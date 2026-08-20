@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#121212">
+    <meta
+      name="description"
+      content="Padel Manager hjelper administratorer og spillere med turneringer, kamper, baner og resultater."
+    >
+    <title>Padel Manager</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="assets/icons/appicon-256.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-lockup">
+          <img class="brand-mark" src="assets/icons/appicon-256.png" alt="" width="58" height="58">
+          <div>
+            <p class="eyebrow">Turneringsverktøy</p>
+            <h1>Padel Manager</h1>
+          </div>
+        </div>
+        <div class="status-pill" id="connectionStatus">Lokal demo</div>
+      </header>
+
+      <main>
+        <section class="start-panel" id="startView" aria-labelledby="startTitle">
+          <div class="intro">
+            <div class="intro-copy">
+              <p class="eyebrow">Webapp for alle enheter</p>
+              <h2 id="startTitle">Se neste kamp, bane, makker og motstandere uten å spørre administrator.</h2>
+              <p>
+                Dette er et første utkast til Padel Manager. Data lagres foreløpig lokalt i nettleseren,
+                slik at flyten kan testes før Supabase og publisering kobles på.
+              </p>
+            </div>
+            <img class="hero-logo" src="assets/padel-manager-logo.png" alt="Padel Manager" width="360">
+          </div>
+
+          <div class="action-grid">
+            <form class="panel" id="createTournamentForm">
+              <h3>Ny turnering</h3>
+              <label>
+                Turneringsnavn
+                <input name="tournamentName" type="text" value="Risløkka Padel" autocomplete="off" required>
+              </label>
+              <label>
+                Spillere
+                <textarea name="players" rows="8" required>Sigurd
+Elin
+Elisabeth
+Hanne
+Ruben
+Karoline
+Lars
+Tina</textarea>
+              </label>
+              <label>
+                Antall baner
+                <input name="courts" type="number" min="1" max="12" value="1" required>
+              </label>
+              <button class="primary" type="submit">Opprett turnering</button>
+            </form>
+
+            <form class="panel" id="joinTournamentForm">
+              <h3>Bli med</h3>
+              <label>
+                Invitasjonskode
+                <input name="inviteCode" type="text" placeholder="P4K7D" maxlength="8" autocomplete="off" required>
+              </label>
+              <button class="secondary" type="submit">Finn turnering</button>
+              <p class="hint">I dette utkastet fungerer koden for turneringen som er opprettet på denne enheten.</p>
+            </form>
+          </div>
+        </section>
+
+        <section class="workspace hidden" id="workspaceView" aria-live="polite">
+          <div class="workspace-header">
+            <div>
+              <p class="eyebrow" id="roundLabel">Runde 1</p>
+              <h2 id="tournamentTitle">Padel Manager</h2>
+            </div>
+            <div class="share-box">
+              <span>Invitasjonskode</span>
+              <strong id="inviteCode">-----</strong>
+            </div>
+          </div>
+
+          <nav class="tabs" aria-label="Visning">
+            <button class="tab active" data-view="admin">Admin</button>
+            <button class="tab" data-view="player">Spiller</button>
+            <button class="tab" data-view="spectator">Tilskuer</button>
+          </nav>
+
+          <section class="view-grid" data-section="admin">
+            <div class="panel command-panel">
+              <div class="panel-heading">
+                <h3>Turnering</h3>
+                <span id="tournamentStatus">Klar</span>
+              </div>
+              <div class="button-row">
+                <button class="primary" id="generateRoundButton" type="button">Generer runde</button>
+                <button class="secondary" id="completeRoundButton" type="button">Fullfør runde</button>
+              </div>
+              <div class="button-row">
+                <button class="ghost" id="resetDemoButton" type="button">Nullstill demo</button>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Spillere</h3>
+                <span id="playerCount">0</span>
+              </div>
+              <form class="inline-form" id="addPlayerForm">
+                <input name="playerName" type="text" placeholder="Legg til spiller" autocomplete="off" required>
+                <button class="secondary" type="submit">Legg til</button>
+              </form>
+              <ul class="compact-list" id="playersList"></ul>
+            </div>
+
+            <div class="panel wide">
+              <div class="panel-heading">
+                <h3>Kamper</h3>
+                <span id="matchCount">0</span>
+              </div>
+              <div class="matches" id="adminMatches"></div>
+            </div>
+          </section>
+
+          <section class="view-grid hidden" data-section="player">
+            <div class="panel player-select-panel">
+              <h3>Hvem er du?</h3>
+              <div class="player-buttons" id="playerButtons"></div>
+            </div>
+
+            <div class="next-match" id="playerNextMatch">
+              <p class="eyebrow">Din neste kamp</p>
+              <h3>Velg spillerprofil</h3>
+              <p>Da viser appen bane, makker og motstandere for akkurat deg.</p>
+            </div>
+
+            <div class="panel wide">
+              <h3>Kommende og aktive kamper</h3>
+              <div class="matches" id="playerMatches"></div>
+            </div>
+          </section>
+
+          <section class="view-grid hidden" data-section="spectator">
+            <div class="panel wide">
+              <h3>Turneringsoversikt</h3>
+              <div class="matches" id="spectatorMatches"></div>
+            </div>
+            <div class="panel">
+              <h3>Tabell</h3>
+              <ol class="standings" id="standingsList"></ol>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

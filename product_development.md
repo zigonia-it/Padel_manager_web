@@ -1,0 +1,897 @@
+# Padel Manager Web - Produktutviklingsdokument
+
+Sist oppdatert: 2026-08-21
+
+Status: aktivt arbeidsdokument for web/PWA-versjonen
+
+Kildegrunnlag:
+
+- Eksisterende SwiftUI-prosjekt: `/Users/sigurd/Documents/Developer/PadelManager-main`
+- Nåværende webprosjekt: `/Users/sigurd/Documents/Developer/padel_manager_webapp`
+- Tidligere webplan: `development_plan.md`
+- Migreringsnotater: `migration_notes.md`
+
+## 1. Formål
+
+Padel Manager Web skal gjøre det mulig å opprette, administrere og følge en padelturnering fra valgfri enhet: iPhone, Android, iPad, nettbrett, PC, Mac og moderne nettlesere.
+
+Den viktigste brukeropplevelsen er:
+
+> Jeg trenger ikke holde styr på turneringen. Padel Manager forteller meg når jeg skal spille, hvem jeg spiller med, hvem jeg møter, og hvilken bane jeg skal på.
+
+Webversjonen skal videreføre den beste turneringslogikken, visuelle identiteten og arbeidsflyten fra SwiftUI-appen, men løse det største nye behovet: flere enheter samtidig.
+
+Påmeldingsflyten bør føles litt som Kahoot: administrator er host, deltakerne bruker en kode eller QR-kode, skriver inn navnet sitt, og dukker opp i en deltakerliste/lobby hos administrator før turneringen startes.
+
+## 2. Hvorfor Web
+
+Den opprinnelige SwiftUI-appen var en lokal iOS-app med sterk offline- og lagringsmodell, men den krevde Apple-økosystemet og App Store-sporet.
+
+For et hobbyprosjekt og en turneringsapp som skal brukes av mange spillere på forskjellige enheter, er web/PWA bedre egnet fordi:
+
+- ingen Apple Developer-betaling kreves for brukerne eller prosjektet
+- appen kan åpnes direkte fra en lenke eller QR-kode
+- spillere kan bruke egne telefoner, nettbrett eller datamaskiner
+- administrator kan kjøre turneringen fra PC/Mac/iPad
+- web gir naturlig vei til sanntidsoppdateringer via Supabase
+- PWA kan senere gi app-lignende installasjon og push-varslinger
+
+## 3. Produktprinsipper
+
+1. Appen skal løse live-turneringssituasjonen først.
+2. Spilleren skal se relevant informasjon uten å forstå hele turneringssystemet.
+3. Administrator skal ha kontroll uten at alle må stå rundt administratorens enhet.
+4. Webversjonen skal ikke arve Xcode-/App Store-kompleksitet.
+5. Domenelogikken fra SwiftUI-appen skal bevares der den er god.
+6. Arkitekturen skal starte modulært, slik at webappen ikke får samme "God Object"-problem som `SessionManager` i SwiftUI-appen.
+7. Første versjon skal være enkel nok til å ferdigstilles.
+
+## 4. Målgrupper og Roller
+
+### 4.1 Administrator / Host
+
+Administrator oppretter og styrer turneringen.
+
+Administrator skal kunne:
+
+- opprette turnering
+- se spillere som melder seg på med invitasjonskode eller QR-kode
+- legge til seg selv eller andre spillere manuelt ved behov
+- fjerne eller korrigere spillere
+- angi antall baner
+- velge turneringsformat og regler
+- generere runder/kamper
+- starte kamper og runder
+- tildele eller endre bane
+- registrere og korrigere resultater
+- håndtere walkover/forfeit
+- se tabell, kamper og status
+- dele invitasjonskode, lenke og senere QR-kode
+- avslutte turneringen
+
+Administratorrettigheter skal være skilt fra invitasjonskoden.
+
+Administrator kan delta i turneringen som spiller, men det skal ikke være et krav. Hvis administrator skal spille, kan administrator enten legge inn seg selv manuelt eller melde seg på som vanlig spiller fra en egen enhet.
+
+### 4.2 Spiller
+
+Spiller kobler seg til med invitasjonskode eller QR-kode og oppgir navnet sitt.
+
+Spiller skal kunne:
+
+- skrive inn navn ved påmelding
+- velge en avatar ved påmelding
+- bli lagt til i deltakerlisten hos administrator
+- se egen neste kamp
+- se bane
+- se lagkamerat
+- se motstandere
+- se om de har pause
+- se aktive og kommende kamper
+- se tidligere resultater
+- se tabell/ranking
+- få varsel når egen kamp nærmer seg eller starter
+
+Spiller skal normalt ikke kunne endre turneringsdata.
+
+### 4.3 Tilskuer
+
+Tilskuer kan følge turneringen uten å identifisere seg som spiller.
+
+Tilskuer skal kunne:
+
+- se aktive kamper
+- se kommende kamper
+- se resultater
+- se tabell
+
+Tilskuer får ikke personlige varsler.
+
+## 5. Kjerneflyt
+
+1. Administrator oppretter en turnering.
+2. Systemet genererer en turnerings-ID og en kort invitasjonskode.
+3. Administrator deler invitasjonskode, lenke eller QR-kode.
+4. Spillerne åpner appen på egen enhet og skriver inn invitasjonskoden eller scanner QR-koden.
+5. Spilleren skriver inn navnet sitt og velger en avatar.
+6. Spilleren legges til i turneringens deltakerliste med navn og avatar.
+7. Administrator ser spillerne dukke opp i listen og kan korrigere, fjerne eller legge til spillere manuelt.
+8. Administrator legger eventuelt inn seg selv hvis administrator også skal spille.
+9. Administrator angir baner og genererer kampoppsett når deltakerlisten er klar.
+10. Appen husker spilleridentiteten på spillerens enhet.
+11. Administrator starter runde/kamp.
+12. Alle enheter oppdateres automatisk.
+13. Spillerens skjerm viser bare det spilleren trenger akkurat nå.
+14. Resultater registreres av administrator.
+15. Tabell, kampliste og spilleroversikt oppdateres live.
+
+Denne flyten skal prioriteres over en forhåndsutfylt spillerliste. Administrator kan fortsatt legge inn spillere manuelt, men standardopplevelsen skal være at spillerne melder seg på selv.
+
+## 5.1 Påmeldingslobby
+
+Før kampoppsett genereres, bør administrator se en lobby med påmeldte spillere.
+
+Lobbyen skal vise:
+
+- invitasjonskode
+- QR-kode når dette er implementert
+- liste over spillere som har meldt seg på, med navn og avatar
+- antall påmeldte spillere
+- knapp for å legge til spiller manuelt
+- mulighet til å fjerne eller endre navn
+- knapp for å starte/generere turnering når listen er klar
+
+Spillerens påmeldingsskjerm bør være enkel:
+
+1. Skriv inn invitasjonskode eller scan QR.
+2. Skriv inn navn.
+3. Velg avatar.
+4. Se bekreftelse: "Du er med".
+5. Vent på at administrator starter turneringen.
+
+## 5.2 Avatarer
+
+Spillere bør kunne velge en enkel avatar når de melder seg på. Avatar vises ved siden av navnet i lobbyen, spillerlisten, kampkort, tabell og personlig spilleroversikt.
+
+MVP-variant:
+
+- et lite sett med ferdiglagde avatarer
+- avatar lagres som en enkel `avatar_id`
+- ingen bildeopplasting
+- samme avatar kan i første versjon brukes av flere spillere
+- midlertidig kan DiceBear brukes som placeholder-avatar basert på spillerens navn
+
+Senere variant:
+
+- større avatarbibliotek
+- fargevalg eller små variasjoner
+- unike avatarer per spiller i samme turnering
+- opplasting av profilbilde
+- lagret spillerprofil på tvers av turneringer
+
+Avatarene bør lages i samme visuelle stil som Padel Manager-identiteten: mørk/gull/sølv, sportslig, tydelige små ikoner og lesbare i liten størrelse.
+
+## 6. MVP
+
+MVP skal være den første fungerende webversjonen som kan brukes i en ekte liten turnering.
+
+### 6.1 Inkluderes i MVP
+
+- opprette turnering
+- spillere kan melde seg på med navn via invitasjonskode/QR
+- spillere kan velge avatar ved påmelding
+- admin kan legge inn eller korrigere spillere manuelt
+- angi baner
+- generere round-robin-kamper
+- støtte singles ved 2-3 spillere
+- støtte doubles ved 4+ spillere
+- sit-out / pause ved oddetall
+- invitasjonskode
+- spilleridentifikasjon
+- adminvisning
+- spillervisning
+- tilskuervisning
+- aktiv kamp
+- kommende kamper
+- resultatregistrering
+- tabell/ranking
+- enkel lokal lagring
+- grunnleggende responsive layout
+- Padel Manager-logo, ikoner, Orbitron-font og gull/sølv-fargeprofil
+
+### 6.2 Ikke i første MVP
+
+- full brukerkonto
+- betaling/Pro
+- App Store-funksjoner
+- flerspråklig støtte
+- full cup/bracket-modus
+- avansert kamp-poengsystem med deuce/advantage
+- player profile photos
+- karrierestatistikk
+- PDF-eksport
+- avansert offline-konflikthåndtering
+- push-varslinger
+
+Disse skal ikke fjernes som ideer, men vente til grunnflyten fungerer.
+
+## 7. Funksjoner fra SwiftUI-Appen som Skal Beholdes
+
+### 7.1 Turneringslogikk
+
+SwiftUI-appen har god domenelogikk som skal være fasit for webversjonen.
+
+Viktige kilder:
+
+- `TournamentScheduler.swift`
+- `LeaderboardCalculator.swift`
+- `GameEngine.swift`
+- `CupEngine.swift`
+- `Player.swift`
+- `Team.swift`
+- `Match.swift`
+- `MatchState.swift`
+- `TeamGameScore.swift`
+- `TournamentSettings.swift`
+
+Behold:
+
+- Berger-rotasjon for partner-runder
+- singles-runder for færre enn 4 spillere
+- partnerrotasjon for 4+ spillere
+- sit-out ved oddetall
+- matchmodell med `teamOne`, `teamTwo`, `sittingOut`, `currentSet`, `completedSets`, `winnerTeamIndex`
+- tabell sortert på poeng, seire, sett, games og navn
+- fleksibel poengmodus: games, sets, matches
+
+### 7.2 Visuell Identitet
+
+Behold:
+
+- logo
+- appikoner
+- Orbitron-font
+- mørk sports-/premiumfølelse
+- gull som primæraksent: `#CC9414`
+- lys gull: `#EBC761`
+- mørk gull: `#805600`
+- sølv/grå som sekundæraksent: `#616B7A`
+- glasskort og tydelige knappestiler
+
+Webversjonen må justere typografi for nettleser, spesielt liten tekst. Orbitron er sterk visuelt, men krever mer fontstørrelse, linjehøyde og forsiktig bokstavavstand.
+
+### 7.3 Produktfunksjoner
+
+Fra SwiftUI-appen bør følgende vurderes videreført i web:
+
+- live scoring
+- fleksible regler
+- leaderboard
+- lagre og dele resultater
+- turneringshistorikk
+- templates
+- court assignment
+- walkover/forfeit
+- large-score mode
+- live standings QR
+- spillerprofiler og statistikk
+
+Men rekkefølgen må tilpasses webprosjektets behov.
+
+## 8. Funksjoner som Skal Endres i Webversjonen
+
+### 8.1 Fra Lokal App til Multi-Device
+
+SwiftUI-appen var lokal-først og iCloud-orientert. Webversjonen skal være multi-device først.
+
+Det betyr:
+
+- Supabase/PostgreSQL blir sannhetskilde for aktive turneringer
+- Supabase Realtime brukes for live-oppdateringer
+- lokal lagring brukes som cache/offline-buffer
+- host/player/tilskuer-roller må håndheves i backend, ikke bare UI
+- invitasjonskode gir lesetilgang, ikke adminrettigheter
+- admin-token eller konto gir skrivetilgang
+
+### 8.2 Fra App Store Privacy til Web Privacy
+
+Gammel privacy policy sa at data ikke ble sendt til server. Det var riktig for lokal iOS-app.
+
+For webversjonen blir dette annerledes når Supabase tas i bruk. Ny privacy-tekst må forklare:
+
+- hvilke data lagres i skyen
+- at spillernavn, kamper og resultater lagres for turneringen
+- hvem som kan se data via invitasjonskode
+- hvordan turnering kan slettes
+- at push-abonnementer kan lagres hvis varslinger aktiveres
+
+Dette må oppdateres før offentlig publisering.
+
+### 8.3 Fra Pro/Betaling til Åpen Hobby-MVP
+
+SwiftUI-appen hadde StoreKit 2, Pro-funksjoner og free/pro gating.
+
+Webversjonen skal foreløpig ikke ha betaling. Følgende holdes ute:
+
+- StoreKit
+- Pro-opplåsing
+- App Store-gating
+- abonnementstekster
+- kjøpsflyt
+
+Funksjoner som templates og historikk kan likevel bygges senere uten betalingslogikk.
+
+## 9. Foreslått Webarkitektur
+
+Første versjon kan fortsatt være enkel HTML/CSS/JavaScript, men koden bør deles i moduler før funksjonaliteten vokser.
+
+Foreslått struktur:
+
+```text
+padel_manager_webapp/
+  index.html
+  styles.css
+  assets/
+  src/
+    app.js
+    models.js
+    scheduler.js
+    leaderboard.js
+    scoring.js
+    storage.js
+    supabaseClient.js
+    realtime.js
+    views/
+      adminView.js
+      playerView.js
+      spectatorView.js
+```
+
+### 9.1 Moduler
+
+`models.js`
+
+- Tournament
+- Player
+- Team
+- Court
+- Round
+- Match
+- TournamentSettings
+
+`scheduler.js`
+
+- singles-runder
+- partner-runder
+- Berger-rotasjon
+- sit-out
+- fremtidig cup/bracket
+
+`leaderboard.js`
+
+- poengberegning
+- statistikk
+- sortering
+- tiebreakers
+
+`scoring.js`
+
+- resultatregistrering
+- walkover
+- senere game/set/deuce/advantage
+
+`storage.js`
+
+- localStorage i tidlig demo
+- IndexedDB når offline/cache blir større
+
+`supabaseClient.js`
+
+- API-klient
+- auth/token-håndtering
+- miljøvariabler
+
+`realtime.js`
+
+- subscription på turnering
+- live oppdatering av kamper, runder, resultater og tabell
+
+`views/`
+
+- DOM-rendering og UI-hendelser
+- ingen tung turneringslogikk
+
+## 10. Datamodell for Web
+
+### 10.1 MVP-tabeller
+
+`tournaments`
+
+- id
+- invite_code
+- name
+- status
+- admin_token_hash
+- current_round
+- settings
+- created_at
+- updated_at
+
+`players`
+
+- id
+- tournament_id
+- name
+- avatar_id
+- accent
+- active
+- join_status
+- joined_from
+- created_at
+
+`courts`
+
+- id
+- tournament_id
+- name
+- court_number
+- active
+
+`rounds`
+
+- id
+- tournament_id
+- round_number
+- status
+- created_at
+
+`matches`
+
+- id
+- tournament_id
+- round_id
+- court_id
+- rotation_number
+- team_one
+- team_two
+- sitting_out
+- state
+- completed_sets
+- current_set
+- winner_team_index
+- is_walkover
+- started_at
+- completed_at
+- updated_at
+
+### 10.2 Senere tabeller
+
+`push_subscriptions`
+
+- id
+- player_id
+- tournament_id
+- endpoint
+- auth_key
+- public_key
+- active
+- created_at
+
+`player_profiles`
+
+- id
+- display_name
+- avatar_id
+- avatar_url
+- created_at
+
+`tournament_history`
+
+- id
+- tournament_id
+- completed_at
+- snapshot
+
+## 11. Live-Oppdateringer
+
+Alle enheter som følger turneringen skal oppdateres automatisk når:
+
+- kamp starter
+- kamp avsluttes
+- resultat lagres
+- bane endres
+- spillerliste endres
+- ny runde genereres
+- tabell endres
+- turnering avsluttes
+
+Supabase Realtime bør brukes på relevante tabeller.
+
+Minimum i MVP:
+
+- lytt på `matches`
+- lytt på `rounds`
+- lytt på `players`
+- trigge ny beregning av tabell i klienten
+
+Senere kan leaderboard enten beregnes server-side eller lagres som avledet state.
+
+## 12. Offline og Recovery
+
+SwiftUI-appen var lokal-først og hadde sterkt fokus på save/load. Webversjonen bør ta med samme robusthet gradvis.
+
+MVP:
+
+- lokal cache av siste turnering på admin-enheten
+- tydelig status: lokal demo / online / offline
+- ikke miste data ved refresh
+
+Neste fase:
+
+- IndexedDB for admin-handlinger
+- kø for usynkroniserte resultater
+- sync når nett kommer tilbake
+- siste gode server-state
+
+Senere:
+
+- konfliktvisning ved flere adminendringer
+- restore from last good save
+- save health check
+
+## 13. Varslinger
+
+Varslinger var planlagt i Swift-roadmap og er sentrale for webideen.
+
+Varslingstyper:
+
+- Din kamp starter nå
+- Du spiller neste kamp
+- Bane er klar
+- Runde er ferdig
+- Turneringen er oppdatert
+
+Fase 1 bør ikke blokkere på dette.
+
+Fase 2:
+
+- PWA manifest
+- Service Worker
+- Web Push
+- push subscription per spiller/enhet
+- åpne riktig turnering/kamp fra varsel
+
+## 14. Skjermbilder og Informasjonsarkitektur
+
+### 14.1 Start
+
+- Padel Manager-logo
+- Ny turnering
+- Bli med i turnering
+- invitasjonskode
+- navn ved påmelding
+
+### 14.2 Admin
+
+Prioritet:
+
+- turneringsstatus
+- påmeldte spillere
+- aktiv runde
+- aktive/klare kamper per bane
+- registrer resultat
+- start neste kamp/runde
+- spillere og baner
+- del turnering
+
+### 14.3 Spiller
+
+Prioritet:
+
+- din neste kamp
+- bane
+- makker
+- motstandere
+- status: spiller nå / neste / pause
+- aktive kamper
+- tabell
+
+### 14.4 Tilskuer
+
+Prioritet:
+
+- aktive kamper
+- resultater
+- kommende kamper
+- tabell
+
+### 14.5 Display/TV-modus
+
+Senere egen visningsmodus:
+
+- stor turneringstittel
+- runde
+- baner
+- aktive kamper
+- neste runde/timer
+- standings
+
+## 15. Turneringstyper
+
+### 15.1 Round Robin
+
+MVP-format.
+
+Regler:
+
+- 2-3 spillere: singles
+- 4+ spillere: doubles
+- partnerrotasjon
+- oddetall gir pause/sit-out
+- poengmodus: games, sets eller matches
+
+### 15.2 Cup
+
+Senere fase.
+
+Fra SwiftUI-appen:
+
+- auto team setup
+- manual team setup
+- bracket til neste power of 2
+- byes
+- finalevinner
+- valgfri bronsefinale
+
+Cup skal ikke inn i første web-MVP med mindre round-robin er stabil.
+
+## 16. Migreringsstrategi fra SwiftUI
+
+### 16.1 Behold
+
+- domenemodeller
+- scheduler-prinsipp
+- leaderboard-prinsipp
+- scoringregler
+- matchstatus
+- visuell identitet
+- share-kort-ide
+- history/templates som senere funksjoner
+
+### 16.2 Tilpass
+
+- iOS navigation -> web views/routes
+- SwiftUI state -> JavaScript state/store
+- UserDefaults/Documents/iCloud -> localStorage/IndexedDB/Supabase
+- StoreKit/Pro -> ut av MVP
+- native notifications -> Web Push
+- Swift localization -> enkel norsk/engelsk først, senere i18n
+
+### 16.3 Erstatt
+
+- Xcode/App Store-releaseflyt
+- StoreKit
+- iCloud save sync
+- UIKit haptics
+- SwiftUI-only layoutkomponenter
+
+## 17. Utviklingsfaser
+
+### Fase 0 - Nåværende Utkast
+
+Status:
+
+- statisk HTML/CSS/JS
+- Padel Manager-assets kopiert inn
+- lokal demo-state
+- enkel admin/spiller/tilskuer
+- portet første scheduler/leaderboard-prinsipp
+
+Neste:
+
+- rydde dokumentasjon
+- splitte JS i moduler
+- gjøre første lokal flyt mer komplett
+
+### Fase 1 - Lokal Web-MVP
+
+Mål: kunne kjøre en turnering på én enhet med god flyt.
+
+Oppgaver:
+
+- modulær JS-struktur
+- bedre setup for spillere/baner/regler
+- generer runder og kamper
+- admin-resultatregistrering
+- spilleroversikt
+- tilskueroversikt
+- tabell
+- lokal save/load
+- grunnleggende tester for scheduler og leaderboard
+
+### Fase 2 - Publiserbar Demo
+
+Mål: kunne åpne appen på nett.
+
+Oppgaver:
+
+- klargjøre for Vercel/Netlify
+- flytte statiske filer til enkel deploystruktur
+- legge inn miljøkonfigurasjon
+- første offentlig/privat testlenke
+- enkel feilhåndtering
+
+### Fase 3 - Supabase og Multi-Device
+
+Mål: administrator og spillere på hver sin enhet.
+
+Oppgaver:
+
+- Supabase-prosjekt
+- database schema
+- create/join tournament
+- invite code
+- admin token
+- realtime subscriptions
+- permissions / RLS
+- live oppdatering av kamper/resultater/tabell
+
+### Fase 4 - PWA og Varslinger
+
+Mål: føles mer som app.
+
+Oppgaver:
+
+- Service Worker
+- install prompt
+- offline cache
+- Web Push
+- push subscriptions
+- player-specific notifications
+
+### Fase 5 - Videreutvikling
+
+Mulige funksjoner:
+
+- QR-invitasjon
+- display/TV-modus
+- cup/bracket
+- templates
+- turneringshistorikk
+- spillerprofiler
+- avatarvalg og avatarbibliotek
+- avatarer
+- head-to-head
+- recent form
+- PDF/rapport
+- offentlig read-only turneringsside
+- flere administratorer
+
+## 18. Teststrategi
+
+Fra SwiftUI-prosjektet bør testholdningen videreføres: scoring, persistence og tournament progression må beskyttes.
+
+For web:
+
+### 18.1 Tidlige tester
+
+- scheduler: singles
+- scheduler: doubles
+- scheduler: oddetall/sit-out
+- leaderboard: games
+- leaderboard: sets
+- leaderboard: matches
+- match finish/winner
+- walkover når det legges inn
+
+### 18.2 UI-test manuelt
+
+- opprett turnering
+- generer runde
+- registrer resultat
+- velg spillerprofil
+- kontroller personlig visning
+- kontroller tabell
+- refresh siden
+- test mobil bredde
+- test desktop bredde
+
+### 18.3 Multi-device test senere
+
+- admin i én nettleser
+- spiller i en annen nettleser
+- tilskuer i tredje
+- resultat registreres
+- alle oppdateres uten refresh
+
+## 19. Publisering
+
+Anbefalt retning:
+
+- Vercel eller Netlify for frontend
+- Supabase for database, auth/realtime og senere serverfunksjoner
+
+Første publisering bør være en enkel demo uten sensitiv informasjon.
+
+Før offentlig bruk må følgende finnes:
+
+- oppdatert privacy-tekst for web
+- tydelig demo-/beta-status
+- slett turnering eller utløp for testdata
+- ingen hemmelige nøkler i frontend
+
+## 20. Kildegjennomgang
+
+Det gamle prosjektet inneholder 280 Markdown-filer:
+
+- 6 toppnivåfiler
+- 5 filer i `docs/`
+- 1 appspesifikk `PadelManager/CLAUDE.md`
+- 268 filer under `Tools/`
+
+Produktdokumentet er primært basert på:
+
+- `docs/README.md`
+- `docs/ARCHITECTURE.md`
+- `docs/ROADMAP.md`
+- `docs/CHANGELOG.md`
+- `docs/TESTING.md`
+- `functions.md`
+- `redesigning_the_app_structure.md`
+- `redevelopment.md`
+- `redesign code.md`
+- `App functions and flow template/Navigation structure.md`
+- `Tools/release/APP_DESCRIPTION.md`
+- `Tools/release/PRIVACY_POLICY.md`
+- `Tools/project-assets/registry/ASSETS_MAP.md`
+- `Tools/project-assets/registry/asset-rules.md`
+- `Tools/AI_INDEX.md`
+- `Tools/AI_INFO.md`
+- `Tools/AI_MAP.md`
+- `Tools/AI_PLANNING.md`
+- `Tools/AI_RULES.md`
+- `Tools/SKILLS_MAP.md`
+
+`Tools/skills/**` er i hovedsak generiske arbeidsverktøy for Swift, App Store, sikkerhet, simulator, testing og dokumentasjon. Disse skal ikke overføres som produktkrav, men de gir nyttige arbeidsregler:
+
+- bruk minste nødvendige filsett
+- les canonical docs først
+- hold assets separert og registrert
+- dokumentasjon skal oppdateres når systemet endres
+- stabilitet før nye funksjoner
+- små målrettede endringer
+
+## 21. Åpne Beslutninger
+
+1. Skal første publisering være Vercel eller Netlify?
+2. Skal vi beholde ren HTML/CSS/JS litt til, eller gå tidlig til Vite?
+3. Skal Supabase kobles inn før eller etter lokal MVP er mer komplett?
+4. Skal webversjonen starte med bare norsk, eller norsk/engelsk?
+5. Skal spillere som melder seg på med navn automatisk godkjennes, eller skal admin godkjenne før de er aktive?
+6. Skal MVP-avatarer være abstrakte ikoner, padel-relaterte figurer, initialer med farger, eller en blanding?
+6. Skal administrator-token være lokal hemmelighet i MVP, eller kreve enkel konto?
+7. Skal turneringer automatisk utløpe/slettes etter en periode?
+
+## 22. Neste Konkrete Arbeid
+
+Anbefalt rekkefølge:
+
+1. Splitte `app.js` i moduler.
+2. Lage `docs/` i webprosjektet med dette dokumentet som startpunkt.
+3. Lage små tester for scheduler og leaderboard.
+4. Forbedre lokal adminflyt.
+5. Forbedre personlig spillervisning.
+6. Klargjøre første publiserbare demo.
+7. Koble Supabase.
+
+## 23. Arbeidsregel for Videre Utvikling
+
+Når nye funksjoner legges til:
+
+1. Oppdater dette dokumentet hvis produktretning endres.
+2. Legg domenelogikk i egne moduler.
+3. Hold UI-kode fri for tung turneringslogikk.
+4. Test scheduler/scoring/leaderboard før visuell polish.
+5. Ikke legg inn betaling, konto eller push før grunnflyten er stabil.
+6. Ikke legg sensitive nøkler i frontend.
+7. Behold Padel Manager-identiteten, men juster webtypografi ut fra faktisk lesbarhet på Mac, mobil og nettbrett.
