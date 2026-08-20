@@ -1,5 +1,6 @@
 const storageKey = "padel-manager-demo";
 const accents = ["silver", "green", "blue", "clay", "yellow", "navy", "mint", "coral"];
+const defaultAvatarId = "smash";
 
 const defaultTournament = createTournament({
   name: "Risløkka Padel",
@@ -13,11 +14,17 @@ let state = loadState();
 const elements = {
   startView: document.querySelector("#startView"),
   workspaceView: document.querySelector("#workspaceView"),
+  resumePanel: document.querySelector("#resumePanel"),
+  resumeTitle: document.querySelector("#resumeTitle"),
+  resumeSummary: document.querySelector("#resumeSummary"),
+  resumeTournamentButton: document.querySelector("#resumeTournamentButton"),
   createTournamentForm: document.querySelector("#createTournamentForm"),
   joinTournamentForm: document.querySelector("#joinTournamentForm"),
   joinAvatarPreview: document.querySelector("#joinAvatarPreview"),
   joinNamePreview: document.querySelector("#joinNamePreview"),
+  avatarPicker: document.querySelector("#avatarPicker"),
   addPlayerForm: document.querySelector("#addPlayerForm"),
+  courtSettingsForm: document.querySelector("#courtSettingsForm"),
   tournamentTitle: document.querySelector("#tournamentTitle"),
   roundLabel: document.querySelector("#roundLabel"),
   inviteCode: document.querySelector("#inviteCode"),
@@ -29,6 +36,7 @@ const elements = {
   showStartButton: document.querySelector("#showStartButton"),
   copyStatus: document.querySelector("#copyStatus"),
   tournamentStatus: document.querySelector("#tournamentStatus"),
+  lobbyStatus: document.querySelector("#lobbyStatus"),
   playerCount: document.querySelector("#playerCount"),
   matchCount: document.querySelector("#matchCount"),
   playersList: document.querySelector("#playersList"),
@@ -40,6 +48,9 @@ const elements = {
   playerNextMatch: document.querySelector("#playerNextMatch"),
   generateRoundButton: document.querySelector("#generateRoundButton"),
   completeRoundButton: document.querySelector("#completeRoundButton"),
+  exportBackupButton: document.querySelector("#exportBackupButton"),
+  importBackupButton: document.querySelector("#importBackupButton"),
+  backupFileInput: document.querySelector("#backupFileInput"),
   resetDemoButton: document.querySelector("#resetDemoButton"),
 };
 
@@ -48,6 +59,7 @@ syncJoinPreview();
 prefillInviteCodeFromUrl();
 
 elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
+elements.avatarPicker.addEventListener("change", syncJoinPreview);
 
 elements.createTournamentForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -75,6 +87,7 @@ elements.joinTournamentForm.addEventListener("submit", (event) => {
   const formData = new FormData(event.currentTarget);
   const inviteCode = formData.get("inviteCode").trim().toUpperCase();
   const playerName = formData.get("playerName").trim();
+  const avatarId = formData.get("avatarId") || defaultAvatarId;
 
   if (inviteCode !== state.inviteCode) {
     alert(`Fant ikke turnering med kode ${inviteCode}. Prøv ${state.inviteCode} i demoen.`);
@@ -83,7 +96,7 @@ elements.joinTournamentForm.addEventListener("submit", (event) => {
 
   if (!playerName) return;
 
-  const player = joinTournament(playerName);
+  const player = joinTournament(playerName, avatarId);
   state.selectedPlayerId = player.id;
 
   showWorkspace("player");
@@ -95,18 +108,34 @@ elements.joinTournamentForm.addEventListener("submit", (event) => {
 
 elements.addPlayerForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (state.rounds.length > 0) {
+    alert("Spillere kan bare legges til før første runde i denne demoen.");
+    return;
+  }
   const formData = new FormData(event.currentTarget);
   const name = formData.get("playerName").trim();
   if (!name) return;
 
-  addPlayer(name, "admin");
-  state.schedule = buildSchedule(state.players);
+  addPlayer(name, "admin", defaultAvatarId);
   event.currentTarget.reset();
   saveState();
   render();
 });
 
+elements.courtSettingsForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const courtCount = Number(new FormData(event.currentTarget).get("courtCount"));
+  updateCourtCount(courtCount);
+  saveState();
+  render();
+});
+
 elements.generateRoundButton.addEventListener("click", () => {
+  const blockReason = generateRoundBlockReason();
+  if (blockReason) {
+    alert(blockReason);
+    return;
+  }
   generateNextRound();
   saveState();
   render();
@@ -132,10 +161,23 @@ elements.completeRoundButton.addEventListener("click", () => {
   render();
 });
 
+elements.exportBackupButton.addEventListener("click", exportBackup);
+
+elements.importBackupButton.addEventListener("click", () => {
+  elements.backupFileInput.click();
+});
+
+elements.backupFileInput.addEventListener("change", importBackup);
+
 elements.resetDemoButton.addEventListener("click", () => {
   state = structuredClone(defaultTournament);
-  saveState();
+  localStorage.removeItem(storageKey);
   showStart();
+  render();
+});
+
+elements.resumeTournamentButton.addEventListener("click", () => {
+  showWorkspace("admin");
   render();
 });
 
@@ -157,7 +199,7 @@ document.querySelectorAll(".tab").forEach((tab) => {
 });
 
 function createTournament({ name, inviteCode, players, courtCount }) {
-  const tournamentPlayers = players.map(createPlayer);
+  const tournamentPlayers = players.map((playerName, index) => createPlayer(playerName, index, defaultAvatarId));
   return {
     id: crypto.randomUUID(),
     name,
@@ -183,11 +225,11 @@ function createTournament({ name, inviteCode, players, courtCount }) {
   };
 }
 
-function createPlayer(name, index) {
+function createPlayer(name, index, avatarId = defaultAvatarId) {
   return {
     id: crypto.randomUUID(),
     name,
-    avatarId: name,
+    avatarId,
     accent: accents[index % accents.length],
     active: true,
     joinStatus: "joined",
@@ -210,12 +252,13 @@ function loadState() {
 function migrateState(nextState) {
   nextState.settings ??= defaultTournament.settings;
   nextState.players ??= [];
+  nextState.courts ??= structuredClone(defaultTournament.courts);
   nextState.schedule ??= buildSchedule(nextState.players);
   nextState.rounds ??= [];
   nextState.players = nextState.players.map((player, index) => ({
     active: true,
     accent: accents[index % accents.length],
-    avatarId: player.name,
+    avatarId: defaultAvatarId,
     joinStatus: "joined",
     joinedFrom: "manual",
     createdAt: new Date().toISOString(),
@@ -256,6 +299,55 @@ function saveState() {
   localStorage.setItem(storageKey, JSON.stringify(state));
 }
 
+function exportBackup() {
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    app: "Padel Manager Web",
+    version: 1,
+    tournament: state,
+  };
+  const file = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(file);
+  link.download = `${slugify(state.name)}-${state.inviteCode}-backup.json`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function importBackup(event) {
+  const [file] = event.currentTarget.files;
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      const importedState = parsed.tournament ?? parsed;
+      if (!isValidTournamentState(importedState)) throw new Error("Invalid backup");
+      state = migrateState(importedState);
+      saveState();
+      showWorkspace("admin");
+      render();
+      elements.copyStatus.textContent = "Backup er importert.";
+    } catch {
+      alert("Kunne ikke importere backup. Velg en gyldig Padel Manager JSON-fil.");
+    } finally {
+      event.currentTarget.value = "";
+    }
+  });
+  reader.readAsText(file);
+}
+
+function isValidTournamentState(candidate) {
+  return Boolean(
+    candidate &&
+      typeof candidate.name === "string" &&
+      typeof candidate.inviteCode === "string" &&
+      Array.isArray(candidate.players) &&
+      Array.isArray(candidate.rounds),
+  );
+}
+
 function syncCreateFormDefaults() {
   elements.createTournamentForm.elements.tournamentName.value = defaultTournament.name;
   elements.createTournamentForm.elements.players.value = defaultTournament.players
@@ -266,8 +358,9 @@ function syncCreateFormDefaults() {
 
 function syncJoinPreview() {
   const name = elements.joinTournamentForm.elements.playerName.value.trim() || "Navnet ditt";
+  const avatarId = new FormData(elements.joinTournamentForm).get("avatarId") || defaultAvatarId;
   elements.joinNamePreview.textContent = name;
-  elements.joinAvatarPreview.src = avatarUrl({ name, avatarId: name });
+  elements.joinAvatarPreview.src = avatarUrl({ name, avatarId });
 }
 
 function prefillInviteCodeFromUrl() {
@@ -302,6 +395,7 @@ function activateTab(view) {
 
 function render() {
   const matches = getAllMatches();
+  renderStartResume();
   elements.tournamentTitle.textContent = state.name;
   elements.roundLabel.textContent = `Runde ${Math.max(state.currentRound, 1)}`;
   elements.inviteCode.textContent = state.inviteCode;
@@ -311,7 +405,14 @@ function render() {
   elements.tournamentStatus.textContent = state.status;
   elements.playerCount.textContent = `${state.players.length} spillere`;
   elements.matchCount.textContent = `${matches.length} kamper`;
+  elements.courtSettingsForm.elements.courtCount.value = state.courts.length;
+  elements.generateRoundButton.disabled = Boolean(generateRoundBlockReason());
+  elements.generateRoundButton.textContent = state.currentRound > 0 ? "Generer neste runde" : "Start første runde";
+  elements.completeRoundButton.disabled = !getActiveRound() || getActiveRound().status === "finished";
+  elements.addPlayerForm.elements.playerName.disabled = state.rounds.length > 0;
+  elements.addPlayerForm.querySelector("button").disabled = state.rounds.length > 0;
 
+  renderLobbyStatus();
   renderPlayers();
   renderMatches(matches);
   renderStandings(matches);
@@ -319,8 +420,45 @@ function render() {
   renderPlayerNextMatch(matches);
 }
 
+function renderStartResume() {
+  const hasSavedTournament = Boolean(localStorage.getItem(storageKey));
+  elements.resumePanel.classList.toggle("hidden", !hasSavedTournament);
+  if (!hasSavedTournament) return;
+
+  elements.resumeTitle.textContent = `Fortsett ${state.name}`;
+  elements.resumeSummary.textContent = `${state.players.length} spillere · ${state.courts.length} baner · kode ${state.inviteCode}`;
+}
+
+function renderLobbyStatus() {
+  const minimumPlayersReady = state.players.length >= 2;
+  const hasCourts = state.courts.length >= 1;
+  const hasStarted = state.rounds.length > 0;
+  const blockReason = generateRoundBlockReason();
+  const nextRoundLabel = blockReason || (state.currentRound > 0 ? `Neste blir runde ${state.currentRound + 1}` : "Klar for første runde");
+  const playerMode = state.players.length >= 4 ? "Double" : state.players.length >= 2 ? "Single" : "Venter";
+
+  elements.lobbyStatus.innerHTML = `
+    <div class="${minimumPlayersReady ? "ready" : "waiting"}">
+      <span>Spillere</span>
+      <strong>${state.players.length}</strong>
+      <small>${minimumPlayersReady ? playerMode : "Minst 2"}</small>
+    </div>
+    <div class="${hasCourts ? "ready" : "waiting"}">
+      <span>Baner</span>
+      <strong>${state.courts.length}</strong>
+      <small>${hasCourts ? "Klar" : "Mangler"}</small>
+    </div>
+    <div class="${canGenerateRound() ? "ready" : "waiting"}">
+      <span>Status</span>
+      <strong>${hasStarted ? "I gang" : "Lobby"}</strong>
+      <small>${nextRoundLabel}</small>
+    </div>
+  `;
+}
+
 function renderPlayers() {
   const standings = leaderboardEntries(getAllMatches());
+  const lobbyLocked = state.rounds.length > 0;
   elements.playersList.innerHTML = "";
   if (state.players.length === 0) {
     const item = document.createElement("li");
@@ -344,8 +482,12 @@ function renderPlayers() {
           <small>${player.joinedFrom === "self" ? "Påmeldt selv" : "Lagt til av admin"}</small>
         </span>
       </span>
-      <strong>${entry?.points ?? 0} p</strong>
+      <span class="player-actions">
+        <strong>${entry?.points ?? 0} p</strong>
+        <button class="icon-button danger-button" type="button" aria-label="Fjern ${escapeHtml(player.name)}" ${lobbyLocked ? "disabled" : ""}>Fjern</button>
+      </span>
     `;
+    item.querySelector("button").addEventListener("click", () => removePlayer(player.id));
     elements.playersList.append(item);
   });
 }
@@ -484,7 +626,7 @@ function renderPlayerNextMatch(matches) {
 }
 
 function avatarUrl(player) {
-  const seed = encodeURIComponent(player.avatarId ?? player.name ?? "Padel");
+  const seed = encodeURIComponent(`${player.avatarId ?? defaultAvatarId}-${player.name ?? "Padel"}`);
   return `https://api.dicebear.com/10.x/thumbs/svg?seed=${seed}&size=64&borderRadius=50&backgroundColor=cc9414,616b7a,ebc761`;
 }
 
@@ -518,20 +660,63 @@ async function copyText(text, successMessage) {
   }
 }
 
-function joinTournament(name) {
+function joinTournament(name, avatarId) {
   const existingPlayer = state.players.find((player) => player.name.localeCompare(name, "nb", { sensitivity: "accent" }) === 0);
   if (existingPlayer) return existingPlayer;
-  return addPlayer(name, "self");
+  return addPlayer(name, "self", avatarId);
 }
 
-function addPlayer(name, joinedFrom) {
+function addPlayer(name, joinedFrom, avatarId) {
   const player = {
-    ...createPlayer(name, state.players.length),
+    ...createPlayer(name, state.players.length, avatarId),
     joinedFrom,
   };
   state.players.push(player);
   state.schedule = buildSchedule(state.players);
   return player;
+}
+
+function removePlayer(playerId) {
+  if (state.rounds.length > 0) {
+    alert("Spillere kan ikke fjernes etter at kampoppsettet er startet i denne demoen.");
+    return;
+  }
+  state.players = state.players.filter((player) => player.id !== playerId);
+  if (state.selectedPlayerId === playerId) state.selectedPlayerId = null;
+  state.schedule = buildSchedule(state.players);
+  saveState();
+  render();
+}
+
+function updateCourtCount(courtCount) {
+  const safeCourtCount = Math.max(1, Math.min(12, courtCount || 1));
+  const existingCourts = state.courts.slice(0, safeCourtCount);
+  const nextCourts = Array.from({ length: safeCourtCount }, (_, index) => {
+    return existingCourts[index] ?? {
+      id: crypto.randomUUID(),
+      name: `Bane ${index + 1}`,
+      courtNumber: index + 1,
+      active: true,
+    };
+  });
+  state.courts = nextCourts.map((court, index) => ({
+    ...court,
+    name: `Bane ${index + 1}`,
+    courtNumber: index + 1,
+    active: true,
+  }));
+}
+
+function canGenerateRound() {
+  return !generateRoundBlockReason();
+}
+
+function generateRoundBlockReason() {
+  const activeRound = getActiveRound();
+  if (state.players.length < 2) return "Legg til minst to spillere før du starter runden.";
+  if (state.courts.length < 1) return "Legg til minst én bane før du starter runden.";
+  if (activeRound && activeRound.status !== "finished") return "Fullfør pågående runde før du genererer neste.";
+  return "";
 }
 
 function teamDisplay(team) {
@@ -836,6 +1021,16 @@ function replaceChildren(container, children, emptyText) {
 function createInviteCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   return Array.from({ length: 5 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+}
+
+function slugify(value) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 48) || "padel-manager";
 }
 
 render();

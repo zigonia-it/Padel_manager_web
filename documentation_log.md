@@ -212,3 +212,48 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste QR-koden visuelt i nettleser og med mobilkamera.
 - Gjøre lobbyen tydeligere før kampoppsett genereres.
 - Lage første avatarvelger.
+
+## 2026-08-21 - Større MVP-runde for brukbar mandagsdemo
+
+### Gjort
+
+- La til avatarvalg i påmeldingsflyten med fire midlertidige valg.
+- Avatar-preview oppdateres når spilleren skriver navn eller bytter avatarvalg.
+- La til tydelig admin-status for spillere, baner og turneringsklarhet.
+- La til banejustering direkte i adminvisningen.
+- Sperret rundestart når det mangler spillere, baner eller en runde allerede pågår.
+- Endret knappen mellom `Start første runde` og `Generer neste runde`.
+- Låser manuell spilleradministrasjon etter at kampoppsett er startet.
+- La til fjerning av spillere før første runde.
+- La til lokal eksport av backup som JSON.
+- La til import av Padel Manager-backup fra JSON.
+- La til `Fortsett som admin` på startsiden når en lokal turnering finnes i nettleseren.
+- Endret `Nullstill demo` slik at lagret lokal turnering fjernes fra nettleseren.
+- Testet hovedflyten i Playwright:
+  - opprette turnering
+  - se lobby/status
+  - starte første runde
+  - lagre resultat
+  - fullføre runde
+  - åpne for neste runde
+
+### Beslutninger
+
+- Lokal backup er viktig frem til Supabase er på plass.
+- Lobbyen skal fungere som kontrollrom for admin før turneringen starter.
+- Spillerlisten låses etter første runde i lokal demo for å unngå ødelagte kampreferanser.
+- Importfil-input skjules helt og styres via `Importer backup`-knappen.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `documentation_log.md`
+
+### Neste steg
+
+- Gjøre spillerfanen mer ferdig for reell mobilbruk under turnering.
+- Legge inn en bedre adminflyt for å avslutte turnering.
+- Teste layout visuelt på smal mobilbredde.
+- Vurdere GitHub-remote og publisering av første testdemo.

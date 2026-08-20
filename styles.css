@@ -60,6 +60,11 @@ button {
   padding: 0.88rem 1rem;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 input,
 textarea {
   width: 100%;
@@ -85,6 +90,21 @@ textarea {
 label {
   display: grid;
   gap: 0.5rem;
+  color: var(--silver-light);
+  font-size: 0.96rem;
+  font-weight: 700;
+  letter-spacing: 0.028em;
+  line-height: 1.5;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  margin-bottom: 0.58rem;
   color: var(--silver-light);
   font-size: 0.96rem;
   font-weight: 700;
@@ -216,6 +236,39 @@ h3 {
   line-height: 1.45;
 }
 
+.avatar-picker {
+  display: grid;
+}
+
+.avatar-picker label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid rgba(235, 199, 97, 0.24);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--gold-light);
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+.avatar-picker label:has(input:checked) {
+  border-color: rgba(235, 199, 97, 0.72);
+  background: rgba(204, 148, 20, 0.2);
+}
+
+.avatar-picker input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.avatar-picker {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .share-panel {
   align-content: start;
 }
@@ -280,6 +333,11 @@ h3 {
 .start-panel {
   display: grid;
   gap: 28px;
+}
+
+.resume-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
 }
 
 .intro {
@@ -361,6 +419,44 @@ h3 {
 .match-top,
 .score-row {
   justify-content: space-between;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.status-grid > div {
+  display: grid;
+  gap: 0.2rem;
+  border: 1px solid rgba(235, 199, 97, 0.18);
+  border-radius: 8px;
+  padding: 0.72rem 0.78rem;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.status-grid span,
+.status-grid small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.035em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.status-grid strong {
+  font-size: 1.18rem;
+  line-height: 1.2;
+}
+
+.status-grid .ready strong {
+  color: var(--gold-light);
+}
+
+.status-grid .waiting strong {
+  color: var(--silver-light);
 }
 
 .wide {
@@ -450,6 +546,26 @@ h3 {
   align-items: center;
   gap: 0.62rem;
   min-width: 0;
+}
+
+.player-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 0 0 auto;
+}
+
+.icon-button {
+  min-height: 34px;
+  padding: 0.45rem 0.58rem;
+  font-size: 0.76rem;
+  line-height: 1.2;
+}
+
+.danger-button {
+  border: 1px solid rgba(168, 59, 54, 0.38);
+  background: rgba(168, 59, 54, 0.12);
+  color: #f0b1ad;
 }
 
 .avatar {
@@ -613,6 +729,10 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .resume-panel {
+    grid-template-columns: 1fr;
+  }
+
   .teams {
     grid-template-columns: 1fr;
   }
@@ -623,5 +743,21 @@ h3 {
 
   .tabs {
     grid-template-columns: 1fr;
+  }
+
+  .avatar-picker,
+  .status-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .compact-list li,
+  .standings li {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .player-actions {
+    justify-content: space-between;
+    width: 100%;
   }
 }
