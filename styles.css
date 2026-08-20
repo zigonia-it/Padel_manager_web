@@ -459,6 +459,10 @@ h3 {
   color: var(--silver-light);
 }
 
+.player-status-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .wide {
   grid-column: 1 / -1;
 }
@@ -601,6 +605,13 @@ h3 {
   border-radius: 8px;
   padding: 16px;
   background: var(--cell);
+}
+
+.highlight-match {
+  border-color: rgba(235, 199, 97, 0.52);
+  background:
+    linear-gradient(180deg, rgba(235, 199, 97, 0.13), rgba(255, 255, 255, 0.045)),
+    var(--cell);
 }
 
 .match-court {
@@ -746,7 +757,8 @@ h3 {
   }
 
   .avatar-picker,
-  .status-grid {
+  .status-grid,
+  .player-status-grid {
     grid-template-columns: 1fr 1fr;
   }
 

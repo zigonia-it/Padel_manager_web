@@ -151,6 +151,9 @@
                 <input id="backupFileInput" type="file" accept="application/json" hidden>
               </div>
               <div class="button-row">
+                <button class="ghost" id="endTournamentButton" type="button">Avslutt turnering</button>
+              </div>
+              <div class="button-row">
                 <button class="ghost" id="resetDemoButton" type="button">Nullstill demo</button>
               </div>
             </div>
@@ -215,9 +218,19 @@
               <p>Da viser appen bane, makker og motstandere for akkurat deg.</p>
             </div>
 
+            <div class="panel">
+              <h3>Din status</h3>
+              <div class="status-grid player-status-grid" id="playerStatusGrid"></div>
+            </div>
+
             <div class="panel wide">
-              <h3>Kommende og aktive kamper</h3>
+              <h3>Dine kamper</h3>
               <div class="matches" id="playerMatches"></div>
+            </div>
+
+            <div class="panel wide">
+              <h3>Tabell</h3>
+              <ol class="standings" id="playerStandingsList"></ol>
             </div>
           </section>
 

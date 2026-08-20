@@ -257,3 +257,37 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Legge inn en bedre adminflyt for å avslutte turnering.
 - Teste layout visuelt på smal mobilbredde.
 - Vurdere GitHub-remote og publisering av første testdemo.
+
+## 2026-08-21 - Spilleropplevelse og turneringsavslutning
+
+### Gjort
+
+- Forbedret spillerfanen slik at valgt spiller får tydelig kampstatus.
+- Viser `Du spiller nå`, `Din neste kamp`, `Pause denne runden`, `Venter` eller ferdig-status.
+- La til statuskort på spillerfanen for status, poeng og kamper.
+- Filtrerer `Dine kamper` til bare valgt spillers kamper.
+- La til tabell direkte på spillerfanen.
+- Highlightet valgt spillers egne kampkort.
+- La til `Avslutt turnering` i adminvisningen.
+- Avsluttet turnering stopper videre rundegenerering og viser ferdig-status til spillere.
+- Avbrutte kamper teller ikke som spilte kamper i statistikken.
+- Testet med fem spillere i Playwright for å sjekke både aktiv kamp og pause/sit-out.
+
+### Beslutninger
+
+- Spillerfanen skal være en praktisk mobilskjerm under turnering, ikke bare en kopi av admin/spectator.
+- `Dine kamper` skal være tom frem til spillerprofil er valgt.
+- Avslutning av turnering holder data synlig, men stopper videre kampgenerering.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste og stramme layout på mobilbredde.
+- Gjøre resultatregistrering mer robust og mer touch-vennlig for admin.
+- Vurdere enkel publisering av lokal demo.

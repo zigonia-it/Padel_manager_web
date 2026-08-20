@@ -44,13 +44,16 @@ const elements = {
   playerMatches: document.querySelector("#playerMatches"),
   spectatorMatches: document.querySelector("#spectatorMatches"),
   standingsList: document.querySelector("#standingsList"),
+  playerStandingsList: document.querySelector("#playerStandingsList"),
   playerButtons: document.querySelector("#playerButtons"),
   playerNextMatch: document.querySelector("#playerNextMatch"),
+  playerStatusGrid: document.querySelector("#playerStatusGrid"),
   generateRoundButton: document.querySelector("#generateRoundButton"),
   completeRoundButton: document.querySelector("#completeRoundButton"),
   exportBackupButton: document.querySelector("#exportBackupButton"),
   importBackupButton: document.querySelector("#importBackupButton"),
   backupFileInput: document.querySelector("#backupFileInput"),
+  endTournamentButton: document.querySelector("#endTournamentButton"),
   resetDemoButton: document.querySelector("#resetDemoButton"),
 };
 
@@ -124,6 +127,10 @@ elements.addPlayerForm.addEventListener("submit", (event) => {
 
 elements.courtSettingsForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (getActiveRound()?.status === "active" || state.status === "Avsluttet") {
+    alert("Baner kan ikke endres mens en runde pågår eller etter at turneringen er avsluttet.");
+    return;
+  }
   const courtCount = Number(new FormData(event.currentTarget).get("courtCount"));
   updateCourtCount(courtCount);
   saveState();
@@ -168,6 +175,13 @@ elements.importBackupButton.addEventListener("click", () => {
 });
 
 elements.backupFileInput.addEventListener("change", importBackup);
+
+elements.endTournamentButton.addEventListener("click", () => {
+  if (!confirm("Avslutte turneringen? Du kan fortsatt se resultater og laste ned backup etterpå.")) return;
+  endTournament();
+  saveState();
+  render();
+});
 
 elements.resetDemoButton.addEventListener("click", () => {
   state = structuredClone(defaultTournament);
@@ -408,7 +422,10 @@ function render() {
   elements.courtSettingsForm.elements.courtCount.value = state.courts.length;
   elements.generateRoundButton.disabled = Boolean(generateRoundBlockReason());
   elements.generateRoundButton.textContent = state.currentRound > 0 ? "Generer neste runde" : "Start første runde";
-  elements.completeRoundButton.disabled = !getActiveRound() || getActiveRound().status === "finished";
+  elements.completeRoundButton.disabled = !getActiveRound() || getActiveRound().status === "finished" || state.status === "Avsluttet";
+  elements.endTournamentButton.disabled = state.status === "Avsluttet";
+  elements.courtSettingsForm.elements.courtCount.disabled = getActiveRound()?.status === "active" || state.status === "Avsluttet";
+  elements.courtSettingsForm.querySelector("button").disabled = getActiveRound()?.status === "active" || state.status === "Avsluttet";
   elements.addPlayerForm.elements.playerName.disabled = state.rounds.length > 0;
   elements.addPlayerForm.querySelector("button").disabled = state.rounds.length > 0;
 
@@ -418,6 +435,7 @@ function render() {
   renderStandings(matches);
   renderPlayerSelector();
   renderPlayerNextMatch(matches);
+  renderPlayerStatus(matches);
 }
 
 function renderStartResume() {
@@ -433,6 +451,7 @@ function renderLobbyStatus() {
   const minimumPlayersReady = state.players.length >= 2;
   const hasCourts = state.courts.length >= 1;
   const hasStarted = state.rounds.length > 0;
+  const isFinished = state.status === "Avsluttet";
   const blockReason = generateRoundBlockReason();
   const nextRoundLabel = blockReason || (state.currentRound > 0 ? `Neste blir runde ${state.currentRound + 1}` : "Klar for første runde");
   const playerMode = state.players.length >= 4 ? "Double" : state.players.length >= 2 ? "Single" : "Venter";
@@ -450,7 +469,7 @@ function renderLobbyStatus() {
     </div>
     <div class="${canGenerateRound() ? "ready" : "waiting"}">
       <span>Status</span>
-      <strong>${hasStarted ? "I gang" : "Lobby"}</strong>
+      <strong>${isFinished ? "Ferdig" : hasStarted ? "I gang" : "Lobby"}</strong>
       <small>${nextRoundLabel}</small>
     </div>
   `;
@@ -493,6 +512,10 @@ function renderPlayers() {
 }
 
 function renderMatches(matches) {
+  const selectedPlayer = getPlayerById(state.selectedPlayerId);
+  const playerMatches = selectedPlayer
+    ? matches.filter((match) => matchIncludesPlayer(match, selectedPlayer.id))
+    : [];
   replaceChildren(
     elements.adminMatches,
     matches.map((match) => createMatchCard(match, true)),
@@ -500,8 +523,8 @@ function renderMatches(matches) {
   );
   replaceChildren(
     elements.playerMatches,
-    matches.map((match) => createMatchCard(match, false)),
-    "Ingen kamper er generert ennå.",
+    playerMatches.map((match) => createMatchCard(match, false, selectedPlayer?.id)),
+    selectedPlayer ? "Du har ingen kamper ennå." : "Velg spillerprofil for å se dine kamper.",
   );
   replaceChildren(
     elements.spectatorMatches,
@@ -510,9 +533,9 @@ function renderMatches(matches) {
   );
 }
 
-function createMatchCard(match, editable) {
+function createMatchCard(match, editable, highlightedPlayerId = null) {
   const card = document.createElement("article");
-  card.className = "match-card";
+  card.className = `match-card ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
   card.innerHTML = `
     <div class="match-top">
       <span class="match-court">${match.courtName ?? "Ikke tildelt bane"}</span>
@@ -557,7 +580,12 @@ function createMatchCard(match, editable) {
 }
 
 function renderStandings(matches) {
-  elements.standingsList.innerHTML = "";
+  renderStandingsList(elements.standingsList, matches);
+  renderStandingsList(elements.playerStandingsList, matches);
+}
+
+function renderStandingsList(container, matches) {
+  container.innerHTML = "";
   leaderboardEntries(matches).forEach((entry) => {
     const item = document.createElement("li");
     item.innerHTML = `
@@ -567,7 +595,7 @@ function renderStandings(matches) {
       </span>
       <strong>${entry.points} p · ${entry.matchWins} seire · ${entry.gamesWon} games</strong>
     `;
-    elements.standingsList.append(item);
+    container.append(item);
   });
 }
 
@@ -598,30 +626,91 @@ function renderPlayerNextMatch(matches) {
     return;
   }
 
-  const match = matches.find((item) => {
-    return item.state !== "finished" && matchPlayers(item).some((matchPlayer) => matchPlayer.id === player.id);
-  });
-
-  if (!match) {
+  if (state.status === "Avsluttet") {
+    const placement = playerPlacement(player, matches);
     elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">Pause</p>
-      <h3>${escapeHtml(player.name)}, du har ingen aktiv kamp akkurat nå.</h3>
-      <p>Når neste runde genereres, vises kampinformasjonen her.</p>
+      <p class="eyebrow">Turneringen er ferdig</p>
+      <h3>${escapeHtml(player.name)}${placement ? `, du endte på ${placement}. plass.` : ""}</h3>
+      <p>Sjekk tabellen under for endelige resultater.</p>
     `;
     return;
   }
 
+  const playerState = playerTournamentState(player, matches);
+
+  if (playerState.kind === "resting") {
+    elements.playerNextMatch.innerHTML = `
+      <p class="eyebrow">Pause denne runden</p>
+      <h3>${escapeHtml(player.name)}, du sitter over nå.</h3>
+      <p>Følg med på neste runde. Du vises her igjen når du har kamp.</p>
+    `;
+    return;
+  }
+
+  if (!playerState.match) {
+    elements.playerNextMatch.innerHTML = `
+      <p class="eyebrow">Venter</p>
+      <h3>${escapeHtml(player.name)}, du har ingen aktiv kamp akkurat nå.</h3>
+      <p>Når administrator genererer neste runde, vises bane, makker og motstandere her.</p>
+    `;
+    return;
+  }
+
+  const match = playerState.match;
   const isTeamOne = match.teamOne.players.some((item) => item.id === player.id);
   const ownTeam = isTeamOne ? match.teamOne : match.teamTwo;
   const opponents = isTeamOne ? match.teamTwo : match.teamOne;
   const teammate = ownTeam.players.find((item) => item.id !== player.id);
   const opponentNames = opponents.players.map((opponent) => escapeHtml(opponent.name)).join(" & ");
+  const statusLabel = playerState.kind === "playing" ? "Du spiller nå" : "Din neste kamp";
 
   elements.playerNextMatch.innerHTML = `
-    <p class="eyebrow">Din neste kamp</p>
+    <p class="eyebrow">${statusLabel}</p>
     <h3>${match.courtName ?? "Bane kommer"}</h3>
     <p>${teammate ? `Du spiller med ${escapeHtml(teammate.name)}.` : "Du spiller single."}</p>
     <p>Mot ${opponentNames}.</p>
+  `;
+}
+
+function renderPlayerStatus(matches) {
+  const player = getPlayerById(state.selectedPlayerId);
+  if (!player) {
+    elements.playerStatusGrid.innerHTML = `
+      <div class="waiting">
+        <span>Status</span>
+        <strong>Velg</strong>
+        <small>Spiller</small>
+      </div>
+    `;
+    return;
+  }
+
+  const playerMatches = matches.filter((match) => matchIncludesPlayer(match, player.id));
+  const stats = statsForPlayer(player, matches);
+  const nextState = playerTournamentState(player, matches);
+  const statusText = {
+    playing: "Pågår",
+    waiting: "Neste",
+    resting: "Pause",
+    idle: "Venter",
+  }[nextState.kind] ?? "Venter";
+
+  elements.playerStatusGrid.innerHTML = `
+    <div class="${nextState.kind === "playing" ? "ready" : "waiting"}">
+      <span>Status</span>
+      <strong>${state.status === "Avsluttet" ? "Ferdig" : statusText}</strong>
+      <small>${nextState.match?.courtName ?? (nextState.kind === "resting" ? "Denne runden" : "Ingen bane")}</small>
+    </div>
+    <div class="ready">
+      <span>Poeng</span>
+      <strong>${pointsByPlayer(matches, state.settings.pointMode)[player.id] ?? 0}</strong>
+      <small>${stats.matchWins} seire</small>
+    </div>
+    <div class="ready">
+      <span>Kamper</span>
+      <strong>${playerMatches.length}</strong>
+      <small>${stats.matchesPlayed} spilt</small>
+    </div>
   `;
 }
 
@@ -688,6 +777,17 @@ function removePlayer(playerId) {
   render();
 }
 
+function endTournament() {
+  const activeRound = getActiveRound();
+  if (activeRound && activeRound.status !== "finished") {
+    activeRound.status = "finished";
+    activeRound.matches.forEach((match) => {
+      if (match.state !== "finished") match.state = "cancelled";
+    });
+  }
+  state.status = "Avsluttet";
+}
+
 function updateCourtCount(courtCount) {
   const safeCourtCount = Math.max(1, Math.min(12, courtCount || 1));
   const existingCourts = state.courts.slice(0, safeCourtCount);
@@ -713,6 +813,7 @@ function canGenerateRound() {
 
 function generateRoundBlockReason() {
   const activeRound = getActiveRound();
+  if (state.status === "Avsluttet") return "Turneringen er avsluttet.";
   if (state.players.length < 2) return "Legg til minst to spillere før du starter runden.";
   if (state.courts.length < 1) return "Legg til minst én bane før du starter runden.";
   if (activeRound && activeRound.status !== "finished") return "Fullfør pågående runde før du genererer neste.";
@@ -907,7 +1008,7 @@ function statsForPlayer(player, matches) {
       const teamIndex = playerTeamIndex(player, match);
       if (teamIndex === null) return stats;
 
-      stats.matchesPlayed += match.state === "waiting" ? 0 : 1;
+      stats.matchesPlayed += ["waiting", "cancelled"].includes(match.state) ? 0 : 1;
       stats.matchWins += match.winnerTeamIndex === teamIndex ? 1 : 0;
       match.completedSets.forEach((set) => {
         stats.setsWon += teamIndex === 0 ? Number(set.teamOne > set.teamTwo) : Number(set.teamTwo > set.teamOne);
@@ -964,6 +1065,29 @@ function matchPlayers(match) {
   return [...match.teamOne.players, ...match.teamTwo.players];
 }
 
+function matchIncludesPlayer(match, playerId) {
+  return matchPlayers(match).some((player) => player.id === playerId);
+}
+
+function playerTournamentState(player, matches) {
+  const activeRound = getActiveRound();
+  const playingMatch = matches.find((match) => match.state === "playing" && matchIncludesPlayer(match, player.id));
+  if (playingMatch) return { kind: "playing", match: playingMatch };
+
+  const waitingMatch = matches.find((match) => match.state === "waiting" && matchIncludesPlayer(match, player.id));
+  if (waitingMatch) return { kind: "waiting", match: waitingMatch };
+
+  const sittingOut = activeRound?.sittingOut?.some((sittingPlayer) => sittingPlayer.id === player.id);
+  if (activeRound?.status === "active" && sittingOut) return { kind: "resting", match: null };
+
+  return { kind: "idle", match: null };
+}
+
+function playerPlacement(player, matches) {
+  const index = leaderboardEntries(matches).findIndex((entry) => entry.player.id === player.id);
+  return index >= 0 ? index + 1 : null;
+}
+
 function getActiveRound() {
   return state.rounds[state.rounds.length - 1];
 }
@@ -981,6 +1105,7 @@ function matchStateText(stateName) {
     waiting: "Venter",
     playing: "Pågår",
     finished: "Ferdig",
+    cancelled: "Avbrutt",
   }[stateName] ?? stateName;
 }
 
