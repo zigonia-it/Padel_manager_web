@@ -448,3 +448,46 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste full runde med flere kamper, fullføring og neste runde.
 - Gjøre spillerfanen tydeligere for valgt spiller under pågående runde.
 - Forberede første publiserbare versjon.
+
+## 2026-08-21 - Fikset dobbelbooking i kampgenerator
+
+### Gjort
+
+- Endret kampgeneratoren for runder slik at lag pares i rekkefølge i stedet for å lage round-robin mellom alle lag i samme runde.
+- Fikset en viktig feil der samme lag/spillere kunne havne på flere baner i samme runde.
+- Setter alle genererte banekamper som `Pågår`, slik at flere baner kan spilles samtidig.
+- Fjernet logikk som automatisk satte andre aktive kamper tilbake til `Venter` når en kamp startes eller åpnes igjen.
+- La til rundeoppsummering over kampkortene:
+  - rundenummer
+  - antall aktive kamper i runden
+  - ferdigprogresjon
+  - hvem som har pause
+- Gjorde kampseksjonen tydeligere som `Kamper og historikk`, siden totalen inkluderer tidligere runder.
+- Testet i Playwright på mobilbredde:
+  - opprette turnering med to baner
+  - fylle åtte demospillere
+  - generere runde 1
+  - bekrefte to samtidige kamper med åtte unike spillere
+  - fullføre begge kampene med hurtigscore
+  - fullføre runden
+  - generere runde 2
+  - bekrefte at runde 2 også har to samtidige kamper uten dobbelbooking
+
+### Beslutninger
+
+- En runde skal aldri gi samme spiller flere kamper samtidig.
+- Ved flere baner skal flere kamper kunne være `Pågår` samtidig.
+- Ubrukte lag/spillere i en runde legges i pause-listen.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste oddetallsspillere og pausevisning visuelt.
+- Forbedre spillerfanen slik at den viser aktiv kamp og pause enda tydeligere.
+- Klargjøre publiseringsløp for første testdemo.

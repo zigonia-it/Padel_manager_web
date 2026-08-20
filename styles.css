@@ -438,13 +438,15 @@ h3 {
   justify-content: space-between;
 }
 
-.status-grid {
+.status-grid,
+.round-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
-.status-grid > div {
+.status-grid > div,
+.round-summary > div {
   display: grid;
   gap: 0.2rem;
   border: 1px solid rgba(235, 199, 97, 0.18);
@@ -454,7 +456,9 @@ h3 {
 }
 
 .status-grid span,
-.status-grid small {
+.status-grid small,
+.round-summary span,
+.round-summary small {
   color: var(--muted);
   font-size: 0.72rem;
   font-weight: 800;
@@ -463,9 +467,14 @@ h3 {
   text-transform: uppercase;
 }
 
-.status-grid strong {
+.status-grid strong,
+.round-summary strong {
   font-size: 1.18rem;
   line-height: 1.2;
+}
+
+.round-summary strong {
+  color: var(--gold-light);
 }
 
 .status-grid .ready strong {
@@ -889,6 +898,7 @@ h3 {
 
   .avatar-picker,
   .status-grid,
+  .round-summary,
   .player-status-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -922,6 +932,7 @@ h3 {
 
   .avatar-picker,
   .status-grid,
+  .round-summary,
   .player-status-grid,
   .tennis-scoreboard,
   .point-controls,

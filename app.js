@@ -50,6 +50,7 @@ const elements = {
   playerCount: document.querySelector("#playerCount"),
   matchCount: document.querySelector("#matchCount"),
   playersList: document.querySelector("#playersList"),
+  roundSummary: document.querySelector("#roundSummary"),
   adminMatches: document.querySelector("#adminMatches"),
   playerMatches: document.querySelector("#playerMatches"),
   spectatorMatches: document.querySelector("#spectatorMatches"),
@@ -486,6 +487,7 @@ function render() {
 
   renderLobbyStatus();
   renderPlayers();
+  renderRoundSummary();
   renderMatches(matches);
   renderStandings(matches);
   renderPlayerSelector();
@@ -594,6 +596,42 @@ function renderPlayers() {
     item.querySelector(".danger-button").addEventListener("click", () => removePlayer(player.id));
     elements.playersList.append(item);
   });
+}
+
+function renderRoundSummary() {
+  const activeRound = getActiveRound();
+  elements.roundSummary.innerHTML = "";
+  if (!activeRound || activeRound.matches.length === 0) {
+    appendEmptyText(elements.roundSummary, "Rundeoppsett vises her når kampene er generert.");
+    return;
+  }
+
+  const progress = roundProgress(activeRound);
+  const summaryItems = [
+    {
+      label: "Runde",
+      value: activeRound.roundNumber,
+      detail: activeRound.status === "active" ? "Pågår" : "Fullført",
+    },
+    {
+      label: "Kamper",
+      value: activeRound.matches.length,
+      detail: `${progress.finished}/${progress.total} ferdig`,
+    },
+    {
+      label: "Pause",
+      value: activeRound.sittingOut?.length ?? 0,
+      detail: activeRound.sittingOut?.length ? activeRound.sittingOut.map((player) => player.name).join(", ") : "Ingen",
+    },
+  ];
+
+  elements.roundSummary.innerHTML = summaryItems.map((item) => `
+    <div>
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${escapeHtml(item.value)}</strong>
+      <small>${escapeHtml(item.detail)}</small>
+    </div>
+  `).join("");
 }
 
 function renderMatches(matches) {
@@ -1062,14 +1100,23 @@ function generateNextRound() {
 
   const scheduleIndex = state.currentRound % schedule.length;
   const roundPlan = schedule[scheduleIndex];
-  const matches = generateRoundRobinMatches(roundPlan.teams, state.currentRound + 1, roundPlan.sittingOut)
+  const matchPlan = generateRoundMatches(roundPlan.teams, state.currentRound + 1, roundPlan.sittingOut);
+  const matches = matchPlan
     .slice(0, state.courts.length)
     .map((match, index) => ({
       ...match,
       courtId: state.courts[index]?.id ?? null,
       courtName: state.courts[index]?.name ?? null,
-      state: index === 0 ? "playing" : "waiting",
+      state: "playing",
     }));
+  const playingPlayerIds = new Set(matches.flatMap((match) => matchPlayers(match).map((player) => player.id)));
+  const sittingOut = uniquePlayers([
+    ...roundPlan.sittingOut,
+    ...roundPlan.teams.flatMap((team) => team.players).filter((player) => !playingPlayerIds.has(player.id)),
+  ]);
+  matches.forEach((match) => {
+    match.sittingOut = sittingOut;
+  });
 
   state.currentRound += 1;
   state.status = "Runde pågår";
@@ -1078,7 +1125,7 @@ function generateNextRound() {
     roundNumber: state.currentRound,
     status: "active",
     createdAt: new Date().toISOString(),
-    sittingOut: roundPlan.sittingOut,
+    sittingOut,
     matches,
   });
 }
@@ -1131,29 +1178,27 @@ function generatePartnerRounds(players) {
   return rounds;
 }
 
-function generateRoundRobinMatches(teams, rotationNumber, sittingOut) {
+function generateRoundMatches(teams, rotationNumber, sittingOut) {
   const matches = [];
-  for (let homeIndex = 0; homeIndex < teams.length; homeIndex += 1) {
-    for (let awayIndex = homeIndex + 1; awayIndex < teams.length; awayIndex += 1) {
-      matches.push({
-        id: crypto.randomUUID(),
-        tournamentId: state.id,
-        rotationNumber,
-        teamOne: teams[homeIndex],
-        teamTwo: teams[awayIndex],
-        sittingOut,
-        state: "waiting",
-        completedSets: [],
-        currentSet: { teamOne: 0, teamTwo: 0 },
-        currentGame: { teamOne: 0, teamTwo: 0 },
-        startingTeamIndex: Math.round(Math.random()),
-        winnerTeamIndex: null,
-        isWalkover: false,
-        courtId: null,
-        courtName: null,
-        completedAt: null,
-      });
-    }
+  for (let teamIndex = 0; teamIndex < teams.length - 1; teamIndex += 2) {
+    matches.push({
+      id: crypto.randomUUID(),
+      tournamentId: state.id,
+      rotationNumber,
+      teamOne: teams[teamIndex],
+      teamTwo: teams[teamIndex + 1],
+      sittingOut,
+      state: "waiting",
+      completedSets: [],
+      currentSet: { teamOne: 0, teamTwo: 0 },
+      currentGame: { teamOne: 0, teamTwo: 0 },
+      startingTeamIndex: Math.round(Math.random()),
+      winnerTeamIndex: null,
+      isWalkover: false,
+      courtId: null,
+      courtName: null,
+      completedAt: null,
+    });
   }
   return matches;
 }
@@ -1253,19 +1298,12 @@ function isSetComplete(teamOne, teamTwo) {
 function startMatch(match) {
   const activeRound = getActiveRound();
   if (!activeRound || activeRound.status !== "active") return;
-  activeRound.matches.forEach((roundMatch) => {
-    if (roundMatch.state === "playing") roundMatch.state = "waiting";
-  });
   match.state = "playing";
   saveState();
   render();
 }
 
 function reopenMatch(match) {
-  const activeRound = getActiveRound();
-  activeRound?.matches.forEach((roundMatch) => {
-    if (roundMatch.state === "playing") roundMatch.state = "waiting";
-  });
   match.state = "playing";
   match.completedSets = [];
   match.currentGame = { teamOne: 0, teamTwo: 0 };
@@ -1384,6 +1422,15 @@ function playerTeamIndex(player, match) {
 
 function matchPlayers(match) {
   return [...match.teamOne.players, ...match.teamTwo.players];
+}
+
+function uniquePlayers(players) {
+  const seen = new Set();
+  return players.filter((player) => {
+    if (seen.has(player.id)) return false;
+    seen.add(player.id);
+    return true;
+  });
 }
 
 function matchIncludesPlayer(match, playerId) {
