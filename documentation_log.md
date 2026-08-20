@@ -539,3 +539,64 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Vurdere om spillerfarge også skal kunne velges manuelt sammen med avatar.
 - Teste fargekontrast på flere skjermstørrelser.
 - Videreføre fargene i spillerfanens neste-kamp-kort.
+
+## 2026-08-21 - Stort pass på Now-opplevelse, kampkort og regler
+
+### Gjort
+
+- Sammenlignet webappen mot eldre SwiftUI-skjermer:
+  - `NowView.swift`
+  - `MatchRow.swift`
+  - `RoundSummaryCard.swift`
+  - `RulesView.swift`
+- La inn live-overblikk for admin med:
+  - aktiv/neste kamp
+  - antall aktive, ventende og ferdige kamper
+  - rundeprogresjon som progressbar
+- Gjorde kampkortene mer lik den gamle kampvisningen:
+  - runde- og kampnummer
+  - `Nå`-markør
+  - banechip
+  - statuschip per kampstatus
+  - tydelig kampoverskrift
+  - serverindikator
+  - vinnertekst når kampen er ferdig
+- Gjorde spillerfanens neste-kamp-kort mer komplett:
+  - bruker spillerens accentfarge
+  - viser makker, motstandere, bane, games og tennispoeng
+  - viser tydelig pausekort når spilleren står over
+  - viser tydelig ventekort når spilleren ikke har kamp ennå
+- Utvidet tabellen med:
+  - plassering
+  - poeng
+  - kamper spilt
+  - kampseire
+  - sett
+  - games
+- La inn regelseksjon i tilskuervisningen for:
+  - tennispoeng
+  - gyldige settresultater
+  - rangeringsregler
+  - pause/sit-out
+- Bumpet Service Worker-cache til `padel-manager-v3`.
+
+### Beslutninger
+
+- Webappen skal hente tilbake følelsen fra SwiftUI-appen gjennom tydelige live-kort før vi bygger mer avansert historikk/cup.
+- Admin må alltid ha en rask statusflate øverst, ikke bare lange kampkort.
+- Spillerfanen skal prioritere “hva skal jeg gjøre nå?” fremfor full turneringsadministrasjon.
+- Regler skal være tilgjengelige i appen, men korte nok til å brukes under en aktiv turnering.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste hele flyten visuelt på mobil og desktop.
+- Vurdere large-score-modus for admin når en kamp pågår.
+- Legge inn manuell court-edit per kamp hvis banefordelingen må overstyres underveis.

@@ -70,6 +70,7 @@ const elements = {
   showStartButton: document.querySelector("#showStartButton"),
   copyStatus: document.querySelector("#copyStatus"),
   tournamentStatus: document.querySelector("#tournamentStatus"),
+  adminLiveOverview: document.querySelector("#adminLiveOverview"),
   lobbyStatus: document.querySelector("#lobbyStatus"),
   playerCount: document.querySelector("#playerCount"),
   matchCount: document.querySelector("#matchCount"),
@@ -79,6 +80,7 @@ const elements = {
   playerMatches: document.querySelector("#playerMatches"),
   spectatorMatches: document.querySelector("#spectatorMatches"),
   standingsList: document.querySelector("#standingsList"),
+  rulesList: document.querySelector("#rulesList"),
   playerStandingsList: document.querySelector("#playerStandingsList"),
   playerButtons: document.querySelector("#playerButtons"),
   playerNextMatch: document.querySelector("#playerNextMatch"),
@@ -355,6 +357,7 @@ function migrateMatch(match, tournamentId) {
     return {
       currentGame: { teamOne: 0, teamTwo: 0 },
       completedSets: [],
+      sittingOut: [],
       ...match,
     };
   }
@@ -520,6 +523,8 @@ function render() {
   renderPlayerSelector();
   renderPlayerNextMatch(matches);
   renderPlayerStatus(matches);
+  renderAdminLiveOverview(matches);
+  renderRules();
 }
 
 function syncConnectionStatus() {
@@ -563,6 +568,57 @@ function renderLobbyStatus() {
       <span>Status</span>
       <strong>${statusText}</strong>
       <small>${progress ? `${progress.finished}/${progress.total} kamper ferdig` : nextRoundLabel}</small>
+    </div>
+  `;
+}
+
+function renderAdminLiveOverview(matches) {
+  if (!elements.adminLiveOverview) return;
+
+  const activeRound = getActiveRound();
+  const playingMatches = matches.filter((match) => match.state === "playing");
+  const waitingMatches = matches.filter((match) => match.state === "waiting");
+  const finishedMatches = matches.filter((match) => match.state === "finished");
+  const progress = activeRound ? roundProgress(activeRound) : { total: matches.length, finished: finishedMatches.length };
+  const progressPercent = progress.total ? Math.round((progress.finished / progress.total) * 100) : 0;
+  const spotlightMatch = playingMatches[0] ?? waitingMatches[0] ?? matches.at(-1);
+
+  if (!spotlightMatch) {
+    elements.adminLiveOverview.innerHTML = `
+      <div class="overview-main">
+        <span class="status-chip waiting">Lobby</span>
+        <strong>Del koden og fyll spillerlisten.</strong>
+        <small>${state.players.length} spillere klare · ${state.courts.length} baner</small>
+      </div>
+      <div class="progress-track" aria-label="Turneringsfremdrift">
+        <span style="width: 0%"></span>
+      </div>
+    `;
+    return;
+  }
+
+  elements.adminLiveOverview.innerHTML = `
+    <div class="overview-main">
+      <span class="status-chip ${spotlightMatch.state}">${matchStateText(spotlightMatch.state)}</span>
+      <strong>${escapeHtml(primaryMatchHeadline(spotlightMatch))}</strong>
+      <small>${escapeHtml(matchContextText(spotlightMatch))} · ${escapeHtml(setScoreText(spotlightMatch))} games · ${escapeHtml(gameScoreText(spotlightMatch))}</small>
+    </div>
+    <div class="overview-stats">
+      <div>
+        <span>Aktive</span>
+        <strong>${playingMatches.length}</strong>
+      </div>
+      <div>
+        <span>Neste</span>
+        <strong>${waitingMatches.length}</strong>
+      </div>
+      <div>
+        <span>Ferdig</span>
+        <strong>${finishedMatches.length}</strong>
+      </div>
+    </div>
+    <div class="progress-track" aria-label="Turneringsfremdrift">
+      <span style="width: ${progressPercent}%"></span>
     </div>
   `;
 }
@@ -715,10 +771,20 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
   card.setAttribute("style", teamAccentStyle(match.teamOne));
   const teamOneName = escapeHtml(match.teamOne.displayName);
   const teamTwoName = escapeHtml(match.teamTwo.displayName);
+  const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
   card.innerHTML = `
     <div class="match-top">
-      <span class="match-court">${match.courtName ?? "Ikke tildelt bane"}</span>
-      <span class="match-status">${matchStateText(match.state)}</span>
+      <div class="match-meta">
+        <span>${escapeHtml(matchContextText(match))}</span>
+        ${match.state === "playing" ? "<span class=\"now-chip\">Nå</span>" : ""}
+      </div>
+      <div class="match-top-actions">
+        <span class="match-court">${match.courtName ?? "Ikke tildelt bane"}</span>
+        <span class="match-status ${match.state}">${matchStateText(match.state)}</span>
+      </div>
+    </div>
+    <div class="match-headline">
+      <span>${escapeHtml(primaryMatchHeadline(match))}</span>
     </div>
     <div class="teams">
       <div class="team">
@@ -740,8 +806,15 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
         <small>Poeng</small>
         <strong>${gameScoreText(match)}</strong>
       </div>
+      <div>
+        <small>Server</small>
+        <strong>${escapeHtml(startingTeamText(match))}</strong>
+      </div>
     </div>
-    <p class="hint">${scoreSummary(match)}${sittingOutSummary(match)}</p>
+    <div class="match-note">
+      <p class="hint">${scoreSummary(match)}${sittingOutSummary(match)}</p>
+      ${winner ? `<p class="winner-note">Vinner: ${escapeHtml(winner.displayName)}</p>` : ""}
+    </div>
   `;
 
   if (editable && match.state !== "cancelled") {
@@ -798,15 +871,24 @@ function renderStandings(matches) {
 
 function renderStandingsList(container, matches) {
   container.innerHTML = "";
-  leaderboardEntries(matches).forEach((entry) => {
+  const entries = leaderboardEntries(matches);
+  if (entries.length === 0) {
+    appendEmptyText(container, "Tabellen vises når spillere er lagt til.");
+    return;
+  }
+  entries.forEach((entry, index) => {
     const item = document.createElement("li");
     item.setAttribute("style", accentStyle(entry.player.accent));
     item.innerHTML = `
       <span class="player-list-name">
+        <span class="placement-badge">${index + 1}</span>
         <img class="avatar" src="${avatarUrl(entry.player)}" alt="" width="34" height="34">
         <span class="player-name-badge">${escapeHtml(entry.player.name)}</span>
       </span>
-      <strong>${entry.points} p · ${entry.matchWins} seire · ${entry.gamesWon} games</strong>
+      <span class="standing-stats">
+        <strong>${entry.points} p</strong>
+        <small>${entry.matchesPlayed} spilt · ${entry.matchWins} seire · ${entry.setsWon} sett · ${entry.gamesWon} games</small>
+      </span>
     `;
     container.append(item);
   });
@@ -832,6 +914,7 @@ function renderPlayerSelector() {
 function renderPlayerNextMatch(matches) {
   const player = getPlayerById(state.selectedPlayerId);
   if (!player) {
+    elements.playerNextMatch.removeAttribute("style");
     elements.playerNextMatch.innerHTML = `
       <p class="eyebrow">Din neste kamp</p>
       <h3>Velg spillerprofil</h3>
@@ -842,6 +925,7 @@ function renderPlayerNextMatch(matches) {
 
   if (state.status === "Avsluttet") {
     const placement = playerPlacement(player, matches);
+    elements.playerNextMatch.setAttribute("style", accentStyle(player.accent));
     elements.playerNextMatch.innerHTML = `
       <p class="eyebrow">Turneringen er ferdig</p>
       <h3>${escapeHtml(player.name)}${placement ? `, du endte på ${placement}. plass.` : ""}</h3>
@@ -851,11 +935,23 @@ function renderPlayerNextMatch(matches) {
   }
 
   const playerState = playerTournamentState(player, matches);
+  elements.playerNextMatch.setAttribute("style", accentStyle(player.accent));
 
   if (playerState.kind === "resting") {
+    const activeRound = getActiveRound();
     elements.playerNextMatch.innerHTML = `
       <p class="eyebrow">Pause denne runden</p>
       <h3>${escapeHtml(player.name)}, du sitter over nå.</h3>
+      <div class="player-now-grid">
+        <div>
+          <span>Runde</span>
+          <strong>${activeRound?.roundNumber ?? "-"}</strong>
+        </div>
+        <div>
+          <span>Status</span>
+          <strong>Pause</strong>
+        </div>
+      </div>
       <p>Følg med på neste runde. Du vises her igjen når du har kamp.</p>
     `;
     return;
@@ -865,6 +961,16 @@ function renderPlayerNextMatch(matches) {
     elements.playerNextMatch.innerHTML = `
       <p class="eyebrow">Venter</p>
       <h3>${escapeHtml(player.name)}, du har ingen aktiv kamp akkurat nå.</h3>
+      <div class="player-now-grid">
+        <div>
+          <span>Status</span>
+          <strong>Venter</strong>
+        </div>
+        <div>
+          <span>Runde</span>
+          <strong>${Math.max(state.currentRound, 1)}</strong>
+        </div>
+      </div>
       <p>Når administrator genererer neste runde, vises bane, makker og motstandere her.</p>
     `;
     return;
@@ -877,12 +983,34 @@ function renderPlayerNextMatch(matches) {
   const teammate = ownTeam.players.find((item) => item.id !== player.id);
   const opponentNames = opponents.players.map((opponent) => escapeHtml(opponent.name)).join(" & ");
   const statusLabel = playerState.kind === "playing" ? "Du spiller nå" : "Din neste kamp";
+  const ownScore = isTeamOne ? match.currentSet.teamOne : match.currentSet.teamTwo;
+  const opponentScore = isTeamOne ? match.currentSet.teamTwo : match.currentSet.teamOne;
 
   elements.playerNextMatch.innerHTML = `
     <p class="eyebrow">${statusLabel}</p>
     <h3>${match.courtName ?? "Bane kommer"}</h3>
-    <p>${teammate ? `Du spiller med ${escapeHtml(teammate.name)}.` : "Du spiller single."}</p>
-    <p>Mot ${opponentNames}.</p>
+    <div class="player-now-grid">
+      <div>
+        <span>Makker</span>
+        <strong>${teammate ? escapeHtml(teammate.name) : "Single"}</strong>
+      </div>
+      <div>
+        <span>Mot</span>
+        <strong>${opponentNames}</strong>
+      </div>
+      <div>
+        <span>Games</span>
+        <strong>${ownScore}-${opponentScore}</strong>
+      </div>
+      <div>
+        <span>Poeng</span>
+        <strong>${gameScoreText(match)}</strong>
+      </div>
+    </div>
+    <div class="next-match-summary">
+      <span>${escapeHtml(matchContextText(match))}</span>
+      <span>${scoreSummary(match)}</span>
+    </div>
   `;
 }
 
@@ -926,6 +1054,41 @@ function renderPlayerStatus(matches) {
       <small>${stats.matchesPlayed} spilt</small>
     </div>
   `;
+}
+
+function renderRules() {
+  if (!elements.rulesList) return;
+  const pointModeText = {
+    matches: "Tabellen gir 3 poeng for kampseier.",
+    sets: "Tabellen gir poeng for vunnet sett.",
+    games: "Tabellen teller hvert vunnet game.",
+  }[state.settings.pointMode] ?? "Tabellpoeng følger valgt regelsett.";
+
+  const rules = [
+    {
+      title: "Tennispoeng",
+      text: "Poeng føres som 0, 15, 30, 40 og A. Ved 40-40 må laget vinne to poeng på rad.",
+    },
+    {
+      title: "Sett",
+      text: "MVP spiller ett sett per kamp. Gyldig sluttresultat er 6-x med to games margin, 7-5 eller 7-6.",
+    },
+    {
+      title: "Rangering",
+      text: `${pointModeText} Ved likhet sorteres spillerne på kampseire, sett og navn.`,
+    },
+    {
+      title: "Pause",
+      text: "Ved oddetall eller for mange lag til antall baner får noen pause i runden og kommer tilbake i neste rotasjon.",
+    },
+  ];
+
+  elements.rulesList.innerHTML = rules.map((rule) => `
+    <div>
+      <strong>${escapeHtml(rule.title)}</strong>
+      <p>${escapeHtml(rule.text)}</p>
+    </div>
+  `).join("");
 }
 
 function avatarUrl(player) {
@@ -1528,6 +1691,10 @@ function getActiveRound() {
   return state.rounds[state.rounds.length - 1];
 }
 
+function getRoundForMatch(match) {
+  return state.rounds.find((round) => round.matches.some((roundMatch) => roundMatch.id === match.id));
+}
+
 function getAllMatches() {
   return state.rounds.flatMap((round) => round.matches);
 }
@@ -1547,6 +1714,31 @@ function matchStateText(stateName) {
     finished: "Ferdig",
     cancelled: "Avbrutt",
   }[stateName] ?? stateName;
+}
+
+function matchContextText(match) {
+  const round = getRoundForMatch(match);
+  const matchIndex = round ? round.matches.findIndex((item) => item.id === match.id) + 1 : null;
+  const sitOutCount = match.sittingOut?.length ?? 0;
+  const parts = [
+    `Runde ${match.rotationNumber}`,
+    matchIndex ? `Kamp ${matchIndex}` : "",
+    sitOutCount ? `${sitOutCount} pause` : "",
+  ].filter(Boolean);
+  return parts.join(" · ");
+}
+
+function primaryMatchHeadline(match) {
+  if (match.state === "finished" && match.winnerTeamIndex !== null) {
+    const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo;
+    return `${winner.displayName} vant ${setScoreText(match)}`;
+  }
+  if (match.state === "cancelled") return "Kampen er avbrutt";
+  return `${match.teamOne.displayName} mot ${match.teamTwo.displayName}`;
+}
+
+function startingTeamText(match) {
+  return match.startingTeamIndex === 0 ? "Lag 1" : "Lag 2";
 }
 
 function scoreSummary(match) {
@@ -1570,7 +1762,7 @@ function tennisPointLabel(value) {
 }
 
 function sittingOutSummary(match) {
-  if (!match.sittingOut.length) return "";
+  if (!match.sittingOut?.length) return "";
   return ` · Pause: ${match.sittingOut.map((player) => escapeHtml(player.name)).join(", ")}`;
 }
 
