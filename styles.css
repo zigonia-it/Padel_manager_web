@@ -259,6 +259,24 @@ h3 {
   line-height: 1.6;
 }
 
+.qr-card {
+  justify-items: center;
+}
+
+.qr-card span {
+  justify-self: start;
+}
+
+.qr-card img {
+  width: min(100%, 180px);
+  aspect-ratio: 1;
+  height: auto;
+  border: 8px solid #fbf5e6;
+  border-radius: 8px;
+  background: #fbf5e6;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
 .start-panel {
   display: grid;
   gap: 28px;

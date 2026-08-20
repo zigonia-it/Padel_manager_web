@@ -185,3 +185,30 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Legge inn QR-kode basert på join-lenken.
 - Gjøre lobbyen mer tydelig før første runde genereres.
+
+## 2026-08-21 - QR-kode for påmelding
+
+### Gjort
+
+- La til QR-kode i `Del turnering`-panelet.
+- QR-koden genereres fra join-lenken med invitasjonskode.
+- Bruker høy kontrast og lys bakgrunn rundt QR-koden for bedre scanning.
+- QR-koden oppdateres automatisk når turneringen får ny invitasjonskode.
+
+### Beslutninger
+
+- Bruker QuickChart som midlertidig QR-bildegenerator i den statiske demoen.
+- Egen eller self-hosted QR-generering vurderes senere hvis appen skal være mindre avhengig av eksterne tjenester.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste QR-koden visuelt i nettleser og med mobilkamera.
+- Gjøre lobbyen tydeligere før kampoppsett genereres.
+- Lage første avatarvelger.

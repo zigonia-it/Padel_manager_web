@@ -22,6 +22,7 @@ const elements = {
   roundLabel: document.querySelector("#roundLabel"),
   inviteCode: document.querySelector("#inviteCode"),
   adminInviteCode: document.querySelector("#adminInviteCode"),
+  joinQrCode: document.querySelector("#joinQrCode"),
   joinLink: document.querySelector("#joinLink"),
   copyInviteCodeButton: document.querySelector("#copyInviteCodeButton"),
   copyJoinLinkButton: document.querySelector("#copyJoinLinkButton"),
@@ -306,6 +307,7 @@ function render() {
   elements.inviteCode.textContent = state.inviteCode;
   elements.adminInviteCode.textContent = state.inviteCode;
   elements.joinLink.value = createJoinLink();
+  elements.joinQrCode.src = createQrCodeUrl(createJoinLink());
   elements.tournamentStatus.textContent = state.status;
   elements.playerCount.textContent = `${state.players.length} spillere`;
   elements.matchCount.textContent = `${matches.length} kamper`;
@@ -491,6 +493,19 @@ function createJoinLink() {
   url.searchParams.set("join", state.inviteCode);
   url.hash = "";
   return url.toString();
+}
+
+function createQrCodeUrl(text) {
+  const params = new URLSearchParams({
+    text,
+    size: "360",
+    margin: "2",
+    format: "svg",
+    dark: "16130e",
+    light: "fbf5e6",
+    ecLevel: "Q",
+  });
+  return `https://quickchart.io/qr?${params.toString()}`;
 }
 
 async function copyText(text, successMessage) {
