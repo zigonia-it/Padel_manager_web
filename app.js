@@ -4,7 +4,7 @@ const accents = ["silver", "green", "blue", "clay", "yellow", "navy", "mint", "c
 const defaultTournament = createTournament({
   name: "Risløkka Padel",
   inviteCode: "P4K7D",
-  players: ["Sigurd", "Elin", "Elisabeth", "Hanne", "Ruben", "Karoline", "Lars", "Tina"],
+  players: [],
   courtCount: 1,
 });
 
@@ -15,6 +15,8 @@ const elements = {
   workspaceView: document.querySelector("#workspaceView"),
   createTournamentForm: document.querySelector("#createTournamentForm"),
   joinTournamentForm: document.querySelector("#joinTournamentForm"),
+  joinAvatarPreview: document.querySelector("#joinAvatarPreview"),
+  joinNamePreview: document.querySelector("#joinNamePreview"),
   addPlayerForm: document.querySelector("#addPlayerForm"),
   tournamentTitle: document.querySelector("#tournamentTitle"),
   roundLabel: document.querySelector("#roundLabel"),
@@ -35,6 +37,9 @@ const elements = {
 };
 
 syncCreateFormDefaults();
+syncJoinPreview();
+
+elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
 
 elements.createTournamentForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -61,13 +66,22 @@ elements.joinTournamentForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
   const inviteCode = formData.get("inviteCode").trim().toUpperCase();
+  const playerName = formData.get("playerName").trim();
 
   if (inviteCode !== state.inviteCode) {
     alert(`Fant ikke turnering med kode ${inviteCode}. Prøv ${state.inviteCode} i demoen.`);
     return;
   }
 
+  if (!playerName) return;
+
+  const player = joinTournament(playerName);
+  state.selectedPlayerId = player.id;
+
   showWorkspace("player");
+  event.currentTarget.reset();
+  syncJoinPreview();
+  saveState();
   render();
 });
 
@@ -77,7 +91,7 @@ elements.addPlayerForm.addEventListener("submit", (event) => {
   const name = formData.get("playerName").trim();
   if (!name) return;
 
-  state.players.push(createPlayer(name, state.players.length));
+  addPlayer(name, "admin");
   state.schedule = buildSchedule(state.players);
   event.currentTarget.reset();
   saveState();
@@ -155,6 +169,9 @@ function createPlayer(name, index) {
     avatarId: name,
     accent: accents[index % accents.length],
     active: true,
+    joinStatus: "joined",
+    joinedFrom: "manual",
+    createdAt: new Date().toISOString(),
   };
 }
 
@@ -171,11 +188,16 @@ function loadState() {
 
 function migrateState(nextState) {
   nextState.settings ??= defaultTournament.settings;
+  nextState.players ??= [];
   nextState.schedule ??= buildSchedule(nextState.players);
+  nextState.rounds ??= [];
   nextState.players = nextState.players.map((player, index) => ({
     active: true,
     accent: accents[index % accents.length],
     avatarId: player.name,
+    joinStatus: "joined",
+    joinedFrom: "manual",
+    createdAt: new Date().toISOString(),
     ...player,
   }));
   nextState.rounds = nextState.rounds.map((round) => ({
@@ -221,6 +243,12 @@ function syncCreateFormDefaults() {
   elements.createTournamentForm.elements.courts.value = defaultTournament.courts.length;
 }
 
+function syncJoinPreview() {
+  const name = elements.joinTournamentForm.elements.playerName.value.trim() || "Navnet ditt";
+  elements.joinNamePreview.textContent = name;
+  elements.joinAvatarPreview.src = avatarUrl({ name, avatarId: name });
+}
+
 function showStart() {
   elements.startView.classList.remove("hidden");
   elements.workspaceView.classList.add("hidden");
@@ -260,13 +288,27 @@ function render() {
 function renderPlayers() {
   const standings = leaderboardEntries(getAllMatches());
   elements.playersList.innerHTML = "";
+  if (state.players.length === 0) {
+    const item = document.createElement("li");
+    item.className = "empty-list-item";
+    item.innerHTML = `
+      <span>
+        Ingen spillere ennå. Del koden ${state.inviteCode}, eller legg til spillere manuelt.
+      </span>
+    `;
+    elements.playersList.append(item);
+    return;
+  }
   state.players.forEach((player) => {
     const entry = standings.find((item) => item.player.id === player.id);
     const item = document.createElement("li");
     item.innerHTML = `
       <span class="player-list-name">
         <img class="avatar" src="${avatarUrl(player)}" alt="" width="34" height="34">
-        ${player.name}
+        <span>
+          ${escapeHtml(player.name)}
+          <small>${player.joinedFrom === "self" ? "Påmeldt selv" : "Lagt til av admin"}</small>
+        </span>
       </span>
       <strong>${entry?.points ?? 0} p</strong>
     `;
@@ -345,7 +387,7 @@ function renderStandings(matches) {
     item.innerHTML = `
       <span class="player-list-name">
         <img class="avatar" src="${avatarUrl(entry.player)}" alt="" width="34" height="34">
-        ${entry.player.name}
+        ${escapeHtml(entry.player.name)}
       </span>
       <strong>${entry.points} p · ${entry.matchWins} seire · ${entry.gamesWon} games</strong>
     `;
@@ -358,7 +400,7 @@ function renderPlayerSelector() {
   state.players.forEach((player) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.innerHTML = `<img class="avatar" src="${avatarUrl(player)}" alt="" width="30" height="30"><span>${player.name}</span>`;
+    button.innerHTML = `<img class="avatar" src="${avatarUrl(player)}" alt="" width="30" height="30"><span>${escapeHtml(player.name)}</span>`;
     button.classList.toggle("active", state.selectedPlayerId === player.id);
     button.addEventListener("click", () => {
       state.selectedPlayerId = player.id;
@@ -387,7 +429,7 @@ function renderPlayerNextMatch(matches) {
   if (!match) {
     elements.playerNextMatch.innerHTML = `
       <p class="eyebrow">Pause</p>
-      <h3>${player.name}, du har ingen aktiv kamp akkurat nå.</h3>
+      <h3>${escapeHtml(player.name)}, du har ingen aktiv kamp akkurat nå.</h3>
       <p>Når neste runde genereres, vises kampinformasjonen her.</p>
     `;
     return;
@@ -397,12 +439,13 @@ function renderPlayerNextMatch(matches) {
   const ownTeam = isTeamOne ? match.teamOne : match.teamTwo;
   const opponents = isTeamOne ? match.teamTwo : match.teamOne;
   const teammate = ownTeam.players.find((item) => item.id !== player.id);
+  const opponentNames = opponents.players.map((opponent) => escapeHtml(opponent.name)).join(" & ");
 
   elements.playerNextMatch.innerHTML = `
     <p class="eyebrow">Din neste kamp</p>
     <h3>${match.courtName ?? "Bane kommer"}</h3>
-    <p>${teammate ? `Du spiller med ${teammate.name}.` : "Du spiller single."}</p>
-    <p>Mot ${opponents.displayName}.</p>
+    <p>${teammate ? `Du spiller med ${escapeHtml(teammate.name)}.` : "Du spiller single."}</p>
+    <p>Mot ${opponentNames}.</p>
   `;
 }
 
@@ -411,12 +454,28 @@ function avatarUrl(player) {
   return `https://api.dicebear.com/10.x/thumbs/svg?seed=${seed}&size=64&borderRadius=50&backgroundColor=cc9414,616b7a,ebc761`;
 }
 
+function joinTournament(name) {
+  const existingPlayer = state.players.find((player) => player.name.localeCompare(name, "nb", { sensitivity: "accent" }) === 0);
+  if (existingPlayer) return existingPlayer;
+  return addPlayer(name, "self");
+}
+
+function addPlayer(name, joinedFrom) {
+  const player = {
+    ...createPlayer(name, state.players.length),
+    joinedFrom,
+  };
+  state.players.push(player);
+  state.schedule = buildSchedule(state.players);
+  return player;
+}
+
 function teamDisplay(team) {
   return team.players
     .map((player) => `
       <span class="team-player">
         <img class="avatar small-avatar" src="${avatarUrl(player)}" alt="" width="28" height="28">
-        ${player.name}
+        ${escapeHtml(player.name)}
       </span>
     `)
     .join("");
@@ -685,7 +744,17 @@ function scoreSummary(match) {
 
 function sittingOutSummary(match) {
   if (!match.sittingOut.length) return "";
-  return ` · Pause: ${match.sittingOut.map((player) => player.name).join(", ")}`;
+  return ` · Pause: ${match.sittingOut.map((player) => escapeHtml(player.name)).join(", ")}`;
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#039;",
+  })[character]);
 }
 
 function replaceChildren(container, children, emptyText) {

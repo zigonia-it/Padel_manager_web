@@ -123,3 +123,36 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Lage små commits etter avgrensede arbeidsøkter.
 - Vurdere GitHub-remote når prosjektet skal sikkerhetskopieres eller publiseres.
+
+## 2026-08-21 - Første lobby- og join-flyt
+
+### Gjort
+
+- Gjorde spillerlisten ved opprettelse av turnering valgfri.
+- La til navn i `Bli med`-skjemaet.
+- La til midlertidig avatar-preview som genereres fra spillerens navn.
+- Oppdaterte join-flyten slik at spillere med riktig invitasjonskode legges inn i lobby/spillerliste.
+- Velger automatisk spillerprofilen etter påmelding.
+- Viser om en spiller er påmeldt selv eller lagt til av admin.
+- La inn tomtilstand i admin-lobbyen når ingen spillere er påmeldt.
+- Escapet spillernavn før de vises i HTML for å redusere risiko ved brukerinput.
+
+### Beslutninger
+
+- Standardflyten skal nå være at spillere melder seg på selv med kode og navn.
+- Administrator kan fortsatt legge inn spillere manuelt.
+- DiceBear beholdes som midlertidig avatar-placeholder frem til egen avatarvelger lages.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `documentation_log.md`
+
+### Neste steg
+
+- Lage tydeligere admin-lobby med deling av kode/lenke.
+- Legge inn QR-kode for join.
+- Lage første reelle avatarvelger.
+- Vurdere egen start/tilbake-knapp for å teste join-flyten lettere på samme enhet.

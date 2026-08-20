@@ -189,6 +189,33 @@ h3 {
   line-height: 1.15;
 }
 
+.join-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  border: 1px solid rgba(235, 199, 97, 0.22);
+  border-radius: 8px;
+  padding: 0.78rem 0.85rem;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.join-preview span,
+.player-list-name small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  line-height: 1.45;
+}
+
+.join-preview strong {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
 .start-panel {
   display: grid;
   gap: 28px;
@@ -377,6 +404,17 @@ h3 {
 .small-avatar {
   width: 28px;
   height: 28px;
+}
+
+.large-avatar {
+  width: 48px;
+  height: 48px;
+}
+
+.empty-list-item {
+  justify-content: flex-start !important;
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .match-card {

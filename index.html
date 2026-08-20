@@ -48,15 +48,8 @@
                 <input name="tournamentName" type="text" value="Risløkka Padel" autocomplete="off" required>
               </label>
               <label>
-                Spillere
-                <textarea name="players" rows="8" required>Sigurd
-Elin
-Elisabeth
-Hanne
-Ruben
-Karoline
-Lars
-Tina</textarea>
+                Spillere, valgfritt
+                <textarea name="players" rows="6" placeholder="Legg inn spillere manuelt hvis noen ikke har egen enhet."></textarea>
               </label>
               <label>
                 Antall baner
@@ -71,7 +64,18 @@ Tina</textarea>
                 Invitasjonskode
                 <input name="inviteCode" type="text" placeholder="P4K7D" maxlength="8" autocomplete="off" required>
               </label>
-              <button class="secondary" type="submit">Finn turnering</button>
+              <label>
+                Navn
+                <input name="playerName" type="text" placeholder="Skriv navnet ditt" autocomplete="name" required>
+              </label>
+              <div class="join-preview" aria-live="polite">
+                <img class="avatar large-avatar" id="joinAvatarPreview" src="" alt="" width="48" height="48">
+                <div>
+                  <span>Din midlertidige avatar</span>
+                  <strong id="joinNamePreview">Navnet ditt</strong>
+                </div>
+              </div>
+              <button class="secondary" type="submit">Bli med i turnering</button>
               <p class="hint">I dette utkastet fungerer koden for turneringen som er opprettet på denne enheten.</p>
             </form>
           </div>
@@ -112,7 +116,7 @@ Tina</textarea>
 
             <div class="panel">
               <div class="panel-heading">
-                <h3>Spillere</h3>
+                <h3>Lobby / spillere</h3>
                 <span id="playerCount">0</span>
               </div>
               <form class="inline-form" id="addPlayerForm">
