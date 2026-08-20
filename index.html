@@ -142,6 +142,17 @@
                 </label>
                 <button class="secondary" type="submit">Oppdater</button>
               </form>
+              <form class="inline-form" id="tournamentSettingsForm">
+                <label>
+                  Tabellpoeng
+                  <select name="pointMode">
+                    <option value="matches">Kamper</option>
+                    <option value="sets">Sett</option>
+                    <option value="games">Games</option>
+                  </select>
+                </label>
+                <button class="secondary" type="submit">Lagre regler</button>
+              </form>
               <div class="button-row">
                 <button class="primary" id="generateRoundButton" type="button">Start første runde</button>
                 <button class="secondary" id="completeRoundButton" type="button">Fullfør runde</button>
@@ -192,9 +203,10 @@
                 <span id="playerCount">0</span>
               </div>
               <form class="inline-form" id="addPlayerForm">
-                <input name="playerName" type="text" placeholder="Legg til spiller" autocomplete="off" required>
+                <textarea name="playerName" rows="2" placeholder="Legg til én eller flere spillere" autocomplete="off" required></textarea>
                 <button class="secondary" type="submit">Legg til</button>
               </form>
+              <button class="secondary" id="seedPlayersButton" type="button">Fyll demospillere</button>
               <ul class="compact-list" id="playersList"></ul>
             </div>
 

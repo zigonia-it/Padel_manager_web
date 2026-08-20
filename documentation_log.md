@@ -394,3 +394,57 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Fortsette med større sammenhengende arbeidspakker frem mot brukbar mandagsdemo.
 - Teste join-flyt fra spillerperspektiv etter at admin har opprettet turnering.
 - Forberede publisering når lokal MVP er stabil nok.
+
+## 2026-08-21 - Større adminoppsett for mandagsdemo
+
+### Gjort
+
+- La til regelvalg for tabellpoeng i adminvisningen:
+  - kamper
+  - sett
+  - games
+- Gjorde spillerfeltet i lobbyen til bulk-input.
+- Bulk-input støtter navn separert med linjeskift, komma eller semikolon.
+- La til `Fyll demospillere` med faste spillernavn:
+  - Sigurd
+  - Elin
+  - Elisabeth
+  - Hanne
+  - Ruben
+  - Karoline
+  - Lars
+  - Tina
+- La til redigering av navn og avatar for spillere før første runde.
+- La til duplikatsjekk ved redigering og innlegging av spillere.
+- Låser spillerredigering, sletting, bulk-input og demoknapp etter at kampoppsettet er startet.
+- Blokkerer nye spillere fra å melde seg på etter turneringen har startet.
+- Beholder eksisterende spillere som prøver å åpne join-flyten etter start.
+- La til styling for `select`-felt og redigerbare spillerlinjer.
+- Testet i Playwright på mobilbredde:
+  - opprette tom turnering
+  - fylle demospillere
+  - redigere spiller til `Sigurd A`
+  - endre avatarvalg
+  - endre tabellpoeng
+  - starte runde med åtte spillere og to baner
+  - bekrefte at spillerredigering låses etter start
+  - bekrefte at sen påmelding blokkeres
+
+### Beslutninger
+
+- Mandagsdemoen bør ha en rask vei til realistiske data.
+- Admin må kunne rette skrivefeil og avatarvalg før turneringen starter.
+- Nye spillere etter start blokkeres i lokal MVP for å unngå ødelagte runder og tabell.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste full runde med flere kamper, fullføring og neste runde.
+- Gjøre spillerfanen tydeligere for valgt spiller under pågående runde.
+- Forberede første publiserbare versjon.

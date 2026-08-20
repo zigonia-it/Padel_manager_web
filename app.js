@@ -2,6 +2,13 @@ const storageKey = "padel-manager-demo";
 const accents = ["silver", "green", "blue", "clay", "yellow", "navy", "mint", "coral"];
 const defaultAvatarId = "smash";
 const tennisPointLabels = ["0", "15", "30", "40", "A"];
+const demoPlayerNames = ["Sigurd", "Elin", "Elisabeth", "Hanne", "Ruben", "Karoline", "Lars", "Tina"];
+const avatarOptions = [
+  { id: "smash", label: "Smash" },
+  { id: "serve", label: "Serve" },
+  { id: "wall", label: "Vegg" },
+  { id: "lob", label: "Lob" },
+];
 
 const defaultTournament = createTournament({
   name: "Risløkka Padel",
@@ -27,6 +34,7 @@ const elements = {
   avatarPicker: document.querySelector("#avatarPicker"),
   addPlayerForm: document.querySelector("#addPlayerForm"),
   courtSettingsForm: document.querySelector("#courtSettingsForm"),
+  tournamentSettingsForm: document.querySelector("#tournamentSettingsForm"),
   tournamentTitle: document.querySelector("#tournamentTitle"),
   roundLabel: document.querySelector("#roundLabel"),
   inviteCode: document.querySelector("#inviteCode"),
@@ -55,6 +63,7 @@ const elements = {
   exportBackupButton: document.querySelector("#exportBackupButton"),
   importBackupButton: document.querySelector("#importBackupButton"),
   backupFileInput: document.querySelector("#backupFileInput"),
+  seedPlayersButton: document.querySelector("#seedPlayersButton"),
   endTournamentButton: document.querySelector("#endTournamentButton"),
   resetDemoButton: document.querySelector("#resetDemoButton"),
 };
@@ -74,11 +83,7 @@ elements.avatarPicker.addEventListener("change", syncJoinPreview);
 elements.createTournamentForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
-  const playerNames = formData
-    .get("players")
-    .split("\n")
-    .map((name) => name.trim())
-    .filter(Boolean);
+  const playerNames = parsePlayerNames(formData.get("players"));
 
   state = createTournament({
     name: formData.get("tournamentName").trim(),
@@ -106,7 +111,13 @@ elements.joinTournamentForm.addEventListener("submit", (event) => {
 
   if (!playerName) return;
 
-  const player = joinTournament(playerName, avatarId);
+  const existingPlayer = findPlayerByName(playerName);
+  if (!existingPlayer && state.rounds.length > 0) {
+    alert("Turneringen er startet. Be administrator legge deg til i neste turnering.");
+    return;
+  }
+
+  const player = existingPlayer ?? joinTournament(playerName, avatarId);
   state.selectedPlayerId = player.id;
 
   showWorkspace("player");
@@ -123,10 +134,10 @@ elements.addPlayerForm.addEventListener("submit", (event) => {
     return;
   }
   const formData = new FormData(event.currentTarget);
-  const name = formData.get("playerName").trim();
-  if (!name) return;
+  const names = parsePlayerNames(formData.get("playerName"));
+  if (names.length === 0) return;
 
-  addPlayer(name, "admin", defaultAvatarId);
+  addPlayers(names, "admin");
   event.currentTarget.reset();
   saveState();
   render();
@@ -140,6 +151,24 @@ elements.courtSettingsForm.addEventListener("submit", (event) => {
   }
   const courtCount = Number(new FormData(event.currentTarget).get("courtCount"));
   updateCourtCount(courtCount);
+  saveState();
+  render();
+});
+
+elements.tournamentSettingsForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const pointMode = new FormData(event.currentTarget).get("pointMode");
+  updatePointMode(pointMode);
+  saveState();
+  render();
+});
+
+elements.seedPlayersButton.addEventListener("click", () => {
+  if (state.rounds.length > 0) {
+    alert("Demospillere kan bare fylles før første runde.");
+    return;
+  }
+  addPlayers(demoPlayerNames, "admin");
   saveState();
   render();
 });
@@ -269,7 +298,10 @@ function loadState() {
 }
 
 function migrateState(nextState) {
-  nextState.settings ??= defaultTournament.settings;
+  nextState.settings = {
+    ...defaultTournament.settings,
+    ...(nextState.settings ?? {}),
+  };
   nextState.players ??= [];
   nextState.courts ??= structuredClone(defaultTournament.courts);
   nextState.schedule ??= buildSchedule(nextState.players);
@@ -441,6 +473,7 @@ function render() {
   elements.playerCount.textContent = `${state.players.length} spillere`;
   elements.matchCount.textContent = `${matches.length} kamper`;
   elements.courtSettingsForm.elements.courtCount.value = state.courts.length;
+  elements.tournamentSettingsForm.elements.pointMode.value = state.settings.pointMode;
   elements.generateRoundButton.disabled = Boolean(generateRoundBlockReason());
   elements.generateRoundButton.textContent = state.currentRound > 0 ? "Generer neste runde" : "Start første runde";
   elements.completeRoundButton.disabled = !getActiveRound() || getActiveRound().status === "finished" || !canCompleteRound(getActiveRound()) || state.status === "Avsluttet";
@@ -449,6 +482,7 @@ function render() {
   elements.courtSettingsForm.querySelector("button").disabled = getActiveRound()?.status === "active" || state.status === "Avsluttet";
   elements.addPlayerForm.elements.playerName.disabled = state.rounds.length > 0;
   elements.addPlayerForm.querySelector("button").disabled = state.rounds.length > 0;
+  elements.seedPlayersButton.disabled = state.rounds.length > 0 || demoPlayerNames.every((name) => findPlayerByName(name));
 
   renderLobbyStatus();
   renderPlayers();
@@ -522,6 +556,7 @@ function renderPlayers() {
   state.players.forEach((player) => {
     const entry = standings.find((item) => item.player.id === player.id);
     const item = document.createElement("li");
+    item.className = lobbyLocked ? "" : "editable-player";
     item.innerHTML = `
       <span class="player-list-name">
         <img class="avatar" src="${avatarUrl(player)}" alt="" width="34" height="34">
@@ -535,7 +570,28 @@ function renderPlayers() {
         <button class="icon-button danger-button" type="button" aria-label="Fjern ${escapeHtml(player.name)}" ${lobbyLocked ? "disabled" : ""}>Fjern</button>
       </span>
     `;
-    item.querySelector("button").addEventListener("click", () => removePlayer(player.id));
+    if (!lobbyLocked) {
+      const editor = document.createElement("form");
+      editor.className = "player-edit-grid";
+      editor.innerHTML = `
+        <input name="playerName" type="text" value="${escapeAttribute(player.name)}" aria-label="Endre navn for ${escapeAttribute(player.name)}" required>
+        <select name="avatarId" aria-label="Avatar for ${escapeAttribute(player.name)}">
+          ${avatarOptions.map((avatar) => `
+            <option value="${avatar.id}" ${player.avatarId === avatar.id ? "selected" : ""}>${avatar.label}</option>
+          `).join("")}
+        </select>
+        <button class="secondary icon-button" type="submit">Lagre</button>
+      `;
+      editor.addEventListener("submit", (event) => {
+        event.preventDefault();
+        updatePlayer(player.id, {
+          name: new FormData(event.currentTarget).get("playerName").trim(),
+          avatarId: new FormData(event.currentTarget).get("avatarId"),
+        });
+      });
+      item.append(editor);
+    }
+    item.querySelector(".danger-button").addEventListener("click", () => removePlayer(player.id));
     elements.playersList.append(item);
   });
 }
@@ -860,9 +916,22 @@ async function copyText(text, successMessage) {
 }
 
 function joinTournament(name, avatarId) {
-  const existingPlayer = state.players.find((player) => player.name.localeCompare(name, "nb", { sensitivity: "accent" }) === 0);
+  const existingPlayer = findPlayerByName(name);
   if (existingPlayer) return existingPlayer;
   return addPlayer(name, "self", avatarId);
+}
+
+function parsePlayerNames(value) {
+  return String(value)
+    .split(/[\n,;]+/)
+    .map((name) => name.trim())
+    .filter(Boolean);
+}
+
+function addPlayers(names, joinedFrom) {
+  names.forEach((name) => {
+    if (!findPlayerByName(name)) addPlayer(name, joinedFrom, defaultAvatarId);
+  });
 }
 
 function addPlayer(name, joinedFrom, avatarId) {
@@ -875,6 +944,26 @@ function addPlayer(name, joinedFrom, avatarId) {
   return player;
 }
 
+function updatePlayer(playerId, updates) {
+  const player = getPlayerById(playerId);
+  if (!player || state.rounds.length > 0) return;
+
+  const nextName = updates.name?.trim();
+  if (!nextName) return;
+
+  const duplicate = state.players.find((item) => item.id !== playerId && item.name.localeCompare(nextName, "nb", { sensitivity: "accent" }) === 0);
+  if (duplicate) {
+    alert(`${nextName} finnes allerede i spillerlisten.`);
+    return;
+  }
+
+  player.name = nextName;
+  player.avatarId = updates.avatarId || player.avatarId || defaultAvatarId;
+  state.schedule = buildSchedule(state.players);
+  saveState();
+  render();
+}
+
 function removePlayer(playerId) {
   if (state.rounds.length > 0) {
     alert("Spillere kan ikke fjernes etter at kampoppsettet er startet i denne demoen.");
@@ -885,6 +974,11 @@ function removePlayer(playerId) {
   state.schedule = buildSchedule(state.players);
   saveState();
   render();
+}
+
+function updatePointMode(pointMode) {
+  if (!["matches", "sets", "games"].includes(pointMode)) return;
+  state.settings.pointMode = pointMode;
 }
 
 function endTournament() {
@@ -1327,6 +1421,10 @@ function getPlayerById(id) {
   return state.players.find((player) => player.id === id);
 }
 
+function findPlayerByName(name) {
+  return state.players.find((player) => player.name.localeCompare(name, "nb", { sensitivity: "accent" }) === 0);
+}
+
 function matchStateText(stateName) {
   return {
     waiting: "Venter",
@@ -1369,6 +1467,10 @@ function escapeHtml(value) {
     "\"": "&quot;",
     "'": "&#039;",
   })[character]);
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value);
 }
 
 function appendEmptyText(container, emptyText) {

@@ -44,7 +44,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -66,7 +67,8 @@ button:disabled {
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -76,6 +78,16 @@ textarea {
   font-size: 0.96rem;
   letter-spacing: 0.028em;
   line-height: 1.62;
+}
+
+select {
+  min-height: 52px;
+  appearance: none;
+  background:
+    linear-gradient(45deg, transparent 50%, var(--gold-light) 50%) calc(100% - 18px) 50% / 7px 7px no-repeat,
+    linear-gradient(135deg, var(--gold-light) 50%, transparent 50%) calc(100% - 13px) 50% / 7px 7px no-repeat,
+    rgba(255, 255, 255, 0.07);
+  padding-right: 2.2rem;
 }
 
 input::placeholder,
@@ -579,6 +591,27 @@ h3 {
   flex: 0 0 auto;
 }
 
+.editable-player {
+  display: grid !important;
+  align-items: stretch !important;
+}
+
+.editable-player > .player-list-name,
+.editable-player > .player-actions {
+  width: 100%;
+}
+
+.editable-player > .player-actions {
+  justify-content: space-between;
+}
+
+.player-edit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(110px, 0.7fr) auto;
+  gap: 8px;
+  width: 100%;
+}
+
 .icon-button {
   min-height: 34px;
   padding: 0.45rem 0.58rem;
@@ -869,6 +902,10 @@ h3 {
   .player-actions {
     justify-content: space-between;
     width: 100%;
+  }
+
+  .player-edit-grid {
+    grid-template-columns: 1fr;
   }
 }
 
