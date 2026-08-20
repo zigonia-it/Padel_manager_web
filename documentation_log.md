@@ -99,3 +99,27 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Bruke `development_plan.md` som praktisk veikart for neste implementasjonsrunde.
 - Starte på lobby og join-flyt før Supabase kobles på.
+
+## 2026-08-21 - Git-oppsett
+
+### Gjort
+
+- Initialiserte git-repo i prosjektmappen.
+- Satte hovedbranch til `main`.
+- La til `.gitignore` for macOS-filer, logger, dependencies, build-output, lokale miljøfiler og testartefakter.
+- Laget første commit med webutkast, assets og dokumentasjon.
+
+### Beslutninger
+
+- Git brukes videre som sikkerhetsnett før større endringer.
+- `.DS_Store` skal ikke trackes.
+
+### Endrede filer
+
+- `.gitignore`
+- `documentation_log.md`
+
+### Neste steg
+
+- Lage små commits etter avgrensede arbeidsøkter.
+- Vurdere GitHub-remote når prosjektet skal sikkerhetskopieres eller publiseres.
