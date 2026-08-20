@@ -491,3 +491,51 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste oddetallsspillere og pausevisning visuelt.
 - Forbedre spillerfanen slik at den viser aktiv kamp og pause enda tydeligere.
 - Klargjøre publiseringsløp for første testdemo.
+
+## 2026-08-21 - Overført spillerfargesystem fra SwiftUI
+
+### Gjort
+
+- Leste fargesystemet i det gamle SwiftUI-prosjektet:
+  - `PlayerAccent.swift`
+  - `PlayerBadgeView.swift`
+  - `TeamBadgeView.swift`
+  - `AppColors.swift`
+- Overførte 16-fargers spillerpalett til webappen.
+- Mapper eldre web-accenter til nærmeste SwiftUI-accent ved migrering.
+- La inn CSS-variabler per spiller/lag:
+  - basisfarge
+  - lys variant
+  - mørk variant
+  - RGB-verdi for skygger og glow
+- Gjorde spillerkort i lobby/tabell fargede med venstremarkør og badge.
+- Gjorde avatar-ringene spillerfargede.
+- Gjorde lagvisning inne i kampkort farget per spiller.
+- Gjorde kampkort farget etter lag/accent med subtil venstremarkør og bakgrunnsglow.
+- Gjorde spillerknapper på spillerfanen fargekodet.
+- Fikset at poengtekst som `0 p` ikke bryter over flere linjer på mobil.
+- Bumpet Service Worker-cache til `padel-manager-v2` slik at nye CSS/JS-endringer blir hentet.
+- Testet visuelt i Playwright på mobilbredde med:
+  - demospillere i lobby
+  - fargede spillerkort
+  - generert runde
+  - fargede lagbadges i kampkort
+
+### Beslutninger
+
+- Webappen skal bruke samme `PlayerAccent`-rekkefølge som SwiftUI-appen.
+- Farge skal hjelpe lesbarhet, ikke bare dekorere.
+- Avatarvalg og spillerfarge holdes foreløpig separat.
+
+### Endrede filer
+
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Vurdere om spillerfarge også skal kunne velges manuelt sammen med avatar.
+- Teste fargekontrast på flere skjermstørrelser.
+- Videreføre fargene i spillerfanens neste-kamp-kort.

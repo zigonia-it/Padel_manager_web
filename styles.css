@@ -15,6 +15,10 @@
   --live: #d98a2b;
   --finished: #3f9d63;
   --danger: #a83b36;
+  --player-accent: var(--gold);
+  --player-accent-light: var(--gold-light);
+  --player-accent-dark: var(--gold-dark);
+  --player-accent-rgb: 204, 148, 20;
   --shadow: 0 18px 52px rgba(0, 0, 0, 0.38);
   font-family: Orbitron, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -573,6 +577,7 @@ h3 {
 
 .compact-list li,
 .standings li {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -585,6 +590,18 @@ h3 {
   line-height: 1.55;
 }
 
+.compact-list li::before,
+.standings li::before,
+.match-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: 8px 0 0 8px;
+  background: linear-gradient(180deg, var(--player-accent-light), var(--player-accent-dark));
+  box-shadow: 0 0 14px rgba(var(--player-accent-rgb), 0.35);
+}
+
 .player-list-name,
 .team-player {
   display: inline-flex;
@@ -593,11 +610,48 @@ h3 {
   min-width: 0;
 }
 
+.player-name-badge,
+.team-player-badge {
+  display: inline-grid;
+  align-items: center;
+  min-height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.34rem 0.72rem;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), transparent 42%),
+    linear-gradient(160deg, var(--player-accent-light), var(--player-accent), var(--player-accent-dark));
+  color: white;
+  font-weight: 900;
+  line-height: 1.25;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 8px 18px rgba(var(--player-accent-rgb), 0.24);
+}
+
+.player-name-badge small {
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: none;
+}
+
+.team-player-badge {
+  min-height: 28px;
+  padding: 0.28rem 0.62rem;
+  font-size: 0.86rem;
+}
+
 .player-actions {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
   flex: 0 0 auto;
+}
+
+.player-actions strong {
+  min-width: 3rem;
+  white-space: nowrap;
 }
 
 .editable-player {
@@ -638,10 +692,12 @@ h3 {
   width: 34px;
   height: 34px;
   flex: 0 0 auto;
-  border: 1px solid rgba(235, 199, 97, 0.36);
+  border: 2px solid var(--player-accent-light);
   border-radius: 50%;
-  background: rgba(235, 199, 97, 0.12);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+  background: rgba(var(--player-accent-rgb), 0.18);
+  box-shadow:
+    0 0 0 2px rgba(var(--player-accent-rgb), 0.18),
+    0 6px 16px rgba(0, 0, 0, 0.22);
 }
 
 .small-avatar {
@@ -661,12 +717,18 @@ h3 {
 }
 
 .match-card {
+  position: relative;
   display: grid;
   gap: 16px;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(var(--player-accent-rgb), 0.34);
   border-radius: 8px;
   padding: 16px;
-  background: var(--cell);
+  background:
+    linear-gradient(135deg, rgba(var(--player-accent-rgb), 0.18), transparent 42%),
+    var(--cell);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 30px rgba(var(--player-accent-rgb), 0.12);
 }
 
 .match-controls {
@@ -706,9 +768,9 @@ h3 {
 }
 
 .highlight-match {
-  border-color: rgba(235, 199, 97, 0.52);
+  border-color: rgba(var(--player-accent-rgb), 0.74);
   background:
-    linear-gradient(180deg, rgba(235, 199, 97, 0.13), rgba(255, 255, 255, 0.045)),
+    linear-gradient(180deg, rgba(var(--player-accent-rgb), 0.22), rgba(255, 255, 255, 0.045)),
     var(--cell);
 }
 
@@ -809,14 +871,19 @@ h3 {
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
-  border: 1px solid rgba(235, 199, 97, 0.24);
-  background: rgba(255, 255, 255, 0.065);
-  color: var(--gold-light);
+  border: 1px solid rgba(var(--player-accent-rgb), 0.34);
+  background:
+    linear-gradient(180deg, rgba(var(--player-accent-rgb), 0.16), rgba(255, 255, 255, 0.045)),
+    rgba(255, 255, 255, 0.065);
+  color: var(--ink);
 }
 
 .player-buttons button.active {
-  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26), transparent 42%),
+    linear-gradient(160deg, var(--player-accent-light), var(--player-accent), var(--player-accent-dark));
   color: #fff;
+  box-shadow: 0 10px 24px rgba(var(--player-accent-rgb), 0.28);
 }
 
 .next-match {

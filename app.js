@@ -1,5 +1,29 @@
 const storageKey = "padel-manager-demo";
-const accents = ["silver", "green", "blue", "clay", "yellow", "navy", "mint", "coral"];
+const playerAccentPalette = {
+  blue: "#1a59f2",
+  orange: "#e67a0a",
+  mint: "#148f42",
+  pink: "#d12e52",
+  indigo: "#7030d1",
+  teal: "#0a8080",
+  red: "#c70a33",
+  yellow: "#b88c00",
+  gold: "#cc9414",
+  silver: "#616b7a",
+  bronze: "#9e560f",
+  sapphire: "#052e9e",
+  emerald: "#0a7538",
+  garnet: "#991020",
+  amethyst: "#8524b8",
+  onyx: "#1f2126",
+};
+const legacyAccentMap = {
+  green: "mint",
+  clay: "bronze",
+  navy: "sapphire",
+  coral: "orange",
+};
+const accents = Object.keys(playerAccentPalette);
 const defaultAvatarId = "smash";
 const tennisPointLabels = ["0", "15", "30", "40", "A"];
 const demoPlayerNames = ["Sigurd", "Elin", "Elisabeth", "Hanne", "Ruben", "Karoline", "Lars", "Tina"];
@@ -315,6 +339,9 @@ function migrateState(nextState) {
     joinedFrom: "manual",
     createdAt: new Date().toISOString(),
     ...player,
+  })).map((player, index) => ({
+    ...player,
+    accent: normalizeAccent(player.accent, index),
   }));
   nextState.rounds = nextState.rounds.map((round) => ({
     ...round,
@@ -559,10 +586,11 @@ function renderPlayers() {
     const entry = standings.find((item) => item.player.id === player.id);
     const item = document.createElement("li");
     item.className = lobbyLocked ? "" : "editable-player";
+    item.setAttribute("style", accentStyle(player.accent));
     item.innerHTML = `
       <span class="player-list-name">
         <img class="avatar" src="${avatarUrl(player)}" alt="" width="34" height="34">
-        <span>
+        <span class="player-name-badge">
           ${escapeHtml(player.name)}
           <small>${player.joinedFrom === "self" ? "Påmeldt selv" : "Lagt til av admin"}</small>
         </span>
@@ -684,6 +712,7 @@ function renderGroupedMatches(container, matches, emptyText, cardFactory) {
 function createMatchCard(match, editable, highlightedPlayerId = null) {
   const card = document.createElement("article");
   card.className = `match-card match-${match.state} ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
+  card.setAttribute("style", teamAccentStyle(match.teamOne));
   const teamOneName = escapeHtml(match.teamOne.displayName);
   const teamTwoName = escapeHtml(match.teamTwo.displayName);
   card.innerHTML = `
@@ -694,12 +723,12 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
     <div class="teams">
       <div class="team">
         <small>Lag 1</small>
-        <strong>${teamDisplay(match.teamOne)}</strong>
+        <strong style="${teamAccentStyle(match.teamOne)}">${teamDisplay(match.teamOne)}</strong>
       </div>
       <div class="versus">mot</div>
       <div class="team">
         <small>Lag 2</small>
-        <strong>${teamDisplay(match.teamTwo)}</strong>
+        <strong style="${teamAccentStyle(match.teamTwo)}">${teamDisplay(match.teamTwo)}</strong>
       </div>
     </div>
     <div class="tennis-scoreboard" aria-label="Poengstilling">
@@ -771,10 +800,11 @@ function renderStandingsList(container, matches) {
   container.innerHTML = "";
   leaderboardEntries(matches).forEach((entry) => {
     const item = document.createElement("li");
+    item.setAttribute("style", accentStyle(entry.player.accent));
     item.innerHTML = `
       <span class="player-list-name">
         <img class="avatar" src="${avatarUrl(entry.player)}" alt="" width="34" height="34">
-        ${escapeHtml(entry.player.name)}
+        <span class="player-name-badge">${escapeHtml(entry.player.name)}</span>
       </span>
       <strong>${entry.points} p · ${entry.matchWins} seire · ${entry.gamesWon} games</strong>
     `;
@@ -787,6 +817,7 @@ function renderPlayerSelector() {
   state.players.forEach((player) => {
     const button = document.createElement("button");
     button.type = "button";
+    button.setAttribute("style", accentStyle(player.accent));
     button.innerHTML = `<img class="avatar" src="${avatarUrl(player)}" alt="" width="30" height="30"><span>${escapeHtml(player.name)}</span>`;
     button.classList.toggle("active", state.selectedPlayerId === player.id);
     button.addEventListener("click", () => {
@@ -1083,12 +1114,49 @@ function isEditableAdminMatch(match) {
 function teamDisplay(team) {
   return team.players
     .map((player) => `
-      <span class="team-player">
+      <span class="team-player" style="${accentStyle(player.accent)}">
         <img class="avatar small-avatar" src="${avatarUrl(player)}" alt="" width="28" height="28">
-        ${escapeHtml(player.name)}
+        <span class="team-player-badge">${escapeHtml(player.name)}</span>
       </span>
     `)
     .join("");
+}
+
+function accentStyle(accent) {
+  const base = playerAccentPalette[normalizeAccent(accent)] ?? playerAccentPalette.gold;
+  const light = mixHex(base, "#ffffff", 0.28);
+  const dark = mixHex(base, "#000000", 0.18);
+  const [r, g, b] = hexToRgb(base);
+  return `--player-accent: ${base}; --player-accent-light: ${light}; --player-accent-dark: ${dark}; --player-accent-rgb: ${r}, ${g}, ${b};`;
+}
+
+function teamAccentStyle(team) {
+  return accentStyle(team.accent ?? team.players[0]?.accent);
+}
+
+function normalizeAccent(accent, fallbackIndex = 0) {
+  if (playerAccentPalette[accent]) return accent;
+  if (legacyAccentMap[accent]) return legacyAccentMap[accent];
+  return accents[fallbackIndex % accents.length];
+}
+
+function hexToRgb(hex) {
+  const normalized = hex.replace("#", "");
+  return [
+    Number.parseInt(normalized.slice(0, 2), 16),
+    Number.parseInt(normalized.slice(2, 4), 16),
+    Number.parseInt(normalized.slice(4, 6), 16),
+  ];
+}
+
+function rgbToHex([r, g, b]) {
+  return `#${[r, g, b].map((value) => Math.round(value).toString(16).padStart(2, "0")).join("")}`;
+}
+
+function mixHex(hex, targetHex, amount) {
+  const source = hexToRgb(hex);
+  const target = hexToRgb(targetHex);
+  return rgbToHex(source.map((value, index) => value + (target[index] - value) * amount));
 }
 
 function generateNextRound() {
