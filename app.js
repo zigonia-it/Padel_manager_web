@@ -21,6 +21,12 @@ const elements = {
   tournamentTitle: document.querySelector("#tournamentTitle"),
   roundLabel: document.querySelector("#roundLabel"),
   inviteCode: document.querySelector("#inviteCode"),
+  adminInviteCode: document.querySelector("#adminInviteCode"),
+  joinLink: document.querySelector("#joinLink"),
+  copyInviteCodeButton: document.querySelector("#copyInviteCodeButton"),
+  copyJoinLinkButton: document.querySelector("#copyJoinLinkButton"),
+  showStartButton: document.querySelector("#showStartButton"),
+  copyStatus: document.querySelector("#copyStatus"),
   tournamentStatus: document.querySelector("#tournamentStatus"),
   playerCount: document.querySelector("#playerCount"),
   matchCount: document.querySelector("#matchCount"),
@@ -38,6 +44,7 @@ const elements = {
 
 syncCreateFormDefaults();
 syncJoinPreview();
+prefillInviteCodeFromUrl();
 
 elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
 
@@ -129,6 +136,19 @@ elements.resetDemoButton.addEventListener("click", () => {
   saveState();
   showStart();
   render();
+});
+
+elements.showStartButton.addEventListener("click", () => {
+  prefillJoinForm(state.inviteCode);
+  showStart();
+});
+
+elements.copyInviteCodeButton.addEventListener("click", () => {
+  copyText(state.inviteCode, "Invitasjonskoden er kopiert.");
+});
+
+elements.copyJoinLinkButton.addEventListener("click", () => {
+  copyText(createJoinLink(), "Join-lenken er kopiert.");
 });
 
 document.querySelectorAll(".tab").forEach((tab) => {
@@ -249,6 +269,16 @@ function syncJoinPreview() {
   elements.joinAvatarPreview.src = avatarUrl({ name, avatarId: name });
 }
 
+function prefillInviteCodeFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const inviteCode = params.get("join") ?? params.get("code");
+  if (inviteCode) prefillJoinForm(inviteCode);
+}
+
+function prefillJoinForm(inviteCode) {
+  elements.joinTournamentForm.elements.inviteCode.value = inviteCode.trim().toUpperCase();
+}
+
 function showStart() {
   elements.startView.classList.remove("hidden");
   elements.workspaceView.classList.add("hidden");
@@ -274,6 +304,8 @@ function render() {
   elements.tournamentTitle.textContent = state.name;
   elements.roundLabel.textContent = `Runde ${Math.max(state.currentRound, 1)}`;
   elements.inviteCode.textContent = state.inviteCode;
+  elements.adminInviteCode.textContent = state.inviteCode;
+  elements.joinLink.value = createJoinLink();
   elements.tournamentStatus.textContent = state.status;
   elements.playerCount.textContent = `${state.players.length} spillere`;
   elements.matchCount.textContent = `${matches.length} kamper`;
@@ -452,6 +484,23 @@ function renderPlayerNextMatch(matches) {
 function avatarUrl(player) {
   const seed = encodeURIComponent(player.avatarId ?? player.name ?? "Padel");
   return `https://api.dicebear.com/10.x/thumbs/svg?seed=${seed}&size=64&borderRadius=50&backgroundColor=cc9414,616b7a,ebc761`;
+}
+
+function createJoinLink() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("join", state.inviteCode);
+  url.hash = "";
+  return url.toString();
+}
+
+async function copyText(text, successMessage) {
+  try {
+    await navigator.clipboard.writeText(text);
+    elements.copyStatus.textContent = successMessage;
+  } catch {
+    elements.copyStatus.textContent = "Kunne ikke kopiere automatisk. Marker teksten og kopier manuelt.";
+    if (text === createJoinLink()) elements.joinLink.select();
+  }
 }
 
 function joinTournament(name) {

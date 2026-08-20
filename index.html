@@ -114,6 +114,29 @@
               </div>
             </div>
 
+            <div class="panel share-panel">
+              <div class="panel-heading">
+                <h3>Del turnering</h3>
+                <span>Lokal demo</span>
+              </div>
+              <div class="share-details">
+                <div>
+                  <span>Invitasjonskode</span>
+                  <strong id="adminInviteCode">-----</strong>
+                </div>
+                <div>
+                  <span>Join-lenke</span>
+                  <input id="joinLink" type="text" readonly value="">
+                </div>
+              </div>
+              <div class="button-row">
+                <button class="secondary" id="copyInviteCodeButton" type="button">Kopier kode</button>
+                <button class="secondary" id="copyJoinLinkButton" type="button">Kopier lenke</button>
+              </div>
+              <button class="ghost" id="showStartButton" type="button">Vis startside for testing</button>
+              <p class="hint" id="copyStatus">QR-kode kommer i neste steg. Foreløpig kan lenken brukes som testlenke.</p>
+            </div>
+
             <div class="panel">
               <div class="panel-heading">
                 <h3>Lobby / spillere</h3>

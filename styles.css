@@ -216,6 +216,49 @@ h3 {
   line-height: 1.45;
 }
 
+.share-panel {
+  align-content: start;
+}
+
+.share-details {
+  display: grid;
+  gap: 12px;
+}
+
+.share-details > div {
+  display: grid;
+  gap: 0.45rem;
+  border: 1px solid rgba(235, 199, 97, 0.18);
+  border-radius: 8px;
+  padding: 0.78rem 0.85rem;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.share-details span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.share-details strong {
+  color: var(--gold-light);
+  font-size: clamp(1.7rem, 4vw, 2.45rem);
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+}
+
+.share-details input {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
 .start-panel {
   display: grid;
   gap: 28px;

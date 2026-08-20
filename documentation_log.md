@@ -156,3 +156,32 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Legge inn QR-kode for join.
 - Lage første reelle avatarvelger.
 - Vurdere egen start/tilbake-knapp for å teste join-flyten lettere på samme enhet.
+
+## 2026-08-21 - Deling av turnering i adminvisning
+
+### Gjort
+
+- La til et eget `Del turnering`-panel i adminvisningen.
+- Viser invitasjonskode tydelig i adminpanelet.
+- Genererer en enkel join-lenke med `?join=KODE`.
+- La til knapper for å kopiere invitasjonskode og join-lenke.
+- La til fallback-tekst hvis automatisk kopiering ikke er tilgjengelig.
+- La til knapp for å vise startsiden igjen, slik at join-flyten kan testes på samme enhet.
+- Prefyller invitasjonskode i join-skjemaet hvis siden åpnes med `?join=KODE`.
+
+### Beslutninger
+
+- QR-kode tas som eget neste steg.
+- Delingspanelet ligger i adminvisningen for å holde toppbaren ren og mobilvennlig.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `documentation_log.md`
+
+### Neste steg
+
+- Legge inn QR-kode basert på join-lenken.
+- Gjøre lobbyen mer tydelig før første runde genereres.
