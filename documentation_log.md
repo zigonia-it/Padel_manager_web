@@ -341,3 +341,56 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste og forbedre layout på mobilbredde.
 - Legge inn tydeligere historikk/filtrering mellom aktive og gamle kamper.
 - Vurdere publisering av første testdemo.
+
+## 2026-08-21 - PWA, mobilpolish og tennispoeng
+
+### Gjort
+
+- La til Service Worker og app-shell-cache for første PWA/offline-støtte.
+- Oppdaterte PWA-manifest med tydelig `start_url` og `scope`.
+- La til Apple touch icon for bedre installasjonsopplevelse på iOS/iPadOS.
+- Endret statuspillen til å vise `Lokal PWA` eller `Offline`.
+- Grupperte kampvisninger i `Pågår`, `Venter` og `Ferdig`.
+- La til tennis-/padelpoeng i kampkort:
+  - `0`, `15`, `30`, `40`
+  - deuce som `40-40`
+  - advantage som `A-40` eller `40-A`
+  - vunnet game øker game-stillingen i settet
+- Beholdt manuell ferdigregistrering med hurtigscore.
+- La til `7-6` som hurtigscore for tiebreak-sett.
+- Strammet validering av settresultater til 6-x med to games margin, 7-5 eller 7-6.
+- Fikset `Nullstill demo` slik at synlige skjemaer også nullstilles.
+- Fjernet ubrukt render-hjelper etter ny kampgruppering.
+- Testet mobilflyt i Playwright på 390px bredde:
+  - opprette tom lobby
+  - legge til fire spillere
+  - starte første runde
+  - føre poeng til 15-0, 30-0, 40-0
+  - bekrefte game til 1-0
+  - bekrefte deuce `40-40`
+  - bekrefte advantage `A-40`
+- Tok visuelt skjermbilde av mobilvisningen og sjekket at scorekort og knapper ikke overlapper.
+
+### Beslutninger
+
+- Tennis-/padelpoeng er nå del av lokal MVP, ikke en senere avansert funksjon.
+- MVP støtter fortsatt ett sett per kamp.
+- Flere sett og full tiebreak-poengføring flyttes til senere arbeid.
+- Hurtigscore beholdes fordi det er raskt for admin under ekte spill.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `manifest.webmanifest`
+- `service-worker.js`
+- `development_plan.md`
+- `product_development.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Fortsette med større sammenhengende arbeidspakker frem mot brukbar mandagsdemo.
+- Teste join-flyt fra spillerperspektiv etter at admin har opprettet turnering.
+- Forberede publisering når lokal MVP er stabil nok.

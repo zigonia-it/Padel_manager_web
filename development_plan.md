@@ -105,6 +105,7 @@ MVP bør inneholde:
 - aktiv kamp
 - kommende kamper
 - resultatregistrering
+- tennis-/padelpoeng med 0, 15, 30, 40, deuce og advantage
 - tabell/ranking
 - personlig spilleroversikt
 - responsivt grensesnitt
@@ -116,7 +117,8 @@ Ikke prioritert i første MVP:
 - betaling
 - App Store-spesifikke funksjoner
 - full cup/bracket-modus
-- avansert scoring med deuce/advantage
+- flere sett per kamp
+- full tiebreak-poengføring
 - bildeopplasting
 - karrierestatistikk
 - PDF-eksport
@@ -140,7 +142,7 @@ Videre teknisk retning:
 - bruke Supabase som backend
 - bruke Supabase Realtime for live-oppdateringer
 - bruke IndexedDB for mer robust lokal cache
-- legge til Service Worker når PWA/offline blir prioritert
+- videreutvikle Service Worker/offline-cache når publisering nærmer seg
 
 ## 6. Foreslått Arkitektur
 

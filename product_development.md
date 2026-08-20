@@ -127,7 +127,20 @@ Tilskuer får ikke personlige varsler.
 
 Denne flyten skal prioriteres over en forhåndsutfylt spillerliste. Administrator kan fortsatt legge inn spillere manuelt, men standardopplevelsen skal være at spillerne melder seg på selv.
 
-## 5.1 Påmeldingslobby
+## 5.1 Kamp- og Poengstruktur
+
+Kampene skal følge tennis-/padelstruktur:
+
+- poeng i game vises som `0`, `15`, `30`, `40` og `A`
+- deuce vises som `40-40`
+- fordel vises som `A-40` eller `40-A`
+- vunnet game øker game-stillingen i settet
+- sett kan registreres som 6-x med to games margin, eller 7-5 / 7-6
+- admin kan både føre poeng løpende og registrere ferdig sett med hurtigscore
+
+MVP støtter ett sett per kamp. Flere sett og full tiebreak-poengføring kan legges til senere.
+
+## 5.2 Påmeldingslobby
 
 Før kampoppsett genereres, bør administrator se en lobby med påmeldte spillere.
 
@@ -149,7 +162,7 @@ Spillerens påmeldingsskjerm bør være enkel:
 4. Se bekreftelse: "Du er med".
 5. Vent på at administrator starter turneringen.
 
-## 5.2 Avatarer
+## 5.3 Avatarer
 
 Spillere bør kunne velge en enkel avatar når de melder seg på. Avatar vises ved siden av navnet i lobbyen, spillerlisten, kampkort, tabell og personlig spilleroversikt.
 
@@ -194,6 +207,7 @@ MVP skal være den første fungerende webversjonen som kan brukes i en ekte lite
 - aktiv kamp
 - kommende kamper
 - resultatregistrering
+- tennis-/padelpoeng med deuce og advantage
 - tabell/ranking
 - enkel lokal lagring
 - grunnleggende responsive layout
@@ -206,7 +220,8 @@ MVP skal være den første fungerende webversjonen som kan brukes i en ekte lite
 - App Store-funksjoner
 - flerspråklig støtte
 - full cup/bracket-modus
-- avansert kamp-poengsystem med deuce/advantage
+- flere sett per kamp
+- full tiebreak-poengføring
 - player profile photos
 - karrierestatistikk
 - PDF-eksport

@@ -1,6 +1,7 @@
 const storageKey = "padel-manager-demo";
 const accents = ["silver", "green", "blue", "clay", "yellow", "navy", "mint", "coral"];
 const defaultAvatarId = "smash";
+const tennisPointLabels = ["0", "15", "30", "40", "A"];
 
 const defaultTournament = createTournament({
   name: "Risløkka Padel",
@@ -14,6 +15,7 @@ let state = loadState();
 const elements = {
   startView: document.querySelector("#startView"),
   workspaceView: document.querySelector("#workspaceView"),
+  connectionStatus: document.querySelector("#connectionStatus"),
   resumePanel: document.querySelector("#resumePanel"),
   resumeTitle: document.querySelector("#resumeTitle"),
   resumeSummary: document.querySelector("#resumeSummary"),
@@ -60,6 +62,11 @@ const elements = {
 syncCreateFormDefaults();
 syncJoinPreview();
 prefillInviteCodeFromUrl();
+registerServiceWorker();
+syncConnectionStatus();
+
+window.addEventListener("online", syncConnectionStatus);
+window.addEventListener("offline", syncConnectionStatus);
 
 elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
 elements.avatarPicker.addEventListener("change", syncJoinPreview);
@@ -181,6 +188,9 @@ elements.endTournamentButton.addEventListener("click", () => {
 elements.resetDemoButton.addEventListener("click", () => {
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
+  syncCreateFormDefaults();
+  elements.joinTournamentForm.reset();
+  syncJoinPreview();
   showStart();
   render();
 });
@@ -281,7 +291,13 @@ function migrateState(nextState) {
 }
 
 function migrateMatch(match, tournamentId) {
-  if (match.teamOne && match.teamTwo) return match;
+  if (match.teamOne && match.teamTwo) {
+    return {
+      currentGame: { teamOne: 0, teamTwo: 0 },
+      completedSets: [],
+      ...match,
+    };
+  }
   return {
     id: match.id,
     tournamentId,
@@ -297,6 +313,7 @@ function migrateMatch(match, tournamentId) {
       teamOne: match.scoreTeam1 ?? 0,
       teamTwo: match.scoreTeam2 ?? 0,
     },
+    currentGame: { teamOne: 0, teamTwo: 0 },
     startingTeamIndex: 0,
     winnerTeamIndex: match.scoreTeam1 > match.scoreTeam2 ? 0 : match.scoreTeam2 > match.scoreTeam1 ? 1 : null,
     isWalkover: false,
@@ -345,6 +362,15 @@ function importBackup(event) {
     }
   });
   reader.readAsText(file);
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {
+      elements.connectionStatus.textContent = "Lokal demo";
+    });
+  });
 }
 
 function isValidTournamentState(candidate) {
@@ -433,6 +459,11 @@ function render() {
   renderPlayerStatus(matches);
 }
 
+function syncConnectionStatus() {
+  elements.connectionStatus.textContent = navigator.onLine ? "Lokal PWA" : "Offline";
+  elements.connectionStatus.classList.toggle("offline", !navigator.onLine);
+}
+
 function renderStartResume() {
   const hasSavedTournament = Boolean(localStorage.getItem(storageKey));
   elements.resumePanel.classList.toggle("hidden", !hasSavedTournament);
@@ -514,21 +545,46 @@ function renderMatches(matches) {
   const playerMatches = selectedPlayer
     ? matches.filter((match) => matchIncludesPlayer(match, selectedPlayer.id))
     : [];
-  replaceChildren(
+  renderGroupedMatches(
     elements.adminMatches,
-    matches.map((match) => createMatchCard(match, isEditableAdminMatch(match))),
+    matches,
     "Ingen kamper ennå. Generer første runde.",
+    (match) => createMatchCard(match, isEditableAdminMatch(match)),
   );
-  replaceChildren(
+  renderGroupedMatches(
     elements.playerMatches,
-    playerMatches.map((match) => createMatchCard(match, false, selectedPlayer?.id)),
+    playerMatches,
     selectedPlayer ? "Du har ingen kamper ennå." : "Velg spillerprofil for å se dine kamper.",
+    (match) => createMatchCard(match, false, selectedPlayer?.id),
   );
-  replaceChildren(
+  renderGroupedMatches(
     elements.spectatorMatches,
-    matches.map((match) => createMatchCard(match, false)),
-    "Ingen kamper er generert ennå.",
+    matches,
+    "Ingen kamper ennå. Generer første runde.",
+    (match) => createMatchCard(match, false),
   );
+}
+
+function renderGroupedMatches(container, matches, emptyText, cardFactory) {
+  container.innerHTML = "";
+  if (matches.length === 0) {
+    appendEmptyText(container, emptyText);
+    return;
+  }
+
+  const groups = [
+    { title: "Pågår", matches: matches.filter((match) => match.state === "playing") },
+    { title: "Venter", matches: matches.filter((match) => match.state === "waiting") },
+    { title: "Ferdig", matches: matches.filter((match) => ["finished", "cancelled"].includes(match.state)) },
+  ].filter((group) => group.matches.length > 0);
+
+  groups.forEach((group) => {
+    const section = document.createElement("section");
+    section.className = "match-group";
+    section.innerHTML = `<h4>${group.title}</h4>`;
+    section.append(...group.matches.map(cardFactory));
+    container.append(section);
+  });
 }
 
 function createMatchCard(match, editable, highlightedPlayerId = null) {
@@ -552,13 +608,27 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
         <strong>${teamDisplay(match.teamTwo)}</strong>
       </div>
     </div>
+    <div class="tennis-scoreboard" aria-label="Poengstilling">
+      <div>
+        <small>Games</small>
+        <strong>${setScoreText(match)}</strong>
+      </div>
+      <div>
+        <small>Poeng</small>
+        <strong>${gameScoreText(match)}</strong>
+      </div>
+    </div>
     <p class="hint">${scoreSummary(match)}${sittingOutSummary(match)}</p>
   `;
 
-  if (editable) {
+  if (editable && match.state !== "cancelled") {
     const controls = document.createElement("div");
     controls.className = "match-controls";
     controls.innerHTML = `
+      <div class="point-controls">
+        <button class="secondary point-button" type="button" data-point-team="0" ${match.state === "finished" ? "disabled" : ""}>Poeng ${teamOneName}</button>
+        <button class="secondary point-button" type="button" data-point-team="1" ${match.state === "finished" ? "disabled" : ""}>Poeng ${teamTwoName}</button>
+      </div>
       <div class="score-row">
         <label>${teamOneName} <input type="number" min="0" max="99" value="${match.currentSet.teamOne}" aria-label="Games ${teamOneName}"></label>
         <label>${teamTwoName} <input type="number" min="0" max="99" value="${match.currentSet.teamTwo}" aria-label="Games ${teamTwoName}"></label>
@@ -585,6 +655,9 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
         teamTwoInput.value = teamTwo;
         saveMatchResult(match, teamOne, teamTwo);
       });
+    });
+    controls.querySelectorAll("[data-point-team]").forEach((button) => {
+      button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.pointTeam)));
     });
     controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
     controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
@@ -763,6 +836,7 @@ function quickScoreButtons(teamOneName, teamTwoName) {
     [6, 3],
     [6, 4],
     [7, 5],
+    [7, 6],
   ];
 
   return [
@@ -1008,6 +1082,7 @@ function createTeam(players) {
 
 function finishMatch(match) {
   match.state = "finished";
+  match.currentGame = { teamOne: 0, teamTwo: 0 };
   match.completedSets = [match.currentSet];
   match.winnerTeamIndex = match.currentSet.teamOne > match.currentSet.teamTwo ? 0 : 1;
   match.completedAt = new Date().toISOString();
@@ -1025,6 +1100,7 @@ function saveMatchResult(match, teamOne, teamTwo) {
   }
 
   match.currentSet = { teamOne, teamTwo };
+  match.currentGame = { teamOne: 0, teamTwo: 0 };
   finishMatch(match);
   saveState();
   render();
@@ -1034,8 +1110,50 @@ function validateScore(teamOne, teamTwo) {
   if (!Number.isInteger(teamOne) || !Number.isInteger(teamTwo)) return "Resultatet må være hele tall.";
   if (teamOne < 0 || teamTwo < 0) return "Resultatet kan ikke være negativt.";
   if (teamOne === teamTwo) return "Resultatet kan ikke være uavgjort.";
-  if (Math.max(teamOne, teamTwo) < state.settings.gamesToWinSet) return `Vinnerlaget må ha minst ${state.settings.gamesToWinSet} games.`;
+  if (!isSetComplete(teamOne, teamTwo)) {
+    return "Sett må vinnes 6-x med to games margin, eller 7-5 / 7-6 etter tiebreak.";
+  }
   return "";
+}
+
+function awardTennisPoint(match, teamIndex) {
+  if (match.state === "waiting") match.state = "playing";
+  if (["finished", "cancelled"].includes(match.state)) return;
+
+  const scoringTeam = teamIndex === 0 ? "teamOne" : "teamTwo";
+  const otherTeam = teamIndex === 0 ? "teamTwo" : "teamOne";
+  const scoringPoints = match.currentGame[scoringTeam] ?? 0;
+  const otherPoints = match.currentGame[otherTeam] ?? 0;
+
+  if (scoringPoints === 4 || (scoringPoints === 3 && otherPoints < 3)) {
+    awardGame(match, scoringTeam);
+  } else if (scoringPoints === 3 && otherPoints === 3) {
+    match.currentGame[scoringTeam] = 4;
+  } else if (otherPoints === 4) {
+    match.currentGame[otherTeam] = 3;
+  } else {
+    match.currentGame[scoringTeam] = scoringPoints + 1;
+  }
+
+  saveState();
+  render();
+}
+
+function awardGame(match, scoringTeam) {
+  match.currentSet[scoringTeam] += 1;
+  match.currentGame = { teamOne: 0, teamTwo: 0 };
+
+  if (isSetComplete(match.currentSet.teamOne, match.currentSet.teamTwo)) {
+    finishMatch(match);
+  }
+}
+
+function isSetComplete(teamOne, teamTwo) {
+  const winnerGames = Math.max(teamOne, teamTwo);
+  const loserGames = Math.min(teamOne, teamTwo);
+  if (winnerGames === 6 && winnerGames - loserGames >= 2) return true;
+  if (winnerGames === 7 && [5, 6].includes(loserGames)) return true;
+  return false;
 }
 
 function startMatch(match) {
@@ -1056,6 +1174,7 @@ function reopenMatch(match) {
   });
   match.state = "playing";
   match.completedSets = [];
+  match.currentGame = { teamOne: 0, teamTwo: 0 };
   match.winnerTeamIndex = null;
   match.completedAt = null;
   saveState();
@@ -1219,9 +1338,22 @@ function matchStateText(stateName) {
 
 function scoreSummary(match) {
   if (match.completedSets.length) {
-    return match.completedSets.map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ");
+    return `Ferdig: ${match.completedSets.map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ")}`;
   }
+  return `Sett: ${setScoreText(match)} · Game: ${gameScoreText(match)}`;
+}
+
+function setScoreText(match) {
   return `${match.currentSet.teamOne}-${match.currentSet.teamTwo}`;
+}
+
+function gameScoreText(match) {
+  const currentGame = match.currentGame ?? { teamOne: 0, teamTwo: 0 };
+  return `${tennisPointLabel(currentGame.teamOne)}-${tennisPointLabel(currentGame.teamTwo)}`;
+}
+
+function tennisPointLabel(value) {
+  return tennisPointLabels[value] ?? "0";
 }
 
 function sittingOutSummary(match) {
@@ -1239,16 +1371,11 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function replaceChildren(container, children, emptyText) {
-  container.innerHTML = "";
-  if (children.length === 0) {
-    const empty = document.createElement("p");
-    empty.className = "hint";
-    empty.textContent = emptyText;
-    container.append(empty);
-    return;
-  }
-  container.append(...children);
+function appendEmptyText(container, emptyText) {
+  const empty = document.createElement("p");
+  empty.className = "hint";
+  empty.textContent = emptyText;
+  container.append(empty);
 }
 
 function createInviteCode() {
