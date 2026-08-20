@@ -607,11 +607,28 @@ h3 {
   background: var(--cell);
 }
 
+.match-controls {
+  display: grid;
+  gap: 12px;
+}
+
 .highlight-match {
   border-color: rgba(235, 199, 97, 0.52);
   background:
     linear-gradient(180deg, rgba(235, 199, 97, 0.13), rgba(255, 255, 255, 0.045)),
     var(--cell);
+}
+
+.match-playing {
+  border-color: rgba(235, 199, 97, 0.46);
+}
+
+.match-finished {
+  border-color: rgba(63, 157, 99, 0.42);
+}
+
+.match-cancelled {
+  opacity: 0.72;
 }
 
 .match-court {
@@ -657,11 +674,31 @@ h3 {
 }
 
 .score-row input {
-  max-width: 82px;
+  max-width: 110px;
+  min-height: 52px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 900;
 }
 
 .score-row label {
   color: var(--ink);
+}
+
+.quick-score-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.quick-score-button {
+  min-height: 40px;
+  padding: 0.55rem 0.5rem;
+  border: 1px solid rgba(235, 199, 97, 0.22);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--silver-light);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
 }
 
 .player-buttons {
@@ -746,6 +783,10 @@ h3 {
 
   .teams {
     grid-template-columns: 1fr;
+  }
+
+  .quick-score-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .versus {

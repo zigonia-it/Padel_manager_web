@@ -152,15 +152,10 @@ elements.completeRoundButton.addEventListener("click", () => {
   const activeRound = getActiveRound();
   if (!activeRound) return;
 
-  activeRound.matches.forEach((match, index) => {
-    if (match.state !== "finished") {
-      match.currentSet = {
-        teamOne: index % 2 === 0 ? state.settings.gamesToWinSet : state.settings.gamesToWinSet - 1,
-        teamTwo: index % 2 === 0 ? state.settings.gamesToWinSet - 1 : state.settings.gamesToWinSet,
-      };
-      finishMatch(match);
-    }
-  });
+  if (!canCompleteRound(activeRound)) {
+    alert("Alle kamper i runden må være ferdige eller avbrutt før runden fullføres.");
+    return;
+  }
 
   activeRound.status = "finished";
   state.status = "Runde fullført";
@@ -422,7 +417,7 @@ function render() {
   elements.courtSettingsForm.elements.courtCount.value = state.courts.length;
   elements.generateRoundButton.disabled = Boolean(generateRoundBlockReason());
   elements.generateRoundButton.textContent = state.currentRound > 0 ? "Generer neste runde" : "Start første runde";
-  elements.completeRoundButton.disabled = !getActiveRound() || getActiveRound().status === "finished" || state.status === "Avsluttet";
+  elements.completeRoundButton.disabled = !getActiveRound() || getActiveRound().status === "finished" || !canCompleteRound(getActiveRound()) || state.status === "Avsluttet";
   elements.endTournamentButton.disabled = state.status === "Avsluttet";
   elements.courtSettingsForm.elements.courtCount.disabled = getActiveRound()?.status === "active" || state.status === "Avsluttet";
   elements.courtSettingsForm.querySelector("button").disabled = getActiveRound()?.status === "active" || state.status === "Avsluttet";
@@ -451,10 +446,13 @@ function renderLobbyStatus() {
   const minimumPlayersReady = state.players.length >= 2;
   const hasCourts = state.courts.length >= 1;
   const hasStarted = state.rounds.length > 0;
+  const activeRound = getActiveRound();
   const isFinished = state.status === "Avsluttet";
   const blockReason = generateRoundBlockReason();
   const nextRoundLabel = blockReason || (state.currentRound > 0 ? `Neste blir runde ${state.currentRound + 1}` : "Klar for første runde");
   const playerMode = state.players.length >= 4 ? "Double" : state.players.length >= 2 ? "Single" : "Venter";
+  const progress = activeRound?.status === "active" ? roundProgress(activeRound) : null;
+  const statusText = isFinished ? "Ferdig" : activeRound?.status === "active" ? "I gang" : hasStarted ? "Mellom" : "Lobby";
 
   elements.lobbyStatus.innerHTML = `
     <div class="${minimumPlayersReady ? "ready" : "waiting"}">
@@ -469,8 +467,8 @@ function renderLobbyStatus() {
     </div>
     <div class="${canGenerateRound() ? "ready" : "waiting"}">
       <span>Status</span>
-      <strong>${isFinished ? "Ferdig" : hasStarted ? "I gang" : "Lobby"}</strong>
-      <small>${nextRoundLabel}</small>
+      <strong>${statusText}</strong>
+      <small>${progress ? `${progress.finished}/${progress.total} kamper ferdig` : nextRoundLabel}</small>
     </div>
   `;
 }
@@ -518,7 +516,7 @@ function renderMatches(matches) {
     : [];
   replaceChildren(
     elements.adminMatches,
-    matches.map((match) => createMatchCard(match, true)),
+    matches.map((match) => createMatchCard(match, isEditableAdminMatch(match))),
     "Ingen kamper ennå. Generer første runde.",
   );
   replaceChildren(
@@ -535,7 +533,9 @@ function renderMatches(matches) {
 
 function createMatchCard(match, editable, highlightedPlayerId = null) {
   const card = document.createElement("article");
-  card.className = `match-card ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
+  card.className = `match-card match-${match.state} ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
+  const teamOneName = escapeHtml(match.teamOne.displayName);
+  const teamTwoName = escapeHtml(match.teamTwo.displayName);
   card.innerHTML = `
     <div class="match-top">
       <span class="match-court">${match.courtName ?? "Ikke tildelt bane"}</span>
@@ -556,24 +556,40 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
   `;
 
   if (editable) {
-    const scoreRow = document.createElement("div");
-    scoreRow.className = "score-row";
-    scoreRow.innerHTML = `
-      <label>Lag 1 <input type="number" min="0" value="${match.currentSet.teamOne}" aria-label="Games lag 1"></label>
-      <label>Lag 2 <input type="number" min="0" value="${match.currentSet.teamTwo}" aria-label="Games lag 2"></label>
-      <button class="secondary" type="button">Lagre resultat</button>
+    const controls = document.createElement("div");
+    controls.className = "match-controls";
+    controls.innerHTML = `
+      <div class="score-row">
+        <label>${teamOneName} <input type="number" min="0" max="99" value="${match.currentSet.teamOne}" aria-label="Games ${teamOneName}"></label>
+        <label>${teamTwoName} <input type="number" min="0" max="99" value="${match.currentSet.teamTwo}" aria-label="Games ${teamTwoName}"></label>
+        <button class="secondary save-score-button" type="button">${match.state === "finished" ? "Oppdater" : "Lagre"}</button>
+      </div>
+      <div class="quick-score-grid" aria-label="Hurtigscore">
+        ${quickScoreButtons(match.teamOne.displayName, match.teamTwo.displayName)}
+      </div>
+      <div class="button-row">
+        <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>Start kamp</button>
+        <button class="secondary reopen-match-button" type="button" ${match.state !== "finished" || getActiveRound()?.status !== "active" ? "disabled" : ""}>Angre resultat</button>
+        <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>Avbryt kamp</button>
+      </div>
     `;
-    const [teamOneInput, teamTwoInput] = scoreRow.querySelectorAll("input");
-    scoreRow.querySelector("button").addEventListener("click", () => {
-      match.currentSet = {
-        teamOne: Number(teamOneInput.value),
-        teamTwo: Number(teamTwoInput.value),
-      };
-      finishMatch(match);
-      saveState();
-      render();
+
+    const [teamOneInput, teamTwoInput] = controls.querySelectorAll("input");
+    controls.querySelector(".save-score-button").addEventListener("click", () => {
+      saveMatchResult(match, Number(teamOneInput.value), Number(teamTwoInput.value));
     });
-    card.append(scoreRow);
+    controls.querySelectorAll("[data-score]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const [teamOne, teamTwo] = button.dataset.score.split("-").map(Number);
+        teamOneInput.value = teamOne;
+        teamTwoInput.value = teamTwo;
+        saveMatchResult(match, teamOne, teamTwo);
+      });
+    });
+    controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
+    controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
+    controls.querySelector(".cancel-match-button").addEventListener("click", () => cancelMatch(match));
+    card.append(controls);
   }
 
   return card;
@@ -739,6 +755,26 @@ function createQrCodeUrl(text) {
   return `https://quickchart.io/qr?${params.toString()}`;
 }
 
+function quickScoreButtons(teamOneName, teamTwoName) {
+  const scores = [
+    [6, 0],
+    [6, 1],
+    [6, 2],
+    [6, 3],
+    [6, 4],
+    [7, 5],
+  ];
+
+  return [
+    ...scores.map(([teamOne, teamTwo]) => quickScoreButton(teamOne, teamTwo, teamOneName)),
+    ...scores.map(([teamOne, teamTwo]) => quickScoreButton(teamTwo, teamOne, teamTwoName)),
+  ].join("");
+}
+
+function quickScoreButton(teamOne, teamTwo, winnerName) {
+  return `<button class="quick-score-button" type="button" data-score="${teamOne}-${teamTwo}">${teamOne}-${teamTwo} ${escapeHtml(winnerName)}</button>`;
+}
+
 async function copyText(text, successMessage) {
   try {
     await navigator.clipboard.writeText(text);
@@ -818,6 +854,24 @@ function generateRoundBlockReason() {
   if (state.courts.length < 1) return "Legg til minst én bane før du starter runden.";
   if (activeRound && activeRound.status !== "finished") return "Fullfør pågående runde før du genererer neste.";
   return "";
+}
+
+function canCompleteRound(round) {
+  if (!round || round.status === "finished") return false;
+  return round.matches.length > 0 && round.matches.every((match) => ["finished", "cancelled"].includes(match.state));
+}
+
+function roundProgress(round) {
+  if (!round) return null;
+  return {
+    total: round.matches.length,
+    finished: round.matches.filter((match) => ["finished", "cancelled"].includes(match.state)).length,
+  };
+}
+
+function isEditableAdminMatch(match) {
+  const activeRound = getActiveRound();
+  return Boolean(state.status !== "Avsluttet" && activeRound && activeRound.matches.some((roundMatch) => roundMatch.id === match.id));
 }
 
 function teamDisplay(team) {
@@ -953,11 +1007,6 @@ function createTeam(players) {
 }
 
 function finishMatch(match) {
-  if (match.currentSet.teamOne === match.currentSet.teamTwo) {
-    alert("Resultatet kan ikke være uavgjort i dette utkastet.");
-    return;
-  }
-
   match.state = "finished";
   match.completedSets = [match.currentSet];
   match.winnerTeamIndex = match.currentSet.teamOne > match.currentSet.teamTwo ? 0 : 1;
@@ -966,6 +1015,64 @@ function finishMatch(match) {
   const activeRound = getActiveRound();
   const nextWaitingMatch = activeRound?.matches.find((item) => item.state === "waiting");
   if (nextWaitingMatch) nextWaitingMatch.state = "playing";
+}
+
+function saveMatchResult(match, teamOne, teamTwo) {
+  const validationError = validateScore(teamOne, teamTwo);
+  if (validationError) {
+    alert(validationError);
+    return;
+  }
+
+  match.currentSet = { teamOne, teamTwo };
+  finishMatch(match);
+  saveState();
+  render();
+}
+
+function validateScore(teamOne, teamTwo) {
+  if (!Number.isInteger(teamOne) || !Number.isInteger(teamTwo)) return "Resultatet må være hele tall.";
+  if (teamOne < 0 || teamTwo < 0) return "Resultatet kan ikke være negativt.";
+  if (teamOne === teamTwo) return "Resultatet kan ikke være uavgjort.";
+  if (Math.max(teamOne, teamTwo) < state.settings.gamesToWinSet) return `Vinnerlaget må ha minst ${state.settings.gamesToWinSet} games.`;
+  return "";
+}
+
+function startMatch(match) {
+  const activeRound = getActiveRound();
+  if (!activeRound || activeRound.status !== "active") return;
+  activeRound.matches.forEach((roundMatch) => {
+    if (roundMatch.state === "playing") roundMatch.state = "waiting";
+  });
+  match.state = "playing";
+  saveState();
+  render();
+}
+
+function reopenMatch(match) {
+  const activeRound = getActiveRound();
+  activeRound?.matches.forEach((roundMatch) => {
+    if (roundMatch.state === "playing") roundMatch.state = "waiting";
+  });
+  match.state = "playing";
+  match.completedSets = [];
+  match.winnerTeamIndex = null;
+  match.completedAt = null;
+  saveState();
+  render();
+}
+
+function cancelMatch(match) {
+  if (!confirm("Avbryte denne kampen? Den teller ikke i tabellen.")) return;
+  match.state = "cancelled";
+  match.completedSets = [];
+  match.winnerTeamIndex = null;
+  match.completedAt = new Date().toISOString();
+  const activeRound = getActiveRound();
+  const nextWaitingMatch = activeRound?.matches.find((item) => item.state === "waiting");
+  if (nextWaitingMatch) nextWaitingMatch.state = "playing";
+  saveState();
+  render();
 }
 
 function leaderboardEntries(matches) {
@@ -1015,7 +1122,7 @@ function statsForPlayer(player, matches) {
         stats.gamesWon += teamIndex === 0 ? set.teamOne : set.teamTwo;
       });
 
-      if (match.state !== "finished") {
+      if (match.state === "playing") {
         stats.gamesWon += teamIndex === 0 ? match.currentSet.teamOne : match.currentSet.teamTwo;
       }
 
@@ -1031,6 +1138,7 @@ function applyGamePoints(match, points) {
     award(set.teamTwo, match.teamTwo, points);
   });
   if (match.state !== "finished") {
+    if (match.state !== "playing") return;
     award(match.currentSet.teamOne, match.teamOne, points);
     award(match.currentSet.teamTwo, match.teamTwo, points);
   }

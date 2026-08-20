@@ -291,3 +291,53 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste og stramme layout på mobilbredde.
 - Gjøre resultatregistrering mer robust og mer touch-vennlig for admin.
 - Vurdere enkel publisering av lokal demo.
+
+## 2026-08-21 - Robust admin-scoring og rundeprogresjon
+
+### Gjort
+
+- Bygget om `Fullfør runde` slik at den ikke lenger auto-fyller falske resultater.
+- Runder kan bare fullføres når alle kamper er ferdige eller avbrutt.
+- La til hurtigscore-knapper for vanlige resultater:
+  - 6-0
+  - 6-1
+  - 6-2
+  - 6-3
+  - 6-4
+  - 7-5
+- La til større og mer touch-vennlige scorefelt.
+- La til kampkontroller for admin:
+  - start kamp
+  - lagre/oppdater resultat
+  - angre resultat før runden fullføres
+  - avbryt kamp
+- La til scorevalidering:
+  - ingen uavgjort
+  - ingen negative tall
+  - vinner må ha minst riktig antall games
+- Viser rundeprogresjon som `ferdige kamper / totale kamper`.
+- Gamle kamper vises som historikk, men får ikke admin-kontroller når en ny runde er startet.
+- Testet i Playwright:
+  - opprette turnering
+  - starte runde
+  - bruke hurtigscore
+  - aktivere `Fullfør runde`
+  - generere neste runde
+
+### Beslutninger
+
+- Admin skal føre reelle resultater; appen skal ikke gjette/fylle ut resultater automatisk.
+- Hurtigscore prioriteres for mobilbruk, siden dette trolig er raskest under en ekte turnering.
+- Gamle runder skal være lesbare historikkkort når ny runde er aktiv.
+
+### Endrede filer
+
+- `app.js`
+- `styles.css`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste og forbedre layout på mobilbredde.
+- Legge inn tydeligere historikk/filtrering mellom aktive og gamle kamper.
+- Vurdere publisering av første testdemo.
