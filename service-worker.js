@@ -1,4 +1,4 @@
-const cacheName = "padel-manager-v3";
+const cacheName = "padel-manager-v4";
 
 const appShell = [
   "./",

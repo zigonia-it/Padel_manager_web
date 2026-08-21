@@ -600,3 +600,47 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste hele flyten visuelt på mobil og desktop.
 - Vurdere large-score-modus for admin når en kamp pågår.
 - Legge inn manuell court-edit per kamp hvis banefordelingen må overstyres underveis.
+
+## 2026-08-21 - Large-score og baneredigering
+
+### Gjort
+
+- La inn fullskjerm `dialog` for stor score i adminvisningen.
+- La inn `Stor score`-knapp på aktive kampkort.
+- Gjorde lagflatene i stor-score trykkbare slik at admin kan føre tennispoeng med store knapper.
+- Synkroniserer score i stor-score med:
+  - admin-overblikket
+  - kampkortet
+  - lagrede turneringsdata
+- Lukker stor-score automatisk hvis kampen blir ferdig eller ikke lenger er aktiv.
+- La inn manuell baneredigering per kampkort.
+- Beholder kobling til kjent bane hvis navnet matcher en bane i turneringen.
+- Bumpet Service Worker-cache til `padel-manager-v4`.
+- Testet visuelt og funksjonelt i Playwright på mobilbredde:
+  - opprette turnering med to baner
+  - fylle demospillere
+  - starte runde
+  - endre bane på kampkort
+  - åpne stor-score
+  - føre poeng fra stor-score
+  - bekrefte at poeng oppdateres i modal og kampkort
+
+### Beslutninger
+
+- Stor-score er foreløpig adminverktøy, ikke spillervisning.
+- Baneredigering skjer direkte på kampkortet for rask bruk under turnering.
+- Fullskjerm scoremodus skal være enkel og robust før vi legger inn mer avansert courtside-visning.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste stor-score på desktopbredde.
+- Vurdere å gjøre server-lag og deuce/advantage mer visuelt fremhevet.
+- Legge inn valgfri manuell spillerfarge sammen med avatarvalg.

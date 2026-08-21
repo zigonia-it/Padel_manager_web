@@ -42,6 +42,7 @@ const defaultTournament = createTournament({
 });
 
 let state = loadState();
+let largeScoreMatchId = null;
 
 const elements = {
   startView: document.querySelector("#startView"),
@@ -93,6 +94,13 @@ const elements = {
   seedPlayersButton: document.querySelector("#seedPlayersButton"),
   endTournamentButton: document.querySelector("#endTournamentButton"),
   resetDemoButton: document.querySelector("#resetDemoButton"),
+  largeScoreDialog: document.querySelector("#largeScoreDialog"),
+  largeScoreSurface: document.querySelector("#largeScoreSurface"),
+  largeScoreContext: document.querySelector("#largeScoreContext"),
+  largeScoreTitle: document.querySelector("#largeScoreTitle"),
+  largeScoreBoard: document.querySelector("#largeScoreBoard"),
+  largeScoreActions: document.querySelector("#largeScoreActions"),
+  closeLargeScoreButton: document.querySelector("#closeLargeScoreButton"),
 };
 
 syncCreateFormDefaults();
@@ -267,6 +275,14 @@ elements.copyInviteCodeButton.addEventListener("click", () => {
 
 elements.copyJoinLinkButton.addEventListener("click", () => {
   copyText(createJoinLink(), "Join-lenken er kopiert.");
+});
+
+elements.closeLargeScoreButton.addEventListener("click", closeLargeScore);
+elements.largeScoreDialog.addEventListener("click", (event) => {
+  if (event.target === elements.largeScoreDialog) closeLargeScore();
+});
+elements.largeScoreDialog.addEventListener("close", () => {
+  largeScoreMatchId = null;
 });
 
 document.querySelectorAll(".tab").forEach((tab) => {
@@ -825,6 +841,10 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
         <button class="secondary point-button" type="button" data-point-team="0" ${match.state === "finished" ? "disabled" : ""}>Poeng ${teamOneName}</button>
         <button class="secondary point-button" type="button" data-point-team="1" ${match.state === "finished" ? "disabled" : ""}>Poeng ${teamTwoName}</button>
       </div>
+      <div class="court-edit-row">
+        <label>Bane <input class="court-name-input" type="text" value="${escapeAttribute(match.courtName ?? "")}" placeholder="Bane" aria-label="Bane for ${teamOneName} mot ${teamTwoName}"></label>
+        <button class="secondary save-court-button" type="button">Lagre bane</button>
+      </div>
       <div class="score-row">
         <label>${teamOneName} <input type="number" min="0" max="99" value="${match.currentSet.teamOne}" aria-label="Games ${teamOneName}"></label>
         <label>${teamTwoName} <input type="number" min="0" max="99" value="${match.currentSet.teamTwo}" aria-label="Games ${teamTwoName}"></label>
@@ -835,12 +855,17 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
       </div>
       <div class="button-row">
         <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>Start kamp</button>
+        <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>Stor score</button>
         <button class="secondary reopen-match-button" type="button" ${match.state !== "finished" || getActiveRound()?.status !== "active" ? "disabled" : ""}>Angre resultat</button>
         <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>Avbryt kamp</button>
       </div>
     `;
 
-    const [teamOneInput, teamTwoInput] = controls.querySelectorAll("input");
+    const courtInput = controls.querySelector(".court-name-input");
+    const [teamOneInput, teamTwoInput] = controls.querySelectorAll(".score-row input");
+    controls.querySelector(".save-court-button").addEventListener("click", () => {
+      updateMatchCourt(match, courtInput.value);
+    });
     controls.querySelector(".save-score-button").addEventListener("click", () => {
       saveMatchResult(match, Number(teamOneInput.value), Number(teamTwoInput.value));
     });
@@ -856,6 +881,7 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
       button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.pointTeam)));
     });
     controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
+    controls.querySelector(".large-score-button").addEventListener("click", () => openLargeScore(match.id));
     controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
     controls.querySelector(".cancel-match-button").addEventListener("click", () => cancelMatch(match));
     card.append(controls);
@@ -1089,6 +1115,58 @@ function renderRules() {
       <p>${escapeHtml(rule.text)}</p>
     </div>
   `).join("");
+}
+
+function openLargeScore(matchId) {
+  const match = getMatchById(matchId);
+  if (!match || match.state !== "playing") return;
+  largeScoreMatchId = matchId;
+  elements.largeScoreDialog.showModal();
+  renderLargeScore();
+}
+
+function closeLargeScore() {
+  elements.largeScoreDialog.close();
+}
+
+function renderLargeScore() {
+  if (!largeScoreMatchId || !elements.largeScoreDialog.open) return;
+  const match = getMatchById(largeScoreMatchId);
+  if (!match || match.state !== "playing") {
+    closeLargeScore();
+    return;
+  }
+
+  elements.largeScoreSurface.setAttribute("style", teamAccentStyle(match.teamOne));
+  elements.largeScoreContext.textContent = `${matchContextText(match)} · ${match.courtName ?? "Ikke tildelt bane"}`;
+  elements.largeScoreTitle.textContent = `${match.teamOne.displayName} mot ${match.teamTwo.displayName}`;
+  elements.largeScoreBoard.innerHTML = [match.teamOne, match.teamTwo].map((team, index) => {
+    const teamKey = index === 0 ? "teamOne" : "teamTwo";
+    return `
+      <button class="large-score-team" type="button" data-large-score-team="${index}" style="${teamAccentStyle(team)}">
+        <span>${teamDisplay(team)}</span>
+        <strong>${match.currentSet[teamKey]}</strong>
+        <small>${tennisPointLabel(match.currentGame[teamKey])}</small>
+      </button>
+    `;
+  }).join("");
+  elements.largeScoreActions.innerHTML = `
+    <div>
+      <span>Games</span>
+      <strong>${setScoreText(match)}</strong>
+    </div>
+    <div>
+      <span>Poeng</span>
+      <strong>${gameScoreText(match)}</strong>
+    </div>
+    <div>
+      <span>Server</span>
+      <strong>${escapeHtml(startingTeamText(match))}</strong>
+    </div>
+  `;
+  elements.largeScoreBoard.querySelectorAll("[data-large-score-team]").forEach((button) => {
+    button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.largeScoreTeam)));
+  });
 }
 
 function avatarUrl(player) {
@@ -1507,6 +1585,7 @@ function awardTennisPoint(match, teamIndex) {
 
   saveState();
   render();
+  renderLargeScore();
 }
 
 function awardGame(match, scoringTeam) {
@@ -1532,6 +1611,7 @@ function startMatch(match) {
   match.state = "playing";
   saveState();
   render();
+  renderLargeScore();
 }
 
 function reopenMatch(match) {
@@ -1542,6 +1622,7 @@ function reopenMatch(match) {
   match.completedAt = null;
   saveState();
   render();
+  renderLargeScore();
 }
 
 function cancelMatch(match) {
@@ -1555,6 +1636,17 @@ function cancelMatch(match) {
   if (nextWaitingMatch) nextWaitingMatch.state = "playing";
   saveState();
   render();
+  renderLargeScore();
+}
+
+function updateMatchCourt(match, courtName) {
+  const nextCourtName = courtName.trim();
+  match.courtName = nextCourtName || null;
+  const matchingCourt = state.courts.find((court) => court.name.localeCompare(nextCourtName, "nb", { sensitivity: "accent" }) === 0);
+  match.courtId = matchingCourt?.id ?? match.courtId ?? null;
+  saveState();
+  render();
+  renderLargeScore();
 }
 
 function leaderboardEntries(matches) {
@@ -1697,6 +1789,10 @@ function getRoundForMatch(match) {
 
 function getAllMatches() {
   return state.rounds.flatMap((round) => round.matches);
+}
+
+function getMatchById(matchId) {
+  return getAllMatches().find((match) => match.id === matchId);
 }
 
 function getPlayerById(id) {
