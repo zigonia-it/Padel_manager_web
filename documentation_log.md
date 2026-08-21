@@ -644,3 +644,60 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste stor-score på desktopbredde.
 - Vurdere å gjøre server-lag og deuce/advantage mer visuelt fremhevet.
 - Legge inn valgfri manuell spillerfarge sammen med avatarvalg.
+
+## 2026-08-21 - Admin-regler, baner, set-popup og spillerprofilvalg
+
+### Gjort
+
+- La inn språkvelger øverst til høyre med norsk, nynorsk og engelsk som valg.
+- La inn grunnstruktur for språk i app-state og kjerneoversettelser.
+- La admin velge:
+  - games som trengs for å vinne et sett
+  - sett som trengs for å vinne en match
+  - tabellpoeng-modus
+- Endret scoremotoren slik at flere sett per match støttes.
+- Flyttet hurtigvalg for ferdig sett fra kampkortet til popupen `Set resultat`.
+- Gjorde set-popupen dynamisk etter valgt games-regel.
+- Endret spillerkort slik at `Lagt til av admin` vises ved siden av spillerbadgen.
+- La inn admin-underfaner for `Styring`, `Del`, `Spillere` og `Kamper`, slik at adminpanelet blir mer kompakt.
+- Lot admin skrive inn konkrete baner i bruk, for eksempel `3, 4, 16`.
+- Endret primærflyten fra `Start/fullfør runde` til `Start turnering` og `Fullfør turnering`.
+- La inn `Admin har lagt meg til` på startsiden, slik at spillere kan velge en eksisterende admin-opprettet spillerprofil og få samme spilleropplevelse.
+- Bumpet Service Worker-cache til `padel-manager-v5`.
+
+### Beslutninger
+
+- Flere sett per match støttes i logikken nå, men UI viser fremdeles én aktiv set-score av gangen.
+- Språkvelgeren er første strukturpass; full oversettelse av all dynamisk tekst tas senere.
+- Baner lagres som konkrete banenummer, ikke bare antall.
+- Admin-underfaner brukes for å redusere scrolling uten å fjerne eksisterende funksjonalitet.
+
+### Testet
+
+- Playwright mobilbredde:
+  - opprette turnering
+  - fylle demospillere
+  - bytte til admin-underfaner
+  - flytte `Lagt til av admin` utenfor spillerbadge
+  - sette baner til `3, 4, 16`
+  - sette regler til 4 games per sett og 2 sett per match
+  - starte turnering
+  - bekrefte kamp på Bane 3 og Bane 4
+  - åpne `Set resultat`-popup
+  - bekrefte 4-games hurtigscore
+  - velge eksisterende admin-opprettet spillerprofil fra startsiden
+  - bytte språk til engelsk for kjerneetikett
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Fullføre oversettelser for all dynamisk tekst.
+- Gjøre deuce/advantage visuelt tydeligere i stor-score og kampkort.
+- Vurdere hvordan ubrukte baner bør vises når man har flere baner enn kamper i en runde.

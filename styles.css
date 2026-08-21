@@ -143,6 +143,34 @@ legend {
   margin-bottom: 20px;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.language-picker {
+  display: grid;
+  gap: 0.28rem;
+  min-width: 138px;
+}
+
+.language-picker span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.language-picker select {
+  min-height: 42px;
+  padding-top: 0.52rem;
+  padding-bottom: 0.52rem;
+  font-size: 0.82rem;
+}
+
 .brand-lockup {
   display: flex;
   align-items: center;
@@ -412,6 +440,29 @@ h3 {
   gap: 18px;
 }
 
+.admin-subtabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.subtab {
+  min-height: 42px;
+  padding: 0.62rem 0.7rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.subtab.active {
+  background: linear-gradient(180deg, var(--gold-light), var(--gold));
+  color: white;
+}
+
 .panel,
 .next-match {
   display: grid;
@@ -424,6 +475,15 @@ h3 {
   padding: 20px;
   box-shadow: var(--shadow);
   backdrop-filter: blur(18px);
+}
+
+.panel:has(> .admin-panel.hidden) {
+  display: none;
+}
+
+.admin-panel {
+  display: grid;
+  gap: 18px;
 }
 
 .panel-heading,
@@ -680,6 +740,7 @@ h3 {
 .team-player {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.62rem;
   min-width: 0;
 }
@@ -708,6 +769,21 @@ h3 {
 .player-name-badge small {
   color: rgba(255, 255, 255, 0.72);
   text-shadow: none;
+}
+
+.join-source-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border: 1px solid rgba(235, 199, 97, 0.18);
+  border-radius: 999px;
+  padding: 0.22rem 0.56rem;
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
 }
 
 .team-player-badge {
@@ -1058,7 +1134,8 @@ h3 {
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
 
-.player-buttons button {
+.player-buttons button,
+.existing-player-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1068,6 +1145,16 @@ h3 {
     linear-gradient(180deg, rgba(var(--player-accent-rgb), 0.16), rgba(255, 255, 255, 0.045)),
     rgba(255, 255, 255, 0.065);
   color: var(--ink);
+}
+
+.existing-player-box,
+.existing-player-list {
+  display: grid;
+  gap: 10px;
+}
+
+.existing-player-list {
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
 }
 
 .player-buttons button.active {
@@ -1164,6 +1251,29 @@ h3 {
   padding: 0;
   background: transparent;
   color: var(--ink);
+}
+
+.score-dialog {
+  width: min(640px, calc(100vw - 24px));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0;
+  background: transparent;
+  color: var(--ink);
+}
+
+.score-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.score-dialog-surface {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025) 40%),
+    var(--surface);
 }
 
 .large-score-dialog::backdrop {
@@ -1305,6 +1415,12 @@ h3 {
     flex-direction: column;
   }
 
+  .topbar-actions {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .brand-lockup {
     width: 100%;
     align-items: center;
@@ -1362,6 +1478,10 @@ h3 {
 
   .tabs {
     grid-template-columns: 1fr;
+  }
+
+  .admin-subtabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .avatar-picker,

@@ -20,11 +20,21 @@
         <div class="brand-lockup">
           <img class="brand-mark" src="assets/icons/appicon-256.png" alt="" width="58" height="58">
           <div>
-            <p class="eyebrow">Turneringsverktøy</p>
+            <p class="eyebrow" data-i18n="brandEyebrow">Turneringsverktøy</p>
             <h1>Padel Manager</h1>
           </div>
         </div>
-        <div class="status-pill" id="connectionStatus">Lokal demo</div>
+        <div class="topbar-actions">
+          <label class="language-picker">
+            <span data-i18n="languageLabel">Språk</span>
+            <select id="languageSelect" aria-label="Språk">
+              <option value="nb">Norsk</option>
+              <option value="nn">Nynorsk</option>
+              <option value="en">English</option>
+            </select>
+          </label>
+          <div class="status-pill" id="connectionStatus">Lokal demo</div>
+        </div>
       </header>
 
       <main>
@@ -96,6 +106,10 @@
                 </label>
               </fieldset>
               <button class="secondary" type="submit">Bli med i turnering</button>
+              <div class="existing-player-box">
+                <button class="ghost" id="showExistingPlayersButton" type="button">Admin har lagt meg til</button>
+                <div class="existing-player-list hidden" id="existingPlayerList"></div>
+              </div>
               <p class="hint">I dette utkastet fungerer koden for turneringen som er opprettet på denne enheten.</p>
             </form>
           </div>
@@ -129,7 +143,15 @@
           </nav>
 
           <section class="view-grid" data-section="admin">
+            <div class="admin-subtabs wide" role="tablist" aria-label="Adminseksjoner">
+              <button class="subtab active" type="button" data-admin-panel="control">Styring</button>
+              <button class="subtab" type="button" data-admin-panel="share">Del</button>
+              <button class="subtab" type="button" data-admin-panel="players">Spillere</button>
+              <button class="subtab" type="button" data-admin-panel="matches">Kamper</button>
+            </div>
+
             <div class="panel command-panel">
+              <div class="admin-panel" data-admin-panel-section="control">
               <div class="panel-heading">
                 <h3>Turnering</h3>
                 <span id="tournamentStatus">Klar</span>
@@ -138,8 +160,8 @@
               <div class="status-grid" id="lobbyStatus"></div>
               <form class="inline-form" id="courtSettingsForm">
                 <label>
-                  Baner
-                  <input name="courtCount" type="number" min="1" max="12" value="1" required>
+                  Baner i bruk
+                  <input name="courtList" type="text" value="1" placeholder="1, 2 eller 3, 4, 16" required>
                 </label>
                 <button class="secondary" type="submit">Oppdater</button>
               </form>
@@ -152,11 +174,19 @@
                     <option value="games">Games</option>
                   </select>
                 </label>
+                <label>
+                  Games per sett
+                  <input name="gamesToWinSet" type="number" min="1" max="12" value="6" required>
+                </label>
+                <label>
+                  Sett per match
+                  <input name="setsToWinMatch" type="number" min="1" max="5" value="1" required>
+                </label>
                 <button class="secondary" type="submit">Lagre regler</button>
               </form>
               <div class="button-row">
-                <button class="primary" id="generateRoundButton" type="button">Start første runde</button>
-                <button class="secondary" id="completeRoundButton" type="button">Fullfør runde</button>
+                <button class="primary" id="generateRoundButton" type="button">Start turnering</button>
+                <button class="secondary" id="completeRoundButton" type="button">Fullfør turnering</button>
               </div>
               <div class="button-row">
                 <button class="secondary" id="exportBackupButton" type="button">Last ned backup</button>
@@ -169,9 +199,11 @@
               <div class="button-row">
                 <button class="ghost" id="resetDemoButton" type="button">Nullstill demo</button>
               </div>
+              </div>
             </div>
 
             <div class="panel share-panel">
+              <div class="admin-panel hidden" data-admin-panel-section="share">
               <div class="panel-heading">
                 <h3>Del turnering</h3>
                 <span>Lokal demo</span>
@@ -196,9 +228,11 @@
               </div>
               <button class="ghost" id="showStartButton" type="button">Vis startside for testing</button>
               <p class="hint" id="copyStatus">Scan QR-koden eller bruk lenken for å teste påmelding.</p>
+              </div>
             </div>
 
             <div class="panel">
+              <div class="admin-panel hidden" data-admin-panel-section="players">
               <div class="panel-heading">
                 <h3>Lobby / spillere</h3>
                 <span id="playerCount">0</span>
@@ -209,15 +243,18 @@
               </form>
               <button class="secondary" id="seedPlayersButton" type="button">Fyll demospillere</button>
               <ul class="compact-list" id="playersList"></ul>
+              </div>
             </div>
 
             <div class="panel wide">
+              <div class="admin-panel hidden" data-admin-panel-section="matches">
               <div class="panel-heading">
                 <h3>Kamper og historikk</h3>
                 <span id="matchCount">0</span>
               </div>
               <div class="round-summary" id="roundSummary"></div>
               <div class="matches" id="adminMatches"></div>
+              </div>
             </div>
           </section>
 
@@ -277,6 +314,17 @@
           </div>
           <div class="large-score-board" id="largeScoreBoard"></div>
           <div class="large-score-actions" id="largeScoreActions"></div>
+        </div>
+      </dialog>
+
+      <dialog class="score-dialog" id="setScoreDialog" aria-labelledby="setScoreTitle">
+        <div class="score-dialog-surface">
+          <div class="panel-heading">
+            <h3 id="setScoreTitle">Settresultat</h3>
+            <button class="ghost icon-button" id="closeSetScoreButton" type="button">Lukk</button>
+          </div>
+          <p class="hint" id="setScoreContext">Velg ferdig sett.</p>
+          <div class="quick-score-grid" id="setScoreOptions"></div>
         </div>
       </dialog>
     </div>
