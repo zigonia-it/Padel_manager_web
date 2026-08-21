@@ -883,6 +883,32 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Teste på publisert mobilside etter deploy og reload.
 
+## 2026-08-21 - Lokal rolle styrer adminfane
+
+### Gjort
+
+- La til egen lokal rollemarkør ved siden av turneringsstate.
+- Setter lokal rolle til `admin` når turnering opprettes eller backup importeres.
+- Setter lokal rolle til `player` når bruker blir med eller velger eksisterende spillerprofil.
+- Endret admin-sjekken slik adminfanen krever både admin-token og lokal adminrolle.
+- Nullstilling fjerner også lokal rolle.
+
+### Testet
+
+- `node --check app.js`.
+- Playwright lokal flyt:
+  - spillerrolle skjuler adminfanen selv om admin-token finnes lokalt
+  - adminrolle viser adminfanen og adminflate
+
+### Endrede filer
+
+- `app.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste på mobil ved å bli med som spiller på nytt eller velge eksisterende spillerprofil.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

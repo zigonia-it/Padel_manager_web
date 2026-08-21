@@ -1,4 +1,5 @@
 const storageKey = "padel-manager-demo";
+const roleStorageKey = "padel-manager-role";
 const playerAccentPalette = {
   blue: "#1a59f2",
   orange: "#e67a0a",
@@ -192,6 +193,7 @@ elements.createTournamentForm.addEventListener("submit", async (event) => {
     courtCount: Number(formData.get("courts")),
   });
 
+  setLocalRole("admin");
   saveState({ remote: false });
   await createRemoteTournament();
   showWorkspace();
@@ -227,6 +229,8 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
 
   const player = existingPlayer ?? joinTournament(playerName, avatarId);
   state.selectedPlayerId = player.id;
+  setLocalRole("player");
+  saveState({ remote: false });
 
   showWorkspace("player");
   event.currentTarget.reset();
@@ -334,6 +338,7 @@ elements.endTournamentButton.addEventListener("click", () => {
 elements.resetDemoButton.addEventListener("click", () => {
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
+  localStorage.removeItem(roleStorageKey);
   syncCreateFormDefaults();
   elements.joinTournamentForm.reset();
   syncJoinPreview();
@@ -658,6 +663,7 @@ function importBackup(event) {
       const importedState = parsed.tournament ?? parsed;
       if (!isValidTournamentState(importedState)) throw new Error("Invalid backup");
       state = migrateState(importedState);
+      setLocalRole("admin");
       saveState();
       showWorkspace("admin");
       render();
@@ -746,11 +752,23 @@ function activateTab(view) {
 }
 
 function isCurrentUserAdmin() {
-  return Boolean(state.adminToken && localStorage.getItem(storageKey));
+  return Boolean(state.adminToken && localStorage.getItem(storageKey) && currentLocalRole() === "admin");
 }
 
 function hasTournamentForInvite(inviteCode, loadedRemote = false) {
   return Boolean(inviteCode && inviteCode === state.inviteCode && (loadedRemote || localStorage.getItem(storageKey)));
+}
+
+function setLocalRole(role) {
+  localStorage.setItem(roleStorageKey, role);
+}
+
+function currentLocalRole() {
+  const storedRole = localStorage.getItem(roleStorageKey);
+  if (storedRole) return storedRole;
+  if (state.adminToken) return "admin";
+  if (state.selectedPlayerId) return "player";
+  return "spectator";
 }
 
 function renderRoleVisibility() {
@@ -1280,6 +1298,7 @@ function renderExistingPlayerList() {
     button.innerHTML = `<img class="avatar" src="${avatarUrl(player)}" alt="" width="30" height="30"><span>${escapeHtml(player.name)}</span>`;
     button.addEventListener("click", () => {
       state.selectedPlayerId = player.id;
+      setLocalRole("player");
       saveState();
       showWorkspace("player");
       render();
