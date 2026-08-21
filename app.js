@@ -2358,4 +2358,19 @@ function slugify(value) {
     .slice(0, 48) || "padel-manager";
 }
 
+function restoreInitialView() {
+  const hasSavedTournament = Boolean(localStorage.getItem(storageKey));
+  const params = new URLSearchParams(window.location.search);
+  const hasInviteUrl = params.has("join") || params.has("code");
+  if (!hasSavedTournament || hasInviteUrl) return;
+
+  if (isCurrentUserAdmin()) {
+    showWorkspace("admin");
+    return;
+  }
+
+  showWorkspace(state.selectedPlayerId ? "player" : "spectator");
+}
+
+restoreInitialView();
 render();

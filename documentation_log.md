@@ -857,6 +857,32 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Etter deploy: åpne live-siden på mobil og reload én gang slik ny Service Worker tar over.
 
+## 2026-08-21 - Reload tilbake til riktig visning
+
+### Gjort
+
+- La til gjenoppretting av startvisning ved sidelast.
+- Spillere med valgt profil sendes tilbake til spillerfanen etter reload.
+- Admin med lokal admin-token sendes tilbake til adminfanen etter reload.
+- Invite-/QR-lenker fortsetter å åpne startsiden med invitasjonskode forhåndsutfylt.
+
+### Testet
+
+- `node --check app.js`.
+- Playwright lokal flyt:
+  - non-admin med `selectedPlayerId` lander på spillerfanen etter reload
+  - admin med admin-token lander på adminfanen etter reload
+  - invite-URL lander på startsiden med kode forhåndsutfylt
+
+### Endrede filer
+
+- `app.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste på publisert mobilside etter deploy og reload.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.
