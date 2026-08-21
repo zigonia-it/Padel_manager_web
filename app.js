@@ -27,7 +27,7 @@ const legacyAccentMap = {
 const accents = Object.keys(playerAccentPalette);
 const defaultAvatarId = "smash";
 const tennisPointLabels = ["0", "15", "30", "40", "A"];
-const demoPlayerNames = ["Sigurd", "Elin", "Elisabeth", "Hanne", "Ruben", "Karoline", "Lars", "Tina"];
+const demoPlayerNames = ["Sigurd", "Elin", "Elisabeth", "Hanne", "Ruben", "Karoline", "Lars", "Magnus", "Tina", "Håkon", "Erik", "Anita", "Terje"];
 const avatarOptions = [
   { id: "smash", label: "Smash" },
   { id: "serve", label: "Serve" },
