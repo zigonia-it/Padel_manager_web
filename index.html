@@ -259,19 +259,18 @@
           </section>
 
           <section class="view-grid hidden" data-section="player">
-            <div class="panel player-select-panel">
-              <h3>Hvem er du?</h3>
-              <div class="player-buttons" id="playerButtons"></div>
-            </div>
-
             <div class="next-match" id="playerNextMatch">
               <p class="eyebrow">Din neste kamp</p>
               <h3>Velg spillerprofil</h3>
               <p>Da viser appen bane, makker og motstandere for akkurat deg.</p>
             </div>
 
-            <div class="panel">
-              <h3>Din status</h3>
+            <div class="panel player-profile-panel">
+              <div class="panel-heading">
+                <h3>Din status</h3>
+                <button class="secondary compact-button" id="changePlayerButton" type="button">Bytt</button>
+              </div>
+              <div class="player-identity-card" id="playerIdentityCard"></div>
               <div class="status-grid player-status-grid" id="playerStatusGrid"></div>
             </div>
 

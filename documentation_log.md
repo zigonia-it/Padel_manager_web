@@ -701,3 +701,38 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Fullføre oversettelser for all dynamisk tekst.
 - Gjøre deuce/advantage visuelt tydeligere i stor-score og kampkort.
 - Vurdere hvordan ubrukte baner bør vises når man har flere baner enn kamper i en runde.
+
+## 2026-08-21 - Full kampplan, låst spillerprofil og hostingklar statisk app
+
+### Gjort
+
+- Endret spillerfanen slik at den ikke lenger lar spilleren bytte til andre spillere inne i spiller-view.
+- Slo spilleridentitet og status sammen i ett panel med aktuell spiller, avatar og kilde (`Lagt til av admin` / `Registrert selv`).
+- Endret turneringsgenerering slik at første start lager hele kampoppsettet for turneringen.
+- Aktiverer bare banekapasiteten i aktiv runde; resten av kampene ligger synlig som ventende og starter når en bane frigjøres.
+- La inn globale kampnummer, slik at `Kamp 5` betyr kamp fem i hele turneringen.
+- Endret tilskuermodus til kompakte livekort for pågående kamper.
+- Rettet spillerstatistikk slik at pågående kamper ikke telles som spilt før de er ferdige.
+- Oppdaterte README med statisk hostingoppsett for GitHub Pages, Netlify og Cloudflare Pages.
+- Bumpet Service Worker-cache til `padel-manager-v6`.
+
+### Beslutninger
+
+- Hele planen genereres tidlig, men runder aktiveres kontrollert for å unngå at alle kamper ser pågående ut samtidig.
+- Spillerprofil velges fra invitasjonsflyt/startside, ikke fra spillerfanen.
+- Tilskuermodus prioriterer livekamper fremfor historikk og full kampoversikt.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `README.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste faktisk publisering på valgt host.
+- Koble Supabase/realtime når lokal demo-flyt er godkjent.
+- Fullføre språkoversettelser for alle dynamiske tekster.

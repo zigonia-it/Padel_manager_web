@@ -115,7 +115,8 @@ const elements = {
   standingsList: document.querySelector("#standingsList"),
   rulesList: document.querySelector("#rulesList"),
   playerStandingsList: document.querySelector("#playerStandingsList"),
-  playerButtons: document.querySelector("#playerButtons"),
+  playerIdentityCard: document.querySelector("#playerIdentityCard"),
+  changePlayerButton: document.querySelector("#changePlayerButton"),
   playerNextMatch: document.querySelector("#playerNextMatch"),
   playerStatusGrid: document.querySelector("#playerStatusGrid"),
   generateRoundButton: document.querySelector("#generateRoundButton"),
@@ -268,9 +269,17 @@ elements.generateRoundButton.addEventListener("click", () => {
     alert(blockReason);
     return;
   }
-  generateNextRound();
+  if (state.rounds.length === 0) {
+    generateFullTournamentSchedule();
+  } else {
+    startNextScheduledRound();
+  }
   saveState();
   render();
+});
+
+elements.changePlayerButton.addEventListener("click", () => {
+  showStart();
 });
 
 elements.completeRoundButton.addEventListener("click", () => {
@@ -597,7 +606,7 @@ function render() {
   elements.tournamentSettingsForm.elements.gamesToWinSet.value = state.settings.gamesToWinSet;
   elements.tournamentSettingsForm.elements.setsToWinMatch.value = state.settings.setsToWinMatch;
   elements.generateRoundButton.disabled = Boolean(generateRoundBlockReason());
-  elements.generateRoundButton.textContent = state.currentRound > 0 ? t("startNextRound") : t("startTournament");
+  elements.generateRoundButton.textContent = tournamentActionText();
   elements.completeRoundButton.textContent = t("finishTournament");
   elements.completeRoundButton.disabled = state.status === "Avsluttet" || getAllMatches().length === 0;
   elements.endTournamentButton.closest(".button-row").classList.add("hidden");
@@ -612,7 +621,7 @@ function render() {
   renderRoundSummary();
   renderMatches(matches);
   renderStandings(matches);
-  renderPlayerSelector();
+  renderPlayerIdentity();
   renderPlayerNextMatch(matches);
   renderPlayerStatus(matches);
   renderAdminLiveOverview(matches);
@@ -683,8 +692,9 @@ function renderAdminLiveOverview(matches) {
   if (!elements.adminLiveOverview) return;
 
   const activeRound = getActiveRound();
-  const playingMatches = matches.filter((match) => match.state === "playing");
-  const waitingMatches = matches.filter((match) => match.state === "waiting");
+  const liveMatches = activeRound?.status === "active" ? activeRound.matches : matches;
+  const playingMatches = liveMatches.filter((match) => match.state === "playing");
+  const waitingMatches = liveMatches.filter((match) => match.state === "waiting");
   const finishedMatches = matches.filter((match) => match.state === "finished");
   const progress = activeRound ? roundProgress(activeRound) : { total: matches.length, finished: finishedMatches.length };
   const progressPercent = progress.total ? Math.round((progress.finished / progress.total) * 100) : 0;
@@ -840,12 +850,7 @@ function renderMatches(matches) {
     selectedPlayer ? "Du har ingen kamper ennå." : "Velg spillerprofil for å se dine kamper.",
     (match) => createMatchCard(match, false, selectedPlayer?.id),
   );
-  renderGroupedMatches(
-    elements.spectatorMatches,
-    matches,
-    "Ingen kamper ennå. Generer første runde.",
-    (match) => createMatchCard(match, false),
-  );
+  renderSpectatorMatches(matches);
 }
 
 function renderGroupedMatches(container, matches, emptyText, cardFactory) {
@@ -868,6 +873,53 @@ function renderGroupedMatches(container, matches, emptyText, cardFactory) {
     section.append(...group.matches.map(cardFactory));
     container.append(section);
   });
+}
+
+function renderSpectatorMatches(matches) {
+  elements.spectatorMatches.innerHTML = "";
+  const playingMatches = matches.filter((match) => match.state === "playing");
+  if (playingMatches.length === 0) {
+    const waitingMatches = matches.filter((match) => match.state === "waiting");
+    if (waitingMatches.length === 0) {
+      appendEmptyText(elements.spectatorMatches, "Ingen pågående kamper ennå.");
+      return;
+    }
+    appendEmptyText(elements.spectatorMatches, "Ingen kamper pågår akkurat nå. Neste kampoppsett er klart i spillerfanen.");
+    return;
+  }
+
+  const section = document.createElement("section");
+  section.className = "match-group spectator-live-group";
+  section.innerHTML = `<h4>Pågående kamper</h4>`;
+  section.append(...playingMatches.map(createSpectatorMatchCard));
+  elements.spectatorMatches.append(section);
+}
+
+function createSpectatorMatchCard(match) {
+  const card = document.createElement("article");
+  card.className = "spectator-score-card";
+  card.setAttribute("style", teamAccentStyle(match.teamOne));
+  card.innerHTML = `
+    <div class="spectator-score-top">
+      <span>${escapeHtml(matchContextText(match))}</span>
+      <strong>${match.courtName ?? "Bane kommer"}</strong>
+    </div>
+    <div class="spectator-score-teams">
+      <div style="${teamAccentStyle(match.teamOne)}">
+        <span>${teamDisplay(match.teamOne)}</span>
+        <strong>${match.currentSet.teamOne}</strong>
+      </div>
+      <div style="${teamAccentStyle(match.teamTwo)}">
+        <span>${teamDisplay(match.teamTwo)}</span>
+        <strong>${match.currentSet.teamTwo}</strong>
+      </div>
+    </div>
+    <div class="spectator-score-bottom">
+      <span>Poeng ${escapeHtml(gameScoreText(match))}</span>
+      <span>Games ${escapeHtml(setScoreText(match))}</span>
+    </div>
+  `;
+  return card;
 }
 
 function createMatchCard(match, editable, highlightedPlayerId = null) {
@@ -1000,25 +1052,32 @@ function renderStandingsList(container, matches) {
   });
 }
 
-function renderPlayerSelector() {
-  elements.playerButtons.innerHTML = "";
-  if (state.players.length === 0) {
-    appendEmptyText(elements.playerButtons, "Spillere vises her når admin har lagt dem til.");
+function renderPlayerIdentity() {
+  const player = getPlayerById(state.selectedPlayerId);
+  elements.changePlayerButton.disabled = state.players.length === 0;
+
+  if (!player) {
+    elements.playerIdentityCard.removeAttribute("style");
+    elements.playerIdentityCard.innerHTML = `
+      <div class="empty-list-item">
+        Åpne invitasjonslenken, scan QR-koden eller velg "Admin har lagt meg til" fra startsiden.
+      </div>
+    `;
     return;
   }
-  state.players.forEach((player) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.setAttribute("style", accentStyle(player.accent));
-    button.innerHTML = `<img class="avatar" src="${avatarUrl(player)}" alt="" width="30" height="30"><span>${escapeHtml(player.name)}</span>`;
-    button.classList.toggle("active", state.selectedPlayerId === player.id);
-    button.addEventListener("click", () => {
-      state.selectedPlayerId = player.id;
-      saveState();
-      render();
-    });
-    elements.playerButtons.append(button);
-  });
+
+  const joinedByAdmin = player.joinedFrom !== "self";
+  elements.playerIdentityCard.setAttribute("style", accentStyle(player.accent));
+  elements.playerIdentityCard.innerHTML = `
+    <div class="player-identity-main">
+      <img class="avatar" src="${avatarUrl(player)}" alt="" width="44" height="44">
+      <div>
+        <span>Aktuell spiller</span>
+        <strong>${escapeHtml(player.name)}</strong>
+      </div>
+    </div>
+    <span class="join-source-chip">${joinedByAdmin ? "Lagt til av admin" : "Registrert selv"}</span>
+  `;
 }
 
 function renderExistingPlayerList() {
@@ -1463,12 +1522,21 @@ function canGenerateRound() {
   return !generateRoundBlockReason();
 }
 
+function tournamentActionText() {
+  if (state.rounds.length === 0) return t("startTournament");
+  const activeRound = getActiveRound();
+  if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return "Fullfør kampene";
+  if (getNextScheduledRound()) return t("startNextRound");
+  return "Hele turneringen er generert";
+}
+
 function generateRoundBlockReason() {
   const activeRound = getActiveRound();
   if (state.status === "Avsluttet") return "Turneringen er avsluttet.";
   if (state.players.length < 2) return "Legg til minst to spillere før du starter runden.";
   if (state.courts.length < 1) return "Legg til minst én bane før du starter runden.";
-  if (activeRound && activeRound.status !== "finished" && !canCompleteRound(activeRound)) return "Alle kamper må være ferdige før neste runde.";
+  if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return "Alle kamper må være ferdige før neste runde.";
+  if (state.rounds.length > 0 && !getNextScheduledRound()) return "Hele turneringen er generert.";
   return "";
 }
 
@@ -1538,24 +1606,34 @@ function mixHex(hex, targetHex, amount) {
   return rgbToHex(source.map((value, index) => value + (target[index] - value) * amount));
 }
 
-function generateNextRound() {
+function generateFullTournamentSchedule() {
   const schedule = state.schedule.length ? state.schedule : buildSchedule(state.players);
   if (!schedule.length) {
     alert("Legg til minst to spillere før du genererer kamper.");
     return;
   }
 
-  const scheduleIndex = state.currentRound % schedule.length;
-  const roundPlan = schedule[scheduleIndex];
-  const matchPlan = generateRoundMatches(roundPlan.teams, state.currentRound + 1, roundPlan.sittingOut);
-  const matches = matchPlan
-    .slice(0, state.courts.length)
-    .map((match, index) => ({
-      ...match,
-      courtId: state.courts[index]?.id ?? null,
-      courtName: state.courts[index]?.name ?? null,
-      state: "playing",
-    }));
+  state.rounds = schedule
+    .map((roundPlan, index) => createScheduledRound(roundPlan, index + 1))
+    .filter((round) => round.matches.length > 0);
+
+  if (!state.rounds.length) {
+    alert("Fant ingen gyldige kamper med spillerlisten.");
+    return;
+  }
+
+  activateRound(state.rounds[0]);
+  state.status = "Runde pågår";
+}
+
+function createScheduledRound(roundPlan, roundNumber) {
+  const matchPlan = generateRoundMatches(roundPlan.teams, roundNumber, roundPlan.sittingOut);
+  const matches = matchPlan.map((match, index) => ({
+    ...match,
+    courtId: state.courts[index % state.courts.length]?.id ?? null,
+    courtName: state.courts[index % state.courts.length]?.name ?? null,
+    state: "waiting",
+  }));
   const playingPlayerIds = new Set(matches.flatMap((match) => matchPlayers(match).map((player) => player.id)));
   const sittingOut = uniquePlayers([
     ...roundPlan.sittingOut,
@@ -1565,16 +1643,41 @@ function generateNextRound() {
     match.sittingOut = sittingOut;
   });
 
-  state.currentRound += 1;
-  state.status = "Runde pågår";
-  state.rounds.push({
+  return {
     id: crypto.randomUUID(),
-    roundNumber: state.currentRound,
-    status: "active",
+    roundNumber,
+    status: "scheduled",
     createdAt: new Date().toISOString(),
     sittingOut,
     matches,
+  };
+}
+
+function activateRound(round) {
+  state.rounds.forEach((item) => {
+    if (item.status === "active") item.status = "finished";
   });
+  round.status = "active";
+  round.startedAt = round.startedAt ?? new Date().toISOString();
+  let startedMatches = 0;
+  round.matches.forEach((match) => {
+    if (match.state === "waiting" && startedMatches < state.courts.length) {
+      match.state = "playing";
+      startedMatches += 1;
+    }
+  });
+  state.currentRound = round.roundNumber;
+  state.status = "Runde pågår";
+}
+
+function getNextScheduledRound() {
+  return state.rounds.find((round) => round.status === "scheduled");
+}
+
+function startNextScheduledRound() {
+  const nextRound = getNextScheduledRound();
+  if (!nextRound) return;
+  activateRound(nextRound);
 }
 
 function buildSchedule(players) {
@@ -1674,7 +1777,11 @@ function finishMatch(match) {
 
   const activeRound = getActiveRound();
   const nextWaitingMatch = activeRound?.matches.find((item) => item.state === "waiting");
-  if (nextWaitingMatch) nextWaitingMatch.state = "playing";
+  if (nextWaitingMatch) {
+    nextWaitingMatch.state = "playing";
+    nextWaitingMatch.courtId = match.courtId;
+    nextWaitingMatch.courtName = match.courtName;
+  }
 }
 
 function saveMatchResult(match, teamOne, teamTwo) {
@@ -1852,7 +1959,7 @@ function statsForPlayer(player, matches) {
       const teamIndex = playerTeamIndex(player, match);
       if (teamIndex === null) return stats;
 
-      stats.matchesPlayed += ["waiting", "cancelled"].includes(match.state) ? 0 : 1;
+      stats.matchesPlayed += match.state === "finished" ? 1 : 0;
       stats.matchWins += match.winnerTeamIndex === teamIndex ? 1 : 0;
       match.completedSets.forEach((set) => {
         stats.setsWon += teamIndex === 0 ? Number(set.teamOne > set.teamTwo) : Number(set.teamTwo > set.teamOne);
@@ -1943,7 +2050,7 @@ function playerPlacement(player, matches) {
 }
 
 function getActiveRound() {
-  return state.rounds[state.rounds.length - 1];
+  return state.rounds.find((round) => round.status === "active") ?? state.rounds.at(-1);
 }
 
 function getRoundForMatch(match) {
@@ -1976,8 +2083,7 @@ function matchStateText(stateName) {
 }
 
 function matchContextText(match) {
-  const round = getRoundForMatch(match);
-  const matchIndex = round ? round.matches.findIndex((item) => item.id === match.id) + 1 : null;
+  const matchIndex = globalMatchNumber(match);
   const sitOutCount = match.sittingOut?.length ?? 0;
   const parts = [
     `Runde ${match.rotationNumber}`,
@@ -1985,6 +2091,11 @@ function matchContextText(match) {
     sitOutCount ? `${sitOutCount} pause` : "",
   ].filter(Boolean);
   return parts.join(" · ");
+}
+
+function globalMatchNumber(match) {
+  const index = getAllMatches().findIndex((item) => item.id === match.id);
+  return index >= 0 ? index + 1 : null;
 }
 
 function primaryMatchHeadline(match) {
