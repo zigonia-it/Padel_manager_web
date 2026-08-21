@@ -942,6 +942,38 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Kontrollere på iPhone/Safari etter deploy og en reload.
 
+## 2026-08-21 - Fjernet Orbitron fra norsk tekst
+
+### Gjort
+
+- Fjernet Orbitron fra knapper, H2, H3 og eyebrow-tekst.
+- Beholder Orbitron på brand-H1 og invitasjons-/delingskoder.
+- Bumpet Service Worker-cache til `padel-manager-v13`.
+
+### Beslutning
+
+- Norsk tekst og dynamisk tekst skal bruke systemfont for å unngå fontbytte midt i ord med `æ`, `ø` og `å`.
+
+### Testet
+
+- `node --check service-worker.js`.
+- Playwright mobilbredde 360px:
+  - `Risløkka Padel` bruker systemfont
+  - eyebrow bruker systemfont
+  - aktiv tab/knapp bruker systemfont
+  - brand-H1 bruker fortsatt Orbitron
+  - ingen horisontal overflow
+
+### Endrede filer
+
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Kontrollere på iPhone/Safari etter deploy og reload.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.
