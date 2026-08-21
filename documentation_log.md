@@ -595,6 +595,47 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - `service-worker.js`
 - `documentation_log.md`
 
+## 2026-08-21 - Supabase live sync for fler-enhetsbruk
+
+### Gjort
+
+- La til Supabase browser-klient via CDN.
+- La til `supabase-config.js` for Project URL og anon/publishable key.
+- La til `supabase_schema.sql` med `tournaments`-tabell, RLS, RPC-funksjoner og realtime-publication.
+- Knyttet appens lagring til Supabase når configen er fylt inn.
+- Beholder lokal fallback når Supabase-config mangler.
+- Splittet delt turneringsstate fra lokal `selectedPlayerId` og lokal admin-token.
+- Opprettelse av turnering lagres via `create_tournament`.
+- Spillere kan hente turnering via invitekode og registrere seg via `join_tournament`.
+- Admin-endringer lagres via `save_tournament_state` med lokal admin-token.
+- Enheter abonnerer på realtime-endringer for aktiv turnering.
+- Oppdaterte startteksten slik den beskriver lokal fallback og Supabase live sync riktig.
+- Oppdaterte README med faktisk Supabase-oppsett.
+- Bumpet Service Worker-cache til `padel-manager-v8`.
+
+### Beslutninger
+
+- Første mandagsklare backend lagrer hele turneringsstaten som JSON i én Supabase-rad for raskest mulig stabil fler-enhetsflyt.
+- Admin-token lagres bare lokalt på admin-enheten og sendes ikke i delt state.
+- Spillere kan melde seg på via RPC uten admin-token, men full turneringsstyring krever admin-token.
+- Lokal fallback beholdes slik appen fortsatt kan testes uten Supabase.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `service-worker.js`
+- `supabase-config.js`
+- `supabase_schema.sql`
+- `README.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Opprette Supabase-prosjekt og kjøre `supabase_schema.sql`.
+- Fylle inn `supabase-config.js`.
+- Teste admin + minst to telefoner på live URL.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

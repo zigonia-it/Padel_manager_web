@@ -72,6 +72,19 @@ const defaultTournament = createTournament({
 
 let state = loadState();
 let largeScoreMatchId = null;
+const supabaseSettings = window.PADEL_MANAGER_SUPABASE ?? {};
+const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
+  ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  })
+  : null;
+let realtimeChannel = null;
+let remoteSaveTimer = null;
+let isApplyingRemoteState = false;
 
 const elements = {
   startView: document.querySelector("#startView"),
@@ -150,6 +163,7 @@ prefillInviteCodeFromUrl();
 syncCopyrightYear();
 registerServiceWorker();
 syncConnectionStatus();
+connectRealtimeForCurrentState();
 
 window.addEventListener("online", syncConnectionStatus);
 window.addEventListener("offline", syncConnectionStatus);
@@ -163,7 +177,7 @@ elements.languageSelect.addEventListener("change", () => {
   render();
 });
 
-elements.createTournamentForm.addEventListener("submit", (event) => {
+elements.createTournamentForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
   const playerNames = parsePlayerNames(formData.get("players"));
@@ -175,17 +189,20 @@ elements.createTournamentForm.addEventListener("submit", (event) => {
     courtCount: Number(formData.get("courts")),
   });
 
-  saveState();
+  saveState({ remote: false });
+  await createRemoteTournament();
   showWorkspace();
   render();
 });
 
-elements.joinTournamentForm.addEventListener("submit", (event) => {
+elements.joinTournamentForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
   const inviteCode = formData.get("inviteCode").trim().toUpperCase();
   const playerName = formData.get("playerName").trim();
   const avatarId = formData.get("avatarId") || defaultAvatarId;
+
+  if (supabaseClient) await loadRemoteTournamentByInvite(inviteCode);
 
   if (inviteCode !== state.inviteCode) {
     alert(`Fant ikke turnering med kode ${inviteCode}. Prøv ${state.inviteCode} i demoen.`);
@@ -194,10 +211,15 @@ elements.joinTournamentForm.addEventListener("submit", (event) => {
 
   if (!playerName) return;
 
-  const existingPlayer = findPlayerByName(playerName);
+  let existingPlayer = findPlayerByName(playerName);
   if (!existingPlayer && state.rounds.length > 0) {
     alert("Turneringen er startet. Be administrator legge deg til i neste turnering.");
     return;
+  }
+
+  if (!existingPlayer && supabaseClient) {
+    await joinRemoteTournament(playerName, avatarId);
+    existingPlayer = findPlayerByName(playerName);
   }
 
   const player = existingPlayer ?? joinTournament(playerName, avatarId);
@@ -206,7 +228,7 @@ elements.joinTournamentForm.addEventListener("submit", (event) => {
   showWorkspace("player");
   event.currentTarget.reset();
   syncJoinPreview();
-  saveState();
+  saveState({ remote: !supabaseClient });
   render();
 });
 
@@ -366,6 +388,7 @@ function createTournament({ name, inviteCode, players, courtCount }) {
   const tournamentPlayers = players.map((playerName, index) => createPlayer(playerName, index, defaultAvatarId));
   return {
     id: crypto.randomUUID(),
+    adminToken: crypto.randomUUID(),
     name,
     inviteCode,
     status: "Klar",
@@ -419,6 +442,8 @@ function migrateState(nextState) {
     ...defaultTournament.settings,
     ...(nextState.settings ?? {}),
   };
+  nextState.adminToken ??= crypto.randomUUID();
+  nextState.selectedPlayerId ??= null;
   nextState.players ??= [];
   nextState.courts ??= structuredClone(defaultTournament.courts);
   nextState.schedule ??= buildSchedule(nextState.players);
@@ -474,8 +499,120 @@ function migrateMatch(match, tournamentId) {
   };
 }
 
-function saveState() {
+function saveState(options = {}) {
   localStorage.setItem(storageKey, JSON.stringify(state));
+  if (options.remote !== false) queueRemoteSave();
+}
+
+function isSupabaseReady() {
+  return Boolean(supabaseClient);
+}
+
+function sanitizeSharedState(nextState) {
+  const sharedState = structuredClone(nextState);
+  delete sharedState.adminToken;
+  delete sharedState.selectedPlayerId;
+  return sharedState;
+}
+
+function applyRemoteState(remoteState) {
+  if (!remoteState) return;
+  const selectedPlayerId = state.selectedPlayerId ?? null;
+  const adminToken = state.id === remoteState.id ? state.adminToken ?? null : null;
+  isApplyingRemoteState = true;
+  const nextState = migrateState({
+    ...remoteState,
+    selectedPlayerId,
+  });
+  nextState.adminToken = adminToken;
+  state = nextState;
+  saveState({ remote: false });
+  connectRealtimeForCurrentState();
+  render();
+  isApplyingRemoteState = false;
+}
+
+async function createRemoteTournament() {
+  if (!isSupabaseReady()) return false;
+  const { data, error } = await supabaseClient.rpc("create_tournament", {
+    p_state: sanitizeSharedState(state),
+    p_admin_token: state.adminToken,
+  });
+  if (error) {
+    alert(`Supabase er konfigurert, men turneringen ble ikke lagret: ${error.message}`);
+    return false;
+  }
+  applyRemoteState({
+    ...data,
+    adminToken: state.adminToken,
+    selectedPlayerId: state.selectedPlayerId,
+  });
+  return true;
+}
+
+async function loadRemoteTournamentByInvite(inviteCode) {
+  if (!isSupabaseReady() || !inviteCode) return false;
+  const { data, error } = await supabaseClient.rpc("get_tournament_by_code", {
+    p_invite_code: inviteCode,
+  });
+  if (error || !data) return false;
+  applyRemoteState(data);
+  return true;
+}
+
+async function joinRemoteTournament(playerName, avatarId) {
+  if (!isSupabaseReady()) return false;
+  const player = createPlayer(playerName, state.players.length, avatarId);
+  player.joinedFrom = "self";
+  const { data, error } = await supabaseClient.rpc("join_tournament", {
+    p_invite_code: state.inviteCode,
+    p_player: player,
+  });
+  if (error) {
+    alert(`Kunne ikke melde deg på: ${error.message}`);
+    return false;
+  }
+  applyRemoteState(data);
+  return true;
+}
+
+function queueRemoteSave() {
+  if (!isSupabaseReady() || isApplyingRemoteState || !state.adminToken || !state.id) return;
+  window.clearTimeout(remoteSaveTimer);
+  remoteSaveTimer = window.setTimeout(saveRemoteState, 350);
+}
+
+async function saveRemoteState() {
+  if (!isSupabaseReady() || !state.adminToken || !state.id) return;
+  const { error } = await supabaseClient.rpc("save_tournament_state", {
+    p_tournament_id: state.id,
+    p_admin_token: state.adminToken,
+    p_state: sanitizeSharedState(state),
+  });
+  if (error) {
+    console.warn("Supabase sync failed", error);
+    elements.copyStatus.textContent = "Kunne ikke synkronisere live akkurat nå. Lokal kopi er lagret.";
+  }
+}
+
+function connectRealtimeForCurrentState() {
+  if (!isSupabaseReady() || !state.id) return;
+  if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
+  realtimeChannel = supabaseClient
+    .channel(`tournament:${state.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "tournaments",
+        filter: `id=eq.${state.id}`,
+      },
+      (payload) => {
+        if (payload.new?.state) applyRemoteState(payload.new.state);
+      },
+    )
+    .subscribe();
 }
 
 function exportBackup() {
@@ -639,7 +776,7 @@ function render() {
 }
 
 function syncConnectionStatus() {
-  elements.connectionStatus.textContent = navigator.onLine ? t("localPwa") : t("offline");
+  elements.connectionStatus.textContent = navigator.onLine ? (isSupabaseReady() ? "Live PWA" : t("localPwa")) : t("offline");
   elements.connectionStatus.classList.toggle("offline", !navigator.onLine);
 }
 

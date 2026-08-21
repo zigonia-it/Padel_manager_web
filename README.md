@@ -2,17 +2,19 @@
 
 Sist oppdatert: 2026-08-21
 
-Status: statisk webapp klar for første hostingtest
+Status: statisk webapp med Supabase live sync klar for første fler-enhetstest
 
-Padel Manager er en statisk webapp for å sette opp og følge en padelturnering på tvers av mobil, nettbrett og PC/Mac. Appen bruker foreløpig lokal nettleserlagring, men er strukturert slik at Supabase/realtime kan kobles på senere.
+Padel Manager er en statisk webapp for å sette opp og følge en padelturnering på tvers av mobil, nettbrett og PC/Mac. Appen kan kjøre lokalt uten backend, og bruker Supabase Realtime når `supabase-config.js` er fylt inn.
 
 ## Innhold
 
 - `index.html` - appstruktur og visninger
 - `styles.css` - responsivt design
-- `app.js` - lokal demo-logikk for turnering, spillere, runder, kamper og resultater
+- `app.js` - turneringslogikk, lokal fallback og Supabase live sync
 - `assets/` - logo, appikoner og Orbitron-font fra SwiftUI-prosjektet
 - `manifest.webmanifest` - start på PWA-oppsett
+- `supabase-config.js` - Supabase URL/nøkkel for live sync
+- `supabase_schema.sql` - databaseoppsett for delt turnering og realtime
 - `development_plan.md` - overordnet plan
 - `product_development.md` - samlet produktutviklingsdokument for webversjonen
 - `migration_notes.md` - notater om hva som bør porteres fra SwiftUI-appen
@@ -49,13 +51,33 @@ Direkte åpning av `index.html` fungerer også for grunnflyten, men lokal server
 
 ## Publisering
 
-Appen kan hostes som en ren statisk side. Last opp hele prosjektmappen, inkludert `assets/`, `manifest.webmanifest`, `service-worker.js`, `index.html`, `styles.css` og `app.js`.
+Appen kan hostes som en ren statisk side. Last opp hele prosjektmappen, inkludert `assets/`, `manifest.webmanifest`, `service-worker.js`, `supabase-config.js`, `index.html`, `styles.css` og `app.js`.
 
 Anbefalte førstevalg:
 
 1. GitHub Pages: bruk repoets hovedmappe som static site.
 2. Netlify: dra prosjektmappen inn som nytt statisk site, eller koble til GitHub-repoet.
 3. Cloudflare Pages: koble til GitHub-repoet, la build command stå tom, og sett output directory til `/`.
+
+## Supabase live sync
+
+For at flere enheter skal se samme turnering live:
+
+1. Opprett et Supabase-prosjekt.
+2. Åpne SQL Editor i Supabase.
+3. Kjør hele innholdet i `supabase_schema.sql`.
+4. Gå til Project Settings -> Data API / API.
+5. Kopier Project URL og anon/publishable key.
+6. Fyll inn `supabase-config.js`:
+
+```js
+window.PADEL_MANAGER_SUPABASE = {
+  url: "https://din-prosjekt-id.supabase.co",
+  anonKey: "din-anon-eller-publishable-key",
+};
+```
+
+Når configen er fylt inn, viser appen `Live PWA` i toppen. Admin-enheten oppretter turneringen og får lokal admin-token. Spillere og tilskuere kan åpne invite/QR-lenken fra egne enheter og se samme turnering via Supabase Realtime.
 
 ## Støttet nå
 
@@ -65,11 +87,10 @@ Anbefalte førstevalg:
 4. Poengføring bruker tennisstruktur med games, sett og valgbart antall sett for match.
 5. Admin kan føre poeng direkte eller sette resultat via popup.
 6. Tilskuermodus viser kompakte livekort for pågående kamper.
-7. Appen har PWA-manifest og service worker for første installasjonstest.
+7. Appen har PWA-manifest, service worker og Supabase live sync for første fler-enhetstest.
 
 ## Neste tekniske steg
 
-1. Koble datamodellen mot Supabase.
-2. Legge inn realtime-oppdateringer mellom enheter.
-3. Fullføre oversettelser for all dynamisk tekst.
-4. Splitte JavaScript-koden i mindre moduler når funksjonaliteten har stabilisert seg.
+1. Teste live sync på ekte telefoner etter at Supabase-config er fylt inn.
+2. Fullføre oversettelser for all dynamisk tekst.
+3. Splitte JavaScript-koden i mindre moduler når funksjonaliteten har stabilisert seg.
