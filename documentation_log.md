@@ -714,6 +714,32 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Kontrollere at Supabase migration er kjørt.
 - Teste live sync på publisert URL.
 
+## 2026-08-21 - Supabase migration kjørt
+
+### Gjort
+
+- Kjørte Supabase migration mot prosjektet `sxzlljxodorkfrjnwfgr`.
+- Brukte Supabase session pooler fordi direct database host ikke løste DNS.
+- Verifiserte `public.tournaments` via Supabase REST API.
+- Verifiserte `get_tournament_by_code` RPC-endepunktet via Supabase REST API.
+- Kjørte `supabase init` og la til lokal Supabase CLI-konfigurasjon.
+
+### Beslutninger
+
+- Databasepassord og connection string skal fortsatt ikke lagres i repo.
+- `supabase/config.toml` og `supabase/.gitignore` kan versjoneres fordi de ikke inneholder hemmeligheter.
+
+### Endrede filer
+
+- `documentation_log.md`
+- `supabase/config.toml`
+- `supabase/.gitignore`
+
+### Neste steg
+
+- Teste live sync gjennom publisert webapp.
+- Lage en testturnering og åpne samme invite på minst to enheter.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.
