@@ -826,6 +826,37 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste samme rolleflyt på publisert URL etter push.
 - Vurdere bedre visuell tekst rundt `Admin har lagt meg til`, for eksempel `Finn profilen min`.
 
+## 2026-08-21 - Mobilvisning for spillerfanen
+
+### Gjort
+
+- Skjulte invitasjonskodeboksen i workspace-header når aktiv fane er `Spiller` eller `Tilskuer`.
+- Beholder invitasjonskodeboksen på aktiv adminfane for ekte admin.
+- Oppdaterer rolle-/fanesynlighet direkte ved tabbytte, ikke bare ved full render.
+- Endret Service Worker fra cache-first til network-first for egne appfiler.
+- Bumpet Service Worker-cache til `padel-manager-v11`.
+
+### Testet
+
+- `node --check app.js`.
+- `node --check service-worker.js`.
+- Playwright lokal flyt:
+  - adminfanen viser invitasjonskodeboksen
+  - spillerfanen skjuler invitasjonskodeboksen
+  - tilskuerfanen skjuler invitasjonskodeboksen
+  - adminfanen får invitasjonskodeboksen tilbake
+  - non-admin får ikke adminfane eller invitasjonskodeboks
+
+### Endrede filer
+
+- `app.js`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Etter deploy: åpne live-siden på mobil og reload én gang slik ny Service Worker tar over.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

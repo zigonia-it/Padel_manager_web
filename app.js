@@ -72,6 +72,7 @@ const defaultTournament = createTournament({
 
 let state = loadState();
 let largeScoreMatchId = null;
+let activeView = "admin";
 const supabaseSettings = window.PADEL_MANAGER_SUPABASE ?? {};
 const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
   ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
@@ -734,12 +735,14 @@ function showWorkspace(tab = "admin") {
 
 function activateTab(view) {
   const requestedView = view === "admin" && !isCurrentUserAdmin() ? "player" : view;
+  activeView = requestedView;
   document.querySelectorAll(".tab").forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.view === requestedView);
   });
   document.querySelectorAll("[data-section]").forEach((section) => {
     section.classList.toggle("hidden", section.dataset.section !== requestedView);
   });
+  renderRoleVisibility();
 }
 
 function isCurrentUserAdmin() {
@@ -753,11 +756,7 @@ function hasTournamentForInvite(inviteCode, loadedRemote = false) {
 function renderRoleVisibility() {
   const isAdmin = isCurrentUserAdmin();
   elements.adminTab.classList.toggle("hidden", !isAdmin);
-  elements.headerShareBox.classList.toggle("hidden", !isAdmin);
-
-  if (!isAdmin && document.querySelector('[data-section="admin"]:not(.hidden)')) {
-    activateTab(state.selectedPlayerId ? "player" : "spectator");
-  }
+  elements.headerShareBox.classList.toggle("hidden", !isAdmin || activeView !== "admin");
 }
 
 function activateAdminPanel(panel) {

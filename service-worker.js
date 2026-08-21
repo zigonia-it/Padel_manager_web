@@ -1,4 +1,4 @@
-const cacheName = "padel-manager-v10";
+const cacheName = "padel-manager-v11";
 
 const appShell = [
   "./",
@@ -29,11 +29,16 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  if (new URL(event.request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-      return fetch(event.request).catch(() => {
+    fetch(event.request).then((response) => {
+      const responseToCache = response.clone();
+      caches.open(cacheName).then((cache) => cache.put(event.request, responseToCache));
+      return response;
+    }).catch(() => {
+      return caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
         if (event.request.mode === "navigate") return caches.match("./index.html");
         return Response.error();
       });
