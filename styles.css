@@ -1400,6 +1400,20 @@ h3 {
   backdrop-filter: blur(8px);
 }
 
+.site-footer {
+  padding: 10px 0 22px;
+  color: rgba(240, 232, 213, 0.62);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
 .score-dialog-surface {
   display: grid;
   gap: 16px;

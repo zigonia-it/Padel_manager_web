@@ -736,3 +736,19 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste faktisk publisering på valgt host.
 - Koble Supabase/realtime når lokal demo-flyt er godkjent.
 - Fullføre språkoversettelser for alle dynamiske tekster.
+
+## 2026-08-21 - Footer med copyright
+
+### Gjort
+
+- La til standard copyright-footer på nettsiden.
+- Årsspennet starter på 2026 og oppdateres automatisk til gjeldende år.
+- Bumpet Service Worker-cache til `padel-manager-v7`.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`

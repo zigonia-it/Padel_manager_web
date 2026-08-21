@@ -87,6 +87,7 @@ const elements = {
   joinNamePreview: document.querySelector("#joinNamePreview"),
   avatarPicker: document.querySelector("#avatarPicker"),
   languageSelect: document.querySelector("#languageSelect"),
+  copyrightYearRange: document.querySelector("#copyrightYearRange"),
   showExistingPlayersButton: document.querySelector("#showExistingPlayersButton"),
   existingPlayerList: document.querySelector("#existingPlayerList"),
   addPlayerForm: document.querySelector("#addPlayerForm"),
@@ -146,6 +147,7 @@ let pendingSetScoreMatchId = null;
 syncCreateFormDefaults();
 syncJoinPreview();
 prefillInviteCodeFromUrl();
+syncCopyrightYear();
 registerServiceWorker();
 syncConnectionStatus();
 
@@ -522,6 +524,13 @@ function registerServiceWorker() {
       elements.connectionStatus.textContent = "Lokal demo";
     });
   });
+}
+
+function syncCopyrightYear() {
+  if (!elements.copyrightYearRange) return;
+  const startYear = 2026;
+  const currentYear = new Date().getFullYear();
+  elements.copyrightYearRange.textContent = currentYear > startYear ? `${startYear}-${currentYear}` : `${startYear}`;
 }
 
 function isValidTournamentState(candidate) {
