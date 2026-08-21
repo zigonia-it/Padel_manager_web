@@ -793,6 +793,39 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste samme turnering fra admin-Mac og minst én mobil via publisert URL.
 - Opprette en testturnering og bekrefte at spiller-join og live oppdatering fungerer på tvers av enheter.
 
+## 2026-08-21 - Skjult adminflate for spillere
+
+### Gjort
+
+- Skjulte adminfanen for brukere uten gyldig lokal admin-token.
+- Skjulte invitasjonskodeboksen i arbeidsflaten for spillere og tilskuere.
+- Endret lagret non-admin-flyt slik den ikke viser `Fortsett som admin`.
+- Rettet migrering slik spillerkopier fra Supabase ikke får ny admin-token ved refresh.
+- Endret `Admin har lagt meg til` slik spilleren må fylle inn invitasjonskode først.
+- Avviser ukjent invitasjonskode før eksisterende spillerliste vises.
+- Bumpet Service Worker-cache til `padel-manager-v10`.
+
+### Testet
+
+- `node --check app.js`.
+- Playwright lokal flyt:
+  - tom invitasjonskode gir prompt
+  - non-admin får ikke adminfane
+  - non-admin får ikke invitasjonskode i workspace-header
+  - non-admin resume åpner spillerflate
+  - ukjent invitasjonskode avvises
+
+### Endrede filer
+
+- `app.js`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste samme rolleflyt på publisert URL etter push.
+- Vurdere bedre visuell tekst rundt `Admin har lagt meg til`, for eksempel `Finn profilen min`.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

@@ -103,6 +103,8 @@ const elements = {
   copyrightYearRange: document.querySelector("#copyrightYearRange"),
   showExistingPlayersButton: document.querySelector("#showExistingPlayersButton"),
   existingPlayerList: document.querySelector("#existingPlayerList"),
+  adminTab: document.querySelector('[data-view="admin"]'),
+  headerShareBox: document.querySelector(".workspace-header .share-box"),
   addPlayerForm: document.querySelector("#addPlayerForm"),
   courtSettingsForm: document.querySelector("#courtSettingsForm"),
   tournamentSettingsForm: document.querySelector("#tournamentSettingsForm"),
@@ -202,10 +204,10 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
   const playerName = formData.get("playerName").trim();
   const avatarId = formData.get("avatarId") || defaultAvatarId;
 
-  if (supabaseClient) await loadRemoteTournamentByInvite(inviteCode);
+  const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
 
-  if (inviteCode !== state.inviteCode) {
-    alert(`Fant ikke turnering med kode ${inviteCode}. Prøv ${state.inviteCode} i demoen.`);
+  if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
+    alert(`Fant ikke turnering med kode ${inviteCode}.`);
     return;
   }
 
@@ -339,7 +341,7 @@ elements.resetDemoButton.addEventListener("click", () => {
 });
 
 elements.resumeTournamentButton.addEventListener("click", () => {
-  showWorkspace("admin");
+  showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
   render();
 });
 
@@ -356,7 +358,21 @@ elements.copyJoinLinkButton.addEventListener("click", () => {
   copyText(createJoinLink(), "Join-lenken er kopiert.");
 });
 
-elements.showExistingPlayersButton.addEventListener("click", () => {
+elements.showExistingPlayersButton.addEventListener("click", async () => {
+  const inviteCode = elements.joinTournamentForm.elements.inviteCode.value.trim().toUpperCase();
+  if (!inviteCode) {
+    alert("Skriv inn invitasjonskoden først.");
+    elements.joinTournamentForm.elements.inviteCode.focus();
+    return;
+  }
+
+  const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
+
+  if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
+    alert(`Fant ikke turnering med kode ${inviteCode}.`);
+    return;
+  }
+
   elements.existingPlayerList.classList.toggle("hidden");
   renderExistingPlayerList();
 });
@@ -442,7 +458,7 @@ function migrateState(nextState) {
     ...defaultTournament.settings,
     ...(nextState.settings ?? {}),
   };
-  nextState.adminToken ??= crypto.randomUUID();
+  nextState.adminToken ??= null;
   nextState.selectedPlayerId ??= null;
   nextState.players ??= [];
   nextState.courts ??= structuredClone(defaultTournament.courts);
@@ -717,12 +733,31 @@ function showWorkspace(tab = "admin") {
 }
 
 function activateTab(view) {
+  const requestedView = view === "admin" && !isCurrentUserAdmin() ? "player" : view;
   document.querySelectorAll(".tab").forEach((tab) => {
-    tab.classList.toggle("active", tab.dataset.view === view);
+    tab.classList.toggle("active", tab.dataset.view === requestedView);
   });
   document.querySelectorAll("[data-section]").forEach((section) => {
-    section.classList.toggle("hidden", section.dataset.section !== view);
+    section.classList.toggle("hidden", section.dataset.section !== requestedView);
   });
+}
+
+function isCurrentUserAdmin() {
+  return Boolean(state.adminToken && localStorage.getItem(storageKey));
+}
+
+function hasTournamentForInvite(inviteCode, loadedRemote = false) {
+  return Boolean(inviteCode && inviteCode === state.inviteCode && (loadedRemote || localStorage.getItem(storageKey)));
+}
+
+function renderRoleVisibility() {
+  const isAdmin = isCurrentUserAdmin();
+  elements.adminTab.classList.toggle("hidden", !isAdmin);
+  elements.headerShareBox.classList.toggle("hidden", !isAdmin);
+
+  if (!isAdmin && document.querySelector('[data-section="admin"]:not(.hidden)')) {
+    activateTab(state.selectedPlayerId ? "player" : "spectator");
+  }
 }
 
 function activateAdminPanel(panel) {
@@ -738,6 +773,7 @@ function render() {
   const matches = getAllMatches();
   applyLanguage();
   renderStartResume();
+  renderRoleVisibility();
   elements.tournamentTitle.textContent = state.name;
   elements.roundLabel.textContent = `Runde ${Math.max(state.currentRound, 1)}`;
   elements.inviteCode.textContent = state.inviteCode;
@@ -799,8 +835,12 @@ function renderStartResume() {
   elements.resumePanel.classList.toggle("hidden", !hasSavedTournament);
   if (!hasSavedTournament) return;
 
+  const isAdmin = isCurrentUserAdmin();
   elements.resumeTitle.textContent = `Fortsett ${state.name}`;
-  elements.resumeSummary.textContent = `${state.players.length} spillere · ${state.courts.length} baner · kode ${state.inviteCode}`;
+  elements.resumeSummary.textContent = isAdmin
+    ? `${state.players.length} spillere · ${state.courts.length} baner · kode ${state.inviteCode}`
+    : `${state.players.length} spillere · ${state.courts.length} baner`;
+  elements.resumeTournamentButton.textContent = isAdmin ? "Fortsett som admin" : "Fortsett turnering";
 }
 
 function renderLobbyStatus() {
