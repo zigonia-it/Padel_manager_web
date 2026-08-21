@@ -60,6 +60,13 @@ Anbefalte førstevalg:
 2. Netlify: dra prosjektmappen inn som nytt statisk site, eller koble til GitHub-repoet.
 3. Cloudflare Pages: koble til GitHub-repoet, la build command stå tom, og sett output directory til `/`.
 
+Dette repoet har GitHub Pages-workflow i `.github/workflows/pages.yml`.
+Forventet Pages-adresse:
+
+```text
+https://zigonia-it.github.io/Padel_manager_web/
+```
+
 ## Supabase live sync
 
 For at flere enheter skal se samme turnering live:

@@ -740,6 +740,32 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Teste live sync gjennom publisert webapp.
 - Lage en testturnering og åpne samme invite på minst to enheter.
 
+## 2026-08-21 - GitHub Pages publisering
+
+### Gjort
+
+- La til GitHub Pages workflow for statisk deploy fra `main`.
+- La til `.nojekyll`.
+- Oppdaterte README med forventet GitHub Pages URL.
+
+### Beslutninger
+
+- GitHub Pages brukes som rask første hosting for mandagsklar test.
+- Supabase fortsetter som backend/live sync.
+
+### Endrede filer
+
+- `.github/workflows/pages.yml`
+- `.nojekyll`
+- `README.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Pushe workflowen til GitHub.
+- Kontrollere at GitHub Pages deployer.
+- Åpne live URL og teste Supabase live sync.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.
