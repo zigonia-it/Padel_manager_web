@@ -663,6 +663,33 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Kjøre `supabase_schema.sql`.
 - Fylle inn `supabase-config.js`.
 
+## 2026-08-21 - Supabase GitHub-migration struktur
+
+### Gjort
+
+- La til `supabase/migrations/20260821093000_initial_padel_manager.sql`.
+- Kopierte eksisterende Supabase-schema inn som første versjonerte migration.
+- La til `supabase/README.md` med working directory og migration-info.
+- Oppdaterte README med både manuell SQL Editor-flyt og GitHub/Supabase-migration-flyt.
+
+### Beslutninger
+
+- Rotfilen `supabase_schema.sql` beholdes for enkel manuell kjøring.
+- `supabase/migrations/` brukes når Supabase kobles til GitHub-repo.
+
+### Endrede filer
+
+- `README.md`
+- `documentation_log.md`
+- `supabase/README.md`
+- `supabase/migrations/20260821093000_initial_padel_manager.sql`
+
+### Neste steg
+
+- Pushe repoet til GitHub.
+- Velge repoet i Supabase.
+- Sette Supabase Working directory til `.`.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

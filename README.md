@@ -15,6 +15,7 @@ Padel Manager er en statisk webapp for å sette opp og følge en padelturnering 
 - `manifest.webmanifest` - start på PWA-oppsett
 - `supabase-config.js` - Supabase URL/nøkkel for live sync
 - `supabase_schema.sql` - databaseoppsett for delt turnering og realtime
+- `supabase/migrations/` - samme databaseoppsett som Supabase/GitHub migration
 - `development_plan.md` - overordnet plan
 - `product_development.md` - samlet produktutviklingsdokument for webversjonen
 - `migration_notes.md` - notater om hva som bør porteres fra SwiftUI-appen
@@ -64,11 +65,12 @@ Anbefalte førstevalg:
 For at flere enheter skal se samme turnering live:
 
 1. Opprett et Supabase-prosjekt.
-2. Åpne SQL Editor i Supabase.
-3. Kjør hele innholdet i `supabase_schema.sql`.
-4. Gå til Project Settings -> Data API / API.
-5. Kopier Project URL og anon/publishable key.
-6. Fyll inn `supabase-config.js`:
+2. Kjør databaseoppsettet på én av disse måtene:
+   - Manuelt: åpne SQL Editor og kjør hele `supabase_schema.sql`.
+   - GitHub: koble repoet til Supabase og bruk `supabase/migrations/`.
+3. Gå til Project Settings -> Data API / API.
+4. Kopier Project URL og anon/publishable key.
+5. Fyll inn `supabase-config.js`:
 
 ```js
 window.PADEL_MANAGER_SUPABASE = {
@@ -78,6 +80,12 @@ window.PADEL_MANAGER_SUPABASE = {
 ```
 
 Når configen er fylt inn, viser appen `Live PWA` i toppen. Admin-enheten oppretter turneringen og får lokal admin-token. Spillere og tilskuere kan åpne invite/QR-lenken fra egne enheter og se samme turnering via Supabase Realtime.
+
+Ved GitHub-integrasjon i Supabase:
+
+- Velg dette repoet.
+- Sett Working directory til `.`.
+- Supabase finner migration-filen under `supabase/migrations/`.
 
 ## Støttet nå
 
