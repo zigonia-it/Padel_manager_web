@@ -909,6 +909,39 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Teste på mobil ved å bli med som spiller på nytt eller velge eksisterende spillerprofil.
 
+## 2026-08-21 - Mobiltypografi og tryggere padding
+
+### Gjort
+
+- Byttet global brødtekst/småtekst fra Orbitron til systemfont for bedre lesbarhet.
+- Beholdt Orbitron som displayfont for overskrifter, knapper og kode-/brandpreg.
+- Reduserte mobilstørrelser på overskrifter, knapper, labels og hjelpetekst.
+- Endret appbredden til full viewport med trygg sidepadding, inkludert safe-area-støtte.
+- Strammet mobilpadding i paneler, startkort og statusbokser.
+- Endret mobil-H2 og hero-logo slik de tar mindre plass på smale skjermer.
+- Bumpet Service Worker-cache til `padel-manager-v12`.
+
+### Testet
+
+- `node --check app.js`.
+- `node --check service-worker.js`.
+- Playwright mobilbredde 360px:
+  - startside har `scrollWidth` lik viewportbredde
+  - spiller-workspace har `scrollWidth` lik viewportbredde
+  - ingen elementer går utenfor viewport
+  - body/hint bruker systemfont
+  - H2 bruker fortsatt Orbitron som displayfont
+
+### Endrede filer
+
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Kontrollere på iPhone/Safari etter deploy og en reload.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

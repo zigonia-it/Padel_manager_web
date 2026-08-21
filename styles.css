@@ -1,5 +1,7 @@
 :root {
   color-scheme: light;
+  --font-ui: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: Orbitron, var(--font-ui);
   --ink: #f7f1e4;
   --ink-dark: #16130e;
   --muted: #b8b0a2;
@@ -20,7 +22,7 @@
   --player-accent-dark: var(--gold-dark);
   --player-accent-rgb: 204, 148, 20;
   --shadow: 0 18px 52px rgba(0, 0, 0, 0.38);
-  font-family: Orbitron, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
 }
 
 @font-face {
@@ -42,8 +44,10 @@ body {
     radial-gradient(circle at 10% 105%, rgba(97, 107, 122, 0.16), transparent 28rem),
     linear-gradient(145deg, #181512 0%, #0f0f10 56%, #18130d 100%);
   color: var(--ink);
-  letter-spacing: 0.018em;
+  font-family: var(--font-ui);
+  letter-spacing: 0.006em;
   line-height: 1.5;
+  overflow-x: clip;
 }
 
 button,
@@ -54,13 +58,14 @@ select {
 }
 
 button {
+  font-family: var(--font-display);
   min-height: 44px;
   border: 0;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 800;
-  font-size: 0.98rem;
-  letter-spacing: 0.025em;
+  font-size: 0.94rem;
+  letter-spacing: 0.018em;
   line-height: 1.3;
   padding: 0.88rem 1rem;
 }
@@ -79,9 +84,9 @@ select {
   padding: 0.78rem 0.85rem;
   background: rgba(255, 255, 255, 0.07);
   color: var(--ink);
-  font-size: 0.96rem;
-  letter-spacing: 0.028em;
-  line-height: 1.62;
+  font-size: 1rem;
+  letter-spacing: 0.006em;
+  line-height: 1.5;
 }
 
 select {
@@ -107,9 +112,9 @@ label {
   display: grid;
   gap: 0.5rem;
   color: var(--silver-light);
-  font-size: 0.96rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  letter-spacing: 0.028em;
+  letter-spacing: 0.01em;
   line-height: 1.5;
 }
 
@@ -122,16 +127,16 @@ fieldset {
 legend {
   margin-bottom: 0.58rem;
   color: var(--silver-light);
-  font-size: 0.96rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  letter-spacing: 0.028em;
+  letter-spacing: 0.01em;
   line-height: 1.5;
 }
 
 .app-shell {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 24px 0 42px;
+  padding: 24px max(16px, env(safe-area-inset-right)) 42px max(16px, env(safe-area-inset-left));
 }
 
 .topbar,
@@ -192,6 +197,7 @@ p {
 }
 
 h1 {
+  font-family: var(--font-display);
   font-size: clamp(1.65rem, 3vw, 2.6rem);
   font-weight: 800;
   letter-spacing: 0.018em;
@@ -199,6 +205,7 @@ h1 {
 }
 
 h2 {
+  font-family: var(--font-display);
   max-width: 740px;
   font-size: clamp(1.9rem, 3.85vw, 3.45rem);
   font-weight: 800;
@@ -207,6 +214,7 @@ h2 {
 }
 
 h3 {
+  font-family: var(--font-display);
   font-size: 1.08rem;
   font-weight: 800;
   letter-spacing: 0.018em;
@@ -214,6 +222,7 @@ h3 {
 }
 
 .eyebrow {
+  font-family: var(--font-display);
   color: var(--gold-light);
   font-size: 0.82rem;
   font-weight: 900;
@@ -247,12 +256,13 @@ h3 {
 .share-box span,
 .hint {
   color: var(--muted);
-  font-size: 0.94rem;
-  letter-spacing: 0.022em;
-  line-height: 1.65;
+  font-size: 0.9rem;
+  letter-spacing: 0.006em;
+  line-height: 1.58;
 }
 
 .share-box strong {
+  font-family: var(--font-display);
   font-size: 1.45rem;
   letter-spacing: 0.06em;
   line-height: 1.15;
@@ -274,7 +284,7 @@ h3 {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.006em;
   line-height: 1.45;
 }
 
@@ -298,7 +308,7 @@ h3 {
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.055);
   color: var(--gold-light);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   text-align: center;
 }
 
@@ -340,12 +350,13 @@ h3 {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.022em;
   line-height: 1.45;
   text-transform: uppercase;
 }
 
 .share-details strong {
+  font-family: var(--font-display);
   color: var(--gold-light);
   font-size: clamp(1.7rem, 4vw, 2.45rem);
   letter-spacing: 0.12em;
@@ -416,9 +427,9 @@ h3 {
 .intro p:not(.eyebrow) {
   max-width: 620px;
   color: var(--muted);
-  font-size: 1.02rem;
-  letter-spacing: 0.018em;
-  line-height: 1.82;
+  font-size: 1rem;
+  letter-spacing: 0.006em;
+  line-height: 1.65;
 }
 
 .intro-copy {
@@ -1548,8 +1559,44 @@ h3 {
 
 @media (max-width: 760px) {
   .app-shell {
-    width: min(100% - 20px, 1180px);
-    padding-top: 14px;
+    width: min(1180px, 100%);
+    padding: 14px max(18px, env(safe-area-inset-right)) 34px max(18px, env(safe-area-inset-left));
+  }
+
+  body {
+    font-size: 0.96rem;
+  }
+
+  h1 {
+    font-size: clamp(1.35rem, 7vw, 2rem);
+    line-height: 1.12;
+  }
+
+  h2 {
+    font-size: clamp(1.45rem, 7vw, 2.1rem);
+    line-height: 1.16;
+  }
+
+  h3 {
+    font-size: 1rem;
+  }
+
+  button {
+    font-size: 0.9rem;
+    padding: 0.76rem 0.86rem;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 0.98rem;
+    padding: 0.7rem 0.76rem;
+  }
+
+  label,
+  legend,
+  .hint {
+    font-size: 0.88rem;
   }
 
   .topbar,
@@ -1571,6 +1618,17 @@ h3 {
   .brand-lockup {
     width: 100%;
     align-items: center;
+    gap: 10px;
+  }
+
+  .brand-mark {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+  }
+
+  .language-picker {
+    min-width: 0;
   }
 
   .share-box {
@@ -1579,8 +1637,9 @@ h3 {
 
   .intro {
     grid-template-columns: 1fr;
-    min-height: 390px;
-    padding: 24px;
+    min-height: auto;
+    gap: 20px;
+    padding: 20px;
   }
 
   .hero-logo {
@@ -1590,6 +1649,7 @@ h3 {
   .action-grid,
   .view-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .resume-panel {
@@ -1625,6 +1685,7 @@ h3 {
 
   .tabs {
     grid-template-columns: 1fr;
+    gap: 6px;
   }
 
   .admin-subtabs {
@@ -1664,13 +1725,34 @@ h3 {
 
 @media (max-width: 430px) {
   .app-shell {
-    width: min(100% - 14px, 1180px);
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-left: max(16px, env(safe-area-inset-left));
   }
 
   .intro,
   .panel,
   .next-match {
-    padding: 16px;
+    padding: 14px;
+  }
+
+  .topbar,
+  .workspace-header {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .panel,
+  .next-match {
+    gap: 14px;
+  }
+
+  .status-pill,
+  .share-box,
+  .join-preview,
+  .share-details > div,
+  .status-grid > div,
+  .round-summary > div {
+    padding: 0.65rem 0.68rem;
   }
 
   .avatar-picker,
@@ -1686,6 +1768,20 @@ h3 {
   }
 
   h2 {
-    font-size: 1.65rem;
+    font-size: 1.42rem;
+  }
+
+  .eyebrow,
+  .language-picker span {
+    font-size: 0.68rem;
+    letter-spacing: 0.035em;
+  }
+
+  .share-box strong {
+    font-size: 1.22rem;
+  }
+
+  .hero-logo {
+    width: min(62vw, 220px);
   }
 }
