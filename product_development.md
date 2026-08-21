@@ -680,7 +680,22 @@ Cup skal ikke inn i første web-MVP med mindre round-robin er stabil.
 - UserDefaults/Documents/iCloud -> localStorage/IndexedDB/Supabase
 - StoreKit/Pro -> ut av MVP
 - native notifications -> Web Push
-- Swift localization -> enkel norsk/engelsk først, senere i18n
+- Swift localization -> `translations.js` med `nb`, `nn`, `en`, `t(key, values)` og fallback til bokmål
+
+### 16.2.1 Språkstruktur
+
+Språk skal håndteres med et eget tekstbibliotek, ikke hardkodede tekststrenger spredt utover appkoden.
+
+Målstruktur:
+
+- `translations.js` eier tekstene.
+- `app.js` henter tekst med `t("tekstNokkel")`.
+- Tekster med verdier bruker `t("playersReady", { count })`.
+- Valgt språk hentes fra `state.settings.language`.
+- Hvis en tekst mangler på valgt språk, faller appen tilbake til bokmål.
+- Hardkodet tekst flyttes gradvis ut av `index.html` og `app.js` etter hvert som UI-et stabiliseres.
+
+Dette ligner en dictionary/oppslagstabell fra Python, og er mer ryddig enn `if/elif/else` for hver tekst.
 
 ### 16.3 Erstatt
 
@@ -880,8 +895,8 @@ Produktdokumentet er primært basert på:
 
 1. Skal første publisering være Vercel eller Netlify?
 2. Skal vi beholde ren HTML/CSS/JS litt til, eller gå tidlig til Vite?
-3. Skal Supabase kobles inn før eller etter lokal MVP er mer komplett?
-4. Skal webversjonen starte med bare norsk, eller norsk/engelsk?
+3. Supabase kobles inn som mandagsklar fler-enhetsbackend, med lokal fallback.
+4. Webversjonen skal støtte bokmål, nynorsk og engelsk via `translations.js`.
 5. Skal spillere som melder seg på med navn automatisk godkjennes, eller skal admin godkjenne før de er aktive?
 6. Skal MVP-avatarer være abstrakte ikoner, padel-relaterte figurer, initialer med farger, eller en blanding?
 6. Skal administrator-token være lokal hemmelighet i MVP, eller kreve enkel konto?
@@ -891,13 +906,11 @@ Produktdokumentet er primært basert på:
 
 Anbefalt rekkefølge:
 
-1. Splitte `app.js` i moduler.
-2. Lage `docs/` i webprosjektet med dette dokumentet som startpunkt.
-3. Lage små tester for scheduler og leaderboard.
-4. Forbedre lokal adminflyt.
-5. Forbedre personlig spillervisning.
-6. Klargjøre første publiserbare demo.
-7. Koble Supabase.
+1. Opprette Supabase-prosjekt, kjøre `supabase_schema.sql` og fylle inn `supabase-config.js`.
+2. Teste live sync med admin + minst to telefoner.
+3. Flytte hardkodet tekst til `translations.js`.
+4. Lage små tester for scheduler og leaderboard.
+5. Splitte `app.js` i moduler når flyten er stabil.
 
 ## 23. Arbeidsregel for Videre Utvikling
 

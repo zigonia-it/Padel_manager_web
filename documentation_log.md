@@ -636,6 +636,33 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Fylle inn `supabase-config.js`.
 - Teste admin + minst to telefoner på live URL.
 
+## 2026-08-21 - Plan for språkstruktur
+
+### Gjort
+
+- La inn beslutning om språkarkitektur i `development_plan.md`.
+- Oppdaterte `product_development.md` med `translations.js`, `t(key, values)` og fallback til bokmål.
+- Presiserte at bokmål, nynorsk og engelsk skal håndteres via tekstbibliotek, ikke `if/else` for hver tekst.
+- Oppdaterte neste konkrete arbeid slik Supabase-oppsett og live test kommer før full språkflytting.
+
+### Beslutninger
+
+- Appen skal etter hvert hente all visningstekst fra `translations.js`.
+- Hardkodet tekst flyttes gradvis når UI-flyten er stabil nok.
+- Manglende oversettelser skal falle tilbake til bokmål.
+
+### Endrede filer
+
+- `development_plan.md`
+- `product_development.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Opprette Supabase-prosjekt.
+- Kjøre `supabase_schema.sql`.
+- Fylle inn `supabase-config.js`.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

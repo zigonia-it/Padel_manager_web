@@ -241,7 +241,22 @@ Eksempel på ønsket join-lenke:
 padelmanager.no/join/P4K7D
 ```
 
-## 11. Live-Oppdateringer
+## 11. Språk og Tekststruktur
+
+Appen skal bruke en enkel i18n-struktur i JavaScript.
+
+Planlagt løsning:
+
+- opprette `translations.js`
+- samle tekster i én struktur per språk: `nb`, `nn`, `en`
+- hente tekst med `t("tekstNokkel")`
+- støtte variabler med `t("playersReady", { count: 8 })`
+- bruke bokmål (`nb`) som fallback hvis tekst mangler på nynorsk eller engelsk
+- flytte hardkodet tekst gradvis ut av `index.html` og `app.js`
+
+Dette tilsvarer en dictionary/oppslagstabell, ikke mange `if/else`-blokker. Målet er at appkoden skal beskrive funksjon, mens `translations.js` eier visningsteksten.
+
+## 12. Live-Oppdateringer
 
 Alle enheter bør oppdateres automatisk når:
 
@@ -255,7 +270,7 @@ Alle enheter bør oppdateres automatisk når:
 
 MVP kan starte lokalt, men arkitekturen skal være klar for Supabase Realtime.
 
-## 12. Offline og Recovery
+## 13. Offline og Recovery
 
 MVP:
 
@@ -270,7 +285,7 @@ Senere:
 - synk når nett kommer tilbake
 - restore fra siste kjente gode turneringsstatus
 
-## 13. Publisering
+## 14. Publisering
 
 Aktuelle publiseringsspor:
 
@@ -287,7 +302,7 @@ Krav før publisering:
 - fungerende join-flyt
 - enkel personverntekst for webversjonen
 
-## 14. Utviklingsrekkefølge
+## 15. Utviklingsrekkefølge
 
 1. Rydde dokumentasjon og prosjektstruktur.
 2. Lage lobby og join-flyt.
@@ -302,7 +317,7 @@ Krav før publisering:
 11. Forbedre PWA-oppsett.
 12. Publisere første demo.
 
-## 15. Arbeidsregel
+## 16. Arbeidsregel
 
 Etter hver tydelige arbeidsøkt skal `documentation_log.md` oppdateres med:
 
