@@ -974,6 +974,47 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Kontrollere på iPhone/Safari etter deploy og reload.
 
+## 2026-08-21 - Oxanium som norsk-sikker UI-font
+
+### Gjort
+
+- La til `Oxanium-VariableFont_wght.ttf` i `assets/fonts/`.
+- Endret hovedfonten fra systemfont til Oxanium.
+- Beholdt Orbitron som fallback/displayfont for brand-H1.
+- La Oxanium inn i Service Worker app shell.
+- Bumpet Service Worker-cache til `padel-manager-v14`.
+
+### Beslutning
+
+- Oxanium brukes som UI-font fordi den har et firkantet, futuristisk uttrykk som passer bedre med Padel Manager-designet enn ren systemfont, samtidig som den støtter norsk tekst uten synlig fallback.
+
+### Kilder
+
+- Google Fonts metadata beskriver Oxanium som en square/futuristic display typeface med vektakse 200-800.
+- Google Fonts/metadata viser `latin` og `latin-ext` subsets.
+- Typographer viser norsk språkstøtte og tegnkart med `Æ`, `Ø`, `Å`, `æ`, `ø` og `å`.
+
+### Testet
+
+- `node --check service-worker.js`.
+- Playwright mobilbredde 360px:
+  - Oxanium lastes i browseren
+  - `document.fonts.check` er true for `Risløkka æøå ÆØÅ`
+  - H2 og aktiv tab bruker Oxanium
+  - brand-H1 bruker fortsatt Orbitron
+  - ingen horisontal overflow
+
+### Endrede filer
+
+- `assets/fonts/Oxanium-VariableFont_wght.ttf`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Kontrollere på iPhone/Safari etter deploy og reload.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

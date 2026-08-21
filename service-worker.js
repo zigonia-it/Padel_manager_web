@@ -1,4 +1,4 @@
-const cacheName = "padel-manager-v13";
+const cacheName = "padel-manager-v14";
 
 const appShell = [
   "./",
@@ -11,6 +11,7 @@ const appShell = [
   "./assets/icons/appicon-256.png",
   "./assets/icons/appicon-512.png",
   "./assets/fonts/Orbitron-VariableFont_wght.ttf",
+  "./assets/fonts/Oxanium-VariableFont_wght.ttf",
 ];
 
 self.addEventListener("install", (event) => {
