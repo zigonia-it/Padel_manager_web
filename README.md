@@ -1,5 +1,7 @@
 # Padel Manager Web
 
+Live app: https://zigonia-it.github.io/Padel_manager_web/
+
 Sist oppdatert: 2026-08-21
 
 Status: statisk webapp med Supabase live sync klar for første fler-enhetstest
