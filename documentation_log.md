@@ -690,6 +690,30 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Velge repoet i Supabase.
 - Sette Supabase Working directory til `.`.
 
+## 2026-08-21 - Supabase project config
+
+### Gjort
+
+- Fylte inn Supabase Project URL i `supabase-config.js`.
+- Fylte inn Supabase publishable key i `supabase-config.js`.
+- Bumpet Service Worker-cache til `padel-manager-v9`.
+
+### Beslutninger
+
+- Frontend bruker publishable key.
+- Database connection string/passord skal ikke legges i repo eller frontend.
+
+### Endrede filer
+
+- `supabase-config.js`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Kontrollere at Supabase migration er kjørt.
+- Teste live sync på publisert URL.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.
