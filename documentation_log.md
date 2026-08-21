@@ -766,6 +766,33 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Kontrollere at GitHub Pages deployer.
 - Åpne live URL og teste Supabase live sync.
 
+## 2026-08-21 - Publisert webapp verifisert
+
+### Gjort
+
+- Aktiverte GitHub Pages med GitHub Actions som kilde i repo-innstillingene.
+- Trigget ny deploy fra `main`.
+- Verifiserte at GitHub Actions-runnen for `d46df59` fullførte med `success`.
+- Verifiserte at `https://zigonia-it.github.io/Padel_manager_web/` svarer med `200`.
+- Verifiserte at `supabase-config.js` serveres fra GitHub Pages.
+- Verifiserte at live Supabase REST API svarer mot `public.tournaments`.
+- Oppdaterte README slik neste steg handler om ekte fler-enhetstest, ikke utfylling av config.
+
+### Beslutninger
+
+- GitHub Pages er valgt som første publiserte hosting for mandagstest.
+- Supabase-prosjektet brukes som live backend for turneringsdata.
+
+### Endrede filer
+
+- `README.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Teste samme turnering fra admin-Mac og minst én mobil via publisert URL.
+- Opprette en testturnering og bekrefte at spiller-join og live oppdatering fungerer på tvers av enheter.
+
 ### Neste steg
 
 - Teste hele flyten visuelt på mobil og desktop.

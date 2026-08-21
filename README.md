@@ -106,6 +106,6 @@ Ved GitHub-integrasjon i Supabase:
 
 ## Neste tekniske steg
 
-1. Teste live sync på ekte telefoner etter at Supabase-config er fylt inn.
+1. Teste live sync på ekte telefoner via publisert GitHub Pages-adresse.
 2. Fullføre oversettelser for all dynamisk tekst.
 3. Splitte JavaScript-koden i mindre moduler når funksjonaliteten har stabilisert seg.
