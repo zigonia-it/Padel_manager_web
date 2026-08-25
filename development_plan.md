@@ -1,8 +1,57 @@
 # Padel Manager Web - Utviklingsplan
 
-Sist oppdatert: 2026-08-21
+Sist oppdatert: 2026-08-26
 
 Status: aktivt arbeidsdokument for plan og gjennomføring
+
+## 0. Førsteprioritet: Responsiv UI-opprydding etter ny designretning
+
+Før neste funksjonsrunde skal grensesnittet ryddes opp slik at det nye Padel Manager-designet fungerer på PC, iPad og telefon.
+
+Bakgrunn: `landing_page.jpg` er designfasit for forsiden, og skjermbilder fra admin-, spiller- og tilskuervisning viser at appvisningene foreløpig har for store nav-elementer, overlappende rollelabels og ujevn skalering på store skjermer.
+
+Målet er å beholde den nye mørk/gull-retningen, men gjøre den praktisk og responsiv i hele appen.
+
+Arbeidsliste:
+
+1. Redusere og normalisere toppnavigasjonen i appvisningene.
+   - Menyen skal være fast og flytende over UI-et.
+   - På PC skal menyen være lesbar uten å dominere innholdet.
+   - På telefon og iPad i stående modus skal menyen være hamburger.
+   - Rollelabels som `Admin`, `Spiller` og `Tilskuer` må ikke overlappe hovedmenytekst.
+2. Lage tydelige responsive regler for tre hovedflater:
+   - PC/desktop
+   - iPad/nettbrett, både liggende og stående
+   - telefon
+3. Justere arbeidsvisningene etter ny stil:
+   - adminpanel
+   - spillervisning
+   - tilskuervisning
+   - tabell
+   - kampkort
+   - regler/deling/lobby
+4. Bruke designassetene konsekvent:
+   - `menu_highlight.png` som aktiv markør i menyvalg.
+   - `button.png` som utgangspunkt for primære knapper.
+   - `padel_manager_button.png` som Padel Manager-badge nederst til høyre på forsiden.
+   - `padel_manager logo_1x.png` som hovedlogo.
+   - `bg_img.png` som kodet bakgrunn, ikke `landing_page.jpg` som flatt bilde.
+5. Beholde spillerfarger.
+   - Spillerbadges skal fortsatt vise individuelle farger.
+   - Ny badge-stil skal bare gi mer glossy/brandet uttrykk, ikke fjerne fargekodingen.
+6. Fikse appvisningene fra vedlagte skjermbilder:
+   - unngå ekstremt store tab-/nav-tekster
+   - fjerne overlapp mellom menyvalg og rollelabels
+   - sikre at invitasjonskodekort og toppheader ikke kolliderer
+   - sørge for at store kort og lister får god bredde og avstand
+7. Verifisere visuelt med Playwright før commit:
+   - desktop ca. 1440 x 900
+   - iPad portrait ca. 820 x 1180
+   - mobil ca. 390 x 844
+   - minst én admin-, spiller- og tilskuervisning
+   - hamburger åpen/lukket
+   - smooth scroll fra meny og `Get Started`
+   - konsoll uten errors/warnings
 
 ## 1. Formål
 
@@ -193,14 +242,19 @@ Detaljert datamodell ligger i `product_development.md`.
 
 ## 8. Visuell Retning
 
-Webappen skal videreføre uttrykket fra SwiftUI-prosjektet:
+Webappen skal videreføre Padel Manager-identiteten og den nye landing page-retningen:
 
-- Padel Manager-logo
-- appikoner
+- `landing_page.jpg` brukes som visuell referanse, ikke som flatt UI-bilde
+- `bg_img.png` brukes som kodet bakgrunn
+- `padel_manager logo_1x.png` brukes som hovedlogo
+- `padel_manager_button.png` brukes som bunnbadge/logo der det passer
+- `button.png` brukes som utgangspunkt for primære knapper
+- `menu_highlight.png` brukes som utgangspunkt for aktive menyvalg og hamburgerstreker
 - Orbitron-font
 - mørk sports-/premiumfølelse
 - gull som primæraksent
 - sølv/grå som sekundæraksent
+- spillerfarger beholdes som funksjonell identifikasjon
 - tydelige glasskort
 - lesbar liten tekst i nettleser
 
@@ -304,18 +358,19 @@ Krav før publisering:
 
 ## 15. Utviklingsrekkefølge
 
-1. Rydde dokumentasjon og prosjektstruktur.
-2. Lage lobby og join-flyt.
-3. Legge inn navn og avatar ved påmelding.
-4. Vise påmeldte spillere hos administrator.
-5. Legge inn QR-kode.
-6. Splitte `app.js` i moduler.
-7. Lage tester for kampgenerator og tabell.
-8. Koble til Supabase.
-9. Legge inn realtime-oppdateringer.
-10. Lage admin-, spiller- og tilskuervisning.
-11. Forbedre PWA-oppsett.
-12. Publisere første demo.
+1. Fullføre responsiv UI-opprydding etter ny `landing_page.jpg`-basert designretning.
+2. Rydde dokumentasjon og prosjektstruktur.
+3. Lage lobby og join-flyt.
+4. Legge inn navn og avatar ved påmelding.
+5. Vise påmeldte spillere hos administrator.
+6. Legge inn QR-kode.
+7. Splitte `app.js` i moduler.
+8. Lage tester for kampgenerator og tabell.
+9. Koble til Supabase.
+10. Legge inn realtime-oppdateringer.
+11. Lage admin-, spiller- og tilskuervisning.
+12. Forbedre PWA-oppsett.
+13. Publisere første demo.
 
 ## 16. Arbeidsregel
 

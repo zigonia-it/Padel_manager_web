@@ -1,6 +1,6 @@
 # Padel Manager Web - Produktutviklingsdokument
 
-Sist oppdatert: 2026-08-21
+Sist oppdatert: 2026-08-26
 
 Status: aktivt arbeidsdokument for web/PWA-versjonen
 
@@ -45,6 +45,7 @@ For et hobbyprosjekt og en turneringsapp som skal brukes av mange spillere på f
 5. Domenelogikken fra SwiftUI-appen skal bevares der den er god.
 6. Arkitekturen skal starte modulært, slik at webappen ikke får samme "God Object"-problem som `SessionManager` i SwiftUI-appen.
 7. Første versjon skal være enkel nok til å ferdigstilles.
+8. Det visuelle uttrykket skal være kodet responsivt, ikke avhenge av flate designbilder som UI.
 
 ## 4. Målgrupper og Roller
 
@@ -211,7 +212,31 @@ MVP skal være den første fungerende webversjonen som kan brukes i en ekte lite
 - tabell/ranking
 - enkel lokal lagring
 - grunnleggende responsive layout
-- Padel Manager-logo, ikoner, Orbitron-font og gull/sølv-fargeprofil
+- Padel Manager-logo, ikoner, Orbitron-font og mørk/gull-fargeprofil basert på ny landing page-retning
+
+### 6.1.1 Visuell MVP-Retning
+
+`landing_page.jpg` er visuell fasit for forsiden, men selve appen skal bygges som ekte HTML/CSS.
+
+Forsiden skal ha:
+
+- fullskjerm hero med mørkt padel-bilde i bakgrunnen
+- stor sentrert Padel Manager-logo
+- fast/flytende toppmeny
+- `Get Started`-knapp i gullstil
+- `No App Needed` under CTA
+- Zigonia-logo nederst til venstre
+- Padel Manager-badge nederst til høyre
+- tydelig hint om at opprett/bli med-skjemaene ligger under heroen
+
+Appvisningene skal følge samme retning, men være praktiske arbeidsflater:
+
+- mindre, lesbar og ikke-overlappende navigasjon
+- tydelige kort med mørk glassfølelse og gullrammer
+- knapper som bygger på `button.png`
+- aktiv menyindikator basert på `menu_highlight.png`
+- individuelle spillerfarger beholdes i badges, tabell, kampkort og status
+- telefon og iPad i stående modus bruker hamburgernavigasjon
 
 ### 6.2 Ikke i første MVP
 

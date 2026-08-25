@@ -1,13 +1,21 @@
-const cacheName = "padel-manager-v14";
+const cacheName = "padel-manager-v19";
 
 const appShell = [
   "./",
   "./index.html",
-  "./styles.css",
+  "./styles.css?v=landing-coded-3",
   "./app.js",
   "./supabase-config.js",
   "./manifest.webmanifest",
+  "./assets/favicon.jpg",
   "./assets/padel-manager-logo.png",
+  "./assets/New assets/bg_img.png",
+  "./assets/New assets/menu_highlight.png",
+  "./assets/New assets/menu_style.png",
+  "./assets/New assets/button.png",
+  "./assets/New assets/padel_manager logo_1x.png",
+  "./assets/New assets/padel_manager_button.png",
+  "./assets/New assets/zigonia_developer_logo.png",
   "./assets/icons/appicon-256.png",
   "./assets/icons/appicon-512.png",
   "./assets/fonts/Orbitron-VariableFont_wght.ttf",

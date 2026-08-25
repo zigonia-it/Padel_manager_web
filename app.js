@@ -157,6 +157,8 @@ const elements = {
   setScoreContext: document.querySelector("#setScoreContext"),
   setScoreOptions: document.querySelector("#setScoreOptions"),
   closeSetScoreButton: document.querySelector("#closeSetScoreButton"),
+  landingMenuToggle: document.querySelector(".landing-menu-toggle"),
+  landingLinks: document.querySelector("#landingLinks"),
 };
 
 let pendingSetScoreMatchId = null;
@@ -405,6 +407,40 @@ document.querySelectorAll(".subtab").forEach((tab) => {
 document.querySelectorAll(".tab").forEach((tab) => {
   tab.addEventListener("click", () => activateTab(tab.dataset.view));
 });
+
+document.querySelectorAll(".landing-links a, .landing-cta").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    const targetId = link.getAttribute("href");
+    if (!targetId?.startsWith("#")) return;
+    const target = document.querySelector(targetId);
+    if (!target) return;
+
+    event.preventDefault();
+    document.querySelectorAll(".landing-links a").forEach((navLink) => {
+      const isClickedNavLink = navLink === link;
+      const isCtaTarget = link.classList.contains("landing-cta") && navLink.textContent.trim() === "Admin";
+      navLink.classList.toggle("active", isClickedNavLink || isCtaTarget);
+    });
+    closeLandingMenu();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+});
+
+elements.landingMenuToggle?.addEventListener("click", () => {
+  const isOpen = document.body.classList.toggle("landing-menu-open");
+  elements.landingMenuToggle.setAttribute("aria-expanded", String(isOpen));
+  elements.landingMenuToggle.setAttribute("aria-label", isOpen ? "Lukk meny" : "Åpne meny");
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeLandingMenu();
+});
+
+function closeLandingMenu() {
+  document.body.classList.remove("landing-menu-open");
+  elements.landingMenuToggle?.setAttribute("aria-expanded", "false");
+  elements.landingMenuToggle?.setAttribute("aria-label", "Åpne meny");
+}
 
 function createTournament({ name, inviteCode, players, courtCount }) {
   const tournamentPlayers = players.map((playerName, index) => createPlayer(playerName, index, defaultAvatarId));
@@ -729,11 +765,13 @@ function prefillJoinForm(inviteCode) {
 }
 
 function showStart() {
+  document.body.classList.remove("workspace-active");
   elements.startView.classList.remove("hidden");
   elements.workspaceView.classList.add("hidden");
 }
 
 function showWorkspace(tab = "admin") {
+  document.body.classList.add("workspace-active");
   elements.startView.classList.add("hidden");
   elements.workspaceView.classList.remove("hidden");
   activateTab(tab);

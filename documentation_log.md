@@ -1,12 +1,66 @@
 # Padel Manager Web - Dokumentasjonslogg
 
-Sist oppdatert: 2026-08-21
+Sist oppdatert: 2026-08-26
 
 Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padel Manager Web.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
+
+## 2026-08-26 - Ny landing page-retning og responsiv UI-plan
+
+### Gjort
+
+- La inn nye designassets i prosjektet og committet dem separat tidligere som `20bebf4 Add new design assets`.
+- Brukte `landing_page.jpg` som designreferanse for en kodet forside i HTML/CSS.
+- Bygget en ny landing hero med:
+  - mørkt padel-bakgrunnsbilde fra `bg_img.png`
+  - stor Padel Manager-logo fra `padel_manager logo_1x.png`
+  - flytende toppmeny
+  - gull `Get Started`-knapp
+  - `No App Needed`-tekst
+  - Zigonia-logo nederst til venstre
+  - Padel Manager-badge fra `padel_manager_button.png` nederst til høyre
+- La inn smooth scroll fra landingmeny og CTA til riktig seksjon.
+- La inn hamburgernavigasjon for telefon og iPad i stående modus.
+- Oppdaterte knapper mot uttrykket i `button.png`.
+- Beholdt individuelle spillerfarger i spillerbadges etter tilbakemelding.
+- Oppdaterte service worker-cacheversjon og assetliste for nye CSS/assets.
+- Dokumenterte en ny førsteprioritet i `development_plan.md` for å rydde opp i responsiv UI etter skjermbildene fra admin-, spiller- og tilskuervisning.
+
+### Beslutninger
+
+- `landing_page.jpg` skal være designfasit, men ikke brukes som flatt UI-bilde.
+- Forsiden skal bygges av ekte, responsive HTML/CSS-elementer.
+- `bg_img.png`, `padel_manager logo_1x.png`, `menu_highlight.png`, `button.png` og `padel_manager_button.png` er hovedassets for ny designretning.
+- Spillerfarger er funksjonelle og skal beholdes, også når badges får ny visuell stil.
+- Før neste funksjonsarbeid skal appvisningene ryddes opp visuelt og responsivt.
+
+### Observerte problemer
+
+- Desktop/appvisningene har for store toppnav-/tabtekster i enkelte bredder.
+- Rollelabels kan overlappe hovedmenytekst.
+- Admin-, spiller- og tilskuervisning trenger bedre skalering, avstand og kortstruktur.
+- Invitasjonskodekort og toppheader må verifiseres på desktop og nettbrett.
+
+### Endrede filer
+
+- `index.html`
+- `styles.css`
+- `app.js`
+- `service-worker.js`
+- `development_plan.md`
+- `product_development.md`
+- `documentation_log.md`
+- `README.md`
+
+### Neste steg
+
+- Gjennomføre førsteprioriteten i `development_plan.md`.
+- Teste desktop, iPad portrait/landscape og mobil med Playwright.
+- Verifisere admin-, spiller- og tilskuervisning etter UI-oppryddingen.
+- Lage commit når UI-et er ryddet og dokumentasjonen stemmer.
 
 ## 2026-08-21 - Første webutkast og produktretning
 

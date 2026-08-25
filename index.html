@@ -3,22 +3,22 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#121212">
+    <meta name="theme-color" content="#080706">
     <meta
       name="description"
       content="Padel Manager hjelper administratorer og spillere med turneringer, kamper, baner og resultater."
     >
     <title>Padel Manager</title>
     <link rel="manifest" href="manifest.webmanifest">
-    <link rel="apple-touch-icon" href="assets/icons/appicon-256.png">
-    <link rel="icon" href="assets/icons/appicon-256.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="apple-touch-icon" href="assets/New assets/padel_manager logo_1x.png">
+    <link rel="icon" href="assets/favicon.jpg">
+    <link rel="stylesheet" href="styles.css?v=landing-coded-3">
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
         <div class="brand-lockup">
-          <img class="brand-mark" src="assets/icons/appicon-256.png" alt="" width="58" height="58">
+          <img class="brand-mark" src="assets/New assets/padel_manager logo_1x.png" alt="" width="58" height="58">
           <div>
             <p class="eyebrow" data-i18n="brandEyebrow">Turneringsverktøy</p>
             <h1>Padel Manager</h1>
@@ -40,14 +40,30 @@
       <main>
         <section class="start-panel" id="startView" aria-labelledby="startTitle">
           <div class="intro">
+            <nav class="landing-nav" aria-label="Forside">
+              <img class="landing-nav-logo" src="assets/New assets/padel_manager logo_1x.png" alt="Padel Manager" width="74" height="74">
+              <button class="landing-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="landingLinks">
+                <span></span>
+                <span></span>
+                <span></span>
+              </button>
+              <div class="landing-links" id="landingLinks">
+                <a class="active" href="#startView">Hjem</a>
+                <a href="#createTournamentForm">Admin</a>
+                <a href="#joinTournamentForm">Spiller</a>
+                <a href="#createTournamentForm">Turnering</a>
+              </div>
+            </nav>
+
             <div class="intro-copy">
-              <p class="eyebrow">Version 0.1</p>
-              <h2 id="startTitle">Se neste kamp, bane, makker og motstandere</h2>
-              <p>
-                Padel Manager kan testes lokalt i nettleseren og synkroniseres live mellom enheter.
-              </p>
+              <img class="hero-logo" src="assets/New assets/padel_manager logo_1x.png" alt="Padel Manager" width="560">
+              <h2 id="startTitle">PADEL MANAGER</h2>
+              <a class="landing-cta" href="#createTournamentForm">Get Started</a>
+              <p>No App Needed</p>
             </div>
-            <img class="hero-logo" src="assets/padel-manager-logo.png" alt="Padel Manager" width="360">
+
+            <img class="landing-developer-logo" src="assets/New assets/zigonia_developer_logo.png" alt="Zigonia IT" width="220">
+            <img class="landing-badge" src="assets/New assets/padel_manager_button.png" alt="Padel Manager" width="210">
           </div>
 
           <div class="action-grid">

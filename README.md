@@ -2,9 +2,9 @@
 
 Live app: https://zigonia-it.github.io/Padel_manager_web/
 
-Sist oppdatert: 2026-08-21
+Sist oppdatert: 2026-08-26
 
-Status: statisk webapp med Supabase live sync klar for første fler-enhetstest
+Status: statisk webapp med Supabase live sync og pågående responsiv designoppdatering
 
 Padel Manager er en statisk webapp for å sette opp og følge en padelturnering på tvers av mobil, nettbrett og PC/Mac. Appen kan kjøre lokalt uten backend, og bruker Supabase Realtime når `supabase-config.js` er fylt inn.
 
@@ -13,7 +13,7 @@ Padel Manager er en statisk webapp for å sette opp og følge en padelturnering 
 - `index.html` - appstruktur og visninger
 - `styles.css` - responsivt design
 - `app.js` - turneringslogikk, lokal fallback og Supabase live sync
-- `assets/` - logo, appikoner og Orbitron-font fra SwiftUI-prosjektet
+- `assets/` - logo, appikoner, designassets og fonter
 - `manifest.webmanifest` - start på PWA-oppsett
 - `supabase-config.js` - Supabase URL/nøkkel for live sync
 - `supabase_schema.sql` - databaseoppsett for delt turnering og realtime
@@ -105,9 +105,11 @@ Ved GitHub-integrasjon i Supabase:
 5. Admin kan føre poeng direkte eller sette resultat via popup.
 6. Tilskuermodus viser kompakte livekort for pågående kamper.
 7. Appen har PWA-manifest, service worker og Supabase live sync for første fler-enhetstest.
+8. Forsiden er under oppdatering mot ny `landing_page.jpg`-basert designretning med kodet, responsiv HTML/CSS.
 
 ## Neste tekniske steg
 
-1. Teste live sync på ekte telefoner via publisert GitHub Pages-adresse.
-2. Fullføre oversettelser for all dynamisk tekst.
-3. Splitte JavaScript-koden i mindre moduler når funksjonaliteten har stabilisert seg.
+1. Fullføre førsteprioriteten i `development_plan.md`: responsiv UI-opprydding etter ny designretning.
+2. Teste live sync på ekte telefoner via publisert GitHub Pages-adresse.
+3. Fullføre oversettelser for all dynamisk tekst.
+4. Splitte JavaScript-koden i mindre moduler når funksjonaliteten har stabilisert seg.
