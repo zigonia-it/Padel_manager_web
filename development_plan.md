@@ -366,19 +366,26 @@ Krav før publisering:
 6. Legge inn QR-kode.
 7. Splitte `app.js` i moduler.
 8. Lage tester for kampgenerator og tabell.
-9. Koble til Supabase.
-10. Legge inn realtime-oppdateringer.
-11. Lage admin-, spiller- og tilskuervisning.
-12. Forbedre PWA-oppsett.
-13. Publisere første demo.
+9. Opprette modusene cup-mode og round robin mode basert på forrige app logikk i /Users/sigurd/Documents/Developer/PadelManager-main/
+10. Koble til Supabase.
+11. Legge inn realtime-oppdateringer.
+12. Lage admin-, spiller- og tilskuervisning.
+13. Forbedre PWA-oppsett.
+14. Publisere første demo.
 
 ## 16. Arbeidsregel
 
-Etter hver tydelige arbeidsøkt skal `documentation_log.md` oppdateres med:
-
+Etter hver tydelige arbeidsøkt skal disse dokumentene oppdateres med:
 - hva som ble gjort
 - viktige beslutninger
 - endrede filer
 - neste steg
 
+development_plan.md
+documentation_log.md
+product_development.md
+README.md
+
+
 Målet er at prosjektet alltid skal være mulig å plukke opp igjen uten å miste kontekst.
+Appen skal være funskjonibel til enhver tid.
