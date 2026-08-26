@@ -8,6 +8,34 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - La til optimistisk kollisjonsvern for admin-state
+
+- La til kolonnen `public.tournaments.revision`, som økes server-side ved hver godkjente state-endring.
+- Oppdaterte `create_tournament`, `get_tournament_by_code`, `join_tournament` og `save_player_point` slik at state alltid bærer gjeldende revisjon.
+- Endret `save_tournament_state` til å kreve forventet revisjon og avvise foreldede admin-skrivinger atomisk.
+- Oppdaterte klienten med revisjonssporing, håndtering av samtidige lokale endringer og tydelig melding ved konflikt.
+- Kjørte migreringen `atomic_admin_revisions` i Supabase-prosjektet `sxzlljxodorkfrjnwfgr`; Supabase registrerte den med versjon `20260826225931`.
+
+### Endrede filer
+
+- `app.js`
+- `development_plan.md`
+- `documentation_log.md`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826225503_atomic_admin_revisions.sql`
+
+### Verifisering
+
+- `node --check app.js`
+- Supabase test: lagring med forventet revisjon `0` ga revisjon `1`.
+- Supabase test: ny lagring med foreldet revisjon `0` ble avvist.
+- Bekreftet at gammel tre-parameter-signatur for `save_tournament_state` er fjernet og ny fire-parameter-signatur er aktiv.
+- Kontrolltesten ryddet opp etter seg; ingen testturneringer ble liggende.
+
+### Neste steg
+
+- Portére validerte RPC-operasjoner for kampstart, resultat, walkover, avbrytelse og rundeavansement.
+
 ## 2026-08-27 - Bumpet produktversjon til 0.2 Beta
 
 - Oppdaterte synlig appversjon fra `v. 0.1 (Beta)` til `v. 0.2 (Beta)`.

@@ -29,13 +29,14 @@ Prosjektmetadata:
 - Den nye topp-logoen er kontrollert i desktop- og mobilvisning.
 - `v. 0.2 (Beta)` er verifisert på publisert `https://padelstar.app` med Vercel Analytics og service-worker-cache `v40`.
 - Spillerpoeng krever nå et serverutstedt spillertoken som lagres hash-et i en RLS-beskyttet Supabase-tabell.
+- Admin-state har nå serverstyrt revisjon og optimistisk kollisjonsvern; foreldede hele-state-skrivinger blir avvist av Supabase.
 
 ## Neste fase: produksjonsklar beta
 
 Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
 1. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
-2. **Gjør admin-operasjoner atomiske.** Portér kampstart, resultat, walkover, avbrytelse og rundeavansement til validerte Supabase-operasjoner med samme kollisjonsvern som spillerpoeng-RPC-en.
+2. **Gjør admin-operasjoner atomiske.** Revisjonsvernet er første del. Portér deretter kampstart, resultat, walkover, avbrytelse og rundeavansement til validerte Supabase-operasjoner.
 3. **Stabiliser realtime.** Verifiser admin, spiller og tilskuer på separate enheter med samtidige oppdateringer, refresh og reconnect; håndter stale state og feilmeldinger tydelig.
 4. **Etabler automatiserte regresjonstester.** Prioriter scheduler for singles/doubles/sit-out, cup-seeding/byes/bracket, scoring, leaderboard, walkover/undo og rolle-/modulvisning.
 5. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
@@ -108,6 +109,7 @@ Spiller skal kunne:
 - se tidligere resultater
 - se tabell
 - motta varsler når egen kamp nærmer seg eller starter
+- på sikt opprette egen profil med fast avatar og statistikk
 
 Spilleren skal normalt ikke kunne endre turneringsdata.
 
@@ -166,6 +168,8 @@ Ikke prioritert i første MVP:
 - karrierestatistikk
 - PDF-eksport
 - push-varslinger
+- avatar creator
+- database med brukere så man kan logge inn fra flere enheter
 
 ## 5. Teknisk Retning
 

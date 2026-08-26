@@ -92,6 +92,7 @@ let realtimeChannel = null;
 let remoteSaveTimer = null;
 let playerScoreSaveChain = Promise.resolve();
 let isApplyingRemoteState = false;
+let remoteMutationSequence = 0;
 
 const elements = {
   startView: document.querySelector("#startView"),
@@ -528,6 +529,7 @@ function createTournament({ name, inviteCode, players, courtCount }) {
     rounds: [],
     cup: null,
     cupTeams: [],
+    revision: 0,
     selectedPlayerId: null,
     playerToken: null,
   };
@@ -568,6 +570,7 @@ function migrateState(nextState) {
   nextState.settings.includesThirdPlaceMatch = Boolean(nextState.settings.includesThirdPlaceMatch);
   nextState.adminToken ??= null;
   nextState.playerToken ??= null;
+  nextState.revision = Number.isInteger(nextState.revision) && nextState.revision >= 0 ? nextState.revision : 0;
   nextState.selectedPlayerId ??= null;
   nextState.players ??= [];
   nextState.courts ??= structuredClone(defaultTournament.courts);
@@ -633,7 +636,10 @@ function migrateMatch(match, tournamentId) {
 
 function saveState(options = {}) {
   localStorage.setItem(storageKey, JSON.stringify(state));
-  if (options.remote !== false && isCurrentUserAdmin()) queueRemoteSave();
+  if (options.remote !== false && isCurrentUserAdmin()) {
+    remoteMutationSequence += 1;
+    queueRemoteSave();
+  }
 }
 
 function isSupabaseReady() {
@@ -726,14 +732,30 @@ function queueRemoteSave() {
 
 async function saveRemoteState() {
   if (!isSupabaseReady() || !state.adminToken || !state.id) return;
-  const { error } = await supabaseClient.rpc("save_tournament_state", {
+  const requestSequence = remoteMutationSequence;
+  const expectedRevision = state.revision;
+  const { data, error } = await supabaseClient.rpc("save_tournament_state", {
     p_tournament_id: state.id,
     p_admin_token: state.adminToken,
     p_state: sanitizeSharedState(state),
+    p_expected_revision: expectedRevision,
   });
   if (error) {
     console.warn("Supabase sync failed", error);
-    elements.copyStatus.textContent = "Kunne ikke synkronisere live akkurat nå. Lokal kopi er lagret.";
+    if (error.message?.includes("Tournament state changed") && requestSequence === remoteMutationSequence) {
+      elements.copyStatus.textContent = "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter.";
+    } else {
+      elements.copyStatus.textContent = "Kunne ikke synkronisere live akkurat nå. Lokal kopi er lagret.";
+    }
+    return;
+  }
+
+  if (!data) return;
+  if (requestSequence === remoteMutationSequence) {
+    applyRemoteState(data);
+  } else if (state.id === data.id && Number.isInteger(data.revision)) {
+    state.revision = data.revision;
+    saveState({ remote: false });
   }
 }
 
