@@ -8,6 +8,22 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Detaljplan for neste produksjonsfase
+
+- Brøt «Neste fase» i `development_plan.md` ned i syv avhengige gjennomføringsfaser med arbeid, akseptansekriterier og verifikasjon.
+- Dokumenterte tillatelsesgater for repo, live Supabase, midlertidige testdata, publisert beta, eksterne tjenesteinnstillinger og nye avhengigheter.
+- Valgte å starte tekniske faser uten å innføre kontoer/auth eller endre eksterne prosjektnavn. Personvernkontakt, lagringstid og analytics beholdes som eierbeslutninger til lanseringsfasen.
+- Verifiserte gjeldende Supabase changelog og dokumentasjon for databasefunksjoner, Edge Functions og rate-limit-retning før videre datalagsarbeid.
+
+### Endrede filer
+
+- `development_plan.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Kartlegge og hardne roller, grants, RLS, token-livssyklus, payloadgrenser og rate limiting.
+
 ## 2026-08-27 - Porterte dynamisk cup-rundeavansement til admin-RPC
 
 - La til `admin_advance_cup(...)` med låsing av turneringsraden, admin-token, forventet revisjon og servervalidering av at siste cup-runde er ferdig.

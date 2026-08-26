@@ -46,6 +46,215 @@ Prioritert rekkefølge basert på siste dokumentasjonslogg:
 6. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
 7. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
 
+## Detaljert gjennomføringsplan for «Neste fase»
+
+Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ekte små turneringer, uten å utvide produktet med kontoer, betaling eller andre funksjoner som ikke er nødvendige for live-flyten. Arbeidet gjennomføres i rekkefølgen under. Hver hoveddel avsluttes med verifisering, dokumentasjon og egen commit/push før neste del starter.
+
+### Fase 0 – Tillatelse, baseline og arbeidsregler
+
+**Formål**
+
+- Avklare hvilke live-systemer og brukerdata som kan berøres.
+- Dokumentere baseline for kode, database, publisert PWA, grants, realtime og eksisterende tester.
+- Lage en isolert testkonvensjon for midlertidige turneringer som alltid slettes etter testen.
+
+**Arbeid**
+
+1. Kontrollere branch, arbeidsstatus, siste commit, Supabase-migreringshistorikk og produksjonskonfigurasjon uten å endre dem.
+2. Kontrollere at ingen hemmelige nøkler eller testdata ligger i repoet.
+3. Lage en sporbar sjekkliste for hver fase: endrede filer, migrering, positiv test, negativ test, sikkerhetskontroll og cleanup.
+4. Fastsette hvilke endringer som kan gjøres lokalt, hvilke som må kjøres mot Supabase, og hvilke som krever ekstern Vercel/GitHub/DNS-tilgang.
+
+**Akseptansekriterier**
+
+- Baseline og tillatelsesvalg er dokumentert.
+- Ingen eksisterende brukerturnering eller brukerdata brukes som testfixture.
+- Arbeidskopien er ren bortsett fra kjente brukerfiler før første kodeendring.
+
+### Fase 1 – Hardne roller, skrivetilgang og rate limiting
+
+**Formål**
+
+- Sikre at admin, spiller og tilskuer har tydelig avgrensede handlinger.
+- Redusere risikoen ved dagens statiske klient og bevisst anon-baserte RPC-er.
+
+**Arbeid**
+
+1. Kartlegge alle offentlige tabeller, RPC-signaturer, grants, RLS-policyer, `SECURITY DEFINER`-funksjoner og `search_path`.
+2. Validere at admin-token aldri returneres i delt state eller backup, at spiller-token bare brukes til spillerens egne poeng, og at invitasjonskode ikke gir skriveadgang.
+3. Kontrollere inputgrenser for navn, invitasjonskode, state-størrelse, lag, kamper, resultater og handlingstyper.
+4. Legge inn eller stramme servervalidering på alle admin-endepunkter, inkludert reopen/undo, med token, rolle, aktiv turnering og revisjon.
+5. Velge og implementere en rate-limit-strategi som passer statisk hosting. Førstevalg er server-side begrensning på join-, score- og admin-operasjoner basert på hash av token/turnering og tidsvindu. IP-basert begrensning eller Edge Function brukes bare hvis det er nødvendig og godkjent.
+6. Kjøre Supabase security/performance advisors og kontrollere grants etter hver DDL-endring.
+
+**Akseptansekriterier**
+
+- Tilskuer kan lese relevant turneringsstate, men kan ikke skrive.
+- Spiller kan bare føre poeng i egen kamp med gyldig serverutstedt token.
+- Admin-handlinger krever korrekt admin-token og forventet revisjon.
+- Ugyldige payloads, token, roller, state-overganger og overskridelse av rate limit avvises uten delvis lagring.
+- Ingen service-role-/secret-nøkkel finnes i frontend.
+
+**Verifikasjon**
+
+- Positive og negative RPC-tester per rolle.
+- Grants/RLS/advisor-kontroll.
+- Rate-limit-test med grense, avvisning og nytt tidsvindu.
+- Test at alle testdata slettes og at tabellene er tomme for egne testfixture.
+
+### Fase 2 – Gjøre gjenværende admin-operasjoner atomiske
+
+**Formål**
+
+- Fjerne siste behov for hele-state-skriving ved korrigering av kampresultater.
+- Gjøre reopen/undo trygt ved samtidige admin-enheter.
+
+**Arbeid**
+
+1. Spesifisere undo-kontrakten: én siste handling per kamp, hvilken match/runde den gjelder, forventet revisjon og hvilke avledede felter som må gjenopprettes.
+2. Lage servervaliderte RPC-er for reopen/undo av settresultat, poeng-/kampsteg og walkover der det er nødvendig, med radlås og compare-and-swap på revisjon.
+3. Sikre at undo også gjenoppretter neste ventende kamp på riktig bane, rundestatus, cupvinner og bracketrelaterte felter.
+4. Koble klientens undo-knapp til samme serialiserte skrivekø som øvrige admin-operasjoner.
+5. Beholde lokal fallback uten Supabase, men vise tydelig når endringen bare er lokal.
+
+**Akseptansekriterier**
+
+- Reopen/undo kan ikke overskrive en nyere endring fra en annen admin.
+- Undo kan bare brukes én gang på samme lagrede handling.
+- Runde-, cup-, leaderboard- og banestatus blir konsistent etter undo.
+- Hele-state-RPC brukes ikke for en atomisk kampkorrigering.
+
+**Verifikasjon**
+
+- Test for hvert undo-scenario, ugyldig kamp/status/token og stale revision.
+- Sammenhengende test: registrer resultat → aktiver neste kamp → undo → bekreft full gjenoppretting.
+- Cup-test med final/bronsefinale og round-robin-test med neste runde.
+
+### Fase 3 – Stabilere realtime, reconnect og stale state
+
+**Formål**
+
+- Gjøre fler-enhetsflyten forutsigbar når nettverket faller ut, siden lastes på nytt eller to adminer skriver samtidig.
+
+**Arbeid**
+
+1. Modellere realtime-statusene `connecting`, `connected`, `disconnected`, `reconnecting` og `error` i UI.
+2. Håndtere channel-status og automatisk reconnect med kontrollert backoff, uten å opprette doble abonnementer.
+3. Bruke serverrevisjon til å ignorere eldre realtime-payloads og hente fersk state etter reconnect.
+4. Samordne realtime, online/offline-status, lokal cache og ventende skrivekø slik at offline-endringer ikke skjuler en serverkonflikt.
+5. Gi admin en tydelig handling ved konflikt, mens spiller/tilskuer får lese siste kjente state og statusmelding.
+6. Kjøre smoke-test på separate admin-, spiller- og tilskuerklienter med refresh, nettverksbrudd, samtidig resultat og reconnect.
+
+**Akseptansekriterier**
+
+- Maks ett aktivt realtime-abonnement per turnering/enhet.
+- Nyeste serverrevisjon vinner; eldre payload kan ikke rulle state tilbake.
+- Reconnect henter korrekt state uten manuell full restart.
+- Feilstatus er synlig uten å avsløre tokens eller tekniske hemmeligheter.
+
+### Fase 4 – Automatiserte regresjonstester
+
+**Formål**
+
+- Gjøre turneringsmotor, scoring, roller og databasekontrakter repeterbart testbare.
+
+**Arbeid**
+
+1. Etablere et minimalt testoppsett med eksisterende Node-/browser-verktøy; nye avhengigheter installeres ikke uten egen godkjenning.
+2. Lage rene tester for scheduler: singles, doubles, rotasjon, sit-out, baner og deterministiske grenser.
+3. Lage cup-tester for auto/manual lag, seeding, power-of-two, byes, oddetalls-bye, pending-slots, final og bronsefinale.
+4. Lage scoringstester for 0/15/30/40, deuce, advantage, sett, kamp, ugyldig score og ledertabell.
+5. Lage rolle-/modultester for admin, spiller, tilskuer, token og synlig/skjult navigasjon.
+6. Lage SQL/RPC-kontraktstester for grants, revisions, race/conflict, rate limit og cleanup.
+7. Koble testkommandoene til en lokal/verifiserbar CI-kjøring dersom repoet ikke allerede har dette.
+
+**Akseptansekriterier**
+
+- Testene feiler på en kjent regresjon og passer på korrigert kode.
+- Alle prioriterte punkter over har minst én positiv og én negativ test.
+- Testene kan kjøres uten produksjonsdata og uten å lekke tokens.
+
+### Fase 5 – Rydde struktur og tekst
+
+**Formål**
+
+- Redusere `app.js`-koblinger uten å endre observerbar funksjonalitet.
+- Gjøre språk- og feilmeldinger konsistente.
+
+**Arbeid**
+
+1. Fryse testbaseline fra fase 4 før refaktorering.
+2. Flytte oversettelsesdictionary og `t(...)` til `translations.js`, med `nb` som fallback for `nn`/`en`.
+3. Dele ut rene domenegrenser for state/migrering, turneringsmotor, scoring, Supabase/realtime og visning i små, dokumenterte steg.
+4. Beholde eksisterende globale browser-entrypoints inntil alle kallere er flyttet, slik at PWA-flyten ikke brytes.
+5. Erstatte hardkodet brukertext gradvis, men la logg-/debugtekst og migreringskommentarer være teknisk tydelige.
+6. Kjøre regresjonstest og browser-smoke-test etter hver modulgrense.
+
+**Akseptansekriterier**
+
+- Ingen funksjonsendring i opprett, join, admin, spiller, tilskuer, cup, scoring eller backup.
+- Nye tekster følger samme nøkkel- og fallbackmønster.
+- Moduler har tydelig ansvar og kan testes uten å starte hele UI-et der det er praktisk.
+
+### Fase 6 – PWA, oppstart, offline og recovery
+
+**Formål**
+
+- Gjøre installert PWA mer robust på iPhone, Safari, Chrome og Android.
+
+**Arbeid**
+
+1. Måle kald oppstart, installert oppstart, app-shell, største assets og første interaksjon på representative viewport-størrelser.
+2. Optimalisere kun dokumenterte flaskehalser: bildeformat/størrelse, fontlasting, script/cache og unødvendig første-render-arbeid.
+3. Verifisere service-worker-strategi, cacheversjon, oppdatering og fallback ved offline navigasjon.
+4. Innføre IndexedDB som robust lokal state-/kølagring med migreringsvei fra eksisterende localStorage; behold localStorage som kompatibilitetsfallback under overgang.
+5. Kølegge bare eksplisitt støttede offline-handlinger, merke dem lokalt som ventende og sende dem etter reconnect med revisjonskontroll.
+6. Lage recovery-flyt for siste kjente gode state, importert backup og konflikter; aldri overskriv serverstate automatisk etter ukjent konflikt.
+
+**Akseptansekriterier**
+
+- Appen starter og viser siste kjente visning offline.
+- Cacheoppdatering kan verifiseres etter ny versjon uten fastlåst gammel app-shell.
+- Lokal state overlever refresh og migrering.
+- Offline handlinger blir enten synkronisert trygt eller tydelig presentert som ikke synkronisert.
+
+### Fase 7 – Lanseringsgrunnlag og drift
+
+**Formål**
+
+- Gjøre betaen forståelig, sporbar og trygg å drifte.
+
+**Arbeid**
+
+1. Skrive kort personverntekst for navn, avatar, turneringsdata, tokens, realtime og eventuell analytics.
+2. Avklare behandlingsansvarlig/kontakt, formål, lagringstid, sletting og geografisk driftsområde før teksten låses.
+3. Implementere eller dokumentere utløp/sletting av turneringer og spillerøkter i tråd med valgt retensjon; sletting skal være eksplisitt og verifiserbar.
+4. Dokumentere deploy/runbook for GitHub/Vercel, DNS, service worker, Supabase-migreringer, grants, advisors, backup og rollback.
+5. Dokumentere feilhåndtering og observability: browser-status, Vercel Analytics, Supabase advisors, databasefeil og hva som ikke logges.
+6. Verifisere produksjonsdeploy, HTTPS, offentlig join-lenke, PWA-assets, cacheversjon og live sync.
+7. La GitHub-, Vercel- og Supabase-navn være uendret med mindre en konkret brukerbeslutning gjør rename nødvendig.
+
+**Akseptansekriterier**
+
+- Personverntekst og retensjon er godkjent av eier.
+- En ny deploy kan gjennomføres og kontrolleres med dokumentert sjekkliste.
+- Databaseendringer, backup, sletting og rollback har dokumentert fremgangsmåte.
+- Publisert beta viser korrekt versjon, status og kontakt-/personvernlenke.
+
+## Tillatelser og avklaringer som må være på plass før implementering
+
+Følgende ber jeg om eksplisitt godkjenning for før første implementeringscommit i denne fasen:
+
+1. **Repo:** Tillat endringer i kildekode, SQL-schema, migreringer og dokumentasjon, med commit og push til `main` etter hver ferdig fase.
+2. **Live Supabase:** Tillat lesing av schema/grants/advisors og kjøring av nødvendige DDL-migreringer mot prosjektet `sxzlljxodorkfrjnwfgr`.
+3. **Midlertidige testdata:** Tillat at jeg oppretter testturneringer og spillerøkter med tydelig testkode i Supabase, og sletter bare disse etter hver test. Ingen eksisterende brukerdata skal slettes eller endres.
+4. **Publisert beta:** Tillat read-only smoke-test mot `https://padelstar.app` og lokal PWA/browser-test. Dersom push automatisk utløser Vercel/GitHub Pages-deploy, tillat denne indirekte deployen.
+5. **Eksterne tjenesteendringer:** Vercel-, GitHub-, DNS- eller Supabase-dashboardinnstillinger endres ikke uten særskilt godkjenning i tillegg. Jeg kan først kartlegge dem read-only.
+6. **Avhengigheter:** Tillat ikke installasjon av nye npm-/systempakker som standard. Hvis test- eller rate-limitløsningen krever en ny avhengighet, stopper jeg og ber om separat godkjenning.
+7. **Personvernvalg:** Før fase 7 trenger jeg din beslutning om behandlingsansvarlig/kontaktadresse, ønsket lagringstid for turneringer/spillerdata og om Vercel Analytics skal beholdes i betaen.
+
+Standardforutsetning dersom du godkjenner uten andre valg: ingen konto-/auth-innføring i denne fasen, ingen rename av eksterne prosjekter, ingen sletting utover egne midlertidige testdata, og rate limiting holdes server-side så langt det er mulig innen dagens statiske arkitektur.
+
 ## 1. Formål
 
 Padelstar skal være en plattformuavhengig webapp for administrasjon og gjennomføring av padelturneringer.
