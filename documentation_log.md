@@ -8,6 +8,37 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Porterte settresultat og round-robin-rundeavansement
+
+- La til `admin_set_result(...)` med servervalidering av settscore, kampstatus, vinner, neste kamp og revisjon.
+- La til `admin_advance_round(...)` for round-robin; serveren krever ferdig aktiv runde og starter neste planlagte runde atomisk.
+- Koblede begge operasjonene til klientens serialiserte Supabase-skrivekø med konfliktmelding og lokal fallback.
+- Lot cupens dynamiske bracket-avansement ligge i eksisterende klientgenerator til det får en egen validerings-RPC.
+- Kjørte migreringene `admin_set_result` og `admin_advance_round` i Supabase-prosjektet `sxzlljxodorkfrjnwfgr`.
+
+### Endrede filer
+
+- `app.js`
+- `development_plan.md`
+- `documentation_log.md`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826231439_admin_set_result.sql`
+- `supabase/migrations/20260826231841_admin_advance_round.sql`
+
+### Verifisering
+
+- `node --check app.js`
+- Supabase test: `6–4` fullførte kamp, satte vinner og aktiverte neste kamp på frigitt bane.
+- Supabase test: ugyldig settscore og foreldet revisjon ble avvist.
+- Supabase test: round-robin-runde ble avsluttet, neste planlagte runde aktivert og riktig antall kamper startet.
+- Supabase bekreftet at begge nye RPC-er er tilgjengelige for `anon`, men ikke direkte for `authenticated` eller `PUBLIC`.
+- Supabase advisors viser kun de kjente bevisste `SECURITY DEFINER`-advarslene og deny-by-default-info for `player_sessions`.
+- Kontrolltestene ryddet opp etter seg; ingen testturneringer ble liggende.
+
+### Neste steg
+
+- Portére dynamisk cup-bracket-avansement og vurdere servervalidering av reopen/undo.
+
 ## 2026-08-27 - Porterte kampstart, avbrytelse og walkover til admin-RPC
 
 - La til `admin_match_action(...)` som låser turneringsraden før endring og krever admin-token og forventet revisjon.

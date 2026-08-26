@@ -31,13 +31,14 @@ Prosjektmetadata:
 - Spillerpoeng krever nå et serverutstedt spillertoken som lagres hash-et i en RLS-beskyttet Supabase-tabell.
 - Admin-state har nå serverstyrt revisjon og optimistisk kollisjonsvern; foreldede hele-state-skrivinger blir avvist av Supabase.
 - Kampstart, avbrytelse og walkover går nå gjennom en servervalidert admin-RPC med samme revisjonsvern.
+- Settresultat og round-robin-rundeavansement går nå gjennom servervaliderte admin-RPC-er.
 
 ## Neste fase: produksjonsklar beta
 
 Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
 1. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
-2. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse og walkover er portert. Portér deretter settresultat og rundeavansement til validerte Supabase-operasjoner.
+2. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse, walkover, settresultat og round-robin-rundeavansement er portert. Portér deretter dynamisk cup-bracket og gjenværende admin-handlinger.
 3. **Stabiliser realtime.** Verifiser admin, spiller og tilskuer på separate enheter med samtidige oppdateringer, refresh og reconnect; håndter stale state og feilmeldinger tydelig.
 4. **Etabler automatiserte regresjonstester.** Prioriter scheduler for singles/doubles/sit-out, cup-seeding/byes/bracket, scoring, leaderboard, walkover/undo og rolle-/modulvisning.
 5. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.

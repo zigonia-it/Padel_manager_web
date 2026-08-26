@@ -334,18 +334,24 @@ elements.cupTeamForm.addEventListener("submit", (event) => {
 
 elements.generateRoundButton.addEventListener("click", () => {
   const activeRound = getActiveRound();
-  if (activeRound && activeRound.status === "active" && canCompleteRound(activeRound)) {
-    activeRound.status = "finished";
-    state.status = "Runde fullført";
-  }
-  const blockReason = generateRoundBlockReason();
-  if (blockReason) {
-    alert(blockReason);
-    return;
+  const completingActiveRound = activeRound?.status === "active" && canCompleteRound(activeRound);
+  if (!completingActiveRound) {
+    const blockReason = generateRoundBlockReason();
+    if (blockReason) {
+      alert(blockReason);
+      return;
+    }
   }
   if (state.rounds.length === 0) {
     generateFullTournamentSchedule();
+  } else if (isSupabaseReady() && state.settings.format === "roundRobin" && completingActiveRound) {
+    queueRemoteRoundAdvance();
+    return;
   } else {
+    if (completingActiveRound) {
+      activeRound.status = "finished";
+      state.status = "Runde fullført";
+    }
     startNextScheduledRound();
   }
   saveState();
@@ -791,6 +797,82 @@ function queueRemoteMatchAction(match, action, teamIndex = null) {
         elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
           ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
           : "Kunne ikke oppdatere kampen live akkurat nå. Lokal kopi er lagret.";
+        return;
+      }
+
+      if (!data) return;
+      lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
+      if (requestSequence === remoteMutationSequence) {
+        applyRemoteState(data);
+      } else if (state.id === data.id && Number.isInteger(data.revision)) {
+        state.revision = data.revision;
+        saveState({ remote: false });
+      }
+    });
+}
+
+function queueRemoteSetResult(match, teamOne, teamTwo) {
+  if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
+
+  window.clearTimeout(remoteSaveTimer);
+  remoteSaveTimer = null;
+  remoteWriteChain = remoteWriteChain
+    .catch(() => {})
+    .then(async () => {
+      if (remoteMutationSequence > lastRemotePersistedSequence) await saveRemoteState();
+
+      const requestSequence = remoteMutationSequence;
+      const expectedRevision = state.revision;
+      const { data, error } = await supabaseClient.rpc("admin_set_result", {
+        p_tournament_id: state.id,
+        p_admin_token: state.adminToken,
+        p_match_id: match.id,
+        p_team_one_score: teamOne,
+        p_team_two_score: teamTwo,
+        p_expected_revision: expectedRevision,
+      });
+
+      if (error) {
+        console.warn("Supabase set result failed", error);
+        elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
+          ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
+          : "Kunne ikke lagre settresultatet live akkurat nå. Lokal kopi er lagret.";
+        return;
+      }
+
+      if (!data) return;
+      lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
+      if (requestSequence === remoteMutationSequence) {
+        applyRemoteState(data);
+      } else if (state.id === data.id && Number.isInteger(data.revision)) {
+        state.revision = data.revision;
+        saveState({ remote: false });
+      }
+    });
+}
+
+function queueRemoteRoundAdvance() {
+  if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
+
+  window.clearTimeout(remoteSaveTimer);
+  remoteSaveTimer = null;
+  remoteWriteChain = remoteWriteChain
+    .catch(() => {})
+    .then(async () => {
+      if (remoteMutationSequence > lastRemotePersistedSequence) await saveRemoteState();
+
+      const requestSequence = remoteMutationSequence;
+      const { data, error } = await supabaseClient.rpc("admin_advance_round", {
+        p_tournament_id: state.id,
+        p_admin_token: state.adminToken,
+        p_expected_revision: state.revision,
+      });
+
+      if (error) {
+        console.warn("Supabase round advance failed", error);
+        elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
+          ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
+          : "Kunne ikke starte neste runde live akkurat nå. Lokal kopi er lagret.";
         return;
       }
 
@@ -2774,6 +2856,11 @@ function saveSetResult(match, teamOne, teamTwo) {
   const validationError = validateSetScore(teamOne, teamTwo);
   if (validationError) {
     alert(validationError);
+    return;
+  }
+
+  if (isSupabaseReady()) {
+    queueRemoteSetResult(match, teamOne, teamTwo);
     return;
   }
 
