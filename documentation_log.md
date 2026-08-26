@@ -1279,10 +1279,12 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
   - `authenticated` og `PUBLIC` har ikke unødvendige grants på appens tabell/funksjoner
 - Testet Supabase create/join via REST/RPC med publishable key og slettet midlertidig testturnering etterpå.
 - Bumpet Service Worker-cache til `padel-manager-v23` og oppdaterte app-shell til nye CSS/JS cache-bustere.
+- La til `vercel.json` med headers for statisk hosting og service worker-cache på Vercel.
 
 ### Beslutninger
 
 - GitHub Pages brukes videre som publiseringskanal siden repoet allerede har en fungerende Pages-workflow fra repo-roten.
+- Vercel er koblet til samme GitHub-repo som ekstra publiseringsspor.
 - Supabase-funksjonene beholder `SECURITY DEFINER`, men eksponeres eksplisitt og smalt til `anon` fordi appen er en statisk klient uten egen server.
 - Databasen lagrer fremdeles turneringsstate som JSONB i én tabell for å holde MVP-flyten enkel; normalisering kan tas senere når produktflyten er stabil.
 
@@ -1309,6 +1311,7 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - `service-worker.js`
 - `supabase_schema.sql`
 - `supabase/migrations/20260826152343_secure_public_api_grants.sql`
+- `vercel.json`
 - `documentation_log.md`
 
 ### Neste steg
