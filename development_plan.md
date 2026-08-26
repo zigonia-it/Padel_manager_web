@@ -32,6 +32,7 @@ er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i 
 9. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
 10. rette opp ui errors som at en button har feil fassong og kurve osv.
 11. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
+12. Ta bort bytt knappen fra spiller din status kortet
 
 ## 1. Formål
 
