@@ -1,208 +1,216 @@
 <!doctype html>
 <html lang="no">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#080706">
-    <meta
-      name="description"
-      content="Padel Manager hjelper administratorer og spillere med turneringer, kamper, baner og resultater."
-    >
-    <title>Padel Manager</title>
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="apple-touch-icon" href="assets/New assets/padel_manager logo_1x.png">
-    <link rel="icon" href="assets/favicon.jpg">
-    <link rel="stylesheet" href="styles.css?v=admin-player-flow-1">
-  </head>
-  <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <div class="brand-lockup">
-          <img class="brand-mark" src="assets/New assets/padel_manager logo_1x.png" alt="" width="58" height="58">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080706">
+  <meta name="description"
+    content="Padel Manager hjelper administratorer og spillere med turneringer, kamper, baner og resultater.">
+  <title>Padelstar</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/favicon.jpg">
+  <link rel="icon" href="assets/favicon.jpg">
+  <link rel="stylesheet" href="styles.css?v=admin-player-flow-1">
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <img class="brand-mark" src="assets/padelstar_logo.png" alt="" width="58" height="58">
+        <div>
+          <p class="eyebrow" data-i18n="brandEyebrow">Turneringsverktøy</p>
+          <h1>Padelstar</h1>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <nav class="app-menu" aria-label="Moduler">
+          <button class="module-link" type="button" data-module-link="landing">Hjem</button>
+          <button class="module-link" type="button" data-module-link="setup-admin">Create</button>
+          <button class="module-link" type="button" data-module-link="setup-player">Join</button>
+          <button class="module-link" type="button" data-module-link="admin">Admin</button>
+          <button class="module-link" type="button" data-module-link="player">Spiller</button>
+          <button class="module-link" type="button" data-module-link="tournament">Turnering</button>
+        </nav>
+        <label class="language-picker">
+          <span data-i18n="languageLabel">Språk</span>
+          <select id="languageSelect" aria-label="Språk">
+            <option value="nb">Norsk</option>
+            <option value="nn">Nynorsk</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <div class="status-pill" id="connectionStatus">Lokal demo</div>
+      </div>
+    </header>
+
+    <main>
+      <section class="start-panel app-module" id="startView" data-module="landing" aria-labelledby="startTitle">
+        <div class="intro">
+          <nav class="landing-nav" aria-label="Forside">
+            <img class="landing-nav-logo" src="assets/favicon.jpg" alt="Padelstar" width="74" height="74">
+            <button class="landing-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false"
+              aria-controls="landingLinks">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div class="landing-links" id="landingLinks">
+              <button class="module-link active" type="button" data-module-link="landing">Hjem</button>
+              <button class="module-link" type="button" data-module-link="setup-admin">Create</button>
+              <button class="module-link" type="button" data-module-link="setup-player">Join</button>
+              <button class="module-link" type="button" data-module-link="admin">Admin</button>
+              <button class="module-link" type="button" data-module-link="player">Spiller</button>
+              <button class="module-link" type="button" data-module-link="tournament">Turnering</button>
+            </div>
+          </nav>
+
+          <div class="intro-copy">
+            <img class="hero-logo" src="assets/padelstar_logo.png" alt="Padelstar" width="560">
+            <h2 id="startTitle">PADELSTAR</h2>
+            <div class="landing-actions" aria-label="Startvalg">
+              <button class="landing-cta" type="button" data-module-link="setup-admin">Opprett turnering</button>
+              <button class="landing-cta landing-cta-secondary" type="button" data-module-link="setup-player">Bli med i
+                turnering</button>
+            </div>
+            <p>Ingen app nødvendig</p>
+          </div>
+
+          <img class="landing-developer-logo" src="assets/New assets/zigonia_developer_logo.png" alt="Zigonia IT"
+            width="220">
+          <img class="landing-badge" src="assets/padelstar_button_L.png" alt="Padelstar" width="210">
+        </div>
+
+        <div class="panel resume-panel hidden" id="resumePanel">
           <div>
-            <p class="eyebrow" data-i18n="brandEyebrow">Turneringsverktøy</p>
-            <h1>Padel Manager</h1>
+            <p class="eyebrow">Lagret lokalt</p>
+            <h3 id="resumeTitle">Fortsett turnering</h3>
+            <p class="hint" id="resumeSummary">Det finnes en turnering lagret i denne nettleseren.</p>
           </div>
+          <button class="primary" id="resumeTournamentButton" type="button">Fortsett som admin</button>
         </div>
-        <div class="topbar-actions">
-          <nav class="app-menu" aria-label="Moduler">
-            <button class="module-link" type="button" data-module-link="landing">Hjem</button>
-            <button class="module-link" type="button" data-module-link="setup-admin">Create</button>
-            <button class="module-link" type="button" data-module-link="setup-player">Join</button>
-            <button class="module-link" type="button" data-module-link="admin">Admin</button>
-            <button class="module-link" type="button" data-module-link="player">Spiller</button>
-            <button class="module-link" type="button" data-module-link="tournament">Turnering</button>
-          </nav>
-          <label class="language-picker">
-            <span data-i18n="languageLabel">Språk</span>
-            <select id="languageSelect" aria-label="Språk">
-              <option value="nb">Norsk</option>
-              <option value="nn">Nynorsk</option>
-              <option value="en">English</option>
-            </select>
+      </section>
+
+      <section class="setup-panel app-module hidden" id="setupAdminView" data-module="setup-admin"
+        aria-labelledby="setupAdminTitle">
+        <form class="panel setup-card" id="createTournamentForm">
+          <p class="eyebrow">Create</p>
+          <h2 id="setupAdminTitle">Ny turnering</h2>
+          <label>
+            Turneringsnavn
+            <input name="tournamentName" type="text" value="Risløkka Padel" autocomplete="off" required>
           </label>
-          <div class="status-pill" id="connectionStatus">Lokal demo</div>
+          <label>
+            Spillere, valgfritt
+            <textarea name="players" rows="6"
+              placeholder="Legg inn spillere manuelt hvis noen ikke har egen enhet."></textarea>
+          </label>
+          <fieldset class="admin-player-choice">
+            <legend>Admin-deltakelse</legend>
+            <label class="checkbox-card">
+              <input id="adminParticipatesInput" name="adminParticipates" type="checkbox">
+              <span>
+                <strong>Admin spiller selv</strong>
+                <small>Velg dette hvis den som oppretter turneringen også skal ha spillerprofil.</small>
+              </span>
+            </label>
+            <label class="admin-player-name hidden" id="adminPlayerNameField">
+              Spillernavn for admin
+              <input name="adminPlayerName" type="text" value="Admin" autocomplete="name">
+            </label>
+          </fieldset>
+          <label>
+            Antall baner
+            <input name="courts" type="number" min="1" max="12" value="1" required>
+          </label>
+          <button class="primary" type="submit">Opprett turnering</button>
+        </form>
+      </section>
+
+      <section class="setup-panel app-module hidden" id="setupPlayerView" data-module="setup-player"
+        aria-labelledby="setupPlayerTitle">
+        <form class="panel setup-card" id="joinTournamentForm">
+          <p class="eyebrow">Join</p>
+          <h2 id="setupPlayerTitle">Bli med</h2>
+          <label>
+            Invitasjonskode
+            <input name="inviteCode" type="text" placeholder="P4K7D" maxlength="8" autocomplete="off" required>
+          </label>
+          <label>
+            Navn
+            <input name="playerName" type="text" placeholder="Skriv navnet ditt" autocomplete="name" required>
+          </label>
+          <div class="join-preview" aria-live="polite">
+            <img class="avatar large-avatar" id="joinAvatarPreview" src="" alt="" width="48" height="48">
+            <div>
+              <span>Din avatar</span>
+              <strong id="joinNamePreview">Navnet ditt</strong>
+            </div>
+          </div>
+          <fieldset class="avatar-picker" id="avatarPicker">
+            <legend>Velg avatar</legend>
+            <label>
+              <input type="radio" name="avatarId" value="smash" checked>
+              <span>Smash</span>
+            </label>
+            <label>
+              <input type="radio" name="avatarId" value="serve">
+              <span>Serve</span>
+            </label>
+            <label>
+              <input type="radio" name="avatarId" value="wall">
+              <span>Vegg</span>
+            </label>
+            <label>
+              <input type="radio" name="avatarId" value="lob">
+              <span>Lob</span>
+            </label>
+          </fieldset>
+          <button class="secondary" type="submit">Bli med i turnering</button>
+          <div class="existing-player-box">
+            <button class="ghost" id="showExistingPlayersButton" type="button">Admin har lagt meg til</button>
+            <div class="existing-player-list hidden" id="existingPlayerList"></div>
+          </div>
+          <p class="hint">I dette utkastet fungerer koden for turneringen som er opprettet på denne enheten.</p>
+        </form>
+      </section>
+
+      <section class="workspace app-module hidden" id="workspaceView" data-module="workspace" aria-live="polite">
+        <div class="workspace-header">
+          <div>
+            <p class="eyebrow" id="roundLabel">Runde 1</p>
+            <h2 id="tournamentTitle">Padel Manager</h2>
+          </div>
+          <div class="share-box">
+            <span>Invitasjonskode</span>
+            <strong id="inviteCode">-----</strong>
+          </div>
         </div>
-      </header>
 
-      <main>
-        <section class="start-panel app-module" id="startView" data-module="landing" aria-labelledby="startTitle">
-          <div class="intro">
-            <nav class="landing-nav" aria-label="Forside">
-              <img class="landing-nav-logo" src="assets/New assets/padel_manager logo_1x.png" alt="Padel Manager" width="74" height="74">
-              <button class="landing-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false" aria-controls="landingLinks">
-                <span></span>
-                <span></span>
-                <span></span>
-              </button>
-              <div class="landing-links" id="landingLinks">
-                <button class="module-link active" type="button" data-module-link="landing">Hjem</button>
-                <button class="module-link" type="button" data-module-link="setup-admin">Create</button>
-                <button class="module-link" type="button" data-module-link="setup-player">Join</button>
-                <button class="module-link" type="button" data-module-link="admin">Admin</button>
-                <button class="module-link" type="button" data-module-link="player">Spiller</button>
-                <button class="module-link" type="button" data-module-link="tournament">Turnering</button>
-              </div>
-            </nav>
+        <button class="workspace-menu-toggle" type="button" aria-label="Åpne visningsmeny" aria-expanded="false"
+          aria-controls="workspaceTabs">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <nav class="tabs" id="workspaceTabs" aria-label="Visning">
+          <button class="tab active module-link" type="button" data-module-link="admin" data-view="admin">Admin</button>
+          <button class="tab module-link" type="button" data-module-link="player" data-view="player">Spiller</button>
+          <button class="tab module-link" type="button" data-module-link="tournament"
+            data-view="tournament">Turnering</button>
+        </nav>
 
-            <div class="intro-copy">
-              <img class="hero-logo" src="assets/New assets/padel_manager logo_1x.png" alt="Padel Manager" width="560">
-              <h2 id="startTitle">PADEL MANAGER</h2>
-              <div class="landing-actions" aria-label="Startvalg">
-                <button class="landing-cta" type="button" data-module-link="setup-admin">Create</button>
-                <button class="landing-cta landing-cta-secondary" type="button" data-module-link="setup-player">Join</button>
-              </div>
-              <p>No App Needed</p>
-            </div>
-
-            <img class="landing-developer-logo" src="assets/New assets/zigonia_developer_logo.png" alt="Zigonia IT" width="220">
-            <img class="landing-badge" src="assets/New assets/padel_manager_button.png" alt="Padel Manager" width="210">
+        <section class="view-grid" data-section="admin">
+          <div class="admin-subtabs wide" role="tablist" aria-label="Adminseksjoner">
+            <button class="subtab active" type="button" data-admin-panel="control">Styring</button>
+            <button class="subtab" type="button" data-admin-panel="share">Del</button>
+            <button class="subtab" type="button" data-admin-panel="players">Spillere</button>
+            <button class="subtab" type="button" data-admin-panel="matches">Kamper</button>
           </div>
 
-          <div class="panel resume-panel hidden" id="resumePanel">
-            <div>
-              <p class="eyebrow">Lagret lokalt</p>
-              <h3 id="resumeTitle">Fortsett turnering</h3>
-              <p class="hint" id="resumeSummary">Det finnes en turnering lagret i denne nettleseren.</p>
-            </div>
-            <button class="primary" id="resumeTournamentButton" type="button">Fortsett som admin</button>
-          </div>
-        </section>
-
-        <section class="setup-panel app-module hidden" id="setupAdminView" data-module="setup-admin" aria-labelledby="setupAdminTitle">
-          <form class="panel setup-card" id="createTournamentForm">
-            <p class="eyebrow">Create</p>
-            <h2 id="setupAdminTitle">Ny turnering</h2>
-            <label>
-              Turneringsnavn
-              <input name="tournamentName" type="text" value="Risløkka Padel" autocomplete="off" required>
-            </label>
-            <label>
-              Spillere, valgfritt
-              <textarea name="players" rows="6" placeholder="Legg inn spillere manuelt hvis noen ikke har egen enhet."></textarea>
-            </label>
-            <fieldset class="admin-player-choice">
-              <legend>Admin-deltakelse</legend>
-              <label class="checkbox-card">
-                <input id="adminParticipatesInput" name="adminParticipates" type="checkbox">
-                <span>
-                  <strong>Admin spiller selv</strong>
-                  <small>Velg dette hvis den som oppretter turneringen også skal ha spillerprofil.</small>
-                </span>
-              </label>
-              <label class="admin-player-name hidden" id="adminPlayerNameField">
-                Spillernavn for admin
-                <input name="adminPlayerName" type="text" value="Admin" autocomplete="name">
-              </label>
-            </fieldset>
-            <label>
-              Antall baner
-              <input name="courts" type="number" min="1" max="12" value="1" required>
-            </label>
-            <button class="primary" type="submit">Opprett turnering</button>
-          </form>
-        </section>
-
-        <section class="setup-panel app-module hidden" id="setupPlayerView" data-module="setup-player" aria-labelledby="setupPlayerTitle">
-          <form class="panel setup-card" id="joinTournamentForm">
-            <p class="eyebrow">Join</p>
-            <h2 id="setupPlayerTitle">Bli med</h2>
-            <label>
-              Invitasjonskode
-              <input name="inviteCode" type="text" placeholder="P4K7D" maxlength="8" autocomplete="off" required>
-            </label>
-            <label>
-              Navn
-              <input name="playerName" type="text" placeholder="Skriv navnet ditt" autocomplete="name" required>
-            </label>
-            <div class="join-preview" aria-live="polite">
-              <img class="avatar large-avatar" id="joinAvatarPreview" src="" alt="" width="48" height="48">
-              <div>
-                <span>Din avatar</span>
-                <strong id="joinNamePreview">Navnet ditt</strong>
-              </div>
-            </div>
-            <fieldset class="avatar-picker" id="avatarPicker">
-              <legend>Velg avatar</legend>
-              <label>
-                <input type="radio" name="avatarId" value="smash" checked>
-                <span>Smash</span>
-              </label>
-              <label>
-                <input type="radio" name="avatarId" value="serve">
-                <span>Serve</span>
-              </label>
-              <label>
-                <input type="radio" name="avatarId" value="wall">
-                <span>Vegg</span>
-              </label>
-              <label>
-                <input type="radio" name="avatarId" value="lob">
-                <span>Lob</span>
-              </label>
-            </fieldset>
-            <button class="secondary" type="submit">Bli med i turnering</button>
-            <div class="existing-player-box">
-              <button class="ghost" id="showExistingPlayersButton" type="button">Admin har lagt meg til</button>
-              <div class="existing-player-list hidden" id="existingPlayerList"></div>
-            </div>
-            <p class="hint">I dette utkastet fungerer koden for turneringen som er opprettet på denne enheten.</p>
-          </form>
-        </section>
-
-        <section class="workspace app-module hidden" id="workspaceView" data-module="workspace" aria-live="polite">
-          <div class="workspace-header">
-            <div>
-              <p class="eyebrow" id="roundLabel">Runde 1</p>
-              <h2 id="tournamentTitle">Padel Manager</h2>
-            </div>
-            <div class="share-box">
-              <span>Invitasjonskode</span>
-              <strong id="inviteCode">-----</strong>
-            </div>
-          </div>
-
-          <button class="workspace-menu-toggle" type="button" aria-label="Åpne visningsmeny" aria-expanded="false" aria-controls="workspaceTabs">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-          <nav class="tabs" id="workspaceTabs" aria-label="Visning">
-            <button class="tab active module-link" type="button" data-module-link="admin" data-view="admin">Admin</button>
-            <button class="tab module-link" type="button" data-module-link="player" data-view="player">Spiller</button>
-            <button class="tab module-link" type="button" data-module-link="tournament" data-view="tournament">Turnering</button>
-          </nav>
-
-          <section class="view-grid" data-section="admin">
-            <div class="admin-subtabs wide" role="tablist" aria-label="Adminseksjoner">
-              <button class="subtab active" type="button" data-admin-panel="control">Styring</button>
-              <button class="subtab" type="button" data-admin-panel="share">Del</button>
-              <button class="subtab" type="button" data-admin-panel="players">Spillere</button>
-              <button class="subtab" type="button" data-admin-panel="matches">Kamper</button>
-            </div>
-
-            <div class="panel command-panel">
-              <div class="admin-panel" data-admin-panel-section="control">
+          <div class="panel command-panel">
+            <div class="admin-panel" data-admin-panel-section="control">
               <div class="panel-heading">
                 <h3>Turnering</h3>
                 <span id="tournamentStatus">Klar</span>
@@ -250,11 +258,11 @@
               <div class="button-row">
                 <button class="ghost" id="resetDemoButton" type="button">Nullstill demo</button>
               </div>
-              </div>
             </div>
+          </div>
 
-            <div class="panel share-panel">
-              <div class="admin-panel hidden" data-admin-panel-section="share">
+          <div class="panel share-panel">
+            <div class="admin-panel hidden" data-admin-panel-section="share">
               <div class="panel-heading">
                 <h3>Del turnering</h3>
                 <span>Lokal demo</span>
@@ -279,112 +287,116 @@
               </div>
               <button class="ghost" id="showStartButton" type="button">Vis startside for testing</button>
               <p class="hint" id="copyStatus">Scan QR-koden eller bruk lenken for å teste påmelding.</p>
-              </div>
             </div>
+          </div>
 
-            <div class="panel">
-              <div class="admin-panel hidden" data-admin-panel-section="players">
+          <div class="panel">
+            <div class="admin-panel hidden" data-admin-panel-section="players">
               <div class="panel-heading">
                 <h3>Lobby / spillere</h3>
                 <span id="playerCount">0</span>
               </div>
               <form class="inline-form" id="addPlayerForm">
-                <textarea name="playerName" rows="2" placeholder="Legg til én eller flere spillere" autocomplete="off" required></textarea>
+                <textarea name="playerName" rows="2" placeholder="Legg til én eller flere spillere" autocomplete="off"
+                  required></textarea>
                 <button class="secondary" type="submit">Legg til</button>
               </form>
               <button class="secondary" id="seedPlayersButton" type="button">Fyll demospillere</button>
               <ul class="compact-list" id="playersList"></ul>
-              </div>
             </div>
+          </div>
 
-            <div class="panel wide">
-              <div class="admin-panel hidden" data-admin-panel-section="matches">
+          <div class="panel wide">
+            <div class="admin-panel hidden" data-admin-panel-section="matches">
               <div class="panel-heading">
                 <h3>Kamper og historikk</h3>
                 <span id="matchCount">0</span>
               </div>
               <div class="round-summary" id="roundSummary"></div>
               <div class="matches" id="adminMatches"></div>
-              </div>
             </div>
-          </section>
-
-          <section class="view-grid hidden" data-section="player">
-            <div class="next-match" id="playerNextMatch">
-              <p class="eyebrow">Din neste kamp</p>
-              <h3>Velg spillerprofil</h3>
-              <p>Da viser appen bane, makker og motstandere for akkurat deg.</p>
-            </div>
-
-            <div class="panel player-profile-panel">
-              <div class="panel-heading">
-                <h3>Din status</h3>
-                <button class="secondary compact-button" id="changePlayerButton" type="button">Bytt</button>
-              </div>
-              <div class="player-identity-card" id="playerIdentityCard"></div>
-              <div class="status-grid player-status-grid" id="playerStatusGrid"></div>
-            </div>
-
-            <div class="panel wide">
-              <h3>Dine kamper</h3>
-              <div class="matches" id="playerMatches"></div>
-            </div>
-
-            <div class="panel wide">
-              <h3>Tabell</h3>
-              <ol class="standings" id="playerStandingsList"></ol>
-            </div>
-          </section>
-
-          <section class="view-grid hidden" data-section="tournament">
-            <div class="panel wide">
-              <h3>Turneringsoversikt</h3>
-              <div class="matches" id="spectatorMatches"></div>
-            </div>
-            <div class="panel">
-              <h3>Tabell</h3>
-              <ol class="standings" id="standingsList"></ol>
-            </div>
-            <div class="panel">
-              <h3>Regler</h3>
-              <div class="rules-list" id="rulesList"></div>
-            </div>
-          </section>
+          </div>
         </section>
-      </main>
 
-      <dialog class="large-score-dialog" id="largeScoreDialog" aria-labelledby="largeScoreTitle">
-        <div class="large-score-surface" id="largeScoreSurface">
-          <div class="large-score-top">
-            <div>
-              <p class="eyebrow" id="largeScoreContext">Kamp</p>
-              <h2 id="largeScoreTitle">Large score</h2>
+        <section class="view-grid hidden" data-section="player">
+          <div class="next-match" id="playerNextMatch">
+            <p class="eyebrow">Din neste kamp</p>
+            <h3>Velg spillerprofil</h3>
+            <p>Da viser appen bane, makker og motstandere for akkurat deg.</p>
+          </div>
+
+          <div class="panel player-profile-panel">
+            <div class="panel-heading">
+              <h3>Din status</h3>
+              <button class="secondary compact-button" id="changePlayerButton" type="button">Bytt</button>
             </div>
-            <button class="ghost icon-button" id="closeLargeScoreButton" type="button">Lukk</button>
+            <div class="player-identity-card" id="playerIdentityCard"></div>
+            <div class="status-grid player-status-grid" id="playerStatusGrid"></div>
           </div>
-          <div class="large-score-board" id="largeScoreBoard"></div>
-          <div class="large-score-actions" id="largeScoreActions"></div>
-        </div>
-      </dialog>
 
-      <dialog class="score-dialog" id="setScoreDialog" aria-labelledby="setScoreTitle">
-        <div class="score-dialog-surface">
-          <div class="panel-heading">
-            <h3 id="setScoreTitle">Settresultat</h3>
-            <button class="ghost icon-button" id="closeSetScoreButton" type="button">Lukk</button>
+          <div class="panel wide">
+            <h3>Dine kamper</h3>
+            <div class="matches" id="playerMatches"></div>
           </div>
-          <p class="hint" id="setScoreContext">Velg ferdig sett.</p>
-          <div class="quick-score-grid" id="setScoreOptions"></div>
+
+          <div class="panel wide">
+            <h3>Tabell</h3>
+            <ol class="standings" id="playerStandingsList"></ol>
+          </div>
+        </section>
+
+        <section class="view-grid hidden" data-section="tournament">
+          <div class="panel wide">
+            <h3>Turneringsoversikt</h3>
+            <div class="matches" id="spectatorMatches"></div>
+          </div>
+          <div class="panel">
+            <h3>Tabell</h3>
+            <ol class="standings" id="standingsList"></ol>
+          </div>
+          <div class="panel">
+            <h3>Regler</h3>
+            <div class="rules-list" id="rulesList"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <dialog class="large-score-dialog" id="largeScoreDialog" aria-labelledby="largeScoreTitle">
+      <div class="large-score-surface" id="largeScoreSurface">
+        <div class="large-score-top">
+          <div>
+            <p class="eyebrow" id="largeScoreContext">Kamp</p>
+            <h2 id="largeScoreTitle">Large score</h2>
+          </div>
+          <button class="ghost icon-button" id="closeLargeScoreButton" type="button">Lukk</button>
         </div>
-      </dialog>
+        <div class="large-score-board" id="largeScoreBoard"></div>
+        <div class="large-score-actions" id="largeScoreActions"></div>
+      </div>
+    </dialog>
 
-      <footer class="site-footer">
-        <p>Copyright &copy; <span id="copyrightYearRange">2026</span> Sigurd Steen Grødem. All rights reserved.</p>
-      </footer>
-    </div>
+    <dialog class="score-dialog" id="setScoreDialog" aria-labelledby="setScoreTitle">
+      <div class="score-dialog-surface">
+        <div class="panel-heading">
+          <h3 id="setScoreTitle">Settresultat</h3>
+          <button class="ghost icon-button" id="closeSetScoreButton" type="button">Lukk</button>
+        </div>
+        <p class="hint" id="setScoreContext">Velg ferdig sett.</p>
+        <div class="quick-score-grid" id="setScoreOptions"></div>
+      </div>
+    </dialog>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
-    <script src="app.js?v=admin-player-flow-1"></script>
-  </body>
+    <footer class="site-footer">
+      <p>Padelstar.app </p>
+      <p>Copyright &copy; <span id="copyrightYearRange">2026</span> Padelstar/Sigurd Steen Grødem. All rights reserved.
+      </p>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="app.js?v=admin-player-flow-1"></script>
+</body>
+
 </html>
