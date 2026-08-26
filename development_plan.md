@@ -7,6 +7,55 @@ Status: aktivt arbeidsdokument for plan og gjennomføring
 ## 0. Førsteprioritet: Responsiv UI-opprydding etter ny designretning
 
 Før neste funksjonsrunde skal grensesnittet ryddes opp slik at det nye Padel Manager-designet fungerer på PC, iPad og telefon.
+#Funksjonsflyt:
+
+Kan du gjøre denne appen om til en en sides app?
+
+Jeg ønsker at forskjellige moduler skal komme til syne når de er aktive og være usynlige og ikke ta opp noe plass når de er inaktive. 
+
+#Moduler og logikk:
+
+##Landing page: 
+vises når ingen turnering er aktiv, 
+skjules når en av de andre modulene er aktiv. 
+
+To buttons
+Create
+Join 
+
+
+##Setup admin:
+Vises når admin setter opp en turnering (create)
+Skjules i andre visninger
+
+##Setup player
+Vises når en spiller skal joine en aktiv turnering (join) 
+Skjules ellers 
+
+Vise det samme som setup fanen viser i dag
+
+##Admin view
+Vises når en turnering er aktiv for admin
+Skjules når en turnering ikke er aktiv 
+
+Viser det sammen som admin fanen i dag
+
+##Player view 
+Hvis for hver spiller når en turnering er aktiv, også admin dersom han deltar
+Skjules ellers
+
+Vise det samme som playerfanen viser i dag
+
+##Tournament view 
+Vises når en turnering er aktiv 
+Skjules ellers. 
+
+Den skal vise det tilsvarende som i tilskuertallene i viser i dag
+
+##Menu
+Link alle modulene i menyen. De skal følge samme logikk, altså vises dersom modulen er aktiv, skjules når den ikke er det. 
+
+
 
 Bakgrunn: `landing_page.jpg` er designfasit for forsiden, og skjermbilder fra admin-, spiller- og tilskuervisning viser at appvisningene foreløpig har for store nav-elementer, overlappende rollelabels og ujevn skalering på store skjermer.
 

@@ -8,6 +8,29 @@ Denne filen er den løpende prosjektloggen for Padel Manager Web.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-26 - Dokumentert turneringslogikk fra iOS-appen
+
+### Gjort
+
+- Leste gjennom sentrale Swift-filer fra `PadelManager-main` for turneringsmotor, kampflyt, scoring, leaderboard og cup.
+- Opprettet `tournament_logic.md` som portingsreferanse for webappen.
+- Dokumenterte round-robin-logikk, cup-logikk, kampstatus, scoring, walkover, undo, leaderboard, persistens og hvordan admin som spiller bør modelleres i webappen.
+
+### Beslutninger
+
+- Admin skal forstås som rolle/host utenfor selve turneringsmotoren.
+- Dersom admin deltar, må admin også representeres som en spiller i turneringen.
+- iOS-logikken skal brukes som funksjonell referanse, men database- og sanntidsflyt må modelleres eksplisitt for webappen.
+
+### Endrede filer
+
+- `tournament_logic.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Bruke `tournament_logic.md` som sjekkliste når database-tabeller, API-operasjoner og sanntidsoppdateringer videreutvikles.
+
 ## 2026-08-26 - Menykomponent og in-app hamburgerfix
 
 ### Gjort
