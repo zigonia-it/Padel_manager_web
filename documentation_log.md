@@ -8,6 +8,27 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-26 - La planlagte funksjoner inn i README
+
+### Gjort
+
+- La til en kort `Planlagte funksjoner`-seksjon i `README.md`.
+- Beholdt README som forklarende dokument, men gjorde plass til en produktnær oversikt over kommende funksjoner.
+
+### Beslutninger
+
+- README kan vise planlagte funksjoner på høyt nivå.
+- Detaljert arbeidsrekkefølge og tekniske oppgaver skal fortsatt ligge i `development_plan.md`.
+
+### Endrede filer
+
+- `README.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Synkronisere denne listen med `development_plan.md` når større funksjoner flyttes fra plan til ferdig app.
+
 ## 2026-08-26 - Gjort README mer forklarende
 
 ### Gjort
