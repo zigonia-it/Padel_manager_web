@@ -6,6 +6,10 @@ Status: referanse for webimplementasjonen
 
 Dette dokumentet beskriver turneringslogikken slik den var modellert i den tidligere iOS-appen `PadelManager-main`. Dokumentet er ment som en praktisk portingsreferanse for webappen, ikke som en instruksjonsfil fra iOS-prosjektet.
 
+## Webstatus per 2026-08-26
+
+Webappen støtter nå `roundRobin` og et første `cup`-format med automatisk eller manuelt lagoppsett. Cupen seeder lagene, håndterer byes til nærmeste toerpotens, viser pending-slots, oppretter neste runde fra vinnerlagene og kan opprette valgfri bronsefinale. Admin kan også registrere walkover og angre siste kampsteg med ett-stegs undo.
+
 ## Kilder i iOS-prosjektet
 
 - `PadelManager/Core/Session/SessionManager.swift`
@@ -90,8 +94,25 @@ Konsekvens: Round-robin i iOS-appen er ikke bare "alle spillere mot alle". For f
 
 Cup-formatet er single elimination med to mulige lagoppsett:
 
-- `auto`: spillerlisten shuffles, og spillere pares fortløpende to og to. Ved oddetall blir siste spiller uten lag.
+- `auto`: spillerlisten shuffles, og spillere pares fortløpende to og to. Ved oddetall blir siste spiller uten lag og sitter over i første runde.
 - `manual`: ferdige `cupTeams` brukes direkte.
+
+Webimplementert del:
+
+- formatet kan velges i admin før turneringsstart
+- automatisk lagoppsett parer spillerne to og to
+- manuelt lagoppsett kan definere én eller to spillere per lag
+- lagene seedes og bracket-størrelsen rundes opp til nærmeste toerpotens
+- byes går videre til neste runde
+- neste runde opprettes fra vinnerlagene
+- pending-slots vises for senere bracket-runder
+- bronsefinale opprettes mellom semifinaletaperne når valget er aktivert
+- walkover kan registreres til valgfritt lag i en aktiv eller ventende kamp
+- siste poeng-, settresultat- eller walkover-handling kan angres
+
+Gjenstår i webporteringen:
+
+- full kamp-/bracket-historikk utover siste undo-steg
 
 Når cupen starter:
 

@@ -11,7 +11,7 @@ Oppdateringslogikk:
 
 ## 0. Nåværende fokus
 
-Appen er nå i versjon 0.1 Beta med publisert responsiv PWA/webapp som kan hostes statisk, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
+Appen er nå i versjon 0.1 Beta med publisert responsiv PWA/webapp som kan hostes statisk, én-sides modulflyt, Supabase-tilkobling, round-robin og cup-format med automatisk eller manuelt lagoppsett, pending-bracket, valgfri bronsefinale, walkover og ett-stegs undo, og lokal rollelogikk der admin kan velge om han også er spiller.
 
 Prosjektmetadata:
 - Navn: Padelstar
@@ -28,6 +28,9 @@ Padelstar-branding er delvis gjennomført i appkoden:
 - Nunito og Titillium Web er satt som hovedfonter i CSS.
 - Gullpaletten er justert mot en litt gulere Padelstar-gulltone.
 - Tunge PWA-bilder er byttet ut med lettere genererte webvarianter.
+- Spillerpoeng kan synkroniseres atomisk mot Supabase via en begrenset RPC.
+- Turneringsformat kan velges mellom round-robin og cup med automatisk eller manuelt lagoppsett, byes, pending-bracket, bronsefinale og rundeavansement.
+- Admin kan registrere walkover og angre siste poeng-, settresultat- eller walkover-handling.
 
 Gjenstår:
 
@@ -38,16 +41,14 @@ Gjenstår:
 ## Neste fase 
 er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i ui problemer:
 
-1. Bruke `tournament_logic.md` som referanse for videre porting fra iOS-appen.
-2. Skille tydelig mellom host/admin-rolle og spilleridentitet i database- og klientstate.
-3. Gjøre scoring, walkover, kampstart og rundeavansement som robuste, atomiske operasjoner mot Supabase.
-4. Videreutvikle realtime-flyten slik admin-, spiller- og turneringsvisning alltid viser samme turneringsstate.
-5. Gjøre det slik at aktive spillere i en kamp også kan sette poeng i egen kamp
-6. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
-7. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
-8. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
-9. rette opp ui errors som at en button har feil fassong og kurve osv.
-10. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
+1. Skille tydelig mellom host/admin-rolle og spilleridentitet i database- og klientstate.
+2. Gjøre scoring, walkover, kampstart og rundeavansement som robuste, atomiske operasjoner mot Supabase. Spillerpoeng-RPC er migrert og verifisert; øvrige kampoperasjoner gjenstår.
+3. Videreutvikle realtime-flyten slik admin-, spiller- og turneringsvisning alltid viser samme turneringsstate.
+4. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
+5. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
+6. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
+7. rette opp ui errors som at en button har feil fassong og kurve osv.
+8. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
 
 ## 1. Formål
 

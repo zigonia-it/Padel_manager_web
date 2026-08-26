@@ -1,12 +1,362 @@
 # Padelstar - Dokumentasjonslogg
 
-Sist oppdatert: 2026-08-26
+Sist oppdatert: 2026-08-27
 
 Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
+
+## 2026-08-27 - Oppdatert topp-logo
+
+- Byttet toppfeltets sammensatte tekst- og ikonlogo med `assets/padelstar_button-900.png`.
+- Tilpasset logoens størrelse for både workspace-header og smal mobilvisning.
+- Bumpet service worker-cache til `padelstar-v38`.
+
+### Endrede filer
+
+- `index.html`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Verifisering
+
+- `file assets/padelstar_button-900.png`
+- `node --check app.js`
+- `git diff --check`
+
+### Neste steg
+
+- Kontrollere den nye logoen i publisert PWA etter neste deploy.
+
+## 2026-08-27 - Produksjonsklarere brukerflate
+
+- Fjernet synlige referanser til demo, testing og demospillere fra appen.
+- Fjernet utviklerknappen for å åpne startsiden fra delingspanelet.
+- Endret nullstilling til `Nullstill turnering` med tydelig bekreftelse før lokale og nettlagrede data slettes.
+- Beholdt `v. 0.1 (Beta)` som eneste synlige produktmodenhetsmarkering.
+- Bumpet service worker-cache til `padelstar-v37`.
+
+### Endrede filer
+
+- `app.js`
+- `index.html`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `python3 -m json.tool manifest.webmanifest`
+- `git diff --check`
+- Sjekket at aktive appfiler ikke inneholder synlige demo-/testetiketter.
+
+### Neste steg
+
+- Fortsette produksjonsklarering av data- og tilgangsmodell før bred lansering.
+
+## 2026-08-26 - Join-lenke bruker offentlig nettadresse
+
+- Join-lenken bruker nå `https://padelstar.app/?join=...` når appen kjøres på en publisert adresse.
+- Lokal utvikling på `localhost`/`127.0.0.1` beholder lokal origin slik at join-flyt kan testes lokalt.
+- Bumpet service worker-cache til `padelstar-v36`.
+
+### Endrede filer
+
+- `app.js`
+- `index.html`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `python3 -m json.tool manifest.webmanifest`
+- `git diff --check`
+
+### Neste steg
+
+- Deploy endringen slik at den nye offentlige join-lenken brukes av publiserte turneringer.
+
+## 2026-08-26 - Forenklede tilkoblingsetiketter
+
+- Endret statuspillen fra `Live PWA` til `Online`.
+- Endret lokal fallback fra `Lokal PWA`/`Lokal demo` til `Lokal`.
+- `Offline` beholdes når nettleseren er frakoblet.
+- Bumpet service worker-cache til `padelstar-v35`.
+
+### Verifisering
+
+- `node --check app.js`
+- `python3 -m json.tool manifest.webmanifest`
+- `git diff --check`
+
+## 2026-08-26 - Migrert og verifisert atomisk Supabase-synk for spillerpoeng
+
+### Gjort
+
+- La til `save_player_point(...)` som en egen begrenset Supabase RPC.
+- RPC-en låser turneringsraden, validerer invitasjonskode, kampstatus, spillerens tilhørighet og lagindeks, og oppdaterer kun én poenghendelse.
+- Portet eksisterende tennispoeng-, game-, sett- og kampavansementlogikk til den atomiske RPC-en.
+- La til en seriell klientkø for spillerpoeng slik at raske trykk behandles i riktig rekkefølge.
+- Stoppet spillerrollen fra å sende hele turneringsstate via admin-RPC.
+- Oppdaterte rot-skjemaet og opprettet migration `20260826211047_player_score_rpc.sql`.
+- Kjørte migrationen mot Supabase-prosjektet `sxzlljxodorkfrjnwfgr`.
+- Bumpet service worker-cache til `padelstar-v30` for spillerpoeng-klienten.
+
+### Beslutninger
+
+- Admin fortsetter å bruke `save_tournament_state` med admin-token.
+- Spillere sender bare kamp-ID, spiller-ID, lagindeks og invitasjonskode for ett poeng.
+- RPC-en er et bevisst offentlig anon-endepunkt i dagens statiske MVP og må følges opp med rate limiting/sterkere spiller-token før bred produksjonsbruk.
+
+### Endrede filer
+
+- `app.js`
+- `service-worker.js`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826211047_player_score_rpc.sql`
+- `development_plan.md`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `python3 -m json.tool manifest.webmanifest`
+- `git diff --check`
+- Supabase security advisors ble lest for å kontrollere eksisterende funksjons- og grant-mønster.
+- Kjørte RPC-en direkte med gyldig spiller og bekreftet at `teamOne` økte fra `1` til `2`.
+- Kjørte RPC-en med ukjent spiller og bekreftet avvisning.
+- Bekreftet grants: `anon` kan kjøre RPC-en, `authenticated` kan ikke.
+- Lokal browser verifiserte at spillerklienten kunne sende poeng og at live state ble oppdatert til `40-0`.
+
+### Neste steg
+
+- Følge opp rate limiting/sterkere spiller-token før bred produksjonsbruk.
+- Fortsette med turneringstype-logikken fra `tournament_logic.md`.
+
+## 2026-08-26 - Første automatiske cup-format
+
+### Gjort
+
+- La til formatvalg mellom `roundRobin` og `cup` i adminreglene.
+- Implementerte automatisk cup-lagoppsett med paring av spillere to og to; en eventuell siste spiller ved oddetall sitter over i første runde.
+- Implementerte seeding, bracket-størrelse til nærmeste power of 2 og byes.
+- Implementerte dynamisk opprettelse av neste cup-runde fra vinnerlagene.
+- La til migreringssikring for `settings.format` og `state.cup`.
+- Rettet overgangstilstanden slik at neste cup-runde blir tilgjengelig når siste kamp i aktiv runde er ferdig.
+- Bumpet service worker-cache til `padelstar-v31` etter automatisk cup-støtte.
+
+### Beslutninger
+
+- Første cup-snitt bruker automatisk lagoppsett og krever minst fire spillere; oddetall håndteres med sit-out for siste spiller.
+- Manuelle lag, bronsefinale og full pending-bracket kommer senere.
+- Round-robin-flyten beholdes uendret.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `development_plan.md`
+- `tournament_logic.md`
+- `product_development.md`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `python3 -m json.tool manifest.webmanifest`
+- `git diff --check`
+- Lokal browser på `http://127.0.0.1:8091` med ren origin.
+- Opprettet cup med åtte spillere og to baner.
+- Bekreftet formatvalg, fire automatiske lag, to aktive kamper i første runde og vinnerne videre til runde 2.
+- Bekreftet at fullført aktiv cup-runde viser `Start neste runde`.
+
+### Neste steg
+
+- Legge til tester for cup-seeding, byes og rundeavansement.
+- Portere manuelle cup-lag, bronsefinale, walkover og undo.
+
+## 2026-08-26 - Manuelle cup-lag
+
+### Gjort
+
+- La til valg mellom automatisk og manuelt cup-lagoppsett i admin.
+- La til lagredigering før turneringsstart, med ett lag per linje og `+` mellom spillerne.
+- Validerer at lagene har én eller to spillere, at spillerne finnes og at hver spiller bare brukes én gang.
+- Koblede manuelle lag til cup-generatoren; spillere som ikke er med på et manuelt lag sitter over i første runde.
+- Holder lagoppsettet låst etter at første runde er startet.
+- Bumpet service worker-cache til `padelstar-v32`.
+
+### Beslutninger
+
+- Manuelle lag lagres som `cupTeams` i turneringsstate og bruker eksisterende spiller-ID-er og accents.
+- Et manuelt lag kan foreløpig bestå av én eller to spillere, slik at samme cup-motor også kan brukes til single-lag.
+- Bronsefinale, pending-bracket, walkover og undo er fortsatt egne gjenstående porteringssteg.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Portere pending-bracket og bronsefinale.
+- Legge til walkover- og undo-flyt.
+
+## 2026-08-26 - Cup-bracket og bronsefinale
+
+### Gjort
+
+- La til eksplisitt cup-bracket i turneringsstate med pending-slots for senere runder.
+- Viser første runde, pending finale og eventuell pending bronsefinale i adminvisningen.
+- Oppdaterer bracket-slots når vinnerne fra forrige runde er klare.
+- La til valgfri bronsefinale mellom taperne fra semifinalene.
+- Markerer cupen som ferdig når finalen og eventuell bronsefinale er ferdige.
+- Bumpet service worker-cache til `padelstar-v33`.
+
+### Beslutninger
+
+- Bracketet lagres som `state.cup.bracket` med `match`- og `pending`-slots.
+- Bronsefinalen behandles som en egen kamp i finalerunden, men påvirker ikke hvilket lag som vinner cupen.
+- Eldre cuper uten eksplisitt bracket fortsetter med eksisterende dynamiske rundeavansement.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `development_plan.md`
+- `tournament_logic.md`
+- `product_development.md`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `git diff --check`
+- Lokal browser på `http://127.0.0.1:8095` med ren origin.
+- Bekreftet pending finale og bronsefinale etter cupstart.
+- Fullførte første runde og bekreftet at finale og bronsefinale ble opprettet med riktige lag.
+- Fullførte begge sluttkampene og bekreftet `Fullført`, vinner i bracket og ingen browser-feil.
+
+### Neste steg
+
+- Legge til walkover og undo.
+
+## 2026-08-26 - Walkover og ett-stegs undo
+
+### Gjort
+
+- La til admin-knapper for å registrere walkover til hvert av lagene.
+- Walkover markerer vinner, setter kampstatus til ferdig og påvirker ikke game- eller settresultater.
+- La til ett-stegs undo for siste poeng, settresultat eller walkover.
+- Undo gjenoppretter også kampstatus, turneringsstatus og eventuell neste kamp som ble startet automatisk.
+- Markerer walkover tydelig i kampkortet og bracketet.
+- Bumpet service worker-cache til `padelstar-v34`.
+
+### Beslutninger
+
+- Undo lagrer kun siste handling per kamp, i tråd med iOS-modellens `lastScoredMatchState`.
+- Walkover er en admin-operasjon; spillerrollen får fortsatt bare poengknapper.
+- Full historikk og flere undo-steg er ikke en del av denne porteringen.
+
+### Endrede filer
+
+- `app.js`
+- `styles.css`
+- `index.html`
+- `service-worker.js`
+- `development_plan.md`
+- `tournament_logic.md`
+- `product_development.md`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `git diff --check`
+- Lokal browser på `http://127.0.0.1:8096` med ren origin.
+- Bekreftet at admin-kortet viser to walkover-kontroller.
+- Registrerte et 6-0-resultat og bekreftet at `Angre resultat` gjenopprettet kampen til 0-0 og `playing`.
+- Bekreftet ingen browser-feil etter reload.
+
+### Neste steg
+
+- Skille tydeligere mellom host/admin og spilleridentitet i datalaget.
+- Gjøre øvrige kampoperasjoner atomiske mot Supabase.
+
+## 2026-08-26 - Spiller kan føre poeng i egen kamp
+
+### Gjort
+
+- Gjorde poengknappene tilgjengelige i spillerens egen pågående kamp.
+- Begrenset spillerkontrollene til poengføring; admin beholder bane-, sett-, kamp- og avbryt-funksjoner.
+- Fjernet funksjonen fra listen over planlagte funksjoner.
+
+### Beslutninger
+
+- En spiller får bare poengkontroller når valgt spiller er med i kampen og kampen har status `playing`.
+- Ventende, avsluttede og andre spilleres kamper viser ingen redigeringskontroller.
+- Den eksisterende lagrings- og realtime-arkitekturen beholdes; separat serverautorisert spiller-skriving må hardnes i neste datalagfase.
+
+### Endrede filer
+
+- `app.js`
+- `README.md`
+- `development_plan.md`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `git diff --check`
+- Lokal browser på `http://127.0.0.1:8090`.
+- Opprettet en aktiv kamp med Ada, Bo, Cato og Dina.
+- Valgte Ada som spiller og bekreftet at egen pågående kamp viser bare poengknapper.
+- Trykket `Poeng Ada & Dina` og bekreftet at stillingen endret seg fra `0-0` til `15-0`.
+
+### Neste steg
+
+- Legge inn automatiserbare tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
+- Samle opprydding av midlertidige testturneringer.
+
+## 2026-08-26 - Verifisert hjem- og fortsett-flyt etter merge
+
+### Gjort
+
+- Merget `codex/padelstar-post-beta-0.1` inn i `main` som fast-forward.
+- Opprettet ny arbeidsgren `codex/padelstar-post-beta-0.2` fra den sammenslåtte `main`.
+- Verifiserte lokalt i browser at en aktiv turnering viser `Hjem` i menyen.
+- Verifiserte at hjemvisningen viser resume-panelet med turneringsnavn, spillere, baner og invitasjonskode.
+- Verifiserte at `Fortsett som admin` returnerer til adminmodulen med samme turneringsstate.
+
+### Beslutninger
+
+- Nye endringer skal bygges videre på den sammenslåtte Padelstar-beta-historikken.
+- Browser-verifiseringen bruker en midlertidig testturnering som må slettes etter testen.
+
+### Endrede filer
+
+- `documentation_log.md`
+
+### Verifisering
+
+- Lokal browser på `http://127.0.0.1:8090`.
+- Opprettet `Codex Home Flow Test 2046` med invitasjonskode `ZXZRU`.
+- Bekreftet flyten aktiv turnering → `Hjem` → `Fortsett som admin`.
+
+### Neste steg
+
+- Rydde testturneringen fra Supabase etter eksplisitt bekreftelse.
+- Fortsette med neste produksjonsklarering i `development_plan.md`.
 
 ## 2026-08-26 - Hjemvisning under aktiv turnering
 

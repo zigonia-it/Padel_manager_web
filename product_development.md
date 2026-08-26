@@ -679,7 +679,7 @@ Regler:
 
 ### 15.2 Cup
 
-Senere fase.
+Første cup-snitt er nå implementert i webappen.
 
 Fra SwiftUI-appen:
 
@@ -690,7 +690,15 @@ Fra SwiftUI-appen:
 - finalevinner
 - valgfri bronsefinale
 
-Cup skal ikke inn i første web-MVP med mindre round-robin er stabil.
+Webstatus:
+
+- formatvalg mellom round-robin og cup
+- automatisk eller manuelt lagoppsett
+- seed-ing til nærmeste power of 2
+- byes og dynamisk opprettelse av neste runde fra vinnerlagene
+- pending-bracket og valgfri bronsefinale
+- walkover og ett-stegs undo for siste kampsteg
+- full cup-historikk gjenstår
 
 ## 16. Migreringsstrategi fra SwiftUI
 
