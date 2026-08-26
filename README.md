@@ -4,7 +4,7 @@ Live app: https://padelstar.app
 
 Sist oppdatert: 2026-08-27
 
-Status: 0.1 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
+Status: 0.2 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
 Metadata:
 - Navn: Padelstar

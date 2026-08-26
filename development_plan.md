@@ -11,7 +11,7 @@ Oppdateringslogikk:
 
 ## 0. Nåværende fokus
 
-Appen er i versjon 0.1 Beta og har en publisert responsiv PWA/webapp med én-sides modulflyt, Supabase-tilkobling, round-robin og cup-format med automatisk eller manuelt lagoppsett, pending-bracket, valgfri bronsefinale, walkover og ett-stegs undo. Join-lenker bruker den offentlige adressen `https://padelstar.app/?join=...`, mens lokal origin beholdes ved lokal utvikling.
+Appen er i versjon 0.2 Beta og har en publisert responsiv PWA/webapp med én-sides modulflyt, Supabase-tilkobling, round-robin og cup-format med automatisk eller manuelt lagoppsett, pending-bracket, valgfri bronsefinale, walkover og ett-stegs undo. Join-lenker bruker den offentlige adressen `https://padelstar.app/?join=...`, mens lokal origin beholdes ved lokal utvikling.
 
 Prosjektmetadata:
 - Navn: Padelstar

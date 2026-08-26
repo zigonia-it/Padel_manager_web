@@ -8,6 +8,25 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Bumpet produktversjon til 0.2 Beta
+
+- Oppdaterte synlig appversjon fra `v. 0.1 (Beta)` til `v. 0.2 (Beta)`.
+- Synkroniserte aktiv versjonsstatus i README og utviklingsplan.
+- Bumpet service-worker-cache til `padelstar-v40` slik at PWA-en henter oppdatert app-shell.
+- Lot backup-formatets interne `version: 1` stå uendret siden det ikke er produktversjonen.
+
+### Endrede filer
+
+- `index.html`
+- `README.md`
+- `development_plan.md`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Neste steg
+
+- Fortsette produksjonsklareringen fra `development_plan.md`.
+
 ## 2026-08-27 - Topp-logo som hjem-knapp
 
 - Gjorde `padelstar_button-900.png` i headeren klikkbar.
