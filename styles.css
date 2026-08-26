@@ -448,6 +448,27 @@ body:not(.workspace-active):not(.setup-active) .topbar {
   min-width: 0;
 }
 
+.brand-home-button {
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+}
+
+button.brand-home-button:not(:disabled):hover {
+  transform: none;
+}
+
+.brand-home-button:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 4px;
+}
+
 .brand-logo {
   display: block;
   width: clamp(180px, 20vw, 270px);

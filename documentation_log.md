@@ -8,6 +8,30 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Topp-logo som hjem-knapp
+
+- Gjorde `padelstar_button-900.png` i headeren klikkbar.
+- Koblet logoen til eksisterende `landing`-modul slik at den åpner hjemvisningen uten full sidelasting.
+- La til tastaturfokus og tilgjengelig navn for hjem-knappen.
+- Bumpet service worker-cache til `padelstar-v39`.
+
+### Endrede filer
+
+- `index.html`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`
+
+### Verifisering
+
+- Lokal browser bekreftet at header-logoen vises som `Gå til hjem`.
+- `node --check app.js`
+- `git diff --check`
+
+### Neste steg
+
+- Fortsette med produksjonsklaringen fra `development_plan.md`.
+
 ## 2026-08-27 - Synkronisert plan og prioritert neste fase
 
 - Brukte `documentation_log.md` som canonical arbeidslogg; det finnes ikke en separat `development_log.md` i repoet.
