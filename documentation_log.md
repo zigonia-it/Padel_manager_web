@@ -8,6 +8,38 @@ Denne filen er den løpende prosjektloggen for Padel Manager Web.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-26 - Menykomponent og in-app hamburgerfix
+
+### Gjort
+
+- Fjernet bruk av `menu_style.png` som bakgrunn i de faktiske menyflatene, fordi assetet inneholder statisk tekst fra designreferansen.
+- Kodet hovedmeny og admin-underfaner som ekte responsive HTML/CSS-elementer.
+- Beholdt `menu_highlight.png` som aktiv menyindikator og hamburgerstrek.
+- La inn egen workspace-hamburger for mobil og smale nettbrett.
+- Gjorde hamburgerlogikken mer robust med delegert click-håndtering, `aria-expanded` som synlighetsfallback og automatisk lukking ved Escape, hash-endring, visningsbytte og klikk utenfor menyen.
+- Bumpet CSS-, JS- og service worker-versjon for å unngå gammel PWA-cache.
+- Verifiserte i in-app-browser med mobil viewport at workspace-hamburgeren åpner menyen med `opacity: 1` og viser `Admin`, `Spiller` og `Tilskuer`.
+
+### Beslutninger
+
+- Menyutseendet skal bygges i kode, ikke ved å legge inn statiske screenshots som UI-bakgrunn.
+- `menu_style.png` kan bare brukes som visuell referanse, ikke som aktiv menyasset.
+- Hamburger skal trigges på bredde under 900px, uten avhengighet til `orientation: portrait`, fordi in-app/mobile viewport ikke alltid rapporterer orientation slik CSS-regelen forventer.
+
+### Endrede filer
+
+- `index.html`
+- `styles.css`
+- `app.js`
+- `service-worker.js`
+- `development_plan.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Gjøre videre visuell opprydding av panelbredder og avstander i admin-, spiller- og tilskuervisning.
+- Teste faktisk telefon/iPad etter hard refresh eller ny cacheversjon.
+
 ## 2026-08-26 - Ny landing page-retning og responsiv UI-plan
 
 ### Gjort

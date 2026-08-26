@@ -159,6 +159,8 @@ const elements = {
   closeSetScoreButton: document.querySelector("#closeSetScoreButton"),
   landingMenuToggle: document.querySelector(".landing-menu-toggle"),
   landingLinks: document.querySelector("#landingLinks"),
+  workspaceMenuToggle: document.querySelector(".workspace-menu-toggle"),
+  workspaceTabs: document.querySelector("#workspaceTabs"),
 };
 
 let pendingSetScoreMatchId = null;
@@ -426,20 +428,64 @@ document.querySelectorAll(".landing-links a, .landing-cta").forEach((link) => {
   });
 });
 
-elements.landingMenuToggle?.addEventListener("click", () => {
-  const isOpen = document.body.classList.toggle("landing-menu-open");
-  elements.landingMenuToggle.setAttribute("aria-expanded", String(isOpen));
-  elements.landingMenuToggle.setAttribute("aria-label", isOpen ? "Lukk meny" : "Åpne meny");
+document.addEventListener("click", (event) => {
+  const clickTarget = event.target instanceof Element ? event.target : null;
+  if (!clickTarget) return;
+
+  const landingToggle = clickTarget.closest(".landing-menu-toggle");
+  if (landingToggle) {
+    event.preventDefault();
+    const isOpen = !document.body.classList.contains("landing-menu-open");
+    setLandingMenuOpen(isOpen);
+    return;
+  }
+
+  const workspaceToggle = clickTarget.closest(".workspace-menu-toggle");
+  if (workspaceToggle) {
+    event.preventDefault();
+    const isOpen = !document.body.classList.contains("workspace-menu-open");
+    setWorkspaceMenuOpen(isOpen);
+    return;
+  }
+
+  if (!clickTarget.closest(".landing-links")) closeLandingMenu();
+  if (!clickTarget.closest(".tabs")) closeWorkspaceMenu();
+});
+
+window.addEventListener("hashchange", () => {
+  closeLandingMenu();
+  closeWorkspaceMenu();
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeLandingMenu();
+  if (event.key === "Escape") {
+    closeLandingMenu();
+    closeWorkspaceMenu();
+  }
 });
 
 function closeLandingMenu() {
-  document.body.classList.remove("landing-menu-open");
-  elements.landingMenuToggle?.setAttribute("aria-expanded", "false");
-  elements.landingMenuToggle?.setAttribute("aria-label", "Åpne meny");
+  setLandingMenuOpen(false);
+}
+
+function closeWorkspaceMenu() {
+  setWorkspaceMenuOpen(false);
+}
+
+function setLandingMenuOpen(isOpen) {
+  document.body.classList.toggle("landing-menu-open", isOpen);
+  document.querySelectorAll(".landing-menu-toggle").forEach((toggle) => {
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    toggle.setAttribute("aria-label", isOpen ? "Lukk meny" : "Åpne meny");
+  });
+}
+
+function setWorkspaceMenuOpen(isOpen) {
+  document.body.classList.toggle("workspace-menu-open", isOpen);
+  document.querySelectorAll(".workspace-menu-toggle").forEach((toggle) => {
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    toggle.setAttribute("aria-label", isOpen ? "Lukk visningsmeny" : "Åpne visningsmeny");
+  });
 }
 
 function createTournament({ name, inviteCode, players, courtCount }) {
@@ -766,15 +812,18 @@ function prefillJoinForm(inviteCode) {
 
 function showStart() {
   document.body.classList.remove("workspace-active");
+  closeWorkspaceMenu();
   elements.startView.classList.remove("hidden");
   elements.workspaceView.classList.add("hidden");
 }
 
 function showWorkspace(tab = "admin") {
   document.body.classList.add("workspace-active");
+  closeLandingMenu();
   elements.startView.classList.add("hidden");
   elements.workspaceView.classList.remove("hidden");
   activateTab(tab);
+  requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
 }
 
 function activateTab(view) {
@@ -786,6 +835,7 @@ function activateTab(view) {
   document.querySelectorAll("[data-section]").forEach((section) => {
     section.classList.toggle("hidden", section.dataset.section !== requestedView);
   });
+  closeWorkspaceMenu();
   renderRoleVisibility();
 }
 

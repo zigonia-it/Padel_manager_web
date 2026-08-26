@@ -12,6 +12,8 @@ Bakgrunn: `landing_page.jpg` er designfasit for forsiden, og skjermbilder fra ad
 
 Målet er å beholde den nye mørk/gull-retningen, men gjøre den praktisk og responsiv i hele appen.
 
+Status 2026-08-26: Pågår. Første feilspor er korrigert: `menu_style.png` skal ikke brukes som statisk menybakgrunn fordi bildet inneholder ferdig tekst. Menyer skal kodes som ekte HTML/CSS-elementer, med `menu_highlight.png` kun som aktiv markør og hamburgerstreker.
+
 Arbeidsliste:
 
 1. Redusere og normalisere toppnavigasjonen i appvisningene.

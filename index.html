@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/New assets/padel_manager logo_1x.png">
     <link rel="icon" href="assets/favicon.jpg">
-    <link rel="stylesheet" href="styles.css?v=landing-coded-3">
+    <link rel="stylesheet" href="styles.css?v=workspace-ui-3">
   </head>
   <body>
     <div class="app-shell">
@@ -151,7 +151,12 @@
             </div>
           </div>
 
-          <nav class="tabs" aria-label="Visning">
+          <button class="workspace-menu-toggle" type="button" aria-label="Åpne visningsmeny" aria-expanded="false" aria-controls="workspaceTabs">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <nav class="tabs" id="workspaceTabs" aria-label="Visning">
             <button class="tab active" data-view="admin">Admin</button>
             <button class="tab" data-view="player">Spiller</button>
             <button class="tab" data-view="spectator">Tilskuer</button>
@@ -349,6 +354,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=workspace-ui-3"></script>
   </body>
 </html>
