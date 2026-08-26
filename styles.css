@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
-  --font-ui: Orbitron, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: Orbitron, var(--font-ui);
+  --font-ui: "Saira", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Orbitron", var(--font-ui);
   --ink: #fff4d6;
   --cream: #fff4d6;
   --ink-dark: #100b07;
@@ -34,6 +34,14 @@
 }
 
 @font-face {
+  font-family: "Saira";
+  src: url("assets/fonts/Saira-VariableFont_wdth,wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-stretch: 75% 125%;
+  font-display: swap;
+}
+
+@font-face {
   font-family: "Oxanium";
   src: url("assets/fonts/Oxanium-VariableFont_wght.ttf") format("truetype");
   font-weight: 200 800;
@@ -59,7 +67,7 @@ body {
     #080706;
   color: var(--ink);
   font-family: var(--font-ui);
-  letter-spacing: 0;
+  letter-spacing: 0.015em;
   line-height: 1.5;
   overflow-x: clip;
 }
@@ -90,6 +98,7 @@ input,
 textarea,
 select {
   font: inherit;
+  letter-spacing: 0.01em;
 }
 
 button {
@@ -97,9 +106,8 @@ button {
   border: 1px solid transparent;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.94rem;
-  letter-spacing: 0;
   line-height: 1.3;
   padding: 0.88rem 1rem;
   transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
@@ -126,7 +134,6 @@ select {
     rgba(14, 10, 7, 0.72);
   color: var(--ink);
   font-size: 1rem;
-  letter-spacing: 0;
   line-height: 1.5;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
@@ -155,8 +162,8 @@ label {
   gap: 0.5rem;
   color: var(--silver-light);
   font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.5;
 }
 
@@ -170,8 +177,8 @@ legend {
   margin-bottom: 0.58rem;
   color: var(--silver-light);
   font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.5;
 }
 
@@ -268,8 +275,8 @@ body:not(.workspace-active):not(.setup-active) .topbar {
 .language-picker span {
   color: var(--muted);
   font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.2;
   text-transform: uppercase;
 }
@@ -305,8 +312,8 @@ p {
 h1 {
   font-family: var(--font-display);
   font-size: clamp(1.65rem, 3vw, 2.6rem);
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 800;
+  letter-spacing: 0.025em;
   line-height: 1.12;
   text-transform: uppercase;
 }
@@ -314,8 +321,8 @@ h1 {
 h2 {
   max-width: 740px;
   font-size: clamp(2.25rem, 5.8vw, 5.4rem);
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 800;
+  letter-spacing: 0.025em;
   line-height: 0.98;
 }
 
@@ -333,16 +340,16 @@ h2 {
 
 h3 {
   font-size: 1.08rem;
-  font-weight: 800;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   line-height: 1.35;
 }
 
 .eyebrow {
   color: var(--gold-light);
   font-size: 0.82rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.5;
   text-transform: uppercase;
 }
@@ -373,14 +380,14 @@ h3 {
 .hint {
   color: var(--muted);
   font-size: 0.9rem;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
   line-height: 1.58;
 }
 
 .share-box strong {
   font-family: var(--font-display);
   font-size: 1.45rem;
-  letter-spacing: 0;
+  letter-spacing: 0.025em;
   line-height: 1.15;
 }
 
@@ -401,8 +408,8 @@ h3 {
   display: block;
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.45;
 }
 
@@ -490,7 +497,7 @@ h3 {
 .checkbox-card small {
   color: var(--muted);
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.45;
 }
 
@@ -519,8 +526,8 @@ h3 {
 .share-details span {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.45;
   text-transform: uppercase;
 }
@@ -529,7 +536,8 @@ h3 {
   font-family: var(--font-display);
   color: var(--gold-light);
   font-size: clamp(1.7rem, 4vw, 2.45rem);
-  letter-spacing: 0;
+  font-weight: 800;
+  letter-spacing: 0.025em;
   line-height: 1.1;
 }
 
@@ -692,6 +700,7 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   font-family: var(--font-display);
   font-size: clamp(1rem, 1.7vw, 1.6rem);
   font-weight: 800;
+  letter-spacing: 0.025em;
   line-height: 1.1;
   text-decoration: none;
   text-shadow: 0 3px 10px rgba(0, 0, 0, 0.58);
@@ -753,7 +762,8 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   color: #17100a;
   font-family: var(--font-display);
   font-size: clamp(1.15rem, 2.15vw, 2rem);
-  font-weight: 900;
+  font-weight: 800;
+  letter-spacing: 0.025em;
   line-height: 1;
   text-decoration: none;
   box-shadow:
@@ -789,6 +799,7 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   font-family: var(--font-display);
   font-size: clamp(1.1rem, 2.15vw, 2rem);
   font-weight: 700;
+  letter-spacing: 0.025em;
   line-height: 1.15;
   text-shadow: 0 4px 14px rgba(0, 0, 0, 0.64);
 }
@@ -932,8 +943,8 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
 .round-summary small {
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -980,8 +991,8 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
 .overview-main small {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.55;
 }
 
@@ -1003,8 +1014,8 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
 .overview-stats span {
   color: var(--muted);
   font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -1150,7 +1161,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   color: var(--muted);
   font-family: var(--font-display);
   font-size: clamp(0.84rem, 1vw, 1rem);
-  font-weight: 900;
+  font-weight: 800;
+  letter-spacing: 0.025em;
 }
 
 .tab.active {
@@ -1187,8 +1199,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   margin: 0;
   color: var(--silver-light);
   font-size: 0.82rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.4;
   text-transform: uppercase;
 }
@@ -1249,7 +1261,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
     linear-gradient(160deg, var(--player-accent-light), var(--player-accent), var(--player-accent-dark)),
     var(--player-accent);
   color: white;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1.25;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
   box-shadow:
@@ -1272,8 +1284,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   background: rgba(0, 0, 0, 0.16);
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.25;
 }
 
@@ -1316,8 +1328,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .player-identity-main span {
   color: var(--muted);
   font-size: 0.74rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -1358,7 +1370,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   background: rgba(var(--player-accent-rgb), 0.16);
   color: var(--ink);
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -1380,8 +1392,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .standing-stats small {
   color: var(--muted);
   font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.45;
 }
 
@@ -1485,8 +1497,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .tennis-scoreboard small {
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -1494,7 +1506,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .tennis-scoreboard strong {
   color: var(--gold-light);
   font-size: 1.32rem;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
   line-height: 1.15;
 }
 
@@ -1550,8 +1562,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   gap: 8px;
   color: var(--muted);
   font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -1600,8 +1612,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 
 .match-court {
   color: var(--gold-light);
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
 }
 
 .match-meta,
@@ -1615,8 +1627,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .match-meta {
   color: var(--muted);
   font-size: 0.76rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.4;
   text-transform: uppercase;
 }
@@ -1624,8 +1636,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .match-headline {
   color: var(--silver-light);
   font-size: 0.88rem;
-  font-weight: 800;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   line-height: 1.55;
 }
 
@@ -1640,8 +1652,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   padding: 0.28rem 0.58rem;
   color: var(--gold-light);
   font-size: 0.84rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .now-chip,
@@ -1678,8 +1690,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .winner-note {
   color: #a8e5bc;
   font-size: 0.84rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   line-height: 1.45;
 }
 
@@ -1706,7 +1718,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 
 .versus {
   color: var(--gold);
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .score-row input {
@@ -1714,7 +1726,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   min-height: 52px;
   text-align: center;
   font-size: 1.1rem;
-  font-weight: 900;
+  font-weight: 700;
 }
 
 .score-row label {
@@ -1751,7 +1763,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   background: rgba(255, 255, 255, 0.055);
   color: var(--silver-light);
   font-size: 0.72rem;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
 }
 
 .player-buttons {
@@ -1809,8 +1821,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   gap: 0.25rem;
   color: rgba(255, 255, 255, 0.78);
   font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.55;
 }
 
@@ -1837,8 +1849,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .player-now-grid span {
   color: rgba(255, 255, 255, 0.68);
   font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -1864,7 +1876,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .rules-list p {
   color: var(--muted);
   font-size: 0.84rem;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
   line-height: 1.65;
 }
 
@@ -1897,8 +1909,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   padding: 10px 0 22px;
   color: rgba(240, 232, 213, 0.62);
   font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1.5;
   text-align: center;
 }
@@ -1987,7 +1999,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .large-score-team strong {
   font-size: clamp(5rem, 18vw, 13rem);
   line-height: 0.9;
-  letter-spacing: 0;
+  letter-spacing: 0.01em;
   text-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
@@ -2001,7 +2013,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   background: rgba(0, 0, 0, 0.24);
   color: var(--gold-light);
   font-size: clamp(1.4rem, 4vw, 2.6rem);
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -2023,8 +2035,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 .large-score-actions span {
   color: var(--muted);
   font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-weight: 700;
+  letter-spacing: 0.035em;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -2425,7 +2437,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   .eyebrow,
   .language-picker span {
     font-size: 0.68rem;
-    letter-spacing: 0;
+    letter-spacing: 0.035em;
   }
 
   .share-box strong {
