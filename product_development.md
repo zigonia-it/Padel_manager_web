@@ -1,4 +1,4 @@
-# Padel Manager Web - Produktutviklingsdokument
+# Padelstar - Produktutviklingsdokument
 
 Sist oppdatert: 2026-08-26
 
@@ -13,11 +13,11 @@ Kildegrunnlag:
 
 ## 1. Formål
 
-Padel Manager Web skal gjøre det mulig å opprette, administrere og følge en padelturnering fra valgfri enhet: iPhone, Android, iPad, nettbrett, PC, Mac og moderne nettlesere.
+Padelstar skal gjøre det mulig å opprette, administrere og følge en padelturnering fra valgfri enhet: iPhone, Android, iPad, nettbrett, PC, Mac og moderne nettlesere.
 
 Den viktigste brukeropplevelsen er:
 
-> Jeg trenger ikke holde styr på turneringen. Padel Manager forteller meg når jeg skal spille, hvem jeg spiller med, hvem jeg møter, og hvilken bane jeg skal på.
+> Jeg trenger ikke holde styr på turneringen. Padelstar forteller meg når jeg skal spille, hvem jeg spiller med, hvem jeg møter, og hvilken bane jeg skal på.
 
 Webversjonen skal videreføre den beste turneringslogikken, visuelle identiteten og arbeidsflyten fra SwiftUI-appen, men løse det største nye behovet: flere enheter samtidig.
 
@@ -183,7 +183,7 @@ Senere variant:
 - opplasting av profilbilde
 - lagret spillerprofil på tvers av turneringer
 
-Avatarene bør lages i samme visuelle stil som Padel Manager-identiteten: mørk/gull/sølv, sportslig, tydelige små ikoner og lesbare i liten størrelse.
+Avatarene bør lages i samme visuelle stil som Padelstar-identiteten: mørk/gull/sølv, sportslig, tydelige små ikoner og lesbare i liten størrelse.
 
 ## 6. MVP
 
@@ -212,7 +212,7 @@ MVP skal være den første fungerende webversjonen som kan brukes i en ekte lite
 - tabell/ranking
 - enkel lokal lagring
 - grunnleggende responsive layout
-- Padel Manager-logo, ikoner, Orbitron-font og mørk/gull-fargeprofil basert på ny landing page-retning
+- Padelstar-logo, ikoner, Titillium Web/Nunito-font og mørk/gull-fargeprofil basert på ny landing page-retning
 
 ### 6.1.1 Visuell MVP-Retning
 
@@ -221,12 +221,12 @@ MVP skal være den første fungerende webversjonen som kan brukes i en ekte lite
 Forsiden skal ha:
 
 - fullskjerm hero med mørkt padel-bilde i bakgrunnen
-- stor sentrert Padel Manager-logo
+- stor sentrert Padelstar-logo
 - fast/flytende toppmeny
 - `Get Started`-knapp i gullstil
 - `No App Needed` under CTA
 - Zigonia-logo nederst til venstre
-- Padel Manager-badge nederst til høyre
+- Padelstar-badge nederst til høyre
 - tydelig hint om at opprett/bli med-skjemaene ligger under heroen
 
 Appvisningene skal følge samme retning, men være praktiske arbeidsflater:
@@ -290,15 +290,16 @@ Behold:
 
 - logo
 - appikoner
-- Orbitron-font
+- Titillium Web som displayfont
+- Nunito som UI-font
 - mørk sports-/premiumfølelse
-- gull som primæraksent: `#CC9414`
-- lys gull: `#EBC761`
-- mørk gull: `#805600`
+- gull som primæraksent: `#F0B52E`
+- lys gull: `#FFF096`
+- mørk gull: `#986016`
 - sølv/grå som sekundæraksent: `#616B7A`
 - glasskort og tydelige knappestiler
 
-Webversjonen må justere typografi for nettleser, spesielt liten tekst. Orbitron er sterk visuelt, men krever mer fontstørrelse, linjehøyde og forsiktig bokstavavstand.
+Webversjonen må justere typografi for nettleser, spesielt liten tekst. Nunito skal bære lesbar UI-tekst, mens Titillium Web brukes der appen trenger mer sportslig/display-preget uttrykk.
 
 ### 7.3 Produktfunksjoner
 
@@ -605,7 +606,7 @@ Fase 2:
 
 ### 14.1 Start
 
-- Padel Manager-logo
+- Padelstar-logo
 - Ny turnering
 - Bli med i turnering
 - invitasjonskode
@@ -737,7 +738,7 @@ Dette ligner en dictionary/oppslagstabell fra Python, og er mer ryddig enn `if/e
 Status:
 
 - statisk HTML/CSS/JS
-- Padel Manager-assets kopiert inn
+- Padelstar-assets kopiert inn
 - lokal demo-state
 - enkel admin/spiller/tilskuer
 - portet første scheduler/leaderboard-prinsipp
@@ -947,4 +948,4 @@ Når nye funksjoner legges til:
 4. Test scheduler/scoring/leaderboard før visuell polish.
 5. Ikke legg inn betaling, konto eller push før grunnflyten er stabil.
 6. Ikke legg sensitive nøkler i frontend.
-7. Behold Padel Manager-identiteten, men juster webtypografi ut fra faktisk lesbarhet på Mac, mobil og nettbrett.
+7. Behold Padelstar-identiteten, men juster webtypografi ut fra faktisk lesbarhet på Mac, mobil og nettbrett.

@@ -1,12 +1,12 @@
-# Padel Manager Web
+# Padelstar
 
-Live app: https://zigonia-it.github.io/Padel_manager_web/
+Live app: https://padelstar.app
 
 Sist oppdatert: 2026-08-26
 
-Status: statisk webapp med Supabase live sync og pågående responsiv designoppdatering
+Status: 0.1 Beta, statisk webapp med Supabase live sync
 
-Padel Manager er en statisk webapp for å sette opp og følge en padelturnering på tvers av mobil, nettbrett og PC/Mac. Appen kan kjøre lokalt uten backend, og bruker Supabase Realtime når `supabase-config.js` er fylt inn.
+Padelstar er en statisk webapp for å sette opp og følge en padelturnering på tvers av mobil, nettbrett og PC/Mac. Appen kan kjøre lokalt uten backend, og bruker Supabase Realtime når `supabase-config.js` er fylt inn.
 
 ## Innhold
 
@@ -56,17 +56,15 @@ Direkte åpning av `index.html` fungerer også for grunnflyten, men lokal server
 
 Appen kan hostes som en ren statisk side. Last opp hele prosjektmappen, inkludert `assets/`, `manifest.webmanifest`, `service-worker.js`, `supabase-config.js`, `index.html`, `styles.css` og `app.js`.
 
-Anbefalte førstevalg:
+Publiseringsspor:
 
-1. GitHub Pages: bruk repoets hovedmappe som static site.
-2. Netlify: dra prosjektmappen inn som nytt statisk site, eller koble til GitHub-repoet.
-3. Cloudflare Pages: koble til GitHub-repoet, la build command stå tom, og sett output directory til `/`.
+1. Vercel: koblet til repoet for `padelstar.app`.
+2. GitHub Pages: tidligere brukt som første statiske testspor.
 
-Dette repoet har GitHub Pages-workflow i `.github/workflows/pages.yml`.
-Forventet Pages-adresse:
+Produksjonsadresse:
 
 ```text
-https://zigonia-it.github.io/Padel_manager_web/
+https://padelstar.app
 ```
 
 ## Supabase live sync
@@ -82,7 +80,7 @@ For at flere enheter skal se samme turnering live:
 5. Fyll inn `supabase-config.js`:
 
 ```js
-window.PADEL_MANAGER_SUPABASE = {
+window.PADELSTAR_SUPABASE = {
   url: "https://din-prosjekt-id.supabase.co",
   anonKey: "din-anon-eller-publishable-key",
 };
@@ -105,11 +103,11 @@ Ved GitHub-integrasjon i Supabase:
 5. Admin kan føre poeng direkte eller sette resultat via popup.
 6. Tilskuermodus viser kompakte livekort for pågående kamper.
 7. Appen har PWA-manifest, service worker og Supabase live sync for første fler-enhetstest.
-8. Forsiden er under oppdatering mot ny `landing_page.jpg`-basert designretning med kodet, responsiv HTML/CSS.
+8. Padelstar-branding, appikon og lette PWA-assets er tatt i bruk.
 
 ## Neste tekniske steg
 
-1. Fullføre førsteprioriteten i `development_plan.md`: responsiv UI-opprydding etter ny designretning.
-2. Teste live sync på ekte telefoner via publisert GitHub Pages-adresse.
+1. Teste live sync på ekte telefoner via publisert Padelstar-adresse.
+2. Gjøre scoring og rundeavansement mer atomisk mot Supabase.
 3. Fullføre oversettelser for all dynamisk tekst.
 4. Splitte JavaScript-koden i mindre moduler når funksjonaliteten har stabilisert seg.

@@ -8,21 +8,21 @@
      PADELSTAR CORE PALETTE
      ========================================================= */
 
-  --ink: #fded8e;
-  --cream: #fff3bd;
+  --ink: #fff096;
+  --cream: #fff4bd;
   --ink-dark: #170901;
-  --muted: #c6a66a;
+  --muted: #cfb36f;
 
-  --gold: #e7a22c;
-  --gold-light: #fded8e;
-  --gold-bright: #f3c14a;
-  --gold-dark: #854d14;
+  --gold: #f0b52e;
+  --gold-light: #fff096;
+  --gold-bright: #ffd447;
+  --gold-dark: #986016;
   --gold-deep: #4c2b0c;
 
-  --gold-rgb: 231, 162, 44;
-  --gold-light-rgb: 253, 237, 142;
-  --gold-bright-rgb: 243, 193, 74;
-  --gold-dark-rgb: 133, 77, 20;
+  --gold-rgb: 240, 181, 46;
+  --gold-light-rgb: 255, 240, 150;
+  --gold-bright-rgb: 255, 212, 71;
+  --gold-dark-rgb: 152, 96, 22;
 
   --line: rgba(var(--gold-bright-rgb), 0.30);
 
@@ -92,7 +92,7 @@ body {
     linear-gradient(180deg,
       rgba(15, 7, 2, 0.72),
       rgba(15, 7, 2, 0.97)),
-    url("assets/New assets/bg_img.png") center top / cover fixed,
+    url("assets/bg_img-2200.png") center top / cover fixed,
     var(--soft);
 
   color: var(--ink);
@@ -110,7 +110,7 @@ body.workspace-active {
     linear-gradient(90deg,
       rgba(15, 7, 2, 0.3),
       rgba(23, 9, 1, 0.76)),
-    url("assets/New assets/bg_img.png") center bottom / auto 150% fixed,
+    url("assets/bg_img-2200.png") center bottom / auto 150% fixed,
     var(--soft);
 }
 
@@ -889,7 +889,7 @@ h3 {
     linear-gradient(180deg,
       rgba(15, 7, 2, 0.18),
       rgba(15, 7, 2, 0.48)),
-    url("assets/New assets/bg_img.png") center / 160% auto no-repeat;
+    url("assets/bg_img-2200.png") center / 160% auto no-repeat;
 
   box-shadow:
     0 30px 80px rgba(0, 0, 0, 0.58);

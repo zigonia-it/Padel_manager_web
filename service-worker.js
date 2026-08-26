@@ -1,24 +1,22 @@
-const cacheName = "padel-manager-v24";
+const cacheName = "padelstar-v26";
 
 const appShell = [
   "./",
   "./index.html",
-  "./styles.css?v=admin-player-flow-1",
-  "./app.js?v=admin-player-flow-1",
+  "./styles.css?v=padelstar-cleanup-1",
+  "./app.js?v=padelstar-cleanup-1",
   "./supabase-config.js",
   "./manifest.webmanifest",
-  "./assets/favicon.jpg",
-  "./assets/padel-manager-logo.png",
-  "./assets/New assets/bg_img.png",
+  "./assets/icons/padelstar-256.png",
+  "./assets/icons/padelstar-512.png",
+  "./assets/padelstar_logo-1200.png",
+  "./assets/padelstar_button.png",
+  "./assets/padelstar_button-900.png",
+  "./assets/zigonia-it_logo_gold.png",
+  "./assets/bg_img-2200.png",
   "./assets/New assets/menu_highlight.png",
-  "./assets/New assets/button.png",
-  "./assets/New assets/padel_manager logo_1x.png",
-  "./assets/New assets/padel_manager_button.png",
-  "./assets/New assets/zigonia_developer_logo.png",
-  "./assets/icons/appicon-256.png",
-  "./assets/icons/appicon-512.png",
-  "./assets/fonts/Orbitron-VariableFont_wght.ttf",
-  "./assets/fonts/Oxanium-VariableFont_wght.ttf",
+  "./assets/fonts/TitilliumWeb-Bold.ttf",
+  "./assets/fonts/Nunito-VariableFont_wght.ttf",
 ];
 
 self.addEventListener("install", (event) => {

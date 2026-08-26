@@ -1,12 +1,109 @@
-# Padel Manager Web - Dokumentasjonslogg
+# Padelstar - Dokumentasjonslogg
 
 Sist oppdatert: 2026-08-26
 
 Status: løpende prosjektlogg
 
-Denne filen er den løpende prosjektloggen for Padel Manager Web.
+Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
+
+## 2026-08-26 - Supabase cleanup-RPC for testturneringer
+
+### Gjort
+
+- Installerte og verifiserte Supabase CLI, Vercel CLI og 12ui CLI.
+- Opprettet Supabase migration med CLI: `20260826202526_delete_tournament_rpc.sql`.
+- La til `delete_tournament(p_tournament_id uuid, p_admin_token text)` som admin-token-beskyttet RPC.
+- Oppdaterte rot-skjemaet `supabase_schema.sql` med samme funksjon og grants.
+- Knyttet `Nullstill demo` til remote sletting når Supabase er aktiv og lokal admin-token finnes.
+- Kjørte migrationen på Supabase-prosjektet `sxzlljxodorkfrjnwfgr`.
+- Verifiserte at `anon` kan kjøre funksjonen, mens `public` og `authenticated` ikke har execute-grant.
+- Testet sletting i transaksjon med midlertidig rad og rollback.
+- Slettet Playwright-testturneringen `PASTM` fra live Supabase og verifiserte at den ikke finnes lenger.
+- Bumpet service worker-cache til `padelstar-v26`.
+- Fjernet cleanup-punktet fra aktiv utviklingsplan etter at det var implementert.
+
+### Beslutninger
+
+- Sletting av turnering gjøres via RPC med både turnerings-ID og admin-token, ikke direkte tabell-delete fra klient.
+- Lokal reset skal fortsatt fungere selv om remote-sletting feiler, men feilen logges og vises som statusmelding.
+- `delete_tournament` eksponeres bare eksplisitt til `anon`, i samme klient-RPC-mønster som resten av den statiske appen.
+
+### Endrede filer
+
+- `app.js`
+- `index.html`
+- `service-worker.js`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826202526_delete_tournament_rpc.sql`
+- `development_plan.md`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `python3 -m json.tool manifest.webmanifest`
+- `git diff --check`
+- Sjekket at alle filer i service worker app-shell finnes lokalt.
+- Kjørte lokal mobilflyt i browser på `http://localhost:8090`:
+  - opprettet testturnering `Codex Cleanup Test 2031`
+  - bekreftet admin-spiller-flyt med `Admin`, `Spiller` og `Turnering` i menyen
+  - bekreftet at testturneringen ble skrevet til Supabase med invitekode `HSGGF`
+  - trykket `Nullstill demo`
+  - bekreftet at appen returnerte til landing page
+  - bekreftet i Supabase at `HSGGF` hadde `remaining = 0`
+
+### Neste steg
+
+- Teste `Nullstill demo` på publisert Padelstar etter deploy, slik at remote-raden faktisk forsvinner fra brukerflyten.
+
+## 2026-08-26 - Padelstar-branding og lettere PWA-assets
+
+### Gjort
+
+- Opprettet post-beta arbeidsgren `codex/padelstar-post-beta-0.1`.
+- Oppdaterte appnavn i manifest, README, aktiv utviklingsplan og produktdokument til Padelstar.
+- Byttet appikon, apple touch icon og små logoer til nye Padelstar-assets.
+- Genererte lettere webvarianter:
+  - `assets/icons/padelstar-256.png`
+  - `assets/icons/padelstar-512.png`
+  - `assets/padelstar_logo-1200.png`
+  - `assets/bg_img-2200.png`
+  - `assets/padelstar_button-900.png`
+- Oppdaterte service worker-cache fra `padel-manager-v24` til `padelstar-v25`.
+- Tok tunge/originale logo- og bakgrunnsfiler ut av app-shell-cachen.
+- Byttet Supabase-configvariabel til `PADELSTAR_SUPABASE`, med bakoverkompatibel alias for gammel `PADEL_MANAGER_SUPABASE`.
+- Byttet localStorage-nøkler til `padelstar-*`, med migrering fra gamle `padel-manager-*`-nøkler.
+- Justerte gullpaletten til en litt gulere Padelstar-tone.
+- Fjernet `Bytt`-knappen fra spillerens `Din status`-kort.
+- La inn oppfølging i `development_plan.md` om å rydde testturnering fra Supabase og lage trygg cleanup/sletting for egne testturneringer.
+
+### Beslutninger
+
+- Originale store bildefiler beholdes som kildeassets, men webappen skal bruke optimaliserte varianter der bildene vises små eller lastes i app shell.
+- Ekstern rename av GitHub-repo, Vercel-prosjekt og Supabase-prosjekt gjøres ikke automatisk fra kodeendringen.
+- Gammel lokal lagring og gammel Supabase-configvariabel støttes midlertidig for å unngå brå brudd for eksisterende beta-test.
+
+### Endrede filer
+
+- `index.html`
+- `styles.css`
+- `app.js`
+- `manifest.webmanifest`
+- `service-worker.js`
+- `supabase-config.js`
+- `supabase/config.toml`
+- `README.md`
+- `development_plan.md`
+- `product_development.md`
+- `documentation_log.md`
+- `assets/`
+
+### Neste steg
+
+- Verifisere lokalt med browser at Padelstar-assets lastes uten 404 og at spillerstatuskortet ikke viser `Bytt`.
+- Avklare om GitHub-, Vercel- og Supabase-prosjektnavn skal endres i tjenestene.
 
 ## 2026-08-26 - Ryddet utviklingsplan etter oppdateringslogikk
 

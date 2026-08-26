@@ -1,5 +1,7 @@
-const storageKey = "padel-manager-demo";
-const roleStorageKey = "padel-manager-role";
+const legacyStorageKey = "padel-manager-demo";
+const legacyRoleStorageKey = "padel-manager-role";
+const storageKey = "padelstar-demo";
+const roleStorageKey = "padelstar-role";
 const playerAccentPalette = {
   blue: "#1a59f2",
   orange: "#e67a0a",
@@ -9,7 +11,7 @@ const playerAccentPalette = {
   teal: "#0a8080",
   red: "#c70a33",
   yellow: "#b88c00",
-  gold: "#cc9414",
+  gold: "#f0b52e",
   silver: "#616b7a",
   bronze: "#9e560f",
   sapphire: "#052e9e",
@@ -71,10 +73,12 @@ const defaultTournament = createTournament({
   courtCount: 1,
 });
 
+migrateLegacyLocalStorage();
+
 let state = loadState();
 let largeScoreMatchId = null;
 let activeModule = "landing";
-const supabaseSettings = window.PADEL_MANAGER_SUPABASE ?? {};
+const supabaseSettings = window.PADELSTAR_SUPABASE ?? window.PADEL_MANAGER_SUPABASE ?? {};
 const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
   ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
     auth: {
@@ -140,7 +144,6 @@ const elements = {
   rulesList: document.querySelector("#rulesList"),
   playerStandingsList: document.querySelector("#playerStandingsList"),
   playerIdentityCard: document.querySelector("#playerIdentityCard"),
-  changePlayerButton: document.querySelector("#changePlayerButton"),
   playerNextMatch: document.querySelector("#playerNextMatch"),
   playerStatusGrid: document.querySelector("#playerStatusGrid"),
   generateRoundButton: document.querySelector("#generateRoundButton"),
@@ -340,10 +343,6 @@ elements.generateRoundButton.addEventListener("click", () => {
   render();
 });
 
-elements.changePlayerButton.addEventListener("click", () => {
-  showStart();
-});
-
 elements.completeRoundButton.addEventListener("click", () => {
   if (!confirm("Fullføre turneringen? Pågående kamper som ikke er ferdige blir avbrutt.")) return;
   endTournament();
@@ -366,7 +365,8 @@ elements.endTournamentButton.addEventListener("click", () => {
   render();
 });
 
-elements.resetDemoButton.addEventListener("click", () => {
+elements.resetDemoButton.addEventListener("click", async () => {
+  await deleteRemoteTournament();
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
   localStorage.removeItem(roleStorageKey);
@@ -710,6 +710,24 @@ async function saveRemoteState() {
   }
 }
 
+async function deleteRemoteTournament() {
+  if (!isSupabaseReady() || !state.adminToken || !state.id) return false;
+  const { error } = await supabaseClient.rpc("delete_tournament", {
+    p_tournament_id: state.id,
+    p_admin_token: state.adminToken,
+  });
+  if (error) {
+    console.warn("Supabase delete failed", error);
+    elements.copyStatus.textContent = "Kunne ikke slette live-turneringen. Lokal kopi nullstilles.";
+    return false;
+  }
+  if (realtimeChannel) {
+    supabaseClient.removeChannel(realtimeChannel);
+    realtimeChannel = null;
+  }
+  return true;
+}
+
 function connectRealtimeForCurrentState() {
   if (!isSupabaseReady() || !state.id) return;
   if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
@@ -733,7 +751,7 @@ function connectRealtimeForCurrentState() {
 function exportBackup() {
   const backup = {
     exportedAt: new Date().toISOString(),
-    app: "Padel Manager Web",
+    app: "Padelstar",
     version: 1,
     tournament: state,
   };
@@ -762,7 +780,7 @@ function importBackup(event) {
       render();
       elements.copyStatus.textContent = "Backup er importert.";
     } catch {
-      alert("Kunne ikke importere backup. Velg en gyldig Padel Manager JSON-fil.");
+      alert("Kunne ikke importere backup. Velg en gyldig Padelstar JSON-fil.");
     } finally {
       event.currentTarget.value = "";
     }
@@ -1434,8 +1452,6 @@ function renderStandingsList(container, matches) {
 
 function renderPlayerIdentity() {
   const player = getPlayerById(state.selectedPlayerId);
-  elements.changePlayerButton.disabled = state.players.length === 0;
-
   if (!player) {
     elements.playerIdentityCard.removeAttribute("style");
     elements.playerIdentityCard.innerHTML = `
@@ -2555,7 +2571,16 @@ function slugify(value) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
-    .slice(0, 48) || "padel-manager";
+    .slice(0, 48) || "padelstar";
+}
+
+function migrateLegacyLocalStorage() {
+  if (!localStorage.getItem(storageKey) && localStorage.getItem(legacyStorageKey)) {
+    localStorage.setItem(storageKey, localStorage.getItem(legacyStorageKey));
+  }
+  if (!localStorage.getItem(roleStorageKey) && localStorage.getItem(legacyRoleStorageKey)) {
+    localStorage.setItem(roleStorageKey, localStorage.getItem(legacyRoleStorageKey));
+  }
 }
 
 function restoreInitialView() {

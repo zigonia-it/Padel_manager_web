@@ -164,16 +164,48 @@ begin
 end;
 $$;
 
+create or replace function public.delete_tournament(
+  p_tournament_id uuid,
+  p_admin_token text
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  deleted_count integer;
+begin
+  if p_tournament_id is null or p_admin_token is null or length(p_admin_token) < 16 then
+    raise exception 'Invalid delete payload';
+  end if;
+
+  delete from public.tournaments
+  where id = p_tournament_id
+    and admin_token = p_admin_token;
+
+  get diagnostics deleted_count = row_count;
+
+  if deleted_count = 0 then
+    raise exception 'Admin token mismatch or tournament not found';
+  end if;
+
+  return true;
+end;
+$$;
+
 revoke all on function public.touch_updated_at() from public, anon, authenticated;
 revoke all on function public.create_tournament(jsonb, text) from public, anon, authenticated;
 revoke all on function public.get_tournament_by_code(text) from public, anon, authenticated;
 revoke all on function public.save_tournament_state(uuid, text, jsonb) from public, anon, authenticated;
 revoke all on function public.join_tournament(text, jsonb) from public, anon, authenticated;
+revoke all on function public.delete_tournament(uuid, text) from public, anon, authenticated;
 
 grant execute on function public.create_tournament(jsonb, text) to anon;
 grant execute on function public.get_tournament_by_code(text) to anon;
 grant execute on function public.save_tournament_state(uuid, text, jsonb) to anon;
 grant execute on function public.join_tournament(text, jsonb) to anon;
+grant execute on function public.delete_tournament(uuid, text) to anon;
 
 alter default privileges for role postgres in schema public
   revoke select, insert, update, delete on tables from anon, authenticated, service_role;

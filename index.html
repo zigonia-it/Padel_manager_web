@@ -9,16 +9,17 @@
     content="Padelstar hjelper administratorer og spillere med turneringer, kamper, baner og resultater.">
   <title>Padelstar</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="assets/favicon.jpg">
-  <link rel="icon" href="assets/favicon.png" type="image/png">
-  <link rel="stylesheet" href="styles.css?v=admin-player-flow-1">
+  <link rel="apple-touch-icon" href="assets/icons/padelstar-512.png">
+  <link rel="icon" href="assets/icons/padelstar-256.png" type="image/png">
+  <link rel="preload" href="assets/padelstar_logo-1200.png" as="image">
+  <link rel="stylesheet" href="styles.css?v=padelstar-cleanup-1">
 </head>
 
 <body>
   <div class="app-shell">
     <header class="topbar">
       <div class="brand-lockup">
-        <img class="brand-mark" src="assets/favicon.png" alt="" width="58" height="58">
+        <img class="brand-mark" src="assets/icons/padelstar-256.png" alt="" width="58" height="58">
         <div>
           <p class="eyebrow" data-i18n="brandEyebrow">Turneringsverktøy</p>
           <h1>Padelstar</h1>
@@ -49,7 +50,7 @@
       <section class="start-panel app-module" id="startView" data-module="landing" aria-labelledby="startTitle">
         <div class="intro">
           <nav class="landing-nav" aria-label="Forside">
-            <img class="landing-nav-logo" src="assets/favicon.png" alt="Padelstar" width="74" height="74">
+            <img class="landing-nav-logo" src="assets/icons/padelstar-256.png" alt="Padelstar" width="74" height="74">
             <button class="landing-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false"
               aria-controls="landingLinks">
               <span></span>
@@ -67,7 +68,7 @@
           </nav>
 
           <div class="intro-copy">
-            <img class="hero-logo" src="assets/padelstar_logo.png" alt="Padelstar" width="560">
+            <img class="hero-logo" src="assets/padelstar_logo-1200.png" alt="Padelstar" width="560">
             <h2 id="startTitle">PADELSTAR</h2>
             <h4 class="version">v. 0.1 (Beta)</h4>
             <div class="landing-actions" aria-label="Startvalg">
@@ -80,7 +81,7 @@
           </div>
 
           <img class="landing-developer-logo" src="assets/zigonia-it_logo_gold.png" alt="Zigonia IT" width="170">
-          <img class="landing-badge" src="assets/padelstar_button_L.png" alt="Padelstar" width="210">
+          <img class="landing-badge" src="assets/padelstar_button-900.png" alt="Padelstar" width="210">
         </div>
 
         <div class="panel resume-panel hidden" id="resumePanel">
@@ -329,7 +330,6 @@
           <div class="panel player-profile-panel">
             <div class="panel-heading">
               <h3>Din status</h3>
-              <button class="secondary compact-button" id="changePlayerButton" type="button">Bytt</button>
             </div>
             <div class="player-identity-card" id="playerIdentityCard"></div>
             <div class="status-grid player-status-grid" id="playerStatusGrid"></div>
@@ -398,7 +398,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="app.js?v=admin-player-flow-1"></script>
+  <script src="app.js?v=padelstar-cleanup-1"></script>
 </body>
 
 </html>
