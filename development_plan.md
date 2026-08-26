@@ -1,4 +1,4 @@
-# Padel Manager Web - Utviklingsplan
+# Padelstar - Utviklingsplan
 
 Sist oppdatert: 2026-08-26
 
@@ -11,12 +11,29 @@ Oppdateringslogikk:
 
 ## 0. Nåværende fokus
 
-Appen har nå en publisert statisk webapp, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
+Appen er nå i versjon 0.1 Beta med publisert responsiv PWA/webapp som kan hostes statisk, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
+
+Prosjektmetadata:
+- Navn: Padelstar
+- Undertittel: Padel Manager
+- Utvikler: Sigurd Steen Grødem
+- Firma: Zigonia IT
 
 ## Nytt siden forrige sesjon:
-  Appen har fått nytt navn, "Padelstar", ny nettadresse: https://padelstar.app, dermed også nye logo og button filer der dette måtte oppdateres. sjekk om alle filer er oppdatert med ny logo, oppdater de resterende gullfargene i koden til å reflektere den nye litt mer gulaktige gullfargen. og oppdater repo, gitnavn, vectelnavn, supabasenavn slik at det blir en symetri i navngivingen. oppdater deretter koden med de nye navnene i referansere i mellom ulike tjenester.
-  Det er også lastet inn nye fontsett, nunito og tittiluium.
-  endrede filer: index.html, styles.css, og de nye logofilene i assets.
+
+Padelstar-branding er delvis gjennomført i appkoden:
+
+- Appnavn, manifest, service worker, Supabase-configvariabel og README er oppdatert til Padelstar.
+- Nye Padelstar-logoer, appikoner og knappassets er tatt i bruk.
+- Nunito og Titillium Web er satt som hovedfonter i CSS.
+- Gullpaletten er justert mot en litt gulere Padelstar-gulltone.
+- Tunge PWA-bilder er byttet ut med lettere genererte webvarianter.
+
+Gjenstår:
+
+- Avklare og eventuelt utføre faktisk rename i GitHub-repo, Vercel-prosjekt og Supabase-prosjekt i de eksterne tjenestene.
+- Oppdatere eventuelle eksterne URL-er etter at tjenestenavnene er endret.
+- Verifisere at `https://padelstar.app` peker på riktig Vercel-deploy.
 
 ## Neste fase 
 er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i ui problemer:
@@ -26,17 +43,15 @@ er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i 
 3. Gjøre scoring, walkover, kampstart og rundeavansement som robuste, atomiske operasjoner mot Supabase.
 4. Videreutvikle realtime-flyten slik admin-, spiller- og turneringsvisning alltid viser samme turneringsstate.
 5. Gjøre det slik at aktive spillere i en kamp også kan sette poeng i egen kamp
-6. gjøre det mulig å forlate en en visning og gå tilbake til hjemsiden fra alle visninger
-7. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
-8. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
-9. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
-10. rette opp ui errors som at en button har feil fassong og kurve osv.
-11. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
-12. Ta bort bytt knappen fra spiller din status kortet
+6. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
+7. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
+8. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
+9. rette opp ui errors som at en button har feil fassong og kurve osv.
+10. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
 
 ## 1. Formål
 
-Padel Manager Web skal være en plattformuavhengig webapp for administrasjon og gjennomføring av padelturneringer.
+Padelstar skal være en plattformuavhengig webapp for administrasjon og gjennomføring av padelturneringer.
 
 Løsningen skal fungere på:
 
@@ -177,7 +192,7 @@ Videre teknisk retning:
 ## 6. Foreslått Arkitektur
 
 ```text
-Padel Manager Web
+Padelstar
   |
   +-- Admin / Host
   |
@@ -223,15 +238,16 @@ Detaljert datamodell ligger i `product_development.md`.
 
 ## 8. Visuell Retning
 
-Webappen skal videreføre Padel Manager-identiteten og den nye landing page-retningen:
+Webappen skal videreføre Padelstar-identiteten og den nye landing page-retningen:
 
 - `landing_page.jpg` brukes som visuell referanse, ikke som flatt UI-bilde
 - `bg_img.png` brukes som kodet bakgrunn
-- `padel_manager logo_1x.png` brukes som hovedlogo
-- `padel_manager_button.png` brukes som bunnbadge/logo der det passer
+- `padelstar_logo-1200.png` brukes som optimalisert hovedlogo i appen
+- `padelstar_button-900.png` brukes som optimalisert bunnbadge/logo der det passer
 - `button.png` brukes som utgangspunkt for primære knapper
 - `menu_highlight.png` brukes som utgangspunkt for aktive menyvalg og hamburgerstreker
-- Orbitron-font
+- Titillium Web som displayfont
+- Nunito som UI-font
 - mørk sports-/premiumfølelse
 - gull som primæraksent
 - sølv/grå som sekundæraksent
@@ -239,7 +255,7 @@ Webappen skal videreføre Padel Manager-identiteten og den nye landing page-retn
 - tydelige glasskort
 - lesbar liten tekst i nettleser
 
-Typografi skal vurderes praktisk i Safari/Chrome på Mac, mobil og nettbrett. Orbitron kan brukes, men liten tekst må ha nok størrelse, linjehøyde og luft.
+Typografi skal vurderes praktisk i Safari/Chrome på Mac, mobil og nettbrett. Titillium Web brukes til displaytekst, Nunito til UI-tekst, og liten tekst må ha nok størrelse, linjehøyde og luft.
 
 ## 9. Avatarer
 
@@ -251,7 +267,7 @@ MVP:
 
 Senere:
 
-- lag egne Padel Manager-avatarer
+- lag egne Padelstar-avatarer
 - bygg avatarvelger
 - vurder farger, figurer eller padel-relaterte ikoner
 - vurder unike avatarer per turnering
@@ -273,7 +289,7 @@ Neste versjon:
 Eksempel på ønsket join-lenke:
 
 ```text
-padelmanager.no/join/P4K7D
+padelstar.app/?join=P4K7D
 ```
 
 ## 11. Språk og Tekststruktur
