@@ -849,7 +849,7 @@ function prefillJoinForm(inviteCode) {
 }
 
 function showStart() {
-  showModule(hasActiveTournament() ? "tournament" : "landing");
+  showModule("landing");
 }
 
 function showWorkspace(view = "admin") {
@@ -907,6 +907,7 @@ function normalizeModule(moduleName) {
 
   if (requestedModule === "admin") return isCurrentUserAdmin() ? "admin" : fallbackTournamentModule();
   if (requestedModule === "player") return state.selectedPlayerId ? "player" : fallbackTournamentModule();
+  if (requestedModule === "landing") return "landing";
   if (requestedModule === "setup-player") return "setup-player";
   if (requestedModule === "tournament") return "tournament";
 
@@ -952,7 +953,7 @@ function renderRoleVisibility() {
   const tournamentIsActive = hasActiveTournament();
   const canShowPlayer = Boolean(state.selectedPlayerId);
   const visibleModules = new Set(tournamentIsActive
-    ? ["tournament", "setup-player", ...(isAdmin ? ["admin"] : []), ...(canShowPlayer ? ["player"] : [])]
+    ? ["landing", "tournament", "setup-player", ...(isAdmin ? ["admin"] : []), ...(canShowPlayer ? ["player"] : [])]
     : ["landing", "setup-admin", "setup-player"]);
   const workspaceModule = workspaceModuleFromActiveModule();
 

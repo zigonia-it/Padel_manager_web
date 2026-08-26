@@ -8,6 +8,48 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-26 - Hjemvisning under aktiv turnering
+
+### Gjort
+
+- Gjorde `Hjem` tilgjengelig i menyen også når en turnering er aktiv.
+- Endret `showStart()` slik at den alltid viser landing/hjem, ikke automatisk turneringsvisning.
+- Lot resume-panelet på hjemvisningen være veien tilbake til admin-, spiller- eller turneringsmodulen.
+- Bumpet service worker-cache til `padelstar-v28`.
+- Fjernet punktet om hjem-/tilbakeflyt fra aktiv utviklingsplan.
+
+### Beslutninger
+
+- Hjemvisningen skal ikke avslutte eller nullstille turneringen.
+- Aktiv turnering kan fortsatt fortsettes via `Fortsett som admin` eller `Fortsett turnering`.
+
+### Endrede filer
+
+- `app.js`
+- `index.html`
+- `service-worker.js`
+- `development_plan.md`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `python3 -m json.tool manifest.webmanifest`
+- `git diff --check`
+- Sjekket at alle filer i service worker app-shell finnes lokalt.
+- Kjørte lokal mobilflyt i browser på `http://localhost:8090`:
+  - opprettet testturnering `Codex Home Test 2044`
+  - bekreftet at aktiv turnering viser `Hjem`, `Bli med`, `Admin`, `Spiller` og `Turnering`
+  - gikk til `Hjem`
+  - bekreftet at hjemvisningen viser resume-panelet for aktiv turnering
+  - brukte `Fortsett som admin` tilbake til adminmodulen
+  - brukte `Nullstill demo`
+  - bekreftet i Supabase at invitekode `3J7V3` hadde `remaining = 0`
+
+### Neste steg
+
+- Browser-verifisere flyten: opprett turnering, gå til `Hjem`, fortsett tilbake til aktiv turnering.
+
 ## 2026-08-26 - La planlagte funksjoner inn i README
 
 ### Gjort

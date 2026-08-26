@@ -43,12 +43,11 @@ er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i 
 3. Gjøre scoring, walkover, kampstart og rundeavansement som robuste, atomiske operasjoner mot Supabase.
 4. Videreutvikle realtime-flyten slik admin-, spiller- og turneringsvisning alltid viser samme turneringsstate.
 5. Gjøre det slik at aktive spillere i en kamp også kan sette poeng i egen kamp
-6. gjøre det mulig å forlate en en visning og gå tilbake til hjemsiden fra alle visninger
-7. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
-8. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
-9. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
-10. rette opp ui errors som at en button har feil fassong og kurve osv.
-11. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
+6. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
+7. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
+8. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
+9. rette opp ui errors som at en button har feil fassong og kurve osv.
+10. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
 
 ## 1. Formål
 
