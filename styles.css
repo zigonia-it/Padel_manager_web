@@ -1,6 +1,6 @@
 :root {
   color-scheme: light;
-  --font-ui: Oxanium, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: Orbitron, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: Orbitron, var(--font-ui);
   --ink: #fff4d6;
   --cream: #fff4d6;
@@ -507,7 +507,7 @@ h3 {
   gap: 12px;
 }
 
-.share-details > div {
+.share-details>div {
   display: grid;
   gap: 0.45rem;
   border: 1px solid rgba(235, 199, 97, 0.18);
@@ -598,7 +598,7 @@ h3 {
     radial-gradient(circle at 50% 46%, rgba(0, 0, 0, 0.12), transparent 32rem);
 }
 
-.intro > * {
+.intro>* {
   position: relative;
   z-index: 1;
 }
@@ -723,8 +723,7 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   width: clamp(320px, 36vw, 680px);
   height: auto;
   filter:
-    drop-shadow(0 24px 34px rgba(0, 0, 0, 0.58))
-    drop-shadow(0 0 26px rgba(255, 224, 154, 0.12));
+    drop-shadow(0 24px 34px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 26px rgba(255, 224, 154, 0.12));
 }
 
 .intro-copy h2 {
@@ -915,8 +914,8 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   gap: 10px;
 }
 
-.status-grid > div,
-.round-summary > div {
+.status-grid>div,
+.round-summary>div {
   display: grid;
   gap: 0.2rem;
   border: 1px solid rgba(255, 224, 154, 0.22);
@@ -992,7 +991,7 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   gap: 8px;
 }
 
-.overview-stats > div {
+.overview-stats>div {
   display: grid;
   gap: 0.12rem;
   border: 1px solid rgba(235, 199, 97, 0.14);
@@ -1391,12 +1390,12 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   align-items: stretch !important;
 }
 
-.editable-player > .player-list-name,
-.editable-player > .player-actions {
+.editable-player>.player-list-name,
+.editable-player>.player-actions {
   width: 100%;
 }
 
-.editable-player > .player-actions {
+.editable-player>.player-actions {
   justify-content: space-between;
 }
 
@@ -1474,7 +1473,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   gap: 10px;
 }
 
-.tennis-scoreboard > div {
+.tennis-scoreboard>div {
   display: grid;
   gap: 0.22rem;
   border: 1px solid rgba(255, 224, 154, 0.22);
@@ -1567,7 +1566,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   gap: 8px;
 }
 
-.spectator-score-teams > div {
+.spectator-score-teams>div {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
@@ -1825,8 +1824,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   gap: 10px;
 }
 
-.player-now-grid > div,
-.rules-list > div {
+.player-now-grid>div,
+.rules-list>div {
   display: grid;
   gap: 0.22rem;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -1974,7 +1973,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
     0 20px 60px rgba(var(--player-accent-rgb), 0.22);
 }
 
-.large-score-team > span {
+.large-score-team>span {
   display: grid;
   gap: 0.52rem;
   justify-items: center;
@@ -2012,7 +2011,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   gap: 10px;
 }
 
-.large-score-actions > div {
+.large-score-actions>div {
   display: grid;
   gap: 0.18rem;
   border: 1px solid rgba(235, 199, 97, 0.2);
@@ -2289,7 +2288,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   }
 
   body.landing-menu-open .landing-links,
-  .landing-menu-toggle[aria-expanded="true"] + .landing-links {
+  .landing-menu-toggle[aria-expanded="true"]+.landing-links {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
@@ -2352,7 +2351,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   }
 
   body.workspace-menu-open .tabs,
-  .workspace-menu-toggle[aria-expanded="true"] + .tabs {
+  .workspace-menu-toggle[aria-expanded="true"]+.tabs {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
@@ -2401,9 +2400,9 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   .status-pill,
   .share-box,
   .join-preview,
-  .share-details > div,
-  .status-grid > div,
-  .round-summary > div {
+  .share-details>div,
+  .status-grid>div,
+  .round-summary>div {
     padding: 0.65rem 0.68rem;
   }
 
