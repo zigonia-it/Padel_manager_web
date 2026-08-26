@@ -18,7 +18,8 @@ Appen har nå en publisert statisk webapp, én-sides modulflyt, Supabase-tilkobl
   Det er også lastet inn nye fontsett, nunito og tittiluium.
   endrede filer: index.html, styles.css, og de nye logofilene i assets.
 
-Neste fase er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i ui problemer:
+## Neste fase 
+er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i ui problemer:
 
 1. Bruke `tournament_logic.md` som referanse for videre porting fra iOS-appen.
 2. Skille tydelig mellom host/admin-rolle og spilleridentitet i database- og klientstate.
@@ -29,7 +30,8 @@ Neste fase er å gjøre turneringsmotoren og datalaget mer produksjonsklart og r
 7. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
 8. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
 9. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
-10. rette opp ui errors som at en button har feil overlay og kurve osv.
+10. rette opp ui errors som at en button har feil fassong og kurve osv.
+11. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
 
 ## 1. Formål
 
