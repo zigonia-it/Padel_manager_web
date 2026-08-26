@@ -13,7 +13,9 @@ Oppdateringslogikk:
 
 Appen har nå en publisert statisk webapp, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
 
+Nytt siden forrige sesjon:
 Appen har fått nytt navn, "Padelstar", ny nettadresse: https://padelstar.app, dermed også nye logo og button filer der dette måtte oppdateres. sjekk om alle filer er oppdatert med ny logo, oppdater gullfargene i koden til å reflektere den nye litt mer gulaktige gullfargen. og oppdater repo, gitnavn, vectelnavn, supabasenavn slik at det blir en symetri i navngivingen. oppdater deretter koden med de nye navnene i referansere i mellom ulike tjenester.
+det er også lastet inn nye fontsett, nunito og fira code.
 
 Neste fase er å gjøre turneringsmotoren og datalaget mer produksjonsklart:
 
