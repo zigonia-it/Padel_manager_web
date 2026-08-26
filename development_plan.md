@@ -13,18 +13,19 @@ Oppdateringslogikk:
 
 Appen har nå en publisert statisk webapp, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
 
-Nytt siden forrige sesjon:
-Appen har fått nytt navn, "Padelstar", ny nettadresse: https://padelstar.app, dermed også nye logo og button filer der dette måtte oppdateres. sjekk om alle filer er oppdatert med ny logo, oppdater gullfargene i koden til å reflektere den nye litt mer gulaktige gullfargen. og oppdater repo, gitnavn, vectelnavn, supabasenavn slik at det blir en symetri i navngivingen. oppdater deretter koden med de nye navnene i referansere i mellom ulike tjenester.
-det er også lastet inn nye fontsett, nunito og fira code.
+## Nytt siden forrige sesjon:
+  Appen har fått nytt navn, "Padelstar", ny nettadresse: https://padelstar.app, dermed også nye logo og button filer der dette måtte oppdateres. sjekk om alle filer er oppdatert med ny logo, oppdater de resterende gullfargene i koden til å reflektere den nye litt mer gulaktige gullfargen. og oppdater repo, gitnavn, vectelnavn, supabasenavn slik at det blir en symetri i navngivingen. oppdater deretter koden med de nye navnene i referansere i mellom ulike tjenester.
+  Det er også lastet inn nye fontsett, nunito og tittiluium.
+  endrede filer: index.html, styles.css, og de nye logofilene i assets.
 
-Neste fase er å gjøre turneringsmotoren og datalaget mer produksjonsklart:
+Neste fase er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i ui problemer:
 
 1. Bruke `tournament_logic.md` som referanse for videre porting fra iOS-appen.
 2. Skille tydelig mellom host/admin-rolle og spilleridentitet i database- og klientstate.
 3. Gjøre scoring, walkover, kampstart og rundeavansement som robuste, atomiske operasjoner mot Supabase.
 4. Videreutvikle realtime-flyten slik admin-, spiller- og turneringsvisning alltid viser samme turneringsstate.
 5. Gjøre det slik at aktive spillere i en kamp også kan sette poeng i egen kamp
-6. gjøre det mulig å forlate en en visning og gå tilbake til hjemsiden
+6. gjøre det mulig å forlate en en visning og gå tilbake til hjemsiden fra alle visninger
 7. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
 8. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
 9. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
