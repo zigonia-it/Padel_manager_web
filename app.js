@@ -344,8 +344,9 @@ elements.generateRoundButton.addEventListener("click", () => {
   }
   if (state.rounds.length === 0) {
     generateFullTournamentSchedule();
-  } else if (isSupabaseReady() && state.settings.format === "roundRobin" && completingActiveRound) {
-    queueRemoteRoundAdvance();
+  } else if (isSupabaseReady() && completingActiveRound) {
+    if (state.settings.format === "roundRobin") queueRemoteRoundAdvance();
+    if (state.settings.format === "cup") queueRemoteCupAdvance();
     return;
   } else {
     if (completingActiveRound) {
@@ -873,6 +874,42 @@ function queueRemoteRoundAdvance() {
         elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
           ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
           : "Kunne ikke starte neste runde live akkurat nå. Lokal kopi er lagret.";
+        return;
+      }
+
+      if (!data) return;
+      lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
+      if (requestSequence === remoteMutationSequence) {
+        applyRemoteState(data);
+      } else if (state.id === data.id && Number.isInteger(data.revision)) {
+        state.revision = data.revision;
+        saveState({ remote: false });
+      }
+    });
+}
+
+function queueRemoteCupAdvance() {
+  if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
+
+  window.clearTimeout(remoteSaveTimer);
+  remoteSaveTimer = null;
+  remoteWriteChain = remoteWriteChain
+    .catch(() => {})
+    .then(async () => {
+      if (remoteMutationSequence > lastRemotePersistedSequence) await saveRemoteState();
+
+      const requestSequence = remoteMutationSequence;
+      const { data, error } = await supabaseClient.rpc("admin_advance_cup", {
+        p_tournament_id: state.id,
+        p_admin_token: state.adminToken,
+        p_expected_revision: state.revision,
+      });
+
+      if (error) {
+        console.warn("Supabase cup advance failed", error);
+        elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
+          ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
+          : "Kunne ikke starte neste cup-runde live akkurat nå. Lokal kopi er lagret.";
         return;
       }
 
@@ -2302,7 +2339,7 @@ function tournamentActionText() {
   const activeRound = getActiveRound();
   if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return "Fullfør kampene";
   if (getNextScheduledRound()) return t("startNextRound");
-  if (cupCanAdvance()) return t("startNextRound");
+  if (cupCanAdvance() || cupCanFinalize()) return t("startNextRound");
   if (state.settings.format === "cup" && state.status === "Cup ferdig") return "Cup ferdig";
   return "Hele turneringen er generert";
 }
@@ -2321,7 +2358,7 @@ function generateRoundBlockReason() {
   }
   if (state.courts.length < 1) return "Legg til minst én bane før du starter runden.";
   if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return "Alle kamper må være ferdige før neste runde.";
-  if (state.rounds.length > 0 && !getNextScheduledRound() && !cupCanAdvance()) {
+  if (state.rounds.length > 0 && !getNextScheduledRound() && !cupCanAdvance() && !cupCanFinalize()) {
     return state.settings.format === "cup" && state.status === "Cup ferdig"
       ? "Cupen er ferdig."
       : "Hele turneringen er generert.";
@@ -2578,6 +2615,14 @@ function cupCanAdvance() {
       .map((match) => match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo),
   ];
   return advancingTeams.length > 1;
+}
+
+function cupCanFinalize() {
+  if (state.settings.format !== "cup") return false;
+  const round = state.rounds.at(-1);
+  if (!round || round.status !== "active" || !canCompleteRound(round)) return false;
+  const finalRoundNumber = state.cup?.bracket?.rounds?.at(-1)?.roundNumber;
+  return finalRoundNumber ? round.roundNumber === finalRoundNumber : true;
 }
 
 function getCupBracketRound(roundNumber) {

@@ -8,6 +8,35 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Porterte dynamisk cup-rundeavansement til admin-RPC
+
+- La til `admin_advance_cup(...)` med låsing av turneringsraden, admin-token, forventet revisjon og servervalidering av at siste cup-runde er ferdig.
+- Serveren bygger neste cup-runde fra vinnerne, viderefører byes for oddetallsbraketter, starter kamper på tilgjengelige baner og oppdaterer bracket-slots atomisk.
+- Serveren oppretter valgfri bronsefinale i finalerunden og lagrer final-/bronsefinale-IDene i bracket-state.
+- Koblet klientens cup-knapp og finalisering til RPC-en, samtidig som lokal/offline cup-generator beholdes som fallback.
+- Lot finalerunden gå gjennom samme RPC slik at serveren setter `Cup ferdig` og vinneren konsistent på tvers av admin-enheter.
+
+### Endrede filer
+
+- `app.js`
+- `development_plan.md`
+- `documentation_log.md`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826232333_admin_advance_cup.sql`
+
+### Verifisering
+
+- `node --check app.js`
+- `git diff --check`
+- Supabase test: 4-lags cup opprettet final- og bronsefinalekamp, startet begge på tilgjengelige baner og oppdaterte bracket-referansene.
+- Supabase test: oddetallsbrakett beholdt siste lag som bye til neste runde.
+- Supabase test: foreldet revisjon ble avvist.
+- Kontrolltestene ryddet opp etter seg; ingen testturneringer ble liggende.
+
+### Neste steg
+
+- Portére servervalidering av reopen/undo og deretter teste realtime/reconnect mellom flere admin-, spiller- og tilskuerklienter.
+
 ## 2026-08-27 - Porterte settresultat og round-robin-rundeavansement
 
 - La til `admin_set_result(...)` med servervalidering av settscore, kampstatus, vinner, neste kamp og revisjon.
