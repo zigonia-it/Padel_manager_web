@@ -1,14 +1,5 @@
 create extension if not exists pgcrypto;
 
-create table if not exists public.tournaments (
-  id uuid primary key,
-  invite_code text not null unique,
-  admin_token text not null,
-  state jsonb not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
 create table if not exists public.player_sessions (
   id uuid primary key default gen_random_uuid(),
   tournament_id uuid not null references public.tournaments(id) on delete cascade,
@@ -24,18 +15,6 @@ revoke all privileges on table public.player_sessions from anon, authenticated;
 create index if not exists player_sessions_tournament_player_idx
 on public.player_sessions (tournament_id, player_id);
 
-alter table public.tournaments enable row level security;
-
-drop policy if exists "Public can read tournament states for realtime" on public.tournaments;
-create policy "Public can read tournament states for realtime"
-on public.tournaments
-for select
-to anon
-using (true);
-
-revoke all privileges on table public.tournaments from anon, authenticated;
-grant select on public.tournaments to anon;
-
 create or replace function public.touch_updated_at()
 returns trigger
 language plpgsql
@@ -45,87 +24,6 @@ as $$
 begin
   new.updated_at = now();
   return new;
-end;
-$$;
-
-drop trigger if exists tournaments_touch_updated_at on public.tournaments;
-create trigger tournaments_touch_updated_at
-before update on public.tournaments
-for each row
-execute function public.touch_updated_at();
-
-create or replace function public.create_tournament(
-  p_state jsonb,
-  p_admin_token text
-)
-returns jsonb
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  next_id uuid := (p_state->>'id')::uuid;
-  next_invite_code text := upper(p_state->>'inviteCode');
-  saved_state jsonb;
-begin
-  if next_id is null or next_invite_code is null or p_admin_token is null or length(p_admin_token) < 16 then
-    raise exception 'Invalid tournament payload';
-  end if;
-
-  saved_state := p_state - 'adminToken' - 'selectedPlayerId';
-
-  insert into public.tournaments (id, invite_code, admin_token, state)
-  values (next_id, next_invite_code, p_admin_token, saved_state)
-  on conflict (id) do update
-  set invite_code = excluded.invite_code,
-      admin_token = excluded.admin_token,
-      state = excluded.state;
-
-  return saved_state;
-end;
-$$;
-
-create or replace function public.get_tournament_by_code(
-  p_invite_code text
-)
-returns jsonb
-language sql
-security definer
-set search_path = public
-as $$
-  select state
-  from public.tournaments
-  where invite_code = upper(trim(p_invite_code))
-  limit 1;
-$$;
-
-create or replace function public.save_tournament_state(
-  p_tournament_id uuid,
-  p_admin_token text,
-  p_state jsonb
-)
-returns jsonb
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  saved_state jsonb;
-begin
-  saved_state := p_state - 'adminToken' - 'selectedPlayerId';
-
-  update public.tournaments
-  set state = saved_state,
-      invite_code = upper(saved_state->>'inviteCode')
-  where id = p_tournament_id
-    and admin_token = p_admin_token
-  returning state into saved_state;
-
-  if saved_state is null then
-    raise exception 'Admin token mismatch or tournament not found';
-  end if;
-
-  return saved_state;
 end;
 $$;
 
@@ -384,79 +282,10 @@ $$;
 revoke all on function public.save_player_point(uuid, text, uuid, uuid, integer, text) from public, anon, authenticated;
 grant execute on function public.save_player_point(uuid, text, uuid, uuid, integer, text) to anon;
 
-create or replace function public.delete_tournament(
-  p_tournament_id uuid,
-  p_admin_token text
-)
-returns boolean
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  deleted_count integer;
-begin
-  if p_tournament_id is null or p_admin_token is null or length(p_admin_token) < 16 then
-    raise exception 'Invalid delete payload';
-  end if;
-
-  delete from public.tournaments
-  where id = p_tournament_id
-    and admin_token = p_admin_token;
-
-  get diagnostics deleted_count = row_count;
-
-  if deleted_count = 0 then
-    raise exception 'Admin token mismatch or tournament not found';
-  end if;
-
-  return true;
-end;
-$$;
-
-revoke all on function public.touch_updated_at() from public, anon, authenticated;
-revoke all on function public.create_tournament(jsonb, text) from public, anon, authenticated;
-revoke all on function public.get_tournament_by_code(text) from public, anon, authenticated;
-revoke all on function public.save_tournament_state(uuid, text, jsonb) from public, anon, authenticated;
-revoke all on function public.join_tournament(text, jsonb) from public, anon, authenticated;
-revoke all on function public.delete_tournament(uuid, text) from public, anon, authenticated;
-
-grant execute on function public.create_tournament(jsonb, text) to anon;
-grant execute on function public.get_tournament_by_code(text) to anon;
-grant execute on function public.save_tournament_state(uuid, text, jsonb) to anon;
-grant execute on function public.join_tournament(text, jsonb) to anon;
-grant execute on function public.delete_tournament(uuid, text) to anon;
-
-alter default privileges for role postgres in schema public
-  revoke select, insert, update, delete on tables from anon, authenticated, service_role;
-
-alter default privileges for role postgres in schema public
-  revoke execute on functions from anon, authenticated, service_role;
-
-alter default privileges for role postgres in schema public
-  revoke usage, select on sequences from anon, authenticated, service_role;
-
-alter default privileges for role postgres in schema public
-  revoke execute on functions from public;
-
 do $$
 begin
   if to_regprocedure('public.rls_auto_enable()') is not null then
     execute 'revoke execute on function public.rls_auto_enable() from public, anon, authenticated';
-  end if;
-end;
-$$;
-
-do $$
-begin
-  if not exists (
-    select 1
-    from pg_publication_tables
-    where pubname = 'supabase_realtime'
-      and schemaname = 'public'
-      and tablename = 'tournaments'
-  ) then
-    alter publication supabase_realtime add table public.tournaments;
   end if;
 end;
 $$;

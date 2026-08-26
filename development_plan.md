@@ -27,19 +27,20 @@ Prosjektmetadata:
 - Admin kan registrere walkover og angre siste poeng-, settresultat- eller walkover-handling.
 - Join-lenken bruker `https://padelstar.app`, og synlige demo-/testreferanser er fjernet fra brukerflaten.
 - Den nye topp-logoen er kontrollert i desktop- og mobilvisning.
+- `v. 0.2 (Beta)` er verifisert på publisert `https://padelstar.app` med Vercel Analytics og service-worker-cache `v40`.
+- Spillerpoeng krever nå et serverutstedt spillertoken som lagres hash-et i en RLS-beskyttet Supabase-tabell.
 
 ## Neste fase: produksjonsklar beta
 
 Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
-1. **Lukk publiseringsløpet.** Deploy den nye branchen, kontroller at `https://padelstar.app` peker på riktig Vercel-deploy, og verifiser at siste service-worker-cache aktiveres.
-2. **Hardne roller og skrivetilgang.** Skill host/admin tydeligere fra spilleridentitet i datalaget, innfør sterkere spiller-token eller tilsvarende begrensning, og gjennomgå RLS/grants/rate limiting før bred bruk.
-3. **Gjør admin-operasjoner atomiske.** Portér kampstart, resultat, walkover, avbrytelse og rundeavansement til validerte Supabase-operasjoner med samme kollisjonsvern som spillerpoeng-RPC-en.
-4. **Stabiliser realtime.** Verifiser admin, spiller og tilskuer på separate enheter med samtidige oppdateringer, refresh og reconnect; håndter stale state og feilmeldinger tydelig.
-5. **Etabler automatiserte regresjonstester.** Prioriter scheduler for singles/doubles/sit-out, cup-seeding/byes/bracket, scoring, leaderboard, walkover/undo og rolle-/modulvisning.
-6. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
-7. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
-8. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
+1. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
+2. **Gjør admin-operasjoner atomiske.** Portér kampstart, resultat, walkover, avbrytelse og rundeavansement til validerte Supabase-operasjoner med samme kollisjonsvern som spillerpoeng-RPC-en.
+3. **Stabiliser realtime.** Verifiser admin, spiller og tilskuer på separate enheter med samtidige oppdateringer, refresh og reconnect; håndter stale state og feilmeldinger tydelig.
+4. **Etabler automatiserte regresjonstester.** Prioriter scheduler for singles/doubles/sit-out, cup-seeding/byes/bracket, scoring, leaderboard, walkover/undo og rolle-/modulvisning.
+5. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
+6. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
+7. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
 
 ## 1. Formål
 

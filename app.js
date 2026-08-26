@@ -255,18 +255,21 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
 
   if (!playerName) return;
 
-  let existingPlayer = findPlayerByName(playerName);
-  if (!existingPlayer && state.rounds.length > 0) {
-    alert("Turneringen er startet. Be administrator legge deg til i neste turnering.");
-    return;
+  let player;
+  if (supabaseClient) {
+    const joined = await joinRemoteTournament(playerName, avatarId);
+    if (!joined) return;
+    player = findPlayerByName(playerName);
+  } else {
+    const existingPlayer = findPlayerByName(playerName);
+    if (!existingPlayer && state.rounds.length > 0) {
+      alert("Turneringen er startet. Be administrator legge deg til i neste turnering.");
+      return;
+    }
+    player = existingPlayer ?? joinTournament(playerName, avatarId);
   }
 
-  if (!existingPlayer && supabaseClient) {
-    await joinRemoteTournament(playerName, avatarId);
-    existingPlayer = findPlayerByName(playerName);
-  }
-
-  const player = existingPlayer ?? joinTournament(playerName, avatarId);
+  if (!player) return;
   state.selectedPlayerId = player.id;
   setLocalRole("player");
   saveState({ remote: false });
@@ -526,6 +529,7 @@ function createTournament({ name, inviteCode, players, courtCount }) {
     cup: null,
     cupTeams: [],
     selectedPlayerId: null,
+    playerToken: null,
   };
 }
 
@@ -563,6 +567,7 @@ function migrateState(nextState) {
   if (!["auto", "manual"].includes(nextState.settings.cupTeamSetupMode)) nextState.settings.cupTeamSetupMode = "auto";
   nextState.settings.includesThirdPlaceMatch = Boolean(nextState.settings.includesThirdPlaceMatch);
   nextState.adminToken ??= null;
+  nextState.playerToken ??= null;
   nextState.selectedPlayerId ??= null;
   nextState.players ??= [];
   nextState.courts ??= structuredClone(defaultTournament.courts);
@@ -638,6 +643,7 @@ function isSupabaseReady() {
 function sanitizeSharedState(nextState) {
   const sharedState = structuredClone(nextState);
   delete sharedState.adminToken;
+  delete sharedState.playerToken;
   delete sharedState.selectedPlayerId;
   return sharedState;
 }
@@ -646,12 +652,14 @@ function applyRemoteState(remoteState) {
   if (!remoteState) return;
   const selectedPlayerId = state.selectedPlayerId ?? null;
   const adminToken = state.id === remoteState.id ? state.adminToken ?? null : null;
+  const playerToken = state.id === remoteState.id ? state.playerToken ?? null : null;
   isApplyingRemoteState = true;
   const nextState = migrateState({
     ...remoteState,
     selectedPlayerId,
   });
   nextState.adminToken = adminToken;
+  nextState.playerToken = playerToken;
   state = nextState;
   saveState({ remote: false });
   connectRealtimeForCurrentState();
@@ -699,7 +707,14 @@ async function joinRemoteTournament(playerName, avatarId) {
     alert(`Kunne ikke melde deg på: ${error.message}`);
     return false;
   }
-  applyRemoteState(data);
+  if (!data?.state || !data.playerToken || !data.playerId) {
+    alert("Kunne ikke opprette en sikker spillerøkt.");
+    return false;
+  }
+  applyRemoteState(data.state);
+  state.playerToken = data.playerToken;
+  state.selectedPlayerId = data.playerId;
+  saveState({ remote: false });
   return true;
 }
 
@@ -723,7 +738,7 @@ async function saveRemoteState() {
 }
 
 function queuePlayerScore(matchId, teamIndex) {
-  if (!isSupabaseReady() || !state.id || !state.inviteCode || !state.selectedPlayerId) return;
+  if (!isSupabaseReady() || !state.id || !state.inviteCode || !state.selectedPlayerId || !state.playerToken) return;
 
   const payload = {
     p_tournament_id: state.id,
@@ -731,6 +746,7 @@ function queuePlayerScore(matchId, teamIndex) {
     p_player_id: state.selectedPlayerId,
     p_match_id: matchId,
     p_team_index: teamIndex,
+    p_player_token: state.playerToken,
   };
 
   playerScoreSaveChain = playerScoreSaveChain
@@ -785,11 +801,13 @@ function connectRealtimeForCurrentState() {
 }
 
 function exportBackup() {
+  const exportedState = structuredClone(state);
+  delete exportedState.playerToken;
   const backup = {
     exportedAt: new Date().toISOString(),
     app: "Padelstar",
     version: 1,
-    tournament: state,
+    tournament: exportedState,
   };
   const file = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
@@ -1628,10 +1646,15 @@ function renderExistingPlayerList() {
     button.className = "existing-player-button";
     button.setAttribute("style", accentStyle(player.accent));
     button.innerHTML = `<img class="avatar" src="${avatarUrl(player)}" alt="" width="30" height="30"><span>${escapeHtml(player.name)}</span>`;
-    button.addEventListener("click", () => {
-      state.selectedPlayerId = player.id;
+    button.addEventListener("click", async () => {
+      if (supabaseClient) {
+        const joined = await joinRemoteTournament(player.name, player.avatarId);
+        if (!joined) return;
+      } else {
+        state.selectedPlayerId = player.id;
+      }
       setLocalRole("player");
-      saveState();
+      saveState({ remote: false });
       showWorkspace("player");
       render();
     });

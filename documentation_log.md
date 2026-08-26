@@ -27,6 +27,39 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Fortsette produksjonsklareringen fra `development_plan.md`.
 
+## 2026-08-27 - Produksjonskontroll og sikrere spillerpoeng
+
+- Verifiserte publisert `https://padelstar.app` i nettleser: `v. 0.2 (Beta)`, `padelstar_button-900.png` som hjem-knapp og Vercel Analytics-scriptet er aktive.
+- Verifiserte publisert service-worker-cache `padelstar-v40`.
+- La til serverutstedte spillertoken for Supabase-spillere; bare hash av tokenet lagres i `public.player_sessions`.
+- Sikret `save_player_point(...)` mot manglende eller ugyldig spillertoken og fjernet den gamle fem-parameter-signaturen.
+- Oppdaterte remote join og «Admin har lagt meg til» slik at begge oppretter en lokal spillerøkt med token.
+- Fjernet spillertoken fra delt state og backup-eksport.
+- Låste `player_sessions` med RLS uten offentlige lese-/skriverettigheter og låste `touch_updated_at`-funksjonens `search_path`.
+- Fjernet offentlig execute-tilgang til den eksisterende `rls_auto_enable()`-funksjonen i Supabase.
+- Kjørte migreringen `20260826223457_player_session_tokens` mot Supabase-prosjektet `sxzlljxodorkfrjnwfgr` via databasekanalen.
+
+### Endrede filer
+
+- `app.js`
+- `README.md`
+- `development_plan.md`
+- `documentation_log.md`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826223457_player_session_tokens.sql`
+
+### Verifisering
+
+- `node --check app.js`
+- `git diff --check`
+- Supabase positiv/negativ RPC-test: gyldig token førte poeng, ugyldig token ble avvist.
+- Supabase bekreftet 0 testturneringer og 0 player sessions etter kontrolltesten.
+- Supabase bekreftet at `anon` ikke kan lese `player_sessions` eller kjøre `touch_updated_at`/`rls_auto_enable`.
+
+### Neste steg
+
+- Gjøre kampstart, resultat, walkover, avbrytelse og rundeavansement atomiske mot Supabase.
+
 ## 2026-08-27 - Topp-logo som hjem-knapp
 
 - Gjorde `padelstar_button-900.png` i headeren klikkbar.

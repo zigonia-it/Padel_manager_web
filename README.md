@@ -24,13 +24,13 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 - Støtter round-robin og cup med automatisk/manuelt lagoppsett, byes og valgfri bronsefinale.
 - Støtter walkover, ett-stegs undo, QR-kode og offentlig join-lenke.
 - Synkroniserer turneringsstate live via Supabase når live-config er aktiv.
+- Krever serverutstedt spillertoken for spillerstyrt poengføring mot Supabase.
 - Fungerer lokalt i nettleseren med localStorage fallback.
 
 ## Neste steg i beta
 
-Padelstar er i beta. Neste steg er produksjonsklargjøring av live-turneringer før bred offentlig bruk.
+Padelstar er i beta. Neste steg er å hardne roller, tilgang og atomiske live-operasjoner før bred offentlig bruk.
 
-- Verifisere produksjonsdeploy, DNS, service worker og join-lenke på `https://padelstar.app`.
 - Hardne host/admin- og spilleridentitet, Supabase-operasjoner, RLS/grants og rate limiting.
 - Verifisere fler-enhetssynk mellom admin, spiller og tilskuer ved reconnect og samtidige endringer.
 - Lage automatiserte regresjonstester for turneringsmotor, scoring, leaderboard, walkover/undo og roller.
