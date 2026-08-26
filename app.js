@@ -91,6 +91,8 @@ const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && windo
 let realtimeChannel = null;
 let remoteSaveTimer = null;
 let playerScoreSaveChain = Promise.resolve();
+let remoteWriteChain = Promise.resolve();
+let lastRemotePersistedSequence = 0;
 let isApplyingRemoteState = false;
 let remoteMutationSequence = 0;
 
@@ -727,7 +729,10 @@ async function joinRemoteTournament(playerName, avatarId) {
 function queueRemoteSave() {
   if (!isSupabaseReady() || isApplyingRemoteState || !state.adminToken || !state.id) return;
   window.clearTimeout(remoteSaveTimer);
-  remoteSaveTimer = window.setTimeout(saveRemoteState, 350);
+  remoteSaveTimer = window.setTimeout(() => {
+    remoteSaveTimer = null;
+    remoteWriteChain = remoteWriteChain.catch(() => {}).then(saveRemoteState);
+  }, 350);
 }
 
 async function saveRemoteState() {
@@ -751,12 +756,53 @@ async function saveRemoteState() {
   }
 
   if (!data) return;
+  lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
   if (requestSequence === remoteMutationSequence) {
     applyRemoteState(data);
   } else if (state.id === data.id && Number.isInteger(data.revision)) {
     state.revision = data.revision;
     saveState({ remote: false });
   }
+}
+
+function queueRemoteMatchAction(match, action, teamIndex = null) {
+  if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
+
+  window.clearTimeout(remoteSaveTimer);
+  remoteSaveTimer = null;
+  remoteWriteChain = remoteWriteChain
+    .catch(() => {})
+    .then(async () => {
+      if (remoteMutationSequence > lastRemotePersistedSequence) await saveRemoteState();
+
+      const requestSequence = remoteMutationSequence;
+      const expectedRevision = state.revision;
+      const { data, error } = await supabaseClient.rpc("admin_match_action", {
+        p_tournament_id: state.id,
+        p_admin_token: state.adminToken,
+        p_match_id: match.id,
+        p_action: action,
+        p_team_index: teamIndex,
+        p_expected_revision: expectedRevision,
+      });
+
+      if (error) {
+        console.warn("Supabase admin match action failed", error);
+        elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
+          ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
+          : "Kunne ikke oppdatere kampen live akkurat nå. Lokal kopi er lagret.";
+        return;
+      }
+
+      if (!data) return;
+      lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
+      if (requestSequence === remoteMutationSequence) {
+        applyRemoteState(data);
+      } else if (state.id === data.id && Number.isInteger(data.revision)) {
+        state.revision = data.revision;
+        saveState({ remote: false });
+      }
+    });
 }
 
 function queuePlayerScore(matchId, teamIndex) {
@@ -2819,6 +2865,10 @@ function setsWonByTeam(match, teamIndex) {
 function startMatch(match) {
   const activeRound = getActiveRound();
   if (!activeRound || activeRound.status !== "active") return;
+  if (isSupabaseReady()) {
+    queueRemoteMatchAction(match, "start");
+    return;
+  }
   match.state = "playing";
   saveState();
   render();
@@ -2846,6 +2896,10 @@ function reopenMatch(match) {
 
 function cancelMatch(match) {
   if (!confirm("Avbryte denne kampen? Den teller ikke i tabellen.")) return;
+  if (isSupabaseReady()) {
+    queueRemoteMatchAction(match, "cancel");
+    return;
+  }
   match.state = "cancelled";
   match.completedSets = [];
   match.winnerTeamIndex = null;
@@ -2861,6 +2915,11 @@ function setWalkover(match, teamIndex) {
   if (![0, 1].includes(teamIndex) || ["finished", "cancelled"].includes(match.state)) return;
   const winningTeam = teamIndex === 0 ? match.teamOne : match.teamTwo;
   if (!confirm(`Registrere walkover til ${winningTeam.displayName}?`)) return;
+
+  if (isSupabaseReady()) {
+    queueRemoteMatchAction(match, "walkover", teamIndex);
+    return;
+  }
 
   match.lastScoredMatchState = captureMatchUndoState(match);
   match.state = "finished";

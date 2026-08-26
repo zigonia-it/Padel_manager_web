@@ -8,6 +8,37 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Porterte kampstart, avbrytelse og walkover til admin-RPC
+
+- La til `admin_match_action(...)` som låser turneringsraden før endring og krever admin-token og forventet revisjon.
+- Serveren validerer aktiv runde og kampstatus for `start`, `cancel` og `walkover`.
+- Avbrytelse og walkover flytter neste ventende kamp til samme bane når det er relevant.
+- Walkover lagrer undo-snapshot i state slik at eksisterende undo-flyt kan fortsette å fungere.
+- Oppdaterte klienten slik at Supabase-tilkoblede adminer sender disse tre handlingene til RPC-en; lokal modus beholder eksisterende fallback.
+- Serialiserte admin-skrivinger i klienten slik at ventende hele-state-lagring blir sendt før en kampaction.
+- Kjørte migreringen `admin_match_actions` i Supabase-prosjektet `sxzlljxodorkfrjnwfgr`; Supabase registrerte den med versjon `20260826230954`.
+
+### Endrede filer
+
+- `app.js`
+- `development_plan.md`
+- `documentation_log.md`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826230401_admin_match_actions.sql`
+
+### Verifisering
+
+- `node --check app.js`
+- Supabase test: `start` økte revisjonen og satte kamp til `playing`.
+- Supabase test: foreldet revisjon ble avvist.
+- Supabase test: `cancel` satte neste ventende kamp til `playing` på frigitt bane.
+- Supabase test: `walkover` satte vinner, status og walkover-markering korrekt.
+- Kontrolltesten ryddet opp etter seg; ingen testturneringer ble liggende.
+
+### Neste steg
+
+- Portére settresultat og rundeavansement til validerte admin-operasjoner.
+
 ## 2026-08-27 - La til optimistisk kollisjonsvern for admin-state
 
 - La til kolonnen `public.tournaments.revision`, som økes server-side ved hver godkjente state-endring.
