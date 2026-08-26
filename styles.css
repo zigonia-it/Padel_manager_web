@@ -449,6 +449,55 @@ h3 {
   gap: 8px;
 }
 
+.admin-player-choice {
+  display: grid;
+  gap: 12px;
+}
+
+.checkbox-card {
+  display: flex;
+  grid-template-columns: none;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid rgba(255, 224, 154, 0.26);
+  border-radius: 8px;
+  padding: 0.88rem;
+  background:
+    linear-gradient(135deg, rgba(255, 224, 154, 0.08), transparent 52%),
+    rgba(13, 9, 6, 0.56);
+  color: var(--ink);
+}
+
+.checkbox-card input {
+  width: 20px;
+  height: 20px;
+  margin: 0.16rem 0 0;
+  accent-color: var(--gold);
+  flex: 0 0 auto;
+}
+
+.checkbox-card span {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.checkbox-card strong {
+  color: var(--gold-light);
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.checkbox-card small {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.admin-player-name {
+  padding-left: 32px;
+}
+
 .share-panel {
   align-content: start;
 }

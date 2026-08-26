@@ -1,10 +1,10 @@
-const cacheName = "padel-manager-v23";
+const cacheName = "padel-manager-v24";
 
 const appShell = [
   "./",
   "./index.html",
-  "./styles.css?v=single-page-flow-1",
-  "./app.js?v=single-page-flow-1",
+  "./styles.css?v=admin-player-flow-1",
+  "./app.js?v=admin-player-flow-1",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/favicon.jpg",

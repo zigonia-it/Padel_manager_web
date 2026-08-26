@@ -1319,3 +1319,32 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Committe og pushe til `main` slik at GitHub Pages publiserer siste versjon.
 - Sjekke GitHub Actions Pages-deploy etter push.
 - Åpne publisert URL og teste create/join på live-siden med Supabase.
+
+## 2026-08-26 - Admin kan velge egen spillerprofil
+
+### Gjort
+
+- La til valg i Create-modulen for om admin også spiller i turneringen.
+- Viser spillernavnfelt for admin kun når `Admin spiller selv` er valgt.
+- Oppretter admin som første spiller når valget er aktivt.
+- Setter admin-spilleren med `joinedFrom: "admin-self"` og `participantType: "admin-player"`.
+- Beholder lokal rolle som `admin`, men setter samtidig `selectedPlayerId`, slik at både Admin- og Spiller-modulen er tilgjengelig for samme bruker.
+- Viser `Admin spiller` på spillerprofilkortet for denne typen spiller.
+- Bumpet Service Worker-cache til `padel-manager-v24`.
+
+### Testet
+
+- `node --check app.js`
+- Playwright lokalt:
+  - create uten admin som spiller viser `Join`, `Admin` og `Turnering`
+  - create med admin som spiller viser `Join`, `Admin`, `Spiller` og `Turnering`
+  - Spiller-modulen viser admin-spilleren med label `Admin spiller`
+  - ingen konsollfeil
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `documentation_log.md`

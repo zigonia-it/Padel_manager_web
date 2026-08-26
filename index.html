@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/New assets/padel_manager logo_1x.png">
     <link rel="icon" href="assets/favicon.jpg">
-    <link rel="stylesheet" href="styles.css?v=single-page-flow-1">
+    <link rel="stylesheet" href="styles.css?v=admin-player-flow-1">
   </head>
   <body>
     <div class="app-shell">
@@ -101,6 +101,20 @@
               Spillere, valgfritt
               <textarea name="players" rows="6" placeholder="Legg inn spillere manuelt hvis noen ikke har egen enhet."></textarea>
             </label>
+            <fieldset class="admin-player-choice">
+              <legend>Admin-deltakelse</legend>
+              <label class="checkbox-card">
+                <input id="adminParticipatesInput" name="adminParticipates" type="checkbox">
+                <span>
+                  <strong>Admin spiller selv</strong>
+                  <small>Velg dette hvis den som oppretter turneringen også skal ha spillerprofil.</small>
+                </span>
+              </label>
+              <label class="admin-player-name hidden" id="adminPlayerNameField">
+                Spillernavn for admin
+                <input name="adminPlayerName" type="text" value="Admin" autocomplete="name">
+              </label>
+            </fieldset>
             <label>
               Antall baner
               <input name="courts" type="number" min="1" max="12" value="1" required>
@@ -371,6 +385,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
-    <script src="app.js?v=single-page-flow-1"></script>
+    <script src="app.js?v=admin-player-flow-1"></script>
   </body>
 </html>

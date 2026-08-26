@@ -99,6 +99,8 @@ const elements = {
   resumeSummary: document.querySelector("#resumeSummary"),
   resumeTournamentButton: document.querySelector("#resumeTournamentButton"),
   createTournamentForm: document.querySelector("#createTournamentForm"),
+  adminParticipatesInput: document.querySelector("#adminParticipatesInput"),
+  adminPlayerNameField: document.querySelector("#adminPlayerNameField"),
   joinTournamentForm: document.querySelector("#joinTournamentForm"),
   joinAvatarPreview: document.querySelector("#joinAvatarPreview"),
   joinNamePreview: document.querySelector("#joinNamePreview"),
@@ -182,6 +184,7 @@ window.addEventListener("offline", syncConnectionStatus);
 
 elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
 elements.avatarPicker.addEventListener("change", syncJoinPreview);
+elements.adminParticipatesInput.addEventListener("change", syncAdminPlayerChoice);
 elements.languageSelect.addEventListener("change", () => {
   state.settings.language = elements.languageSelect.value;
   saveState();
@@ -191,15 +194,34 @@ elements.languageSelect.addEventListener("change", () => {
 
 elements.createTournamentForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const formData = new FormData(event.currentTarget);
+  const form = event.currentTarget;
+  const formData = new FormData(form);
+  const adminParticipates = formData.get("adminParticipates") === "on";
+  const adminPlayerName = formData.get("adminPlayerName").trim();
   const playerNames = parsePlayerNames(formData.get("players"));
+
+  if (adminParticipates && !adminPlayerName) {
+    alert("Skriv inn spillernavn for admin.");
+    form.elements.adminPlayerName.focus();
+    return;
+  }
+
+  const tournamentPlayers = adminParticipates
+    ? [adminPlayerName, ...playerNames.filter((name) => name.toLowerCase() !== adminPlayerName.toLowerCase())]
+    : playerNames;
 
   state = createTournament({
     name: formData.get("tournamentName").trim(),
     inviteCode: createInviteCode(),
-    players: playerNames,
+    players: tournamentPlayers,
     courtCount: Number(formData.get("courts")),
   });
+
+  if (adminParticipates) {
+    state.players[0].joinedFrom = "admin-self";
+    state.players[0].participantType = "admin-player";
+    state.selectedPlayerId = state.players[0].id;
+  }
 
   setLocalRole("admin");
   saveState({ remote: false });
@@ -511,6 +533,7 @@ function createPlayer(name, index, avatarId = defaultAvatarId) {
     avatarId,
     accent: accents[index % accents.length],
     active: true,
+    participantType: "player",
     joinStatus: "joined",
     joinedFrom: "manual",
     createdAt: new Date().toISOString(),
@@ -541,6 +564,7 @@ function migrateState(nextState) {
   nextState.rounds ??= [];
   nextState.players = nextState.players.map((player, index) => ({
     active: true,
+    participantType: "player",
     accent: accents[index % accents.length],
     avatarId: defaultAvatarId,
     joinStatus: "joined",
@@ -778,6 +802,15 @@ function syncCreateFormDefaults() {
     .map((player) => player.name)
     .join("\n");
   elements.createTournamentForm.elements.courts.value = defaultTournament.courts.length;
+  elements.createTournamentForm.elements.adminParticipates.checked = false;
+  elements.createTournamentForm.elements.adminPlayerName.value = "Admin";
+  syncAdminPlayerChoice();
+}
+
+function syncAdminPlayerChoice() {
+  const adminParticipates = elements.createTournamentForm.elements.adminParticipates.checked;
+  elements.adminPlayerNameField.classList.toggle("hidden", !adminParticipates);
+  elements.createTournamentForm.elements.adminPlayerName.required = adminParticipates;
 }
 
 function syncJoinPreview() {
@@ -1413,7 +1446,11 @@ function renderPlayerIdentity() {
     return;
   }
 
-  const joinedByAdmin = player.joinedFrom !== "self";
+  const joinSourceLabel = player.joinedFrom === "admin-self"
+    ? "Admin spiller"
+    : player.joinedFrom === "self"
+      ? "Registrert selv"
+      : "Lagt til av admin";
   elements.playerIdentityCard.setAttribute("style", accentStyle(player.accent));
   elements.playerIdentityCard.innerHTML = `
     <div class="player-identity-main">
@@ -1423,7 +1460,7 @@ function renderPlayerIdentity() {
         <strong>${escapeHtml(player.name)}</strong>
       </div>
     </div>
-    <span class="join-source-chip">${joinedByAdmin ? "Lagt til av admin" : "Registrert selv"}</span>
+    <span class="join-source-chip">${joinSourceLabel}</span>
   `;
 }
 
