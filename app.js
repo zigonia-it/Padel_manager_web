@@ -2,6 +2,7 @@ const legacyStorageKey = "padel-manager-demo";
 const legacyRoleStorageKey = "padel-manager-role";
 const storageKey = "padelstar-demo";
 const roleStorageKey = "padelstar-role";
+const publicAppUrl = "https://padelstar.app/";
 const playerAccentPalette = {
   blue: "#1a59f2",
   orange: "#e67a0a",
@@ -29,7 +30,6 @@ const legacyAccentMap = {
 const accents = Object.keys(playerAccentPalette);
 const defaultAvatarId = "smash";
 const tennisPointLabels = ["0", "15", "30", "40", "A"];
-const demoPlayerNames = ["Sigurd", "Elin", "Elisabeth", "Hanne", "Ruben", "Karoline", "Lars", "Magnus", "Tina", "Håkon", "Erik", "Anita", "Terje"];
 const avatarOptions = [
   { id: "smash", label: "Smash" },
   { id: "serve", label: "Serve" },
@@ -40,7 +40,7 @@ const translations = {
   nb: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Språk",
-    localPwa: "Lokal PWA",
+    localPwa: "Lokal",
     offline: "Offline",
     startTournament: "Start turnering",
     startNextRound: "Start neste runde",
@@ -49,7 +49,7 @@ const translations = {
   nn: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Språk",
-    localPwa: "Lokal PWA",
+    localPwa: "Lokal",
     offline: "Fråkopla",
     startTournament: "Start turnering",
     startNextRound: "Start neste runde",
@@ -58,7 +58,7 @@ const translations = {
   en: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Language",
-    localPwa: "Local PWA",
+    localPwa: "Local",
     offline: "Offline",
     startTournament: "Start tournament",
     startNextRound: "Start next round",
@@ -90,6 +90,7 @@ const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && windo
   : null;
 let realtimeChannel = null;
 let remoteSaveTimer = null;
+let playerScoreSaveChain = Promise.resolve();
 let isApplyingRemoteState = false;
 
 const elements = {
@@ -120,6 +121,12 @@ const elements = {
   addPlayerForm: document.querySelector("#addPlayerForm"),
   courtSettingsForm: document.querySelector("#courtSettingsForm"),
   tournamentSettingsForm: document.querySelector("#tournamentSettingsForm"),
+  cupTeamSetupModeField: document.querySelector("#cupTeamSetupModeField"),
+  cupThirdPlaceField: document.querySelector("#cupThirdPlaceField"),
+  cupTeamBuilder: document.querySelector("#cupTeamBuilder"),
+  cupTeamForm: document.querySelector("#cupTeamForm"),
+  cupTeamSummary: document.querySelector("#cupTeamSummary"),
+  cupBracket: document.querySelector("#cupBracket"),
   tournamentTitle: document.querySelector("#tournamentTitle"),
   roundLabel: document.querySelector("#roundLabel"),
   inviteCode: document.querySelector("#inviteCode"),
@@ -128,7 +135,6 @@ const elements = {
   joinLink: document.querySelector("#joinLink"),
   copyInviteCodeButton: document.querySelector("#copyInviteCodeButton"),
   copyJoinLinkButton: document.querySelector("#copyJoinLinkButton"),
-  showStartButton: document.querySelector("#showStartButton"),
   copyStatus: document.querySelector("#copyStatus"),
   tournamentStatus: document.querySelector("#tournamentStatus"),
   adminLiveOverview: document.querySelector("#adminLiveOverview"),
@@ -151,9 +157,8 @@ const elements = {
   exportBackupButton: document.querySelector("#exportBackupButton"),
   importBackupButton: document.querySelector("#importBackupButton"),
   backupFileInput: document.querySelector("#backupFileInput"),
-  seedPlayersButton: document.querySelector("#seedPlayersButton"),
   endTournamentButton: document.querySelector("#endTournamentButton"),
-  resetDemoButton: document.querySelector("#resetDemoButton"),
+  resetTournamentButton: document.querySelector("#resetTournamentButton"),
   largeScoreDialog: document.querySelector("#largeScoreDialog"),
   largeScoreSurface: document.querySelector("#largeScoreSurface"),
   largeScoreContext: document.querySelector("#largeScoreContext"),
@@ -276,7 +281,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
 elements.addPlayerForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (state.rounds.length > 0) {
-    alert("Spillere kan bare legges til før første runde i denne demoen.");
+    alert("Spillere kan bare legges til før første runde i denne turneringen.");
     return;
   }
   const formData = new FormData(event.currentTarget);
@@ -305,6 +310,9 @@ elements.tournamentSettingsForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
   updateTournamentRules({
+    format: formData.get("format"),
+    cupTeamSetupMode: formData.get("cupTeamSetupMode"),
+    includesThirdPlaceMatch: formData.get("includesThirdPlaceMatch") === "on",
     pointMode: formData.get("pointMode"),
     gamesToWinSet: Number(formData.get("gamesToWinSet")),
     setsToWinMatch: Number(formData.get("setsToWinMatch")),
@@ -313,14 +321,9 @@ elements.tournamentSettingsForm.addEventListener("submit", (event) => {
   render();
 });
 
-elements.seedPlayersButton.addEventListener("click", () => {
-  if (state.rounds.length > 0) {
-    alert("Demospillere kan bare fylles før første runde.");
-    return;
-  }
-  addPlayers(demoPlayerNames, "admin");
-  saveState();
-  render();
+elements.cupTeamForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  saveManualCupTeams(new FormData(event.currentTarget).get("teamLines"));
 });
 
 elements.generateRoundButton.addEventListener("click", () => {
@@ -365,7 +368,8 @@ elements.endTournamentButton.addEventListener("click", () => {
   render();
 });
 
-elements.resetDemoButton.addEventListener("click", async () => {
+elements.resetTournamentButton.addEventListener("click", async () => {
+  if (!confirm("Nullstille turneringen? Turneringens lokale og nettlagrede data blir slettet.")) return;
   await deleteRemoteTournament();
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
@@ -380,11 +384,6 @@ elements.resetDemoButton.addEventListener("click", async () => {
 elements.resumeTournamentButton.addEventListener("click", () => {
   showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
   render();
-});
-
-elements.showStartButton.addEventListener("click", () => {
-  prefillJoinForm(state.inviteCode);
-  showModule("setup-player");
 });
 
 elements.copyInviteCodeButton.addEventListener("click", () => {
@@ -511,6 +510,8 @@ function createTournament({ name, inviteCode, players, courtCount }) {
       setsToWinMatch: 1,
       pointMode: "matches",
       format: "roundRobin",
+      cupTeamSetupMode: "auto",
+      includesThirdPlaceMatch: false,
       language: "nb",
     },
     courts: Array.from({ length: courtCount }, (_, index) => ({
@@ -520,8 +521,10 @@ function createTournament({ name, inviteCode, players, courtCount }) {
       active: true,
     })),
     players: tournamentPlayers,
-    schedule: buildSchedule(tournamentPlayers),
+    schedule: buildSchedule(tournamentPlayers, "roundRobin"),
     rounds: [],
+    cup: null,
+    cupTeams: [],
     selectedPlayerId: null,
   };
 }
@@ -556,12 +559,17 @@ function migrateState(nextState) {
     ...defaultTournament.settings,
     ...(nextState.settings ?? {}),
   };
+  if (!["roundRobin", "cup"].includes(nextState.settings.format)) nextState.settings.format = "roundRobin";
+  if (!["auto", "manual"].includes(nextState.settings.cupTeamSetupMode)) nextState.settings.cupTeamSetupMode = "auto";
+  nextState.settings.includesThirdPlaceMatch = Boolean(nextState.settings.includesThirdPlaceMatch);
   nextState.adminToken ??= null;
   nextState.selectedPlayerId ??= null;
   nextState.players ??= [];
   nextState.courts ??= structuredClone(defaultTournament.courts);
-  nextState.schedule ??= buildSchedule(nextState.players);
+  nextState.schedule ??= buildSchedule(nextState.players, nextState.settings.format);
   nextState.rounds ??= [];
+  nextState.cup ??= null;
+  nextState.cupTeams = Array.isArray(nextState.cupTeams) ? nextState.cupTeams : [];
   nextState.players = nextState.players.map((player, index) => ({
     active: true,
     participantType: "player",
@@ -588,6 +596,8 @@ function migrateMatch(match, tournamentId) {
       currentGame: { teamOne: 0, teamTwo: 0 },
       completedSets: [],
       sittingOut: [],
+      isThirdPlaceMatch: false,
+      lastScoredMatchState: null,
       ...match,
     };
   }
@@ -610,13 +620,15 @@ function migrateMatch(match, tournamentId) {
     startingTeamIndex: 0,
     winnerTeamIndex: match.scoreTeam1 > match.scoreTeam2 ? 0 : match.scoreTeam2 > match.scoreTeam1 ? 1 : null,
     isWalkover: false,
+    isThirdPlaceMatch: false,
+    lastScoredMatchState: null,
     completedAt: match.completedAt,
   };
 }
 
 function saveState(options = {}) {
   localStorage.setItem(storageKey, JSON.stringify(state));
-  if (options.remote !== false) queueRemoteSave();
+  if (options.remote !== false && isCurrentUserAdmin()) queueRemoteSave();
 }
 
 function isSupabaseReady() {
@@ -710,6 +722,30 @@ async function saveRemoteState() {
   }
 }
 
+function queuePlayerScore(matchId, teamIndex) {
+  if (!isSupabaseReady() || !state.id || !state.inviteCode || !state.selectedPlayerId) return;
+
+  const payload = {
+    p_tournament_id: state.id,
+    p_invite_code: state.inviteCode,
+    p_player_id: state.selectedPlayerId,
+    p_match_id: matchId,
+    p_team_index: teamIndex,
+  };
+
+  playerScoreSaveChain = playerScoreSaveChain
+    .catch(() => {})
+    .then(async () => {
+      const { data, error } = await supabaseClient.rpc("save_player_point", payload);
+      if (error) {
+        console.warn("Supabase player score sync failed", error);
+        elements.copyStatus.textContent = "Kunne ikke synkronisere poenget live akkurat nå. Lokal kopi er lagret.";
+        return;
+      }
+      if (data) applyRemoteState(data);
+    });
+}
+
 async function deleteRemoteTournament() {
   if (!isSupabaseReady() || !state.adminToken || !state.id) return false;
   const { error } = await supabaseClient.rpc("delete_tournament", {
@@ -792,7 +828,7 @@ function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./service-worker.js").catch(() => {
-      elements.connectionStatus.textContent = "Lokal demo";
+      elements.connectionStatus.textContent = "Lokal";
     });
   });
 }
@@ -997,6 +1033,9 @@ function render() {
   elements.playerCount.textContent = `${state.players.length} spillere`;
   elements.matchCount.textContent = `${matches.length} kamper`;
   elements.courtSettingsForm.elements.courtList.value = courtsInputValue();
+  elements.tournamentSettingsForm.elements.format.value = state.settings.format;
+  elements.tournamentSettingsForm.elements.cupTeamSetupMode.value = state.settings.cupTeamSetupMode;
+  elements.tournamentSettingsForm.elements.includesThirdPlaceMatch.checked = state.settings.includesThirdPlaceMatch;
   elements.tournamentSettingsForm.elements.pointMode.value = state.settings.pointMode;
   elements.tournamentSettingsForm.elements.gamesToWinSet.value = state.settings.gamesToWinSet;
   elements.tournamentSettingsForm.elements.setsToWinMatch.value = state.settings.setsToWinMatch;
@@ -1009,11 +1048,15 @@ function render() {
   elements.courtSettingsForm.querySelector("button").disabled = getActiveRound()?.status === "active" || state.status === "Avsluttet";
   elements.addPlayerForm.elements.playerName.disabled = state.rounds.length > 0;
   elements.addPlayerForm.querySelector("button").disabled = state.rounds.length > 0;
-  elements.seedPlayersButton.disabled = state.rounds.length > 0 || demoPlayerNames.every((name) => findPlayerByName(name));
+  elements.cupTeamSetupModeField.classList.toggle("hidden", state.settings.format !== "cup");
+  elements.cupTeamSetupModeField.querySelector("select").disabled = state.rounds.length > 0;
+  elements.cupThirdPlaceField.classList.toggle("hidden", state.settings.format !== "cup");
+  elements.cupThirdPlaceField.querySelector("input").disabled = state.rounds.length > 0;
 
   renderLobbyStatus();
   renderPlayers();
   renderRoundSummary();
+  renderCupBracket();
   renderMatches(matches);
   renderStandings(matches);
   renderPlayerIdentity();
@@ -1022,10 +1065,11 @@ function render() {
   renderAdminLiveOverview(matches);
   renderRules();
   renderExistingPlayerList();
+  renderCupTeamBuilder();
 }
 
 function syncConnectionStatus() {
-  elements.connectionStatus.textContent = navigator.onLine ? (isSupabaseReady() ? "Live PWA" : t("localPwa")) : t("offline");
+  elements.connectionStatus.textContent = navigator.onLine ? (isSupabaseReady() ? "Online" : t("localPwa")) : t("offline");
   elements.connectionStatus.classList.toggle("offline", !navigator.onLine);
 }
 
@@ -1064,7 +1108,9 @@ function renderLobbyStatus() {
   const isFinished = state.status === "Avsluttet";
   const blockReason = generateRoundBlockReason();
   const nextRoundLabel = blockReason || (state.currentRound > 0 ? `Neste blir runde ${state.currentRound + 1}` : "Klar for første runde");
-  const playerMode = state.players.length >= 4 ? "Double" : state.players.length >= 2 ? "Single" : "Venter";
+  const playerMode = state.settings.format === "cup"
+    ? "Cup"
+    : state.players.length >= 4 ? "Double" : state.players.length >= 2 ? "Single" : "Venter";
   const progress = activeRound?.status === "active" ? roundProgress(activeRound) : null;
   const statusText = isFinished ? "Ferdig" : activeRound?.status === "active" ? "I gang" : hasStarted ? "Mellom" : "Lobby";
 
@@ -1196,6 +1242,21 @@ function renderPlayers() {
   });
 }
 
+function renderCupTeamBuilder() {
+  if (!elements.cupTeamBuilder) return;
+  const isCup = state.settings.format === "cup";
+  const isManual = state.settings.cupTeamSetupMode === "manual";
+  const isLocked = state.rounds.length > 0 || state.status === "Avsluttet";
+  elements.cupTeamBuilder.classList.toggle("hidden", !isCup || !isManual);
+  elements.cupTeamSummary.textContent = `${state.cupTeams.length} lag`;
+  const teamLines = state.cupTeams
+    .map((team) => team.players.map((player) => player.name).join(" + "))
+    .join("\n");
+  elements.cupTeamForm.elements.teamLines.value = teamLines;
+  elements.cupTeamForm.elements.teamLines.disabled = isLocked;
+  elements.cupTeamForm.querySelector("button").disabled = isLocked;
+}
+
 function renderRoundSummary() {
   const activeRound = getActiveRound();
   elements.roundSummary.innerHTML = "";
@@ -1247,7 +1308,7 @@ function renderMatches(matches) {
     elements.playerMatches,
     playerMatches,
     selectedPlayer ? "Du har ingen kamper ennå." : "Velg spillerprofil for å se dine kamper.",
-    (match) => createMatchCard(match, false, selectedPlayer?.id),
+    (match) => createMatchCard(match, isEditablePlayerMatch(match, selectedPlayer), selectedPlayer?.id, true),
   );
   renderSpectatorMatches(matches);
 }
@@ -1321,7 +1382,7 @@ function createSpectatorMatchCard(match) {
   return card;
 }
 
-function createMatchCard(match, editable, highlightedPlayerId = null) {
+function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly = false) {
   const card = document.createElement("article");
   card.className = `match-card match-${match.state} ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
   card.setAttribute("style", teamAccentStyle(match.teamOne));
@@ -1381,7 +1442,7 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
         <button class="secondary point-button" type="button" data-point-team="0" ${match.state === "finished" ? "disabled" : ""}>Poeng ${teamOneName}</button>
         <button class="secondary point-button" type="button" data-point-team="1" ${match.state === "finished" ? "disabled" : ""}>Poeng ${teamTwoName}</button>
       </div>
-      <div class="court-edit-row">
+      ${scoreOnly ? "" : `<div class="court-edit-row">
         <label>Bane <input class="court-name-input" type="text" value="${escapeAttribute(match.courtName ?? "")}" placeholder="Bane" aria-label="Bane for ${teamOneName} mot ${teamTwoName}"></label>
         <button class="secondary save-court-button" type="button">Lagre bane</button>
       </div>
@@ -1394,31 +1455,47 @@ function createMatchCard(match, editable, highlightedPlayerId = null) {
         <button class="secondary set-score-button" type="button">Set resultat</button>
         <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>Start kamp</button>
         <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>Stor score</button>
-        <button class="secondary reopen-match-button" type="button" ${match.state !== "finished" || getActiveRound()?.status !== "active" ? "disabled" : ""}>Angre resultat</button>
+        <button class="secondary reopen-match-button" type="button" ${match.state !== "finished" || !match.lastScoredMatchState ? "disabled" : ""}>Angre resultat</button>
         <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>Avbryt kamp</button>
-      </div>
+        <div class="walkover-row">
+          <span>Walkover</span>
+          <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="Registrer walkover for ${teamOneName}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
+          <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="Registrer walkover for ${teamTwoName}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
+        </div>
+      </div>`}
     `;
 
-    const courtInput = controls.querySelector(".court-name-input");
-    const [teamOneInput, teamTwoInput] = controls.querySelectorAll(".score-row input");
-    controls.querySelector(".save-court-button").addEventListener("click", () => {
-      updateMatchCourt(match, courtInput.value);
-    });
-    controls.querySelector(".save-score-button").addEventListener("click", () => {
-      saveMatchResult(match, Number(teamOneInput.value), Number(teamTwoInput.value));
-    });
+    if (!scoreOnly) {
+      const courtInput = controls.querySelector(".court-name-input");
+      const [teamOneInput, teamTwoInput] = controls.querySelectorAll(".score-row input");
+      controls.querySelector(".save-court-button").addEventListener("click", () => {
+        updateMatchCourt(match, courtInput.value);
+      });
+      controls.querySelector(".save-score-button").addEventListener("click", () => {
+        saveMatchResult(match, Number(teamOneInput.value), Number(teamTwoInput.value));
+      });
+    }
     controls.querySelectorAll("[data-point-team]").forEach((button) => {
       button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.pointTeam)));
     });
-    controls.querySelector(".set-score-button").addEventListener("click", () => openSetScoreDialog(match.id));
-    controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
-    controls.querySelector(".large-score-button").addEventListener("click", () => openLargeScore(match.id));
-    controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
-    controls.querySelector(".cancel-match-button").addEventListener("click", () => cancelMatch(match));
+    if (!scoreOnly) {
+      controls.querySelector(".set-score-button").addEventListener("click", () => openSetScoreDialog(match.id));
+      controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
+      controls.querySelector(".large-score-button").addEventListener("click", () => openLargeScore(match.id));
+      controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
+      controls.querySelector(".cancel-match-button").addEventListener("click", () => cancelMatch(match));
+      controls.querySelectorAll(".walkover-button").forEach((button) => {
+        button.addEventListener("click", () => setWalkover(match, Number(button.dataset.walkoverTeam)));
+      });
+    }
     card.append(controls);
   }
 
   return card;
+}
+
+function isEditablePlayerMatch(match, player) {
+  return Boolean(player && match.state === "playing" && matchIncludesPlayer(match, player.id));
 }
 
 function renderStandings(matches) {
@@ -1478,6 +1555,63 @@ function renderPlayerIdentity() {
       </div>
     </div>
     <span class="join-source-chip">${joinSourceLabel}</span>
+  `;
+}
+
+function renderCupBracket() {
+  if (!elements.cupBracket) return;
+  const bracket = state.settings.format === "cup" ? state.cup?.bracket : null;
+  elements.cupBracket.classList.toggle("hidden", !bracket?.rounds?.length);
+  if (!bracket?.rounds?.length) {
+    elements.cupBracket.innerHTML = "";
+    return;
+  }
+
+  elements.cupBracket.innerHTML = `
+    <div class="panel-heading">
+      <h3>Cup-bracket</h3>
+      <span>${bracket.bracketSize} lagplasser</span>
+    </div>
+    <div class="cup-bracket-rounds">
+      ${bracket.rounds.map((round, index) => `
+        <section class="cup-bracket-round">
+          <div class="cup-bracket-round-heading">
+            <strong>${cupRoundTitle(round, index, bracket.rounds.length)}</strong>
+            <span>${round.byeTeams?.length ? `${round.byeTeams.length} bye` : ""}</span>
+          </div>
+          <div class="cup-bracket-slots">
+            ${round.slots.map((slot) => renderCupBracketSlot(slot)).join("")}
+            ${round.thirdPlaceSlot ? renderCupBracketSlot(round.thirdPlaceSlot, true) : ""}
+          </div>
+          ${round.byeTeams?.length ? `<p class="cup-bracket-byes">Bye: ${round.byeTeams.map((team) => escapeHtml(team.displayName)).join(", ")}</p>` : ""}
+        </section>
+      `).join("")}
+    </div>
+  `;
+}
+
+function cupRoundTitle(round, index, totalRounds) {
+  if (totalRounds === 1) return "Finale";
+  if (index === 0) return "Første runde";
+  if (index === totalRounds - 1) return "Finale";
+  if (index === totalRounds - 2) return "Semifinale";
+  return `Runde ${round.roundNumber}`;
+}
+
+function renderCupBracketSlot(slot, isThirdPlace = false) {
+  if (!slot || slot.type === "pending") {
+    return `<div class="cup-bracket-slot pending"><span>${isThirdPlace ? "Bronsefinale" : "Venter på vinnere"}</span></div>`;
+  }
+  const match = getMatchById(slot.matchId);
+  if (!match) return `<div class="cup-bracket-slot pending"><span>Venter på kamp</span></div>`;
+  const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
+  return `
+    <div class="cup-bracket-slot ${match.state}">
+      <span class="cup-bracket-slot-label">${isThirdPlace ? "Bronsefinale" : matchStateText(match.state)}</span>
+      <strong>${escapeHtml(match.teamOne.displayName)}</strong>
+      <strong>${escapeHtml(match.teamTwo.displayName)}</strong>
+      ${winner ? `<small>Vinner: ${escapeHtml(winner.displayName)}</small>` : ""}
+    </div>
   `;
 }
 
@@ -1767,7 +1901,8 @@ function avatarUrl(player) {
 }
 
 function createJoinLink() {
-  const url = new URL(window.location.href);
+  const isLocalDevelopment = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+  const url = new URL(isLocalDevelopment ? window.location.origin : publicAppUrl);
   url.searchParams.set("join", state.inviteCode);
   url.hash = "";
   return url.toString();
@@ -1839,7 +1974,7 @@ function addPlayer(name, joinedFrom, avatarId) {
     joinedFrom,
   };
   state.players.push(player);
-  state.schedule = buildSchedule(state.players);
+  state.schedule = buildSchedule(state.players, state.settings.format);
   return player;
 }
 
@@ -1858,28 +1993,93 @@ function updatePlayer(playerId, updates) {
 
   player.name = nextName;
   player.avatarId = updates.avatarId || player.avatarId || defaultAvatarId;
-  state.schedule = buildSchedule(state.players);
+  state.cupTeams = state.cupTeams.map((team) => createTeam(
+    team.players.map((teamPlayer) => teamPlayer.id === playerId ? player : teamPlayer),
+  ));
+  state.schedule = buildSchedule(state.players, state.settings.format);
   saveState();
   render();
 }
 
 function removePlayer(playerId) {
   if (state.rounds.length > 0) {
-    alert("Spillere kan ikke fjernes etter at kampoppsettet er startet i denne demoen.");
+    alert("Spillere kan ikke fjernes etter at kampoppsettet er startet i denne turneringen.");
     return;
   }
   state.players = state.players.filter((player) => player.id !== playerId);
   if (state.selectedPlayerId === playerId) state.selectedPlayerId = null;
-  state.schedule = buildSchedule(state.players);
+  state.cupTeams = state.cupTeams
+    .map((team) => createTeam(team.players.filter((teamPlayer) => teamPlayer.id !== playerId)))
+    .filter((team) => team.players.length > 0);
+  state.schedule = buildSchedule(state.players, state.settings.format);
   saveState();
   render();
 }
 
-function updateTournamentRules({ pointMode, gamesToWinSet, setsToWinMatch }) {
+function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMatch, pointMode, gamesToWinSet, setsToWinMatch }) {
+  if (state.rounds.length > 0) {
+    alert("Turneringsreglene kan bare endres før første runde.");
+    return;
+  }
+  if (!["roundRobin", "cup"].includes(format)) return;
+  if (!["auto", "manual"].includes(cupTeamSetupMode)) return;
   if (!["matches", "sets", "games"].includes(pointMode)) return;
+  state.settings.format = format;
+  state.settings.cupTeamSetupMode = cupTeamSetupMode;
+  state.settings.includesThirdPlaceMatch = includesThirdPlaceMatch;
   state.settings.pointMode = pointMode;
   state.settings.gamesToWinSet = Math.max(1, Math.min(12, gamesToWinSet || 6));
   state.settings.setsToWinMatch = Math.max(1, Math.min(5, setsToWinMatch || 1));
+  if (state.rounds.length === 0) {
+    state.cup = null;
+    state.schedule = buildSchedule(state.players, state.settings.format);
+  }
+}
+
+function saveManualCupTeams(value) {
+  if (state.rounds.length > 0 || state.status === "Avsluttet") {
+    alert("Cup-lag kan bare endres før første runde.");
+    return;
+  }
+
+  const lines = String(value ?? "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length < 2) {
+    alert("Legg inn minst to cup-lag.");
+    return;
+  }
+
+  const usedPlayerIds = new Set();
+  const teams = [];
+  for (const [index, line] of lines.entries()) {
+    const playerNames = line.split("+").map((name) => name.trim()).filter(Boolean);
+    if (playerNames.length < 1 || playerNames.length > 2) {
+      alert(`Lag ${index + 1} må ha én eller to spillere.`);
+      return;
+    }
+
+    const teamPlayers = [];
+    for (const playerName of playerNames) {
+      const player = findPlayerByName(playerName);
+      if (!player || !player.active) {
+        alert(`Fant ikke aktiv spiller «${playerName}» i spillerlisten.`);
+        return;
+      }
+      if (usedPlayerIds.has(player.id)) {
+        alert(`${player.name} er lagt inn på mer enn ett lag.`);
+        return;
+      }
+      usedPlayerIds.add(player.id);
+      teamPlayers.push(player);
+    }
+    teams.push(createTeam(teamPlayers));
+  }
+
+  state.cupTeams = teams;
+  saveState();
+  render();
 }
 
 function endTournament() {
@@ -1929,6 +2129,8 @@ function tournamentActionText() {
   const activeRound = getActiveRound();
   if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return "Fullfør kampene";
   if (getNextScheduledRound()) return t("startNextRound");
+  if (cupCanAdvance()) return t("startNextRound");
+  if (state.settings.format === "cup" && state.status === "Cup ferdig") return "Cup ferdig";
   return "Hele turneringen er generert";
 }
 
@@ -1936,9 +2138,21 @@ function generateRoundBlockReason() {
   const activeRound = getActiveRound();
   if (state.status === "Avsluttet") return "Turneringen er avsluttet.";
   if (state.players.length < 2) return "Legg til minst to spillere før du starter runden.";
+  if (state.settings.format === "cup") {
+    if (state.settings.cupTeamSetupMode === "manual" && state.cupTeams.length < 2) {
+      return "Definer minst to manuelle cup-lag før du starter turneringen.";
+    }
+    if (state.settings.cupTeamSetupMode === "auto" && state.players.filter((player) => player.active).length < 4) {
+      return "Cup med automatisk lagoppsett krever minst fire aktive spillere.";
+    }
+  }
   if (state.courts.length < 1) return "Legg til minst én bane før du starter runden.";
   if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return "Alle kamper må være ferdige før neste runde.";
-  if (state.rounds.length > 0 && !getNextScheduledRound()) return "Hele turneringen er generert.";
+  if (state.rounds.length > 0 && !getNextScheduledRound() && !cupCanAdvance()) {
+    return state.settings.format === "cup" && state.status === "Cup ferdig"
+      ? "Cupen er ferdig."
+      : "Hele turneringen er generert.";
+  }
   return "";
 }
 
@@ -2009,7 +2223,12 @@ function mixHex(hex, targetHex, amount) {
 }
 
 function generateFullTournamentSchedule() {
-  const schedule = state.schedule.length ? state.schedule : buildSchedule(state.players);
+  if (state.settings.format === "cup") {
+    generateCupTournament();
+    return;
+  }
+
+  const schedule = state.schedule.length ? state.schedule : buildSchedule(state.players, state.settings.format);
   if (!schedule.length) {
     alert("Legg til minst to spillere før du genererer kamper.");
     return;
@@ -2028,10 +2247,188 @@ function generateFullTournamentSchedule() {
   state.status = "Runde pågår";
 }
 
+function generateCupTournament() {
+  const activePlayers = state.players.filter((player) => player.active);
+  const teams = cupTeamsForStart();
+  if (teams.length < 2) {
+    alert(state.settings.cupTeamSetupMode === "manual"
+      ? "Manuell cup krever minst to lag."
+      : "Cup krever minst to lag, altså minst fire spillere i automatisk lagoppsett.");
+    return;
+  }
+
+  const bracketSize = nextPowerOfTwo(teams.length);
+  const seededTeams = shuffleItems(teams);
+  const byeCount = bracketSize - seededTeams.length;
+  const byeTeams = seededTeams.slice(0, byeCount);
+  const teamPlayerIds = new Set(teams.flatMap((team) => team.players.map((player) => player.id)));
+  const firstRound = createScheduledRound({
+    teams: seededTeams.slice(byeCount),
+    sittingOut: [
+      ...activePlayers.filter((player) => !teamPlayerIds.has(player.id)),
+      ...byeTeams.flatMap((team) => team.players),
+    ],
+  }, 1);
+
+  state.cup = {
+    teamSetupMode: "auto",
+    includesThirdPlaceMatch: state.settings.includesThirdPlaceMatch,
+    bracketSize,
+    byeTeams,
+    bracket: createCupBracket({
+      bracketSize,
+      firstRound,
+      byeTeams,
+      includesThirdPlaceMatch: state.settings.includesThirdPlaceMatch,
+    }),
+  };
+  state.rounds = firstRound.matches.length ? [firstRound] : [];
+
+  if (!state.rounds.length) {
+    state.status = "Cup ferdig";
+    return;
+  }
+
+  activateRound(state.rounds[0]);
+  state.status = "Runde pågår";
+}
+
+function createAutoCupTeams(players) {
+  return Array.from({ length: Math.floor(players.length / 2) }, (_, index) => {
+    return createTeam([players[index * 2], players[index * 2 + 1]]);
+  });
+}
+
+function cupTeamsForStart() {
+  if (state.settings.cupTeamSetupMode === "manual") return state.cupTeams;
+  const activePlayers = state.players.filter((player) => player.active);
+  const pairedPlayers = activePlayers.slice(0, activePlayers.length - (activePlayers.length % 2));
+  return createAutoCupTeams(pairedPlayers);
+}
+
+function createCupBracket({ bracketSize, firstRound, byeTeams, includesThirdPlaceMatch }) {
+  const totalRounds = Math.max(1, Math.log2(bracketSize));
+  const rounds = [{
+    roundNumber: 1,
+    slots: firstRound.matches.map((match) => ({ type: "match", matchId: match.id })),
+    byeTeams,
+    thirdPlaceSlot: null,
+  }];
+
+  for (let roundNumber = 2; roundNumber <= totalRounds; roundNumber += 1) {
+    rounds.push({
+      roundNumber,
+      slots: Array.from({ length: Math.max(1, bracketSize / 2 ** roundNumber) }, () => ({ type: "pending" })),
+      byeTeams: [],
+      thirdPlaceSlot: roundNumber === totalRounds && includesThirdPlaceMatch ? { type: "pending" } : null,
+    });
+  }
+
+  return {
+    bracketSize,
+    includesThirdPlaceMatch,
+    rounds,
+    finalMatchId: null,
+    thirdPlaceMatchId: null,
+  };
+}
+
+function createNextCupRound() {
+  const previousRound = state.rounds.at(-1);
+  if (!previousRound || previousRound.status !== "finished") return null;
+
+  const previousBracketRound = getCupBracketRound(previousRound.roundNumber);
+  const regularMatches = previousRound.matches.filter((match) => !match.isThirdPlaceMatch);
+  const advancingTeams = [
+    ...(previousBracketRound?.byeTeams ?? state.cup?.byeTeams ?? []),
+    ...regularMatches
+      .filter((match) => match.state === "finished" && match.winnerTeamIndex !== null)
+      .map((match) => match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo),
+  ];
+  const losingTeams = regularMatches
+    .filter((match) => match.state === "finished" && match.winnerTeamIndex !== null)
+    .map((match) => match.winnerTeamIndex === 0 ? match.teamTwo : match.teamOne);
+  state.cup.byeTeams = [];
+  if (advancingTeams.length < 2) {
+    state.cup.winnerTeam = advancingTeams[0] ?? null;
+    return null;
+  }
+
+  const nextBracketRound = state.cup.bracket?.rounds?.find((round) => round.roundNumber > previousRound.roundNumber);
+  const nextRoundNumber = nextBracketRound?.roundNumber ?? previousRound.roundNumber + 1;
+  const nextRound = createScheduledRound({ teams: advancingTeams, sittingOut: [] }, nextRoundNumber);
+  const isFinalRound = nextBracketRound
+    ? nextRoundNumber === state.cup.bracket.rounds.at(-1)?.roundNumber
+    : advancingTeams.length === 2;
+  let thirdPlaceMatch = null;
+
+  if (isFinalRound && state.cup.includesThirdPlaceMatch && losingTeams.length >= 2) {
+    thirdPlaceMatch = createScheduledMatch(
+      losingTeams[0],
+      losingTeams[1],
+      nextRoundNumber,
+      nextRound.matches.length,
+      true,
+    );
+    nextRound.matches.push(thirdPlaceMatch);
+  }
+
+  if (nextBracketRound) {
+    nextBracketRound.slots = nextRound.matches
+      .filter((match) => !match.isThirdPlaceMatch)
+      .map((match) => ({ type: "match", matchId: match.id }));
+    nextBracketRound.byeTeams = [];
+    nextBracketRound.thirdPlaceSlot = thirdPlaceMatch
+      ? { type: "match", matchId: thirdPlaceMatch.id }
+      : nextBracketRound.thirdPlaceSlot && nextBracketRound.thirdPlaceSlot.type === "pending"
+        ? null
+        : nextBracketRound.thirdPlaceSlot;
+    if (isFinalRound) {
+      state.cup.bracket.finalMatchId = nextRound.matches.find((match) => !match.isThirdPlaceMatch)?.id ?? null;
+      state.cup.bracket.thirdPlaceMatchId = thirdPlaceMatch?.id ?? null;
+    }
+  }
+
+  return nextRound;
+}
+
+function cupCanAdvance() {
+  if (state.settings.format !== "cup") return false;
+  const round = state.rounds.at(-1);
+  if (!round || (round.status !== "finished" && !(round.status === "active" && canCompleteRound(round)))) return false;
+  const bracketRound = getCupBracketRound(round.roundNumber);
+  const advancingTeams = [
+    ...(bracketRound?.byeTeams ?? state.cup?.byeTeams ?? []),
+    ...round.matches
+      .filter((match) => !match.isThirdPlaceMatch)
+      .filter((match) => match.state === "finished" && match.winnerTeamIndex !== null)
+      .map((match) => match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo),
+  ];
+  return advancingTeams.length > 1;
+}
+
+function getCupBracketRound(roundNumber) {
+  return state.cup?.bracket?.rounds?.find((round) => round.roundNumber === roundNumber) ?? null;
+}
+
+function nextPowerOfTwo(value) {
+  return 2 ** Math.ceil(Math.log2(value));
+}
+
+function shuffleItems(items) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
 function createScheduledRound(roundPlan, roundNumber) {
   const matchPlan = generateRoundMatches(roundPlan.teams, roundNumber, roundPlan.sittingOut);
   const matches = matchPlan.map((match, index) => ({
     ...match,
+    isThirdPlaceMatch: false,
     courtId: state.courts[index % state.courts.length]?.id ?? null,
     courtName: state.courts[index % state.courts.length]?.name ?? null,
     state: "waiting",
@@ -2052,6 +2449,17 @@ function createScheduledRound(roundPlan, roundNumber) {
     createdAt: new Date().toISOString(),
     sittingOut,
     matches,
+  };
+}
+
+function createScheduledMatch(teamOne, teamTwo, roundNumber, matchIndex, isThirdPlaceMatch = false) {
+  const match = generateRoundMatches([teamOne, teamTwo], roundNumber, [])[0];
+  return {
+    ...match,
+    isThirdPlaceMatch,
+    courtId: state.courts[matchIndex % state.courts.length]?.id ?? null,
+    courtName: state.courts[matchIndex % state.courts.length]?.name ?? null,
+    state: "waiting",
   };
 }
 
@@ -2078,12 +2486,24 @@ function getNextScheduledRound() {
 
 function startNextScheduledRound() {
   const nextRound = getNextScheduledRound();
-  if (!nextRound) return;
-  activateRound(nextRound);
+  if (nextRound) {
+    activateRound(nextRound);
+    return;
+  }
+  if (state.settings.format !== "cup") return;
+
+  const nextCupRound = createNextCupRound();
+  if (!nextCupRound) {
+    state.status = "Cup ferdig";
+    return;
+  }
+  state.rounds.push(nextCupRound);
+  activateRound(nextCupRound);
 }
 
-function buildSchedule(players) {
+function buildSchedule(players, format = "roundRobin") {
   const activePlayers = players.filter((player) => player.active);
+  if (format === "cup") return [];
   return activePlayers.length < 4
     ? generateSinglesRounds(activePlayers)
     : generatePartnerRounds(activePlayers);
@@ -2147,6 +2567,8 @@ function generateRoundMatches(teams, rotationNumber, sittingOut) {
       startingTeamIndex: Math.round(Math.random()),
       winnerTeamIndex: null,
       isWalkover: false,
+      isThirdPlaceMatch: false,
+      lastScoredMatchState: null,
       courtId: null,
       courtName: null,
       completedAt: null,
@@ -2175,15 +2597,82 @@ function finishMatch(match) {
   match.state = "finished";
   match.currentGame = { teamOne: 0, teamTwo: 0 };
   match.winnerTeamIndex = setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1;
+  match.isWalkover = false;
   match.completedAt = new Date().toISOString();
 
+  activateNextWaitingMatch(match);
+  markCupCompleteIfDone();
+}
+
+function activateNextWaitingMatch(match) {
   const activeRound = getActiveRound();
   const nextWaitingMatch = activeRound?.matches.find((item) => item.state === "waiting");
-  if (nextWaitingMatch) {
-    nextWaitingMatch.state = "playing";
-    nextWaitingMatch.courtId = match.courtId;
-    nextWaitingMatch.courtName = match.courtName;
+  if (!nextWaitingMatch) return null;
+  nextWaitingMatch.state = "playing";
+  nextWaitingMatch.courtId = match.courtId;
+  nextWaitingMatch.courtName = match.courtName;
+  return nextWaitingMatch;
+}
+
+function captureMatchUndoState(match) {
+  const activeRound = getRoundForMatch(match);
+  const matchSnapshot = structuredClone(match);
+  delete matchSnapshot.lastScoredMatchState;
+  const nextWaitingMatch = activeRound?.matches.find((item) => item.id !== match.id && item.state === "waiting");
+  return {
+    match: matchSnapshot,
+    nextWaitingMatch: nextWaitingMatch ? structuredClone(nextWaitingMatch) : null,
+    roundId: activeRound?.id ?? null,
+    roundStatus: activeRound?.status ?? null,
+    tournamentStatus: state.status,
+    cupWinnerTeam: state.cup?.winnerTeam ? structuredClone(state.cup.winnerTeam) : null,
+  };
+}
+
+function undoMatch(match) {
+  const undoState = match.lastScoredMatchState;
+  if (!undoState?.match) {
+    alert("Det finnes ingen siste handling å angre for denne kampen.");
+    return;
   }
+
+  const restoredMatch = structuredClone(undoState.match);
+  delete match.lastScoredMatchState;
+  Object.assign(match, restoredMatch);
+
+  if (undoState.nextWaitingMatch) {
+    const nextMatch = getMatchById(undoState.nextWaitingMatch.id);
+    if (nextMatch) Object.assign(nextMatch, structuredClone(undoState.nextWaitingMatch));
+  }
+
+  const round = state.rounds.find((item) => item.id === undoState.roundId);
+  if (round && undoState.roundStatus) round.status = undoState.roundStatus;
+  if (undoState.tournamentStatus) state.status = undoState.tournamentStatus;
+  if (state.cup) state.cup.winnerTeam = undoState.cupWinnerTeam ? structuredClone(undoState.cupWinnerTeam) : null;
+  saveState();
+  render();
+  renderLargeScore();
+}
+
+function markCupCompleteIfDone() {
+  if (state.settings.format !== "cup") return;
+  const activeRound = getActiveRound();
+  if (!activeRound || !canCompleteRound(activeRound)) return;
+
+  const finalRoundNumber = state.cup?.bracket?.rounds?.at(-1)?.roundNumber;
+  const isFinalRound = finalRoundNumber
+    ? activeRound.roundNumber === finalRoundNumber
+    : !cupCanAdvance();
+  if (!isFinalRound) return;
+
+  const finalMatch = activeRound.matches.find((match) => !match.isThirdPlaceMatch);
+  activeRound.status = "finished";
+  state.status = "Cup ferdig";
+  state.cup.winnerTeam = finalMatch?.winnerTeamIndex === 0
+    ? finalMatch.teamOne
+    : finalMatch?.winnerTeamIndex === 1
+      ? finalMatch.teamTwo
+      : null;
 }
 
 function saveMatchResult(match, teamOne, teamTwo) {
@@ -2197,6 +2686,7 @@ function saveSetResult(match, teamOne, teamTwo) {
     return;
   }
 
+  match.lastScoredMatchState = captureMatchUndoState(match);
   match.currentSet = { teamOne, teamTwo };
   match.currentGame = { teamOne: 0, teamTwo: 0 };
   match.completedSets.push({ teamOne, teamTwo });
@@ -2222,8 +2712,9 @@ function validateSetScore(teamOne, teamTwo) {
 }
 
 function awardTennisPoint(match, teamIndex) {
-  if (match.state === "waiting") match.state = "playing";
   if (["finished", "cancelled"].includes(match.state)) return;
+  match.lastScoredMatchState = captureMatchUndoState(match);
+  if (match.state === "waiting") match.state = "playing";
 
   const scoringTeam = teamIndex === 0 ? "teamOne" : "teamTwo";
   const otherTeam = teamIndex === 0 ? "teamTwo" : "teamOne";
@@ -2241,6 +2732,9 @@ function awardTennisPoint(match, teamIndex) {
   }
 
   saveState();
+  if (currentLocalRole() === "player" && matchIncludesPlayer(match, state.selectedPlayerId)) {
+    queuePlayerScore(match.id, teamIndex);
+  }
   render();
   renderLargeScore();
 }
@@ -2287,10 +2781,18 @@ function startMatch(match) {
 }
 
 function reopenMatch(match) {
+  if (match.lastScoredMatchState) {
+    undoMatch(match);
+    return;
+  }
+
   match.state = "playing";
   match.completedSets = [];
+  match.currentSet = { teamOne: 0, teamTwo: 0 };
   match.currentGame = { teamOne: 0, teamTwo: 0 };
   match.winnerTeamIndex = null;
+  match.isWalkover = false;
+  match.lastScoredMatchState = null;
   match.completedAt = null;
   saveState();
   render();
@@ -2302,10 +2804,29 @@ function cancelMatch(match) {
   match.state = "cancelled";
   match.completedSets = [];
   match.winnerTeamIndex = null;
+  match.isWalkover = false;
   match.completedAt = new Date().toISOString();
-  const activeRound = getActiveRound();
-  const nextWaitingMatch = activeRound?.matches.find((item) => item.state === "waiting");
-  if (nextWaitingMatch) nextWaitingMatch.state = "playing";
+  activateNextWaitingMatch(match);
+  saveState();
+  render();
+  renderLargeScore();
+}
+
+function setWalkover(match, teamIndex) {
+  if (![0, 1].includes(teamIndex) || ["finished", "cancelled"].includes(match.state)) return;
+  const winningTeam = teamIndex === 0 ? match.teamOne : match.teamTwo;
+  if (!confirm(`Registrere walkover til ${winningTeam.displayName}?`)) return;
+
+  match.lastScoredMatchState = captureMatchUndoState(match);
+  match.state = "finished";
+  match.completedSets = [];
+  match.currentSet = { teamOne: 0, teamTwo: 0 };
+  match.currentGame = { teamOne: 0, teamTwo: 0 };
+  match.winnerTeamIndex = teamIndex;
+  match.isWalkover = true;
+  match.completedAt = new Date().toISOString();
+  activateNextWaitingMatch(match);
+  markCupCompleteIfDone();
   saveState();
   render();
   renderLargeScore();
@@ -2503,6 +3024,7 @@ function globalMatchNumber(match) {
 function primaryMatchHeadline(match) {
   if (match.state === "finished" && match.winnerTeamIndex !== null) {
     const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo;
+    if (match.isWalkover) return `${winner.displayName} vant på walkover`;
     return `${winner.displayName} vant ${setScoreText(match)}`;
   }
   if (match.state === "cancelled") return "Kampen er avbrutt";
@@ -2514,6 +3036,7 @@ function startingTeamText(match) {
 }
 
 function scoreSummary(match) {
+  if (match.isWalkover) return "Walkover";
   if (match.completedSets.length) {
     const label = match.state === "finished" ? "Ferdig" : "Sett";
     return `${label}: ${match.completedSets.map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ")}`;

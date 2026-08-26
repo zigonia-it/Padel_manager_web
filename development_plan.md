@@ -1,6 +1,6 @@
 # Padelstar - Utviklingsplan
 
-Sist oppdatert: 2026-08-26
+Sist oppdatert: 2026-08-27
 
 Status: aktivt arbeidsdokument for plan og gjennomføring
 
@@ -11,7 +11,7 @@ Oppdateringslogikk:
 
 ## 0. Nåværende fokus
 
-Appen er nå i versjon 0.1 Beta med publisert responsiv PWA/webapp som kan hostes statisk, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
+Appen er i versjon 0.1 Beta og har en publisert responsiv PWA/webapp med én-sides modulflyt, Supabase-tilkobling, round-robin og cup-format med automatisk eller manuelt lagoppsett, pending-bracket, valgfri bronsefinale, walkover og ett-stegs undo. Join-lenker bruker den offentlige adressen `https://padelstar.app/?join=...`, mens lokal origin beholdes ved lokal utvikling.
 
 Prosjektmetadata:
 - Navn: Padelstar
@@ -19,35 +19,27 @@ Prosjektmetadata:
 - Utvikler: Sigurd Steen Grødem
 - Firma: Zigonia IT
 
-## Nytt siden forrige sesjon:
+## Status siden forrige planoppdatering
 
-Padelstar-branding er delvis gjennomført i appkoden:
+- Padelstar-branding, ny topp-logo, appikoner, fonter og mørk/gull-visuell profil er tatt i bruk.
+- Spillerpoeng synkroniseres atomisk mot Supabase via `save_player_point(...)`, og migreringen er kjørt og verifisert.
+- Turneringsformat støtter round-robin og cup med automatisk eller manuelt lagoppsett, byes, pending-bracket, bronsefinale og rundeavansement.
+- Admin kan registrere walkover og angre siste poeng-, settresultat- eller walkover-handling.
+- Join-lenken bruker `https://padelstar.app`, og synlige demo-/testreferanser er fjernet fra brukerflaten.
+- Den nye topp-logoen er kontrollert i desktop- og mobilvisning.
 
-- Appnavn, manifest, service worker, Supabase-configvariabel og README er oppdatert til Padelstar.
-- Nye Padelstar-logoer, appikoner og knappassets er tatt i bruk.
-- Nunito og Titillium Web er satt som hovedfonter i CSS.
-- Gullpaletten er justert mot en litt gulere Padelstar-gulltone.
-- Tunge PWA-bilder er byttet ut med lettere genererte webvarianter.
+## Neste fase: produksjonsklar beta
 
-Gjenstår:
+Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
-- Avklare og eventuelt utføre faktisk rename i GitHub-repo, Vercel-prosjekt og Supabase-prosjekt i de eksterne tjenestene.
-- Oppdatere eventuelle eksterne URL-er etter at tjenestenavnene er endret.
-- Verifisere at `https://padelstar.app` peker på riktig Vercel-deploy.
-
-## Neste fase 
-er å gjøre turneringsmotoren og datalaget mer produksjonsklart og rette opp i ui problemer:
-
-1. Bruke `tournament_logic.md` som referanse for videre porting fra iOS-appen.
-2. Skille tydelig mellom host/admin-rolle og spilleridentitet i database- og klientstate.
-3. Gjøre scoring, walkover, kampstart og rundeavansement som robuste, atomiske operasjoner mot Supabase.
-4. Videreutvikle realtime-flyten slik admin-, spiller- og turneringsvisning alltid viser samme turneringsstate.
-5. Gjøre det slik at aktive spillere i en kamp også kan sette poeng i egen kamp
-6. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
-7. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
-8. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
-9. rette opp ui errors som at en button har feil fassong og kurve osv.
-10. koden er litt treg på å laste inn bilder når man åpner appen fra hjemskjermen på iphone. hvorfor?
+1. **Lukk publiseringsløpet.** Deploy den nye branchen, kontroller at `https://padelstar.app` peker på riktig Vercel-deploy, og verifiser at siste service-worker-cache aktiveres.
+2. **Hardne roller og skrivetilgang.** Skill host/admin tydeligere fra spilleridentitet i datalaget, innfør sterkere spiller-token eller tilsvarende begrensning, og gjennomgå RLS/grants/rate limiting før bred bruk.
+3. **Gjør admin-operasjoner atomiske.** Portér kampstart, resultat, walkover, avbrytelse og rundeavansement til validerte Supabase-operasjoner med samme kollisjonsvern som spillerpoeng-RPC-en.
+4. **Stabiliser realtime.** Verifiser admin, spiller og tilskuer på separate enheter med samtidige oppdateringer, refresh og reconnect; håndter stale state og feilmeldinger tydelig.
+5. **Etabler automatiserte regresjonstester.** Prioriter scheduler for singles/doubles/sit-out, cup-seeding/byes/bracket, scoring, leaderboard, walkover/undo og rolle-/modulvisning.
+6. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
+7. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
+8. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
 
 ## 1. Formål
 
@@ -153,6 +145,11 @@ MVP bør inneholde:
 - tennis-/padelpoeng med 0, 15, 30, 40, deuce og advantage
 - tabell/ranking
 - personlig spilleroversikt
+- Supabase live sync når konfigurasjon er aktiv
+- atomisk spillerpoengføring via RPC
+- round-robin og cup med automatisk/manuelt lagoppsett
+- byes, pending-bracket og valgfri bronsefinale
+- walkover og ett-stegs undo
 - responsivt grensesnitt
 - lokal lagring i nettleser
 
@@ -161,13 +158,12 @@ Ikke prioritert i første MVP:
 - brukerkonto
 - betaling
 - App Store-spesifikke funksjoner
-- full cup/bracket-modus
-- flere sett per kamp
+- full kamp-/bracket-historikk utover siste undo-steg
+- avansert offline-konflikthåndtering
 - full tiebreak-poengføring
 - bildeopplasting
 - karrierestatistikk
 - PDF-eksport
-- full offline-synk
 - push-varslinger
 
 ## 5. Teknisk Retning
@@ -275,16 +271,18 @@ Senere:
 
 ## 10. QR og Deling
 
-Første versjon:
+Implementert i beta:
 
 - kort invitasjonskode
 - kopierbar lenke
-
-Neste versjon:
-
 - QR-kode i adminvisning
-- enkel mobilvennlig join-side
-- share-funksjon på telefon
+- join-side med prefylt invitasjonskode
+- offentlig join-lenke på `https://padelstar.app/?join=KODE`
+
+Gjenstår:
+
+- native share-funksjon på telefon
+- enkel offentlig read-only-lenke for tilskuere
 
 Eksempel på ønsket join-lenke:
 
@@ -319,17 +317,17 @@ Alle enheter bør oppdateres automatisk når:
 - bane endres
 - tabell endres
 
-MVP kan starte lokalt, men arkitekturen skal være klar for Supabase Realtime.
+Betaen bruker Supabase Realtime når live-konfigurasjon er aktiv, med lokal fallback når backend ikke er tilgjengelig.
 
 ## 13. Offline og Recovery
 
-MVP:
+Implementert i beta:
 
-- behold lokal demo-lagring
+- behold lokal lagring som fallback/cache
 - unngå tap ved refresh
-- vis tydelig at data foreløpig er lokal
+- vis `Online`, `Lokal` eller `Offline` etter tilkoblingsstatus
 
-Senere:
+Neste prioritet:
 
 - IndexedDB
 - kø for handlinger som skjer offline
@@ -345,28 +343,30 @@ Publiseringsspor:
 
 Status:
 
-- GitHub Pages har vært brukt som første publiserte testspor.
+- GitHub Pages er historisk brukt som første publiseringsspor.
 - Vercel er koblet til repoet og har statisk hostingkonfig i `vercel.json`.
+- `https://padelstar.app` er satt som offentlig join-adresse i klienten.
 - Supabase brukes som backend når config er satt, med lokal fallback når backend ikke er tilgjengelig.
 
-Gjenstår før mer offentlig deling:
+Gjenstår før bred offentlig bruk:
 
 - enkel personverntekst for webversjonen
-- live-test med admin og minst to spillerenheter
+- verifisere produksjonsdeploy, DNS og service-worker-cache på `https://padelstar.app`
+- bekrefte live sync med admin, spiller og tilskuer på separate enheter
 - tydelig feilmelding når Supabase ikke kan nås
 - bedre overvåking av deploy- og databasefeil
 
 ## 15. Utviklingsrekkefølge
 
-1. Splitte `app.js` i mindre moduler rundt state, Supabase, turneringsmotor og visningsrendering.
-2. Lage tester for kampgenerator, scoring, leaderboard og tabell.
-3. Portere ferdig round-robin-logikk fra `tournament_logic.md`.
-4. Vurdere om cup-mode skal inn før eller etter full realtime-hardening.
-5. Gjøre scoring og rundeavansement atomisk mot Supabase.
-6. Verifisere realtime mellom admin, spiller og turneringsvisning på flere enheter.
-7. Forbedre PWA-oppsett og offline/recovery.
-8. Lage enkel personverntekst for webversjonen.
-9. Gjøre ny produksjonsdeploy etter database- og realtime-verifisering.
+1. Deploy branchen og verifiser `https://padelstar.app`, DNS, service worker og offentlig join-lenke.
+2. Gjennomfør en kontrollert fler-enhetssmoke-test med admin, spiller og tilskuer.
+3. Hardne host/admin- og spilleridentitet, spiller-token, RLS/grants og rate limiting.
+4. Gjør kampstart, resultat, walkover, avbrytelse og rundeavansement atomiske mot Supabase.
+5. Lag automatiserte tester for scheduler, cup-bracket, scoring, leaderboard, walkover/undo og rollevisning.
+6. Stabiliser realtime ved reconnect, samtidige endringer og stale state.
+7. Flytt hardkodet tekst til i18n-struktur og del `app.js` i mindre moduler.
+8. Mål iPhone-hjemskjermens oppstart og forbedre app-shell, bildehåndtering, IndexedDB og recovery.
+9. Skriv personverntekst, fastsett dataretensjon og dokumenter produksjonsdrift.
 
 ## 16. Arbeidsregel
 

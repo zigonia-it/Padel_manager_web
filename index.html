@@ -21,11 +21,9 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="brand-lockup">
-        <img class="brand-mark" src="assets/icons/padelstar-256.png" alt="" width="58" height="58">
-        <div>
-          <p class="eyebrow" data-i18n="brandEyebrow">Padel Manager</p>
-          <h1>Padelstar</h1>
-        </div>
+        <button class="brand-home-button" type="button" data-module-link="landing" aria-label="Gå til hjem">
+          <img class="brand-logo" src="assets/padelstar_button-900.png" alt="Padelstar" width="270" height="96">
+        </button>
       </div>
       <div class="topbar-actions">
         <nav class="app-menu" aria-label="Moduler">
@@ -44,7 +42,7 @@
             <option value="en">English</option>
           </select>
         </label>
-        <div class="status-pill" id="connectionStatus">Lokal demo</div>
+        <div class="status-pill" id="connectionStatus">Lokal</div>
       </div>
     </header>
 
@@ -82,8 +80,6 @@
 
           </div>
 
-          <img class="landing-developer-logo" src="assets/zigonia-it_logo_gold.png" alt="Zigonia IT" width="170">
-          <img class="landing-badge" src="assets/padelstar_button-900.png" alt="Padelstar" width="210">
         </div>
 
         <div class="panel resume-panel hidden" id="resumePanel">
@@ -230,6 +226,24 @@
               </form>
               <form class="inline-form" id="tournamentSettingsForm">
                 <label>
+                  Turneringsformat
+                  <select name="format">
+                    <option value="roundRobin">Round robin</option>
+                    <option value="cup">Cup</option>
+                  </select>
+                </label>
+                <label id="cupTeamSetupModeField">
+                  Cup-lagoppsett
+                  <select name="cupTeamSetupMode">
+                    <option value="auto">Automatisk</option>
+                    <option value="manual">Manuelt</option>
+                  </select>
+                </label>
+                <label class="checkbox-field" id="cupThirdPlaceField">
+                  <input name="includesThirdPlaceMatch" type="checkbox">
+                  <span>Bronsefinale</span>
+                </label>
+                <label>
                   Tabellpoeng
                   <select name="pointMode">
                     <option value="matches">Kamper</option>
@@ -260,7 +274,7 @@
                 <button class="ghost" id="endTournamentButton" type="button">Avslutt turnering</button>
               </div>
               <div class="button-row">
-                <button class="ghost" id="resetDemoButton" type="button">Nullstill demo</button>
+                <button class="ghost" id="resetTournamentButton" type="button">Nullstill turnering</button>
               </div>
             </div>
           </div>
@@ -269,7 +283,7 @@
             <div class="admin-panel hidden" data-admin-panel-section="share">
               <div class="panel-heading">
                 <h3>Del turnering</h3>
-                <span>Lokal demo</span>
+                <span>Lokal</span>
               </div>
               <div class="share-details">
                 <div>
@@ -289,8 +303,7 @@
                 <button class="secondary" id="copyInviteCodeButton" type="button">Kopier kode</button>
                 <button class="secondary" id="copyJoinLinkButton" type="button">Kopier lenke</button>
               </div>
-              <button class="ghost" id="showStartButton" type="button">Vis startside for testing</button>
-              <p class="hint" id="copyStatus">Scan QR-koden eller bruk lenken for å teste påmelding.</p>
+              <p class="hint" id="copyStatus">Scan QR-koden eller bruk lenken for å bli med i turneringen.</p>
             </div>
           </div>
 
@@ -305,7 +318,20 @@
                   required></textarea>
                 <button class="secondary" type="submit">Legg til</button>
               </form>
-              <button class="secondary" id="seedPlayersButton" type="button">Fyll demospillere</button>
+              <div class="cup-team-builder hidden" id="cupTeamBuilder">
+                <div class="panel-heading">
+                  <h4>Manuelle cup-lag</h4>
+                  <span id="cupTeamSummary">0 lag</span>
+                </div>
+                <p class="hint">Ett lag per linje. Bruk <code>+</code> mellom spillere, for eksempel «Ada + Bo».</p>
+                <form id="cupTeamForm">
+                  <label>
+                    Lagoppsett
+                    <textarea name="teamLines" rows="6" placeholder="Ada + Bo\nCato + Dina"></textarea>
+                  </label>
+                  <button class="secondary" type="submit">Lagre cup-lag</button>
+                </form>
+              </div>
               <ul class="compact-list" id="playersList"></ul>
             </div>
           </div>
@@ -317,6 +343,7 @@
                 <span id="matchCount">0</span>
               </div>
               <div class="round-summary" id="roundSummary"></div>
+              <div class="cup-bracket hidden" id="cupBracket"></div>
               <div class="matches" id="adminMatches"></div>
             </div>
           </div>
@@ -391,17 +418,21 @@
     </dialog>
 
     <footer class="site-footer">
-      <p>Padelstar - Padel Manager</p>
-      <p>Utviklet av Sigurd Steen Grødem, Zigonia IT.</p>
-      <p>Copyright &copy; <span id="copyrightYearRange">2026</span> Zigonia IT / Sigurd Steen Grødem. All rights
-        reserved.
+      <p>
+        <img src="assets/zigonia-it_logo_gold.png" alt="Zigonia IT" width="140">
+      </p>
+      <p>Utviklet av Sigurd Steen Grødem</p>
+      <p>
+        Copyright &copy; <span id="copyrightYearRange">2026</span>. All rights reserved.
       </p>
     </footer>
+
+
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="app.js?v=padelstar-home-1"></script>
+  <script src="app.js?v=padelstar-home-logo-button-1"></script>
 </body>
 
 </html>
