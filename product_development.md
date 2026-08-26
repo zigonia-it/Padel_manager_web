@@ -4,6 +4,12 @@ Sist oppdatert: 2026-08-26
 
 Status: aktivt arbeidsdokument for web/PWA-versjonen
 
+Metadata:
+- Navn: Padelstar
+- Undertittel: Padel Manager
+- Utvikler: Sigurd Steen Grødem
+- Firma: Zigonia IT
+
 Kildegrunnlag:
 
 - Eksisterende SwiftUI-prosjekt: `/Users/sigurd/Documents/Developer/PadelManager-main`

@@ -38,7 +38,7 @@ const avatarOptions = [
 ];
 const translations = {
   nb: {
-    brandEyebrow: "Turneringsverktøy",
+    brandEyebrow: "Padel Manager",
     languageLabel: "Språk",
     localPwa: "Lokal PWA",
     offline: "Offline",
@@ -47,7 +47,7 @@ const translations = {
     finishTournament: "Fullfør turnering",
   },
   nn: {
-    brandEyebrow: "Turneringsverktøy",
+    brandEyebrow: "Padel Manager",
     languageLabel: "Språk",
     localPwa: "Lokal PWA",
     offline: "Fråkopla",
@@ -56,7 +56,7 @@ const translations = {
     finishTournament: "Fullfør turnering",
   },
   en: {
-    brandEyebrow: "Tournament tool",
+    brandEyebrow: "Padel Manager",
     languageLabel: "Language",
     localPwa: "Local PWA",
     offline: "Offline",

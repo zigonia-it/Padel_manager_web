@@ -1,10 +1,10 @@
-const cacheName = "padelstar-v26";
+const cacheName = "padelstar-v27";
 
 const appShell = [
   "./",
   "./index.html",
-  "./styles.css?v=padelstar-cleanup-1",
-  "./app.js?v=padelstar-cleanup-1",
+  "./styles.css?v=padelstar-metadata-1",
+  "./app.js?v=padelstar-metadata-1",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-256.png",

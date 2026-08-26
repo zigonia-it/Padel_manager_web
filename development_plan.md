@@ -11,7 +11,13 @@ Oppdateringslogikk:
 
 ## 0. Nåværende fokus
 
-Appen er nå i versjon 0.1 Beta med publisert statisk webapp, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
+Appen er nå i versjon 0.1 Beta med publisert responsiv PWA/webapp som kan hostes statisk, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
+
+Prosjektmetadata:
+- Navn: Padelstar
+- Undertittel: Padel Manager
+- Utvikler: Sigurd Steen Grødem
+- Firma: Zigonia IT
 
 ## Nytt siden forrige sesjon:
 

@@ -8,6 +8,66 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-26 - Gjort README mer forklarende
+
+### Gjort
+
+- Skrev om `README.md` fra planpreget tekst til en forklaring av hva appen er og hvordan den fungerer.
+- Endret formuleringen fra bare `statisk webapp` til `responsiv PWA som kan hostes statisk`.
+- Flyttet fokuset i README til produkt, roller, prosjektstruktur, lokal kjøring, Supabase, publisering og dokumentasjonskart.
+- Presiserte i `development_plan.md` at appen er responsiv, men fortsatt kan hostes statisk.
+
+### Beslutninger
+
+- README skal forklare prosjektet, ikke fungere som operativ utviklingsplan.
+- Videre prioriteringer og åpne tekniske punkter skal ligge i `development_plan.md`.
+
+### Endrede filer
+
+- `README.md`
+- `development_plan.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Holde README kort og produktnært når nye funksjoner legges til.
+
+## 2026-08-26 - Lagt inn prosjektmetadata
+
+### Gjort
+
+- La inn offisiell metadata for appen i dokumentasjonen:
+  - Navn: Padelstar
+  - Undertittel: Padel Manager
+  - Utvikler: Sigurd Steen Grødem
+  - Firma: Zigonia IT
+- Oppdaterte HTML metadata med `application-name`, `author` og mer presis description.
+- Byttet topptekst/eyebrow i appen til `Padel Manager`.
+- La inn utvikler/firma i footer.
+- Oppdaterte manifestbeskrivelse med samme metadata.
+- Bumpet service worker-cache til `padelstar-v27`.
+
+### Beslutninger
+
+- `Padelstar` er appnavnet.
+- `Padel Manager` brukes som undertittel/kategori, ikke som gammelt produktnavn.
+- Sigurd Steen Grødem og Zigonia IT skal være synlig i footer og dokumentasjon.
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `manifest.webmanifest`
+- `service-worker.js`
+- `README.md`
+- `development_plan.md`
+- `product_development.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Verifisere etter deploy at tittel, footer og PWA-metadata vises riktig i publisert app.
+
 ## 2026-08-26 - Supabase cleanup-RPC for testturneringer
 
 ### Gjort

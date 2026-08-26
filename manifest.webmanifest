@@ -1,7 +1,7 @@
 {
   "name": "Padelstar",
   "short_name": "Padelstar",
-  "description": "Administrer padelturneringer og la spillere følge kamper fra egen enhet.",
+  "description": "Padelstar - Padel Manager av Sigurd Steen Grødem / Zigonia IT.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
