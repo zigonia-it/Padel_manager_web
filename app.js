@@ -73,7 +73,7 @@ const defaultTournament = createTournament({
 
 let state = loadState();
 let largeScoreMatchId = null;
-let activeView = "admin";
+let activeModule = "landing";
 const supabaseSettings = window.PADEL_MANAGER_SUPABASE ?? {};
 const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
   ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
@@ -90,6 +90,8 @@ let isApplyingRemoteState = false;
 
 const elements = {
   startView: document.querySelector("#startView"),
+  setupAdminView: document.querySelector("#setupAdminView"),
+  setupPlayerView: document.querySelector("#setupPlayerView"),
   workspaceView: document.querySelector("#workspaceView"),
   connectionStatus: document.querySelector("#connectionStatus"),
   resumePanel: document.querySelector("#resumePanel"),
@@ -106,6 +108,8 @@ const elements = {
   showExistingPlayersButton: document.querySelector("#showExistingPlayersButton"),
   existingPlayerList: document.querySelector("#existingPlayerList"),
   adminTab: document.querySelector('[data-view="admin"]'),
+  playerTab: document.querySelector('[data-view="player"]'),
+  tournamentTab: document.querySelector('[data-view="tournament"]'),
   headerShareBox: document.querySelector(".workspace-header .share-box"),
   addPlayerForm: document.querySelector("#addPlayerForm"),
   courtSettingsForm: document.querySelector("#courtSettingsForm"),
@@ -206,7 +210,8 @@ elements.createTournamentForm.addEventListener("submit", async (event) => {
 
 elements.joinTournamentForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const formData = new FormData(event.currentTarget);
+  const form = event.currentTarget;
+  const formData = new FormData(form);
   const inviteCode = formData.get("inviteCode").trim().toUpperCase();
   const playerName = formData.get("playerName").trim();
   const avatarId = formData.get("avatarId") || defaultAvatarId;
@@ -237,7 +242,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
   saveState({ remote: false });
 
   showWorkspace("player");
-  event.currentTarget.reset();
+  form.reset();
   syncJoinPreview();
   saveState({ remote: !supabaseClient });
   render();
@@ -357,7 +362,7 @@ elements.resumeTournamentButton.addEventListener("click", () => {
 
 elements.showStartButton.addEventListener("click", () => {
   prefillJoinForm(state.inviteCode);
-  showStart();
+  showModule("setup-player");
 });
 
 elements.copyInviteCodeButton.addEventListener("click", () => {
@@ -406,26 +411,8 @@ document.querySelectorAll(".subtab").forEach((tab) => {
   tab.addEventListener("click", () => activateAdminPanel(tab.dataset.adminPanel));
 });
 
-document.querySelectorAll(".tab").forEach((tab) => {
-  tab.addEventListener("click", () => activateTab(tab.dataset.view));
-});
-
-document.querySelectorAll(".landing-links a, .landing-cta").forEach((link) => {
-  link.addEventListener("click", (event) => {
-    const targetId = link.getAttribute("href");
-    if (!targetId?.startsWith("#")) return;
-    const target = document.querySelector(targetId);
-    if (!target) return;
-
-    event.preventDefault();
-    document.querySelectorAll(".landing-links a").forEach((navLink) => {
-      const isClickedNavLink = navLink === link;
-      const isCtaTarget = link.classList.contains("landing-cta") && navLink.textContent.trim() === "Admin";
-      navLink.classList.toggle("active", isClickedNavLink || isCtaTarget);
-    });
-    closeLandingMenu();
-    target.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
+document.querySelectorAll("[data-module-link]").forEach((link) => {
+  link.addEventListener("click", () => showModule(link.dataset.moduleLink));
 });
 
 document.addEventListener("click", (event) => {
@@ -448,7 +435,7 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  if (!clickTarget.closest(".landing-links")) closeLandingMenu();
+  if (!clickTarget.closest(".landing-links") && !clickTarget.closest(".landing-menu-toggle")) closeLandingMenu();
   if (!clickTarget.closest(".tabs")) closeWorkspaceMenu();
 });
 
@@ -811,32 +798,82 @@ function prefillJoinForm(inviteCode) {
 }
 
 function showStart() {
-  document.body.classList.remove("workspace-active");
-  closeWorkspaceMenu();
-  elements.startView.classList.remove("hidden");
-  elements.workspaceView.classList.add("hidden");
+  showModule(hasActiveTournament() ? "tournament" : "landing");
 }
 
-function showWorkspace(tab = "admin") {
-  document.body.classList.add("workspace-active");
+function showWorkspace(view = "admin") {
+  showModule(normalizeWorkspaceModule(view));
+}
+
+function showModule(moduleName) {
+  const requestedModule = normalizeModule(moduleName);
+  activeModule = requestedModule;
+  const workspaceModule = workspaceModuleFromActiveModule();
+  const isWorkspaceActive = Boolean(workspaceModule);
+  if (requestedModule === "setup-player" && hasActiveTournament() && !elements.joinTournamentForm.elements.inviteCode.value) {
+    prefillJoinForm(state.inviteCode);
+  }
+
+  document.body.classList.toggle("workspace-active", isWorkspaceActive);
+  document.body.classList.toggle("setup-active", requestedModule === "setup-admin" || requestedModule === "setup-player");
   closeLandingMenu();
-  elements.startView.classList.add("hidden");
-  elements.workspaceView.classList.remove("hidden");
-  activateTab(tab);
+  closeWorkspaceMenu();
+
+  document.querySelectorAll(".app-module").forEach((section) => {
+    const sectionModule = section.dataset.module;
+    const isActive = sectionModule === requestedModule || (sectionModule === "workspace" && isWorkspaceActive);
+    section.classList.toggle("hidden", !isActive);
+  });
+
+  document.querySelectorAll("[data-section]").forEach((section) => {
+    section.classList.toggle("hidden", section.dataset.section !== workspaceModule);
+  });
+
+  document.querySelectorAll("[data-module-link]").forEach((link) => {
+    link.classList.toggle("active", link.dataset.moduleLink === requestedModule);
+  });
+
   requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+  renderRoleVisibility();
 }
 
 function activateTab(view) {
-  const requestedView = view === "admin" && !isCurrentUserAdmin() ? "player" : view;
-  activeView = requestedView;
-  document.querySelectorAll(".tab").forEach((tab) => {
-    tab.classList.toggle("active", tab.dataset.view === requestedView);
-  });
-  document.querySelectorAll("[data-section]").forEach((section) => {
-    section.classList.toggle("hidden", section.dataset.section !== requestedView);
-  });
-  closeWorkspaceMenu();
-  renderRoleVisibility();
+  showModule(normalizeWorkspaceModule(view));
+}
+
+function normalizeWorkspaceModule(view) {
+  if (view === "spectator") return "tournament";
+  return view;
+}
+
+function normalizeModule(moduleName) {
+  const requestedModule = normalizeWorkspaceModule(moduleName);
+  const tournamentIsActive = hasActiveTournament();
+
+  if (!tournamentIsActive) {
+    return ["setup-admin", "setup-player"].includes(requestedModule) ? requestedModule : "landing";
+  }
+
+  if (requestedModule === "admin") return isCurrentUserAdmin() ? "admin" : fallbackTournamentModule();
+  if (requestedModule === "player") return state.selectedPlayerId ? "player" : fallbackTournamentModule();
+  if (requestedModule === "setup-player") return "setup-player";
+  if (requestedModule === "tournament") return "tournament";
+
+  return fallbackTournamentModule();
+}
+
+function fallbackTournamentModule() {
+  if (isCurrentUserAdmin()) return "admin";
+  if (state.selectedPlayerId) return "player";
+  return "tournament";
+}
+
+function workspaceModuleFromActiveModule() {
+  return ["admin", "player", "tournament"].includes(activeModule) ? activeModule : null;
+}
+
+function hasActiveTournament() {
+  return Boolean(localStorage.getItem(storageKey));
 }
 
 function isCurrentUserAdmin() {
@@ -861,8 +898,27 @@ function currentLocalRole() {
 
 function renderRoleVisibility() {
   const isAdmin = isCurrentUserAdmin();
+  const tournamentIsActive = hasActiveTournament();
+  const canShowPlayer = Boolean(state.selectedPlayerId);
+  const visibleModules = new Set(tournamentIsActive
+    ? ["tournament", "setup-player", ...(isAdmin ? ["admin"] : []), ...(canShowPlayer ? ["player"] : [])]
+    : ["landing", "setup-admin", "setup-player"]);
+  const workspaceModule = workspaceModuleFromActiveModule();
+
   elements.adminTab.classList.toggle("hidden", !isAdmin);
-  elements.headerShareBox.classList.toggle("hidden", !isAdmin || activeView !== "admin");
+  elements.playerTab.classList.toggle("hidden", !canShowPlayer);
+  elements.tournamentTab.classList.toggle("hidden", !tournamentIsActive);
+  elements.headerShareBox.classList.toggle("hidden", !isAdmin || activeModule !== "admin");
+
+  document.querySelectorAll("[data-module-link]").forEach((link) => {
+    const moduleName = normalizeWorkspaceModule(link.dataset.moduleLink);
+    link.classList.toggle("hidden", !visibleModules.has(moduleName));
+    link.classList.toggle("active", moduleName === activeModule);
+  });
+
+  document.querySelectorAll("[data-section]").forEach((section) => {
+    section.classList.toggle("hidden", section.dataset.section !== workspaceModule);
+  });
 }
 
 function activateAdminPanel(panel) {
@@ -2469,7 +2525,11 @@ function restoreInitialView() {
   const hasSavedTournament = Boolean(localStorage.getItem(storageKey));
   const params = new URLSearchParams(window.location.search);
   const hasInviteUrl = params.has("join") || params.has("code");
-  if (!hasSavedTournament || hasInviteUrl) return;
+  if (hasInviteUrl) {
+    showModule("setup-player");
+    return;
+  }
+  if (!hasSavedTournament) return;
 
   if (isCurrentUserAdmin()) {
     showWorkspace("admin");

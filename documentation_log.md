@@ -1258,3 +1258,61 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - `styles.css`
 - `service-worker.js`
 - `documentation_log.md`
+
+## 2026-08-26 - En-sides modulflyt, Supabase-verifisering og publiseringsklar cache
+
+### Gjort
+
+- La om appen til en en-sides modulflyt der bare aktiv modul vises og inaktive moduler får `display: none`.
+- Delte startsiden i egne moduler for `Landing`, `Setup admin`, `Setup player`, `Admin`, `Player` og `Turnering`.
+- Endret menylogikken slik at modulvalg følger app-state og rolle:
+  - uten aktiv turnering vises `Hjem`, `Create` og `Join`
+  - admin i aktiv turnering ser `Join`, `Admin` og `Turnering`
+  - spiller i aktiv turnering ser `Join`, `Spiller` og `Turnering`
+- Gjorde `Turnering` til erstatning for den gamle tilskuervisningen.
+- Forhåndsutfyller invitekode i Join-modulen når en lokal aktiv turnering finnes.
+- Rettet async submit-feil i join-skjemaet ved å beholde form-referansen før `await`.
+- Verifiserte Supabase-prosjektet `Padel Manager` (`sxzlljxodorkfrjnwfgr`) og bekreftet tabell, RLS, realtime og RPC-er.
+- La til migrasjonen `20260826152343_secure_public_api_grants.sql` og strammet live database-grants:
+  - `anon` har bare `SELECT` på `public.tournaments`
+  - `anon` har `EXECUTE` på nødvendige RPC-funksjoner
+  - `authenticated` og `PUBLIC` har ikke unødvendige grants på appens tabell/funksjoner
+- Testet Supabase create/join via REST/RPC med publishable key og slettet midlertidig testturnering etterpå.
+- Bumpet Service Worker-cache til `padel-manager-v23` og oppdaterte app-shell til nye CSS/JS cache-bustere.
+
+### Beslutninger
+
+- GitHub Pages brukes videre som publiseringskanal siden repoet allerede har en fungerende Pages-workflow fra repo-roten.
+- Supabase-funksjonene beholder `SECURITY DEFINER`, men eksponeres eksplisitt og smalt til `anon` fordi appen er en statisk klient uten egen server.
+- Databasen lagrer fremdeles turneringsstate som JSONB i én tabell for å holde MVP-flyten enkel; normalisering kan tas senere når produktflyten er stabil.
+
+### Testet
+
+- `node --check app.js`
+- Playwright-flyt lokalt:
+  - landing viser bare landingsmodulen
+  - Create åpner admin-oppsett
+  - Join åpner spilleroppsett
+  - opprettet turnering gir aktiv adminvisning
+  - Turnering viser tidligere tilskuerinnhold
+  - Join + spillerregistrering viser spiller-modulen uten konsollfeil
+- Supabase REST/RPC:
+  - `create_tournament`
+  - `join_tournament`
+  - grant-kontroll etter migrasjon
+
+### Endrede filer
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `service-worker.js`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826152343_secure_public_api_grants.sql`
+- `documentation_log.md`
+
+### Neste steg
+
+- Committe og pushe til `main` slik at GitHub Pages publiserer siste versjon.
+- Sjekke GitHub Actions Pages-deploy etter push.
+- Åpne publisert URL og teste create/join på live-siden med Supabase.

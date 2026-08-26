@@ -12,7 +12,7 @@
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="assets/New assets/padel_manager logo_1x.png">
     <link rel="icon" href="assets/favicon.jpg">
-    <link rel="stylesheet" href="styles.css?v=workspace-ui-3">
+    <link rel="stylesheet" href="styles.css?v=single-page-flow-1">
   </head>
   <body>
     <div class="app-shell">
@@ -25,6 +25,14 @@
           </div>
         </div>
         <div class="topbar-actions">
+          <nav class="app-menu" aria-label="Moduler">
+            <button class="module-link" type="button" data-module-link="landing">Hjem</button>
+            <button class="module-link" type="button" data-module-link="setup-admin">Create</button>
+            <button class="module-link" type="button" data-module-link="setup-player">Join</button>
+            <button class="module-link" type="button" data-module-link="admin">Admin</button>
+            <button class="module-link" type="button" data-module-link="player">Spiller</button>
+            <button class="module-link" type="button" data-module-link="tournament">Turnering</button>
+          </nav>
           <label class="language-picker">
             <span data-i18n="languageLabel">Språk</span>
             <select id="languageSelect" aria-label="Språk">
@@ -38,7 +46,7 @@
       </header>
 
       <main>
-        <section class="start-panel" id="startView" aria-labelledby="startTitle">
+        <section class="start-panel app-module" id="startView" data-module="landing" aria-labelledby="startTitle">
           <div class="intro">
             <nav class="landing-nav" aria-label="Forside">
               <img class="landing-nav-logo" src="assets/New assets/padel_manager logo_1x.png" alt="Padel Manager" width="74" height="74">
@@ -48,85 +56,27 @@
                 <span></span>
               </button>
               <div class="landing-links" id="landingLinks">
-                <a class="active" href="#startView">Hjem</a>
-                <a href="#createTournamentForm">Admin</a>
-                <a href="#joinTournamentForm">Spiller</a>
-                <a href="#createTournamentForm">Turnering</a>
+                <button class="module-link active" type="button" data-module-link="landing">Hjem</button>
+                <button class="module-link" type="button" data-module-link="setup-admin">Create</button>
+                <button class="module-link" type="button" data-module-link="setup-player">Join</button>
+                <button class="module-link" type="button" data-module-link="admin">Admin</button>
+                <button class="module-link" type="button" data-module-link="player">Spiller</button>
+                <button class="module-link" type="button" data-module-link="tournament">Turnering</button>
               </div>
             </nav>
 
             <div class="intro-copy">
               <img class="hero-logo" src="assets/New assets/padel_manager logo_1x.png" alt="Padel Manager" width="560">
               <h2 id="startTitle">PADEL MANAGER</h2>
-              <a class="landing-cta" href="#createTournamentForm">Get Started</a>
+              <div class="landing-actions" aria-label="Startvalg">
+                <button class="landing-cta" type="button" data-module-link="setup-admin">Create</button>
+                <button class="landing-cta landing-cta-secondary" type="button" data-module-link="setup-player">Join</button>
+              </div>
               <p>No App Needed</p>
             </div>
 
             <img class="landing-developer-logo" src="assets/New assets/zigonia_developer_logo.png" alt="Zigonia IT" width="220">
             <img class="landing-badge" src="assets/New assets/padel_manager_button.png" alt="Padel Manager" width="210">
-          </div>
-
-          <div class="action-grid">
-            <form class="panel" id="createTournamentForm">
-              <h3>Ny turnering</h3>
-              <label>
-                Turneringsnavn
-                <input name="tournamentName" type="text" value="Risløkka Padel" autocomplete="off" required>
-              </label>
-              <label>
-                Spillere, valgfritt
-                <textarea name="players" rows="6" placeholder="Legg inn spillere manuelt hvis noen ikke har egen enhet."></textarea>
-              </label>
-              <label>
-                Antall baner
-                <input name="courts" type="number" min="1" max="12" value="1" required>
-              </label>
-              <button class="primary" type="submit">Opprett turnering</button>
-            </form>
-
-            <form class="panel" id="joinTournamentForm">
-              <h3>Bli med</h3>
-              <label>
-                Invitasjonskode
-                <input name="inviteCode" type="text" placeholder="P4K7D" maxlength="8" autocomplete="off" required>
-              </label>
-              <label>
-                Navn
-                <input name="playerName" type="text" placeholder="Skriv navnet ditt" autocomplete="name" required>
-              </label>
-              <div class="join-preview" aria-live="polite">
-                <img class="avatar large-avatar" id="joinAvatarPreview" src="" alt="" width="48" height="48">
-                <div>
-                  <span>Din avatar</span>
-                  <strong id="joinNamePreview">Navnet ditt</strong>
-                </div>
-              </div>
-              <fieldset class="avatar-picker" id="avatarPicker">
-                <legend>Velg avatar</legend>
-                <label>
-                  <input type="radio" name="avatarId" value="smash" checked>
-                  <span>Smash</span>
-                </label>
-                <label>
-                  <input type="radio" name="avatarId" value="serve">
-                  <span>Serve</span>
-                </label>
-                <label>
-                  <input type="radio" name="avatarId" value="wall">
-                  <span>Vegg</span>
-                </label>
-                <label>
-                  <input type="radio" name="avatarId" value="lob">
-                  <span>Lob</span>
-                </label>
-              </fieldset>
-              <button class="secondary" type="submit">Bli med i turnering</button>
-              <div class="existing-player-box">
-                <button class="ghost" id="showExistingPlayersButton" type="button">Admin har lagt meg til</button>
-                <div class="existing-player-list hidden" id="existingPlayerList"></div>
-              </div>
-              <p class="hint">I dette utkastet fungerer koden for turneringen som er opprettet på denne enheten.</p>
-            </form>
           </div>
 
           <div class="panel resume-panel hidden" id="resumePanel">
@@ -139,7 +89,74 @@
           </div>
         </section>
 
-        <section class="workspace hidden" id="workspaceView" aria-live="polite">
+        <section class="setup-panel app-module hidden" id="setupAdminView" data-module="setup-admin" aria-labelledby="setupAdminTitle">
+          <form class="panel setup-card" id="createTournamentForm">
+            <p class="eyebrow">Create</p>
+            <h2 id="setupAdminTitle">Ny turnering</h2>
+            <label>
+              Turneringsnavn
+              <input name="tournamentName" type="text" value="Risløkka Padel" autocomplete="off" required>
+            </label>
+            <label>
+              Spillere, valgfritt
+              <textarea name="players" rows="6" placeholder="Legg inn spillere manuelt hvis noen ikke har egen enhet."></textarea>
+            </label>
+            <label>
+              Antall baner
+              <input name="courts" type="number" min="1" max="12" value="1" required>
+            </label>
+            <button class="primary" type="submit">Opprett turnering</button>
+          </form>
+        </section>
+
+        <section class="setup-panel app-module hidden" id="setupPlayerView" data-module="setup-player" aria-labelledby="setupPlayerTitle">
+          <form class="panel setup-card" id="joinTournamentForm">
+            <p class="eyebrow">Join</p>
+            <h2 id="setupPlayerTitle">Bli med</h2>
+            <label>
+              Invitasjonskode
+              <input name="inviteCode" type="text" placeholder="P4K7D" maxlength="8" autocomplete="off" required>
+            </label>
+            <label>
+              Navn
+              <input name="playerName" type="text" placeholder="Skriv navnet ditt" autocomplete="name" required>
+            </label>
+            <div class="join-preview" aria-live="polite">
+              <img class="avatar large-avatar" id="joinAvatarPreview" src="" alt="" width="48" height="48">
+              <div>
+                <span>Din avatar</span>
+                <strong id="joinNamePreview">Navnet ditt</strong>
+              </div>
+            </div>
+            <fieldset class="avatar-picker" id="avatarPicker">
+              <legend>Velg avatar</legend>
+              <label>
+                <input type="radio" name="avatarId" value="smash" checked>
+                <span>Smash</span>
+              </label>
+              <label>
+                <input type="radio" name="avatarId" value="serve">
+                <span>Serve</span>
+              </label>
+              <label>
+                <input type="radio" name="avatarId" value="wall">
+                <span>Vegg</span>
+              </label>
+              <label>
+                <input type="radio" name="avatarId" value="lob">
+                <span>Lob</span>
+              </label>
+            </fieldset>
+            <button class="secondary" type="submit">Bli med i turnering</button>
+            <div class="existing-player-box">
+              <button class="ghost" id="showExistingPlayersButton" type="button">Admin har lagt meg til</button>
+              <div class="existing-player-list hidden" id="existingPlayerList"></div>
+            </div>
+            <p class="hint">I dette utkastet fungerer koden for turneringen som er opprettet på denne enheten.</p>
+          </form>
+        </section>
+
+        <section class="workspace app-module hidden" id="workspaceView" data-module="workspace" aria-live="polite">
           <div class="workspace-header">
             <div>
               <p class="eyebrow" id="roundLabel">Runde 1</p>
@@ -157,9 +174,9 @@
             <span></span>
           </button>
           <nav class="tabs" id="workspaceTabs" aria-label="Visning">
-            <button class="tab active" data-view="admin">Admin</button>
-            <button class="tab" data-view="player">Spiller</button>
-            <button class="tab" data-view="spectator">Tilskuer</button>
+            <button class="tab active module-link" type="button" data-module-link="admin" data-view="admin">Admin</button>
+            <button class="tab module-link" type="button" data-module-link="player" data-view="player">Spiller</button>
+            <button class="tab module-link" type="button" data-module-link="tournament" data-view="tournament">Turnering</button>
           </nav>
 
           <section class="view-grid" data-section="admin">
@@ -305,7 +322,7 @@
             </div>
           </section>
 
-          <section class="view-grid hidden" data-section="spectator">
+          <section class="view-grid hidden" data-section="tournament">
             <div class="panel wide">
               <h3>Turneringsoversikt</h3>
               <div class="matches" id="spectatorMatches"></div>
@@ -354,6 +371,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-config.js"></script>
-    <script src="app.js?v=workspace-ui-3"></script>
+    <script src="app.js?v=single-page-flow-1"></script>
   </body>
 </html>
