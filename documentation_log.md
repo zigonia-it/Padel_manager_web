@@ -8,6 +8,31 @@ Denne filen er den løpende prosjektloggen for Padel Manager Web.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-26 - Ryddet utviklingsplan etter oppdateringslogikk
+
+### Gjort
+
+- Leste nye oppdateringsregler i `development_plan.md`.
+- Fjernet ferdig én-sides modulspesifikasjon og tidligere responsiv UI-arbeidsliste fra aktiv utviklingsplan.
+- Oppdaterte nåværende fokus med neste fase: turneringsmotor, databaseoperasjoner, realtime og tester.
+- Justerte publiseringsdelen slik den beskriver faktisk status for GitHub Pages, Vercel og Supabase.
+- Ryddet utviklingsrekkefølgen slik gjennomførte punkter ikke lenger står som åpne oppgaver.
+
+### Beslutninger
+
+- `development_plan.md` skal bare vise aktivt/gjenstående arbeid.
+- Ferdig arbeid dokumenteres i `documentation_log.md` og fjernes fra den operative planen.
+- Videre arbeid bør styres av `tournament_logic.md` når iOS-logikken portes videre.
+
+### Endrede filer
+
+- `development_plan.md`
+- `documentation_log.md`
+
+### Neste steg
+
+- Følge samme dokumentflyt ved neste commit.
+
 ## 2026-08-26 - Dokumentert turneringslogikk fra iOS-appen
 
 ### Gjort

@@ -4,105 +4,27 @@ Sist oppdatert: 2026-08-26
 
 Status: aktivt arbeidsdokument for plan og gjennomføring
 
-## 0. Førsteprioritet: Responsiv UI-opprydding etter ny designretning
+Oppdateringslogikk:
+- Oppdater dette dokumentet ved hver commit.
+- Kopier det som er gjort over i documentation_log.md så endringene er dokumentert.
+- Fjern deretter det som er implementert fra dette dokumentet.
 
-Før neste funksjonsrunde skal grensesnittet ryddes opp slik at det nye Padel Manager-designet fungerer på PC, iPad og telefon.
-#Funksjonsflyt:
+## 0. Nåværende fokus
 
-Kan du gjøre denne appen om til en en sides app?
+Appen har nå en publisert statisk webapp, én-sides modulflyt, Supabase-tilkobling og lokal rollelogikk der admin kan velge om han også er spiller.
 
-Jeg ønsker at forskjellige moduler skal komme til syne når de er aktive og være usynlige og ikke ta opp noe plass når de er inaktive. 
+Neste fase er å gjøre turneringsmotoren og datalaget mer produksjonsklart:
 
-#Moduler og logikk:
-
-##Landing page: 
-vises når ingen turnering er aktiv, 
-skjules når en av de andre modulene er aktiv. 
-
-To buttons
-Create
-Join 
-
-
-##Setup admin:
-Vises når admin setter opp en turnering (create)
-Skjules i andre visninger
-
-##Setup player
-Vises når en spiller skal joine en aktiv turnering (join) 
-Skjules ellers 
-
-Vise det samme som setup fanen viser i dag
-
-##Admin view
-Vises når en turnering er aktiv for admin
-Skjules når en turnering ikke er aktiv 
-
-Viser det sammen som admin fanen i dag
-
-##Player view 
-Hvis for hver spiller når en turnering er aktiv, også admin dersom han deltar
-Skjules ellers
-
-Vise det samme som playerfanen viser i dag
-
-##Tournament view 
-Vises når en turnering er aktiv 
-Skjules ellers. 
-
-Den skal vise det tilsvarende som i tilskuertallene i viser i dag
-
-##Menu
-Link alle modulene i menyen. De skal følge samme logikk, altså vises dersom modulen er aktiv, skjules når den ikke er det. 
-
-
-
-Bakgrunn: `landing_page.jpg` er designfasit for forsiden, og skjermbilder fra admin-, spiller- og tilskuervisning viser at appvisningene foreløpig har for store nav-elementer, overlappende rollelabels og ujevn skalering på store skjermer.
-
-Målet er å beholde den nye mørk/gull-retningen, men gjøre den praktisk og responsiv i hele appen.
-
-Status 2026-08-26: Pågår. Første feilspor er korrigert: `menu_style.png` skal ikke brukes som statisk menybakgrunn fordi bildet inneholder ferdig tekst. Menyer skal kodes som ekte HTML/CSS-elementer, med `menu_highlight.png` kun som aktiv markør og hamburgerstreker.
-
-Arbeidsliste:
-
-1. Redusere og normalisere toppnavigasjonen i appvisningene.
-   - Menyen skal være fast og flytende over UI-et.
-   - På PC skal menyen være lesbar uten å dominere innholdet.
-   - På telefon og iPad i stående modus skal menyen være hamburger.
-   - Rollelabels som `Admin`, `Spiller` og `Tilskuer` må ikke overlappe hovedmenytekst.
-2. Lage tydelige responsive regler for tre hovedflater:
-   - PC/desktop
-   - iPad/nettbrett, både liggende og stående
-   - telefon
-3. Justere arbeidsvisningene etter ny stil:
-   - adminpanel
-   - spillervisning
-   - tilskuervisning
-   - tabell
-   - kampkort
-   - regler/deling/lobby
-4. Bruke designassetene konsekvent:
-   - `menu_highlight.png` som aktiv markør i menyvalg.
-   - `button.png` som utgangspunkt for primære knapper.
-   - `padel_manager_button.png` som Padel Manager-badge nederst til høyre på forsiden.
-   - `padel_manager logo_1x.png` som hovedlogo.
-   - `bg_img.png` som kodet bakgrunn, ikke `landing_page.jpg` som flatt bilde.
-5. Beholde spillerfarger.
-   - Spillerbadges skal fortsatt vise individuelle farger.
-   - Ny badge-stil skal bare gi mer glossy/brandet uttrykk, ikke fjerne fargekodingen.
-6. Fikse appvisningene fra vedlagte skjermbilder:
-   - unngå ekstremt store tab-/nav-tekster
-   - fjerne overlapp mellom menyvalg og rollelabels
-   - sikre at invitasjonskodekort og toppheader ikke kolliderer
-   - sørge for at store kort og lister får god bredde og avstand
-7. Verifisere visuelt med Playwright før commit:
-   - desktop ca. 1440 x 900
-   - iPad portrait ca. 820 x 1180
-   - mobil ca. 390 x 844
-   - minst én admin-, spiller- og tilskuervisning
-   - hamburger åpen/lukket
-   - smooth scroll fra meny og `Get Started`
-   - konsoll uten errors/warnings
+1. Bruke `tournament_logic.md` som referanse for videre porting fra iOS-appen.
+2. Skille tydelig mellom host/admin-rolle og spilleridentitet i database- og klientstate.
+3. Gjøre scoring, walkover, kampstart og rundeavansement som robuste, atomiske operasjoner mot Supabase.
+4. Videreutvikle realtime-flyten slik admin-, spiller- og turneringsvisning alltid viser samme turneringsstate.
+5. Gjøre det slik at aktive spillere i en kamp også kan sette poeng i egen kamp
+6. gjøre det mulig å forlate en en visning og gå tilbake til hjemsiden
+7. Legge inn tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
+8. Fortsette visuell QA på faktisk mobil og nettbrett etter hver større UI-endring.
+9. stramme opp UI slik at det samsvarer med hjemsidens utseende og grafikk.
+10. rette opp ui errors som at en button har feil overlay og kurve osv.
 
 ## 1. Formål
 
@@ -392,37 +314,35 @@ Senere:
 
 ## 14. Publisering
 
-Aktuelle publiseringsspor:
+Publiseringsspor:
 
+- GitHub Pages
 - Vercel
-- Netlify
-- Cloudflare Pages
-- GitHub Pages for enkel statisk demo
 
-Krav før publisering:
+Status:
 
-- rydde dokumentasjon
-- tydelig lokal/online-status
-- fungerende mobilvisning
-- fungerende join-flyt
+- GitHub Pages har vært brukt som første publiserte testspor.
+- Vercel er koblet til repoet og har statisk hostingkonfig i `vercel.json`.
+- Supabase brukes som backend når config er satt, med lokal fallback når backend ikke er tilgjengelig.
+
+Gjenstår før mer offentlig deling:
+
 - enkel personverntekst for webversjonen
+- live-test med admin og minst to spillerenheter
+- tydelig feilmelding når Supabase ikke kan nås
+- bedre overvåking av deploy- og databasefeil
 
 ## 15. Utviklingsrekkefølge
 
-1. Fullføre responsiv UI-opprydding etter ny `landing_page.jpg`-basert designretning.
-2. Rydde dokumentasjon og prosjektstruktur.
-3. Lage lobby og join-flyt.
-4. Legge inn navn og avatar ved påmelding.
-5. Vise påmeldte spillere hos administrator.
-6. Legge inn QR-kode.
-7. Splitte `app.js` i moduler.
-8. Lage tester for kampgenerator og tabell.
-9. Opprette modusene cup-mode og round robin mode basert på forrige app logikk i /Users/sigurd/Documents/Developer/PadelManager-main/
-10. Koble til Supabase.
-11. Legge inn realtime-oppdateringer.
-12. Lage admin-, spiller- og tilskuervisning.
-13. Forbedre PWA-oppsett.
-14. Publisere første demo.
+1. Splitte `app.js` i mindre moduler rundt state, Supabase, turneringsmotor og visningsrendering.
+2. Lage tester for kampgenerator, scoring, leaderboard og tabell.
+3. Portere ferdig round-robin-logikk fra `tournament_logic.md`.
+4. Vurdere om cup-mode skal inn før eller etter full realtime-hardening.
+5. Gjøre scoring og rundeavansement atomisk mot Supabase.
+6. Verifisere realtime mellom admin, spiller og turneringsvisning på flere enheter.
+7. Forbedre PWA-oppsett og offline/recovery.
+8. Lage enkel personverntekst for webversjonen.
+9. Gjøre ny produksjonsdeploy etter database- og realtime-verifisering.
 
 ## 16. Arbeidsregel
 
