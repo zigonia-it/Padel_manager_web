@@ -2,7 +2,7 @@
 
 Live app: https://padelstar.app
 
-Sist oppdatert: 2026-08-26
+Sist oppdatert: 2026-08-27
 
 Status: 0.1 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
@@ -21,18 +21,22 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 - Lar admin velge om han også deltar som spiller.
 - Viser egne moduler for landing page, oppsett, admin, spiller og turneringsvisning.
 - Skjuler inaktive moduler slik at de ikke tar plass i layouten.
+- Støtter round-robin og cup med automatisk/manuelt lagoppsett, byes og valgfri bronsefinale.
+- Støtter walkover, ett-stegs undo, QR-kode og offentlig join-lenke.
 - Synkroniserer turneringsstate live via Supabase når live-config er aktiv.
 - Fungerer lokalt i nettleseren med localStorage fallback.
 
-## Planlagte funksjoner
+## Neste steg i beta
 
-Padelstar er i beta. Neste funksjoner handler først og fremst om å gjøre live-turneringer mer robuste og bedre å bruke i en faktisk padelhall.
+Padelstar er i beta. Neste steg er produksjonsklargjøring av live-turneringer før bred offentlig bruk.
 
-- Mer robust scoring, kampstart og rundeavansement mot Supabase.
-- Mer komplett realtime-synk mellom admin, spiller og turneringsvisning.
-- Tester for kampgenerator, scoring, leaderboard og rolle-/modulvisning.
-- Videre UI-polish for mobil, nettbrett og desktop.
-- Raskere og mer stabil PWA-opplevelse når appen åpnes fra hjemskjerm på iPhone.
+- Verifisere produksjonsdeploy, DNS, service worker og join-lenke på `https://padelstar.app`.
+- Hardne host/admin- og spilleridentitet, Supabase-operasjoner, RLS/grants og rate limiting.
+- Verifisere fler-enhetssynk mellom admin, spiller og tilskuer ved reconnect og samtidige endringer.
+- Lage automatiserte regresjonstester for turneringsmotor, scoring, leaderboard, walkover/undo og roller.
+- Flytte hardkodet tekst til i18n-struktur og dele `app.js` i mindre moduler.
+- Måle PWA-oppstart og bildehåndtering på iPhone, og forbedre offline/recovery.
+- Skrive personverntekst og fastsette dataretensjon.
 
 ## Roller og visninger
 
