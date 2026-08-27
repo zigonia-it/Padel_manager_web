@@ -68,5 +68,6 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync
 
 - `https://padelstar.app/` svarte med HTTPS og HTTP 200.
 - `https://padelstar.app/service-worker.js` svarte med HTTP 200.
-- `https://padelstar.app/privacy.html` svarte med HTTP 404. Publisering av arbeidskopiens personvernside gjenstår.
-- Supabase-retensjonsmigreringen er ikke kjørt mot live-prosjektet i denne arbeidsøkten.
+- `https://padelstar.app/privacy.html` svarte med HTTP 200 og viste godkjent foreløpig kontakt, 30-dagersregel og Analytics-valg.
+- `https://padelstar.app/service-worker.js` svarte med HTTP 200 etter deploy.
+- Supabase-retensjonsmigreringen ble kjørt live og funksjonens tilgangsvern ble kontrollert read-only.

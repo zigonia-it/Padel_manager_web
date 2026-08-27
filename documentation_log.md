@@ -32,6 +32,15 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Supabase-migreringen er godkjent, men frontend-deploy er fortsatt ikke godkjent eller kjørt.
 - `supabase migration list` og `supabase link --project-ref sxzlljxodorkfrjnwfgr` ble forsøkt; CLI mangler `SUPABASE_ACCESS_TOKEN`, så live-migreringen kunne ikke starte.
 
+## 2026-08-27 - Fullførte Fase 7 etter eieravklaringer og live-verifisering
+
+- Oppdaterte personvernsiden med `sigurd.grodem@live.no`, 30 dagers retensjon for anonyme avsluttede turneringer, fremtidig profilhistorikk og Vercel Analytics.
+- Supabase-prosjektet `sxzlljxodorkfrjnwfgr` ble linket etter CLI-login.
+- Kjørte `20260827003000_retention_cleanup.sql` live via avgrenset linked query etter at `db push` stoppet på historikkforskjeller.
+- Read-only verifikasjon bekreftet at `cleanup_expired_tournaments` finnes live, mens `anon` og `authenticated` ikke har execute-tilgang.
+- Frontend-deploy fra `main` ble kontrollert i produksjon: app, personvernside og service worker svarte HTTP 200. Playwright bekreftet publisert personverntekst og mailto-lenke.
+- Fase 7 er markert fullført. Profilmodell/historikk og automatisk jobbtrigger er videre arbeid, ikke en del av dagens beta-implementasjon.
+
 ### Verifisering
 
 - Supabase-kontrakttesten og hele testpakken kjøres på nytt etter dokumentasjonsendringene.

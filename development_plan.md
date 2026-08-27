@@ -344,7 +344,7 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 ### Fase 7 – Lanseringsgrunnlag og drift
 
-**Status: pågår 2026-08-27**
+**Status: fullført 2026-08-27**
 
 **Formål**
 
@@ -380,13 +380,11 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - `node --check` passerte for nye moduler, service worker og testfiler.
 - Lokal Playwright-smoke viste korrekt personvernsiden, footer-lenken og hovedappen. Kjent lokal begrensning er 404 på `/_vercel/insights/script.js` under enkel lokal server.
 
-**Åpent før Fase 7 kan fullføres**
+**Videre arbeid etter Fase 7**
 
-- Eier har foreløpig godkjent `sigurd.grodem@live.no`, 30 dagers retensjon for anonyme avsluttede turneringer og videreføring av Vercel Analytics.
 - Når profiler bygges, må profil-eid historikk kunne beholdes lenger og slettes innen 30 dager etter profilsletting.
-- Automatisk cleanup/retensjon er implementert som intern Supabase-funksjon og kontrakttestet, men migreringen er ikke kjørt mot live-prosjektet.
-- HTTPS og eksisterende service worker er kontrollert på `https://padelstar.app`; personvernsiden gir fortsatt 404 fordi arbeidskopien ikke er publisert.
-- Produksjonsdeploy, offentlig join-lenke og live sync må gjennomgås på nytt etter at endringene er publisert.
+- Profilmodell og kobling mellom profiler, turneringshistorikk og statistikk hører til en senere produktfase.
+- Cleanup-funksjonen må få en fast automatisk trigger i Supabase-drift eller annen godkjent jobb; manuell kontrollert kjøring er dokumentert i runbooken.
 
 ## Tillatelser og avklaringer som må være på plass før implementering
 

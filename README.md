@@ -34,6 +34,7 @@ Padelstar er i beta. Neste steg er å fullføre lanseringsgrunnlaget før bred o
 - Godkjenne personvern- og retensjonsutkast med endelig kontaktadresse.
 - Verifisere produksjonsdeploy, HTTPS, PWA-assets, cacheversjon og live sync.
 - Gjennomføre cleanup/retensjon i valgt driftsløsning.
+- Bygge brukerprofiler med historikk/statistikk og profilstyrt sletting.
 - Verifisere produksjonsdeploy, HTTPS, PWA-assets, cacheversjon og live sync.
 
 ## Roller og visninger
