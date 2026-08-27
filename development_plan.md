@@ -40,14 +40,15 @@ Prosjektmetadata:
 
 Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
-1. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
-2. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse, walkover, settresultat, round-robin-rundeavansement, dynamisk cup-bracket og reopen/undo er portert.
-3. **Stabiliser realtime.** Admin-, spiller- og tilskuerflyten har kontrollert reconnect, stale-revisjonsvern, synlig status og konfliktbehandling.
-4. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
-5. **Forsterk testdekningen løpende.** Utvid regresjonene når struktur deles opp, særlig for walkover/undo, import/export og browserflyt.
-6. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
-7. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
-8. **Bygg brukerprofiler og historikk.** Etabler profilidentitet, koble turneringer/resultater/statistikk til profilen, vis spillerhistorikk og slett profil-eide data innen 30 dager etter profilsletting.
+1. En bruker må kunne forlate en turnering, men uten at de andre spillerne blir påvirket
+2. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
+3. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse, walkover, settresultat, round-robin-rundeavansement, dynamisk cup-bracket og reopen/undo er portert.
+4. **Stabiliser realtime.** Admin-, spiller- og tilskuerflyten har kontrollert reconnect, stale-revisjonsvern, synlig status og konfliktbehandling.
+5. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
+6. **Forsterk testdekningen løpende.** Utvid regresjonene når struktur deles opp, særlig for walkover/undo, import/export og browserflyt.
+7. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
+8. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
+9. **Bygg brukerprofiler og historikk.** Etabler profilidentitet, koble turneringer/resultater/statistikk til profilen, vis spillerhistorikk og slett profil-eide data innen 30 dager etter profilsletting.
 
 ## Detaljert gjennomføringsplan for «Neste fase»
 
