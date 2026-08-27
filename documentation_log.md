@@ -8,6 +8,38 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Hardnet offentlige RPC-er og rate limiting
+
+- Skjulte `admin_token` fra anon-lesing av `public.tournaments` med kolonnegrants, mens delt state og backup fortsatt renser tokenfelt lokalt.
+- La til RLS-beskyttet `public.api_rate_limits` og atomisk hash-basert rate limiting for oppretting, invitasjonsoppslag, join, spillerpoeng, admin-operasjoner og sletting.
+- Flyttet live RPC-implementasjonene til private `_impl`-funksjoner og beholdt de eksisterende RPC-navnene som validerende wrappers. Kun `anon` har execute på wrapperne; interne funksjoner og rate-limit-hjelperen er stengt direkte.
+- Strammet søkesti til `public, pg_catalog`, la til grenser på navn/state og viste generiske brukerfeil ved Supabase-feil.
+
+### Endrede filer
+
+- `app.js`
+- `index.html`
+- `development_plan.md`
+- `documentation_log.md`
+- `supabase_schema.sql`
+- `supabase/migrations/20260826235212_access_hardening.sql`
+
+### Verifisering
+
+- `node --check app.js`
+- `git diff --check`
+- Supabase grant/RLS-kontroll: anon kan lese `state`, men ikke `admin_token` eller `player_sessions`; anon kan bare kjøre offentlige wrappers.
+- Supabase positiv smoke-test som anon: create → get → join gikk gjennom og ga serverutstedt spillertoken.
+- Supabase negativ test: ugyldig admin-token ble avvist før lagring.
+- Rate-limit-test: tredje kall etter grense 2 ble avvist; transaksjonen ble rullet tilbake.
+- Kontroll etter test: 0 turneringer, 0 spillerøkter og 0 rate-limit-rader.
+- Supabase security advisor viser bare kjente, bevisste SECURITY DEFINER- og deny-by-default-varsler; performance advisor viser ingen lints.
+- Lokal nettleser-smoke: `Online`, `v. 0.2 (Beta)`, logo/hjemknapp og produksjonsprofil rendres.
+
+### Neste steg
+
+- Gjøre reopen/undo for kamp og siste scoring atomisk på serversiden, med stale-revisjon og gjenoppretting av avledet kamp-/runde-/cup-state.
+
 ## 2026-08-27 - Detaljplan for neste produksjonsfase
 
 - Brøt «Neste fase» i `development_plan.md` ned i syv avhengige gjennomføringsfaser med arbeid, akseptansekriterier og verifikasjon.

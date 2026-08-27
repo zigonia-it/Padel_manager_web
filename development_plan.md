@@ -52,6 +52,8 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 ### Fase 0 – Tillatelse, baseline og arbeidsregler
 
+**Status: fullført 2026-08-27**
+
 **Formål**
 
 - Avklare hvilke live-systemer og brukerdata som kan berøres.
@@ -73,6 +75,8 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 ### Fase 1 – Hardne roller, skrivetilgang og rate limiting
 
+**Status: fullført 2026-08-27**
+
 **Formål**
 
 - Sikre at admin, spiller og tilskuer har tydelig avgrensede handlinger.
@@ -83,7 +87,7 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 1. Kartlegge alle offentlige tabeller, RPC-signaturer, grants, RLS-policyer, `SECURITY DEFINER`-funksjoner og `search_path`.
 2. Validere at admin-token aldri returneres i delt state eller backup, at spiller-token bare brukes til spillerens egne poeng, og at invitasjonskode ikke gir skriveadgang.
 3. Kontrollere inputgrenser for navn, invitasjonskode, state-størrelse, lag, kamper, resultater og handlingstyper.
-4. Legge inn eller stramme servervalidering på alle admin-endepunkter, inkludert reopen/undo, med token, rolle, aktiv turnering og revisjon.
+4. Legge inn eller stramme servervalidering på alle porterte admin-endepunkter, med token, rolle, aktiv turnering og revisjon. Reopen/undo får egen atomisk behandling i Fase 2.
 5. Velge og implementere en rate-limit-strategi som passer statisk hosting. Førstevalg er server-side begrensning på join-, score- og admin-operasjoner basert på hash av token/turnering og tidsvindu. IP-basert begrensning eller Edge Function brukes bare hvis det er nødvendig og godkjent.
 6. Kjøre Supabase security/performance advisors og kontrollere grants etter hver DDL-endring.
 
@@ -91,7 +95,7 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 - Tilskuer kan lese relevant turneringsstate, men kan ikke skrive.
 - Spiller kan bare føre poeng i egen kamp med gyldig serverutstedt token.
-- Admin-handlinger krever korrekt admin-token og forventet revisjon.
+- Porterte admin-handlinger krever korrekt admin-token og forventet revisjon.
 - Ugyldige payloads, token, roller, state-overganger og overskridelse av rate limit avvises uten delvis lagring.
 - Ingen service-role-/secret-nøkkel finnes i frontend.
 
@@ -102,7 +106,17 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Rate-limit-test med grense, avvisning og nytt tidsvindu.
 - Test at alle testdata slettes og at tabellene er tomme for egne testfixture.
 
+**Gjennomført i denne fasen**
+
+- Skjulte `admin_token` fra anon-kolonnegrants på `public.tournaments`; delt state og backup inneholder fortsatt ikke tokenet.
+- La til private `public.api_rate_limits` med atomisk hash-basert tidsvindu for create, join, score, admin-operasjoner og sletting. Lesing per invitasjonskode har også et begrenset tidsvindu.
+- Flyttet eksisterende RPC-kropper til interne `_impl`-funksjoner og la validerende, rate-limitende wrappers på de offentlige RPC-navnene. Kun `anon` kan kalle wrapperne; interne funksjoner og rate-limit-hjelperen er ikke direkte kjørbare.
+- La til klientgrenser for turneringsnavn og spillernavn, og skjuler rå Supabase-feilmeldinger fra sluttbrukeren.
+- Beholdt `SECURITY DEFINER` på de offentlige RPC-wrapperne fordi dagens statiske klient bevisst bruker anon med tokenbasert autorisasjon. Supabase-advisorens tilsvarende varsler er derfor kjente og dokumenterte; `api_rate_limits` og `player_sessions` har RLS uten offentlige policyer med deny-by-default.
+
 ### Fase 2 – Gjøre gjenværende admin-operasjoner atomiske
+
+**Status: pågår**
 
 **Formål**
 

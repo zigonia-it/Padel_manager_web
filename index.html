@@ -103,7 +103,7 @@
           <h2 id="setupAdminTitle">Ny turnering</h2>
           <label>
             Turneringsnavn
-            <input name="tournamentName" type="text" value="Risløkka Padel" autocomplete="off" required>
+            <input name="tournamentName" type="text" value="Risløkka Padel" maxlength="80" autocomplete="off" required>
           </label>
           <label>
             Spillere, valgfritt
@@ -121,7 +121,7 @@
             </label>
             <label class="admin-player-name hidden" id="adminPlayerNameField">
               Spillernavn for admin
-              <input name="adminPlayerName" type="text" value="Admin" autocomplete="name">
+              <input name="adminPlayerName" type="text" value="Admin" maxlength="64" autocomplete="name">
             </label>
           </fieldset>
           <label>
@@ -143,7 +143,7 @@
           </label>
           <label>
             Navn
-            <input name="playerName" type="text" placeholder="Skriv navnet ditt" autocomplete="name" required>
+            <input name="playerName" type="text" placeholder="Skriv navnet ditt" maxlength="64" autocomplete="name" required>
           </label>
           <div class="join-preview" aria-live="polite">
             <img class="avatar large-avatar" id="joinAvatarPreview" src="" alt="" width="48" height="48">
@@ -318,7 +318,7 @@
                 <span id="playerCount">0</span>
               </div>
               <form class="inline-form" id="addPlayerForm">
-                <textarea name="playerName" rows="2" placeholder="Legg til én eller flere spillere" autocomplete="off"
+                <textarea name="playerName" rows="2" maxlength="2048" placeholder="Legg til én eller flere spillere" autocomplete="off"
                   required></textarea>
                 <button class="secondary" type="submit">Legg til</button>
               </form>

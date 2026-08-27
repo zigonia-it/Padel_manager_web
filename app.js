@@ -655,6 +655,17 @@ function isSupabaseReady() {
   return Boolean(supabaseClient);
 }
 
+function remoteErrorMessage(error, fallback) {
+  const message = String(error?.message ?? "");
+  if (/rate limit exceeded/i.test(message)) {
+    return "For mange forespørsler akkurat nå. Vent litt og prøv igjen.";
+  }
+  if (/invalid (?:invite code|player|tournament|.*payload)/i.test(message)) {
+    return "Kontroller opplysningene og prøv igjen.";
+  }
+  return fallback;
+}
+
 function sanitizeSharedState(nextState) {
   const sharedState = structuredClone(nextState);
   delete sharedState.adminToken;
@@ -689,7 +700,7 @@ async function createRemoteTournament() {
     p_admin_token: state.adminToken,
   });
   if (error) {
-    alert(`Supabase er konfigurert, men turneringen ble ikke lagret: ${error.message}`);
+    alert(remoteErrorMessage(error, "Turneringen kunne ikke lagres live akkurat nå. Den lokale kopien er beholdt."));
     return false;
   }
   applyRemoteState({
@@ -719,7 +730,7 @@ async function joinRemoteTournament(playerName, avatarId) {
     p_player: player,
   });
   if (error) {
-    alert(`Kunne ikke melde deg på: ${error.message}`);
+    alert(remoteErrorMessage(error, "Kunne ikke melde deg på akkurat nå. Prøv igjen."));
     return false;
   }
   if (!data?.state || !data.playerToken || !data.playerId) {
@@ -757,7 +768,7 @@ async function saveRemoteState() {
     if (error.message?.includes("Tournament state changed") && requestSequence === remoteMutationSequence) {
       elements.copyStatus.textContent = "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter.";
     } else {
-      elements.copyStatus.textContent = "Kunne ikke synkronisere live akkurat nå. Lokal kopi er lagret.";
+      elements.copyStatus.textContent = remoteErrorMessage(error, "Kunne ikke synkronisere live akkurat nå. Lokal kopi er lagret.");
     }
     return;
   }
@@ -797,7 +808,7 @@ function queueRemoteMatchAction(match, action, teamIndex = null) {
         console.warn("Supabase admin match action failed", error);
         elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
           ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
-          : "Kunne ikke oppdatere kampen live akkurat nå. Lokal kopi er lagret.";
+          : remoteErrorMessage(error, "Kunne ikke oppdatere kampen live akkurat nå. Lokal kopi er lagret.");
         return;
       }
 
@@ -837,7 +848,7 @@ function queueRemoteSetResult(match, teamOne, teamTwo) {
         console.warn("Supabase set result failed", error);
         elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
           ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
-          : "Kunne ikke lagre settresultatet live akkurat nå. Lokal kopi er lagret.";
+          : remoteErrorMessage(error, "Kunne ikke lagre settresultatet live akkurat nå. Lokal kopi er lagret.");
         return;
       }
 
@@ -873,7 +884,7 @@ function queueRemoteRoundAdvance() {
         console.warn("Supabase round advance failed", error);
         elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
           ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
-          : "Kunne ikke starte neste runde live akkurat nå. Lokal kopi er lagret.";
+          : remoteErrorMessage(error, "Kunne ikke starte neste runde live akkurat nå. Lokal kopi er lagret.");
         return;
       }
 
@@ -909,7 +920,7 @@ function queueRemoteCupAdvance() {
         console.warn("Supabase cup advance failed", error);
         elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
           ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
-          : "Kunne ikke starte neste cup-runde live akkurat nå. Lokal kopi er lagret.";
+          : remoteErrorMessage(error, "Kunne ikke starte neste cup-runde live akkurat nå. Lokal kopi er lagret.");
         return;
       }
 
@@ -942,7 +953,7 @@ function queuePlayerScore(matchId, teamIndex) {
       const { data, error } = await supabaseClient.rpc("save_player_point", payload);
       if (error) {
         console.warn("Supabase player score sync failed", error);
-        elements.copyStatus.textContent = "Kunne ikke synkronisere poenget live akkurat nå. Lokal kopi er lagret.";
+        elements.copyStatus.textContent = remoteErrorMessage(error, "Kunne ikke synkronisere poenget live akkurat nå. Lokal kopi er lagret.");
         return;
       }
       if (data) applyRemoteState(data);
@@ -957,7 +968,7 @@ async function deleteRemoteTournament() {
   });
   if (error) {
     console.warn("Supabase delete failed", error);
-    elements.copyStatus.textContent = "Kunne ikke slette live-turneringen. Lokal kopi nullstilles.";
+    elements.copyStatus.textContent = remoteErrorMessage(error, "Kunne ikke slette live-turneringen. Lokal kopi nullstilles.");
     return false;
   }
   if (realtimeChannel) {
