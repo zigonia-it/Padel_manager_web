@@ -34,6 +34,7 @@ Prosjektmetadata:
 - Settresultat og round-robin-rundeavansement går nå gjennom servervaliderte admin-RPC-er.
 - Dynamisk cup-rundeavansement går nå gjennom en servervalidert RPC som bygger neste bracket-runde, viderefører byes og oppretter eventuell bronsefinale atomisk.
 - Realtime har nå én kontrollert kanal per turnering, statusvisning, reconnect med backoff, server-refresh og stale-revisjonsvern.
+- Automatiserte regresjonstester er etablert for turneringsmotor, scoring, roller/moduler og Supabase SQL/RPC-kontrakter, med opt-in live Supabase-test og CI-kjøring før GitHub Pages-deploy.
 
 ## Neste fase: produksjonsklar beta
 
@@ -42,8 +43,8 @@ Prioritert rekkefølge basert på siste dokumentasjonslogg:
 1. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
 2. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse, walkover, settresultat, round-robin-rundeavansement, dynamisk cup-bracket og reopen/undo er portert.
 3. **Stabiliser realtime.** Admin-, spiller- og tilskuerflyten har kontrollert reconnect, stale-revisjonsvern, synlig status og konfliktbehandling.
-4. **Etabler automatiserte regresjonstester.** Prioriter scheduler for singles/doubles/sit-out, cup-seeding/byes/bracket, scoring, leaderboard, walkover/undo og rolle-/modulvisning.
-5. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
+4. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
+5. **Forsterk testdekningen løpende.** Utvid regresjonene når struktur deles opp, særlig for walkover/undo, import/export og browserflyt.
 6. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
 7. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
 
@@ -201,7 +202,7 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 ### Fase 4 – Automatiserte regresjonstester
 
-**Status: pågår**
+**Status: fullført 2026-08-27**
 
 **Formål**
 
@@ -223,7 +224,28 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Alle prioriterte punkter over har minst én positiv og én negativ test.
 - Testene kan kjøres uten produksjonsdata og uten å lekke tokens.
 
+**Gjennomført hittil**
+
+- Etablerte dependency-fritt `node:test`-oppsett via `npm test`.
+- La til en testmodus i `app.js` som eksporterer turneringsmotoren til tester uten å starte DOM-/Realtime-oppstarten.
+- La til første regresjonspakke for singles scheduler, doubles-rotasjon med sit-out, banetildeling, cup-byes/pending finaler, bronsefinale, tennispoeng/deuce/advantage, settvalidering og leaderboard.
+- Utvidet pakken med rolle-/modultester for usaved state, admin, spiller, tilskuer, invitasjonsmatch og stripping av lokale admin-/spillertokens fra delt state.
+- La til statiske SQL/RPC-kontraktstester for RLS, grants, private tabeller, anon-kolonnegrant uten `admin_token`, rate-limitende wrapper-RPC-er, `_impl`-revokes, revisjonsbasert compare-and-swap, spiller-tokenhash, radlåsing og single-use undo-snapshots.
+- La til opt-in live Supabase-test som kjører create, read-grants, private-RPC-avvisning, gyldig admin-write, stale write-avvisning, join/spillertoken, spillerpoeng, ugyldig token-avvisning, rate-limit og cleanup.
+- Knyttet `npm test` inn i GitHub Pages-workflowen før statisk artifact lastes opp.
+
+**Verifikasjon hittil**
+
+- `npm test` - 22 tester passerte.
+- `node --check app.js`
+- `node --check test/supabase-contract.test.js`
+- `node --check test/live-supabase.test.js`
+- `PADELSTAR_LIVE_SUPABASE=1 node --test test/live-supabase.test.js`
+- `git diff --check`
+
 ### Fase 5 – Rydde struktur og tekst
+
+**Status: fullført 2026-08-27**
 
 **Formål**
 
@@ -245,7 +267,34 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Nye tekster følger samme nøkkel- og fallbackmønster.
 - Moduler har tydelig ansvar og kan testes uten å starte hele UI-et der det er praktisk.
 
+**Gjennomført hittil**
+
+- Flyttet oversettelsesdictionary og fallback-oppslag til `translations.js`.
+- Lastet `translations.js` før `app.js` i `index.html`, og oppdaterte testharnessen til samme scriptrekkefølge.
+- Flyttet ren scheduler-/teamlogikk til `tournament-engine.js`, mens `app.js` beholder tynne delegater for eksisterende kall.
+- Flyttet ren scoring, settvalidering, poengsummer, leaderboard og spillerstatusberegninger til `scoring-engine.js`.
+- Flyttet state-migrering, sync-metadata, shared-state-sanitizing og remote-feilklassifisering til `state-manager.js`.
+- Flyttet rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering til `realtime-sync.js`.
+- Oppdaterte service-worker-cache til `padelstar-v46` og la de nye domenemodulene inn i app-shell.
+- La til regresjonstest for engelsk tekst, ukjent nøkkel og Bokmål-fallback.
+- La til direkte motortest som bygger doubles-schedule og matchplan uten å gå via `app.js` state.
+- La til direkte tester for scoring-, state- og realtime-modulene uten å gå via `app.js` state.
+
+**Verifikasjon hittil**
+
+- `npm test` - 27 tester passerte og 1 live-test ble korrekt skipped uten opt-in.
+- `node --check translations.js`
+- `node --check tournament-engine.js`
+- `node --check scoring-engine.js`
+- `node --check state-manager.js`
+- `node --check realtime-sync.js`
+- `node --check app.js`
+- `node --check service-worker.js`
+- Lokal browser-smoke med `python3 -m http.server 8080` og Playwright: forsiden rendret, app-shell var til stede, og `translations.js`, `tournament-engine.js`, `scoring-engine.js`, `state-manager.js` og `realtime-sync.js` ble lastet før `app.js`. En kjent lokal 404 for `/_vercel/insights/script.js` ble observert fordi enkel lokal server ikke har Vercel-endepunktet.
+
 ### Fase 6 – PWA, oppstart, offline og recovery
+
+**Status: fullført 2026-08-27**
 
 **Formål**
 
@@ -267,7 +316,35 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Lokal state overlever refresh og migrering.
 - Offline handlinger blir enten synkronisert trygt eller tydelig presentert som ikke synkronisert.
 
+**Gjennomført hittil**
+
+- Gjorde service workeren mer oppdateringsvennlig med `skipWaiting()` og `clients.claim()`.
+- Beholdt network-first-strategien, men hindrer caching av mislykkede same-origin-responser.
+- Strammet offline navigasjonsfallback til cached `index.html`/app-shell.
+- La til `padelstar-demo-last-good` som siste-kjente-gode recovery-kopi ved lokal state-lagring.
+- `loadState()` faller tilbake til recovery-kopien hvis hovedstate i `localStorage` er korrupt.
+- La til `offline-storage.js` som IndexedDB-speiling for state, recovery-kopi, rolle og sync-metadata, mens `localStorage` fortsatt er synkron oppstartsfallback.
+- La til synlig recovery-beskjed når appen måtte starte fra siste-kjente-gode lokale state.
+- Målte største app-shell-assets og byttet til skjermtilpassede PNG-varianter: `bg_img-1600.png`, `padelstar_logo-720.png`, `padelstar_button-540.png` og `zigonia-it_logo_gold-512.png`.
+- Reduserte de fire målte startup-bildene fra ca. 3.2 MB til ca. 1.3 MB.
+- La til testet assetbudsjett for startup-bildene.
+- Oppdaterte service-worker-cache til `padelstar-v49`.
+
+**Verifikasjon hittil**
+
+- `npm test` - 33 tester passerte og 1 live-test ble korrekt skipped uten opt-in.
+- `node --check offline-storage.js`
+- `node --check app.js`
+- `node --check service-worker.js`
+- `node --check test/padelstar.test.js`
+- `node --check test/pwa.test.js`
+- Lokal browser-smoke med `python3 -m http.server 8080` og Playwright: app-shell rendret, `PadelstarOfflineStorage` var lastet, og IndexedDB var støttet i nettleseren. En kjent lokal 404 for `/_vercel/insights/script.js` ble observert fordi enkel lokal server ikke har Vercel-endepunktet.
+- Offline navigasjon etter service-worker-installasjon ble verifisert med Playwright `network-state-set offline`; app-shell rendret fra cache med `deliveryType: "cache-storage"` og 200-status.
+- Lokal navigasjonsmåling etter cache: DOM complete ca. 62 ms for HTML-navigasjonen fra service worker-cache.
+
 ### Fase 7 – Lanseringsgrunnlag og drift
+
+**Status: pågår 2026-08-27**
 
 **Formål**
 
@@ -289,6 +366,27 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - En ny deploy kan gjennomføres og kontrolleres med dokumentert sjekkliste.
 - Databaseendringer, backup, sletting og rollback har dokumentert fremgangsmåte.
 - Publisert beta viser korrekt versjon, status og kontakt-/personvernlenke.
+
+**Gjennomført hittil**
+
+- La til `privacy.html` som et tydelig merket beta-utkast, med lenke fra appens footer og cache-busting til service-worker-cache `v50`.
+- La til `data_retention.md` med foreslått 30-dagers retensjon etter avsluttet turnering, lokal lagring og slettingsprosedyre.
+- La til `operations_runbook.md` med lokal verifikasjon, deploy, Supabase-migrering, backup, rollback, observability og produksjonssjekk.
+- La til launch-readiness-tester for personvernside, retensjonsdokument og runbook.
+
+**Verifikasjon hittil**
+
+- `npm test` - 37 tester passerte og 1 live-test ble korrekt skipped uten opt-in.
+- `node --check` passerte for nye moduler, service worker og testfiler.
+- Lokal Playwright-smoke viste korrekt personvernsiden, footer-lenken og hovedappen. Kjent lokal begrensning er 404 på `/_vercel/insights/script.js` under enkel lokal server.
+
+**Åpent før Fase 7 kan fullføres**
+
+- Eier har foreløpig godkjent `sigurd.grodem@live.no`, 30 dagers retensjon for anonyme avsluttede turneringer og videreføring av Vercel Analytics.
+- Når profiler bygges, må profil-eid historikk kunne beholdes lenger og slettes innen 30 dager etter profilsletting.
+- Automatisk cleanup/retensjon er implementert som intern Supabase-funksjon og kontrakttestet, men migreringen er ikke kjørt mot live-prosjektet.
+- HTTPS og eksisterende service worker er kontrollert på `https://padelstar.app`; personvernsiden gir fortsatt 404 fordi arbeidskopien ikke er publisert.
+- Produksjonsdeploy, offentlig join-lenke og live sync må gjennomgås på nytt etter at endringene er publisert.
 
 ## Tillatelser og avklaringer som må være på plass før implementering
 

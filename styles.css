@@ -92,7 +92,7 @@ body {
     linear-gradient(180deg,
       rgba(15, 7, 2, 0.72),
       rgba(15, 7, 2, 0.97)),
-    url("assets/bg_img-2200.png") center top / cover fixed,
+    url("assets/bg_img-1600.png") center top / cover fixed,
     var(--soft);
 
   color: var(--ink);
@@ -110,7 +110,7 @@ body.workspace-active {
     linear-gradient(90deg,
       rgba(15, 7, 2, 0.3),
       rgba(23, 9, 1, 0.76)),
-    url("assets/bg_img-2200.png") center bottom / auto 150% fixed,
+    url("assets/bg_img-1600.png") center bottom / auto 150% fixed,
     var(--soft);
 }
 
@@ -921,7 +921,7 @@ h3 {
     linear-gradient(180deg,
       rgba(15, 7, 2, 0.18),
       rgba(15, 7, 2, 0.48)),
-    url("assets/bg_img-2200.png") center / 160% auto no-repeat;
+    url("assets/bg_img-1600.png") center / 160% auto no-repeat;
 
   box-shadow:
     0 30px 80px rgba(0, 0, 0, 0.58);
@@ -3193,6 +3193,67 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 
 .site-footer p {
   margin: 0;
+}
+
+.site-footer a,
+.privacy-back-link {
+  color: var(--gold-light);
+  text-decoration-color: rgba(var(--gold-light-rgb), 0.42);
+  text-underline-offset: 0.22em;
+}
+
+.privacy-page {
+  width: min(920px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 56px;
+}
+
+.privacy-back-link {
+  display: inline-flex;
+  margin-bottom: 18px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.privacy-document {
+  display: grid;
+  gap: 16px;
+  padding: clamp(22px, 5vw, 44px);
+  border: 1px solid rgba(var(--gold-bright-rgb), 0.24);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg,
+      rgba(var(--gold-light-rgb), 0.08),
+      rgba(var(--gold-light-rgb), 0.025) 32%),
+    rgba(15, 7, 2, 0.88);
+  box-shadow: var(--shadow);
+}
+
+.privacy-document h1,
+.privacy-document h2,
+.privacy-document p {
+  margin: 0;
+}
+
+.privacy-document h1,
+.privacy-document h2 {
+  font-family: var(--font-display);
+}
+
+.privacy-document h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1;
+}
+
+.privacy-document h2 {
+  margin-top: 10px;
+  color: var(--gold-bright);
+  font-size: 1.16rem;
+}
+
+.privacy-document p {
+  max-width: 76ch;
+  color: rgba(255, 244, 189, 0.86);
 }
 
 .score-dialog-surface {

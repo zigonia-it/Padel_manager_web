@@ -1828,6 +1828,35 @@ begin
 end;
 $$;
 
+-- Internal retention job. Run this from trusted database maintenance only.
+create or replace function public.cleanup_expired_tournaments(
+  p_retention_days integer default 30
+)
+returns integer
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+declare
+  deleted_tournaments integer;
+begin
+  if p_retention_days is null or p_retention_days < 1 or p_retention_days > 3650 then
+    raise exception 'Invalid retention window';
+  end if;
+
+  delete from public.tournaments
+  where state->>'status' = 'Avsluttet'
+    and updated_at < now() - make_interval(days => p_retention_days);
+
+  get diagnostics deleted_tournaments = row_count;
+
+  delete from public.api_rate_limits
+  where updated_at < now() - interval '1 day';
+
+  return deleted_tournaments;
+end;
+$$;
+
 revoke all on function public.touch_updated_at() from public, anon, authenticated;
 revoke all on function public.create_tournament_impl(jsonb, text) from public, anon, authenticated;
 revoke all on function public.get_tournament_by_code_impl(text) from public, anon, authenticated;
@@ -1846,6 +1875,7 @@ revoke all on function public.admin_set_result(uuid, text, uuid, integer, intege
 revoke all on function public.admin_match_action(uuid, text, uuid, text, integer, integer) from public, anon, authenticated;
 revoke all on function public.admin_undo_match(uuid, text, uuid, integer) from public, anon, authenticated;
 revoke all on function public.delete_tournament(uuid, text) from public, anon, authenticated;
+revoke all on function public.cleanup_expired_tournaments(integer) from public, anon, authenticated;
 
 grant execute on function public.create_tournament(jsonb, text) to anon;
 grant execute on function public.get_tournament_by_code(text) to anon;

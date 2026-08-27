@@ -8,6 +8,182 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Implementerte Fase 7-retensjonsjobb og kontrollerte produksjon
+
+- La til `supabase/migrations/20260827003000_retention_cleanup.sql` og samme funksjon i `supabase_schema.sql`.
+- `cleanup_expired_tournaments(30)` sletter kun turneringer med eksplisitt status `Avsluttet` etter retensjonsvinduet, rydder rate-limit-rader eldre enn 24 timer og er tilbakekalt fra `public`, `anon` og `authenticated`.
+- La til Supabase-kontrakttest for grenser, statusfilter, serverbasert tidsgrunnlag og tilgangsvern.
+- Utvidet `operations_runbook.md` og `data_retention.md` med kjøring, kontroll og begrensninger for cleanup-jobben.
+
+### Produksjonskontroll
+
+- `https://padelstar.app/` svarte med HTTPS og HTTP 200.
+- `https://padelstar.app/service-worker.js` svarte med HTTP 200.
+- `https://padelstar.app/privacy.html` svarte med HTTP 404 fordi arbeidskopiens endringer ikke er publisert ennå.
+- Live Supabase-migrering og deploy ble ikke kjørt i denne økten.
+- `supabase db lint --local` kunne ikke koble til lokal Postgres på `127.0.0.1:54322`; Docker/local Supabase kjører ikke i miljøet.
+
+## 2026-08-27 - Avklarte foreløpig personvern- og profilretensjon
+
+- Eier oppga `sigurd.grodem@live.no` som foreløpig personvernkontakt.
+- 30 dagers retensjon er godkjent for anonyme avsluttede turneringer.
+- Fremtidige brukerprofiler skal kunne beholde historikk og statistikk lenger; ved profilsletting skal resterende tilknyttede data slettes etter 30 dager.
+- Vercel Analytics beholdes foreløpig.
+- Supabase-migreringen er godkjent, men frontend-deploy er fortsatt ikke godkjent eller kjørt.
+- `supabase migration list` og `supabase link --project-ref sxzlljxodorkfrjnwfgr` ble forsøkt; CLI mangler `SUPABASE_ACCESS_TOKEN`, så live-migreringen kunne ikke starte.
+
+### Verifisering
+
+- Supabase-kontrakttesten og hele testpakken kjøres på nytt etter dokumentasjonsendringene.
+
+## 2026-08-27 - Startet Fase 7 med personvern og driftsgrunnlag
+
+- La til `privacy.html` som et tydelig merket beta-utkast og koblet det fra appens footer.
+- Dokumenterte foreslått datalivsløp og sletting i `data_retention.md`, inkludert 30 dagers foreslått retensjon etter avsluttet turnering.
+- Dokumenterte deploy, Supabase-migreringer, backup, rollback, observability og produksjonskontroll i `operations_runbook.md`.
+- Bumpet service-worker-cache til `padelstar-v50` slik at personvernsiden inngår i app-shell-cache.
+- La til launch-readiness-tester for personvern, retensjon og runbook.
+
+### Status og åpne beslutninger
+
+- Utkastene er ikke endelig godkjent for bred beta. Eier må fortsatt fastsette endelig behandlingsansvarlig/kontaktadresse, konkret retensjon og om Vercel Analytics skal beholdes.
+- Automatisk cleanup og full produksjonsverifikasjon gjenstår.
+
+### Verifisering
+
+- `npm test` - 37 tester passerte og 1 live-test ble korrekt skipped uten opt-in.
+- `node --check` passerte for nye moduler, service worker og testfiler.
+- Lokal Playwright-smoke bekreftet personvernsiden, footer-lenken og hovedappen. Kjent lokal begrensning er 404 på `/_vercel/insights/script.js` under enkel lokal server.
+
+## 2026-08-27 - Fullførte Fase 6 med PWA-cache, recovery og asset-optimalisering
+
+- Gjorde service workeren mer oppdateringsvennlig med `skipWaiting()` og `clients.claim()`.
+- Beholdt network-first-strategien, men hindrer nå at mislykkede same-origin-responser caches.
+- Strammet offline navigasjonsfallback til cached `index.html`/app-shell.
+- La til `padelstar-demo-last-good` som siste-kjente-gode recovery-kopi ved lokal state-lagring.
+- `loadState()` faller nå tilbake til recovery-kopien hvis hovedstate i `localStorage` er korrupt.
+- La til `offline-storage.js` som IndexedDB-speiling for state, recovery-kopi, rolle og sync-metadata, med `localStorage` som synkron fallback.
+- La til synlig recovery-beskjed når appen måtte starte fra siste-kjente-gode lokale state.
+- Målte største app-shell-assets og byttet til skjermtilpassede PNG-varianter: `bg_img-1600.png`, `padelstar_logo-720.png`, `padelstar_button-540.png` og `zigonia-it_logo_gold-512.png`.
+- Reduserte de fire målte startup-bildene fra ca. 3.2 MB til ca. 1.3 MB.
+- La til testet assetbudsjett for startup-bildene.
+- Bumpet service-worker-cache til `padelstar-v49`.
+
+### Endrede filer
+
+- `app.js`
+- `index.html`
+- `service-worker.js`
+- `offline-storage.js`
+- `assets/bg_img-1600.png`
+- `assets/padelstar_logo-720.png`
+- `assets/padelstar_button-540.png`
+- `assets/zigonia-it_logo_gold-512.png`
+- `test/padelstar.test.js`
+- `test/pwa.test.js`
+- `development_plan.md`
+- `documentation_log.md`
+- `README.md`
+
+### Verifisering
+
+- `npm test` - 33 tester passerte og 1 live-test ble korrekt skipped uten opt-in.
+- `node --check offline-storage.js`
+- `node --check app.js`
+- `node --check service-worker.js`
+- `node --check test/padelstar.test.js`
+- `node --check test/pwa.test.js`
+- Lokal browser-smoke med `python3 -m http.server 8080` og Playwright: app-shell rendret, `PadelstarOfflineStorage` var lastet, og IndexedDB var støttet i nettleseren.
+- Offline navigasjon etter service-worker-installasjon ble verifisert med Playwright `network-state-set offline`; app-shell rendret fra cache med `deliveryType: "cache-storage"` og 200-status.
+- Lokal navigasjonsmåling etter cache: DOM complete ca. 62 ms for HTML-navigasjonen fra service worker-cache.
+- Kjent lokal begrensning: `/_vercel/insights/script.js` gir 404 under enkel lokal server, som før.
+
+### Neste steg
+
+- Starte Fase 7 med personverntekst, dataretensjon og deploy-/driftsrunbook.
+
+## 2026-08-27 - Fullførte trygge Fase 5-modulgrenser
+
+- Flyttet oversettelsesdictionary og fallback-oppslag fra `app.js` til ny `translations.js`.
+- Beholdt en tynn `t(...)`-wrapper i `app.js` slik eksisterende kall og browser-entrypoint ikke endres i dette snittet.
+- Lastet `translations.js` før `app.js` i `index.html`, oppdaterte testharnessen til samme scriptrekkefølge og la til regresjonstest for engelsk tekst, ukjent nøkkel og Bokmål-fallback.
+- Flyttet ren scheduler-/teamlogikk til ny `tournament-engine.js`, og lot `app.js` beholde tynne delegater for eksisterende kall.
+- Lastet `tournament-engine.js` før `app.js`, la filen i service-worker app-shell og bumpet cache til `padelstar-v43`.
+- La til direkte motortest som bygger doubles-schedule og matchplan uten å gå via `app.js` state.
+- Flyttet ren scoring, settvalidering, poengsummer, leaderboard og spillerstatusberegninger til `scoring-engine.js`.
+- Flyttet state-migrering, sync-metadata, shared-state-sanitizing og remote-feilklassifisering til `state-manager.js`.
+- Flyttet rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering til `realtime-sync.js`.
+- Lastet alle nye domenemoduler før `app.js` og bumpet service-worker-cache til `padelstar-v46`.
+
+### Endrede filer
+
+- `app.js`
+- `index.html`
+- `service-worker.js`
+- `translations.js`
+- `tournament-engine.js`
+- `scoring-engine.js`
+- `state-manager.js`
+- `realtime-sync.js`
+- `test/padelstar.test.js`
+- `development_plan.md`
+- `documentation_log.md`
+- `README.md`
+
+### Verifisering
+
+- `npm test` - 27 tester passerte og 1 live-test ble korrekt skipped uten opt-in.
+- `node --check translations.js`
+- `node --check tournament-engine.js`
+- `node --check scoring-engine.js`
+- `node --check state-manager.js`
+- `node --check realtime-sync.js`
+- `node --check app.js`
+- `node --check service-worker.js`
+- Lokal browser-smoke med `python3 -m http.server 8080` og Playwright: forsiden og opprettmodulen rendret, og `translations.js` ble lastet.
+- Lokal browser-smoke etter motoruttrekk: forsiden rendret, og `tournament-engine.js` ble lastet før `app.js`.
+- Lokal browser-smoke etter siste moduluttrekk: app-shell rendret, og `translations.js`, `tournament-engine.js`, `scoring-engine.js`, `state-manager.js` og `realtime-sync.js` ble lastet før `app.js`.
+- Kjent lokal begrensning: `/_vercel/insights/script.js` gir 404 under enkel lokal server, som før.
+
+### Neste steg
+
+- Fortsette med fase 6: PWA-oppstart, offline-cache og recovery. Dypere UI-komponentisering kan tas senere dersom `app.js` skal deles ytterligere.
+
+## 2026-08-27 - Etablerte automatiserte regresjonstester og CI-kjøring
+
+- La til et dependency-fritt `node:test`-oppsett med `npm test`.
+- Flyttet appens browser-oppstart inn i `initializeApp()` og eksponerte `window.PadelstarTest` bare når `window.PADELSTAR_TEST_MODE` er satt.
+- La til VM-basert testharness som laster faktisk `app.js`-logikk uten nettleser, Supabase eller nye pakker.
+- Dekket første sett med regresjoner for singles scheduler, doubles-rotasjon/sit-out, banetildeling, cup-byes, pending final/bronsefinale, cup-avansement, tennispoeng, settvalidering og leaderboard.
+- Utvidet testpakken med rolle-/modultester for usaved state, admin, spiller, tilskuer, invitasjonsmatch og stripping av lokale tokens fra delt state.
+- La til statiske SQL/RPC-kontraktstester for RLS, grants, private tabeller, anon-kolonnegrant uten `admin_token`, rate-limitende wrapper-RPC-er, `_impl`-revokes, revisjonsbasert compare-and-swap, spiller-tokenhash, radlåsing og single-use undo-snapshots.
+- La til opt-in live Supabase-test som oppretter én midlertidig testturnering og verifiserer create, read-grants, private-RPC-avvisning, gyldig admin-write, stale write-avvisning, join/spillertoken, spillerpoeng, ugyldig token-avvisning, rate-limit og cleanup.
+- La `npm test` kjøre i GitHub Pages-workflowen før artifact lastes opp og deployes.
+
+### Endrede filer
+
+- `app.js`
+- `.github/workflows/pages.yml`
+- `package.json`
+- `test/padelstar.test.js`
+- `test/supabase-contract.test.js`
+- `test/live-supabase.test.js`
+- `development_plan.md`
+- `documentation_log.md`
+
+### Verifisering
+
+- `npm test` - 22 tester passerte og 1 live-test ble korrekt skipped uten opt-in.
+- `node --check app.js`
+- `node --check test/supabase-contract.test.js`
+- `node --check test/live-supabase.test.js`
+- `PADELSTAR_LIVE_SUPABASE=1 node --test test/live-supabase.test.js` - live Supabase-test passerte og testturneringen ble slettet.
+- `git diff --check`
+
+### Neste steg
+
+- Starte Fase 5 med å flytte tekst/i18n og domenegrenser i små steg, med `npm test` og browser-smoke etter hver modulgrense.
+
 ## 2026-08-27 - Stabiliserte realtime, reconnect og stale state
 
 - La til eksplisitt realtime-status for tilkobling, reconnect, frakobling og feil, med kontrollert backoff og maks ett aktivt abonnement per turnering.

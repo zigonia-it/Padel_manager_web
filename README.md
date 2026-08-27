@@ -25,18 +25,16 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 - Støtter walkover, ett-stegs undo, QR-kode og offentlig join-lenke.
 - Synkroniserer turneringsstate live via Supabase når live-config er aktiv.
 - Krever serverutstedt spillertoken for spillerstyrt poengføring mot Supabase.
-- Fungerer lokalt i nettleseren med localStorage fallback.
+- Fungerer lokalt i nettleseren med localStorage fallback, siste-kjente-gode recovery-kopi og IndexedDB-speiling der nettleseren støtter det.
 
 ## Neste steg i beta
 
-Padelstar er i beta. Neste steg er å hardne roller, tilgang og atomiske live-operasjoner før bred offentlig bruk.
+Padelstar er i beta. Neste steg er å fullføre lanseringsgrunnlaget før bred offentlig bruk.
 
-- Hardne host/admin- og spilleridentitet, Supabase-operasjoner, RLS/grants og rate limiting.
-- Verifisere fler-enhetssynk mellom admin, spiller og tilskuer ved reconnect og samtidige endringer.
-- Lage automatiserte regresjonstester for turneringsmotor, scoring, leaderboard, walkover/undo og roller.
-- Flytte hardkodet tekst til i18n-struktur og dele `app.js` i mindre moduler.
-- Måle PWA-oppstart og bildehåndtering på iPhone, og forbedre offline/recovery.
-- Skrive personverntekst og fastsette dataretensjon.
+- Godkjenne personvern- og retensjonsutkast med endelig kontaktadresse.
+- Verifisere produksjonsdeploy, HTTPS, PWA-assets, cacheversjon og live sync.
+- Gjennomføre cleanup/retensjon i valgt driftsløsning.
+- Verifisere produksjonsdeploy, HTTPS, PWA-assets, cacheversjon og live sync.
 
 ## Roller og visninger
 
@@ -49,7 +47,16 @@ Padelstar er i beta. Neste steg er å hardne roller, tilgang og atomiske live-op
 
 - `index.html` - appstruktur, metadata og moduler.
 - `styles.css` - responsivt design og Padelstar-visuell stil.
-- `app.js` - turneringslogikk, modulvisning, localStorage og Supabase sync.
+- `translations.js` - språkdata og fallback-oppslag for brukerflate.
+- `tournament-engine.js` - ren scheduler- og teamlogikk for turneringsoppsett.
+- `scoring-engine.js` - ren scoring, settvalidering, poengsummer og leaderboard/statistikk.
+- `state-manager.js` - state-migrering, lokal sync-metadata, shared-state-sanitizing og remote-feilklassifisering.
+- `realtime-sync.js` - rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering.
+- `offline-storage.js` - IndexedDB-speiling av lokal state, rolle og sync-kø med localStorage som fallback.
+- `privacy.html` - offentlig beta-utkast for personvern.
+- `data_retention.md` - foreslått retensjon, sletting og åpne eierbeslutninger.
+- `operations_runbook.md` - deploy, database, backup, rollback og produksjonssjekker.
+- `app.js` - browser-entrypoint, modulvisning, localStorage, Supabase-kall og tynne delegater til domenemodulene.
 - `assets/` - logo, appikoner, designassets og fonter.
 - `manifest.webmanifest` - PWA-manifest.
 - `service-worker.js` - app-shell-cache for PWA.

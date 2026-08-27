@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/icons/padelstar-512.png">
   <link rel="icon" href="assets/icons/padelstar-256.png" type="image/png">
-  <link rel="preload" href="assets/padelstar_logo-1200.png" as="image">
+  <link rel="preload" href="assets/padelstar_logo-720.png" as="image" fetchpriority="high">
   <link rel="stylesheet" href="styles.css?v=padelstar-home-1">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -26,7 +26,7 @@
     <header class="topbar">
       <div class="brand-lockup">
         <button class="brand-home-button" type="button" data-module-link="landing" aria-label="Gå til hjem">
-          <img class="brand-logo" src="assets/padelstar_button-900.png" alt="Padelstar" width="270" height="96">
+          <img class="brand-logo" src="assets/padelstar_button-540.png" alt="Padelstar" width="270" height="96">
         </button>
       </div>
       <div class="topbar-actions">
@@ -72,7 +72,8 @@
           </nav>
 
           <div class="intro-copy">
-            <img class="hero-logo" src="assets/padelstar_logo-1200.png" alt="Padelstar" width="560">
+            <img class="hero-logo" src="assets/padelstar_logo-720.png" alt="Padelstar" width="560" height="373"
+              fetchpriority="high">
             <h2 id="startTitle">PADELSTAR</h2>
             <h4 class="version">v. 0.2 (Beta)</h4>
             <div class="landing-actions" aria-label="Startvalg">
@@ -424,14 +425,15 @@
 
     <footer class="site-footer">
       <p>
-        <img src="assets/padelstar_button-900.png" alt="Padelstar" width="180">
+        <img src="assets/padelstar_button-540.png" alt="Padelstar" width="180" height="64" loading="lazy">
       </p>
       <p>Utviklet av Sigurd Steen Grødem</p>
       <p>
         Copyright &copy; <span id="copyrightYearRange">2026</span>. All rights reserved.
       </p>
+      <p><a href="privacy.html">Personvern</a></p>
       <p><br>
-        <img src="assets/zigonia-it_logo_gold.png" alt="Zigonia IT" width="100">
+        <img src="assets/zigonia-it_logo_gold-512.png" alt="Zigonia IT" width="100" height="38" loading="lazy">
       </p>
     </footer>
 
@@ -440,6 +442,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script src="translations.js?v=padelstar-i18n-1"></script>
+  <script src="tournament-engine.js?v=padelstar-engine-1"></script>
+  <script src="scoring-engine.js?v=padelstar-scoring-1"></script>
+  <script src="state-manager.js?v=padelstar-state-1"></script>
+  <script src="realtime-sync.js?v=padelstar-realtime-sync-1"></script>
+  <script src="offline-storage.js?v=padelstar-offline-1"></script>
   <script src="app.js?v=padelstar-realtime-1"></script>
 </body>
 

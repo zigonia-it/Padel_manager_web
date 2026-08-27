@@ -3,6 +3,7 @@ const legacyRoleStorageKey = "padel-manager-role";
 const storageKey = "padelstar-demo";
 const roleStorageKey = "padelstar-role";
 const syncStorageKey = `${storageKey}-sync`;
+const recoveryStorageKey = `${storageKey}-last-good`;
 const publicAppUrl = "https://padelstar.app/";
 const playerAccentPalette = {
   blue: "#1a59f2",
@@ -37,56 +38,12 @@ const avatarOptions = [
   { id: "wall", label: "Vegg" },
   { id: "lob", label: "Lob" },
 ];
-const translations = {
-  nb: {
-    brandEyebrow: "Padel Manager",
-    languageLabel: "Språk",
-    localPwa: "Lokal",
-    offline: "Offline",
-    startTournament: "Start turnering",
-    startNextRound: "Start neste runde",
-    finishTournament: "Fullfør turnering",
-    realtimeConnecting: "Kobler til",
-    realtimeConnected: "Online",
-    realtimeDisconnected: "Frakoblet",
-    realtimeReconnecting: "Kobler til på nytt",
-    realtimeError: "Tilkoblingsfeil",
-    refreshRemoteState: "Last inn siste state",
-    syncPending: "synkroniserer",
-  },
-  nn: {
-    brandEyebrow: "Padel Manager",
-    languageLabel: "Språk",
-    localPwa: "Lokal",
-    offline: "Fråkopla",
-    startTournament: "Start turnering",
-    startNextRound: "Start neste runde",
-    finishTournament: "Fullfør turnering",
-    realtimeConnecting: "Koplar til",
-    realtimeConnected: "Online",
-    realtimeDisconnected: "Fråkopla",
-    realtimeReconnecting: "Koplar til på nytt",
-    realtimeError: "Tilkoblinsfeil",
-    refreshRemoteState: "Last inn siste state",
-    syncPending: "synkroniserer",
-  },
-  en: {
-    brandEyebrow: "Padel Manager",
-    languageLabel: "Language",
-    localPwa: "Local",
-    offline: "Offline",
-    startTournament: "Start tournament",
-    startNextRound: "Start next round",
-    finishTournament: "Finish tournament",
-    realtimeConnecting: "Connecting",
-    realtimeConnected: "Online",
-    realtimeDisconnected: "Disconnected",
-    realtimeReconnecting: "Reconnecting",
-    realtimeError: "Connection error",
-    refreshRemoteState: "Load latest state",
-    syncPending: "syncing",
-  },
-};
+const i18n = window.PadelstarI18n;
+const tournamentEngine = window.PadelstarTournamentEngine;
+const scoring = window.PadelstarScoring;
+const stateManager = window.PadelstarState;
+const realtimeSync = window.PadelstarRealtime;
+const offlineStorage = window.PadelstarOfflineStorage;
 
 const defaultTournament = createTournament({
   name: "Risløkka Padel",
@@ -95,6 +52,7 @@ const defaultTournament = createTournament({
   courtCount: 1,
 });
 
+let recoveredFromLastGood = false;
 migrateLegacyLocalStorage();
 
 let state = loadState();
@@ -127,6 +85,7 @@ let pendingAdminSync = loadPendingAdminSync();
 let pendingPlayerScores = loadPendingPlayerScores();
 if (pendingAdminSync) remoteMutationSequence = 1;
 let playerScoreQueueRunning = false;
+mirrorOfflineStorage();
 
 const elements = {
   startView: document.querySelector("#startView"),
@@ -215,12 +174,14 @@ const elements = {
 
 let pendingSetScoreMatchId = null;
 
+function initializeApp() {
 syncCreateFormDefaults();
 syncJoinPreview();
 prefillInviteCodeFromUrl();
 syncCopyrightYear();
 registerServiceWorker();
 syncConnectionStatus();
+showRecoveryNotice();
 connectRealtimeForCurrentState();
 
 window.addEventListener("online", handleOnline);
@@ -426,7 +387,10 @@ elements.resetTournamentButton.addEventListener("click", async () => {
   await deleteRemoteTournament();
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
+  localStorage.removeItem(recoveryStorageKey);
   localStorage.removeItem(roleStorageKey);
+  localStorage.removeItem(syncStorageKey);
+  removeOfflineStorageKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
   syncCreateFormDefaults();
   elements.joinTournamentForm.reset();
   syncJoinPreview();
@@ -524,6 +488,7 @@ document.addEventListener("keydown", (event) => {
     closeWorkspaceMenu();
   }
 });
+}
 
 function closeLandingMenu() {
   setLandingMenuOpen(false);
@@ -600,127 +565,68 @@ function createPlayer(name, index, avatarId = defaultAvatarId) {
 
 function loadState() {
   const stored = localStorage.getItem(storageKey);
-  if (!stored) return structuredClone(defaultTournament);
+  const recovered = loadSavedState(stored);
+  if (recovered) return recovered;
+  const recoveryState = loadSavedState(localStorage.getItem(recoveryStorageKey));
+  if (recoveryState) {
+    recoveredFromLastGood = true;
+    return recoveryState;
+  }
+  return structuredClone(defaultTournament);
+}
 
+function loadSavedState(serializedState) {
+  if (!serializedState) return null;
   try {
-    return migrateState(JSON.parse(stored));
+    return migrateState(JSON.parse(serializedState));
   } catch {
-    return structuredClone(defaultTournament);
+    return null;
   }
 }
 
 function migrateState(nextState) {
-  nextState.settings = {
-    ...defaultTournament.settings,
-    ...(nextState.settings ?? {}),
-  };
-  if (!["roundRobin", "cup"].includes(nextState.settings.format)) nextState.settings.format = "roundRobin";
-  if (!["auto", "manual"].includes(nextState.settings.cupTeamSetupMode)) nextState.settings.cupTeamSetupMode = "auto";
-  nextState.settings.includesThirdPlaceMatch = Boolean(nextState.settings.includesThirdPlaceMatch);
-  nextState.adminToken ??= null;
-  nextState.playerToken ??= null;
-  nextState.revision = Number.isInteger(nextState.revision) && nextState.revision >= 0 ? nextState.revision : 0;
-  nextState.selectedPlayerId ??= null;
-  nextState.players ??= [];
-  nextState.courts ??= structuredClone(defaultTournament.courts);
-  nextState.schedule ??= buildSchedule(nextState.players, nextState.settings.format);
-  nextState.rounds ??= [];
-  nextState.cup ??= null;
-  nextState.cupTeams = Array.isArray(nextState.cupTeams) ? nextState.cupTeams : [];
-  nextState.players = nextState.players.map((player, index) => ({
-    active: true,
-    participantType: "player",
-    accent: accents[index % accents.length],
-    avatarId: defaultAvatarId,
-    joinStatus: "joined",
-    joinedFrom: "manual",
-    createdAt: new Date().toISOString(),
-    ...player,
-  })).map((player, index) => ({
-    ...player,
-    accent: normalizeAccent(player.accent, index),
-  }));
-  nextState.rounds = nextState.rounds.map((round) => ({
-    ...round,
-    matches: round.matches.map((match) => migrateMatch(match, nextState.id)),
-  }));
-  return nextState;
+  return stateManager.migrateState(nextState, defaultTournament, stateManagerDependencies());
 }
 
 function migrateMatch(match, tournamentId) {
-  if (match.teamOne && match.teamTwo) {
-    return {
-      currentGame: { teamOne: 0, teamTwo: 0 },
-      completedSets: [],
-      sittingOut: [],
-      isThirdPlaceMatch: false,
-      lastScoredMatchState: null,
-      ...match,
-    };
-  }
+  return stateManager.migrateMatch(match, tournamentId, stateManagerDependencies());
+}
+
+function stateManagerDependencies() {
   return {
-    id: match.id,
-    tournamentId,
-    rotationNumber: match.roundNumber ?? 1,
-    courtId: match.courtId,
-    courtName: match.courtName,
-    teamOne: createTeam(match.team1.map(getPlayerById).filter(Boolean)),
-    teamTwo: createTeam(match.team2.map(getPlayerById).filter(Boolean)),
-    sittingOut: [],
-    state: match.status === "Completed" ? "finished" : match.status === "Active" ? "playing" : "waiting",
-    completedSets: [],
-    currentSet: {
-      teamOne: match.scoreTeam1 ?? 0,
-      teamTwo: match.scoreTeam2 ?? 0,
-    },
-    currentGame: { teamOne: 0, teamTwo: 0 },
-    startingTeamIndex: 0,
-    winnerTeamIndex: match.scoreTeam1 > match.scoreTeam2 ? 0 : match.scoreTeam2 > match.scoreTeam1 ? 1 : null,
-    isWalkover: false,
-    isThirdPlaceMatch: false,
-    lastScoredMatchState: null,
-    completedAt: match.completedAt,
+    accents,
+    defaultAvatarId,
+    buildSchedule,
+    createTeam,
+    getPlayerById,
+    normalizeAccent,
   };
 }
 
 function readSyncMetadata() {
-  try {
-    const parsed = JSON.parse(localStorage.getItem(syncStorageKey) ?? "null");
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
+  return stateManager.readSyncMetadata(localStorage, syncStorageKey);
 }
 
 function loadPendingAdminSync() {
-  return Boolean(readSyncMetadata().admin);
+  return stateManager.loadPendingAdminSync(localStorage, syncStorageKey);
 }
 
 function loadPendingPlayerScores() {
-  const metadata = readSyncMetadata();
-  if (!Array.isArray(metadata.playerScores)) return [];
-  return metadata.playerScores
-    .filter((item) => item && typeof item.matchId === "string" && [0, 1].includes(item.teamIndex))
-    .map((item) => ({ matchId: item.matchId, teamIndex: item.teamIndex }));
+  return stateManager.loadPendingPlayerScores(localStorage, syncStorageKey);
 }
 
 function persistSyncMetadata() {
-  if (!pendingAdminSync && pendingPlayerScores.length === 0) {
-    localStorage.removeItem(syncStorageKey);
-    return;
-  }
-  localStorage.setItem(syncStorageKey, JSON.stringify({
-    admin: pendingAdminSync,
-    playerScores: pendingPlayerScores,
-  }));
+  stateManager.persistSyncMetadata(localStorage, syncStorageKey, pendingAdminSync, pendingPlayerScores);
+  mirrorStorageKeys([syncStorageKey]);
 }
 
 function hasPendingRemoteWrites() {
-  return pendingAdminSync || pendingPlayerScores.length > 0;
+  return stateManager.hasPendingRemoteWrites(pendingAdminSync, pendingPlayerScores);
 }
 
 function saveState(options = {}) {
-  localStorage.setItem(storageKey, JSON.stringify(state));
+  persistLocalState();
+  recoveredFromLastGood = false;
   if (options.remote !== false && isCurrentUserAdmin()) {
     pendingAdminSync = true;
     persistSyncMetadata();
@@ -729,40 +635,59 @@ function saveState(options = {}) {
   }
 }
 
+function persistLocalState() {
+  const serializedState = JSON.stringify(state);
+  localStorage.setItem(storageKey, serializedState);
+  if (isValidTournamentState(state)) localStorage.setItem(recoveryStorageKey, serializedState);
+  mirrorStorageKeys([storageKey, recoveryStorageKey]);
+}
+
+function mirrorOfflineStorage() {
+  mirrorStorageKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
+}
+
+function mirrorStorageKeys(keys) {
+  if (!offlineStorage?.isSupported()) return;
+  offlineStorage.mirrorFromLocalStorage(keys, localStorage).catch((error) => {
+    console.warn("IndexedDB mirror failed", error);
+  });
+}
+
+function removeOfflineStorageKeys(keys) {
+  if (!offlineStorage?.isSupported()) return;
+  Promise.all(keys.map((key) => offlineStorage.removeRecord(key))).catch((error) => {
+    console.warn("IndexedDB cleanup failed", error);
+  });
+}
+
 function isSupabaseReady() {
   return Boolean(supabaseClient);
 }
 
 function remoteErrorMessage(error, fallback) {
-  const message = String(error?.message ?? "");
-  if (/rate limit exceeded/i.test(message)) {
-    return "For mange forespørsler akkurat nå. Vent litt og prøv igjen.";
-  }
-  if (/invalid (?:invite code|player|tournament|.*payload)/i.test(message)) {
-    return "Kontroller opplysningene og prøv igjen.";
-  }
-  return fallback;
+  return stateManager.remoteErrorMessage(error, fallback);
 }
 
 function sanitizeSharedState(nextState) {
-  const sharedState = structuredClone(nextState);
-  delete sharedState.adminToken;
-  delete sharedState.playerToken;
-  delete sharedState.selectedPlayerId;
-  return sharedState;
+  return stateManager.sanitizeSharedState(nextState);
 }
 
 function isConflictError(error) {
-  return /tournament state changed|revision|conflict/i.test(String(error?.message ?? ""));
+  return stateManager.isConflictError(error);
 }
 
 function isTransientRemoteError(error) {
-  return !navigator.onLine || /network|fetch|timeout|timed out|closed|aborted|connection/i.test(String(error?.message ?? ""));
+  return stateManager.isTransientRemoteError(error, navigator.onLine);
 }
 
 function setRemoteNotice(message) {
   if (elements.copyStatus) elements.copyStatus.textContent = message;
   renderSyncControls();
+}
+
+function showRecoveryNotice() {
+  if (!recoveredFromLastGood) return;
+  setRemoteNotice("Gjenopprettet siste kjente lokale turnering etter en lagringsfeil.");
 }
 
 function markRemoteConflict() {
@@ -1206,7 +1131,7 @@ function scheduleRealtimeReconnect() {
     supabaseClient.removeChannel(staleChannel);
   }
 
-  const backoff = [1000, 2000, 5000, 10000, 30000][Math.min(realtimeReconnectAttempt, 4)];
+  const backoff = realtimeSync.backoffForAttempt(realtimeReconnectAttempt);
   realtimeReconnectAttempt += 1;
   setRealtimeConnectionState("reconnecting");
   realtimeReconnectTimer = window.setTimeout(() => {
@@ -1263,10 +1188,10 @@ function connectRealtimeForCurrentState() {
   const tournamentId = state.id;
   const generation = ++realtimeConnectionGeneration;
   realtimeTournamentId = tournamentId;
-  setRealtimeConnectionState(realtimeReconnectAttempt > 0 ? "reconnecting" : "connecting");
+  setRealtimeConnectionState(realtimeSync.connectionStateForAttempt(realtimeReconnectAttempt));
   let channel;
   channel = supabaseClient
-    .channel(`tournament:${tournamentId}`)
+    .channel(realtimeSync.channelName(tournamentId))
     .on(
       "postgres_changes",
       {
@@ -1288,16 +1213,13 @@ function connectRealtimeForCurrentState() {
   realtimeChannel = channel;
   channel.subscribe((status, error) => {
     if (generation !== realtimeConnectionGeneration || channel !== realtimeChannel) return;
-    if (status === "SUBSCRIBED") {
+    if (realtimeSync.isSubscribed(status)) {
       realtimeReconnectAttempt = 0;
       setRealtimeConnectionState("connected");
       refreshRemoteState("reconnect").finally(flushPendingRemoteWrites);
-    } else if (["CHANNEL_ERROR", "TIMED_OUT"].includes(status)) {
-      console.warn("Supabase realtime channel failed", error);
-      setRealtimeConnectionState("error");
-      scheduleRealtimeReconnect();
-    } else if (status === "CLOSED") {
-      setRealtimeConnectionState("disconnected");
+    } else if (realtimeSync.shouldReconnect(status)) {
+      if (status !== "CLOSED") console.warn("Supabase realtime channel failed", error);
+      setRealtimeConnectionState(status === "CLOSED" ? "disconnected" : "error");
       scheduleRealtimeReconnect();
     }
   });
@@ -1376,13 +1298,7 @@ function syncCopyrightYear() {
 }
 
 function isValidTournamentState(candidate) {
-  return Boolean(
-    candidate &&
-      typeof candidate.name === "string" &&
-      typeof candidate.inviteCode === "string" &&
-      Array.isArray(candidate.players) &&
-      Array.isArray(candidate.rounds),
-  );
+  return stateManager.isValidTournamentState(candidate);
 }
 
 function syncCreateFormDefaults() {
@@ -1509,6 +1425,7 @@ function hasTournamentForInvite(inviteCode, loadedRemote = false) {
 
 function setLocalRole(role) {
   localStorage.setItem(roleStorageKey, role);
+  mirrorStorageKeys([roleStorageKey]);
 }
 
 function currentLocalRole() {
@@ -1554,6 +1471,8 @@ function activateAdminPanel(panel) {
 }
 
 function render() {
+  if (window.PADELSTAR_TEST_MODE) return;
+
   const matches = getAllMatches();
   applyLanguage();
   renderStartResume();
@@ -1644,7 +1563,7 @@ function applyLanguage() {
 
 function t(key) {
   const language = state.settings?.language ?? "nb";
-  return translations[language]?.[key] ?? translations.nb[key] ?? key;
+  return i18n?.translate(language, key) ?? key;
 }
 
 function renderStartResume() {
@@ -3075,95 +2994,27 @@ function startNextScheduledRound() {
 }
 
 function buildSchedule(players, format = "roundRobin") {
-  const activePlayers = players.filter((player) => player.active);
-  if (format === "cup") return [];
-  return activePlayers.length < 4
-    ? generateSinglesRounds(activePlayers)
-    : generatePartnerRounds(activePlayers);
+  return tournamentEngine.buildSchedule(players, format);
 }
 
 function generateSinglesRounds(players) {
-  if (players.length < 2) return [];
-  const rounds = [];
-
-  for (let homeIndex = 0; homeIndex < players.length; homeIndex += 1) {
-    for (let awayIndex = homeIndex + 1; awayIndex < players.length; awayIndex += 1) {
-      const activePlayers = [players[homeIndex], players[awayIndex]];
-      rounds.push({
-        teams: [createTeam([players[homeIndex]]), createTeam([players[awayIndex]])],
-        sittingOut: players.filter((player) => !activePlayers.some((active) => active.id === player.id)),
-      });
-    }
-  }
-
-  return rounds;
+  return tournamentEngine.generateSinglesRounds(players);
 }
 
 function generatePartnerRounds(players) {
-  let rotation = players.map((player) => player);
-  if (rotation.length % 2 !== 0) rotation.push(null);
-
-  const rounds = [];
-  for (let roundIndex = 0; roundIndex < rotation.length - 1; roundIndex += 1) {
-    const teams = [];
-    const sittingOut = [];
-
-    for (let index = 0; index < rotation.length / 2; index += 1) {
-      const home = rotation[index];
-      const away = rotation[rotation.length - 1 - index];
-
-      if (home && away) teams.push(createTeam([home, away]));
-      else if (home || away) sittingOut.push(home ?? away);
-    }
-
-    rounds.push({ teams, sittingOut });
-    rotation = rotateRoundParticipants(rotation);
-  }
-
-  return rounds;
+  return tournamentEngine.generatePartnerRounds(players);
 }
 
 function generateRoundMatches(teams, rotationNumber, sittingOut) {
-  const matches = [];
-  for (let teamIndex = 0; teamIndex < teams.length - 1; teamIndex += 2) {
-    matches.push({
-      id: crypto.randomUUID(),
-      tournamentId: state.id,
-      rotationNumber,
-      teamOne: teams[teamIndex],
-      teamTwo: teams[teamIndex + 1],
-      sittingOut,
-      state: "waiting",
-      completedSets: [],
-      currentSet: { teamOne: 0, teamTwo: 0 },
-      currentGame: { teamOne: 0, teamTwo: 0 },
-      startingTeamIndex: Math.round(Math.random()),
-      winnerTeamIndex: null,
-      isWalkover: false,
-      isThirdPlaceMatch: false,
-      lastScoredMatchState: null,
-      courtId: null,
-      courtName: null,
-      completedAt: null,
-    });
-  }
-  return matches;
+  return tournamentEngine.generateRoundMatches(teams, rotationNumber, sittingOut, state.id);
 }
 
 function rotateRoundParticipants(participants) {
-  if (participants.length <= 2) return participants;
-  const [fixed, ...rotating] = participants;
-  const last = rotating.at(-1);
-  return [fixed, last, ...rotating.slice(0, -1)];
+  return tournamentEngine.rotateRoundParticipants(participants);
 }
 
 function createTeam(players) {
-  return {
-    id: crypto.randomUUID(),
-    players,
-    accent: players[0]?.accent ?? "silver",
-    displayName: players.map((player) => player.name).join(" & "),
-  };
+  return tournamentEngine.createTeam(players);
 }
 
 function finishMatch(match) {
@@ -3281,13 +3132,7 @@ function saveSetResult(match, teamOne, teamTwo) {
 }
 
 function validateSetScore(teamOne, teamTwo) {
-  if (!Number.isInteger(teamOne) || !Number.isInteger(teamTwo)) return "Resultatet må være hele tall.";
-  if (teamOne < 0 || teamTwo < 0) return "Resultatet kan ikke være negativt.";
-  if (teamOne === teamTwo) return "Resultatet kan ikke være uavgjort.";
-  if (!isSetComplete(teamOne, teamTwo)) {
-    return `Sett må vinnes ${state.settings.gamesToWinSet}-x med to games margin, eller ${state.settings.gamesToWinSet + 1}-${state.settings.gamesToWinSet - 1} / ${state.settings.gamesToWinSet + 1}-${state.settings.gamesToWinSet}.`;
-  }
-  return "";
+  return scoring.validateSetScore(teamOne, teamTwo, state.settings);
 }
 
 function awardTennisPoint(match, teamIndex) {
@@ -3333,21 +3178,15 @@ function awardGame(match, scoringTeam) {
 }
 
 function isSetComplete(teamOne, teamTwo) {
-  const gamesToWinSet = state.settings.gamesToWinSet ?? 6;
-  const winnerGames = Math.max(teamOne, teamTwo);
-  const loserGames = Math.min(teamOne, teamTwo);
-  if (winnerGames === gamesToWinSet && winnerGames - loserGames >= 2) return true;
-  if (winnerGames === gamesToWinSet + 1 && [gamesToWinSet - 1, gamesToWinSet].includes(loserGames)) return true;
-  return false;
+  return scoring.isSetComplete(teamOne, teamTwo, state.settings);
 }
 
 function hasMatchWinner(match) {
-  return setsWonByTeam(match, 0) >= (state.settings.setsToWinMatch ?? 1) ||
-    setsWonByTeam(match, 1) >= (state.settings.setsToWinMatch ?? 1);
+  return scoring.hasMatchWinner(match, state.settings);
 }
 
 function setsWonByTeam(match, teamIndex) {
-  return match.completedSets.filter((set) => teamIndex === 0 ? set.teamOne > set.teamTwo : set.teamTwo > set.teamOne).length;
+  return scoring.setsWonByTeam(match, teamIndex);
 }
 
 function startMatch(match) {
@@ -3440,128 +3279,51 @@ function updateMatchCourt(match, courtName) {
 }
 
 function leaderboardEntries(matches) {
-  const points = pointsByPlayer(matches, state.settings.pointMode);
-  return state.players
-    .map((player) => {
-      const stats = statsForPlayer(player, matches);
-      return {
-        player,
-        points: points[player.id] ?? 0,
-        matchesPlayed: stats.matchesPlayed,
-        matchWins: stats.matchWins,
-        setsWon: stats.setsWon,
-        gamesWon: stats.gamesWon,
-      };
-    })
-    .sort((left, right) => {
-      return (
-        right.points - left.points ||
-        right.matchWins - left.matchWins ||
-        right.setsWon - left.setsWon ||
-        left.player.name.localeCompare(right.player.name, "nb")
-      );
-    });
+  return scoring.leaderboardEntries(state.players, matches, state.settings.pointMode);
 }
 
 function pointsByPlayer(matches, pointMode) {
-  const points = {};
-  matches.forEach((match) => {
-    if (pointMode === "games") applyGamePoints(match, points);
-    if (pointMode === "sets") applySetPoints(match, points);
-    if (pointMode === "matches") applyMatchPoints(match, points);
-  });
-  return points;
+  return scoring.pointsByPlayer(matches, pointMode);
 }
 
 function statsForPlayer(player, matches) {
-  return matches.reduce(
-    (stats, match) => {
-      const teamIndex = playerTeamIndex(player, match);
-      if (teamIndex === null) return stats;
-
-      stats.matchesPlayed += match.state === "finished" ? 1 : 0;
-      stats.matchWins += match.winnerTeamIndex === teamIndex ? 1 : 0;
-      match.completedSets.forEach((set) => {
-        stats.setsWon += teamIndex === 0 ? Number(set.teamOne > set.teamTwo) : Number(set.teamTwo > set.teamOne);
-        stats.gamesWon += teamIndex === 0 ? set.teamOne : set.teamTwo;
-      });
-
-      if (match.state === "playing") {
-        stats.gamesWon += teamIndex === 0 ? match.currentSet.teamOne : match.currentSet.teamTwo;
-      }
-
-      return stats;
-    },
-    { matchesPlayed: 0, matchWins: 0, setsWon: 0, gamesWon: 0 },
-  );
+  return scoring.statsForPlayer(player, matches);
 }
 
 function applyGamePoints(match, points) {
-  match.completedSets.forEach((set) => {
-    award(set.teamOne, match.teamOne, points);
-    award(set.teamTwo, match.teamTwo, points);
-  });
-  if (match.state !== "finished") {
-    if (match.state !== "playing") return;
-    award(match.currentSet.teamOne, match.teamOne, points);
-    award(match.currentSet.teamTwo, match.teamTwo, points);
-  }
+  return scoring.applyGamePoints(match, points);
 }
 
 function applySetPoints(match, points) {
-  match.completedSets.forEach((set) => {
-    if (set.teamOne > set.teamTwo) award(1, match.teamOne, points);
-    if (set.teamTwo > set.teamOne) award(1, match.teamTwo, points);
-  });
+  return scoring.applySetPoints(match, points);
 }
 
 function applyMatchPoints(match, points) {
-  if (match.winnerTeamIndex === null) return;
-  award(3, match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo, points);
+  return scoring.applyMatchPoints(match, points);
 }
 
 function award(value, team, points) {
-  if (value <= 0) return;
-  team.players.forEach((player) => {
-    points[player.id] = (points[player.id] ?? 0) + value;
-  });
+  return scoring.award(value, team, points);
 }
 
 function playerTeamIndex(player, match) {
-  if (match.teamOne.players.some((item) => item.id === player.id)) return 0;
-  if (match.teamTwo.players.some((item) => item.id === player.id)) return 1;
-  return null;
+  return scoring.playerTeamIndex(player, match);
 }
 
 function matchPlayers(match) {
-  return [...match.teamOne.players, ...match.teamTwo.players];
+  return scoring.matchPlayers(match);
 }
 
 function uniquePlayers(players) {
-  const seen = new Set();
-  return players.filter((player) => {
-    if (seen.has(player.id)) return false;
-    seen.add(player.id);
-    return true;
-  });
+  return scoring.uniquePlayers(players);
 }
 
 function matchIncludesPlayer(match, playerId) {
-  return matchPlayers(match).some((player) => player.id === playerId);
+  return scoring.matchIncludesPlayer(match, playerId);
 }
 
 function playerTournamentState(player, matches) {
-  const activeRound = getActiveRound();
-  const playingMatch = matches.find((match) => match.state === "playing" && matchIncludesPlayer(match, player.id));
-  if (playingMatch) return { kind: "playing", match: playingMatch };
-
-  const waitingMatch = matches.find((match) => match.state === "waiting" && matchIncludesPlayer(match, player.id));
-  if (waitingMatch) return { kind: "waiting", match: waitingMatch };
-
-  const sittingOut = activeRound?.sittingOut?.some((sittingPlayer) => sittingPlayer.id === player.id);
-  if (activeRound?.status === "active" && sittingOut) return { kind: "resting", match: null };
-
-  return { kind: "idle", match: null };
+  return scoring.playerTournamentState(player, matches, getActiveRound());
 }
 
 function playerPlacement(player, matches) {
@@ -3722,5 +3484,45 @@ function restoreInitialView() {
   showWorkspace(state.selectedPlayerId ? "player" : "spectator");
 }
 
-restoreInitialView();
-render();
+if (window.PADELSTAR_TEST_MODE) {
+  window.PadelstarTest = {
+    createTournament,
+    createPlayer,
+    createTeam,
+    buildSchedule,
+    generateSinglesRounds,
+    generatePartnerRounds,
+    generateRoundMatches,
+    generateFullTournamentSchedule,
+    generateCupTournament,
+    createNextCupRound,
+    startNextScheduledRound,
+    activateRound,
+    saveSetResult,
+    validateSetScore,
+    awardTennisPoint,
+    leaderboardEntries,
+    pointsByPlayer,
+    statsForPlayer,
+    playerTournamentState,
+    normalizeModule,
+    setLocalRole,
+    currentLocalRole,
+    isCurrentUserAdmin,
+    hasTournamentForInvite,
+    sanitizeSharedState,
+    saveState,
+    t,
+    nextPowerOfTwo,
+    wasRecoveredFromLastGood: () => recoveredFromLastGood,
+    getState: () => state,
+    setState: (nextState) => {
+      state = migrateState(nextState);
+      return state;
+    },
+  };
+} else {
+  initializeApp();
+  restoreInitialView();
+  render();
+}
