@@ -47,6 +47,7 @@ Prioritert rekkefølge basert på siste dokumentasjonslogg:
 5. **Forsterk testdekningen løpende.** Utvid regresjonene når struktur deles opp, særlig for walkover/undo, import/export og browserflyt.
 6. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
 7. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
+8. **Bygg brukerprofiler og historikk.** Etabler profilidentitet, koble turneringer/resultater/statistikk til profilen, vis spillerhistorikk og slett profil-eide data innen 30 dager etter profilsletting.
 
 ## Detaljert gjennomføringsplan for «Neste fase»
 
@@ -385,6 +386,41 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Når profiler bygges, må profil-eid historikk kunne beholdes lenger og slettes innen 30 dager etter profilsletting.
 - Profilmodell og kobling mellom profiler, turneringshistorikk og statistikk hører til en senere produktfase.
 - Cleanup-funksjonen må få en fast automatisk trigger i Supabase-drift eller annen godkjent jobb; manuell kontrollert kjøring er dokumentert i runbooken.
+
+### Fase 8 – Brukerprofiler, historikk og profilstyrt sletting
+
+**Status: planlagt**
+
+**Formål**
+
+- Gi spillere en varig identitet på tvers av turneringer uten å svekke dagens anonyme join-flyt.
+- Gjøre tidligere turneringer, resultater og statistikk tilgjengelig som spillerhistorikk.
+- Etablere tydelig eierskap og sletting for profilknyttede data.
+
+**Arbeid**
+
+1. Definere profilmodell, stabil profil-ID, visningsnavn, avatar og hvordan en profil opprettes, velges og endres.
+2. Knytte spilleridentitet, turneringsdeltakelse, kamper og statistikk til profilen uten å eksponere tokens.
+3. Lage profilvisning med tidligere turneringer, resultater, poeng, statistikk og filtrering.
+4. Beholde anonym turneringsflyt og migrere eksisterende lokale spilleridentiteter uten å gjette brukeridentitet.
+5. Lage profilsletting med 30 dagers forsinket sletting, status og mulighet for å angre før fristen.
+6. Utvide Supabase RLS/RPC-er, cleanup-jobb og backup/import slik at profil-eide data behandles konsistent.
+7. Teste fler-enhetsflyt, profilbytte, historikk, sletting, retensjon og konflikter mellom lokal og live state.
+
+**Akseptansekriterier**
+
+- En spiller kan opprette eller velge sin profil uten at eksisterende anonym join-flyt brytes.
+- Profilen viser kun spillerens egne historikk- og statistikkdata.
+- Profil-eide turneringer kan beholdes lenger enn 30 dager mens profilen består.
+- Profilsletting markerer data for sletting og fjerner resterende profil-eide data innen 30 dager.
+- Tokens, adminhemmeligheter og andre lokale skrivehemmeligheter inngår aldri i profilhistorikk eller eksport.
+- RLS, RPC-er, cleanup og automatiserte tester dekker både positiv og negativ tilgang.
+
+**Avklaringer før implementering**
+
+- Om profil skal bruke e-post, passkey, magic link eller en annen identitetsmekanisme.
+- Om en spiller kan ha flere profiler eller slå sammen historikk.
+- Hvilke statistikkfelter som skal være synlige for profilen og eventuelt andre spillere.
 
 ## Tillatelser og avklaringer som må være på plass før implementering
 

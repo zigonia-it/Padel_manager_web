@@ -29,13 +29,13 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 
 ## Neste steg i beta
 
-Padelstar er i beta. Neste steg er å fullføre lanseringsgrunnlaget før bred offentlig bruk.
+Fase 7 er ferdig. Neste planlagte fase er brukerprofiler, historikk og profilstyrt sletting.
 
-- Godkjenne personvern- og retensjonsutkast med endelig kontaktadresse.
-- Verifisere produksjonsdeploy, HTTPS, PWA-assets, cacheversjon og live sync.
-- Gjennomføre cleanup/retensjon i valgt driftsløsning.
-- Bygge brukerprofiler med historikk/statistikk og profilstyrt sletting.
-- Verifisere produksjonsdeploy, HTTPS, PWA-assets, cacheversjon og live sync.
+- Definere profilidentitet og opprettelses-/innloggingsflyt uten å bryte anonym join.
+- Knytte turneringer, resultater og statistikk til riktig profil.
+- Vise tidligere turneringer og spillerhistorikk.
+- Implementere profilsletting med 30 dagers forsinket sletting.
+- Utvide RLS, RPC-er, cleanup-jobb, backup/import og tester for profil-eide data.
 
 ## Roller og visninger
 
@@ -55,7 +55,7 @@ Padelstar er i beta. Neste steg er å fullføre lanseringsgrunnlaget før bred o
 - `realtime-sync.js` - rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering.
 - `offline-storage.js` - IndexedDB-speiling av lokal state, rolle og sync-kø med localStorage som fallback.
 - `privacy.html` - offentlig beta-utkast for personvern.
-- `data_retention.md` - foreslått retensjon, sletting og åpne eierbeslutninger.
+- `data_retention.md` - retensjon, sletting og profilhistorikk-policy.
 - `operations_runbook.md` - deploy, database, backup, rollback og produksjonssjekker.
 - `app.js` - browser-entrypoint, modulvisning, localStorage, Supabase-kall og tynne delegater til domenemodulene.
 - `assets/` - logo, appikoner, designassets og fonter.

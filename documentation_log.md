@@ -8,6 +8,14 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Dokumenterte Fase 8 som neste planlagte fase
+
+- La inn en egen Fase 8 i `development_plan.md` for brukerprofiler, historikk, statistikk og profilstyrt sletting.
+- Dokumenterte akseptansekriterier for å bevare anonym join, beskytte tokens, vise egen historikk og slette profil-eide data innen 30 dager.
+- Oppdaterte `README.md` med konkret neste arbeidsrekkefølge.
+- Oppdaterte `data_retention.md` med profilhistorikk-policy og krav om profilkobling i cleanup-jobben.
+- Fase 8 er planlagt, ikke implementert. Første tekniske avklaring er valg av identitetsmekanisme.
+
 ## 2026-08-27 - Implementerte Fase 7-retensjonsjobb og kontrollerte produksjon
 
 - La til `supabase/migrations/20260827003000_retention_cleanup.sql` og samme funksjon i `supabase_schema.sql`.

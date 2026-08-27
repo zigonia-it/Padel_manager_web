@@ -41,7 +41,10 @@ Den implementerte interne cleanup-funksjonen sletter foreløpig bare turneringer
 4. Bekreft at tilhørende spillerøkter og rate-limit-data er borte dersom de er knyttet til turneringen.
 5. Be brukeren nullstille lokal turnering i appen eller tømme nettleserdata for å fjerne lokal kopi.
 
-## Åpne eierbeslutninger
+## Neste fase: profilhistorikk
 
-- Om cleanup-funksjonen skal trigges automatisk av Supabase-drift eller en annen godkjent jobb.
-- Profilmodell og kobling mellom profiler, turneringshistorikk og statistikk før profilfunksjonen bygges.
+- Profilmodellen må definere hvilke turneringer og statistikk som eies av profilen.
+- Profilhistorikk kan beholdes lenger mens profilen består.
+- Ved profilsletting må alle tilknyttede data merkes for sletting og fjernes innen 30 dager.
+- Cleanup-jobben må utvides med profilkobling før profiler lanseres.
+- Cleanup-funksjonen må få en fast automatisk trigger i Supabase-drift eller annen godkjent jobb.
