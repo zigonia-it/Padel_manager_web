@@ -46,7 +46,7 @@
             <option value="en">English</option>
           </select>
         </label>
-        <div class="status-pill" id="connectionStatus">Lokal</div>
+        <div class="status-pill" id="connectionStatus" aria-live="polite">Lokal</div>
       </div>
     </header>
 
@@ -308,6 +308,7 @@
                 <button class="secondary" id="copyJoinLinkButton" type="button">Kopier lenke</button>
               </div>
               <p class="hint" id="copyStatus">Scan QR-koden eller bruk lenken for å bli med i turneringen.</p>
+              <button class="secondary hidden" id="refreshRemoteButton" type="button">Last inn siste state</button>
             </div>
           </div>
 
@@ -439,7 +440,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="app.js?v=padelstar-home-logo-button-1"></script>
+  <script src="app.js?v=padelstar-realtime-1"></script>
 </body>
 
 </html>

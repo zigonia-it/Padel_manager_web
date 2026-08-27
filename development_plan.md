@@ -27,12 +27,13 @@ Prosjektmetadata:
 - Admin kan registrere walkover og angre siste poeng-, settresultat- eller walkover-handling.
 - Join-lenken bruker `https://padelstar.app`, og synlige demo-/testreferanser er fjernet fra brukerflaten.
 - Den nye topp-logoen er kontrollert i desktop- og mobilvisning.
-- `v. 0.2 (Beta)` er verifisert på publisert `https://padelstar.app` med Vercel Analytics og service-worker-cache `v40`.
+- `v. 0.2 (Beta)` er verifisert på publisert `https://padelstar.app` med Vercel Analytics og service-worker-cache `v41`.
 - Spillerpoeng krever nå et serverutstedt spillertoken som lagres hash-et i en RLS-beskyttet Supabase-tabell.
 - Admin-state har nå serverstyrt revisjon og optimistisk kollisjonsvern; foreldede hele-state-skrivinger blir avvist av Supabase.
 - Kampstart, avbrytelse og walkover går nå gjennom en servervalidert admin-RPC med samme revisjonsvern.
 - Settresultat og round-robin-rundeavansement går nå gjennom servervaliderte admin-RPC-er.
 - Dynamisk cup-rundeavansement går nå gjennom en servervalidert RPC som bygger neste bracket-runde, viderefører byes og oppretter eventuell bronsefinale atomisk.
+- Realtime har nå én kontrollert kanal per turnering, statusvisning, reconnect med backoff, server-refresh og stale-revisjonsvern.
 
 ## Neste fase: produksjonsklar beta
 
@@ -40,7 +41,7 @@ Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
 1. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
 2. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse, walkover, settresultat, round-robin-rundeavansement, dynamisk cup-bracket og reopen/undo er portert.
-3. **Stabiliser realtime.** Verifiser admin, spiller og tilskuer på separate enheter med samtidige oppdateringer, refresh og reconnect; håndter stale state og feilmeldinger tydelig.
+3. **Stabiliser realtime.** Admin-, spiller- og tilskuerflyten har kontrollert reconnect, stale-revisjonsvern, synlig status og konfliktbehandling.
 4. **Etabler automatiserte regresjonstester.** Prioriter scheduler for singles/doubles/sit-out, cup-seeding/byes/bracket, scoring, leaderboard, walkover/undo og rolle-/modulvisning.
 5. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
 6. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
@@ -160,7 +161,7 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 ### Fase 3 – Stabilere realtime, reconnect og stale state
 
-**Status: pågår**
+**Status: fullført 2026-08-27**
 
 **Formål**
 
@@ -182,7 +183,25 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Reconnect henter korrekt state uten manuell full restart.
 - Feilstatus er synlig uten å avsløre tokens eller tekniske hemmeligheter.
 
+**Gjennomført i denne fasen**
+
+- La til statusmodellene `connecting`, `connected`, `disconnected`, `reconnecting` og `error` med oversatt statuspill og `aria-live`.
+- Hindret doble Supabase-kanaler ved å gjenbruke kanal per turnering og ignorere callbacks fra gamle kanal-generasjoner.
+- La til kontrollert reconnect-backoff på 1, 2, 5, 10 og 30 sekunder, og henter fersk state via `get_tournament_by_code(...)` etter reconnect.
+- Ignorerer realtime-payloads med eldre revisjon. En nyere serverrevisjon vinner over ventende admin-state og viser en synlig `Last inn siste state`-handling ved konflikt.
+- Gjør ventende admin-state og spillerpoeng købare i lokal lagring. Spillerpoeng kan sendes etter reconnect; admin-kampoperasjoner blokkeres tydelig offline fordi de ikke kan utføres optimistisk uten serverrevisjon.
+- Oppdaterte app-shell/cache-busting til service-worker-cache `v41` og bundle-suffikset `padelstar-realtime-1`.
+
+**Verifikasjon**
+
+- `node --check app.js`
+- `git diff --check`
+- Lokal nettleser-smoke med to klienter mot samme app: begge viste `Online`/`connected`, og ingen konsollfeil ble registrert.
+- Eksisterende Supabase stale-revisjonstest fra Fase 2 fortsatt avviser foreldet admin-skriving; ingen nye testdata ble opprettet i denne fasen.
+
 ### Fase 4 – Automatiserte regresjonstester
+
+**Status: pågår**
 
 **Formål**
 

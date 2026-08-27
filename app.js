@@ -2,6 +2,7 @@ const legacyStorageKey = "padel-manager-demo";
 const legacyRoleStorageKey = "padel-manager-role";
 const storageKey = "padelstar-demo";
 const roleStorageKey = "padelstar-role";
+const syncStorageKey = `${storageKey}-sync`;
 const publicAppUrl = "https://padelstar.app/";
 const playerAccentPalette = {
   blue: "#1a59f2",
@@ -45,6 +46,13 @@ const translations = {
     startTournament: "Start turnering",
     startNextRound: "Start neste runde",
     finishTournament: "Fullfør turnering",
+    realtimeConnecting: "Kobler til",
+    realtimeConnected: "Online",
+    realtimeDisconnected: "Frakoblet",
+    realtimeReconnecting: "Kobler til på nytt",
+    realtimeError: "Tilkoblingsfeil",
+    refreshRemoteState: "Last inn siste state",
+    syncPending: "synkroniserer",
   },
   nn: {
     brandEyebrow: "Padel Manager",
@@ -54,6 +62,13 @@ const translations = {
     startTournament: "Start turnering",
     startNextRound: "Start neste runde",
     finishTournament: "Fullfør turnering",
+    realtimeConnecting: "Koplar til",
+    realtimeConnected: "Online",
+    realtimeDisconnected: "Fråkopla",
+    realtimeReconnecting: "Koplar til på nytt",
+    realtimeError: "Tilkoblinsfeil",
+    refreshRemoteState: "Last inn siste state",
+    syncPending: "synkroniserer",
   },
   en: {
     brandEyebrow: "Padel Manager",
@@ -63,6 +78,13 @@ const translations = {
     startTournament: "Start tournament",
     startNextRound: "Start next round",
     finishTournament: "Finish tournament",
+    realtimeConnecting: "Connecting",
+    realtimeConnected: "Online",
+    realtimeDisconnected: "Disconnected",
+    realtimeReconnecting: "Reconnecting",
+    realtimeError: "Connection error",
+    refreshRemoteState: "Load latest state",
+    syncPending: "syncing",
   },
 };
 
@@ -89,12 +111,22 @@ const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && windo
   })
   : null;
 let realtimeChannel = null;
+let realtimeTournamentId = null;
+let realtimeReconnectTimer = null;
+let realtimeReconnectAttempt = 0;
+let realtimeConnectionState = "disconnected";
+let realtimeConnectionGeneration = 0;
+let realtimeRefreshPromise = null;
 let remoteSaveTimer = null;
-let playerScoreSaveChain = Promise.resolve();
 let remoteWriteChain = Promise.resolve();
 let lastRemotePersistedSequence = 0;
 let isApplyingRemoteState = false;
 let remoteMutationSequence = 0;
+let remoteConflict = false;
+let pendingAdminSync = loadPendingAdminSync();
+let pendingPlayerScores = loadPendingPlayerScores();
+if (pendingAdminSync) remoteMutationSequence = 1;
+let playerScoreQueueRunning = false;
 
 const elements = {
   startView: document.querySelector("#startView"),
@@ -139,6 +171,7 @@ const elements = {
   copyInviteCodeButton: document.querySelector("#copyInviteCodeButton"),
   copyJoinLinkButton: document.querySelector("#copyJoinLinkButton"),
   copyStatus: document.querySelector("#copyStatus"),
+  refreshRemoteButton: document.querySelector("#refreshRemoteButton"),
   tournamentStatus: document.querySelector("#tournamentStatus"),
   adminLiveOverview: document.querySelector("#adminLiveOverview"),
   lobbyStatus: document.querySelector("#lobbyStatus"),
@@ -190,8 +223,8 @@ registerServiceWorker();
 syncConnectionStatus();
 connectRealtimeForCurrentState();
 
-window.addEventListener("online", syncConnectionStatus);
-window.addEventListener("offline", syncConnectionStatus);
+window.addEventListener("online", handleOnline);
+window.addEventListener("offline", handleOffline);
 
 elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
 elements.avatarPicker.addEventListener("change", syncJoinPreview);
@@ -373,6 +406,13 @@ elements.importBackupButton.addEventListener("click", () => {
 });
 
 elements.backupFileInput.addEventListener("change", importBackup);
+
+elements.refreshRemoteButton?.addEventListener("click", async () => {
+  elements.refreshRemoteButton.disabled = true;
+  await refreshRemoteState("manual");
+  elements.refreshRemoteButton.disabled = false;
+  render();
+});
 
 elements.endTournamentButton.addEventListener("click", () => {
   if (!confirm("Avslutte turneringen? Du kan fortsatt se resultater og laste ned backup etterpå.")) return;
@@ -643,9 +683,47 @@ function migrateMatch(match, tournamentId) {
   };
 }
 
+function readSyncMetadata() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(syncStorageKey) ?? "null");
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function loadPendingAdminSync() {
+  return Boolean(readSyncMetadata().admin);
+}
+
+function loadPendingPlayerScores() {
+  const metadata = readSyncMetadata();
+  if (!Array.isArray(metadata.playerScores)) return [];
+  return metadata.playerScores
+    .filter((item) => item && typeof item.matchId === "string" && [0, 1].includes(item.teamIndex))
+    .map((item) => ({ matchId: item.matchId, teamIndex: item.teamIndex }));
+}
+
+function persistSyncMetadata() {
+  if (!pendingAdminSync && pendingPlayerScores.length === 0) {
+    localStorage.removeItem(syncStorageKey);
+    return;
+  }
+  localStorage.setItem(syncStorageKey, JSON.stringify({
+    admin: pendingAdminSync,
+    playerScores: pendingPlayerScores,
+  }));
+}
+
+function hasPendingRemoteWrites() {
+  return pendingAdminSync || pendingPlayerScores.length > 0;
+}
+
 function saveState(options = {}) {
   localStorage.setItem(storageKey, JSON.stringify(state));
   if (options.remote !== false && isCurrentUserAdmin()) {
+    pendingAdminSync = true;
+    persistSyncMetadata();
     remoteMutationSequence += 1;
     queueRemoteSave();
   }
@@ -674,11 +752,63 @@ function sanitizeSharedState(nextState) {
   return sharedState;
 }
 
-function applyRemoteState(remoteState) {
-  if (!remoteState) return;
+function isConflictError(error) {
+  return /tournament state changed|revision|conflict/i.test(String(error?.message ?? ""));
+}
+
+function isTransientRemoteError(error) {
+  return !navigator.onLine || /network|fetch|timeout|timed out|closed|aborted|connection/i.test(String(error?.message ?? ""));
+}
+
+function setRemoteNotice(message) {
+  if (elements.copyStatus) elements.copyStatus.textContent = message;
+  renderSyncControls();
+}
+
+function markRemoteConflict() {
+  remoteConflict = true;
+  pendingAdminSync = false;
+  window.clearTimeout(remoteSaveTimer);
+  remoteSaveTimer = null;
+  lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, remoteMutationSequence);
+  persistSyncMetadata();
+  setRemoteNotice("Turneringen ble endret fra en annen admin. Last inn siste state før du fortsetter.");
+  render();
+}
+
+function handleRemoteError(error, fallback) {
+  if (isConflictError(error)) {
+    markRemoteConflict();
+    return;
+  }
+  setRemoteNotice(remoteErrorMessage(error, fallback));
+  if (isTransientRemoteError(error)) scheduleRealtimeReconnect();
+  syncConnectionStatus();
+}
+
+function applyRemoteState(remoteState, options = {}) {
+  if (!remoteState) return false;
+  const source = options.source ?? "remote";
+  const sameTournament = state.id === remoteState.id;
+  const remoteRevision = Number.isInteger(remoteState.revision) ? remoteState.revision : 0;
+  const currentRevision = Number.isInteger(state.revision) ? state.revision : 0;
+
+  if (sameTournament) {
+    if (remoteRevision < currentRevision) return false;
+    if (pendingPlayerScores.length > 0 && ["realtime", "refresh"].includes(source)) return false;
+    if (pendingAdminSync && source !== "rpc" && remoteRevision === currentRevision) return false;
+    if (pendingAdminSync && source !== "rpc" && remoteRevision > currentRevision) markRemoteConflict();
+    if (source === "realtime" && remoteRevision === currentRevision) return false;
+  } else {
+    pendingAdminSync = false;
+    pendingPlayerScores = [];
+    persistSyncMetadata();
+  }
+
   const selectedPlayerId = state.selectedPlayerId ?? null;
   const adminToken = state.id === remoteState.id ? state.adminToken ?? null : null;
   const playerToken = state.id === remoteState.id ? state.playerToken ?? null : null;
+  const previousTournamentId = state.id;
   isApplyingRemoteState = true;
   const nextState = migrateState({
     ...remoteState,
@@ -688,9 +818,14 @@ function applyRemoteState(remoteState) {
   nextState.playerToken = playerToken;
   state = nextState;
   saveState({ remote: false });
-  connectRealtimeForCurrentState();
+  if (options.clearConflict) {
+    remoteConflict = false;
+    setRemoteNotice("Live state er oppdatert.");
+  }
+  if (previousTournamentId !== state.id || !realtimeChannel) connectRealtimeForCurrentState();
   render();
   isApplyingRemoteState = false;
+  return true;
 }
 
 async function createRemoteTournament() {
@@ -707,7 +842,7 @@ async function createRemoteTournament() {
     ...data,
     adminToken: state.adminToken,
     selectedPlayerId: state.selectedPlayerId,
-  });
+  }, { source: "rpc", clearConflict: true });
   return true;
 }
 
@@ -717,7 +852,7 @@ async function loadRemoteTournamentByInvite(inviteCode) {
     p_invite_code: inviteCode,
   });
   if (error || !data) return false;
-  applyRemoteState(data);
+  applyRemoteState(data, { source: "refresh" });
   return true;
 }
 
@@ -754,7 +889,11 @@ function queueRemoteSave() {
 }
 
 async function saveRemoteState() {
-  if (!isSupabaseReady() || !state.adminToken || !state.id) return;
+  if (!isSupabaseReady() || !state.adminToken || !state.id) return false;
+  if (!navigator.onLine) {
+    syncConnectionStatus();
+    return false;
+  }
   const requestSequence = remoteMutationSequence;
   const expectedRevision = state.revision;
   const { data, error } = await supabaseClient.rpc("save_tournament_state", {
@@ -765,33 +904,41 @@ async function saveRemoteState() {
   });
   if (error) {
     console.warn("Supabase sync failed", error);
-    if (error.message?.includes("Tournament state changed") && requestSequence === remoteMutationSequence) {
-      elements.copyStatus.textContent = "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter.";
-    } else {
-      elements.copyStatus.textContent = remoteErrorMessage(error, "Kunne ikke synkronisere live akkurat nå. Lokal kopi er lagret.");
-    }
-    return;
+    if (isConflictError(error) && requestSequence === remoteMutationSequence) markRemoteConflict();
+    else handleRemoteError(error, "Kunne ikke synkronisere live akkurat nå. Lokal kopi er lagret.");
+    return false;
   }
 
-  if (!data) return;
+  if (!data) return false;
   lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
   if (requestSequence === remoteMutationSequence) {
-    applyRemoteState(data);
+    pendingAdminSync = false;
+    persistSyncMetadata();
+    applyRemoteState(data, { source: "rpc", clearConflict: true });
   } else if (state.id === data.id && Number.isInteger(data.revision)) {
     state.revision = data.revision;
     saveState({ remote: false });
   }
+  return true;
 }
 
 function queueRemoteMatchAction(match, action, teamIndex = null) {
   if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
+  if (!navigator.onLine) {
+    setRemoteNotice("Du er offline. Koble til igjen før admin-endringen sendes.");
+    syncConnectionStatus();
+    return;
+  }
 
   window.clearTimeout(remoteSaveTimer);
   remoteSaveTimer = null;
   remoteWriteChain = remoteWriteChain
     .catch(() => {})
     .then(async () => {
-      if (remoteMutationSequence > lastRemotePersistedSequence) await saveRemoteState();
+      if (remoteMutationSequence > lastRemotePersistedSequence) {
+        const saved = await saveRemoteState();
+        if (!saved) return;
+      }
 
       const requestSequence = remoteMutationSequence;
       const expectedRevision = state.revision;
@@ -815,16 +962,16 @@ function queueRemoteMatchAction(match, action, teamIndex = null) {
 
       if (error) {
         console.warn("Supabase admin match action failed", error);
-        elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
-          ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
-          : remoteErrorMessage(error, "Kunne ikke oppdatere kampen live akkurat nå. Lokal kopi er lagret.");
+        handleRemoteError(error, "Kunne ikke oppdatere kampen live akkurat nå. Prøv igjen når forbindelsen er tilbake.");
         return;
       }
 
       if (!data) return;
       lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
       if (requestSequence === remoteMutationSequence) {
-        applyRemoteState(data);
+        pendingAdminSync = false;
+        persistSyncMetadata();
+        applyRemoteState(data, { source: "rpc", clearConflict: true });
       } else if (state.id === data.id && Number.isInteger(data.revision)) {
         state.revision = data.revision;
         saveState({ remote: false });
@@ -834,13 +981,21 @@ function queueRemoteMatchAction(match, action, teamIndex = null) {
 
 function queueRemoteSetResult(match, teamOne, teamTwo) {
   if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
+  if (!navigator.onLine) {
+    setRemoteNotice("Du er offline. Koble til igjen før settresultatet sendes.");
+    syncConnectionStatus();
+    return;
+  }
 
   window.clearTimeout(remoteSaveTimer);
   remoteSaveTimer = null;
   remoteWriteChain = remoteWriteChain
     .catch(() => {})
     .then(async () => {
-      if (remoteMutationSequence > lastRemotePersistedSequence) await saveRemoteState();
+      if (remoteMutationSequence > lastRemotePersistedSequence) {
+        const saved = await saveRemoteState();
+        if (!saved) return;
+      }
 
       const requestSequence = remoteMutationSequence;
       const expectedRevision = state.revision;
@@ -855,16 +1010,16 @@ function queueRemoteSetResult(match, teamOne, teamTwo) {
 
       if (error) {
         console.warn("Supabase set result failed", error);
-        elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
-          ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
-          : remoteErrorMessage(error, "Kunne ikke lagre settresultatet live akkurat nå. Lokal kopi er lagret.");
+        handleRemoteError(error, "Kunne ikke lagre settresultatet live akkurat nå. Prøv igjen når forbindelsen er tilbake.");
         return;
       }
 
       if (!data) return;
       lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
       if (requestSequence === remoteMutationSequence) {
-        applyRemoteState(data);
+        pendingAdminSync = false;
+        persistSyncMetadata();
+        applyRemoteState(data, { source: "rpc", clearConflict: true });
       } else if (state.id === data.id && Number.isInteger(data.revision)) {
         state.revision = data.revision;
         saveState({ remote: false });
@@ -874,13 +1029,21 @@ function queueRemoteSetResult(match, teamOne, teamTwo) {
 
 function queueRemoteRoundAdvance() {
   if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
+  if (!navigator.onLine) {
+    setRemoteNotice("Du er offline. Koble til igjen før neste runde sendes.");
+    syncConnectionStatus();
+    return;
+  }
 
   window.clearTimeout(remoteSaveTimer);
   remoteSaveTimer = null;
   remoteWriteChain = remoteWriteChain
     .catch(() => {})
     .then(async () => {
-      if (remoteMutationSequence > lastRemotePersistedSequence) await saveRemoteState();
+      if (remoteMutationSequence > lastRemotePersistedSequence) {
+        const saved = await saveRemoteState();
+        if (!saved) return;
+      }
 
       const requestSequence = remoteMutationSequence;
       const { data, error } = await supabaseClient.rpc("admin_advance_round", {
@@ -891,16 +1054,16 @@ function queueRemoteRoundAdvance() {
 
       if (error) {
         console.warn("Supabase round advance failed", error);
-        elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
-          ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
-          : remoteErrorMessage(error, "Kunne ikke starte neste runde live akkurat nå. Lokal kopi er lagret.");
+        handleRemoteError(error, "Kunne ikke starte neste runde live akkurat nå. Prøv igjen når forbindelsen er tilbake.");
         return;
       }
 
       if (!data) return;
       lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
       if (requestSequence === remoteMutationSequence) {
-        applyRemoteState(data);
+        pendingAdminSync = false;
+        persistSyncMetadata();
+        applyRemoteState(data, { source: "rpc", clearConflict: true });
       } else if (state.id === data.id && Number.isInteger(data.revision)) {
         state.revision = data.revision;
         saveState({ remote: false });
@@ -910,13 +1073,21 @@ function queueRemoteRoundAdvance() {
 
 function queueRemoteCupAdvance() {
   if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
+  if (!navigator.onLine) {
+    setRemoteNotice("Du er offline. Koble til igjen før neste cup-runde sendes.");
+    syncConnectionStatus();
+    return;
+  }
 
   window.clearTimeout(remoteSaveTimer);
   remoteSaveTimer = null;
   remoteWriteChain = remoteWriteChain
     .catch(() => {})
     .then(async () => {
-      if (remoteMutationSequence > lastRemotePersistedSequence) await saveRemoteState();
+      if (remoteMutationSequence > lastRemotePersistedSequence) {
+        const saved = await saveRemoteState();
+        if (!saved) return;
+      }
 
       const requestSequence = remoteMutationSequence;
       const { data, error } = await supabaseClient.rpc("admin_advance_cup", {
@@ -927,16 +1098,16 @@ function queueRemoteCupAdvance() {
 
       if (error) {
         console.warn("Supabase cup advance failed", error);
-        elements.copyStatus.textContent = error.message?.includes("Tournament state changed")
-          ? "Turneringen ble endret fra en annen admin. Last inn siden før du fortsetter."
-          : remoteErrorMessage(error, "Kunne ikke starte neste cup-runde live akkurat nå. Lokal kopi er lagret.");
+        handleRemoteError(error, "Kunne ikke starte neste cup-runde live akkurat nå. Prøv igjen når forbindelsen er tilbake.");
         return;
       }
 
       if (!data) return;
       lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
       if (requestSequence === remoteMutationSequence) {
-        applyRemoteState(data);
+        pendingAdminSync = false;
+        persistSyncMetadata();
+        applyRemoteState(data, { source: "rpc", clearConflict: true });
       } else if (state.id === data.id && Number.isInteger(data.revision)) {
         state.revision = data.revision;
         saveState({ remote: false });
@@ -946,27 +1117,46 @@ function queueRemoteCupAdvance() {
 
 function queuePlayerScore(matchId, teamIndex) {
   if (!isSupabaseReady() || !state.id || !state.inviteCode || !state.selectedPlayerId || !state.playerToken) return;
+  pendingPlayerScores.push({ matchId, teamIndex });
+  persistSyncMetadata();
+  syncConnectionStatus();
+  processPlayerScoreQueue();
+}
 
-  const payload = {
-    p_tournament_id: state.id,
-    p_invite_code: state.inviteCode,
-    p_player_id: state.selectedPlayerId,
-    p_match_id: matchId,
-    p_team_index: teamIndex,
-    p_player_token: state.playerToken,
-  };
+async function processPlayerScoreQueue() {
+  if (playerScoreQueueRunning || !navigator.onLine || !isSupabaseReady()) return;
+  if (!state.id || !state.inviteCode || !state.selectedPlayerId || !state.playerToken) return;
 
-  playerScoreSaveChain = playerScoreSaveChain
-    .catch(() => {})
-    .then(async () => {
-      const { data, error } = await supabaseClient.rpc("save_player_point", payload);
+  playerScoreQueueRunning = true;
+  try {
+    while (pendingPlayerScores.length > 0 && navigator.onLine) {
+      const pendingScore = pendingPlayerScores[0];
+      const { data, error } = await supabaseClient.rpc("save_player_point", {
+        p_tournament_id: state.id,
+        p_invite_code: state.inviteCode,
+        p_player_id: state.selectedPlayerId,
+        p_match_id: pendingScore.matchId,
+        p_team_index: pendingScore.teamIndex,
+        p_player_token: state.playerToken,
+      });
+
       if (error) {
         console.warn("Supabase player score sync failed", error);
-        elements.copyStatus.textContent = remoteErrorMessage(error, "Kunne ikke synkronisere poenget live akkurat nå. Lokal kopi er lagret.");
-        return;
+        handleRemoteError(error, "Kunne ikke synkronisere poenget live akkurat nå. Lokal kopi er lagret.");
+        break;
       }
-      if (data) applyRemoteState(data);
-    });
+
+      pendingPlayerScores.shift();
+      persistSyncMetadata();
+      if (data && pendingPlayerScores.length === 0) {
+        applyRemoteState(data, { source: "rpc", clearConflict: true });
+      }
+    }
+  } finally {
+    playerScoreQueueRunning = false;
+    syncConnectionStatus();
+    render();
+  }
 }
 
 async function deleteRemoteTournament() {
@@ -980,31 +1170,151 @@ async function deleteRemoteTournament() {
     elements.copyStatus.textContent = remoteErrorMessage(error, "Kunne ikke slette live-turneringen. Lokal kopi nullstilles.");
     return false;
   }
-  if (realtimeChannel) {
-    supabaseClient.removeChannel(realtimeChannel);
-    realtimeChannel = null;
-  }
+  removeRealtimeChannel();
+  pendingAdminSync = false;
+  pendingPlayerScores = [];
+  persistSyncMetadata();
   return true;
 }
 
-function connectRealtimeForCurrentState() {
-  if (!isSupabaseReady() || !state.id) return;
+function setRealtimeConnectionState(nextState) {
+  realtimeConnectionState = nextState;
+  syncConnectionStatus();
+}
+
+function removeRealtimeChannel() {
+  window.clearTimeout(realtimeReconnectTimer);
+  realtimeReconnectTimer = null;
+  realtimeConnectionGeneration += 1;
   if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
-  realtimeChannel = supabaseClient
-    .channel(`tournament:${state.id}`)
+  realtimeChannel = null;
+  realtimeTournamentId = null;
+}
+
+function scheduleRealtimeReconnect() {
+  if (!isSupabaseReady() || !state.id || !hasActiveTournament() || !navigator.onLine) {
+    setRealtimeConnectionState("disconnected");
+    return;
+  }
+  if (realtimeReconnectTimer) return;
+
+  if (realtimeChannel) {
+    const staleChannel = realtimeChannel;
+    realtimeChannel = null;
+    realtimeTournamentId = null;
+    realtimeConnectionGeneration += 1;
+    supabaseClient.removeChannel(staleChannel);
+  }
+
+  const backoff = [1000, 2000, 5000, 10000, 30000][Math.min(realtimeReconnectAttempt, 4)];
+  realtimeReconnectAttempt += 1;
+  setRealtimeConnectionState("reconnecting");
+  realtimeReconnectTimer = window.setTimeout(() => {
+    realtimeReconnectTimer = null;
+    connectRealtimeForCurrentState();
+  }, backoff);
+}
+
+async function refreshRemoteState(reason = "reconnect") {
+  if (!isSupabaseReady() || !state.id || !state.inviteCode || !navigator.onLine) return false;
+  if (realtimeRefreshPromise) return realtimeRefreshPromise;
+
+  const tournamentId = state.id;
+  realtimeRefreshPromise = supabaseClient.rpc("get_tournament_by_code", {
+    p_invite_code: state.inviteCode,
+  }).then(({ data, error }) => {
+    if (error || !data || data.id !== tournamentId) {
+      if (error) handleRemoteError(error, "Kunne ikke hente siste live state akkurat nå.");
+      return false;
+    }
+    return applyRemoteState(data, {
+      source: "refresh",
+      clearConflict: reason === "manual",
+    });
+  }).catch((error) => {
+    handleRemoteError(error, "Kunne ikke hente siste live state akkurat nå.");
+    return false;
+  }).finally(() => {
+    realtimeRefreshPromise = null;
+  });
+
+  return realtimeRefreshPromise;
+}
+
+function flushPendingRemoteWrites() {
+  if (!isSupabaseReady() || !navigator.onLine) return;
+  if (pendingAdminSync && isCurrentUserAdmin()) {
+    if (remoteMutationSequence <= lastRemotePersistedSequence) {
+      remoteMutationSequence = lastRemotePersistedSequence + 1;
+    }
+    remoteWriteChain = remoteWriteChain.catch(() => {}).then(saveRemoteState);
+  }
+  processPlayerScoreQueue();
+}
+
+function connectRealtimeForCurrentState() {
+  if (!isSupabaseReady() || !state.id || !hasActiveTournament()) {
+    setRealtimeConnectionState("connected");
+    return;
+  }
+  if (realtimeChannel && realtimeTournamentId === state.id) return;
+  removeRealtimeChannel();
+
+  const tournamentId = state.id;
+  const generation = ++realtimeConnectionGeneration;
+  realtimeTournamentId = tournamentId;
+  setRealtimeConnectionState(realtimeReconnectAttempt > 0 ? "reconnecting" : "connecting");
+  let channel;
+  channel = supabaseClient
+    .channel(`tournament:${tournamentId}`)
     .on(
       "postgres_changes",
       {
         event: "UPDATE",
         schema: "public",
         table: "tournaments",
-        filter: `id=eq.${state.id}`,
+        filter: `id=eq.${tournamentId}`,
       },
       (payload) => {
-        if (payload.new?.state) applyRemoteState(payload.new.state);
+        if (generation !== realtimeConnectionGeneration || channel !== realtimeChannel) return;
+        if (payload.new?.state) {
+          applyRemoteState({
+            ...payload.new.state,
+            revision: payload.new.revision ?? payload.new.state.revision,
+          }, { source: "realtime" });
+        }
       },
-    )
-    .subscribe();
+    );
+  realtimeChannel = channel;
+  channel.subscribe((status, error) => {
+    if (generation !== realtimeConnectionGeneration || channel !== realtimeChannel) return;
+    if (status === "SUBSCRIBED") {
+      realtimeReconnectAttempt = 0;
+      setRealtimeConnectionState("connected");
+      refreshRemoteState("reconnect").finally(flushPendingRemoteWrites);
+    } else if (["CHANNEL_ERROR", "TIMED_OUT"].includes(status)) {
+      console.warn("Supabase realtime channel failed", error);
+      setRealtimeConnectionState("error");
+      scheduleRealtimeReconnect();
+    } else if (status === "CLOSED") {
+      setRealtimeConnectionState("disconnected");
+      scheduleRealtimeReconnect();
+    }
+  });
+}
+
+function handleOnline() {
+  syncConnectionStatus();
+  if (!isSupabaseReady() || !state.id || !hasActiveTournament()) return;
+  window.clearTimeout(realtimeReconnectTimer);
+  realtimeReconnectTimer = null;
+  connectRealtimeForCurrentState();
+  flushPendingRemoteWrites();
+}
+
+function handleOffline() {
+  removeRealtimeChannel();
+  setRealtimeConnectionState("disconnected");
 }
 
 function exportBackup() {
@@ -1052,8 +1362,8 @@ function importBackup(event) {
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch(() => {
-      elements.connectionStatus.textContent = "Lokal";
+    navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+      console.warn("Service worker registration failed", error);
     });
   });
 }
@@ -1291,11 +1601,36 @@ function render() {
   renderRules();
   renderExistingPlayerList();
   renderCupTeamBuilder();
+  renderSyncControls();
 }
 
 function syncConnectionStatus() {
-  elements.connectionStatus.textContent = navigator.onLine ? (isSupabaseReady() ? "Online" : t("localPwa")) : t("offline");
-  elements.connectionStatus.classList.toggle("offline", !navigator.onLine);
+  let statusKey = "realtimeConnected";
+  let statusClass = "connected";
+  if (!navigator.onLine) {
+    statusKey = "offline";
+    statusClass = "offline";
+  } else if (!isSupabaseReady()) {
+    statusKey = "localPwa";
+    statusClass = "local";
+  } else if (state.id && hasActiveTournament()) {
+    statusKey = `realtime${realtimeConnectionState.charAt(0).toUpperCase()}${realtimeConnectionState.slice(1)}`;
+    statusClass = realtimeConnectionState;
+  }
+  elements.connectionStatus.textContent = t(statusKey);
+  if (navigator.onLine && isSupabaseReady() && hasPendingRemoteWrites()) {
+    elements.connectionStatus.textContent += ` · ${t("syncPending")}`;
+  }
+  elements.connectionStatus.dataset.status = statusClass;
+  elements.connectionStatus.setAttribute("aria-label", `Tilkoblingsstatus: ${elements.connectionStatus.textContent}`);
+  elements.connectionStatus.classList.toggle("offline", statusClass === "offline");
+}
+
+function renderSyncControls() {
+  if (!elements.refreshRemoteButton) return;
+  const canRefresh = remoteConflict && isCurrentUserAdmin();
+  elements.refreshRemoteButton.classList.toggle("hidden", !canRefresh);
+  elements.refreshRemoteButton.textContent = t("refreshRemoteState");
 }
 
 function applyLanguage() {

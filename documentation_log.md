@@ -8,6 +8,34 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Stabiliserte realtime, reconnect og stale state
+
+- La til eksplisitt realtime-status for tilkobling, reconnect, frakobling og feil, med kontrollert backoff og maks ett aktivt abonnement per turnering.
+- Fjernet re-abonnering ved hver innkommende state og ignorerer payloads fra gamle kanal-generasjoner eller med eldre serverrevisjon.
+- Henter fersk state etter reconnect og håndterer ventende admin-state, offline spillerpoeng og admin-konflikt med lokal kø og synlig `Last inn siste state`-handling.
+- Blokkerer remote admin-kampoperasjoner offline når de ikke kan kjøres optimistisk med serverrevisjon, og lar lokal cache stå urørt.
+- Oppdaterte service-worker-cache og app-bundle-suffiks for at reconnect-endringene skal nå PWA-klienter etter deploy.
+
+### Endrede filer
+
+- `app.js`
+- `index.html`
+- `styles.css`
+- `service-worker.js`
+- `development_plan.md`
+- `documentation_log.md`
+
+### Verifisering
+
+- `node --check app.js`
+- `git diff --check`
+- Lokal nettleser-smoke med to klienter: `Online`/`connected` i begge og ingen konsollfeil.
+- Ingen Supabase-testdata opprettet i denne fasen; stale-revisjon og cleanup er verifisert i Fase 2.
+
+### Neste steg
+
+- Etablere automatiserte regresjonstester for turneringsmotor, scoring, roller og SQL/RPC-kontrakter.
+
 ## 2026-08-27 - Gjorde reopen/undo atomisk på serversiden
 
 - La til `admin_undo_match(...)` som låser turneringen, validerer admin-token og forventet revisjon, og gjenoppretter siste kampendring i én transaksjon.

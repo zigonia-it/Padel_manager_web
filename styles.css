@@ -570,6 +570,22 @@ h3 {
   color: #f0b1ad;
 }
 
+.status-pill[data-status="connecting"],
+.status-pill[data-status="reconnecting"] {
+  border-color: rgba(var(--gold-bright-rgb), 0.55);
+  color: var(--gold-bright);
+}
+
+.status-pill[data-status="error"] {
+  border-color: rgba(168, 59, 54, 0.7);
+  color: #f0b1ad;
+}
+
+.status-pill[data-status="disconnected"] {
+  border-color: rgba(168, 59, 54, 0.48);
+  color: #f0b1ad;
+}
+
 .share-box {
   display: grid;
   gap: 0.2rem;
