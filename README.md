@@ -30,13 +30,15 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 
 ## Neste steg i beta
 
-Fase 7 er ferdig, og spiller kan nå forlate sin lokale spillerøkt uten å påvirke turneringen for andre. Neste planlagte fase er brukerprofiler, historikk og profilstyrt sletting.
+Fase 7 er ferdig, og spiller kan nå forlate sin lokale spillerøkt uten å påvirke turneringen for andre. Fase 8 er startet med språkmotor før flere synlige UI-tekster legges til.
 
-- Definere profilidentitet og opprettelses-/innloggingsflyt uten å bryte anonym join.
-- Knytte turneringer, resultater og statistikk til riktig profil.
-- Vise tidligere turneringer og spillerhistorikk.
-- Implementere profilsletting med 30 dagers forsinket sletting.
-- Utvide RLS, RPC-er, cleanup-jobb, backup/import og tester for profil-eide data.
+- Flytte flere synlige tekster inn i språkmotoren, som nå støtter Bokmål, Nynorsk, English (International), Español, Deutsch og Français.
+- Gi spilleren valg etter `Forlat turnering`: se som tilskuer, velg spiller igjen eller bli med på nytt.
+- La spiller markere seg som ute/reist uten å endre historiske kamper eller andre spilleres resultater.
+- Lage tilskuerlenke/read-only modus uten spillerstatus og skrivehandlinger.
+- Deretter bygge brukerprofiler, lokal profil-light, lokal historikk, bedre sync-panel og profilstyrt sletting.
+- Etter dette kommer UI-polish for mobil admin, rolleindikatorer, kampkort, spillerens nå-kort, leaderboard, filtre, cup-bracket, tomtilstander og delingspanel.
+- Filstruktur ryddes i en egen ren fase senere, med appkode i `app/`, styling i `styles/` og dokumentasjon i `docs/`.
 
 ## Roller og visninger
 
@@ -49,7 +51,7 @@ Fase 7 er ferdig, og spiller kan nå forlate sin lokale spillerøkt uten å påv
 
 - `index.html` - appstruktur, metadata og moduler.
 - `styles.css` - responsivt design og Padelstar-visuell stil.
-- `translations.js` - språkdata og fallback-oppslag for brukerflate.
+- `translations.js` - språkmotor med strukturerte nøkler, variabler, fallback og manglende-nøkkel-sporing for brukerflate.
 - `tournament-engine.js` - ren scheduler- og teamlogikk for turneringsoppsett.
 - `scoring-engine.js` - ren scoring, settvalidering, poengsummer og leaderboard/statistikk.
 - `state-manager.js` - state-migrering, lokal sync-metadata, shared-state-sanitizing og remote-feilklassifisering.

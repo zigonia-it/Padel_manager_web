@@ -33,10 +33,10 @@ const accents = Object.keys(playerAccentPalette);
 const defaultAvatarId = "smash";
 const tennisPointLabels = ["0", "15", "30", "40", "A"];
 const avatarOptions = [
-  { id: "smash", label: "Smash" },
-  { id: "serve", label: "Serve" },
-  { id: "wall", label: "Vegg" },
-  { id: "lob", label: "Lob" },
+  { id: "smash", labelKey: "avatar.smash" },
+  { id: "serve", labelKey: "avatar.serve" },
+  { id: "wall", labelKey: "avatar.wall" },
+  { id: "lob", labelKey: "avatar.lob" },
 ];
 const i18n = window.PadelstarI18n;
 const tournamentEngine = window.PadelstarTournamentEngine;
@@ -176,6 +176,7 @@ const elements = {
 let pendingSetScoreMatchId = null;
 
 function initializeApp() {
+syncLanguageOptions();
 syncCreateFormDefaults();
 syncJoinPreview();
 prefillInviteCodeFromUrl();
@@ -192,9 +193,10 @@ elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJo
 elements.avatarPicker.addEventListener("change", syncJoinPreview);
 elements.adminParticipatesInput.addEventListener("change", syncAdminPlayerChoice);
 elements.languageSelect.addEventListener("change", () => {
-  state.settings.language = elements.languageSelect.value;
+  state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
   saveState();
   applyLanguage();
+  syncJoinPreview();
   render();
 });
 
@@ -207,7 +209,7 @@ elements.createTournamentForm.addEventListener("submit", async (event) => {
   const playerNames = parsePlayerNames(formData.get("players"));
 
   if (adminParticipates && !adminPlayerName) {
-    alert("Skriv inn spillernavn for admin.");
+    alert(t("messages.adminNameRequired"));
     form.elements.adminPlayerName.focus();
     return;
   }
@@ -247,7 +249,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
   const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
 
   if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
-    alert(`Fant ikke turnering med kode ${inviteCode}.`);
+    alert(t("messages.tournamentNotFound", { code: inviteCode }));
     return;
   }
 
@@ -261,7 +263,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
   } else {
     const existingPlayer = findPlayerByName(playerName);
     if (!existingPlayer && state.rounds.length > 0) {
-      alert("Turneringen er startet. Be administrator legge deg til i neste turnering.");
+      alert(t("messages.tournamentStartedAskAdmin"));
       return;
     }
     player = existingPlayer ?? joinTournament(playerName, avatarId);
@@ -282,7 +284,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
 elements.addPlayerForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (state.rounds.length > 0) {
-    alert("Spillere kan bare legges til før første runde i denne turneringen.");
+    alert(t("messages.playersLocked"));
     return;
   }
   const formData = new FormData(event.currentTarget);
@@ -298,7 +300,7 @@ elements.addPlayerForm.addEventListener("submit", (event) => {
 elements.courtSettingsForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (getActiveRound()?.status === "active" || state.status === "Avsluttet") {
-    alert("Baner kan ikke endres mens en runde pågår eller etter at turneringen er avsluttet.");
+    alert(t("messages.courtsLocked"));
     return;
   }
   const courtList = new FormData(event.currentTarget).get("courtList");
@@ -355,7 +357,7 @@ elements.generateRoundButton.addEventListener("click", () => {
 });
 
 elements.completeRoundButton.addEventListener("click", () => {
-  if (!confirm("Fullføre turneringen? Pågående kamper som ikke er ferdige blir avbrutt.")) return;
+  if (!confirm(t("messages.finishTournamentConfirm"))) return;
   endTournament();
   saveState();
   render();
@@ -377,14 +379,14 @@ elements.refreshRemoteButton?.addEventListener("click", async () => {
 });
 
 elements.endTournamentButton.addEventListener("click", () => {
-  if (!confirm("Avslutte turneringen? Du kan fortsatt se resultater og laste ned backup etterpå.")) return;
+  if (!confirm(t("messages.endTournamentConfirm"))) return;
   endTournament();
   saveState();
   render();
 });
 
 elements.resetTournamentButton.addEventListener("click", async () => {
-  if (!confirm("Nullstille turneringen? Turneringens lokale og nettlagrede data blir slettet.")) return;
+  if (!confirm(t("messages.resetTournamentConfirm"))) return;
   await deleteRemoteTournament();
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
@@ -417,7 +419,7 @@ elements.copyJoinLinkButton.addEventListener("click", () => {
 elements.showExistingPlayersButton.addEventListener("click", async () => {
   const inviteCode = elements.joinTournamentForm.elements.inviteCode.value.trim().toUpperCase();
   if (!inviteCode) {
-    alert("Skriv inn invitasjonskoden først.");
+    alert(t("messages.inviteCodeRequired"));
     elements.joinTournamentForm.elements.inviteCode.focus();
     return;
   }
@@ -425,7 +427,7 @@ elements.showExistingPlayersButton.addEventListener("click", async () => {
   const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
 
   if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
-    alert(`Fant ikke turnering med kode ${inviteCode}.`);
+    alert(t("messages.tournamentNotFound", { code: inviteCode }));
     return;
   }
 
@@ -505,7 +507,7 @@ function setLandingMenuOpen(isOpen) {
   document.body.classList.toggle("landing-menu-open", isOpen);
   document.querySelectorAll(".landing-menu-toggle").forEach((toggle) => {
     toggle.setAttribute("aria-expanded", String(isOpen));
-    toggle.setAttribute("aria-label", isOpen ? "Lukk meny" : "Åpne meny");
+    toggle.setAttribute("aria-label", isOpen ? t("nav.closeMenu") : t("nav.openMenu"));
   });
 }
 
@@ -513,7 +515,7 @@ function setWorkspaceMenuOpen(isOpen) {
   document.body.classList.toggle("workspace-menu-open", isOpen);
   document.querySelectorAll(".workspace-menu-toggle").forEach((toggle) => {
     toggle.setAttribute("aria-expanded", String(isOpen));
-    toggle.setAttribute("aria-label", isOpen ? "Lukk visningsmeny" : "Åpne visningsmeny");
+    toggle.setAttribute("aria-label", isOpen ? t("nav.closeViewMenu") : t("nav.openViewMenu"));
   });
 }
 
@@ -690,7 +692,7 @@ function setRemoteNotice(message) {
 
 function showRecoveryNotice() {
   if (!recoveredFromLastGood) return;
-  setRemoteNotice("Gjenopprettet siste kjente lokale turnering etter en lagringsfeil.");
+  setRemoteNotice(t("messages.recoveredLocalTournament"));
 }
 
 function markRemoteConflict() {
@@ -700,7 +702,7 @@ function markRemoteConflict() {
   remoteSaveTimer = null;
   lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, remoteMutationSequence);
   persistSyncMetadata();
-  setRemoteNotice("Turneringen ble endret fra en annen admin. Last inn siste state før du fortsetter.");
+  setRemoteNotice(t("messages.remoteConflict"));
   render();
 }
 
@@ -763,7 +765,7 @@ async function createRemoteTournament() {
     p_admin_token: state.adminToken,
   });
   if (error) {
-    alert(remoteErrorMessage(error, "Turneringen kunne ikke lagres live akkurat nå. Den lokale kopien er beholdt."));
+    alert(remoteErrorMessage(error, t("messages.remoteSaveFailed")));
     return false;
   }
   applyRemoteState({
@@ -793,11 +795,11 @@ async function joinRemoteTournament(playerName, avatarId) {
     p_player: player,
   });
   if (error) {
-    alert(remoteErrorMessage(error, "Kunne ikke melde deg på akkurat nå. Prøv igjen."));
+    alert(remoteErrorMessage(error, t("messages.joinFailed")));
     return false;
   }
   if (!data?.state || !data.playerToken || !data.playerId) {
-    alert("Kunne ikke opprette en sikker spillerøkt.");
+    alert(t("messages.securePlayerFailed"));
     return false;
   }
   applyRemoteState(data.state);
@@ -833,7 +835,7 @@ async function saveRemoteState() {
   if (error) {
     console.warn("Supabase sync failed", error);
     if (isConflictError(error) && requestSequence === remoteMutationSequence) markRemoteConflict();
-    else handleRemoteError(error, "Kunne ikke synkronisere live akkurat nå. Lokal kopi er lagret.");
+    else handleRemoteError(error, t("messages.syncFailed"));
     return false;
   }
 
@@ -853,7 +855,7 @@ async function saveRemoteState() {
 function queueRemoteMatchAction(match, action, teamIndex = null) {
   if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
   if (!navigator.onLine) {
-    setRemoteNotice("Du er offline. Koble til igjen før admin-endringen sendes.");
+    setRemoteNotice(t("messages.offlineAdminChange"));
     syncConnectionStatus();
     return;
   }
@@ -890,7 +892,7 @@ function queueRemoteMatchAction(match, action, teamIndex = null) {
 
       if (error) {
         console.warn("Supabase admin match action failed", error);
-        handleRemoteError(error, "Kunne ikke oppdatere kampen live akkurat nå. Prøv igjen når forbindelsen er tilbake.");
+        handleRemoteError(error, t("messages.matchUpdateFailed"));
         return;
       }
 
@@ -910,7 +912,7 @@ function queueRemoteMatchAction(match, action, teamIndex = null) {
 function queueRemoteSetResult(match, teamOne, teamTwo) {
   if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
   if (!navigator.onLine) {
-    setRemoteNotice("Du er offline. Koble til igjen før settresultatet sendes.");
+    setRemoteNotice(t("messages.offlineSetResult"));
     syncConnectionStatus();
     return;
   }
@@ -938,7 +940,7 @@ function queueRemoteSetResult(match, teamOne, teamTwo) {
 
       if (error) {
         console.warn("Supabase set result failed", error);
-        handleRemoteError(error, "Kunne ikke lagre settresultatet live akkurat nå. Prøv igjen når forbindelsen er tilbake.");
+        handleRemoteError(error, t("messages.setResultFailed"));
         return;
       }
 
@@ -958,7 +960,7 @@ function queueRemoteSetResult(match, teamOne, teamTwo) {
 function queueRemoteRoundAdvance() {
   if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
   if (!navigator.onLine) {
-    setRemoteNotice("Du er offline. Koble til igjen før neste runde sendes.");
+    setRemoteNotice(t("messages.offlineNextRound"));
     syncConnectionStatus();
     return;
   }
@@ -982,7 +984,7 @@ function queueRemoteRoundAdvance() {
 
       if (error) {
         console.warn("Supabase round advance failed", error);
-        handleRemoteError(error, "Kunne ikke starte neste runde live akkurat nå. Prøv igjen når forbindelsen er tilbake.");
+        handleRemoteError(error, t("messages.nextRoundFailed"));
         return;
       }
 
@@ -1002,7 +1004,7 @@ function queueRemoteRoundAdvance() {
 function queueRemoteCupAdvance() {
   if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
   if (!navigator.onLine) {
-    setRemoteNotice("Du er offline. Koble til igjen før neste cup-runde sendes.");
+    setRemoteNotice(t("messages.offlineNextCupRound"));
     syncConnectionStatus();
     return;
   }
@@ -1026,7 +1028,7 @@ function queueRemoteCupAdvance() {
 
       if (error) {
         console.warn("Supabase cup advance failed", error);
-        handleRemoteError(error, "Kunne ikke starte neste cup-runde live akkurat nå. Prøv igjen når forbindelsen er tilbake.");
+        handleRemoteError(error, t("messages.nextCupRoundFailed"));
         return;
       }
 
@@ -1070,7 +1072,7 @@ async function processPlayerScoreQueue() {
 
       if (error) {
         console.warn("Supabase player score sync failed", error);
-        handleRemoteError(error, "Kunne ikke synkronisere poenget live akkurat nå. Lokal kopi er lagret.");
+        handleRemoteError(error, t("messages.pointSyncFailed"));
         break;
       }
 
@@ -1095,7 +1097,7 @@ async function deleteRemoteTournament() {
   });
   if (error) {
     console.warn("Supabase delete failed", error);
-    elements.copyStatus.textContent = remoteErrorMessage(error, "Kunne ikke slette live-turneringen. Lokal kopi nullstilles.");
+    elements.copyStatus.textContent = remoteErrorMessage(error, t("messages.deleteRemoteFailed"));
     return false;
   }
   removeRealtimeChannel();
@@ -1152,7 +1154,7 @@ async function refreshRemoteState(reason = "reconnect") {
     p_invite_code: state.inviteCode,
   }).then(({ data, error }) => {
     if (error || !data || data.id !== tournamentId) {
-      if (error) handleRemoteError(error, "Kunne ikke hente siste live state akkurat nå.");
+      if (error) handleRemoteError(error, t("messages.fetchRemoteFailed"));
       return false;
     }
     return applyRemoteState(data, {
@@ -1160,7 +1162,7 @@ async function refreshRemoteState(reason = "reconnect") {
       clearConflict: reason === "manual",
     });
   }).catch((error) => {
-    handleRemoteError(error, "Kunne ikke hente siste live state akkurat nå.");
+    handleRemoteError(error, t("messages.fetchRemoteFailed"));
     return false;
   }).finally(() => {
     realtimeRefreshPromise = null;
@@ -1274,9 +1276,9 @@ function importBackup(event) {
       saveState();
       showWorkspace("admin");
       render();
-      elements.copyStatus.textContent = "Backup er importert.";
+      elements.copyStatus.textContent = t("messages.backupImported");
     } catch {
-      alert("Kunne ikke importere backup. Velg en gyldig Padelstar JSON-fil.");
+      alert(t("messages.importBackupFailed"));
     } finally {
       event.currentTarget.value = "";
     }
@@ -1322,7 +1324,7 @@ function syncAdminPlayerChoice() {
 }
 
 function syncJoinPreview() {
-  const name = elements.joinTournamentForm.elements.playerName.value.trim() || "Navnet ditt";
+  const name = elements.joinTournamentForm.elements.playerName.value.trim() || t("setup.yourName");
   const avatarId = new FormData(elements.joinTournamentForm).get("avatarId") || defaultAvatarId;
   elements.joinNamePreview.textContent = name;
   elements.joinAvatarPreview.src = avatarUrl({ name, avatarId });
@@ -1481,14 +1483,14 @@ function render() {
   renderStartResume();
   renderRoleVisibility();
   elements.tournamentTitle.textContent = state.name;
-  elements.roundLabel.textContent = `Runde ${Math.max(state.currentRound, 1)}`;
+  elements.roundLabel.textContent = t("tournament.roundLabel", { round: Math.max(state.currentRound, 1) });
   elements.inviteCode.textContent = state.inviteCode;
   elements.adminInviteCode.textContent = state.inviteCode;
   elements.joinLink.value = createJoinLink();
   elements.joinQrCode.src = createQrCodeUrl(createJoinLink());
-  elements.tournamentStatus.textContent = state.status;
-  elements.playerCount.textContent = `${state.players.length} spillere`;
-  elements.matchCount.textContent = `${matches.length} kamper`;
+  elements.tournamentStatus.textContent = tournamentStatusText(state.status);
+  elements.playerCount.textContent = t("players.count", { count: state.players.length });
+  elements.matchCount.textContent = t("matches.count", { count: matches.length });
   elements.courtSettingsForm.elements.courtList.value = courtsInputValue();
   elements.tournamentSettingsForm.elements.format.value = state.settings.format;
   elements.tournamentSettingsForm.elements.cupTeamSetupMode.value = state.settings.cupTeamSetupMode;
@@ -1545,7 +1547,9 @@ function syncConnectionStatus() {
     elements.connectionStatus.textContent += ` · ${t("syncPending")}`;
   }
   elements.connectionStatus.dataset.status = statusClass;
-  elements.connectionStatus.setAttribute("aria-label", `Tilkoblingsstatus: ${elements.connectionStatus.textContent}`);
+  elements.connectionStatus.setAttribute("aria-label", t("status.connectionAria", {
+    status: elements.connectionStatus.textContent,
+  }));
   elements.connectionStatus.classList.toggle("offline", statusClass === "offline");
 }
 
@@ -1557,17 +1561,41 @@ function renderSyncControls() {
 }
 
 function applyLanguage() {
-  const language = state.settings.language ?? "nb";
-  document.documentElement.lang = language === "en" ? "en" : "no";
-  elements.languageSelect.value = language;
+  const language = i18n?.normalizeLanguage(state.settings.language) ?? state.settings.language ?? "nb";
+  state.settings.language = language;
+  document.documentElement.lang = i18n?.htmlLang(language) ?? (language === "en" ? "en" : "no");
+  if (elements.languageSelect) elements.languageSelect.value = language;
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = t(node.dataset.i18n);
   });
+  document.querySelectorAll("[data-i18n-aria-label]").forEach((node) => {
+    node.setAttribute("aria-label", t(node.dataset.i18nAriaLabel));
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
+    node.setAttribute("placeholder", t(node.dataset.i18nPlaceholder));
+  });
+  document.querySelectorAll("[data-i18n-alt]").forEach((node) => {
+    node.setAttribute("alt", t(node.dataset.i18nAlt));
+  });
+  document.querySelectorAll("[data-i18n-content]").forEach((node) => {
+    node.setAttribute("content", t(node.dataset.i18nContent));
+  });
 }
 
-function t(key) {
+function syncLanguageOptions() {
+  if (!elements.languageSelect || !i18n?.supportedLanguages) return;
+  elements.languageSelect.innerHTML = "";
+  i18n.supportedLanguages().forEach((language) => {
+    const option = document.createElement("option");
+    option.value = language.code;
+    option.textContent = language.label;
+    elements.languageSelect.append(option);
+  });
+}
+
+function t(key, values = {}) {
   const language = state.settings?.language ?? "nb";
-  return i18n?.translate(language, key) ?? key;
+  return i18n?.translate(language, key, values) ?? key;
 }
 
 function renderStartResume() {
@@ -1576,11 +1604,11 @@ function renderStartResume() {
   if (!hasSavedTournament) return;
 
   const isAdmin = isCurrentUserAdmin();
-  elements.resumeTitle.textContent = `Fortsett ${state.name}`;
+  elements.resumeTitle.textContent = t("resume.title", { name: state.name });
   elements.resumeSummary.textContent = isAdmin
-    ? `${state.players.length} spillere · ${state.courts.length} baner · kode ${state.inviteCode}`
-    : `${state.players.length} spillere · ${state.courts.length} baner`;
-  elements.resumeTournamentButton.textContent = isAdmin ? "Fortsett som admin" : "Fortsett turnering";
+    ? t("resume.adminSummary", { players: state.players.length, courts: state.courts.length, code: state.inviteCode })
+    : t("resume.summary", { players: state.players.length, courts: state.courts.length });
+  elements.resumeTournamentButton.textContent = isAdmin ? t("resume.continueAdmin") : t("resume.continueTournament");
 }
 
 function renderLobbyStatus() {
@@ -1590,28 +1618,30 @@ function renderLobbyStatus() {
   const activeRound = getActiveRound();
   const isFinished = state.status === "Avsluttet";
   const blockReason = generateRoundBlockReason();
-  const nextRoundLabel = blockReason || (state.currentRound > 0 ? `Neste blir runde ${state.currentRound + 1}` : "Klar for første runde");
+  const nextRoundLabel = blockReason || (state.currentRound > 0
+    ? t("tournament.nextRoundLabel", { round: state.currentRound + 1 })
+    : t("tournament.firstRoundReady"));
   const playerMode = state.settings.format === "cup"
     ? "Cup"
-    : state.players.length >= 4 ? "Double" : state.players.length >= 2 ? "Single" : "Venter";
+    : state.players.length >= 4 ? t("common.double") : state.players.length >= 2 ? t("common.single") : t("common.waiting");
   const progress = activeRound?.status === "active" ? roundProgress(activeRound) : null;
-  const statusText = isFinished ? "Ferdig" : activeRound?.status === "active" ? "I gang" : hasStarted ? "Mellom" : "Lobby";
+  const statusText = isFinished ? t("common.finished") : activeRound?.status === "active" ? t("common.playing") : hasStarted ? t("common.betweenRounds") : t("common.lobby");
 
   elements.lobbyStatus.innerHTML = `
     <div class="${minimumPlayersReady ? "ready" : "waiting"}">
-      <span>Spillere</span>
+      <span>${t("admin.players")}</span>
       <strong>${state.players.length}</strong>
-      <small>${minimumPlayersReady ? playerMode : "Minst 2"}</small>
+      <small>${minimumPlayersReady ? playerMode : t("common.minimumTwo")}</small>
     </div>
     <div class="${hasCourts ? "ready" : "waiting"}">
-      <span>Baner</span>
+      <span>${t("admin.courtsInUse")}</span>
       <strong>${state.courts.length}</strong>
-      <small>${hasCourts ? "Klar" : "Mangler"}</small>
+      <small>${hasCourts ? t("common.ready") : t("common.missing")}</small>
     </div>
     <div class="${canGenerateRound() ? "ready" : "waiting"}">
-      <span>Status</span>
+      <span>${t("common.status")}</span>
       <strong>${statusText}</strong>
-      <small>${progress ? `${progress.finished}/${progress.total} kamper ferdig` : nextRoundLabel}</small>
+      <small>${progress ? t("tournament.matchesFinished", { finished: progress.finished, total: progress.total }) : nextRoundLabel}</small>
     </div>
   `;
 }
@@ -1632,10 +1662,10 @@ function renderAdminLiveOverview(matches) {
     elements.adminLiveOverview.innerHTML = `
       <div class="overview-main">
         <span class="status-chip waiting">Lobby</span>
-        <strong>Del koden og fyll spillerlisten.</strong>
-        <small>${state.players.length} spillere klare · ${state.courts.length} baner</small>
+        <strong>${t("tournament.lobbyHeadline")}</strong>
+        <small>${t("tournament.playersReady", { players: state.players.length, courts: state.courts.length })}</small>
       </div>
-      <div class="progress-track" aria-label="Turneringsfremdrift">
+      <div class="progress-track" aria-label="${t("tournament.progressAria")}">
         <span style="width: 0%"></span>
       </div>
     `;
@@ -1646,23 +1676,23 @@ function renderAdminLiveOverview(matches) {
     <div class="overview-main">
       <span class="status-chip ${spotlightMatch.state}">${matchStateText(spotlightMatch.state)}</span>
       <strong>${escapeHtml(primaryMatchHeadline(spotlightMatch))}</strong>
-      <small>${escapeHtml(matchContextText(spotlightMatch))} · ${escapeHtml(setScoreText(spotlightMatch))} games · ${escapeHtml(gameScoreText(spotlightMatch))}</small>
+      <small>${escapeHtml(matchContextText(spotlightMatch))} · ${escapeHtml(setScoreText(spotlightMatch))} ${t("common.games")} · ${escapeHtml(gameScoreText(spotlightMatch))}</small>
     </div>
     <div class="overview-stats">
       <div>
-        <span>Aktive</span>
+        <span>${t("common.active")}</span>
         <strong>${playingMatches.length}</strong>
       </div>
       <div>
-        <span>Neste</span>
+        <span>${t("common.next")}</span>
         <strong>${waitingMatches.length}</strong>
       </div>
       <div>
-        <span>Ferdig</span>
+        <span>${t("common.finished")}</span>
         <strong>${finishedMatches.length}</strong>
       </div>
     </div>
-    <div class="progress-track" aria-label="Turneringsfremdrift">
+    <div class="progress-track" aria-label="${t("tournament.progressAria")}">
       <span style="width: ${progressPercent}%"></span>
     </div>
   `;
@@ -1677,7 +1707,7 @@ function renderPlayers() {
     item.className = "empty-list-item";
     item.innerHTML = `
       <span>
-        Ingen spillere ennå. Del koden ${state.inviteCode}, eller legg til spillere manuelt.
+        ${t("tournament.noPlayers", { code: state.inviteCode })}
       </span>
     `;
     elements.playersList.append(item);
@@ -1692,24 +1722,24 @@ function renderPlayers() {
       <span class="player-list-name">
         <img class="avatar" src="${avatarUrl(player)}" alt="" width="34" height="34">
         <span class="player-name-badge">${escapeHtml(player.name)}</span>
-        <small class="join-source-chip">${player.joinedFrom === "self" ? "Påmeldt selv" : "Lagt til av admin"}</small>
+        <small class="join-source-chip">${player.joinedFrom === "self" ? t("player.joinedSelf") : t("player.addedByAdmin")}</small>
       </span>
       <span class="player-actions">
-        <strong>${entry?.points ?? 0} p</strong>
-        <button class="icon-button danger-button" type="button" aria-label="Fjern ${escapeHtml(player.name)}" ${lobbyLocked ? "disabled" : ""}>Fjern</button>
+        <strong>${t("standings.pointsShort", { points: entry?.points ?? 0 })}</strong>
+        <button class="icon-button danger-button" type="button" aria-label="${t("actions.removePlayerAria", { name: escapeHtml(player.name) })}" ${lobbyLocked ? "disabled" : ""}>${t("actions.remove")}</button>
       </span>
     `;
     if (!lobbyLocked) {
       const editor = document.createElement("form");
       editor.className = "player-edit-grid";
       editor.innerHTML = `
-        <input name="playerName" type="text" value="${escapeAttribute(player.name)}" aria-label="Endre navn for ${escapeAttribute(player.name)}" required>
-        <select name="avatarId" aria-label="Avatar for ${escapeAttribute(player.name)}">
+        <input name="playerName" type="text" value="${escapeAttribute(player.name)}" aria-label="${t("actions.editPlayerNameAria", { name: escapeAttribute(player.name) })}" required>
+        <select name="avatarId" aria-label="${t("actions.playerAvatarAria", { name: escapeAttribute(player.name) })}">
           ${avatarOptions.map((avatar) => `
-            <option value="${avatar.id}" ${player.avatarId === avatar.id ? "selected" : ""}>${avatar.label}</option>
+            <option value="${avatar.id}" ${player.avatarId === avatar.id ? "selected" : ""}>${t(avatar.labelKey)}</option>
           `).join("")}
         </select>
-        <button class="secondary icon-button" type="submit">Lagre</button>
+        <button class="secondary icon-button" type="submit">${t("actions.save")}</button>
       `;
       editor.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -1731,7 +1761,7 @@ function renderCupTeamBuilder() {
   const isManual = state.settings.cupTeamSetupMode === "manual";
   const isLocked = state.rounds.length > 0 || state.status === "Avsluttet";
   elements.cupTeamBuilder.classList.toggle("hidden", !isCup || !isManual);
-  elements.cupTeamSummary.textContent = `${state.cupTeams.length} lag`;
+  elements.cupTeamSummary.textContent = t("common.teamCount", { count: state.cupTeams.length });
   const teamLines = state.cupTeams
     .map((team) => team.players.map((player) => player.name).join(" + "))
     .join("\n");
@@ -1744,26 +1774,26 @@ function renderRoundSummary() {
   const activeRound = getActiveRound();
   elements.roundSummary.innerHTML = "";
   if (!activeRound || activeRound.matches.length === 0) {
-    appendEmptyText(elements.roundSummary, "Rundeoppsett vises her når kampene er generert.");
+    appendEmptyText(elements.roundSummary, t("tournament.noRound"));
     return;
   }
 
   const progress = roundProgress(activeRound);
   const summaryItems = [
     {
-      label: "Runde",
+      label: t("common.round"),
       value: activeRound.roundNumber,
-      detail: activeRound.status === "active" ? "Pågår" : "Fullført",
+      detail: activeRound.status === "active" ? t("common.playing") : t("common.completed"),
     },
     {
-      label: "Kamper",
+      label: t("common.matches"),
       value: activeRound.matches.length,
-      detail: `${progress.finished}/${progress.total} ferdig`,
+      detail: t("tournament.matchesFinishedShort", { finished: progress.finished, total: progress.total }),
     },
     {
-      label: "Pause",
+      label: t("common.resting"),
       value: activeRound.sittingOut?.length ?? 0,
-      detail: activeRound.sittingOut?.length ? activeRound.sittingOut.map((player) => player.name).join(", ") : "Ingen",
+      detail: activeRound.sittingOut?.length ? activeRound.sittingOut.map((player) => player.name).join(", ") : t("common.none"),
     },
   ];
 
@@ -1784,13 +1814,13 @@ function renderMatches(matches) {
   renderGroupedMatches(
     elements.adminMatches,
     matches,
-    "Ingen kamper ennå. Generer første runde.",
+    t("tournament.noMatches"),
     (match) => createMatchCard(match, isEditableAdminMatch(match)),
   );
   renderGroupedMatches(
     elements.playerMatches,
     playerMatches,
-    selectedPlayer ? "Du har ingen kamper ennå." : "Velg spillerprofil for å se dine kamper.",
+    selectedPlayer ? t("tournament.noPlayerMatches") : t("tournament.choosePlayerForMatches"),
     (match) => createMatchCard(match, isEditablePlayerMatch(match, selectedPlayer), selectedPlayer?.id, true),
   );
   renderSpectatorMatches(matches);
@@ -1804,9 +1834,9 @@ function renderGroupedMatches(container, matches, emptyText, cardFactory) {
   }
 
   const groups = [
-    { title: "Pågår", matches: matches.filter((match) => match.state === "playing") },
-    { title: "Venter", matches: matches.filter((match) => match.state === "waiting") },
-    { title: "Ferdig", matches: matches.filter((match) => ["finished", "cancelled"].includes(match.state)) },
+    { title: t("common.playing"), matches: matches.filter((match) => match.state === "playing") },
+    { title: t("common.waiting"), matches: matches.filter((match) => match.state === "waiting") },
+    { title: t("common.finished"), matches: matches.filter((match) => ["finished", "cancelled"].includes(match.state)) },
   ].filter((group) => group.matches.length > 0);
 
   groups.forEach((group) => {
@@ -1824,16 +1854,16 @@ function renderSpectatorMatches(matches) {
   if (playingMatches.length === 0) {
     const waitingMatches = matches.filter((match) => match.state === "waiting");
     if (waitingMatches.length === 0) {
-      appendEmptyText(elements.spectatorMatches, "Ingen pågående kamper ennå.");
+      appendEmptyText(elements.spectatorMatches, t("tournament.noLiveMatches"));
       return;
     }
-    appendEmptyText(elements.spectatorMatches, "Ingen kamper pågår akkurat nå. Neste kampoppsett er klart i spillerfanen.");
+    appendEmptyText(elements.spectatorMatches, t("tournament.noMatchesPlaying"));
     return;
   }
 
   const section = document.createElement("section");
   section.className = "match-group spectator-live-group";
-  section.innerHTML = `<h4>Pågående kamper</h4>`;
+  section.innerHTML = `<h4>${t("common.playingMatches")}</h4>`;
   section.append(...playingMatches.map(createSpectatorMatchCard));
   elements.spectatorMatches.append(section);
 }
@@ -1845,7 +1875,7 @@ function createSpectatorMatchCard(match) {
   card.innerHTML = `
     <div class="spectator-score-top">
       <span>${escapeHtml(matchContextText(match))}</span>
-      <strong>${match.courtName ?? "Bane kommer"}</strong>
+      <strong>${match.courtName ?? t("tournament.courtComing")}</strong>
     </div>
     <div class="spectator-score-teams">
       <div style="${teamAccentStyle(match.teamOne)}">
@@ -1858,8 +1888,8 @@ function createSpectatorMatchCard(match) {
       </div>
     </div>
     <div class="spectator-score-bottom">
-      <span>Poeng ${escapeHtml(gameScoreText(match))}</span>
-      <span>Games ${escapeHtml(setScoreText(match))}</span>
+      <span>${t("common.points")} ${escapeHtml(gameScoreText(match))}</span>
+      <span>${t("common.games")} ${escapeHtml(setScoreText(match))}</span>
     </div>
   `;
   return card;
@@ -1876,10 +1906,10 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
     <div class="match-top">
       <div class="match-meta">
         <span>${escapeHtml(matchContextText(match))}</span>
-        ${match.state === "playing" ? "<span class=\"now-chip\">Nå</span>" : ""}
+        ${match.state === "playing" ? `<span class="now-chip">${t("common.now")}</span>` : ""}
       </div>
       <div class="match-top-actions">
-        <span class="match-court">${match.courtName ?? "Ikke tildelt bane"}</span>
+        <span class="match-court">${match.courtName ?? t("tournament.noCourtAssigned")}</span>
         <span class="match-status ${match.state}">${matchStateText(match.state)}</span>
       </div>
     </div>
@@ -1888,32 +1918,32 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
     </div>
     <div class="teams">
       <div class="team">
-        <small>Lag 1</small>
+        <small>${t("common.teamOne")}</small>
         <strong style="${teamAccentStyle(match.teamOne)}">${teamDisplay(match.teamOne)}</strong>
       </div>
-      <div class="versus">mot</div>
+      <div class="versus">${t("common.against")}</div>
       <div class="team">
-        <small>Lag 2</small>
+        <small>${t("common.teamTwo")}</small>
         <strong style="${teamAccentStyle(match.teamTwo)}">${teamDisplay(match.teamTwo)}</strong>
       </div>
     </div>
-    <div class="tennis-scoreboard" aria-label="Poengstilling">
+    <div class="tennis-scoreboard" aria-label="${t("score.scoreboardAria")}">
       <div>
-        <small>Games</small>
+        <small>${t("common.games")}</small>
         <strong>${setScoreText(match)}</strong>
       </div>
       <div>
-        <small>Poeng</small>
+        <small>${t("common.points")}</small>
         <strong>${gameScoreText(match)}</strong>
       </div>
       <div>
-        <small>Server</small>
+        <small>${t("common.server")}</small>
         <strong>${escapeHtml(startingTeamText(match))}</strong>
       </div>
     </div>
     <div class="match-note">
       <p class="hint">${scoreSummary(match)}${sittingOutSummary(match)}</p>
-      ${winner ? `<p class="winner-note">Vinner: ${escapeHtml(winner.displayName)}</p>` : ""}
+      ${winner ? `<p class="winner-note">${t("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : ""}
     </div>
   `;
 
@@ -1922,28 +1952,28 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
     controls.className = "match-controls";
     controls.innerHTML = `
       <div class="point-controls">
-        <button class="secondary point-button" type="button" data-point-team="0" ${match.state === "finished" ? "disabled" : ""}>Poeng ${teamOneName}</button>
-        <button class="secondary point-button" type="button" data-point-team="1" ${match.state === "finished" ? "disabled" : ""}>Poeng ${teamTwoName}</button>
+        <button class="secondary point-button" type="button" data-point-team="0" ${match.state === "finished" ? "disabled" : ""}>${t("score.pointsLabel", { team: teamOneName })}</button>
+        <button class="secondary point-button" type="button" data-point-team="1" ${match.state === "finished" ? "disabled" : ""}>${t("score.pointsLabel", { team: teamTwoName })}</button>
       </div>
       ${scoreOnly ? "" : `<div class="court-edit-row">
-        <label>Bane <input class="court-name-input" type="text" value="${escapeAttribute(match.courtName ?? "")}" placeholder="Bane" aria-label="Bane for ${teamOneName} mot ${teamTwoName}"></label>
-        <button class="secondary save-court-button" type="button">Lagre bane</button>
+        <label>${t("common.court")} <input class="court-name-input" type="text" value="${escapeAttribute(match.courtName ?? "")}" placeholder="${t("common.court")}" aria-label="${t("score.courtForMatch", { teamOne: teamOneName, teamTwo: teamTwoName })}"></label>
+        <button class="secondary save-court-button" type="button">${t("actions.saveCourt")}</button>
       </div>
       <div class="score-row">
         <label>${teamOneName} <input type="number" min="0" max="99" value="${match.currentSet.teamOne}" aria-label="Games ${teamOneName}"></label>
         <label>${teamTwoName} <input type="number" min="0" max="99" value="${match.currentSet.teamTwo}" aria-label="Games ${teamTwoName}"></label>
-        <button class="secondary save-score-button" type="button">${match.state === "finished" ? "Oppdater" : "Lagre"}</button>
+        <button class="secondary save-score-button" type="button">${match.state === "finished" ? t("actions.updateResult") : t("actions.save")}</button>
       </div>
       <div class="button-row">
-        <button class="secondary set-score-button" type="button">Set resultat</button>
-        <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>Start kamp</button>
-        <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>Stor score</button>
-        <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.lastScoredMatchState ? "disabled" : ""}>${match.state === "finished" ? "Angre resultat" : "Angre siste"}</button>
-        <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>Avbryt kamp</button>
+        <button class="secondary set-score-button" type="button">${t("actions.setResult")}</button>
+        <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>${t("actions.startMatch")}</button>
+        <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>${t("actions.largeScore")}</button>
+        <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.lastScoredMatchState ? "disabled" : ""}>${match.state === "finished" ? t("actions.undoResult") : t("actions.undoLast")}</button>
+        <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${t("actions.cancelMatch")}</button>
         <div class="walkover-row">
-          <span>Walkover</span>
-          <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="Registrer walkover for ${teamOneName}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
-          <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="Registrer walkover for ${teamTwoName}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
+          <span>${t("score.walkover")}</span>
+          <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="${t("score.walkoverForAria", { team: teamOneName })}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
+          <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="${t("score.walkoverForAria", { team: teamTwoName })}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
         </div>
       </div>`}
     `;
@@ -1990,7 +2020,7 @@ function renderStandingsList(container, matches) {
   container.innerHTML = "";
   const entries = leaderboardEntries(matches);
   if (entries.length === 0) {
-    appendEmptyText(container, "Tabellen vises når spillere er lagt til.");
+    appendEmptyText(container, t("tournament.standingsEmpty"));
     return;
   }
   entries.forEach((entry, index) => {
@@ -2003,8 +2033,8 @@ function renderStandingsList(container, matches) {
         <span class="player-name-badge">${escapeHtml(entry.player.name)}</span>
       </span>
       <span class="standing-stats">
-        <strong>${entry.points} p</strong>
-        <small>${entry.matchesPlayed} spilt · ${entry.matchWins} seire · ${entry.setsWon} sett · ${entry.gamesWon} games</small>
+        <strong>${t("standings.pointsShort", { points: entry.points })}</strong>
+        <small>${t("standings.detail", { played: entry.matchesPlayed, wins: entry.matchWins, sets: entry.setsWon, games: entry.gamesWon })}</small>
       </span>
     `;
     container.append(item);
@@ -2017,23 +2047,23 @@ function renderPlayerIdentity() {
     elements.playerIdentityCard.removeAttribute("style");
     elements.playerIdentityCard.innerHTML = `
       <div class="empty-list-item">
-        Åpne invitasjonslenken, scan QR-koden eller velg "Admin har lagt meg til" fra startsiden.
+        ${t("player.identityEmpty")}
       </div>
     `;
     return;
   }
 
   const joinSourceLabel = player.joinedFrom === "admin-self"
-    ? "Admin spiller"
+    ? t("player.adminPlays")
     : player.joinedFrom === "self"
-      ? "Registrert selv"
-      : "Lagt til av admin";
+      ? t("player.registeredSelf")
+      : t("player.addedByAdmin");
   elements.playerIdentityCard.setAttribute("style", accentStyle(player.accent));
   elements.playerIdentityCard.innerHTML = `
     <div class="player-identity-main">
       <img class="avatar" src="${avatarUrl(player)}" alt="" width="44" height="44">
       <div>
-        <span>Aktuell spiller</span>
+        <span>${t("player.currentPlayer")}</span>
         <strong>${escapeHtml(player.name)}</strong>
       </div>
     </div>
@@ -2046,6 +2076,7 @@ function renderLeaveTournamentControl() {
   const hasSelectedPlayer = Boolean(getPlayerById(state.selectedPlayerId));
   elements.leaveTournamentButton.classList.toggle("hidden", !hasSelectedPlayer);
   elements.leaveTournamentButton.disabled = !hasSelectedPlayer;
+  elements.leaveTournamentButton.textContent = t("actions.leaveTournament");
 }
 
 function renderCupBracket() {
@@ -2059,8 +2090,8 @@ function renderCupBracket() {
 
   elements.cupBracket.innerHTML = `
     <div class="panel-heading">
-      <h3>Cup-bracket</h3>
-      <span>${bracket.bracketSize} lagplasser</span>
+      <h3>${t("cup.bracket")}</h3>
+      <span>${t("cup.teamSlots", { count: bracket.bracketSize })}</span>
     </div>
     <div class="cup-bracket-rounds">
       ${bracket.rounds.map((round, index) => `
@@ -2073,7 +2104,7 @@ function renderCupBracket() {
             ${round.slots.map((slot) => renderCupBracketSlot(slot)).join("")}
             ${round.thirdPlaceSlot ? renderCupBracketSlot(round.thirdPlaceSlot, true) : ""}
           </div>
-          ${round.byeTeams?.length ? `<p class="cup-bracket-byes">Bye: ${round.byeTeams.map((team) => escapeHtml(team.displayName)).join(", ")}</p>` : ""}
+          ${round.byeTeams?.length ? `<p class="cup-bracket-byes">${t("cup.bye", { teams: round.byeTeams.map((team) => escapeHtml(team.displayName)).join(", ") })}</p>` : ""}
         </section>
       `).join("")}
     </div>
@@ -2081,26 +2112,26 @@ function renderCupBracket() {
 }
 
 function cupRoundTitle(round, index, totalRounds) {
-  if (totalRounds === 1) return "Finale";
-  if (index === 0) return "Første runde";
-  if (index === totalRounds - 1) return "Finale";
-  if (index === totalRounds - 2) return "Semifinale";
-  return `Runde ${round.roundNumber}`;
+  if (totalRounds === 1) return t("cup.final");
+  if (index === 0) return t("cup.firstRound");
+  if (index === totalRounds - 1) return t("cup.final");
+  if (index === totalRounds - 2) return t("cup.semiFinal");
+  return t("tournament.roundLabel", { round: round.roundNumber });
 }
 
 function renderCupBracketSlot(slot, isThirdPlace = false) {
   if (!slot || slot.type === "pending") {
-    return `<div class="cup-bracket-slot pending"><span>${isThirdPlace ? "Bronsefinale" : "Venter på vinnere"}</span></div>`;
+    return `<div class="cup-bracket-slot pending"><span>${isThirdPlace ? t("cup.thirdPlaceMatch") : t("cup.waitingForWinners")}</span></div>`;
   }
   const match = getMatchById(slot.matchId);
-  if (!match) return `<div class="cup-bracket-slot pending"><span>Venter på kamp</span></div>`;
+  if (!match) return `<div class="cup-bracket-slot pending"><span>${t("cup.waitingForMatch")}</span></div>`;
   const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
   return `
     <div class="cup-bracket-slot ${match.state}">
-      <span class="cup-bracket-slot-label">${isThirdPlace ? "Bronsefinale" : matchStateText(match.state)}</span>
+      <span class="cup-bracket-slot-label">${isThirdPlace ? t("cup.thirdPlaceMatch") : matchStateText(match.state)}</span>
       <strong>${escapeHtml(match.teamOne.displayName)}</strong>
       <strong>${escapeHtml(match.teamTwo.displayName)}</strong>
-      ${winner ? `<small>Vinner: ${escapeHtml(winner.displayName)}</small>` : ""}
+      ${winner ? `<small>${t("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</small>` : ""}
     </div>
   `;
 }
@@ -2109,7 +2140,7 @@ function renderExistingPlayerList() {
   if (!elements.existingPlayerList || elements.existingPlayerList.classList.contains("hidden")) return;
   elements.existingPlayerList.innerHTML = "";
   if (state.players.length === 0) {
-    appendEmptyText(elements.existingPlayerList, "Ingen spillere er lagt til ennå.");
+    appendEmptyText(elements.existingPlayerList, t("players.noneAddedYet"));
     return;
   }
   state.players.forEach((player) => {
@@ -2139,9 +2170,9 @@ function renderPlayerNextMatch(matches) {
   if (!player) {
     elements.playerNextMatch.removeAttribute("style");
     elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">Din neste kamp</p>
-      <h3>Velg spillerprofil</h3>
-      <p>Da viser appen bane, makker og motstandere for akkurat deg.</p>
+      <p class="eyebrow">${t("player.nextMatch")}</p>
+      <h3>${t("player.chooseProfile")}</h3>
+      <p>${t("player.chooseProfileHint")}</p>
     `;
     return;
   }
@@ -2150,9 +2181,9 @@ function renderPlayerNextMatch(matches) {
     const placement = playerPlacement(player, matches);
     elements.playerNextMatch.setAttribute("style", accentStyle(player.accent));
     elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">Turneringen er ferdig</p>
-      <h3>${escapeHtml(player.name)}${placement ? `, du endte på ${placement}. plass.` : ""}</h3>
-      <p>Sjekk tabellen under for endelige resultater.</p>
+      <p class="eyebrow">${t("player.tournamentFinished")}</p>
+      <h3>${placement ? t("player.finishedWithPlacement", { name: escapeHtml(player.name), placement }) : t("player.finishedWithoutPlacement", { name: escapeHtml(player.name) })}</h3>
+      <p>${t("player.checkFinalStandings")}</p>
     `;
     return;
   }
@@ -2163,38 +2194,38 @@ function renderPlayerNextMatch(matches) {
   if (playerState.kind === "resting") {
     const activeRound = getActiveRound();
     elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">Pause denne runden</p>
-      <h3>${escapeHtml(player.name)}, du sitter over nå.</h3>
+      <p class="eyebrow">${t("player.restingThisRound")}</p>
+      <h3>${t("player.restingTitle", { name: escapeHtml(player.name) })}</h3>
       <div class="player-now-grid">
         <div>
-          <span>Runde</span>
+          <span>${t("common.round")}</span>
           <strong>${activeRound?.roundNumber ?? "-"}</strong>
         </div>
         <div>
-          <span>Status</span>
-          <strong>Pause</strong>
+          <span>${t("common.status")}</span>
+          <strong>${t("common.resting")}</strong>
         </div>
       </div>
-      <p>Følg med på neste runde. Du vises her igjen når du har kamp.</p>
+      <p>${t("player.restingHint")}</p>
     `;
     return;
   }
 
   if (!playerState.match) {
     elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">Venter</p>
-      <h3>${escapeHtml(player.name)}, du har ingen aktiv kamp akkurat nå.</h3>
+      <p class="eyebrow">${t("common.waiting")}</p>
+      <h3>${t("player.waitingTitle", { name: escapeHtml(player.name) })}</h3>
       <div class="player-now-grid">
         <div>
-          <span>Status</span>
-          <strong>Venter</strong>
+          <span>${t("common.status")}</span>
+          <strong>${t("common.waiting")}</strong>
         </div>
         <div>
-          <span>Runde</span>
+          <span>${t("common.round")}</span>
           <strong>${Math.max(state.currentRound, 1)}</strong>
         </div>
       </div>
-      <p>Når administrator genererer neste runde, vises bane, makker og motstandere her.</p>
+      <p>${t("player.waitingHint")}</p>
     `;
     return;
   }
@@ -2205,28 +2236,28 @@ function renderPlayerNextMatch(matches) {
   const opponents = isTeamOne ? match.teamTwo : match.teamOne;
   const teammate = ownTeam.players.find((item) => item.id !== player.id);
   const opponentNames = opponents.players.map((opponent) => escapeHtml(opponent.name)).join(" & ");
-  const statusLabel = playerState.kind === "playing" ? "Du spiller nå" : "Din neste kamp";
+  const statusLabel = playerState.kind === "playing" ? t("player.playingNow") : t("player.nextMatch");
   const ownScore = isTeamOne ? match.currentSet.teamOne : match.currentSet.teamTwo;
   const opponentScore = isTeamOne ? match.currentSet.teamTwo : match.currentSet.teamOne;
 
   elements.playerNextMatch.innerHTML = `
     <p class="eyebrow">${statusLabel}</p>
-    <h3>${match.courtName ?? "Bane kommer"}</h3>
+    <h3>${match.courtName ?? t("tournament.courtComing")}</h3>
     <div class="player-now-grid">
       <div>
-        <span>Makker</span>
-        <strong>${teammate ? escapeHtml(teammate.name) : "Single"}</strong>
+        <span>${t("player.teammate")}</span>
+        <strong>${teammate ? escapeHtml(teammate.name) : t("common.single")}</strong>
       </div>
       <div>
-        <span>Mot</span>
+        <span>${t("player.opponents")}</span>
         <strong>${opponentNames}</strong>
       </div>
       <div>
-        <span>Games</span>
+        <span>${t("common.games")}</span>
         <strong>${ownScore}-${opponentScore}</strong>
       </div>
       <div>
-        <span>Poeng</span>
+        <span>${t("common.points")}</span>
         <strong>${gameScoreText(match)}</strong>
       </div>
     </div>
@@ -2242,9 +2273,9 @@ function renderPlayerStatus(matches) {
   if (!player) {
     elements.playerStatusGrid.innerHTML = `
       <div class="waiting">
-        <span>Status</span>
-        <strong>Velg</strong>
-        <small>Spiller</small>
+        <span>${t("common.status")}</span>
+        <strong>${t("common.select")}</strong>
+        <small>${t("common.player")}</small>
       </div>
     `;
     return;
@@ -2254,27 +2285,27 @@ function renderPlayerStatus(matches) {
   const stats = statsForPlayer(player, matches);
   const nextState = playerTournamentState(player, matches);
   const statusText = {
-    playing: "Pågår",
-    waiting: "Neste",
-    resting: "Pause",
-    idle: "Venter",
-  }[nextState.kind] ?? "Venter";
+    playing: t("common.playing"),
+    waiting: t("common.next"),
+    resting: t("common.resting"),
+    idle: t("common.waiting"),
+  }[nextState.kind] ?? t("common.waiting");
 
   elements.playerStatusGrid.innerHTML = `
     <div class="${nextState.kind === "playing" ? "ready" : "waiting"}">
-      <span>Status</span>
-      <strong>${state.status === "Avsluttet" ? "Ferdig" : statusText}</strong>
-      <small>${nextState.match?.courtName ?? (nextState.kind === "resting" ? "Denne runden" : "Ingen bane")}</small>
+      <span>${t("common.status")}</span>
+      <strong>${state.status === "Avsluttet" ? t("common.finished") : statusText}</strong>
+      <small>${nextState.match?.courtName ?? (nextState.kind === "resting" ? t("tournament.thisRound") : t("tournament.noCourt"))}</small>
     </div>
     <div class="ready">
-      <span>Poeng</span>
+      <span>${t("common.points")}</span>
       <strong>${pointsByPlayer(matches, state.settings.pointMode)[player.id] ?? 0}</strong>
-      <small>${stats.matchWins} seire</small>
+      <small>${t("standings.wins", { wins: stats.matchWins })}</small>
     </div>
     <div class="ready">
-      <span>Kamper</span>
+      <span>${t("common.matches")}</span>
       <strong>${playerMatches.length}</strong>
-      <small>${stats.matchesPlayed} spilt</small>
+      <small>${t("standings.played", { played: stats.matchesPlayed })}</small>
     </div>
   `;
 }
@@ -2282,27 +2313,27 @@ function renderPlayerStatus(matches) {
 function renderRules() {
   if (!elements.rulesList) return;
   const pointModeText = {
-    matches: "Tabellen gir 3 poeng for kampseier.",
-    sets: "Tabellen gir poeng for vunnet sett.",
-    games: "Tabellen teller hvert vunnet game.",
-  }[state.settings.pointMode] ?? "Tabellpoeng følger valgt regelsett.";
+    matches: t("rules.rankingMatches"),
+    sets: t("rules.rankingSets"),
+    games: t("rules.rankingGames"),
+  }[state.settings.pointMode] ?? t("rules.rankingFallback");
 
   const rules = [
     {
-      title: "Tennispoeng",
-      text: "Poeng føres som 0, 15, 30, 40 og A. Ved 40-40 må laget vinne to poeng på rad.",
+      title: t("rules.tennisPointsTitle"),
+      text: t("rules.tennisPointsText"),
     },
     {
-      title: "Sett",
-      text: `Kampen spilles best av ${state.settings.setsToWinMatch} sett. Et sett vinnes normalt til ${state.settings.gamesToWinSet} games med to games margin.`,
+      title: t("rules.setsTitle"),
+      text: t("rules.setsText", { sets: state.settings.setsToWinMatch, games: state.settings.gamesToWinSet }),
     },
     {
-      title: "Rangering",
-      text: `${pointModeText} Ved likhet sorteres spillerne på kampseire, sett og navn.`,
+      title: t("rules.rankingTitle"),
+      text: t("rules.rankingText", { pointModeText }),
     },
     {
-      title: "Pause",
-      text: "Ved oddetall eller for mange lag til antall baner får noen pause i runden og kommer tilbake i neste rotasjon.",
+      title: t("rules.restTitle"),
+      text: t("rules.restText"),
     },
   ];
 
@@ -2326,8 +2357,8 @@ function openSetScoreDialog(matchId) {
   const match = getMatchById(matchId);
   if (!match || ["finished", "cancelled"].includes(match.state)) return;
   pendingSetScoreMatchId = matchId;
-  elements.setScoreTitle.textContent = "Set resultat";
-  elements.setScoreContext.textContent = `${match.teamOne.displayName} mot ${match.teamTwo.displayName}`;
+  elements.setScoreTitle.textContent = t("score.setResultTitle");
+  elements.setScoreContext.textContent = t("score.matchup", { teamOne: match.teamOne.displayName, teamTwo: match.teamTwo.displayName });
   elements.setScoreOptions.innerHTML = quickScoreButtons(match.teamOne.displayName, match.teamTwo.displayName);
   elements.setScoreOptions.querySelectorAll("[data-score]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -2359,8 +2390,8 @@ function renderLargeScore() {
   }
 
   elements.largeScoreSurface.setAttribute("style", teamAccentStyle(match.teamOne));
-  elements.largeScoreContext.textContent = `${matchContextText(match)} · ${match.courtName ?? "Ikke tildelt bane"}`;
-  elements.largeScoreTitle.textContent = `${match.teamOne.displayName} mot ${match.teamTwo.displayName}`;
+  elements.largeScoreContext.textContent = `${matchContextText(match)} · ${match.courtName ?? t("tournament.noCourtAssigned")}`;
+  elements.largeScoreTitle.textContent = t("score.matchup", { teamOne: match.teamOne.displayName, teamTwo: match.teamTwo.displayName });
   elements.largeScoreBoard.innerHTML = [match.teamOne, match.teamTwo].map((team, index) => {
     const teamKey = index === 0 ? "teamOne" : "teamTwo";
     return `
@@ -2373,15 +2404,15 @@ function renderLargeScore() {
   }).join("");
   elements.largeScoreActions.innerHTML = `
     <div>
-      <span>Games</span>
+      <span>${t("common.games")}</span>
       <strong>${setScoreText(match)}</strong>
     </div>
     <div>
-      <span>Poeng</span>
+      <span>${t("common.points")}</span>
       <strong>${gameScoreText(match)}</strong>
     </div>
     <div>
-      <span>Server</span>
+      <span>${t("common.server")}</span>
       <strong>${escapeHtml(startingTeamText(match))}</strong>
     </div>
   `;
@@ -2439,7 +2470,7 @@ async function copyText(text, successMessage) {
     await navigator.clipboard.writeText(text);
     elements.copyStatus.textContent = successMessage;
   } catch {
-    elements.copyStatus.textContent = "Kunne ikke kopiere automatisk. Marker teksten og kopier manuelt.";
+    elements.copyStatus.textContent = t("messages.copyFallback");
     if (text === createJoinLink()) elements.joinLink.select();
   }
 }
@@ -2482,7 +2513,7 @@ function updatePlayer(playerId, updates) {
 
   const duplicate = state.players.find((item) => item.id !== playerId && item.name.localeCompare(nextName, "nb", { sensitivity: "accent" }) === 0);
   if (duplicate) {
-    alert(`${nextName} finnes allerede i spillerlisten.`);
+    alert(t("messages.duplicatePlayer", { name: nextName }));
     return;
   }
 
@@ -2498,7 +2529,7 @@ function updatePlayer(playerId, updates) {
 
 function removePlayer(playerId) {
   if (state.rounds.length > 0) {
-    alert("Spillere kan ikke fjernes etter at kampoppsettet er startet i denne turneringen.");
+    alert(t("messages.removePlayersLocked"));
     return;
   }
   state.players = state.players.filter((player) => player.id !== playerId);
@@ -2517,9 +2548,12 @@ function leaveCurrentTournament(options = {}) {
 
   const shouldConfirm = options.confirm !== false;
   const pendingScoreText = pendingPlayerScores.length > 0
-    ? " Ventende poeng fra denne enheten blir ikke sendt."
+    ? t("player.leavePendingScores")
     : "";
-  if (shouldConfirm && !confirm(`Forlate turneringen som ${selectedPlayer.name}? Turneringen og spillerlisten beholdes for alle andre.${pendingScoreText}`)) {
+  if (shouldConfirm && !confirm(t("player.leaveConfirm", {
+    name: selectedPlayer.name,
+    pendingScoreText,
+  }))) {
     return false;
   }
 
@@ -2538,7 +2572,7 @@ function leaveCurrentTournament(options = {}) {
 
 function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMatch, pointMode, gamesToWinSet, setsToWinMatch }) {
   if (state.rounds.length > 0) {
-    alert("Turneringsreglene kan bare endres før første runde.");
+    alert(t("messages.rulesLocked"));
     return;
   }
   if (!["roundRobin", "cup"].includes(format)) return;
@@ -2558,7 +2592,7 @@ function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMat
 
 function saveManualCupTeams(value) {
   if (state.rounds.length > 0 || state.status === "Avsluttet") {
-    alert("Cup-lag kan bare endres før første runde.");
+    alert(t("messages.cupTeamsLocked"));
     return;
   }
 
@@ -2567,7 +2601,7 @@ function saveManualCupTeams(value) {
     .map((line) => line.trim())
     .filter(Boolean);
   if (lines.length < 2) {
-    alert("Legg inn minst to cup-lag.");
+    alert(t("messages.minimumCupTeams"));
     return;
   }
 
@@ -2576,7 +2610,7 @@ function saveManualCupTeams(value) {
   for (const [index, line] of lines.entries()) {
     const playerNames = line.split("+").map((name) => name.trim()).filter(Boolean);
     if (playerNames.length < 1 || playerNames.length > 2) {
-      alert(`Lag ${index + 1} må ha én eller to spillere.`);
+      alert(t("messages.invalidCupTeamSize", { team: index + 1 }));
       return;
     }
 
@@ -2584,11 +2618,11 @@ function saveManualCupTeams(value) {
     for (const playerName of playerNames) {
       const player = findPlayerByName(playerName);
       if (!player || !player.active) {
-        alert(`Fant ikke aktiv spiller «${playerName}» i spillerlisten.`);
+        alert(t("messages.cupPlayerNotFound", { name: playerName }));
         return;
       }
       if (usedPlayerIds.has(player.id)) {
-        alert(`${player.name} er lagt inn på mer enn ett lag.`);
+        alert(t("messages.cupPlayerDuplicate", { name: player.name }));
         return;
       }
       usedPlayerIds.add(player.id);
@@ -2647,31 +2681,31 @@ function canGenerateRound() {
 function tournamentActionText() {
   if (state.rounds.length === 0) return t("startTournament");
   const activeRound = getActiveRound();
-  if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return "Fullfør kampene";
+  if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return t("score.playAllMatchesFirst");
   if (getNextScheduledRound()) return t("startNextRound");
   if (cupCanAdvance() || cupCanFinalize()) return t("startNextRound");
-  if (state.settings.format === "cup" && state.status === "Cup ferdig") return "Cup ferdig";
-  return "Hele turneringen er generert";
+  if (state.settings.format === "cup" && state.status === "Cup ferdig") return t("tournament.cupFinished");
+  return t("tournament.allGenerated");
 }
 
 function generateRoundBlockReason() {
   const activeRound = getActiveRound();
-  if (state.status === "Avsluttet") return "Turneringen er avsluttet.";
-  if (state.players.length < 2) return "Legg til minst to spillere før du starter runden.";
+  if (state.status === "Avsluttet") return t("tournament.finished");
+  if (state.players.length < 2) return t("messages.needTwoPlayersStart");
   if (state.settings.format === "cup") {
     if (state.settings.cupTeamSetupMode === "manual" && state.cupTeams.length < 2) {
-      return "Definer minst to manuelle cup-lag før du starter turneringen.";
+      return t("messages.defineManualCupTeams");
     }
     if (state.settings.cupTeamSetupMode === "auto" && state.players.filter((player) => player.active).length < 4) {
-      return "Cup med automatisk lagoppsett krever minst fire aktive spillere.";
+      return t("messages.autoCupNeedsActivePlayers");
     }
   }
-  if (state.courts.length < 1) return "Legg til minst én bane før du starter runden.";
-  if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return "Alle kamper må være ferdige før neste runde.";
+  if (state.courts.length < 1) return t("messages.needCourt");
+  if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return t("messages.finishMatchesBeforeNext");
   if (state.rounds.length > 0 && !getNextScheduledRound() && !cupCanAdvance() && !cupCanFinalize()) {
     return state.settings.format === "cup" && state.status === "Cup ferdig"
-      ? "Cupen er ferdig."
-      : "Hele turneringen er generert.";
+      ? t("tournament.cupFinishedReason")
+      : t("tournament.allGenerated");
   }
   return "";
 }
@@ -2750,7 +2784,7 @@ function generateFullTournamentSchedule() {
 
   const schedule = state.schedule.length ? state.schedule : buildSchedule(state.players, state.settings.format);
   if (!schedule.length) {
-    alert("Legg til minst to spillere før du genererer kamper.");
+    alert(t("messages.needTwoPlayers"));
     return;
   }
 
@@ -2759,7 +2793,7 @@ function generateFullTournamentSchedule() {
     .filter((round) => round.matches.length > 0);
 
   if (!state.rounds.length) {
-    alert("Fant ingen gyldige kamper med spillerlisten.");
+    alert(t("messages.noValidMatches"));
     return;
   }
 
@@ -2772,8 +2806,8 @@ function generateCupTournament() {
   const teams = cupTeamsForStart();
   if (teams.length < 2) {
     alert(state.settings.cupTeamSetupMode === "manual"
-      ? "Manuell cup krever minst to lag."
-      : "Cup krever minst to lag, altså minst fire spillere i automatisk lagoppsett.");
+      ? t("messages.manualCupNeedsTeams")
+      : t("messages.autoCupNeedsPlayers"));
     return;
   }
 
@@ -3093,7 +3127,7 @@ function captureMatchUndoState(match) {
 function undoMatch(match) {
   const undoState = match.lastScoredMatchState;
   if (!undoState?.match) {
-    alert("Det finnes ingen siste handling å angre for denne kampen.");
+    alert(t("messages.noUndo"));
     return;
   }
 
@@ -3263,7 +3297,7 @@ function reopenMatch(match) {
 }
 
 function cancelMatch(match) {
-  if (!confirm("Avbryte denne kampen? Den teller ikke i tabellen.")) return;
+  if (!confirm(t("messages.cancelMatchConfirm"))) return;
   if (isSupabaseReady()) {
     queueRemoteMatchAction(match, "cancel");
     return;
@@ -3282,7 +3316,7 @@ function cancelMatch(match) {
 function setWalkover(match, teamIndex) {
   if (![0, 1].includes(teamIndex) || ["finished", "cancelled"].includes(match.state)) return;
   const winningTeam = teamIndex === 0 ? match.teamOne : match.teamTwo;
-  if (!confirm(`Registrere walkover til ${winningTeam.displayName}?`)) return;
+  if (!confirm(t("messages.walkoverConfirm", { team: winningTeam.displayName }))) return;
 
   if (isSupabaseReady()) {
     queueRemoteMatchAction(match, "walkover", teamIndex);
@@ -3393,20 +3427,30 @@ function findPlayerByName(name) {
 
 function matchStateText(stateName) {
   return {
-    waiting: "Venter",
-    playing: "Pågår",
-    finished: "Ferdig",
-    cancelled: "Avbrutt",
+    waiting: t("common.waiting"),
+    playing: t("common.playing"),
+    finished: t("common.finished"),
+    cancelled: t("common.cancelled"),
   }[stateName] ?? stateName;
+}
+
+function tournamentStatusText(status) {
+  return {
+    "Klar": t("common.ready"),
+    "Runde pågår": t("common.playing"),
+    "Runde fullført": t("common.completed"),
+    "Avsluttet": t("common.finished"),
+    "Cup ferdig": t("tournament.cupFinished"),
+  }[status] ?? status;
 }
 
 function matchContextText(match) {
   const matchIndex = globalMatchNumber(match);
   const sitOutCount = match.sittingOut?.length ?? 0;
   const parts = [
-    `Runde ${match.rotationNumber}`,
-    matchIndex ? `Kamp ${matchIndex}` : "",
-    sitOutCount ? `${sitOutCount} pause` : "",
+    t("tournament.roundLabel", { round: match.rotationNumber }),
+    matchIndex ? t("matches.matchNumber", { match: matchIndex }) : "",
+    sitOutCount ? t("matches.restingCount", { count: sitOutCount }) : "",
   ].filter(Boolean);
   return parts.join(" · ");
 }
@@ -3419,24 +3463,24 @@ function globalMatchNumber(match) {
 function primaryMatchHeadline(match) {
   if (match.state === "finished" && match.winnerTeamIndex !== null) {
     const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo;
-    if (match.isWalkover) return `${winner.displayName} vant på walkover`;
-    return `${winner.displayName} vant ${setScoreText(match)}`;
+    if (match.isWalkover) return t("score.walkoverWinner", { winner: winner.displayName });
+    return t("score.matchWinner", { winner: winner.displayName, score: setScoreText(match) });
   }
-  if (match.state === "cancelled") return "Kampen er avbrutt";
-  return `${match.teamOne.displayName} mot ${match.teamTwo.displayName}`;
+  if (match.state === "cancelled") return t("score.matchCancelled");
+  return t("score.matchup", { teamOne: match.teamOne.displayName, teamTwo: match.teamTwo.displayName });
 }
 
 function startingTeamText(match) {
-  return match.startingTeamIndex === 0 ? "Lag 1" : "Lag 2";
+  return match.startingTeamIndex === 0 ? t("common.teamOne") : t("common.teamTwo");
 }
 
 function scoreSummary(match) {
-  if (match.isWalkover) return "Walkover";
+  if (match.isWalkover) return t("score.walkover");
   if (match.completedSets.length) {
-    const label = match.state === "finished" ? "Ferdig" : "Sett";
-    return `${label}: ${match.completedSets.map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ")}`;
+    const sets = match.completedSets.map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ");
+    return match.state === "finished" ? t("score.finishedPrefix", { sets }) : t("score.setsPrefix", { sets });
   }
-  return `Sett: ${setScoreText(match)} · Game: ${gameScoreText(match)}`;
+  return t("score.currentSummary", { sets: setScoreText(match), game: gameScoreText(match) });
 }
 
 function setScoreText(match) {
@@ -3454,7 +3498,7 @@ function tennisPointLabel(value) {
 
 function sittingOutSummary(match) {
   if (!match.sittingOut?.length) return "";
-  return ` · Pause: ${match.sittingOut.map((player) => escapeHtml(player.name)).join(", ")}`;
+  return ` · ${t("matches.restingPlayers", { players: match.sittingOut.map((player) => escapeHtml(player.name)).join(", ") })}`;
 }
 
 function escapeHtml(value) {
@@ -3550,6 +3594,7 @@ if (window.PADELSTAR_TEST_MODE) {
     sanitizeSharedState,
     saveState,
     t,
+    i18n,
     nextPowerOfTwo,
     wasRecoveredFromLastGood: () => recoveredFromLastGood,
     getState: () => state,

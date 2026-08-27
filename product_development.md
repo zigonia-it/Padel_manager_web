@@ -949,21 +949,20 @@ Produktdokumentet er primært basert på:
 3. Skal spillerregistrering fortsatt godkjennes automatisk, eller skal admin godkjenne spillere før de blir aktive?
 4. Skal administrator-token erstattes av konto eller en sterkere host-identitet før produksjon?
 5. Skal turneringer automatisk utløpe/slettes etter en periode?
-6. Skal native share, offentlig tilskuerside eller push-varslinger prioriteres først etter produksjonsklaringen?
+6. Skal native share eller push-varslinger prioriteres etter tilskuerlenke og UI-polish?
 
 ## 22. Neste Konkrete Arbeid
 
 Anbefalt rekkefølge:
 
-1. Deploy siste branch og verifiser `https://padelstar.app`, DNS, service worker og join-lenke.
-2. Kjør en kontrollert fler-enhetssmoke-test med admin, spiller og tilskuer.
-3. Hardne spiller- og admin-skrivetilgang med sterkere token, RLS/grants og rate limiting.
-4. Gjør kampstart, resultat, walkover, avbrytelse og rundeavansement atomiske mot Supabase.
-5. Lag automatiserte tester for round-robin, cup, scoring, leaderboard, walkover/undo og rollevisning.
-6. Stabiliser realtime ved reconnect, samtidige endringer og stale state.
-7. Flytt hardkodet tekst til i18n-struktur og del `app.js` i mindre moduler.
-8. Mål PWA-oppstart på iPhone og forbedre bilde- og offline/recovery-flyten.
-9. Skriv personverntekst og fastsett dataretensjon før bred offentlig bruk.
+1. Flytt flere synlige UI-tekster inn i språkmotoren, som nå har Bokmål, Nynorsk, English (International), Español, Deutsch og Français.
+2. Forbedre etterflyten etter `Forlat turnering` med valg for tilskuer, spillerbytte og ny join.
+3. La spiller markere seg som ute/reist uten å påvirke historiske kamper eller andre spilleres resultater.
+4. Lag offentlig/read-only tilskuerlenke og tydelig tilskuermodus.
+5. Bygg første synlige UI-forbedringer: spillerstatus-chips, rolleindikator, mobil bunnnavigasjon, bedre sync-status og enkel runde-/kampfremdrift.
+6. Bygg brukerprofiler, profil-light, lokal historikk og profilstyrt sletting.
+7. Poler mobil- og turnerings-UI: forsidevalg, kompakt admin, kampkort, spillerens nå-kort, leaderboard, filtre, cup-bracket, tomtilstander, delingspanel og tilgjengelige småknapper.
+8. Rydd filstruktur i en egen ren fase med appkode i `app/`, styling i `styles/` og dokumentasjon i `docs/`, uten funksjonsendringer.
 
 ## 23. Arbeidsregel for Videre Utvikling
 

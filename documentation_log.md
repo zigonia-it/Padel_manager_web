@@ -8,6 +8,31 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Startet Fase 8 med språkmotor
+
+- Utvidet `translations.js` fra flat dictionary til språkmotor med strukturerte nøkler, variabler, Bokmål-fallback, `has()` og manglende-nøkkel-sporing.
+- La inn støttede språk i én felles språkliste: Bokmål, Nynorsk, English (International), Español, Deutsch og Français. Det finnes fortsatt bare én engelsk språkvariant, `en`.
+- Flyttet første Fase 8-tekster for `Forlat turnering`, ventende spillerpoeng, refresh/sync-status og tilkoblingsstatus inn i språkmotoren.
+- Oppdaterte `app.js` slik `t()` kan sende variabler til språkstrenger og språkvelgeren bygges fra språkmotorens metadata.
+- Merket `Forlat turnering`-knappen i `index.html` med `data-i18n` og bumpet PWA-cache/scriptversjoner til `padelstar-v53`, `padelstar-i18n-3` og `padelstar-session-3`.
+- La inn Fase 11 i `development_plan.md` for senere ryddig filstruktur med appkode i `app/`, stylesheet i `styles/` og dokumentasjon i `docs/`.
+- Oppdaterte README og `product_development.md` slik strukturfasen ligger som senere, ren flyttefase uten funksjonsendringer.
+
+### Neste steg
+
+- Flytte flere synlige spiller-, rolle-, sync- og tilskuertekster inn i språkmotoren før resten av Fase 8 bygges.
+- Deretter lage etterflyt etter `Forlat turnering` med valg for tilskuer, spillerbytte og ny join.
+
+## 2026-08-27 - Justerte plan for neste appforbedringer
+
+- La inn Fase 8 som språkmotor, spillerøkt, tilgjengelighet og tilskuerlenke.
+- Prioriterte språkmotor/i18n før flere nye synlige UI-tekster, med fallback, variabler og tester.
+- Prioriterte etterflyt for `Forlat turnering` og spillerstatus `ute/reist` som umiddelbart arbeid.
+- La til tilskuerlenke/read-only modus, rolleindikator, spillerstatus-chips, mobil bunnnavigasjon, tydeligere sync-status og enkel runde-/kampfremdrift i Fase 8.
+- Flyttet brukerprofiler til Fase 9 og la inn profil-light, lokal turneringshistorikk og bedre admin-/sync-panel der.
+- La inn Fase 10 for UI-polish: forsidevalg, mobil admin, kampkort, spillerens nå-kort, leaderboard, filtre, cup-bracket, tomtilstander, delingspanel og tilgjengelige småknapper.
+- Oppdaterte README og `product_development.md` slik neste steg samsvarer med `development_plan.md`.
+
 ## 2026-08-27 - Spiller kan forlate lokal turneringsøkt
 
 - La til `Forlat turnering` i spillerens statuspanel.

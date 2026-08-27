@@ -41,7 +41,13 @@ Prosjektmetadata:
 
 Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
-1. **Bygg brukerprofiler og historikk.** Etabler profilidentitet, koble turneringer/resultater/statistikk til profilen, vis spillerhistorikk og slett profil-eide data innen 30 dager etter profilsletting.
+1. **Bygg språkmotoren ferdig før mer UI-tekst.** Flytt resterende hardkodet brukerflate til strukturert i18n, med fallback, variabler og tester.
+2. **Forbedre spillerøkt og tilgjengelighet.** Etter `Forlat turnering` skal spilleren få tydelige valg for å se som tilskuer, velge spiller igjen eller bli med på nytt.
+3. **La spiller melde seg ute av videre turnering.** Spilleren skal kunne markere seg som utilgjengelig/reist uten at historiske kamper eller andre spilleres resultater påvirkes.
+4. **Legg til tilskuerlenke.** Lag en egen read-only lenke/modus for publikum uten spillerstatus og uten join-/skriveflyt.
+5. **Bygg brukerprofiler og historikk.** Etabler profilidentitet, koble turneringer/resultater/statistikk til profilen, vis spillerhistorikk og slett profil-eide data innen 30 dager etter profilsletting.
+6. **Rydd filstruktur i en ren flyttefase.** Samle appkode, styling og dokumentasjon i tydelige mapper uten funksjonsendringer.
+7. **Poler mobil- og turnerings-UI.** Forbedre navigasjon, rolleindikatorer, kampkort, spillerens nå-kort, filtre, tomtilstander, leaderboard og delingsflater.
 
 ## Detaljert gjennomføringsplan for «Neste fase»
 
@@ -382,7 +388,58 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Profilmodell og kobling mellom profiler, turneringshistorikk og statistikk hører til en senere produktfase.
 - Cleanup-funksjonen må få en fast automatisk trigger i Supabase-drift eller annen godkjent jobb; manuell kontrollert kjøring er dokumentert i runbooken.
 
-### Fase 8 – Brukerprofiler, historikk og profilstyrt sletting
+### Fase 8 – Språkmotor, spillerøkt, tilgjengelighet og tilskuerlenke
+
+**Status: pågår**
+
+**Formål**
+
+- Fullføre språkmotoren før appen får mange nye synlige tekster.
+- Gjøre det tydelig hva som skjer etter at en spiller forlater sin lokale spillerøkt.
+- La spillere markere seg som ute av videre turnering uten å ødelegge historiske kamper, resultater eller andre spilleres visning.
+- Gi publikum en ren read-only vei inn i turneringen uten personlig spillerstatus og uten skrivehandlinger.
+- Gi første runde med synlige UI-forbedringer der de hører naturlig sammen med spillerøkt, rolle og sync.
+
+**Arbeid**
+
+1. Utvide `translations.js` fra enkel dictionary til en tydelig språkmotor for brukerflate: strukturert nøkkelnavn, variabler, fallback, manglende-nøkkel-håndtering og testdekning.
+2. Flytte nye og eksisterende synlige brukerflatestrenger for spillerøkt, roller, sync og tilskuerlenke inn i språkmotoren før UI-et bygges videre.
+3. Lage etterflyt etter `Forlat turnering` med valg for `Se som tilskuer`, `Velg spiller igjen` og `Bli med på nytt`.
+4. Lage bedre tomtilstand i spillerpanelet etter forlatelse, med tydelige handlinger i stedet for bare tekst.
+5. Skille mellom lokal forlatelse av spillerøkt og turneringsstatusen `utilgjengelig/reist`.
+6. La spiller markere seg som ute av videre turnering, med tydelig bekreftelse og uten å fjerne spilleren fra historiske kamper.
+7. Oppdatere scheduler/cup-start og videre runder slik at utilgjengelige spillere ikke trekkes inn i nye kamper, mens ferdige/aktive kamper beholder sine referanser.
+8. Lage adminvisning med spillerstatus-chips for `Aktiv`, `Har forlatt enhet`, `Ute/reist`, `Venter` og `Spiller nå`.
+9. Lage diskret rolleindikator for admin, spiller og tilskuer, slik at brukeren alltid ser hvilken visning/rolle som er aktiv.
+10. Lage tilskuerlenke eller tilskuermodus som åpner turneringsvisningen direkte uten spillerstatus, spillerpoengføring eller join-handlinger.
+11. Gjøre tilskuermodus tydelig med egen toppindikator og skjule personlig/handlingsrettet UI.
+12. Lage mobil bunnnavigasjon for `Admin`, `Spiller` og `Turnering` der det gir bedre ergonomi enn toppfaner.
+13. Gjøre sync-/offline-status mer forståelig i UI med tekst som `Online`, `Sender`, `Ikke sendt`, `Konflikt`, `Last inn siste` og `Prøv igjen`.
+14. Legge inn enkel runde-/kampfremdrift som `Runde 2 av 5` og `6/12 kamper ferdig` der data finnes.
+15. Teste lokal, Supabase og browserflyt for språkmotor, forlatelse, gjenvalg av spiller, utilgjengelighet, adminoversikt, mobilnavigasjon, sync-status og tilskuerlenke.
+
+**Gjennomført hittil**
+
+- Startet språkmotoren i `translations.js` med strukturerte nøkler, variabler, Bokmål-fallback og manglende-nøkkel-sporing.
+- Flyttet første Fase 8-tekster for `Forlat turnering`, ventende spillerpoeng, sync-status og tilkoblingsstatus inn i språkmotoren.
+- La inn støttede språk som én felles språkliste: Bokmål, Nynorsk, English (International), Español, Deutsch og Français.
+- Språkvelgeren bygges fra språkmotoren, med statiske HTML-valg som fallback før JavaScript starter.
+
+**Akseptansekriterier**
+
+- Nye synlige UI-tekster i Fase 8 går via språkmotoren og har Bokmål-fallback.
+- Språkmotoren støtter variabler for tellertekster, navn, runder og status uten strengbygging spredt i UI-koden.
+- Etter `Forlat turnering` kan brukeren umiddelbart velge tilskuer, velge spiller igjen eller bli med på nytt.
+- Spillerpanelet har en tydelig handlingsorientert tomtilstand etter forlatelse.
+- En spiller som markerer seg ute/reist fjernes ikke fra tidligere kamper, tabellgrunnlag eller historikk.
+- Nye runder bruker bare tilgjengelige spillere.
+- Admin kan se forskjell på aktiv spiller, ute/reist spiller, spiller nå, venter og lokal spillerøkt som bare er forlatt på én enhet.
+- Tilskuerlenken gir read-only turneringsvisning uten spillerfanens personlige status og uten skrivehandlinger.
+- Mobilnavigasjon og rolleindikator gjør det tydelig om brukeren er admin, spiller eller tilskuer.
+- Sync-/offline-status er handlingsklar uten tekniske ord som `state`, `sync` eller `revision` i brukerflaten.
+- Eksisterende anonym join-flyt og adminflyt fungerer som før.
+
+### Fase 9 – Brukerprofiler, historikk og profilstyrt sletting
 
 **Status: planlagt**
 
@@ -391,23 +448,30 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Gi spillere en varig identitet på tvers av turneringer uten å svekke dagens anonyme join-flyt.
 - Gjøre tidligere turneringer, resultater og statistikk tilgjengelig som spillerhistorikk.
 - Etablere tydelig eierskap og sletting for profilknyttede data.
+- Forberede overgang fra lokal `Min spiller`-profil til serverknyttet profil uten å gjette brukeridentitet.
 
 **Arbeid**
 
 1. Definere profilmodell, stabil profil-ID, visningsnavn, avatar og hvordan en profil opprettes, velges og endres.
 2. Knytte spilleridentitet, turneringsdeltakelse, kamper og statistikk til profilen uten å eksponere tokens.
 3. Lage profilvisning med tidligere turneringer, resultater, poeng, statistikk og filtrering.
-4. Beholde anonym turneringsflyt og migrere eksisterende lokale spilleridentiteter uten å gjette brukeridentitet.
-5. Lage profilsletting med 30 dagers forsinket sletting, status og mulighet for å angre før fristen.
-6. Utvide Supabase RLS/RPC-er, cleanup-jobb og backup/import slik at profil-eide data behandles konsistent.
-7. Teste fler-enhetsflyt, profilbytte, historikk, sletting, retensjon og konflikter mellom lokal og live state.
+4. Lage `Min spiller`/profil-light med lokalt lagret navn og avatar som foreslås ved join før full konto/auth innføres.
+5. Lage lokal turneringshistorikk for avsluttede turneringer med navn, dato, plassering, poeng og kamper, slik at den senere kan migreres til serverprofil.
+6. Beholde anonym turneringsflyt og migrere eksisterende lokale spilleridentiteter uten å gjette brukeridentitet.
+7. Lage profilsletting med 30 dagers forsinket sletting, status og mulighet for å angre før fristen.
+8. Utvide Supabase RLS/RPC-er, cleanup-jobb og backup/import slik at profil-eide data behandles konsistent.
+9. Forbedre admin-/sync-panelet med tydeligere status for `Ikke sendt`, `Serveren har nyere versjon`, `Last inn siste` og `Prøv igjen`.
+10. Teste fler-enhetsflyt, profilbytte, historikk, sletting, retensjon og konflikter mellom lokal og live state.
 
 **Akseptansekriterier**
 
 - En spiller kan opprette eller velge sin profil uten at eksisterende anonym join-flyt brytes.
 - Profilen viser kun spillerens egne historikk- og statistikkdata.
+- Lokal profil-light foreslår navn/avatar ved join uten å kreve konto.
+- Avsluttede turneringer kan lagres som lokal historikk og senere kobles til serverprofil etter eksplisitt brukerhandling.
 - Profil-eide turneringer kan beholdes lenger enn 30 dager mens profilen består.
 - Profilsletting markerer data for sletting og fjerner resterende profil-eide data innen 30 dager.
+- Admin-/sync-panelet gjør konflikt/offline-status handlingsklart uten å lekke tokens eller tekniske hemmeligheter.
 - Tokens, adminhemmeligheter og andre lokale skrivehemmeligheter inngår aldri i profilhistorikk eller eksport.
 - RLS, RPC-er, cleanup og automatiserte tester dekker både positiv og negativ tilgang.
 
@@ -416,6 +480,101 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Om profil skal bruke e-post, passkey, magic link eller en annen identitetsmekanisme.
 - Om en spiller kan ha flere profiler eller slå sammen historikk.
 - Hvilke statistikkfelter som skal være synlige for profilen og eventuelt andre spillere.
+
+### Fase 10 – UI-polish og mobil ergonomi
+
+**Status: planlagt**
+
+**Formål**
+
+- Gjøre Padelstar mer behagelig, rask og tydelig i ekte turneringsbruk på mobil og desktop.
+- Rydde de store arbeidsflatene slik at admin, spiller og tilskuer får hver sin naturlige rytme.
+- Gjøre kamp-, tabell-, delings- og tomtilstander lettere å skanne under stress.
+
+**Arbeid**
+
+1. Samle `Opprett`, `Bli med` og `Fortsett` tydeligere på forsiden som tre startvalg.
+2. Gjøre admin på mobil mer kompakt med sticky underfaner eller tydeligere separate arbeidsflater for `Styring`, `Del`, `Spillere` og `Kamper`.
+3. Videreutvikle visuell rolleforskjell for admin, spiller og tilskuer i header/status.
+4. Prioritere handlinger på adminkampkort: primær handling tydelig, sjeldne handlinger som walkover, avbryt og angre roligere eller samlet.
+5. Gjøre spillerens `nå`-kort mer sportslig og ekstremt lett å skanne: bane, makker, motstander, score og status først.
+6. Forbedre kampkort med klarere bane, status, score og kontrollhierarki.
+7. Forbedre leaderboard med tydeligere forklaring på rangering: poeng, seire, sett, games og eventuelle sorteringshint.
+8. Lage runde-/kampfilter for `Aktive`, `Neste`, `Ferdige` og `Mine`.
+9. Gi cup-bracket egen fullbreddevisning eller bedre horisontal scroll når bracketen blir trang.
+10. Forbedre tomtilstander før turneringsstart med en enkel trinnliste: del kode, legg til spillere, start når nok spillere er klare.
+11. Vise `Sist oppdatert` i live-/sync-status når serverstate hentes eller realtime oppdateres.
+12. Rydde teknisk språk ut av brukerflaten og holde tekniske begreper i tester/runbook.
+13. Gjøre små knapper og ikonknapper mer tilgjengelige med bedre labels, tooltips og mobiltrefflate.
+14. Strukturere delingspanelet med stor QR-kode, kopierknapper, join-lenke og tilskuerlenke side om side der skjermen har plass.
+15. Lage bedre generelle tomtilstander for manglende kamper, spillere og valgt spiller.
+
+**Akseptansekriterier**
+
+- Mobil adminflyt kan brukes uten unødvendig scroll tilbake til toppnavigasjon.
+- Spillerens viktigste kampinformasjon kan skannes på få sekunder på mobil.
+- Kampkort har tydelig primærhandling og mindre visuelt støy fra sjeldne handlinger.
+- Tilskuer/admin kan filtrere lange kampoversikter uten å miste kontekst.
+- Cup-bracket er lesbar på mobil og desktop.
+- Tomtilstander viser neste relevante handling, ikke bare forklarende tekst.
+- Alle nye synlige tekster bruker språkmotoren fra Fase 8.
+
+### Fase 11 – Filstruktur og prosjektorden
+
+**Status: planlagt**
+
+**Formål**
+
+- Gjøre prosjektet lettere å navigere når appkode, tester, dokumentasjon og assets vokser.
+- Flytte filer i en egen ren strukturendring uten funksjonsendringer, slik at eventuelle feil kan spores til path/import/cache og ikke blandes med produktendringer.
+
+**Foreslått struktur**
+
+```text
+/
+  index.html
+  privacy.html
+  manifest.webmanifest
+  service-worker.js
+  supabase-config.js
+  app/
+    app.js
+    translations.js
+    state-manager.js
+    tournament-engine.js
+    scoring-engine.js
+    realtime-sync.js
+    offline-storage.js
+  styles/
+    styles.css
+  docs/
+    development_plan.md
+    documentation_log.md
+    product_development.md
+    data_retention.md
+    operations_runbook.md
+    migration_notes.md
+    tournament_logic.md
+  test/
+  assets/
+  supabase/
+```
+
+**Arbeid**
+
+1. Beholde `README.md`, `package.json`, `vercel.json`, `manifest.webmanifest`, `service-worker.js`, `privacy.html`, `index.html` og `supabase-config.js` i root inntil hosting/PWA-kontrakter sier noe annet.
+2. Flytte browsermoduler til `app/` og oppdatere `index.html`, service-worker app-shell, tester og dokumentasjon.
+3. Flytte stylesheet til `styles/` og oppdatere asset-paths, preload/cache og tester.
+4. Flytte plan-, produkt- og driftsdokumenter til `docs/`, men beholde README i root.
+5. Kjøre full test, `node --check`, `git diff --check` og lokal browser-smoke etter flyttingen.
+
+**Akseptansekriterier**
+
+- Ingen observerbar funksjonsendring.
+- Alle script/style/cache-paths peker til ny struktur.
+- PWA-cache installerer og offline-fallback fungerer etter flytting.
+- Tester og dokumentasjon bruker nye paths.
+- Flyttingen committes separat fra språk-, profil- og UI-funksjoner.
 
 ## Tillatelser og avklaringer som må være på plass før implementering
 
@@ -760,7 +919,10 @@ Gjenstår før bred offentlig bruk:
 7. Flytt hardkodet tekst til i18n-struktur og del `app.js` i mindre moduler.
 8. Mål iPhone-hjemskjermens oppstart og forbedre app-shell, bildehåndtering, IndexedDB og recovery.
 9. Skriv personverntekst, fastsett dataretensjon og dokumenter produksjonsdrift. **Fullført i Fase 7.**
-10. Bygg brukerprofiler, profilknyttet historikk/statistikk og profilstyrt sletting innen 30 dager etter profilsletting. **Planlagt i Fase 8.**
+10. Fullfør språkmotoren, forbedre spillerøkt etter forlatelse, la spiller melde seg ute/reist og lag tilskuerlenke. **Planlagt i Fase 8.**
+11. Bygg brukerprofiler, lokal profil-light, lokal turneringshistorikk, bedre sync-panel, profilknyttet historikk/statistikk og profilstyrt sletting innen 30 dager etter profilsletting. **Planlagt i Fase 9.**
+12. Poler mobil- og turnerings-UI: forsidevalg, mobil admin, rolleindikatorer, kampkort, spillerens nå-kort, leaderboard, filtre, cup-bracket, tomtilstander, delingspanel og tilgjengelige småknapper. **Planlagt i Fase 10.**
+13. Rydd filstruktur med appkode i `app/`, stylesheet i `styles/` og dokumentasjon i `docs/`, uten funksjonsendringer. **Planlagt i Fase 11.**
 
 ## 16. Arbeidsregel
 

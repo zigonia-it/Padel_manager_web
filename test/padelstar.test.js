@@ -11,6 +11,31 @@ const stateManagerPath = path.join(__dirname, "..", "state-manager.js");
 const realtimeSyncPath = path.join(__dirname, "..", "realtime-sync.js");
 const offlineStoragePath = path.join(__dirname, "..", "offline-storage.js");
 const appPath = path.join(__dirname, "..", "app.js");
+const indexPath = path.join(__dirname, "..", "index.html");
+
+function collectTranslationKeys() {
+  const htmlSource = fs.readFileSync(indexPath, "utf8");
+  const appSource = fs.readFileSync(appPath, "utf8");
+  const keys = new Set();
+  const htmlKeyPatterns = [
+    /data-i18n="([^"]+)"/g,
+    /data-i18n-aria-label="([^"]+)"/g,
+    /data-i18n-placeholder="([^"]+)"/g,
+    /data-i18n-alt="([^"]+)"/g,
+    /data-i18n-content="([^"]+)"/g,
+  ];
+
+  htmlKeyPatterns.forEach((pattern) => {
+    let match;
+    while ((match = pattern.exec(htmlSource))) keys.add(match[1]);
+  });
+
+  const translateCallPattern = /(?:^|[^\w.])t\("([^"]+)"/g;
+  let match;
+  while ((match = translateCallPattern.exec(appSource))) keys.add(match[1]);
+
+  return [...keys].sort();
+}
 
 function loadPadelstar(options = {}) {
   const storage = new Map(Object.entries(options.initialStorage ?? {}));
@@ -464,8 +489,39 @@ test("translations are loaded from the shared dictionary with Bokmål fallback",
   const state = makeTournament(api, ["Ada", "Bo"], { settings: { language: "en" } });
 
   assert.equal(api.t("startTournament"), "Start tournament");
+  assert.equal(api.t("actions.leaveTournament"), "Leave tournament");
+  assert.equal(api.t("refreshRemoteState"), "Load latest");
+  assert.equal(
+    api.t("player.leaveConfirm", { name: "Ada", pendingScoreText: "" }),
+    "Leave the tournament as Ada? The tournament and player list stay unchanged for everyone else.",
+  );
+  assert.equal(api.i18n.has("en", "status.connectionAria"), true);
+  assert.equal(api.i18n.htmlLang("en"), "en");
+  assert.equal(api.i18n.normalizeLanguage("international-en"), "nb");
+  assert.equal(
+    JSON.stringify(api.i18n.supportedLanguages().map((language) => language.code)),
+    JSON.stringify(["nb", "nn", "en", "es", "de", "fr"]),
+  );
+  assert.equal(
+    api.i18n.supportedLanguages().filter((language) => language.code === "en").length,
+    1,
+  );
+
+  api.i18n.clearMissingKeys();
   assert.equal(api.t("missingTranslationKey"), "missingTranslationKey");
+  assert.equal(JSON.stringify(api.i18n.missingKeys()), JSON.stringify(["en:missingTranslationKey"]));
+
+  state.settings.language = "es";
+  assert.equal(api.t("startTournament"), "Iniciar torneo");
+  assert.equal(api.t("actions.leaveTournament"), "Salir del torneo");
+
+  state.settings.language = "de";
+  assert.equal(api.t("startNextRound"), "Nächste Runde starten");
+
+  state.settings.language = "fr";
+  assert.equal(api.t("finishTournament"), "Terminer le tournoi");
 
   state.settings.language = "unknown";
   assert.equal(api.t("finishTournament"), "Fullfør turnering");
+  assert.equal(api.t("actions.leaveTournament"), "Forlat turnering");
 });
