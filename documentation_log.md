@@ -8,6 +8,22 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Spiller kan forlate lokal turneringsøkt
+
+- La til `Forlat turnering` i spillerens statuspanel.
+- Forlatelse rydder bare lokal spillerøkt på enheten: `selectedPlayerId`, `playerToken` og ventende spillerpoeng.
+- Spillerlisten, kampoppsettet, resultater og remote turneringsstate muteres ikke, slik at andre spillere ikke påvirkes.
+- Admin som har valgt egen spilleridentitet beholder adminrollen dersom spillerøkten forlates.
+- Bumpet service-worker-cache til `padelstar-v51` og app-scriptet til `padelstar-session-1`.
+- La til regresjonstest som bekrefter at spiller kan forlate uten å endre spillere eller runde.
+
+### Verifisering
+
+- `npm test` - 39 tester passerte og 1 live-test ble korrekt skipped uten opt-in.
+- `node --check app.js`
+- `node --check test/padelstar.test.js`
+- Lokal Playwright-smoke med admin som spiller bekreftet at `Forlat turnering` vises, dialogen forklarer at andre ikke påvirkes, spillerfanen skjules etter forlatelse og adminrollen/spillerlisten beholdes.
+
 ## 2026-08-27 - Dokumenterte Fase 8 som neste planlagte fase
 
 - La inn en egen Fase 8 i `development_plan.md` for brukerprofiler, historikk, statistikk og profilstyrt sletting.

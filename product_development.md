@@ -89,6 +89,7 @@ Spiller skal kunne:
 - skrive inn navn ved påmelding
 - velge en avatar ved påmelding
 - bli lagt til i deltakerlisten hos administrator
+- forlate sin lokale spillerøkt uten å slette egen deltaker eller endre turneringen for andre
 - se egen neste kamp
 - se bane
 - se lagkamerat

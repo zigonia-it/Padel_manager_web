@@ -145,6 +145,7 @@ const elements = {
   rulesList: document.querySelector("#rulesList"),
   playerStandingsList: document.querySelector("#playerStandingsList"),
   playerIdentityCard: document.querySelector("#playerIdentityCard"),
+  leaveTournamentButton: document.querySelector("#leaveTournamentButton"),
   playerNextMatch: document.querySelector("#playerNextMatch"),
   playerStatusGrid: document.querySelector("#playerStatusGrid"),
   generateRoundButton: document.querySelector("#generateRoundButton"),
@@ -397,6 +398,8 @@ elements.resetTournamentButton.addEventListener("click", async () => {
   showStart();
   render();
 });
+
+elements.leaveTournamentButton?.addEventListener("click", () => leaveCurrentTournament());
 
 elements.resumeTournamentButton.addEventListener("click", () => {
   showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
@@ -1514,6 +1517,7 @@ function render() {
   renderMatches(matches);
   renderStandings(matches);
   renderPlayerIdentity();
+  renderLeaveTournamentControl();
   renderPlayerNextMatch(matches);
   renderPlayerStatus(matches);
   renderAdminLiveOverview(matches);
@@ -2037,6 +2041,13 @@ function renderPlayerIdentity() {
   `;
 }
 
+function renderLeaveTournamentControl() {
+  if (!elements.leaveTournamentButton) return;
+  const hasSelectedPlayer = Boolean(getPlayerById(state.selectedPlayerId));
+  elements.leaveTournamentButton.classList.toggle("hidden", !hasSelectedPlayer);
+  elements.leaveTournamentButton.disabled = !hasSelectedPlayer;
+}
+
 function renderCupBracket() {
   if (!elements.cupBracket) return;
   const bracket = state.settings.format === "cup" ? state.cup?.bracket : null;
@@ -2498,6 +2509,31 @@ function removePlayer(playerId) {
   state.schedule = buildSchedule(state.players, state.settings.format);
   saveState();
   render();
+}
+
+function leaveCurrentTournament(options = {}) {
+  const selectedPlayer = getPlayerById(state.selectedPlayerId);
+  if (!selectedPlayer) return false;
+
+  const shouldConfirm = options.confirm !== false;
+  const pendingScoreText = pendingPlayerScores.length > 0
+    ? " Ventende poeng fra denne enheten blir ikke sendt."
+    : "";
+  if (shouldConfirm && !confirm(`Forlate turneringen som ${selectedPlayer.name}? Turneringen og spillerlisten beholdes for alle andre.${pendingScoreText}`)) {
+    return false;
+  }
+
+  state.selectedPlayerId = null;
+  state.playerToken = null;
+  pendingPlayerScores = [];
+  persistSyncMetadata();
+  setLocalRole(isCurrentUserAdmin() ? "admin" : "spectator");
+  saveState({ remote: false });
+  if (!window.PADELSTAR_TEST_MODE) {
+    showWorkspace(isCurrentUserAdmin() ? "admin" : "tournament");
+    render();
+  }
+  return true;
 }
 
 function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMatch, pointMode, gamesToWinSet, setsToWinMatch }) {
@@ -3505,6 +3541,7 @@ if (window.PADELSTAR_TEST_MODE) {
     pointsByPlayer,
     statsForPlayer,
     playerTournamentState,
+    leaveCurrentTournament,
     normalizeModule,
     setLocalRole,
     currentLocalRole,

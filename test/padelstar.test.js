@@ -375,6 +375,27 @@ test("player role cannot open admin module and falls back to player workspace", 
   assert.equal(api.normalizeModule("tournament"), "tournament");
 });
 
+test("player can leave local tournament session without mutating tournament data", () => {
+  const api = loadPadelstar();
+  const state = makeTournament(api, ["Ada", "Bo", "Cy", "Di"]);
+  api.generateFullTournamentSchedule();
+  const firstRound = plain(state.rounds[0]);
+  state.selectedPlayerId = state.players[0].id;
+  state.playerToken = "local-player-token";
+
+  api.saveState({ remote: false });
+  api.setLocalRole("player");
+
+  assert.equal(api.leaveCurrentTournament({ confirm: false }), true);
+
+  assert.equal(state.selectedPlayerId, null);
+  assert.equal(state.playerToken, null);
+  assert.equal(api.currentLocalRole(), "spectator");
+  assert.deepEqual(plain(state.players.map((player) => player.name)), ["Ada", "Bo", "Cy", "Di"]);
+  assert.deepEqual(plain(state.rounds[0]), firstRound);
+  assert.equal(api.normalizeModule("player"), "tournament");
+});
+
 test("spectator role can see tournament view but not admin or player modules", () => {
   const api = loadPadelstar();
   makeTournament(api, ["Ada", "Bo"]);

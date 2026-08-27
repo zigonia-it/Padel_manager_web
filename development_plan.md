@@ -35,20 +35,13 @@ Prosjektmetadata:
 - Dynamisk cup-rundeavansement går nå gjennom en servervalidert RPC som bygger neste bracket-runde, viderefører byes og oppretter eventuell bronsefinale atomisk.
 - Realtime har nå én kontrollert kanal per turnering, statusvisning, reconnect med backoff, server-refresh og stale-revisjonsvern.
 - Automatiserte regresjonstester er etablert for turneringsmotor, scoring, roller/moduler og Supabase SQL/RPC-kontrakter, med opt-in live Supabase-test og CI-kjøring før GitHub Pages-deploy.
+- Spillere kan forlate sin lokale spillerøkt uten at spilleren slettes fra turneringen eller at kampoppsett/resultater endres for andre.
 
 ## Neste fase: produksjonsklar beta
 
 Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
-1. En bruker må kunne forlate en turnering, men uten at de andre spillerne blir påvirket
-2. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
-3. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse, walkover, settresultat, round-robin-rundeavansement, dynamisk cup-bracket og reopen/undo er portert.
-4. **Stabiliser realtime.** Admin-, spiller- og tilskuerflyten har kontrollert reconnect, stale-revisjonsvern, synlig status og konfliktbehandling.
-5. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
-6. **Forsterk testdekningen løpende.** Utvid regresjonene når struktur deles opp, særlig for walkover/undo, import/export og browserflyt.
-7. **Forbedre PWA-opplevelsen.** Mål bilde- og oppstartstid fra iPhone-hjemskjerm, optimaliser app-shell og offline-cache, og vurder IndexedDB for mer robust lokal kø/recovery.
-8. **Fullfør lanseringsgrunnlaget.** Skriv personverntekst, avklar dataretensjon/utløp og dokumenter deploy-, database- og feilhåndtering. Ekstern rename av GitHub-, Vercel- og Supabase-prosjekter tas bare hvis det fortsatt er nødvendig.
-9. **Bygg brukerprofiler og historikk.** Etabler profilidentitet, koble turneringer/resultater/statistikk til profilen, vis spillerhistorikk og slett profil-eide data innen 30 dager etter profilsletting.
+1. **Bygg brukerprofiler og historikk.** Etabler profilidentitet, koble turneringer/resultater/statistikk til profilen, vis spillerhistorikk og slett profil-eide data innen 30 dager etter profilsletting.
 
 ## Detaljert gjennomføringsplan for «Neste fase»
 
@@ -384,6 +377,7 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 **Videre arbeid etter Fase 7**
 
+- Spiller kan nå forlate sin lokale spillerøkt uten at deltakerlisten, kampoppsettet eller andre spilleres visning endres.
 - Når profiler bygges, må profil-eid historikk kunne beholdes lenger og slettes innen 30 dager etter profilsletting.
 - Profilmodell og kobling mellom profiler, turneringshistorikk og statistikk hører til en senere produktfase.
 - Cleanup-funksjonen må få en fast automatisk trigger i Supabase-drift eller annen godkjent jobb; manuell kontrollert kjøring er dokumentert i runbooken.
@@ -765,7 +759,8 @@ Gjenstår før bred offentlig bruk:
 6. Stabiliser realtime ved reconnect, samtidige endringer og stale state.
 7. Flytt hardkodet tekst til i18n-struktur og del `app.js` i mindre moduler.
 8. Mål iPhone-hjemskjermens oppstart og forbedre app-shell, bildehåndtering, IndexedDB og recovery.
-9. Skriv personverntekst, fastsett dataretensjon og dokumenter produksjonsdrift.
+9. Skriv personverntekst, fastsett dataretensjon og dokumenter produksjonsdrift. **Fullført i Fase 7.**
+10. Bygg brukerprofiler, profilknyttet historikk/statistikk og profilstyrt sletting innen 30 dager etter profilsletting. **Planlagt i Fase 8.**
 
 ## 16. Arbeidsregel
 

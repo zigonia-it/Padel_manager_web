@@ -18,6 +18,7 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 
 - Lar admin opprette en turnering og dele invitasjonskode/QR-lenke.
 - Lar spillere bli med fra egen enhet.
+- Lar spillere forlate sin lokale spillerøkt uten å slette spilleren eller endre turneringen for andre.
 - Lar admin velge om han også deltar som spiller.
 - Viser egne moduler for landing page, oppsett, admin, spiller og turneringsvisning.
 - Skjuler inaktive moduler slik at de ikke tar plass i layouten.
@@ -29,7 +30,7 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 
 ## Neste steg i beta
 
-Fase 7 er ferdig. Neste planlagte fase er brukerprofiler, historikk og profilstyrt sletting.
+Fase 7 er ferdig, og spiller kan nå forlate sin lokale spillerøkt uten å påvirke turneringen for andre. Neste planlagte fase er brukerprofiler, historikk og profilstyrt sletting.
 
 - Definere profilidentitet og opprettelses-/innloggingsflyt uten å bryte anonym join.
 - Knytte turneringer, resultater og statistikk til riktig profil.

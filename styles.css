@@ -2273,6 +2273,11 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
     rgba(23, 9, 1, 0.44);
 }
 
+.leave-tournament-button {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
 .player-identity-main {
   display: flex;
 
