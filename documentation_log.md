@@ -8,6 +8,33 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
+## 2026-08-27 - Gjorde reopen/undo atomisk på serversiden
+
+- La til `admin_undo_match(...)` som låser turneringen, validerer admin-token og forventet revisjon, og gjenoppretter siste kampendring i én transaksjon.
+- Utvidet serverens snapshot for spillerpoeng, settresultat og walkover med kilde-revisjon og avledet kamp-/runde-/cup-state.
+- Knyttet klientens reopen/undo til den samme serialiserte Supabase-køen som øvrige admin-operasjoner. Lokal fallback brukes fortsatt uten Supabase.
+- Avviste foreldet revisjon og gjentatt undo etter at snapshotet er brukt.
+
+### Endrede filer
+
+- `app.js`
+- `development_plan.md`
+- `documentation_log.md`
+- `supabase_schema.sql`
+- `supabase/migrations/20260827000755_admin_undo_match.sql`
+
+### Verifisering
+
+- `node --check app.js`
+- `git diff --check`
+- Supabase rollback-tester for settresultat, walkover, spillerpoeng, stale revision og one-time undo.
+- Kontroll etter test: ingen testturneringer, spillerøkter eller rate-limit-rader igjen.
+- Supabase performance advisor: ingen lints. Security advisor viser bare de dokumenterte anon-wrapperne og deny-by-default-tabellene.
+
+### Neste steg
+
+- Stabilere realtime, reconnect og stale state på tvers av admin-, spiller- og tilskuerklienter.
+
 ## 2026-08-27 - Hardnet offentlige RPC-er og rate limiting
 
 - Skjulte `admin_token` fra anon-lesing av `public.tournaments` med kolonnegrants, mens delt state og backup fortsatt renser tokenfelt lokalt.

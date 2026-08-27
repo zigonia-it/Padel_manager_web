@@ -39,7 +39,7 @@ Prosjektmetadata:
 Prioritert rekkefølge basert på siste dokumentasjonslogg:
 
 1. **Hardne roller og skrivetilgang videre.** Gjennomgå host/admin-token, spiller-sessioner, RLS/grants og rate limiting før bred bruk.
-2. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse, walkover, settresultat, round-robin-rundeavansement og dynamisk cup-bracket er portert. Portér deretter gjenværende admin-handlinger, særlig reopen/undo.
+2. **Gjør admin-operasjoner atomiske.** Kampstart, avbrytelse, walkover, settresultat, round-robin-rundeavansement, dynamisk cup-bracket og reopen/undo er portert.
 3. **Stabiliser realtime.** Verifiser admin, spiller og tilskuer på separate enheter med samtidige oppdateringer, refresh og reconnect; håndter stale state og feilmeldinger tydelig.
 4. **Etabler automatiserte regresjonstester.** Prioriter scheduler for singles/doubles/sit-out, cup-seeding/byes/bracket, scoring, leaderboard, walkover/undo og rolle-/modulvisning.
 5. **Rydd struktur og tekst.** Flytt hardkodet brukertekst mot en felles i18n-struktur og del `app.js` i state, turneringsmotor, Supabase/realtime og visningsmoduler når testdekningen er på plass.
@@ -116,7 +116,7 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 ### Fase 2 – Gjøre gjenværende admin-operasjoner atomiske
 
-**Status: pågår**
+**Status: fullført 2026-08-27**
 
 **Formål**
 
@@ -144,7 +144,23 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Sammenhengende test: registrer resultat → aktiver neste kamp → undo → bekreft full gjenoppretting.
 - Cup-test med final/bronsefinale og round-robin-test med neste runde.
 
+**Gjennomført i denne fasen**
+
+- La til `admin_undo_match(...)` med egen server-side implementasjon, admin-token, radlås og compare-and-swap på forventet revisjon.
+- Lagret komplett undo-snapshot for spillerpoeng, settresultat og walkover, inkludert kamp, eventuell neste ventende kamp, bane, rundestatus, turneringsstatus og cupvinner.
+- Knyttet klientens `Angre resultat`/`Angre siste` til den serialiserte RPC-køen. Lokal fallback beholdes kun når Supabase ikke er konfigurert.
+- Begrenset undo til siste aktive runde og én gjenoppretting per lagret handling. Eldre snapshot-format støttes uten å svekke revisjonskontrollen for nye snapshots.
+
+**Verifikasjon**
+
+- Positiv Supabase-test for settresultat og walkover: neste kamp ble startet, deretter ble kampstatus, neste kamp, bane og undo-snapshot gjenopprettet atomisk.
+- Positiv Supabase-test for spillerpoeng: poeng og kamp ble rullet tilbake med snapshotet fjernet etter bruk.
+- Negative tester for foreldet revisjon og nytt undo etter allerede utført undo ble avvist.
+- Alle testene kjørte i rollback-transaksjoner; kontroll etterpå viste 0 turneringer, 0 spillerøkter og 0 rate-limit-rader.
+
 ### Fase 3 – Stabilere realtime, reconnect og stale state
+
+**Status: pågår**
 
 **Formål**
 

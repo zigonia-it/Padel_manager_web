@@ -795,14 +795,23 @@ function queueRemoteMatchAction(match, action, teamIndex = null) {
 
       const requestSequence = remoteMutationSequence;
       const expectedRevision = state.revision;
-      const { data, error } = await supabaseClient.rpc("admin_match_action", {
-        p_tournament_id: state.id,
-        p_admin_token: state.adminToken,
-        p_match_id: match.id,
-        p_action: action,
-        p_team_index: teamIndex,
-        p_expected_revision: expectedRevision,
-      });
+      const rpcName = action === "undo" ? "admin_undo_match" : "admin_match_action";
+      const rpcPayload = action === "undo"
+        ? {
+          p_tournament_id: state.id,
+          p_admin_token: state.adminToken,
+          p_match_id: match.id,
+          p_expected_revision: expectedRevision,
+        }
+        : {
+          p_tournament_id: state.id,
+          p_admin_token: state.adminToken,
+          p_match_id: match.id,
+          p_action: action,
+          p_team_index: teamIndex,
+          p_expected_revision: expectedRevision,
+        };
+      const { data, error } = await supabaseClient.rpc(rpcName, rpcPayload);
 
       if (error) {
         console.warn("Supabase admin match action failed", error);
@@ -1671,7 +1680,7 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
         <button class="secondary set-score-button" type="button">Set resultat</button>
         <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>Start kamp</button>
         <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>Stor score</button>
-        <button class="secondary reopen-match-button" type="button" ${match.state !== "finished" || !match.lastScoredMatchState ? "disabled" : ""}>Angre resultat</button>
+        <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.lastScoredMatchState ? "disabled" : ""}>${match.state === "finished" ? "Angre resultat" : "Angre siste"}</button>
         <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>Avbryt kamp</button>
         <div class="walkover-row">
           <span>Walkover</span>
@@ -2854,6 +2863,7 @@ function captureMatchUndoState(match) {
     roundId: activeRound?.id ?? null,
     roundStatus: activeRound?.status ?? null,
     tournamentStatus: state.status,
+    revision: state.revision,
     cupWinnerTeam: state.cup?.winnerTeam ? structuredClone(state.cup.winnerTeam) : null,
   };
 }
@@ -3019,6 +3029,11 @@ function startMatch(match) {
 }
 
 function reopenMatch(match) {
+  if (isSupabaseReady()) {
+    queueRemoteMatchAction(match, "undo");
+    return;
+  }
+
   if (match.lastScoredMatchState) {
     undoMatch(match);
     return;

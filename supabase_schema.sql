@@ -335,6 +335,8 @@ declare
   next_waiting_index integer;
   waiting_match_index integer;
   current_revision integer;
+  undo_state jsonb;
+  next_waiting_match jsonb;
 begin
   if p_tournament_id is null
     or p_invite_code is null
@@ -398,6 +400,27 @@ begin
         ) then
           raise exception 'Player is not part of this match';
         end if;
+
+        next_waiting_index := null;
+        next_waiting_match := null;
+        for waiting_match_index in 0..(jsonb_array_length(matches) - 1) loop
+          if waiting_match_index <> match_index and matches->waiting_match_index->>'state' = 'waiting' then
+            next_waiting_index := waiting_match_index;
+            next_waiting_match := matches->waiting_match_index;
+            exit;
+          end if;
+        end loop;
+
+        undo_state := jsonb_build_object(
+          'match', match_item - 'lastScoredMatchState',
+          'nextWaitingMatch', next_waiting_match,
+          'roundId', round_item->'id',
+          'roundStatus', round_item->'status',
+          'tournamentStatus', current_state->'status',
+          'revision', to_jsonb(current_revision),
+          'cupWinnerTeam', coalesce(current_state->'cup'->'winnerTeam', 'null'::jsonb)
+        );
+        match_item := jsonb_set(match_item, '{lastScoredMatchState}', undo_state, true);
 
         scoring_key := case when p_team_index = 0 then 'teamOne' else 'teamTwo' end;
         other_key := case when p_team_index = 0 then 'teamTwo' else 'teamOne' end;
@@ -463,7 +486,8 @@ begin
         update public.tournaments
         set state = current_state,
             revision = current_revision
-        where id = p_tournament_id;
+        where id = p_tournament_id
+          and revision = current_revision - 1;
         return current_state;
       end loop;
     end loop;
@@ -1018,6 +1042,7 @@ begin
           'roundId', round_item->'id',
           'roundStatus', round_item->'status',
           'tournamentStatus', current_state->'status',
+          'revision', to_jsonb(current_revision),
           'cupWinnerTeam', coalesce(current_state->'cup'->'winnerTeam', 'null'::jsonb)
         );
         current_set := jsonb_build_object(
@@ -1223,6 +1248,7 @@ begin
             'roundId', round_item->'id',
             'roundStatus', round_item->'status',
             'tournamentStatus', current_state->'status',
+            'revision', to_jsonb(current_revision),
             'cupWinnerTeam', coalesce(current_state->'cup'->'winnerTeam', 'null'::jsonb)
           );
           match_item := jsonb_set(match_item, '{lastScoredMatchState}', undo_state, true);
@@ -1310,6 +1336,159 @@ end;
 $$;
 
 revoke all on function public.admin_match_action_impl(uuid, text, uuid, text, integer, integer) from public, anon, authenticated;
+
+create or replace function public.admin_undo_match_impl(
+  p_tournament_id uuid,
+  p_admin_token text,
+  p_match_id uuid,
+  p_expected_revision integer
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+declare
+  current_state jsonb;
+  current_revision integer;
+  rounds jsonb;
+  round_item jsonb;
+  matches jsonb;
+  match_item jsonb;
+  undo_state jsonb;
+  restored_match jsonb;
+  next_waiting_match jsonb;
+  existing_next_match jsonb;
+  round_index integer;
+  match_index integer;
+  next_waiting_index integer;
+  source_revision integer;
+begin
+  if p_tournament_id is null
+    or p_admin_token is null
+    or length(p_admin_token) < 16
+    or p_match_id is null
+    or p_expected_revision is null
+    or p_expected_revision < 0 then
+    raise exception 'Invalid undo payload';
+  end if;
+
+  select state, revision into current_state, current_revision
+  from public.tournaments
+  where id = p_tournament_id
+    and admin_token = p_admin_token
+  for update;
+
+  if current_state is null then
+    raise exception 'Admin token mismatch or tournament not found';
+  end if;
+
+  if current_revision <> p_expected_revision then
+    raise exception 'Tournament state changed or not found';
+  end if;
+
+  rounds := coalesce(current_state->'rounds', '[]'::jsonb);
+  if jsonb_array_length(rounds) = 0 then
+    raise exception 'No match available for undo';
+  end if;
+
+  for round_index in 0..(jsonb_array_length(rounds) - 1) loop
+    round_item := rounds->round_index;
+    matches := coalesce(round_item->'matches', '[]'::jsonb);
+    if jsonb_array_length(matches) = 0 then
+      continue;
+    end if;
+
+    for match_index in 0..(jsonb_array_length(matches) - 1) loop
+      match_item := matches->match_index;
+      if (match_item->>'id')::uuid <> p_match_id then
+        continue;
+      end if;
+
+      if round_index <> jsonb_array_length(rounds) - 1 then
+        raise exception 'Match is not in the current round';
+      end if;
+
+      if round_item->>'status' not in ('active', 'finished') then
+        raise exception 'Match is not available for undo';
+      end if;
+
+      undo_state := match_item->'lastScoredMatchState';
+      if undo_state is null
+        or jsonb_typeof(undo_state) <> 'object'
+        or jsonb_typeof(undo_state->'match') <> 'object' then
+        raise exception 'No undo available for this match';
+      end if;
+
+      if undo_state ? 'revision' then
+        if coalesce(undo_state->>'revision', '') !~ '^[0-9]+$' then
+          raise exception 'Invalid undo state';
+        end if;
+        source_revision := (undo_state->>'revision')::integer;
+        if current_revision <> source_revision + 1 then
+          raise exception 'Tournament state changed or not found';
+        end if;
+      end if;
+
+      restored_match := (undo_state->'match')::jsonb - 'lastScoredMatchState'::text;
+      if restored_match->>'id' <> p_match_id::text then
+        raise exception 'Invalid undo state';
+      end if;
+      matches := jsonb_set(matches, ARRAY[match_index::text], restored_match, false);
+
+      next_waiting_match := undo_state->'nextWaitingMatch';
+      if jsonb_typeof(next_waiting_match) = 'object' then
+        select entry.ordinality - 1
+        into next_waiting_index
+        from jsonb_array_elements(matches) with ordinality as entry(value, ordinality)
+        where entry.value->>'id' = next_waiting_match->>'id'
+        limit 1;
+
+        if next_waiting_index is null
+          or (matches -> next_waiting_index)->>'id' <> next_waiting_match->>'id' then
+          raise exception 'Undo state no longer matches current round';
+        end if;
+
+        existing_next_match := matches -> next_waiting_index;
+        if existing_next_match->>'state' not in ('waiting', 'playing')
+          or jsonb_typeof(existing_next_match->'lastScoredMatchState') = 'object' then
+          raise exception 'Tournament state changed or not found';
+        end if;
+        matches := jsonb_set(matches, ARRAY[next_waiting_index::text], next_waiting_match, false);
+      end if;
+
+      round_item := jsonb_set(round_item, '{matches}', matches, true);
+      if undo_state->>'roundStatus' is not null then
+        round_item := jsonb_set(round_item, '{status}', to_jsonb(undo_state->>'roundStatus'), true);
+      end if;
+      rounds := jsonb_set(rounds, ARRAY[round_index::text], round_item, false);
+      current_state := jsonb_set(current_state, '{rounds}', rounds, true);
+      if undo_state ? 'tournamentStatus' then
+        current_state := jsonb_set(current_state, '{status}', undo_state->'tournamentStatus', true);
+      end if;
+      if current_state ? 'cup' and undo_state ? 'cupWinnerTeam' then
+        current_state := jsonb_set(current_state, '{cup,winnerTeam}', undo_state->'cupWinnerTeam', true);
+      end if;
+
+      current_revision := current_revision + 1;
+      current_state := jsonb_set(current_state, '{revision}', to_jsonb(current_revision), true);
+      update public.tournaments
+      set state = current_state,
+          revision = current_revision
+      where id = p_tournament_id
+        and revision = p_expected_revision;
+      if not found then
+        raise exception 'Tournament state changed or not found';
+      end if;
+      return current_state;
+    end loop;
+  end loop;
+
+  raise exception 'Match not found';
+end;
+$$;
+
+revoke all on function public.admin_undo_match_impl(uuid, text, uuid, integer) from public, anon, authenticated;
 
 create or replace function public.delete_tournament_impl(
   p_tournament_id uuid,
@@ -1596,6 +1775,36 @@ begin
 end;
 $$;
 
+create or replace function public.admin_undo_match(
+  p_tournament_id uuid,
+  p_admin_token text,
+  p_match_id uuid,
+  p_expected_revision integer
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+begin
+  if p_admin_token is null
+    or p_admin_token !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$' then
+    raise exception 'Invalid undo payload';
+  end if;
+
+  if not public.consume_api_rate_limit('admin:' || p_admin_token, 120, 60) then
+    raise exception 'Rate limit exceeded';
+  end if;
+
+  return public.admin_undo_match_impl(
+    p_tournament_id,
+    p_admin_token,
+    p_match_id,
+    p_expected_revision
+  );
+end;
+$$;
+
 create or replace function public.delete_tournament(
   p_tournament_id uuid,
   p_admin_token text
@@ -1635,6 +1844,7 @@ revoke all on function public.admin_advance_cup(uuid, text, integer) from public
 revoke all on function public.admin_advance_round(uuid, text, integer) from public, anon, authenticated;
 revoke all on function public.admin_set_result(uuid, text, uuid, integer, integer, integer) from public, anon, authenticated;
 revoke all on function public.admin_match_action(uuid, text, uuid, text, integer, integer) from public, anon, authenticated;
+revoke all on function public.admin_undo_match(uuid, text, uuid, integer) from public, anon, authenticated;
 revoke all on function public.delete_tournament(uuid, text) from public, anon, authenticated;
 
 grant execute on function public.create_tournament(jsonb, text) to anon;
@@ -1646,6 +1856,7 @@ grant execute on function public.admin_advance_cup(uuid, text, integer) to anon;
 grant execute on function public.admin_advance_round(uuid, text, integer) to anon;
 grant execute on function public.admin_set_result(uuid, text, uuid, integer, integer, integer) to anon;
 grant execute on function public.admin_match_action(uuid, text, uuid, text, integer, integer) to anon;
+grant execute on function public.admin_undo_match(uuid, text, uuid, integer) to anon;
 grant execute on function public.delete_tournament(uuid, text) to anon;
 
 alter default privileges for role postgres in schema public
