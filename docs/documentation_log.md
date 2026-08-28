@@ -2661,3 +2661,34 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Serverdrevet Web Push er implementert, konfigurert og deployet. Live-endepunktet avviser uautoriserte kall med HTTP 401.
 - Admin-kontoknytting er et kompatibilitetslag rundt eksisterende admin-token, ikke full token-erstatning.
+
+## 2026-08-28 - Sluttføring av Fase 12–15 og dokumentasjonsrydding
+
+### Gjort
+
+- Genererte et nytt VAPID-nøkkelpar lokalt uten å skrive privat nøkkel til repoet.
+- Satt `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` og `VAPID_SUBJECT` som Supabase Function secrets.
+- La public key i `supabase-config.js` og verifiserte at den ble servert fra `https://padelstar.app`.
+- Verifiserte live `push-send`: manglende admin-token gir HTTP 401, mens funksjonen ikke lenger svarer som ukonfigurert.
+- Verifiserte live `/api/health`: HTTP 200 og `Cache-Control: no-store`.
+- Verifiserte live HTML med observability-, delings- og varselkoblinger.
+- Ryddet `docs/development_plan.md` slik at implementerte faser og gjennomførte detaljer ikke lenger ligger i planen. Planen inneholder nå bare åpne valg og fremtidige initiativer.
+
+### Verifisert
+
+- `npm test`: 49 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js` og `node --check service-worker.js` passerte.
+- `git diff --check` passerte.
+- Commit `54e0e18` (`Complete phases 12 through 15`) er pushet til `main`.
+- Arbeidskopien var ren etter commit og push.
+
+### Endrede dokumenter
+
+- `docs/development_plan.md`
+- `docs/documentation_log.md`
+
+### Åpent etter ryddingen
+
+- Eventuell ekstern monitor for `/api/health`.
+- Eventuell senere migrering fra kompatibel admin-token til full konto-/tokenmodell.
+- Nye produktforbedringer må planlegges som egne initiativer.
