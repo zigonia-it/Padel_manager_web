@@ -3891,6 +3891,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   .workspace-active .tabs {
     position: fixed;
 
+    top: auto;
     right: 0;
     bottom: 0;
     left: 0;
@@ -3898,9 +3899,12 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
     z-index: 80;
 
     display: flex;
-    width: auto;
+    width: 100%;
+    height: auto;
+    min-height: 0;
     justify-content: space-around;
     grid-template-columns: none;
+    justify-self: stretch;
 
     gap: 8px;
 
