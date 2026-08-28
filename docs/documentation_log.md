@@ -2714,3 +2714,22 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Mørk/gull beholdes som merkevare, men kontrast og lesbarhet har prioritet over dekor.
 - Det må avgjøres om high-contrast/daylight blir en egen brukerinnstilling eller følger systempreferanser.
 - Første visuelle fokus i hver rolle må velges før redesignarbeidet starter.
+
+## 2026-08-29 - Lighthouse-baseline for Fase 16
+
+### Mottatt rapport
+
+- Samlet Lighthouse-score: 91/100.
+- SEO: 100/100.
+- Ytelse: 67/100.
+- Tilgjengelighet: 98/100.
+- Beste praksis: 100/100.
+- LCP: 9,8 sekunder; FCP: 1,8 sekunder; CLS: 0; TBT: 0 ms; Speed Index: 7,4 sekunder.
+- Lighthouse peker særlig på ubrukt JavaScript med om lag 0,5 sekunder mulig gevinst.
+
+### Konsekvens for planen
+
+- Fase 16 skal prioritere første synlige skjerm og LCP før eller parallelt med den visuelle redesignen.
+- Hero-/bakgrunnsbilder, fontlasting, tredjepartsskript og initial JavaScript skal profileres før optimalisering.
+- SEO 100, beste praksis 100 og CLS 0 er beskyttelseskrav under UI-arbeidet.
+- Målet er LCP under 2,5 sekunder og ytelsesscore minst 90 i samme måleprofil, etter at årsaken til 9,8 sekunder er identifisert og verifisert.

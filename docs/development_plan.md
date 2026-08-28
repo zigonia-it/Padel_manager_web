@@ -40,6 +40,24 @@ Fasen tar utgangspunkt i:
 
 Referansene brukes som prinsippgrunnlag og arbeidsinspirasjon, ikke som kopiering av visuell profil eller innhold.
 
+#### Lighthouse-baseline
+
+Rapport mottatt 2026-08-29 fra simulert mobilmåling:
+
+- samlet score: **91/100**
+- SEO: **100/100**
+- ytelse: **67/100**
+- tilgjengelighet: **98/100**
+- beste praksis: **100/100**
+- LCP: **9,8 s**
+- FCP: **1,8 s**
+- CLS: **0**
+- TBT: **0 ms**
+- Speed Index: **7,4 s**
+- største identifiserte mulighet: ubrukt JavaScript, om lag **0,5 s** mulig gevinst
+
+Baseline skal brukes som før-måling. Den viser at innlastingen av den første synlige skjermen er den viktigste tekniske UI-utfordringen, selv om SEO, stabilitet og beste praksis allerede er sterke.
+
 #### Planlagt arbeid
 
 1. Gjøre en skjerm-for-skjerm-audit av landing, admin, spiller, tilskuer, kampkort, tabell, dialoger og mobilmeny. Registrere kontrast, leserekkefølge, tekstkutt, tetthet, fokus, touchmål og utydelige statuser.
@@ -52,6 +70,7 @@ Referansene brukes som prinsippgrunnlag og arbeidsinspirasjon, ikke som kopierin
 8. Respektere `prefers-reduced-motion`, redusere blur/transparens ved behov og bruke rolige overganger. Animasjon skal fremheve live-hendelser, ikke konkurrere med lesing eller gi flimring.
 9. Verifisere med tastatur, skjermleser, gråskala, økt kontrast, større tekst, redusert transparens, redusert bevegelse, 320 CSS-piksler og desktop/mobil i både stående og liggende visning.
 10. Lage før-/etter-skjermbilder og en kort visuell beslutningslogg før komponentene implementeres.
+11. Gjennomføre en ytelsesrunde før eller parallelt med redesign: finne hva som forsinker LCP, vurdere størrelsen og prioriteringen av hero-/bakgrunnsbilder, redusere ubrukt JavaScript, utsette ikke-kritiske tredjepartsskript og kontrollere fontlasting. Målingen skal gjentas med samme Lighthouse-oppsett.
 
 #### Beslutningsport
 
@@ -67,6 +86,7 @@ Referansene brukes som prinsippgrunnlag og arbeidsinspirasjon, ikke som kopierin
 - Alle primære berøringskontroller har stabil størrelse, tilstrekkelig avstand og synlig fokus.
 - Admin-, spiller- og tilskuervisning har hver sin tydelige visuelle prioritet.
 - Visuell effekt kommer fra komposisjon, typografisk hierarki, kontrast, dybde og live-status, ikke fra lavkontrast-glass, overdreven glow eller dekor som skjuler innhold.
+- Lighthouse-ytelsen forbedres vesentlig fra baseline, med et første mål om LCP under 2,5 sekunder og ytelsesscore på minst 90 i samme simulerte mobilprofil. SEO- og beste praksis-score skal ikke falle.
 - Før-/etter-skjermbilder og resultatet av tilgjengelighetstestene er dokumentert i `documentation_log.md`.
 
 #### Avhengigheter
