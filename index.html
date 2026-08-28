@@ -14,8 +14,9 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/icons/padelstar-512.png">
   <link rel="icon" href="assets/icons/padelstar-256.png" type="image/png">
-  <link rel="preload" href="assets/padelstar_logo-720.png" as="image" fetchpriority="high">
-  <link rel="stylesheet" href="styles/styles.css?v=padelstar-mobile-1">
+  <link rel="preload" href="assets/padelstar_logo-480.png" as="image" fetchpriority="high">
+  <link rel="preload" href="assets/bg_img-1600.jpg" as="image" fetchpriority="high">
+  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-2">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -77,7 +78,7 @@
           </nav>
 
           <div class="intro-copy">
-            <img class="hero-logo" src="assets/padelstar_logo-720.png" alt="Padelstar" width="560" height="373"
+            <img class="hero-logo" src="assets/padelstar_logo-480.png" alt="Padelstar" width="480" height="320"
               fetchpriority="high">
             <h2 id="startTitle">PADELSTAR</h2>
             <h4 class="version" data-i18n="app.version">v. 0.2 (Beta)</h4>
@@ -538,17 +539,17 @@
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
-  <script src="app/translations.js?v=padelstar-i18n-6"></script>
-  <script src="app/tournament-engine.js?v=padelstar-engine-1"></script>
-  <script src="app/scoring-engine.js?v=padelstar-scoring-1"></script>
-  <script src="app/state-manager.js?v=padelstar-state-1"></script>
-  <script src="app/realtime-sync.js?v=padelstar-realtime-sync-1"></script>
-  <script src="app/offline-storage.js?v=padelstar-offline-1"></script>
-  <script src="app/observability.js?v=padelstar-observability-1"></script>
-  <script src="app/profile-manager.js?v=padelstar-profile-1"></script>
-  <script src="app/app.js?v=padelstar-session-6"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="supabase-config.js"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-6"></script>
+  <script defer src="app/tournament-engine.js?v=padelstar-engine-1"></script>
+  <script defer src="app/scoring-engine.js?v=padelstar-scoring-1"></script>
+  <script defer src="app/state-manager.js?v=padelstar-state-1"></script>
+  <script defer src="app/realtime-sync.js?v=padelstar-realtime-sync-1"></script>
+  <script defer src="app/offline-storage.js?v=padelstar-offline-1"></script>
+  <script defer src="app/observability.js?v=padelstar-observability-1"></script>
+  <script defer src="app/profile-manager.js?v=padelstar-profile-1"></script>
+  <script defer src="app/app.js?v=padelstar-session-6"></script>
 </body>
 
 </html>

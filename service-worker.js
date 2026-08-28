@@ -1,10 +1,10 @@
-const cacheName = "padelstar-v59";
+const cacheName = "padelstar-v61";
 
 const appShell = [
   "./",
   "./index.html",
   "./privacy.html",
-  "./styles/styles.css?v=padelstar-mobile-1",
+  "./styles/styles.css?v=padelstar-ui-2",
   "./app/translations.js?v=padelstar-i18n-6",
   "./app/tournament-engine.js?v=padelstar-engine-1",
   "./app/scoring-engine.js?v=padelstar-scoring-1",
@@ -18,10 +18,11 @@ const appShell = [
   "./manifest.webmanifest",
   "./assets/icons/padelstar-256.png",
   "./assets/icons/padelstar-512.png",
-  "./assets/padelstar_logo-720.png",
+  "./assets/padelstar_logo-480.png",
   "./assets/padelstar_button-540.png",
   "./assets/zigonia-it_logo_gold-512.png",
   "./assets/bg_img-1600.png",
+  "./assets/bg_img-1600.jpg",
   "./assets/New assets/menu_highlight.png",
   "./assets/fonts/TitilliumWeb-Bold.ttf",
   "./assets/fonts/Nunito-VariableFont_wght.ttf",

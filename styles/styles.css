@@ -4144,6 +4144,13 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   font-size: .85rem;
 }
 
+/* Keep visually hidden choice controls inside the viewport on narrow screens. */
+.avatar-picker input[type="radio"] {
+  width: 1px !important;
+  height: 1px !important;
+  max-width: 1px !important;
+}
+
 .profile-history-list {
   display: grid;
   gap: .5rem;
@@ -4182,5 +4189,400 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
 
   .profile-history-list li > span {
     text-align: left;
+  }
+}
+
+/* =========================================================
+   PHASE 16: ACCESSIBLE VISUAL SYSTEM
+   ========================================================= */
+
+:root {
+  --text-primary: #fff4bd;
+  --text-secondary: #e7d29a;
+  --text-tertiary: #c8ad6c;
+  --surface-strong: #211207;
+  --surface-solid: #170901;
+  --surface-raised: #2b1808;
+  --focus-ring: #ffffff;
+  --line-strong: rgba(255, 212, 71, 0.54);
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  color: var(--text-primary);
+  letter-spacing: 0;
+  background:
+    linear-gradient(180deg, rgba(15, 7, 2, 0.84), rgba(15, 7, 2, 0.97)),
+    url("../assets/bg_img-1600.jpg") center top / cover fixed,
+    var(--soft);
+}
+
+body.workspace-active {
+  background:
+    linear-gradient(180deg, rgba(15, 7, 2, 0.91), rgba(15, 7, 2, 0.985)),
+    url("../assets/bg_img-1600.jpg") center bottom / auto 150% fixed,
+    var(--soft);
+}
+
+body::before {
+  opacity: 0.22;
+  mix-blend-mode: normal;
+}
+
+button,
+input,
+textarea,
+select {
+  letter-spacing: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+button {
+  min-width: 44px;
+  min-height: 44px;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+input,
+textarea,
+select {
+  max-width: 100%;
+  border-color: rgba(255, 240, 150, 0.58);
+  background: var(--surface-solid);
+  color: var(--text-primary);
+}
+
+.avatar-picker input[type="radio"] {
+  width: 1px;
+  height: 1px;
+  max-width: 1px;
+}
+
+.checkbox-card input[type="checkbox"],
+.checkbox-field input[type="checkbox"] {
+  width: 20px;
+  max-width: 20px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-tertiary);
+  opacity: 1;
+}
+
+label,
+legend,
+.hint,
+.match-meta,
+.profile-stat-grid span,
+.profile-history-list small {
+  color: var(--text-secondary);
+}
+
+label,
+legend {
+  font-size: 0.96rem;
+}
+
+.hint {
+  font-size: 0.92rem;
+}
+
+.topbar,
+.landing-links,
+.landing-menu-toggle,
+.workspace-menu-toggle,
+.tabs,
+.admin-subtabs,
+.panel,
+.next-match,
+.match-card,
+.spectator-score-card {
+  backdrop-filter: none;
+}
+
+.topbar,
+.tabs,
+.admin-subtabs {
+  border-color: var(--line-strong);
+  background: rgba(23, 9, 1, 0.96);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38);
+}
+
+.panel,
+.next-match {
+  border-color: rgba(255, 212, 71, 0.46);
+  background:
+    linear-gradient(180deg, rgba(255, 240, 150, 0.08), rgba(255, 240, 150, 0.015)),
+    var(--surface-strong);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 150, 0.11),
+    0 16px 34px rgba(0, 0, 0, 0.34);
+}
+
+.match-card,
+.status-grid > div,
+.round-summary > div,
+.tennis-scoreboard > div,
+.spectator-score-teams > div,
+.profile-stat-grid > div {
+  border-color: rgba(255, 240, 150, 0.38);
+  background: var(--surface-solid);
+}
+
+.match-card.match-playing,
+.highlight-match,
+.spectator-score-card {
+  border-color: var(--gold-bright);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 212, 71, 0.16),
+    0 14px 30px rgba(0, 0, 0, 0.36);
+}
+
+.match-status,
+.now-chip,
+.status-chip,
+.role-indicator {
+  min-height: 30px;
+  padding-inline: 0.72rem;
+  border-color: rgba(255, 212, 71, 0.52);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.status-chip.finished,
+.match-status.finished {
+  border-color: #72d695;
+  background: #123d28;
+  color: #d9ffe5;
+}
+
+.status-chip.cancelled,
+.match-status.cancelled {
+  border-color: #ff9d94;
+  background: #4a1715;
+  color: #ffe0dc;
+}
+
+.status-chip.waiting,
+.match-status.waiting {
+  border-color: #d9c38b;
+  background: #382b17;
+  color: #fff0be;
+}
+
+.landing-links .module-link,
+.app-menu .module-link,
+.tab,
+.subtab {
+  color: var(--text-secondary);
+}
+
+.landing-links .module-link.active,
+.landing-links .module-link:hover,
+.app-menu .module-link.active,
+.tab.active,
+.subtab.active {
+  color: #ffffff;
+}
+
+.landing-links {
+  border-color: rgba(255, 212, 71, 0.46);
+  background: rgba(23, 9, 1, 0.92);
+}
+
+.intro {
+  min-height: max(90svh, 720px);
+  background:
+    linear-gradient(90deg, rgba(15, 7, 2, 0.76), rgba(15, 7, 2, 0.62)),
+    linear-gradient(180deg, rgba(15, 7, 2, 0.12), rgba(15, 7, 2, 0.52)),
+    url("../assets/bg_img-1600.jpg") center / 160% auto no-repeat;
+}
+
+.intro::before {
+  background: linear-gradient(90deg, rgba(23, 9, 1, 0.52), transparent 32%, transparent 68%, rgba(23, 9, 1, 0.48));
+}
+
+.landing-cta-secondary {
+  border-color: var(--gold-bright);
+  background: rgba(23, 9, 1, 0.94);
+}
+
+.next-match {
+  border-width: 2px;
+}
+
+.next-match .eyebrow,
+.next-match h3 {
+  color: #ffffff;
+}
+
+h1 {
+  font-size: 2.6rem;
+}
+
+h2 {
+  font-size: 3.8rem;
+}
+
+.workspace-header h2 {
+  font-size: 2.6rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+.match-card,
+.team-player,
+.player-name,
+.landing-cta {
+  overflow-wrap: anywhere;
+}
+
+.view-grid > *,
+.panel > *,
+.match-card > *,
+.team-card > * {
+  min-width: 0;
+}
+
+.player-now-grid strong,
+.tennis-scoreboard strong,
+.spectator-score-teams strong,
+.large-score-actions strong {
+  color: #ffffff;
+}
+
+.profile-light-panel,
+.site-footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 640px;
+}
+
+@media (max-width: 760px) {
+  body,
+  body.workspace-active {
+    background-attachment: scroll;
+  }
+
+  body {
+    font-size: 1rem;
+  }
+
+  button {
+    font-size: 0.96rem;
+  }
+
+  label,
+  legend,
+  .hint {
+    font-size: 0.94rem;
+  }
+
+  .intro {
+    min-height: max(90svh, 820px);
+    background-size: auto 100%;
+  }
+
+  .landing-links .module-link,
+  .app-menu .module-link {
+    font-size: 1rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2,
+  .workspace-header h2 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 430px) {
+  .eyebrow,
+  .language-picker span,
+  .match-meta,
+  .match-status,
+  .now-chip,
+  .status-chip {
+    font-size: 0.78rem;
+  }
+
+  .landing-links .module-link {
+    font-size: 0.88rem;
+  }
+
+  h2,
+  .workspace-header h2 {
+    font-size: 1.75rem;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --text-secondary: #fff4bd;
+    --text-tertiary: #ffe7a0;
+    --surface-strong: #0d0602;
+    --surface-solid: #050302;
+    --line-strong: #fff096;
+  }
+
+  .panel,
+  .next-match,
+  .match-card,
+  .status-grid > div,
+  .round-summary > div,
+  .tennis-scoreboard > div,
+  .spectator-score-teams > div {
+    border-width: 2px;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .topbar,
+  .landing-links,
+  .landing-menu-toggle,
+  .workspace-menu-toggle,
+  .tabs,
+  .admin-subtabs,
+  .panel,
+  .next-match,
+  .match-card,
+  .spectator-score-card {
+    backdrop-filter: none;
+    background: var(--surface-solid);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  button:not(:disabled):hover {
+    transform: none;
   }
 }

@@ -14,7 +14,7 @@ Padelstar er en plattformuavhengig PWA for administrasjon og gjennomføring av p
 
 ### Fase 16 – Synlig, tilgjengelig og visuelt sterk UI
 
-**Status: planlagt 2026-08-29**
+**Status: UI-implementasjon ferdig 2026-08-29; Lighthouse-oppfølging gjenstår**
 
 #### Mål
 
@@ -57,6 +57,12 @@ Rapport mottatt 2026-08-29 fra simulert mobilmåling:
 - største identifiserte mulighet: ubrukt JavaScript, om lag **0,5 s** mulig gevinst
 
 Baseline skal brukes som før-måling. Den viser at innlastingen av den første synlige skjermen er den viktigste tekniske UI-utfordringen, selv om SEO, stabilitet og beste praksis allerede er sterke.
+
+#### Implementeringsstatus
+
+UI- og tilgjengelighetsdelen er gjennomført med sterkere tekstnivåer, fokusmarkering, stabile kontrollmål, mobil reflow, redusert blur/transparens, redusert bevegelse, tydeligere statusflater og komprimert hero-bakgrunn/logo. Systempreferanser brukes for økt kontrast, redusert transparens og redusert bevegelse.
+
+Gjenstående arbeid er en separat ytelsesrunde mot publisert URL. Lokal Lighthouse på utviklingsserveren etter endringene ga ytelse **62/100**, LCP **7,4 s**, FCP **3,2 s**, Speed Index **3,2 s**, CLS **0,176**, TBT **0 ms**, tilgjengelighet **98/100**, SEO **100/100** og beste praksis **96/100**. Målingen er ikke sammenlignbar nok med mottatt produksjonsrapport til å lukke ytelsesmålet; årsaken til layoutskiftet i landingens hero og ubrukt JavaScript må følges opp etter deploy.
 
 #### Planlagt arbeid
 

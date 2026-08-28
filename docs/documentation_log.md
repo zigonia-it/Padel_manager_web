@@ -2733,3 +2733,32 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Hero-/bakgrunnsbilder, fontlasting, tredjepartsskript og initial JavaScript skal profileres før optimalisering.
 - SEO 100, beste praksis 100 og CLS 0 er beskyttelseskrav under UI-arbeidet.
 - Målet er LCP under 2,5 sekunder og ytelsesscore minst 90 i samme måleprofil, etter at årsaken til 9,8 sekunder er identifisert og verifisert.
+
+## 2026-08-29 - Fase 16 UI- og tilgjengelighetsoppgradering
+
+### Gjort
+
+- Etablerte et tydeligere tilgjengelig visuelt system i `styles/styles.css` med sterkere teksthierarki, mer solide flater, tydelig fokus, større kontrollmål og statuser som fortsatt kan leses uten farge alene.
+- Reduserte blur/transparens og dekoreffekter på arbeidsflater, og la inn støtte for `prefers-contrast: more`, `prefers-reduced-transparency: reduce` og `prefers-reduced-motion: reduce`.
+- Forbedret mobil reflow og tekstbryting for admin-, spiller- og tilskuerflater. Rettet en konkret 1 px horisontal overflow fra skjulte avatar-radiofelt ved 320 px viewport.
+- Komprimerte bakgrunnsbildet til `assets/bg_img-1600.jpg`, optimaliserte hero-logoen til `assets/padelstar_logo-480.png`, forhåndslastet synlige bilder og utsatte script med `defer`.
+- Oppdaterte service-worker-cache til `padelstar-v61` og beholdt Vercel Analytics-koblingen.
+
+### Design- og researchgrunnlag
+
+- Apple HIG Accessibility, Typography, Layout og Color.
+- WCAG 2.2 med fokus på kontrast, fokus, reflow og target size.
+- Apple Sports for skannbar live-score og Tournated for rollebasert turneringsdrift.
+
+### Verifisert
+
+- Lokal browser-smoke på landing, admin og spiller ved desktop, 390 px mobil og 320 px mobil.
+- 320 px: `document.documentElement.scrollWidth === window.innerWidth`, uten horisontal overflow.
+- Lokal Lighthouse etter endringene: ytelse 62, tilgjengelighet 98, SEO 100, beste praksis 96; LCP 7,4 s, FCP 3,2 s, Speed Index 3,2 s, CLS 0,176, TBT 0 ms.
+- `npm test`: 49 bestått, 1 forventet opt-in live-test hoppet over.
+- `git diff --check` passerte.
+
+### Åpent etter fase 16
+
+- Kjør samme Lighthouse-profil på publisert URL etter deploy og isoler forskjellen mellom utviklingsserver og produksjon.
+- Reduser ubrukt JavaScript og finn årsaken til layoutskiftet i landingens hero før ytelsesmålet LCP under 2,5 sekunder og ytelse minst 90 kan godkjennes.
