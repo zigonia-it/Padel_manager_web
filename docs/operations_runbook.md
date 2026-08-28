@@ -67,10 +67,15 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync
 - Join-lenke bruker `https://padelstar.app/?join=...`.
 - Opprett, join, live update og offline fallback er smoke-testet.
 
-### Siste produksjonskontroll 2026-08-27
+### Siste produksjonskontroll 2026-08-28
 
 - `https://padelstar.app/` svarte med HTTPS og HTTP 200.
 - `https://padelstar.app/service-worker.js` svarte med HTTP 200.
 - `https://padelstar.app/privacy.html` svarte med HTTP 200 og viste godkjent foreløpig kontakt, 30-dagersregel og Analytics-valg.
 - `https://padelstar.app/service-worker.js` svarte med HTTP 200 etter deploy.
 - Supabase-retensjonsmigreringen ble kjørt live og funksjonens tilgangsvern ble kontrollert read-only.
+- `https://padelstar.app` leverte `app/`/`styles/`-strukturen og service worker v58.
+- Tre isolerte browser-sesjoner verifiserte admin, spiller og tilskuer mot samme live-turnering; testturneringen ble slettet etter testen.
+- `PADELSTAR_LIVE_SUPABASE=1 npm test` passerte med 48 av 48 tester, inkludert live RPC/RLS/rate-limit/cleanup-test.
+- Offline reload beholdt app-shell, spillerrolle og lokal turneringsstate; websocket-feil ved frakobling håndteres av reconnect-status.
+- Realtime-smoke observerte at admin mottok spillerens join i samme turnering uten manuell refresh.

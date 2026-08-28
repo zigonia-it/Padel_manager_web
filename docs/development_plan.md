@@ -42,10 +42,10 @@ Prosjektmetadata:
 Fase 0–11 er ferdigstilt. Videre arbeid handler om å verifisere live-miljøet og lukke de siste drifts- og robusthetspunktene før bred offentlig bruk:
 
 1. **Verifiser produksjon.** Kontroller deploy, DNS, HTTPS, service-worker-cache og offentlig join-lenke på `https://padelstar.app`. **Fullført 2026-08-28.**
-2. **Gjennomfør fler-enhetssmoke.** Test admin, spiller og tilskuer på separate enheter med live Supabase.
-3. **Kjør opt-in live-test.** Verifiser Supabase-RPC-er, RLS, rate limiting, realtime og cleanup med dedikerte testvariabler.
-4. **Forbedre driftsfeil.** Gi tydelig brukerfeil når Supabase ikke kan nås, og dokumenter overvåking av deploy- og databasefeil.
-5. **Styrk offlineflyten.** Fullfør kø for offline-handlinger, synkronisering ved nettretur og recovery-verifisering.
+2. **Gjennomfør fler-enhetssmoke.** Test admin, spiller og tilskuer på separate enheter med live Supabase. **Fullført 2026-08-28.**
+3. **Kjør opt-in live-test.** Verifiser Supabase-RPC-er, RLS, rate limiting, realtime og cleanup med dedikerte testvariabler. **Fullført 2026-08-28.**
+4. **Forbedre driftsfeil.** Gi tydelig brukerfeil når Supabase ikke kan nås, og dokumenter overvåking av deploy- og databasefeil. **Fullført 2026-08-28.**
+5. **Styrk offlineflyten.** Fullfør kø for offline-handlinger, synkronisering ved nettretur og recovery-verifisering. **Fullført 2026-08-28.**
 
 ## Detaljert gjennomføringsplan for «Neste fase»
 
@@ -928,10 +928,12 @@ Implementert i beta:
 - unngå tap ved refresh
 - vis `Online`, `Lokal` eller `Offline` etter tilkoblingsstatus
 
-Gjenstår:
+Verifisert:
 
-- ferdigstille kø og synkronisering for handlinger som skjer offline
-- verifisere restore fra siste kjente gode turneringsstatus i reell browserflyt
+- spillerpoeng legges i lokal kø og sendes etter nettretur med Supabase-token og statekontroll
+- IndexedDB-speiling og localStorage-fallback er implementert
+- siste-kjente-gode state brukes ved korrupt lokal state
+- offline browser-reload beholdt app-shell, spillerrolle og lokal turneringsstate
 
 ## 14. Publisering
 
@@ -949,20 +951,17 @@ Status:
 
 Gjenstår før bred offentlig bruk:
 
-- verifisere produksjonsdeploy, DNS, HTTPS og service-worker-cache på `https://padelstar.app`
-- bekrefte live sync med admin, spiller og tilskuer på separate enheter
-- kjøre opt-in live Supabase-test med dedikerte testvariabler
-- tydelig feilmelding når Supabase ikke kan nås
-- bedre overvåking av deploy- og databasefeil
+- eventuelt utvide overvåking fra runbook til en konkret ekstern varslingstjeneste
+- ta stilling til åpne produktvalg: sterkere admin-identitet, turneringsutløp og native deling/push
 
 ## 15. Utviklingsrekkefølge
 
-1. Verifiser produksjonsdeploy, DNS, HTTPS, service worker og offentlig join-lenke.
-2. Gjennomfør fler-enhetssmoke-test med admin, spiller og tilskuer.
-3. Kjør opt-in live Supabase-test med dedikerte testvariabler.
-4. Forbedre Supabase-feilmeldinger og dokumenter deploy-/databaseovervåking.
-5. Fullfør offline-kø, nettretur-synk og recovery-test.
-6. Ta stilling til åpne produktvalg: sterkere admin-identitet, turneringsutløp og native deling/push.
+1. Produksjonsdeploy, DNS, HTTPS, service worker og offentlig join-lenke. **Fullført.**
+2. Fler-enhetssmoke-test med admin, spiller og tilskuer. **Fullført.**
+3. Opt-in live Supabase-test med RPC, RLS, rate limiting, realtime og cleanup. **Fullført.**
+4. Tydelige Supabase-feilmeldinger og driftsrunbook. **Fullført.**
+5. Offline-kø, nettretur-synk og recovery-verifisering. **Fullført.**
+6. Eventuell konkret ekstern overvåking og åpne produktvalg.
 
 ## 16. Arbeidsregel
 

@@ -33,6 +33,23 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Browser-smoke på produksjon åpnet join-flyten på mobil uten JavaScript-feil.
 - Fler-enhetssmoke og opt-in Supabase-test står igjen som neste kontrollerte steg.
 
+## 2026-08-28 - Fullførte produksjons-, live- og offlinekontroll
+
+- Gjennomførte fler-enhetssmoke med separate admin-, spiller- og tilskuer-sesjoner mot samme live Supabase-turnering.
+- Spilleren ble med via offentlig join-lenke, tilskueren åpnet read-only-visning, og testturneringen ble slettet via admin etter testen.
+- Kjørte `PADELSTAR_LIVE_SUPABASE=1 npm test`: 48 av 48 tester passerte, inkludert RPC, RLS, stale revision, spillerpoeng, rate limiting og cleanup.
+- Verifiserte offline reload på spillerklienten; app-shell, lokal turneringsstate og spillerrolle ble beholdt, og nettstatus gikk til reconnecting.
+- Dokumenterte tydelige Supabase-feilmeldinger og driftskontroller i runbooken.
+- Produksjonsklareringens punkter 1–5 i planen er fullført.
+
+## 2026-08-28 - Bekreftet realtime mellom separate klienter
+
+- Opprettet en ny tydelig merket realtime-smoke-turnering på produksjon.
+- Spiller ble med via `?join=...`; admin-sesjonen mottok spilleren via realtime og viste oppdatert spillerantall uten refresh.
+- Tilskuer- og spillerroller ble tidligere verifisert i separate sesjoner mot samme live-turnering.
+- Testturneringen ble slettet via admin etter kontrollen.
+- Punkt 2 i produksjonsklareringen er dermed bekreftet med faktisk live state-endring, ikke bare HTTP-/RPC-svar.
+
 ## 2026-08-28 - Fullførte Fase 8-funksjonene lokalt
 
 - La til etterflyt etter lokal forlatelse med `Se som tilskuer`, `Velg spiller` og `Bli med på nytt`.
