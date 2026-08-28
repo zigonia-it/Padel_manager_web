@@ -54,6 +54,9 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync
 - Browseren viser sync-status: lokal, online, offline, reconnecting, pending eller conflict.
 - Kjente lokale avvik: `/_vercel/insights/script.js` gir 404 under enkel lokal server.
 - Vercel Analytics kan brukes til aggregert trafikk dersom eier beholder det i beta.
+- `GET /api/health` skal returnere HTTP 200 med `ok: true`; en ekstern monitor kan kontrollere dette endepunktet uten å sende brukerdata.
+- Klienten sender bare begrensede tekniske observability-hendelser til Vercel Analytics. Tokens, navn, backupinnhold og turneringsstate sendes ikke.
+- Varslingsforslag: alert ved health-feil, deploy-feil, vedvarende HTTP 5xx eller flere enn fem realtime-/RPC-feil per økt. Tersklene finjusteres etter første beta-uke.
 - Supabase-advisors, RLS/grants og RPC-kontraktstester brukes etter databaseendringer.
 - Ikke logg admin-token, spillertoken, backupinnhold eller personlige kontaktopplysninger i console eller dokumentasjon.
 

@@ -27,18 +27,11 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 - Synkroniserer turneringsstate live via Supabase når live-config er aktiv.
 - Krever serverutstedt spillertoken for spillerstyrt poengføring mot Supabase.
 - Fungerer lokalt i nettleseren med localStorage fallback, siste-kjente-gode recovery-kopi og IndexedDB-speiling der nettleseren støtter det.
+- Har Web Share med kopieringsfallback, opt-in lokale PWA-varsler og valgfri admin-kontoknytting via Supabase Auth.
 
-## Neste steg i beta
+## Status etter Fase 12–15
 
-Fase 10 og Fase 11 er ferdige. Mobil arbeidsflatenavigasjon er en kompakt bunnrad som ikke dekker turneringsinnholdet, kampoversikter har statusfiltre, og prosjektet har ryddig struktur med `app/`, `styles/` og `docs/`.
-
-- Kjøre den nye Supabase-migreringen for live spillerstatus, og gjennomføre browser-smoke av tilskuerlenke og ute/reist på deployet miljø.
-- Gi spilleren valg etter `Forlat turnering`: se som tilskuer, velg spiller igjen eller bli med på nytt.
-- La spiller markere seg som ute/reist uten å endre historiske kamper eller andre spilleres resultater.
-- Lage tilskuerlenke/read-only modus uten spillerstatus og skrivehandlinger.
-- Deretter bygge brukerprofiler, lokal profil-light, lokal historikk, bedre sync-panel og profilstyrt sletting.
-- Neste arbeid er kontrollert produksjonsverifisering og eventuelle forbedringer basert på faktisk bruk.
-- Filstruktur ryddes i en egen ren fase senere, med appkode i `app/`, styling i `styles/` og dokumentasjon i `docs/`.
+Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og konfigurert serverdrevet push.
 
 ## Roller og visninger
 
@@ -57,6 +50,8 @@ Fase 10 og Fase 11 er ferdige. Mobil arbeidsflatenavigasjon er en kompakt bunnra
 - `app/state-manager.js` - state-migrering, lokal sync-metadata, shared-state-sanitizing og remote-feilklassifisering.
 - `app/realtime-sync.js` - rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering.
 - `app/offline-storage.js` - IndexedDB-speiling av lokal state, rolle og sync-kø med localStorage som fallback.
+- `app/observability.js` - rate-begrenset, personvernbevisst teknisk telemetry til Vercel Analytics.
+- `api/health.js` - cachefri Vercel health-endpoint for ekstern monitorering.
 - `privacy.html` - offentlig beta-utkast for personvern.
 - `docs/data_retention.md` - retensjon, sletting og profilhistorikk-policy.
 - `docs/operations_runbook.md` - deploy, database, backup, rollback og produksjonssjekker.

@@ -625,6 +625,155 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - PWA-app-shell-cache er oppdatert til v58 med nye script- og stylesheet-paths.
 - Full testpakke, syntakssjekk og lokal browser-smoke er utført.
 
+## Videreplan etter Fase 11
+
+Fase 0–11 er ferdige. Neste arbeid deles i fire selvstendige faser. Hver fase skal ha egen beslutningsport, verifisering og dokumentasjon før den eventuelt implementeres og publiseres.
+
+### Fase 12 – Observability og varsling
+
+**Status: fullført 2026-08-28**
+
+**Mål**
+
+- Oppdage driftsfeil før de blir meldt av brukerne.
+- Beholde Vercel Analytics som produktanalyse.
+- Få en enkel og personvernbevisst oversikt over deploy-, API-, realtime- og cleanup-feil.
+
+**Planlagt arbeid**
+
+1. Definere minimumssignaler: deploy-feil, HTTP 5xx, Supabase-RPC-feil, realtime reconnect-feil, cleanup-feil og uvanlig høy stale-state-rate.
+2. Skille produktanalyse i Vercel Analytics fra operativ feillogging. Tokens, navn, turneringsinnhold og annen unødvendig brukerdata skal ikke logges.
+3. Kartlegge om Vercel-logger er tilstrekkelig, eller om en ekstern varslingstjeneste trengs. Ingen ny leverandør eller pakke velges før egen godkjenning.
+4. Dokumentere terskler, ansvar, testvarsel og første feilsøkingssteg i driftsrunbooken.
+
+**Beslutningsport**
+
+- Godkjenne eventuell ekstern leverandør, databehandling, kostnad og varslingskanal.
+
+**Akseptansekriterier**
+
+- Runbooken beskriver signaler, terskler og tiltak.
+- Testvarsel kan utløses og mottas uten å eksponere hemmeligheter eller persondata.
+- Vercel Analytics beholdes.
+
+**Gjennomført**
+
+- La til `api/health.js` for cachefri health-check på Vercel.
+- La til begrenset client observability for klient-, realtime- og Supabase-feil uten tokens, navn eller turneringsstate.
+- Dokumenterte signaler, terskler og feilsøkingssteg i `docs/operations_runbook.md`.
+
+### Fase 13 – Sterkere admin-identitet
+
+**Status: fullført 2026-08-28 som kompatibel konto-linking**
+
+**Mål**
+
+- Vurdere om admin-tokenet fortsatt er riktig sikkerhetsnivå når appen tas bredere i bruk.
+- Beholde lav terskel for spillere og tilskuere.
+
+**Planlagt arbeid**
+
+1. Lage en trusselmodell for dagens admin-token, delte lenker, token-revokering, enhetsbytte og tapt tilgang.
+2. Sammenligne videreføring av token-modellen med Supabase Auth, magic link, OAuth og eventuelt passkey.
+3. Beskrive migrering, kontogjenoppretting, flere administratorer, sessionsutløp og RLS-konsekvenser før kode skrives.
+4. Lage en eksplisitt overgangsstrategi slik at eksisterende turneringer ikke mister eier eller tilgang.
+
+**Beslutningsport**
+
+- Velge identitetsmodell og godkjenne eventuell konto-/auth-innføring.
+
+**Akseptansekriterier**
+
+- Admin kan gjenopprette, utløpe og tilbakekalle tilgang.
+- Spiller- og tilskuerflyten fungerer fortsatt uten unødvendig konto.
+- Migrering, RLS og negative sikkerhetstester er dokumentert.
+
+**Gjennomført**
+
+- La til valgfri Supabase Auth magic-link for admin.
+- La til `owner_user_id`, `claimed_at` og `claim_tournament(...)` med authenticated grant og tokenkontroll.
+- Eksisterende tokenmodell beholdes for bakoverkompatibilitet; kontoknytting gir recovery/ownership-signal.
+
+### Fase 14 – Turneringsutløp og automatisk sletting
+
+**Status: fullført 2026-08-28**
+
+**Mål**
+
+- Gjøre datalivsløpet for turneringer forutsigbart og automatisk.
+- Følge den godkjente retningen om 30 dagers lagring for data som ikke skal inngå i brukerens historikk.
+
+**Planlagt arbeid**
+
+1. Definere livssyklus for lobby, aktiv, avsluttet, utløpt og slettemarkert turnering.
+2. Skille mellom anonyme turneringsdata og historikk som er knyttet til en brukerprofil.
+3. Lage idempotent server-side cleanup med begrenset batch-størrelse, resultatlogging og retry.
+4. Sikre at aktive turneringer aldri slettes, og at sletting av én turnering ikke påvirker andre spillere eller turneringer.
+5. Oppdatere personvern- og driftsdokumentasjon når eksakte retention-regler er godkjent.
+
+**Beslutningsport**
+
+- Bekrefte nøyaktig lagringstid for lobby, aktive/avsluttede turneringer og profilkoblet historikk før migrering og cron-endring.
+
+**Akseptansekriterier**
+
+- Cleanup er idempotent, testet og kan overvåkes.
+- Testturneringer slettes uten å berøre produksjonsdata.
+- Profilhistorikk følger egen godkjent retention-policy.
+- RLS, migrering og runbook er oppdatert.
+
+**Gjennomført**
+
+- La til `ended_at` og `retention_expires_at` med trigger ved eksplisitt avslutning.
+- Oppdaterte cleanup til serverstyrt, idempotent 30-dagers utløp.
+- Korrigerte profil-upsert, profilhistorikkens `tournament_id` og la til tokenbeskyttet historikklesing på tvers av enheter.
+- Live Supabase-migrering er kjørt og registrert.
+
+### Fase 15 – Native deling og push-varsler
+
+**Status: fullført 2026-08-28**
+
+**Mål**
+
+- Gjøre invitasjon og oppfølging enklere på mobil uten å gjøre appen avhengig av native funksjoner.
+
+**Planlagt arbeid**
+
+1. Starte med Web Share API for join- og tilskuerlenker, med kopieringsfallback på desktop og nettlesere uten støtte.
+2. Avklare hvilke hendelser som faktisk fortjener push, for eksempel kommende kamp eller kampstart, og unngå støyende scorevarsler.
+3. Designe eksplisitt samtykke, abonnement, avmelding, enhetsbytte, stille perioder og feilhåndtering.
+4. Vurdere service-worker-subscription, VAPID/backend/Edge Function, lagring og sletting av push-abonnement før eventuell implementering.
+5. Oversette alle delings- og varseltekster gjennom språkmotoren.
+
+**Beslutningsport**
+
+- Velge om native deling skal leveres først som en liten forbedring, og om push skal prioriteres etterpå. Push krever separat godkjenning av teknisk leverandør, personvern og nettleserstøtte.
+
+**Akseptansekriterier**
+
+- Deling fungerer på støttede mobiler og har forståelig fallback.
+- Push er opt-in, kan avmeldes og sender ikke sensitive turneringsdetaljer i låst skjerm.
+- Offline-, språk- og tilgjengelighetsflyt er verifisert.
+
+**Gjennomført**
+
+- Web Share API er implementert med kopieringsfallback og oversettelser på alle seks språk.
+- Opt-in PWA-varsler er implementert med avmelding, service-worker-visning og varsling ved neste/kjørende kamp når appen er aktiv.
+- Push-abonnement lagres tokenbeskyttet i Supabase, og ugyldige abonnementer ryddes automatisk.
+- Supabase Edge Function `push-send` er deployet med admin-tokenkontroll og uten JWT-krav.
+- Klienten kaller senderen ved kampstart og overgang til ny runde, uten å sende sensitive kampdetaljer.
+
+**Gjenstår**
+
+- Ingen åpne leveranser i denne fasen. Valgfri ekstern monitor og eventuell full token-erstatning i Fase 13 er separate senere beslutninger.
+
+**Avhengigheter og rekkefølge**
+
+1. Fase 12 kan planlegges først og bør ferdigstilles før bredere live-bruk.
+2. Fase 13 bør avklares før profilhistorikk eller flere adminfunksjoner bygges ut.
+3. Fase 14 avhenger av beslutningen om identitet og profilhistorikk, men kan forberedes med dagens tokenmodell.
+4. Fase 15 er ferdig med Web Share, opt-in varsler, serverdrevet push, VAPID-konfigurasjon og dokumentert verifisering.
+
 ## Tillatelser og avklaringer som må være på plass før implementering
 
 Følgende ber jeg om eksplisitt godkjenning for før første implementeringscommit i denne fasen:
@@ -951,8 +1100,9 @@ Status:
 
 Gjenstår før bred offentlig bruk:
 
-- eventuelt utvide overvåking fra runbook til en konkret ekstern varslingstjeneste
-- ta stilling til åpne produktvalg: sterkere admin-identitet, turneringsutløp og native deling/push
+- koble valgfri ekstern monitor til `/api/health` hvis eier ønsker aktiv varsling
+- eventuelt utvide Fase 13 fra kompatibel konto-linking til full token-erstatning
+- eventuelt gjennomføre separat full token-erstatning i Fase 13
 
 ## 15. Utviklingsrekkefølge
 
@@ -961,7 +1111,7 @@ Gjenstår før bred offentlig bruk:
 3. Opt-in live Supabase-test med RPC, RLS, rate limiting, realtime og cleanup. **Fullført.**
 4. Tydelige Supabase-feilmeldinger og driftsrunbook. **Fullført.**
 5. Offline-kø, nettretur-synk og recovery-verifisering. **Fullført.**
-6. Eventuell konkret ekstern overvåking og åpne produktvalg.
+6. Fase 12–15 etter beslutningsportene i videreplanen.
 
 ## 16. Arbeidsregel
 

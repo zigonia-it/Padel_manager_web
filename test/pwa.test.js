@@ -9,7 +9,7 @@ const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const stylesSource = fs.readFileSync(path.join(root, "styles", "styles.css"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v58/);
+  assert.match(serviceWorkerSource, /padelstar-v59/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);

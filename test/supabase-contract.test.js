@@ -10,6 +10,10 @@ const undoSql = readSql("supabase/migrations/20260827000755_admin_undo_match.sql
 const retentionSql = readSql("supabase/migrations/20260827003000_retention_cleanup.sql");
 const availabilitySql = readSql("supabase/migrations/20260828090000_player_availability.sql");
 const profileSql = readSql("supabase/migrations/20260828100000_player_profiles.sql");
+const identitySql = readSql("supabase/migrations/20260828120000_admin_identity.sql");
+const lifecycleSql = readSql("supabase/migrations/20260828121000_tournament_lifecycle.sql");
+const profileFixSql = readSql("supabase/migrations/20260828122000_profile_history_fixes.sql");
+const pushSql = readSql("supabase/migrations/20260828130000_push_subscriptions.sql");
 const retentionCronSql = readSql("supabase/migrations/20260828103000_retention_cron.sql");
 
 function readSql(relativePath) {
@@ -179,7 +183,7 @@ test("retention cleanup is internal, bounded and only removes explicitly ended t
   assertContains(block, /p_retention_days integer default 30/, "cleanup must default to the documented retention window");
   assertContains(block, /p_retention_days < 1 or p_retention_days > 3650/, "cleanup must bound the retention window");
   assertContains(block, /state->>'status' = 'avsluttet'/, "cleanup must only remove explicitly ended tournaments");
-  assertContains(block, /updated_at < now\(\) - make_interval\(days => p_retention_days\)/, "cleanup must use server timestamps");
+  assertContains(block, /coalesce\(retention_expires_at, updated_at \+ make_interval\(days => p_retention_days\)\) <= now\(\)/, "cleanup must use server timestamps");
   assertContains(block, /delete from public\.api_rate_limits/, "cleanup must remove stale rate-limit rows");
   assertContains(
     schemaSql,
@@ -187,13 +191,37 @@ test("retention cleanup is internal, bounded and only removes explicitly ended t
     "cleanup must not be callable by public roles",
   );
   assert.match(migration, /revoke all on function public\.cleanup_expired_tournaments\(integer\)/, "migration must preserve the revoke");
+  assert.match(lifecycleSql, /retention_expires_at/);
+  assert.match(lifecycleSql, /tournaments_lifecycle_dates/);
+  assert.match(lifecycleSql, /interval '30 days'/);
+});
+
+test("admin identity claim requires authenticated ownership and preserves token compatibility", () => {
+  assert.match(identitySql, /owner_user_id uuid references auth\.users/);
+  assert.match(identitySql, /auth\.uid\(\) is null/);
+  assert.match(identitySql, /admin_token = p_admin_token/);
+  assert.match(identitySql, /owner_user_id is null or owner_user_id = auth\.uid\(\)/);
+  assert.match(identitySql, /grant execute on function public\.claim_tournament\(uuid, text\) to authenticated/);
+  assert.match(identitySql, /revoke all on function public\.claim_tournament\(uuid, text\) from public, anon/);
+});
+
+test("push subscriptions are token-bound and private", () => {
+  assert.match(pushSql, /create table if not exists public\.push_subscriptions/);
+  assert.match(pushSql, /alter table public\.push_subscriptions enable row level security/);
+  assert.match(pushSql, /player_sessions/);
+  assert.match(pushSql, /token_hash = encode\(extensions\.digest/);
+  assert.match(pushSql, /on conflict \(endpoint\) do update/);
+  assert.match(pushSql, /revoke all on function public\.upsert_push_subscription/);
+  assert.match(pushSql, /grant execute on function public\.upsert_push_subscription.*to anon/);
 });
 
 test("profile migration protects profile ownership and delayed deletion", () => {
   assert.match(profileSql, /create table if not exists public\.player_profiles/);
   assert.match(profileSql, /create table if not exists public\.player_profile_history/);
   assert.match(profileSql, /primary key \(profile_id, id\)/);
-  assert.match(profileSql, /on conflict \(profile_id, id\)/);
+  assert.match(profileFixSql, /insert into public\.player_profiles[\s\S]*on conflict \(id\)/);
+  assert.match(profileFixSql, /insert into public\.player_profile_history[\s\S]*on conflict \(profile_id, id\)/);
+  assert.match(profileFixSql, /nullif\(p_history->>'tournamentId', ''\)::uuid/);
   assert.match(profileSql, /alter table public\.player_profiles enable row level security/);
   assert.match(profileSql, /revoke all privileges on table public\.player_profiles from public, anon, authenticated/);
   assert.match(profileSql, /token_hash = encode\(extensions\.digest\(trim\(p_profile_token\), 'sha256'\), 'hex'\)/);
@@ -209,6 +237,8 @@ test("profile migration protects profile ownership and delayed deletion", () => 
   ]) {
     assert.match(profileSql, new RegExp(`revoke all on function public\\.${signature.replace(/[()]/g, "\\$&")}`));
   }
+  assert.match(profileFixSql, /revoke all on function public\.get_player_profile_history_impl\(uuid, text\)/);
   assert.match(profileSql, /grant execute on function public\.upsert_player_profile\(uuid, text, text, text\) to anon/);
   assert.match(profileSql, /grant execute on function public\.save_player_profile_history\(uuid, text, jsonb\) to anon/);
+  assert.match(profileFixSql, /grant execute on function public\.get_player_profile_history\(uuid, text\) to anon/);
 });

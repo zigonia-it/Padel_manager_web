@@ -32,7 +32,7 @@ profilen skal tilknyttede resterende data slettes etter 30 dager. Cleanup-jobben
 kan lanseres. Fase 9 har nå en profil-light lokalt og private Supabase-tabeller for profilhistorikk; profilen bruker en lokalt
 lagret token som aldri legges i turneringsstate, historikk eller backup.
 
-Den implementerte interne cleanup-funksjonen sletter turneringer som admin eksplisitt har satt til `Avsluttet`, og bruker `updated_at` som serverbasert tidsgrunnlag. Den sletter også rate-limit-rader eldre enn 24 timer. Profil-cleanup sletter profil og profilhistorikk når slettingsfristen er passert. Begge funksjonene kjøres av den betrodde `pg_cron`-jobben `padelstar-retention-cleanup`.
+Den implementerte interne cleanup-funksjonen sletter turneringer som admin eksplisitt har satt til `Avsluttet`, og bruker serverfeltene `ended_at` og `retention_expires_at` som tidsgrunnlag. Den sletter også rate-limit-rader eldre enn 24 timer. Profil-cleanup sletter profil og profilhistorikk når slettingsfristen er passert. Begge funksjonene kjøres av den betrodde `pg_cron`-jobben `padelstar-retention-cleanup`.
 
 ## Sletteprosedyre
 

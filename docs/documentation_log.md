@@ -2613,3 +2613,51 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - `styles.css`
 - `service-worker.js`
 - `documentation_log.md`
+## 2026-08-28 - Plan for videre arbeid etter Fase 11
+
+### Gjort
+
+- Oppdaterte `docs/development_plan.md` med en konkret videreplan etter at Fase 0–11 er ferdige.
+- Delte resterende valg i fire faser:
+  - Fase 12: observability og varsling
+  - Fase 13: sterkere admin-identitet
+  - Fase 14: turneringsutløp og automatisk sletting
+  - Fase 15: native deling og push-varsler
+- La inn mål, scope, beslutningsporter, akseptansekriterier og avhengigheter for hver fase.
+- Presiserte at Vercel Analytics beholdes, at tokens og persondata ikke skal inn i logger, og at 30-dagersregelen må skilles fra profilkoblet historikk.
+
+### Beslutninger
+
+- Ingen av de fire fasene implementeres før den tilhørende beslutningsporten er godkjent.
+- Observability kommer først, admin-identitet deretter, så retention/cleanup og til slutt native deling/push.
+- Web Share kan vurderes som en liten første del av Fase 15; push krever separat personvern- og leverandøravklaring.
+
+### Neste steg
+
+- Starte Fase 12 med kartlegging av eksisterende Vercel- og Supabase-signaler og forslag til terskler.
+
+## 2026-08-28 - Fase 12–15 gjennomføring
+
+### Gjort
+
+- Fase 12: la til `api/health.js`, rate-begrenset observability og runbook-signaler. Vercel Analytics beholdes.
+- Fase 13: la til valgfri Supabase Auth magic-link, konto-knytting med `claim_tournament(...)` og owner-felter i `tournaments`.
+- Fase 14: la til eksplisitt turneringslivssyklus med `ended_at`/`retention_expires_at`, og verifiserte automatisk 30-dagers cleanup.
+- Fase 14: la til tokenbeskyttet lesing av profilhistorikk på tvers av enheter og en ny corrective migration for historikk-upserts.
+- Fase 15: implementerte Web Share med fallback, opt-in lokale PWA-varsler, service-worker-visning og kampvarsler når appen er aktiv.
+- Fase 15: la til tokenbeskyttede push-abonnementer, Supabase Edge Function `push-send` og utløsere ved kampstart/ny runde. VAPID-hemmeligheter er satt som Supabase secrets.
+- Oppdaterte personvern, retention-dokumentasjon, README og utviklingsplan.
+
+### Verifisert
+
+- `supabase db push --linked` rapporterte databasen oppdatert etter migreringene til og med push-abonnementet.
+- `supabase functions deploy push-send --no-verify-jwt` fullførte deploy til prosjektet.
+- `npm test`: 49 bestått, 1 opt-in live-test hoppet over.
+- `node --check` for endrede JavaScript-filer og `git diff --check` passerte.
+- Health-handleren returnerer HTTP 200, `ok: true` og `Cache-Control: no-store`.
+- Lokal browser-smoke startet appen uten nye applikasjonsfeil; lokal Vercel Analytics-404 er forventet uten Vercel-runtime.
+
+### Åpent
+
+- Serverdrevet Web Push er implementert, konfigurert og deployet. Live-endepunktet avviser uautoriserte kall med HTTP 401.
+- Admin-kontoknytting er et kompatibilitetslag rundt eksisterende admin-token, ikke full token-erstatning.

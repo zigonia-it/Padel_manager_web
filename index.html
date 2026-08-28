@@ -330,6 +330,20 @@
               <div class="button-row">
                 <button class="ghost" id="resetTournamentButton" type="button" data-i18n="actions.resetTournament">Nullstill turnering</button>
               </div>
+              <div class="admin-identity-panel" id="adminIdentityPanel">
+                <div class="panel-heading">
+                  <h3 data-i18n="admin.identityTitle">Admin-tilgang</h3>
+                  <span id="adminIdentityStatus" class="status-chip"></span>
+                </div>
+                <p class="hint" data-i18n="admin.identityHint">Knytt turneringen til en konto for enklere gjenoppretting.</p>
+                <form class="inline-form" id="adminIdentityForm">
+                  <input id="adminIdentityEmail" name="email" type="email" autocomplete="email" required
+                    data-i18n-placeholder="admin.identityEmailPlaceholder" placeholder="E-postadresse">
+                  <button class="secondary" type="submit" data-i18n="actions.sendAdminLink">Send innloggingslenke</button>
+                </form>
+                <button class="ghost hidden" id="claimTournamentButton" type="button" data-i18n="actions.claimTournament">Knytt til min konto</button>
+                <p class="hint" id="adminIdentityNotice" aria-live="polite"></p>
+              </div>
             </div>
           </div>
 
@@ -359,6 +373,7 @@
                 </div>
               </div>
               <div class="button-row">
+                <button class="primary" id="shareTournamentButton" type="button" data-i18n="actions.shareTournament">Del turnering</button>
                 <button class="secondary" id="copyInviteCodeButton" type="button" data-i18n="actions.copyCode">Kopier kode</button>
                 <button class="secondary" id="copyJoinLinkButton" type="button" data-i18n="actions.copyLink">Kopier lenke</button>
                 <button class="secondary" id="copySpectatorLinkButton" type="button" data-i18n="actions.copySpectatorLink">Kopier tilskuerlenke</button>
@@ -435,6 +450,7 @@
             </div>
             <div class="player-identity-card" id="playerIdentityCard"></div>
             <div class="button-row player-session-actions">
+              <button class="ghost" id="toggleNotificationsButton" type="button" data-i18n="actions.enableNotifications">Slå på varsler</button>
               <button class="ghost" id="toggleAvailabilityButton" type="button" data-i18n="actions.markAway">Meld deg ute</button>
               <button class="ghost danger-button leave-tournament-button" id="leaveTournamentButton" type="button" data-i18n="actions.leaveTournament">Forlat turnering</button>
             </div>
@@ -530,6 +546,7 @@
   <script src="app/state-manager.js?v=padelstar-state-1"></script>
   <script src="app/realtime-sync.js?v=padelstar-realtime-sync-1"></script>
   <script src="app/offline-storage.js?v=padelstar-offline-1"></script>
+  <script src="app/observability.js?v=padelstar-observability-1"></script>
   <script src="app/profile-manager.js?v=padelstar-profile-1"></script>
   <script src="app/app.js?v=padelstar-session-6"></script>
 </body>

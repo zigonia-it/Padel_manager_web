@@ -127,6 +127,8 @@ window.PadelstarState = (() => {
     delete sharedState.adminToken;
     delete sharedState.playerToken;
     delete sharedState.selectedPlayerId;
+    delete sharedState.ownerUserId;
+    delete sharedState.claimedAt;
     return sharedState;
   }
 

@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v58";
+const cacheName = "padelstar-v59";
 
 const appShell = [
   "./",
@@ -11,6 +11,7 @@ const appShell = [
   "./app/state-manager.js?v=padelstar-state-1",
   "./app/realtime-sync.js?v=padelstar-realtime-sync-1",
   "./app/offline-storage.js?v=padelstar-offline-1",
+  "./app/observability.js?v=padelstar-observability-1",
   "./app/profile-manager.js?v=padelstar-profile-1",
   "./app/app.js?v=padelstar-session-6",
   "./supabase-config.js",
@@ -60,4 +61,37 @@ self.addEventListener("fetch", (event) => {
       });
     }),
   );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "padelstar-show-notification") return;
+  event.waitUntil(self.registration.showNotification(event.data.title, {
+    body: event.data.body,
+    tag: event.data.tag || "padelstar-tournament",
+    icon: "./assets/icons/padelstar-256.png",
+    badge: "./assets/icons/padelstar-256.png",
+  }));
+});
+
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data?.json() ?? {};
+  } catch {
+    payload = { body: event.data?.text() ?? "" };
+  }
+  event.waitUntil(self.registration.showNotification(payload.title || "Padelstar", {
+    body: payload.body || "",
+    tag: payload.tag || "padelstar-push",
+    icon: "./assets/icons/padelstar-256.png",
+    badge: "./assets/icons/padelstar-256.png",
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+    const existing = clients.find((client) => "focus" in client);
+    return existing ? existing.focus() : self.clients.openWindow("./");
+  }));
 });

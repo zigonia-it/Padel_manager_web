@@ -12,6 +12,24 @@ create table if not exists public.tournaments (
 
 alter table public.tournaments
   add column if not exists revision integer not null default 0;
+alter table public.tournaments
+  add column if not exists owner_user_id uuid references auth.users(id) on delete set null,
+  add column if not exists claimed_at timestamptz,
+  add column if not exists ended_at timestamptz,
+  add column if not exists retention_expires_at timestamptz;
+create index if not exists tournaments_owner_user_id_idx on public.tournaments (owner_user_id) where owner_user_id is not null;
+
+create or replace function public.set_tournament_lifecycle_dates()
+returns trigger language plpgsql security invoker set search_path = public, pg_catalog as $$
+begin
+  if coalesce(old.state->>'status', '') <> 'Avsluttet' and coalesce(new.state->>'status', '') = 'Avsluttet' then
+    new.ended_at = coalesce(new.ended_at, now());
+    new.retention_expires_at = coalesce(new.retention_expires_at, new.ended_at + interval '30 days');
+  end if;
+  return new;
+end; $$;
+drop trigger if exists tournaments_lifecycle_dates on public.tournaments;
+create trigger tournaments_lifecycle_dates before update on public.tournaments for each row execute function public.set_tournament_lifecycle_dates();
 
 create table if not exists public.player_sessions (
   id uuid primary key default gen_random_uuid(),
@@ -36,6 +54,16 @@ create table if not exists public.api_rate_limits (
   constraint api_rate_limits_bucket_hash_length check (length(bucket_hash) = 64),
   constraint api_rate_limits_request_count_nonnegative check (request_count >= 0)
 );
+
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(), tournament_id uuid not null references public.tournaments(id) on delete cascade,
+  player_id uuid not null, endpoint text not null unique, subscription jsonb not null,
+  created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
+  constraint push_subscription_endpoint_length check (length(endpoint) between 20 and 2048),
+  constraint push_subscription_size check (pg_column_size(subscription) <= 8192)
+);
+alter table public.push_subscriptions enable row level security;
+revoke all privileges on table public.push_subscriptions from public, anon, authenticated;
 
 alter table public.api_rate_limits enable row level security;
 revoke all privileges on table public.api_rate_limits from public, anon, authenticated;
@@ -1846,7 +1874,7 @@ begin
 
   delete from public.tournaments
   where state->>'status' = 'Avsluttet'
-    and updated_at < now() - make_interval(days => p_retention_days);
+    and coalesce(retention_expires_at, updated_at + make_interval(days => p_retention_days)) <= now();
 
   get diagnostics deleted_tournaments = row_count;
 
@@ -1876,6 +1904,20 @@ revoke all on function public.admin_match_action(uuid, text, uuid, text, integer
 revoke all on function public.admin_undo_match(uuid, text, uuid, integer) from public, anon, authenticated;
 revoke all on function public.delete_tournament(uuid, text) from public, anon, authenticated;
 revoke all on function public.cleanup_expired_tournaments(integer) from public, anon, authenticated;
+
+create or replace function public.claim_tournament(uuid, text)
+returns jsonb language plpgsql security definer set search_path = public, pg_catalog as $$
+declare claimed public.tournaments;
+begin
+  if auth.uid() is null or $1 is null or $2 is null or $2 !~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$' then raise exception 'Authentication required'; end if;
+  update public.tournaments set owner_user_id = auth.uid(), claimed_at = coalesce(claimed_at, now())
+  where id = $1 and admin_token = $2 and (owner_user_id is null or owner_user_id = auth.uid())
+  returning id, owner_user_id, claimed_at into claimed;
+  if claimed.id is null then raise exception 'Tournament claim denied'; end if;
+  return jsonb_build_object('id', claimed.id, 'ownerUserId', claimed.owner_user_id, 'claimedAt', claimed.claimed_at);
+end; $$;
+revoke all on function public.claim_tournament(uuid, text) from public, anon;
+grant execute on function public.claim_tournament(uuid, text) to authenticated;
 
 grant execute on function public.create_tournament(jsonb, text) to anon;
 grant execute on function public.get_tournament_by_code(text) to anon;
@@ -2015,9 +2057,16 @@ begin
   if $1 is null or $2 is null or length(trim($2)) < 32 or $3 is null or jsonb_typeof($3) <> 'object' then raise exception 'Invalid profile history payload'; end if;
   if not exists (select 1 from public.player_profiles where id = $1 and token_hash = encode(extensions.digest(trim($2), 'sha256'), 'hex')) then raise exception 'Profile token mismatch'; end if;
   insert into public.player_profile_history (id, profile_id, tournament_id, tournament_name, ended_at, placement, points, matches, wins, sets, games)
-  values (($3->>'id')::uuid, $1, ($3->>'id')::uuid, left(trim($3->>'tournamentName'), 120), ($3->>'endedAt')::timestamptz, nullif($3->>'placement', '')::integer, greatest(0, coalesce(($3->>'points')::integer, 0)), greatest(0, coalesce(($3->>'matches')::integer, 0)), greatest(0, coalesce(($3->>'wins')::integer, 0)), greatest(0, coalesce(($3->>'sets')::integer, 0)), greatest(0, coalesce(($3->>'games')::integer, 0)))
+  values (($3->>'id')::uuid, $1, nullif($3->>'tournamentId', '')::uuid, left(trim($3->>'tournamentName'), 120), ($3->>'endedAt')::timestamptz, nullif($3->>'placement', '')::integer, greatest(0, coalesce(($3->>'points')::integer, 0)), greatest(0, coalesce(($3->>'matches')::integer, 0)), greatest(0, coalesce(($3->>'wins')::integer, 0)), greatest(0, coalesce(($3->>'sets')::integer, 0)), greatest(0, coalesce(($3->>'games')::integer, 0)))
   on conflict (profile_id, id) do update set tournament_name = excluded.tournament_name, ended_at = excluded.ended_at, placement = excluded.placement, points = excluded.points, matches = excluded.matches, wins = excluded.wins, sets = excluded.sets, games = excluded.games;
   return true;
+end; $$;
+
+create or replace function public.get_player_profile_history_impl(uuid, text)
+returns jsonb language plpgsql security definer set search_path = public, pg_catalog as $$
+begin
+  if $1 is null or $2 is null or length(trim($2)) < 32 or not exists (select 1 from public.player_profiles where id = $1 and token_hash = encode(extensions.digest(trim($2), 'sha256'), 'hex')) then raise exception 'Profile token mismatch'; end if;
+  return coalesce((select jsonb_agg(jsonb_build_object('id', h.id, 'profileId', h.profile_id, 'tournamentId', h.tournament_id, 'tournamentName', h.tournament_name, 'endedAt', h.ended_at, 'placement', h.placement, 'points', h.points, 'matches', h.matches, 'wins', h.wins, 'sets', h.sets, 'games', h.games) order by h.ended_at desc) from public.player_profile_history h where h.profile_id = $1), '[]'::jsonb);
 end; $$;
 
 create or replace function public.request_player_profile_deletion_impl(uuid, text)
@@ -2038,6 +2087,9 @@ create or replace function public.upsert_player_profile(uuid, text, text, text)
 returns jsonb language plpgsql security definer set search_path = public, pg_catalog as $$ begin if not public.consume_api_rate_limit('profile:' || coalesce($2, 'missing'), 30, 3600) then raise exception 'Rate limit exceeded'; end if; return public.upsert_player_profile_impl($1, $2, $3, $4); end; $$;
 create or replace function public.save_player_profile_history(uuid, text, jsonb)
 returns boolean language plpgsql security definer set search_path = public, pg_catalog as $$ begin if not public.consume_api_rate_limit('profile-history:' || coalesce($2, 'missing'), 60, 3600) then raise exception 'Rate limit exceeded'; end if; return public.save_player_profile_history_impl($1, $2, $3); end; $$;
+create or replace function public.get_player_profile_history(uuid, text)
+returns jsonb language plpgsql security definer set search_path = public, pg_catalog as $$ begin if not public.consume_api_rate_limit('profile-history-read:' || coalesce($2, 'missing'), 60, 3600) then raise exception 'Rate limit exceeded'; end if; return public.get_player_profile_history_impl($1, $2); end; $$;
+
 create or replace function public.request_player_profile_deletion(uuid, text)
 returns timestamptz language plpgsql security definer set search_path = public, pg_catalog as $$ begin if not public.consume_api_rate_limit('profile-delete:' || coalesce($2, 'missing'), 10, 3600) then raise exception 'Rate limit exceeded'; end if; return public.request_player_profile_deletion_impl($1, $2); end; $$;
 create or replace function public.cancel_player_profile_deletion(uuid, text)
@@ -2045,17 +2097,42 @@ returns boolean language plpgsql security definer set search_path = public, pg_c
 
 revoke all on function public.upsert_player_profile_impl(uuid, text, text, text) from public, anon, authenticated;
 revoke all on function public.save_player_profile_history_impl(uuid, text, jsonb) from public, anon, authenticated;
+revoke all on function public.get_player_profile_history_impl(uuid, text) from public, anon, authenticated;
 revoke all on function public.request_player_profile_deletion_impl(uuid, text) from public, anon, authenticated;
 revoke all on function public.cancel_player_profile_deletion_impl(uuid, text) from public, anon, authenticated;
 revoke all on function public.cleanup_expired_player_profiles(integer) from public, anon, authenticated;
 revoke all on function public.upsert_player_profile(uuid, text, text, text) from public, authenticated;
 revoke all on function public.save_player_profile_history(uuid, text, jsonb) from public, authenticated;
+revoke all on function public.get_player_profile_history(uuid, text) from public, authenticated;
 revoke all on function public.request_player_profile_deletion(uuid, text) from public, authenticated;
 revoke all on function public.cancel_player_profile_deletion(uuid, text) from public, authenticated;
 grant execute on function public.upsert_player_profile(uuid, text, text, text) to anon;
 grant execute on function public.save_player_profile_history(uuid, text, jsonb) to anon;
+grant execute on function public.get_player_profile_history(uuid, text) to anon;
 grant execute on function public.request_player_profile_deletion(uuid, text) to anon;
 grant execute on function public.cancel_player_profile_deletion(uuid, text) to anon;
+
+create or replace function public.upsert_push_subscription(uuid, text, uuid, text, jsonb)
+returns boolean language plpgsql security definer set search_path = public, pg_catalog as $$
+declare next_endpoint text := trim(coalesce($5->>'endpoint', ''));
+begin
+  if $1 is null or $3 is null or $4 is null or length(trim($4)) < 32 or $5 is null or jsonb_typeof($5) <> 'object' or next_endpoint = '' or length(next_endpoint) > 2048 or $5->'keys' is null then raise exception 'Invalid push subscription payload'; end if;
+  if not exists (select 1 from public.player_sessions where tournament_id = $1 and player_id = $3 and token_hash = encode(extensions.digest(trim($4), 'sha256'), 'hex')) or not exists (select 1 from public.tournaments where id = $1 and invite_code = upper(trim($2))) then raise exception 'Player session mismatch'; end if;
+  insert into public.push_subscriptions (tournament_id, player_id, endpoint, subscription) values ($1, $3, next_endpoint, $5)
+  on conflict (endpoint) do update set tournament_id = excluded.tournament_id, player_id = excluded.player_id, subscription = excluded.subscription, updated_at = now();
+  return true;
+end; $$;
+create or replace function public.delete_push_subscription(uuid, uuid, text, text)
+returns boolean language plpgsql security definer set search_path = public, pg_catalog as $$
+begin
+  if not exists (select 1 from public.player_sessions where tournament_id = $1 and player_id = $2 and token_hash = encode(extensions.digest(trim(coalesce($3, '')), 'sha256'), 'hex')) then raise exception 'Player session mismatch'; end if;
+  delete from public.push_subscriptions where tournament_id = $1 and player_id = $2 and endpoint = trim($4);
+  return true;
+end; $$;
+revoke all on function public.upsert_push_subscription(uuid, text, uuid, text, jsonb) from public, authenticated;
+revoke all on function public.delete_push_subscription(uuid, uuid, text, text) from public, authenticated;
+grant execute on function public.upsert_push_subscription(uuid, text, uuid, text, jsonb) to anon;
+grant execute on function public.delete_push_subscription(uuid, uuid, text, text) to anon;
 
 do $$
 begin
