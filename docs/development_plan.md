@@ -37,12 +37,15 @@ Prosjektmetadata:
 - Automatiserte regresjonstester er etablert for turneringsmotor, scoring, roller/moduler og Supabase SQL/RPC-kontrakter, med opt-in live Supabase-test og CI-kjøring før GitHub Pages-deploy.
 - Spillere kan forlate sin lokale spillerøkt uten at spilleren slettes fra turneringen eller at kampoppsett/resultater endres for andre.
 
-## Neste fase: produksjonsklar beta
+## Neste fase: produksjonsklarering
 
-Prioritert rekkefølge basert på siste dokumentasjonslogg:
+Fase 0–11 er ferdigstilt. Videre arbeid handler om å verifisere live-miljøet og lukke de siste drifts- og robusthetspunktene før bred offentlig bruk:
 
-1. **Poler mobil- og turnerings-UI.** Fase 10 er pågående etter at språk, spillerprofil og historikk er ferdigstilt.
-2. **Rydd filstruktur i en ren flyttefase.** Samle appkode, styling og dokumentasjon i tydelige mapper uten funksjonsendringer etter UI-polish.
+1. **Verifiser produksjon.** Kontroller deploy, DNS, HTTPS, service-worker-cache og offentlig join-lenke på `https://padelstar.app`. **Fullført 2026-08-28.**
+2. **Gjennomfør fler-enhetssmoke.** Test admin, spiller og tilskuer på separate enheter med live Supabase.
+3. **Kjør opt-in live-test.** Verifiser Supabase-RPC-er, RLS, rate limiting, realtime og cleanup med dedikerte testvariabler.
+4. **Forbedre driftsfeil.** Gi tydelig brukerfeil når Supabase ikke kan nås, og dokumenter overvåking av deploy- og databasefeil.
+5. **Styrk offlineflyten.** Fullfør kø for offline-handlinger, synkronisering ved nettretur og recovery-verifisering.
 
 ## Detaljert gjennomføringsplan for «Neste fase»
 
@@ -925,12 +928,10 @@ Implementert i beta:
 - unngå tap ved refresh
 - vis `Online`, `Lokal` eller `Offline` etter tilkoblingsstatus
 
-Neste prioritet:
+Gjenstår:
 
-- IndexedDB
-- kø for handlinger som skjer offline
-- synk når nett kommer tilbake
-- restore fra siste kjente gode turneringsstatus
+- ferdigstille kø og synkronisering for handlinger som skjer offline
+- verifisere restore fra siste kjente gode turneringsstatus i reell browserflyt
 
 ## 14. Publisering
 
@@ -948,27 +949,20 @@ Status:
 
 Gjenstår før bred offentlig bruk:
 
-- enkel personverntekst for webversjonen
-- verifisere produksjonsdeploy, DNS og service-worker-cache på `https://padelstar.app`
+- verifisere produksjonsdeploy, DNS, HTTPS og service-worker-cache på `https://padelstar.app`
 - bekrefte live sync med admin, spiller og tilskuer på separate enheter
+- kjøre opt-in live Supabase-test med dedikerte testvariabler
 - tydelig feilmelding når Supabase ikke kan nås
 - bedre overvåking av deploy- og databasefeil
 
 ## 15. Utviklingsrekkefølge
 
-1. Deploy branchen og verifiser `https://padelstar.app`, DNS, service worker og offentlig join-lenke.
-2. Gjennomfør en kontrollert fler-enhetssmoke-test med admin, spiller og tilskuer.
-3. Hardne host/admin- og spilleridentitet, spiller-token, RLS/grants og rate limiting.
-4. Gjør kampstart, resultat, walkover, avbrytelse og rundeavansement atomiske mot Supabase.
-5. Lag automatiserte tester for scheduler, cup-bracket, scoring, leaderboard, walkover/undo og rollevisning.
-6. Stabiliser realtime ved reconnect, samtidige endringer og stale state.
-7. Flytt hardkodet tekst til i18n-struktur og del `app.js` i mindre moduler.
-8. Mål iPhone-hjemskjermens oppstart og forbedre app-shell, bildehåndtering, IndexedDB og recovery.
-9. Skriv personverntekst, fastsett dataretensjon og dokumenter produksjonsdrift. **Fullført i Fase 7.**
-10. Fullfør språkmotoren, forbedre spillerøkt etter forlatelse, la spiller melde seg ute/reist og lag tilskuerlenke. **Planlagt i Fase 8.**
-11. Bygg brukerprofiler, lokal profil-light, lokal turneringshistorikk, bedre sync-panel, profilknyttet historikk/statistikk og profilstyrt sletting innen 30 dager etter profilsletting. **Planlagt i Fase 9.**
-12. Poler mobil- og turnerings-UI: forsidevalg, mobil admin, rolleindikatorer, kampkort, spillerens nå-kort, leaderboard, filtre, cup-bracket, tomtilstander, delingspanel og tilgjengelige småknapper. **Fullført i Fase 10.**
-13. Rydd filstruktur med appkode i `app/`, stylesheet i `styles/` og dokumentasjon i `docs/`, uten funksjonsendringer. **Fullført i Fase 11.**
+1. Verifiser produksjonsdeploy, DNS, HTTPS, service worker og offentlig join-lenke.
+2. Gjennomfør fler-enhetssmoke-test med admin, spiller og tilskuer.
+3. Kjør opt-in live Supabase-test med dedikerte testvariabler.
+4. Forbedre Supabase-feilmeldinger og dokumenter deploy-/databaseovervåking.
+5. Fullfør offline-kø, nettretur-synk og recovery-test.
+6. Ta stilling til åpne produktvalg: sterkere admin-identitet, turneringsutløp og native deling/push.
 
 ## 16. Arbeidsregel
 

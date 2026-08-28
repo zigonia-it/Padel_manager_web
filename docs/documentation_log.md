@@ -25,6 +25,14 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Alle relevante JavaScript-filer passerte `node --check`, og `git diff --check` passerte.
 - Fase 10 og Fase 11 er ferdige. Neste steg er kontrollert produksjonsverifisering.
 
+## 2026-08-28 - Verifiserte produksjonsdeploy
+
+- `https://padelstar.app` svarer med HTTPS 200 fra Vercel.
+- Live HTML peker til `app/` og `styles/`, og service worker leverer `padelstar-v58`.
+- PWA-shell, manifest, join-URL og tilskuer-URL svarte med 200.
+- Browser-smoke på produksjon åpnet join-flyten på mobil uten JavaScript-feil.
+- Fler-enhetssmoke og opt-in Supabase-test står igjen som neste kontrollerte steg.
+
 ## 2026-08-28 - Fullførte Fase 8-funksjonene lokalt
 
 - La til etterflyt etter lokal forlatelse med `Se som tilskuer`, `Velg spiller` og `Bli med på nytt`.
