@@ -1,6 +1,6 @@
 window.PadelstarTournamentEngine = (() => {
   function buildSchedule(players, format = "roundRobin") {
-    const activePlayers = players.filter((player) => player.active);
+    const activePlayers = players.filter((player) => player.active && player.availability !== "away");
     if (format === "cup") return [];
     return activePlayers.length < 4
       ? generateSinglesRounds(activePlayers)

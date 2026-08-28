@@ -955,7 +955,7 @@ Produktdokumentet er primært basert på:
 
 Anbefalt rekkefølge:
 
-1. Flytt flere synlige UI-tekster inn i språkmotoren, som nå har Bokmål, Nynorsk, English (International), Español, Deutsch og Français.
+1. Kjøre Supabase-migreringen for live spillerstatus og gjennomføre browser-smoke av tilskuerlenke, forlatelse og ute/reist på deployet miljø.
 2. Forbedre etterflyten etter `Forlat turnering` med valg for tilskuer, spillerbytte og ny join.
 3. La spiller markere seg som ute/reist uten å påvirke historiske kamper eller andre spilleres resultater.
 4. Lag offentlig/read-only tilskuerlenke og tydelig tilskuermodus.

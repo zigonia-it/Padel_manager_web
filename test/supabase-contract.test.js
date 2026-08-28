@@ -8,6 +8,9 @@ const schemaSql = readSql("supabase_schema.sql");
 const accessHardeningSql = readSql("supabase/migrations/20260826235212_access_hardening.sql");
 const undoSql = readSql("supabase/migrations/20260827000755_admin_undo_match.sql");
 const retentionSql = readSql("supabase/migrations/20260827003000_retention_cleanup.sql");
+const availabilitySql = readSql("supabase/migrations/20260828090000_player_availability.sql");
+const profileSql = readSql("supabase/migrations/20260828100000_player_profiles.sql");
+const retentionCronSql = readSql("supabase/migrations/20260828103000_retention_cron.sql");
 
 function readSql(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -63,6 +66,7 @@ test("public RPC wrappers are rate limited and private implementations stay revo
     "save_tournament_state",
     "join_tournament",
     "save_player_point",
+    "set_player_availability",
     "admin_advance_cup",
     "admin_advance_round",
     "admin_set_result",
@@ -85,6 +89,7 @@ test("public RPC wrappers are rate limited and private implementations stay revo
     "save_tournament_state_impl(uuid, text, jsonb, integer)",
     "join_tournament_impl(text, jsonb)",
     "save_player_point_impl(uuid, text, uuid, uuid, integer, text)",
+    "set_player_availability_impl(uuid, text, uuid, text, text)",
     "admin_advance_cup_impl(uuid, text, integer)",
     "admin_advance_round_impl(uuid, text, integer)",
     "admin_set_result_impl(uuid, text, uuid, integer, integer, integer)",
@@ -122,6 +127,20 @@ test("player score writes require token hash and cannot score for another team",
   assertContains(block, /token_hash = encode\(extensions\.digest\(trim\(p_player_token\), 'sha256'\), 'hex'\)/, "player token must be checked as a hash");
   assertContains(block, /raise exception 'player is not part of this match'/, "player must be part of the scored team");
   assertContains(block, /where id = p_tournament_id\s+and invite_code = upper\(trim\(p_invite_code\)\)\s+for update/, "score writes must lock the target tournament row");
+});
+
+test("player availability writes require a session token and preserve atomic revisions", () => {
+  const block = functionBlock(availabilitySql, "set_player_availability_impl");
+
+  assertContains(block, /p_availability text/, "availability writes must carry a requested status");
+  assertContains(block, /p_availability not in \('active', 'away'\)/, "availability must use the supported statuses");
+  assertContains(block, /from public\.player_sessions/, "availability must verify a server-issued session");
+  assertContains(block, /token_hash = encode\(extensions\.digest\(trim\(p_player_token\), 'sha256'\), 'hex'\)/, "availability token must be checked as a hash");
+  assertContains(block, /for update/, "availability must lock the tournament row");
+  assertContains(block, /revision = current_revision \+ 1/, "availability must increment the revision atomically");
+  assertContains(availabilitySql, /revoke all on function public\.set_player_availability_impl\(/, "private implementation must be revoked");
+  assertContains(availabilitySql, /consume_api_rate_limit/, "availability wrapper must enforce rate limiting");
+  assertContains(availabilitySql, /grant execute on function public\.set_player_availability\(uuid, text, uuid, text, text\) to anon/, "public wrapper must be granted intentionally");
 });
 
 test("admin match RPCs require token, revision and row locks", () => {
@@ -168,4 +187,28 @@ test("retention cleanup is internal, bounded and only removes explicitly ended t
     "cleanup must not be callable by public roles",
   );
   assert.match(migration, /revoke all on function public\.cleanup_expired_tournaments\(integer\)/, "migration must preserve the revoke");
+});
+
+test("profile migration protects profile ownership and delayed deletion", () => {
+  assert.match(profileSql, /create table if not exists public\.player_profiles/);
+  assert.match(profileSql, /create table if not exists public\.player_profile_history/);
+  assert.match(profileSql, /primary key \(profile_id, id\)/);
+  assert.match(profileSql, /on conflict \(profile_id, id\)/);
+  assert.match(profileSql, /alter table public\.player_profiles enable row level security/);
+  assert.match(profileSql, /revoke all privileges on table public\.player_profiles from public, anon, authenticated/);
+  assert.match(profileSql, /token_hash = encode\(extensions\.digest\(trim\(p_profile_token\), 'sha256'\), 'hex'\)/);
+  assert.match(profileSql, /interval '30 days'/);
+  assert.match(profileSql, /cleanup_expired_player_profiles/);
+  assert.match(retentionCronSql, /cron\.schedule/);
+  assert.match(retentionCronSql, /padelstar-retention-cleanup/);
+  for (const signature of [
+    "upsert_player_profile_impl(uuid, text, text, text)",
+    "save_player_profile_history_impl(uuid, text, jsonb)",
+    "request_player_profile_deletion_impl(uuid, text)",
+    "cancel_player_profile_deletion_impl(uuid, text)",
+  ]) {
+    assert.match(profileSql, new RegExp(`revoke all on function public\\.${signature.replace(/[()]/g, "\\$&")}`));
+  }
+  assert.match(profileSql, /grant execute on function public\.upsert_player_profile\(uuid, text, text, text\) to anon/);
+  assert.match(profileSql, /grant execute on function public\.save_player_profile_history\(uuid, text, jsonb\) to anon/);
 });

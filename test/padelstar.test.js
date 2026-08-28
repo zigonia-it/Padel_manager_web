@@ -171,6 +171,18 @@ test("doubles rotation keeps one fixed participant and records sit-out with odd 
   );
 });
 
+test("away players stay in state but are excluded from future schedules", () => {
+  const api = loadPadelstar();
+  const state = makeTournament(api, ["Ada", "Bo", "Cy", "Di"]);
+  state.players[0].availability = "away";
+
+  state.schedule = api.buildSchedule(state.players, "roundRobin");
+
+  assert.equal(state.players[0].active, true);
+  assert.equal(state.players[0].availability, "away");
+  assert.equal(state.schedule.every((round) => round.teams.flatMap((team) => team.players).every((player) => player.id !== state.players[0].id)), true);
+});
+
 test("generating a round assigns only available courts to live matches", () => {
   const api = loadPadelstar();
   const state = makeTournament(api, ["Ada", "Bo", "Cy", "Di", "Eli", "Fia"], { courtCount: 1 });
@@ -524,4 +536,19 @@ test("translations are loaded from the shared dictionary with Bokmål fallback",
   state.settings.language = "unknown";
   assert.equal(api.t("finishTournament"), "Fullfør turnering");
   assert.equal(api.t("actions.leaveTournament"), "Forlat turnering");
+});
+
+test("spectator links use a dedicated read-only query parameter", () => {
+  const api = loadPadelstar();
+  makeTournament(api, ["Ada", "Bo"]);
+
+  assert.match(api.createSpectatorLink(), /[?&]spectate=TEST1(?:&|$)/);
+  assert.doesNotMatch(api.createSpectatorLink(), /[?&]join=/);
+});
+
+test("all visible app translation keys have Bokmål fallback text", () => {
+  const api = loadPadelstar();
+  const missingKeys = collectTranslationKeys().filter((key) => !api.i18n.has("nb", key));
+
+  assert.deepEqual(missingKeys, []);
 });

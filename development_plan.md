@@ -1,6 +1,6 @@
 # Padelstar - Utviklingsplan
 
-Sist oppdatert: 2026-08-27
+Sist oppdatert: 2026-08-28
 
 Status: aktivt arbeidsdokument for plan og gjennomføring
 
@@ -390,7 +390,7 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 
 ### Fase 8 – Språkmotor, spillerøkt, tilgjengelighet og tilskuerlenke
 
-**Status: pågår**
+**Status: fullført 2026-08-28**
 
 **Formål**
 
@@ -424,24 +424,42 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Flyttet første Fase 8-tekster for `Forlat turnering`, ventende spillerpoeng, sync-status og tilkoblingsstatus inn i språkmotoren.
 - La inn støttede språk som én felles språkliste: Bokmål, Nynorsk, English (International), Español, Deutsch og Français.
 - Språkvelgeren bygges fra språkmotoren, med statiske HTML-valg som fallback før JavaScript starter.
+- Flyttet all synlig tekst i hovedappen fra `index.html` og `app.js` til oversettelsesnøkler, inkludert knapper, valglister, tomtilstander, dialoger, statusmeldinger, ARIA-etiketter, placeholders og metabeskrivelse.
+- La inn automatisk nøkkeltest som sikrer at nye synlige apptekster har Bokmål-fallback, samt oversettelse av scorevalideringsfeil ved visning.
+- Oppdaterte PWA-cache og scriptversjoner til `padelstar-v54`, `padelstar-i18n-4` og `padelstar-session-4`.
+- La til etterflyt etter lokal forlatelse med tilskuer, spillerbytte og ny join.
+- La til separat `availability`-status for `active` og `away`, slik at ute/reiste spillere ikke kommer med i nye round-robin- eller cup-runder mens historiske kamper beholdes.
+- La til token-beskyttet `set_player_availability`-RPC i ny Supabase-migrering, med radlås og atomisk revisjonsøkning.
+- La til offentlig `?spectate=KODE`-lenke, rolleindikator, tilskuerbegrensning og mobil bunnnavigasjon.
+- Oppdaterte PWA-cache og scriptversjoner til `padelstar-v55`, `padelstar-i18n-5` og `padelstar-session-5`.
+- Kjørte `20260828090000_player_availability.sql` i det koblede Supabase-prosjektet etter å ha synkronisert migreringshistorikken.
 
 **Akseptansekriterier**
 
 - Nye synlige UI-tekster i Fase 8 går via språkmotoren og har Bokmål-fallback.
+- Alle synlige tekster i hovedappen er nå koblet til språkmotoren; lengre oversettelser i de fem øvrige språkene kan finpusses fortløpende uten nye hardkodede tekster.
 - Språkmotoren støtter variabler for tellertekster, navn, runder og status uten strengbygging spredt i UI-koden.
 - Etter `Forlat turnering` kan brukeren umiddelbart velge tilskuer, velge spiller igjen eller bli med på nytt.
 - Spillerpanelet har en tydelig handlingsorientert tomtilstand etter forlatelse.
 - En spiller som markerer seg ute/reist fjernes ikke fra tidligere kamper, tabellgrunnlag eller historikk.
 - Nye runder bruker bare tilgjengelige spillere.
+- Tilskuerlenke og ute/reist-status er implementert lokalt og live i Supabase med tokenbeskyttet RPC.
 - Admin kan se forskjell på aktiv spiller, ute/reist spiller, spiller nå, venter og lokal spillerøkt som bare er forlatt på én enhet.
 - Tilskuerlenken gir read-only turneringsvisning uten spillerfanens personlige status og uten skrivehandlinger.
 - Mobilnavigasjon og rolleindikator gjør det tydelig om brukeren er admin, spiller eller tilskuer.
 - Sync-/offline-status er handlingsklar uten tekniske ord som `state`, `sync` eller `revision` i brukerflaten.
 - Eksisterende anonym join-flyt og adminflyt fungerer som før.
 
+**Faseverifikasjon**
+
+- `npm test`: 43 tester passerte, 1 opt-in live-test hoppet over uten live-testvariabler.
+- `node --check app.js` og `node --check translations.js` passerte.
+- `supabase migration list --linked`: alle lokale migreringer, inkludert tilgjengelighetsmigreringen, er synkronisert med live.
+- Browser-smoke verifiserte språkvelger, tilskuerfallback, rollevisning og spansk/engelsk setup-flyt.
+
 ### Fase 9 – Brukerprofiler, historikk og profilstyrt sletting
 
-**Status: planlagt**
+**Status: fullført 2026-08-28**
 
 **Formål**
 
@@ -480,6 +498,25 @@ Målet med neste fase er å gjøre 0.2 Beta robust nok til kontrollert bruk i ek
 - Om profil skal bruke e-post, passkey, magic link eller en annen identitetsmekanisme.
 - Om en spiller kan ha flere profiler eller slå sammen historikk.
 - Hvilke statistikkfelter som skal være synlige for profilen og eventuelt andre spillere.
+
+**Gjennomført hittil**
+
+- La til lokal profil-light med stabil profil-ID, visningsnavn, avatar og lokal lagring.
+- Join-flyten foreslår profilens navn/avatar, men anonym join og eksisterende spillerflyt er fortsatt tilgjengelig.
+- Avsluttede turneringer kan lagres som profilens lokale historikk med plassering, poeng, kamper, seire, sett og games.
+- La til profilvisning med samlet statistikk og tidligere turneringer, isolert på profil-ID.
+- La til 30 dagers slettestatus med angre-mulighet og automatisk lokal opprydding når fristen er passert.
+- La til private Supabase-tabeller og tokenbeskyttede RPC-er for profil, historikk, slettingsstatus og intern cleanup.
+- Profilhistorikk og eksport flytter ikke admin- eller spillertoken.
+
+**Faseverifikasjon**
+
+- Kjørte `20260828100000_player_profiles.sql`, `20260828103000_retention_cron.sql` og `20260828104500_profile_history_owner_key.sql` i koblet Supabase-prosjekt.
+- Kontrollerte at `player_profiles` og `player_profile_history` finnes live med RLS, og at profilhistorikk har sammensatt eier-/historikknøkkel.
+- Kontrollerte live `cron.job`: `padelstar-retention-cleanup` kjører daglig kl. 03:15 UTC og kaller begge cleanup-funksjonene.
+- `npm test`: 47 tester totalt, 46 passerte og 1 opt-in live-test hoppet over uten testvariabler.
+- Profilmanager-, Supabase-kontrakt- og PWA-testene passerte.
+- Browser-smoke verifiserte oppretting/lagring av profil, persistering etter reload, profilforslag i join og historikkfilter.
 
 ### Fase 10 – UI-polish og mobil ergonomi
 

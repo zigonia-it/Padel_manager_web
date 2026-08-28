@@ -2,9 +2,12 @@ const legacyStorageKey = "padel-manager-demo";
 const legacyRoleStorageKey = "padel-manager-role";
 const storageKey = "padelstar-demo";
 const roleStorageKey = "padelstar-role";
+const profileStorageKey = "padelstar-profile";
+const profileHistoryStorageKey = "padelstar-profile-history";
 const syncStorageKey = `${storageKey}-sync`;
 const recoveryStorageKey = `${storageKey}-last-good`;
 const publicAppUrl = "https://padelstar.app/";
+const spectatorQueryKey = "spectate";
 const playerAccentPalette = {
   blue: "#1a59f2",
   orange: "#e67a0a",
@@ -44,6 +47,8 @@ const scoring = window.PadelstarScoring;
 const stateManager = window.PadelstarState;
 const realtimeSync = window.PadelstarRealtime;
 const offlineStorage = window.PadelstarOfflineStorage;
+const profileManager = window.PadelstarProfiles;
+let profile = null;
 
 const defaultTournament = createTournament({
   name: "Risløkka Padel",
@@ -56,8 +61,11 @@ let recoveredFromLastGood = false;
 migrateLegacyLocalStorage();
 
 let state = loadState();
+profile = loadLocalProfile();
 let largeScoreMatchId = null;
 let activeModule = "landing";
+let spectatorMode = false;
+let localLeftPlayerId = null;
 const supabaseSettings = window.PADELSTAR_SUPABASE ?? window.PADEL_MANAGER_SUPABASE ?? {};
 const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
   ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
@@ -122,13 +130,16 @@ const elements = {
   cupTeamSummary: document.querySelector("#cupTeamSummary"),
   cupBracket: document.querySelector("#cupBracket"),
   tournamentTitle: document.querySelector("#tournamentTitle"),
+  roleIndicator: document.querySelector("#roleIndicator"),
   roundLabel: document.querySelector("#roundLabel"),
   inviteCode: document.querySelector("#inviteCode"),
   adminInviteCode: document.querySelector("#adminInviteCode"),
   joinQrCode: document.querySelector("#joinQrCode"),
   joinLink: document.querySelector("#joinLink"),
+  spectatorLink: document.querySelector("#spectatorLink"),
   copyInviteCodeButton: document.querySelector("#copyInviteCodeButton"),
   copyJoinLinkButton: document.querySelector("#copyJoinLinkButton"),
+  copySpectatorLinkButton: document.querySelector("#copySpectatorLinkButton"),
   copyStatus: document.querySelector("#copyStatus"),
   refreshRemoteButton: document.querySelector("#refreshRemoteButton"),
   tournamentStatus: document.querySelector("#tournamentStatus"),
@@ -146,6 +157,7 @@ const elements = {
   playerStandingsList: document.querySelector("#playerStandingsList"),
   playerIdentityCard: document.querySelector("#playerIdentityCard"),
   leaveTournamentButton: document.querySelector("#leaveTournamentButton"),
+  toggleAvailabilityButton: document.querySelector("#toggleAvailabilityButton"),
   playerNextMatch: document.querySelector("#playerNextMatch"),
   playerStatusGrid: document.querySelector("#playerStatusGrid"),
   generateRoundButton: document.querySelector("#generateRoundButton"),
@@ -171,6 +183,16 @@ const elements = {
   landingLinks: document.querySelector("#landingLinks"),
   workspaceMenuToggle: document.querySelector(".workspace-menu-toggle"),
   workspaceTabs: document.querySelector("#workspaceTabs"),
+  profileForm: document.querySelector("#profileForm"),
+  profileNameInput: document.querySelector("#profileNameInput"),
+  profileAvatarPicker: document.querySelector("#profileAvatarPicker"),
+  profileStats: document.querySelector("#profileStats"),
+  profileHistory: document.querySelector("#profileHistory"),
+  profileHistoryFilter: document.querySelector("#profileHistoryFilter"),
+  profileHistoryList: document.querySelector("#profileHistoryList"),
+  profileDeletionStatus: document.querySelector("#profileDeletionStatus"),
+  deleteProfileButton: document.querySelector("#deleteProfileButton"),
+  cancelProfileDeletionButton: document.querySelector("#cancelProfileDeletionButton"),
 };
 
 let pendingSetScoreMatchId = null;
@@ -178,7 +200,9 @@ let pendingSetScoreMatchId = null;
 function initializeApp() {
 syncLanguageOptions();
 syncCreateFormDefaults();
+syncJoinFormFromProfile();
 syncJoinPreview();
+renderProfile();
 prefillInviteCodeFromUrl();
 syncCopyrightYear();
 registerServiceWorker();
@@ -191,6 +215,13 @@ window.addEventListener("offline", handleOffline);
 
 elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
 elements.avatarPicker.addEventListener("change", syncJoinPreview);
+elements.profileForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  saveLocalProfileFromForm();
+});
+elements.deleteProfileButton?.addEventListener("click", requestProfileDeletion);
+elements.cancelProfileDeletionButton?.addEventListener("click", cancelProfileDeletion);
+elements.profileHistoryFilter?.addEventListener("change", renderProfile);
 elements.adminParticipatesInput.addEventListener("change", syncAdminPlayerChoice);
 elements.languageSelect.addEventListener("change", () => {
   state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
@@ -228,6 +259,7 @@ elements.createTournamentForm.addEventListener("submit", async (event) => {
   if (adminParticipates) {
     state.players[0].joinedFrom = "admin-self";
     state.players[0].participantType = "admin-player";
+    linkProfileToPlayer(state.players[0]);
     state.selectedPlayerId = state.players[0].id;
   }
 
@@ -254,6 +286,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
   }
 
   if (!playerName) return;
+  ensureProfileForJoin(playerName, avatarId);
 
   let player;
   if (supabaseClient) {
@@ -402,6 +435,7 @@ elements.resetTournamentButton.addEventListener("click", async () => {
 });
 
 elements.leaveTournamentButton?.addEventListener("click", () => leaveCurrentTournament());
+elements.toggleAvailabilityButton?.addEventListener("click", () => toggleSelectedPlayerAvailability());
 
 elements.resumeTournamentButton.addEventListener("click", () => {
   showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
@@ -409,11 +443,15 @@ elements.resumeTournamentButton.addEventListener("click", () => {
 });
 
 elements.copyInviteCodeButton.addEventListener("click", () => {
-  copyText(state.inviteCode, "Invitasjonskoden er kopiert.");
+  copyText(state.inviteCode, t("messages.inviteCopied"));
 });
 
 elements.copyJoinLinkButton.addEventListener("click", () => {
-  copyText(createJoinLink(), "Join-lenken er kopiert.");
+  copyText(createJoinLink(), t("messages.joinLinkCopied"));
+});
+
+elements.copySpectatorLinkButton?.addEventListener("click", () => {
+  copyText(createSpectatorLink(), t("messages.spectatorLinkCopied"));
 });
 
 elements.showExistingPlayersButton.addEventListener("click", async () => {
@@ -461,6 +499,18 @@ document.querySelectorAll("[data-module-link]").forEach((link) => {
 document.addEventListener("click", (event) => {
   const clickTarget = event.target instanceof Element ? event.target : null;
   if (!clickTarget) return;
+
+  const playerAction = clickTarget.closest("[data-player-action]")?.dataset.playerAction;
+  if (playerAction) {
+    if (playerAction === "spectate") showWorkspace("tournament");
+    if (playerAction === "choose") showModule("setup-player");
+    if (playerAction === "rejoin") {
+      prefillJoinForm(state.inviteCode);
+      showModule("setup-player");
+    }
+    render();
+    return;
+  }
 
   const landingToggle = clickTarget.closest(".landing-menu-toggle");
   if (landingToggle) {
@@ -561,11 +611,217 @@ function createPlayer(name, index, avatarId = defaultAvatarId) {
     avatarId,
     accent: accents[index % accents.length],
     active: true,
+    availability: "active",
     participantType: "player",
     joinStatus: "joined",
     joinedFrom: "manual",
     createdAt: new Date().toISOString(),
   };
+}
+
+function loadLocalProfile() {
+  const saved = profileManager?.loadProfile(localStorage, profileStorageKey);
+  if (saved && profileManager?.shouldDelete(saved)) {
+    purgeLocalProfile();
+    return null;
+  }
+  return saved;
+}
+
+function persistLocalProfile() {
+  if (!profile) {
+    localStorage.removeItem(profileStorageKey);
+    removeOfflineStorageKeys([profileStorageKey, profileHistoryStorageKey]);
+    return;
+  }
+  localStorage.setItem(profileStorageKey, JSON.stringify(profile));
+  mirrorStorageKeys([profileStorageKey, profileHistoryStorageKey]);
+}
+
+async function syncProfileRemote() {
+  if (!supabaseClient || !profile?.accessToken) return false;
+  const { data, error } = await supabaseClient.rpc("upsert_player_profile", {
+    p_profile_id: profile.id,
+    p_profile_token: profile.accessToken,
+    p_display_name: profile.displayName,
+    p_avatar_id: profile.avatarId,
+  });
+  if (error) {
+    console.warn("Profile sync failed", error);
+    return false;
+  }
+  if (data?.profile) {
+    profile = profileManager.normalizeProfile({ ...profile, ...data.profile });
+    persistLocalProfile();
+  }
+  return true;
+}
+
+async function syncProfileHistoryRemote(entry) {
+  if (!supabaseClient || !profile?.accessToken || !entry) return false;
+  const { error } = await supabaseClient.rpc("save_player_profile_history", {
+    p_profile_id: profile.id,
+    p_profile_token: profile.accessToken,
+    p_history: entry,
+  });
+  if (error) {
+    console.warn("Profile history sync failed", error);
+    return false;
+  }
+  return true;
+}
+
+function purgeLocalProfile() {
+  profile = null;
+  localStorage.removeItem(profileStorageKey);
+  localStorage.removeItem(profileHistoryStorageKey);
+  removeOfflineStorageKeys([profileStorageKey, profileHistoryStorageKey]);
+}
+
+function profileAvatarIdFromForm() {
+  return new FormData(elements.profileForm).get("profileAvatarId") || defaultAvatarId;
+}
+
+function saveLocalProfileFromForm() {
+  const displayName = elements.profileNameInput.value.trim();
+  if (!displayName) {
+    elements.profileNameInput.focus();
+    return;
+  }
+  profile = profile
+    ? profileManager.normalizeProfile({ ...profile, displayName, avatarId: profileAvatarIdFromForm(), deletionRequestedAt: null, deletionScheduledFor: null })
+    : profileManager.createProfile(displayName, profileAvatarIdFromForm());
+  persistLocalProfile();
+  void syncProfileRemote();
+  const selectedPlayer = getPlayerById(state.selectedPlayerId);
+  if (selectedPlayer) {
+    selectedPlayer.profileId = profile.id;
+    if (state.rounds.length === 0) {
+      selectedPlayer.name = profile.displayName;
+      selectedPlayer.avatarId = profile.avatarId;
+    }
+    saveState({ remote: isCurrentUserAdmin() });
+  }
+  saveProfileHistory();
+  renderProfile();
+  syncJoinPreview();
+  render();
+}
+
+function ensureProfileForJoin(displayName, avatarId) {
+  if (!profile) profile = profileManager.createProfile(displayName, avatarId);
+  else if (!profile.displayName || profile.displayName === displayName) {
+    profile = profileManager.normalizeProfile({ ...profile, displayName, avatarId, deletionRequestedAt: null, deletionScheduledFor: null });
+  }
+  persistLocalProfile();
+  void syncProfileRemote();
+}
+
+function requestProfileDeletion() {
+  if (!profile || !confirm(t("profile.deleteConfirm"))) return;
+  profile = profileManager.requestDeletion(profile);
+  persistLocalProfile();
+  void requestRemoteProfileDeletion();
+  renderProfile();
+}
+
+function cancelProfileDeletion() {
+  if (!profile) return;
+  profile = profileManager.cancelDeletion(profile);
+  persistLocalProfile();
+  void cancelRemoteProfileDeletion();
+  renderProfile();
+}
+
+function linkProfileToPlayer(player) {
+  if (player && profile) player.profileId = profile.id;
+  return player;
+}
+
+function profileHistoryEntry() {
+  if (!profile || state.status !== "Avsluttet") return null;
+  const player = state.players.find((item) => item.profileId === profile.id) ?? getPlayerById(state.selectedPlayerId);
+  if (!player) return null;
+  const matches = getAllMatches().filter((match) => match.state === "finished" && matchIncludesPlayer(match, player.id));
+  const entry = leaderboardEntries(getAllMatches()).find((item) => item.player.id === player.id);
+  const wins = matches.filter((match) => {
+    const teamIndex = match.teamOne.players.some((item) => item.id === player.id) ? 0 : 1;
+    return match.winnerTeamIndex === teamIndex;
+  }).length;
+  const sets = matches.reduce((total, match) => total + (match.completedSets ?? []).filter((set) => {
+    const teamOne = match.teamOne.players.some((item) => item.id === player.id);
+    return teamOne ? set.teamOne > set.teamTwo : set.teamTwo > set.teamOne;
+  }).length, 0);
+  const games = matches.reduce((total, match) => total + (match.completedSets ?? []).reduce((setsTotal, set) => {
+    const teamOne = match.teamOne.players.some((item) => item.id === player.id);
+    return setsTotal + (teamOne ? set.teamOne : set.teamTwo);
+  }, 0), 0);
+  return {
+    id: state.id,
+    profileId: profile.id,
+    tournamentName: state.name,
+    inviteCode: state.inviteCode,
+    endedAt: new Date().toISOString(),
+    placement: entry ? leaderboardEntries(getAllMatches()).findIndex((item) => item.player.id === player.id) + 1 : null,
+    points: entry?.points ?? 0,
+    matches: matches.length,
+    wins,
+    sets,
+    games,
+  };
+}
+
+function saveProfileHistory() {
+  const entry = profileHistoryEntry();
+  if (!entry) return;
+  profileManager.recordHistory(localStorage, profileHistoryStorageKey, entry);
+  mirrorStorageKeys([profileHistoryStorageKey]);
+  void syncProfileHistoryRemote(entry);
+}
+
+async function requestRemoteProfileDeletion() {
+  if (!supabaseClient || !profile?.accessToken) return;
+  await supabaseClient.rpc("request_player_profile_deletion", {
+    p_profile_id: profile.id,
+    p_profile_token: profile.accessToken,
+  });
+}
+
+async function cancelRemoteProfileDeletion() {
+  if (!supabaseClient || !profile?.accessToken) return;
+  await supabaseClient.rpc("cancel_player_profile_deletion", {
+    p_profile_id: profile.id,
+    p_profile_token: profile.accessToken,
+  });
+}
+
+function renderProfile() {
+  if (!elements.profileForm || !profileManager) return;
+  elements.profileNameInput.value = profile?.displayName ?? "";
+  elements.profileAvatarPicker.querySelectorAll("input[name=profileAvatarId]").forEach((input) => {
+    input.checked = input.value === (profile?.avatarId ?? defaultAvatarId);
+  });
+  const pendingDeletion = Boolean(profile?.deletionScheduledFor);
+  elements.profileDeletionStatus.textContent = pendingDeletion
+    ? t("profile.deletePending", { date: new Date(profile.deletionScheduledFor).toLocaleDateString(document.documentElement.lang || "nb-NO") })
+    : "";
+  elements.profileDeletionStatus.classList.toggle("hidden", !pendingDeletion);
+  elements.deleteProfileButton.classList.toggle("hidden", !profile || pendingDeletion);
+  elements.cancelProfileDeletionButton.classList.toggle("hidden", !pendingDeletion);
+  const history = profileManager.historyForProfile(profileManager.loadHistory(localStorage, profileHistoryStorageKey), profile?.id);
+  const summary = profileManager.summarizeHistory(history);
+  elements.profileStats.innerHTML = profile ? [
+    [t("profile.tournaments"), summary.tournaments],
+    [t("profile.matches"), summary.matches],
+    [t("profile.wins"), summary.wins],
+    [t("profile.points"), summary.points],
+  ].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("") : `<p class="hint">${t("profile.empty")}</p>`;
+  const filter = elements.profileHistoryFilter?.value ?? "all";
+  const cutoff = filter === "month" ? Date.now() - 30 * 86400000 : filter === "year" ? Date.now() - 365 * 86400000 : 0;
+  const filteredHistory = history.filter((entry) => !cutoff || new Date(entry.endedAt ?? entry.recordedAt).getTime() >= cutoff);
+  elements.profileHistoryList.innerHTML = filteredHistory.length === 0
+    ? `<p class="hint">${t("profile.noHistory")}</p>`
+    : `<h4>${t("profile.historyTitle")}</h4><ul class="profile-history-list">${filteredHistory.map((entry) => `<li><div><strong>${escapeHtml(entry.tournamentName)}</strong><small>${entry.endedAt ? new Date(entry.endedAt).toLocaleDateString(document.documentElement.lang || "nb-NO") : ""}</small></div><span>${t("profile.historyDetail", { placement: entry.placement ?? "-", points: entry.points, wins: entry.wins, matches: entry.matches })}</span></li>`).join("")}</ul>`;
 }
 
 function loadState() {
@@ -750,7 +1006,7 @@ function applyRemoteState(remoteState, options = {}) {
   saveState({ remote: false });
   if (options.clearConflict) {
     remoteConflict = false;
-    setRemoteNotice("Live state er oppdatert.");
+    setRemoteNotice(t("messages.remoteStateUpdated"));
   }
   if (previousTournamentId !== state.id || !realtimeChannel) connectRealtimeForCurrentState();
   render();
@@ -788,7 +1044,7 @@ async function loadRemoteTournamentByInvite(inviteCode) {
 
 async function joinRemoteTournament(playerName, avatarId) {
   if (!isSupabaseReady()) return false;
-  const player = createPlayer(playerName, state.players.length, avatarId);
+  const player = linkProfileToPlayer(createPlayer(playerName, state.players.length, avatarId));
   player.joinedFrom = "self";
   const { data, error } = await supabaseClient.rpc("join_tournament", {
     p_invite_code: state.inviteCode,
@@ -1324,10 +1580,20 @@ function syncAdminPlayerChoice() {
 }
 
 function syncJoinPreview() {
-  const name = elements.joinTournamentForm.elements.playerName.value.trim() || t("setup.yourName");
-  const avatarId = new FormData(elements.joinTournamentForm).get("avatarId") || defaultAvatarId;
+  const inputName = elements.joinTournamentForm.elements.playerName.value.trim();
+  const name = inputName || profile?.displayName || t("setup.yourName");
+  const avatarId = new FormData(elements.joinTournamentForm).get("avatarId") || profile?.avatarId || defaultAvatarId;
   elements.joinNamePreview.textContent = name;
   elements.joinAvatarPreview.src = avatarUrl({ name, avatarId });
+}
+
+function syncJoinFormFromProfile() {
+  if (!profile || !elements.joinTournamentForm) return;
+  if (!elements.joinTournamentForm.elements.playerName.value) {
+    elements.joinTournamentForm.elements.playerName.value = profile.displayName;
+  }
+  const avatarInput = elements.joinTournamentForm.querySelector(`input[name="avatarId"][value="${profile.avatarId}"]`);
+  if (avatarInput) avatarInput.checked = true;
 }
 
 function prefillInviteCodeFromUrl() {
@@ -1356,6 +1622,7 @@ function showModule(moduleName) {
   if (requestedModule === "setup-player" && hasActiveTournament() && !elements.joinTournamentForm.elements.inviteCode.value) {
     prefillJoinForm(state.inviteCode);
   }
+  if (requestedModule === "setup-player") syncJoinPreview();
 
   document.body.classList.toggle("workspace-active", isWorkspaceActive);
   document.body.classList.toggle("setup-active", requestedModule === "setup-admin" || requestedModule === "setup-player");
@@ -1442,7 +1709,7 @@ function currentLocalRole() {
 }
 
 function renderRoleVisibility() {
-  const isAdmin = isCurrentUserAdmin();
+  const isAdmin = isCurrentUserAdmin() && !spectatorMode;
   const tournamentIsActive = hasActiveTournament();
   const canShowPlayer = Boolean(state.selectedPlayerId);
   const visibleModules = new Set(tournamentIsActive
@@ -1454,6 +1721,10 @@ function renderRoleVisibility() {
   elements.playerTab.classList.toggle("hidden", !canShowPlayer);
   elements.tournamentTab.classList.toggle("hidden", !tournamentIsActive);
   elements.headerShareBox.classList.toggle("hidden", !isAdmin || activeModule !== "admin");
+  if (elements.roleIndicator) {
+    const role = isAdmin ? "admin" : state.selectedPlayerId && !spectatorMode ? "player" : "spectator";
+    elements.roleIndicator.textContent = t(`role.${role}`);
+  }
 
   document.querySelectorAll("[data-module-link]").forEach((link) => {
     const moduleName = normalizeWorkspaceModule(link.dataset.moduleLink);
@@ -1480,6 +1751,7 @@ function render() {
 
   const matches = getAllMatches();
   applyLanguage();
+  renderProfile();
   renderStartResume();
   renderRoleVisibility();
   elements.tournamentTitle.textContent = state.name;
@@ -1487,6 +1759,7 @@ function render() {
   elements.inviteCode.textContent = state.inviteCode;
   elements.adminInviteCode.textContent = state.inviteCode;
   elements.joinLink.value = createJoinLink();
+  if (elements.spectatorLink) elements.spectatorLink.value = createSpectatorLink();
   elements.joinQrCode.src = createQrCodeUrl(createJoinLink());
   elements.tournamentStatus.textContent = tournamentStatusText(state.status);
   elements.playerCount.textContent = t("players.count", { count: state.players.length });
@@ -1520,6 +1793,7 @@ function render() {
   renderStandings(matches);
   renderPlayerIdentity();
   renderLeaveTournamentControl();
+  renderAvailabilityControl();
   renderPlayerNextMatch(matches);
   renderPlayerStatus(matches);
   renderAdminLiveOverview(matches);
@@ -1661,7 +1935,7 @@ function renderAdminLiveOverview(matches) {
   if (!spotlightMatch) {
     elements.adminLiveOverview.innerHTML = `
       <div class="overview-main">
-        <span class="status-chip waiting">Lobby</span>
+        <span class="status-chip waiting">${t("common.lobby")}</span>
         <strong>${t("tournament.lobbyHeadline")}</strong>
         <small>${t("tournament.playersReady", { players: state.players.length, courts: state.courts.length })}</small>
       </div>
@@ -1722,7 +1996,7 @@ function renderPlayers() {
       <span class="player-list-name">
         <img class="avatar" src="${avatarUrl(player)}" alt="" width="34" height="34">
         <span class="player-name-badge">${escapeHtml(player.name)}</span>
-        <small class="join-source-chip">${player.joinedFrom === "self" ? t("player.joinedSelf") : t("player.addedByAdmin")}</small>
+        <small class="join-source-chip">${playerStatusLabel(player)}</small>
       </span>
       <span class="player-actions">
         <strong>${t("standings.pointsShort", { points: entry?.points ?? 0 })}</strong>
@@ -2079,6 +2353,30 @@ function renderLeaveTournamentControl() {
   elements.leaveTournamentButton.textContent = t("actions.leaveTournament");
 }
 
+function renderAvailabilityControl() {
+  if (!elements.toggleAvailabilityButton) return;
+  const player = getPlayerById(state.selectedPlayerId);
+  const isAway = player?.availability === "away";
+  elements.toggleAvailabilityButton.classList.toggle("hidden", !player);
+  elements.toggleAvailabilityButton.disabled = !player;
+  elements.toggleAvailabilityButton.textContent = isAway
+    ? t("actions.returnToTournament")
+    : t("actions.markAway");
+}
+
+function playerStatusLabel(player) {
+  if (player.availability === "away") return t("player.away");
+  if (localLeftPlayerId === player.id && isCurrentUserAdmin()) return t("player.leftDevice");
+  const currentRound = getActiveRound();
+  if (currentRound?.matches.some((match) => match.state === "playing" && matchIncludesPlayer(match, player.id))) {
+    return t("player.playingNow");
+  }
+  if (currentRound?.matches.some((match) => match.state === "waiting" && matchIncludesPlayer(match, player.id))) {
+    return t("common.waiting");
+  }
+  return player.joinedFrom === "self" ? t("player.joinedSelf") : t("player.addedByAdmin");
+}
+
 function renderCupBracket() {
   if (!elements.cupBracket) return;
   const bracket = state.settings.format === "cup" ? state.cup?.bracket : null;
@@ -2173,6 +2471,11 @@ function renderPlayerNextMatch(matches) {
       <p class="eyebrow">${t("player.nextMatch")}</p>
       <h3>${t("player.chooseProfile")}</h3>
       <p>${t("player.chooseProfileHint")}</p>
+      <div class="button-row player-empty-actions">
+        <button class="secondary" type="button" data-player-action="spectate">${t("actions.viewAsSpectator")}</button>
+        <button class="secondary" type="button" data-player-action="choose">${t("actions.choosePlayer")}</button>
+        <button class="ghost" type="button" data-player-action="rejoin">${t("actions.joinAgain")}</button>
+      </div>
     `;
     return;
   }
@@ -2434,6 +2737,14 @@ function createJoinLink() {
   return url.toString();
 }
 
+function createSpectatorLink() {
+  const isLocalDevelopment = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+  const url = new URL(isLocalDevelopment ? window.location.origin : publicAppUrl);
+  url.searchParams.set(spectatorQueryKey, state.inviteCode);
+  url.hash = "";
+  return url.toString();
+}
+
 function createQrCodeUrl(text) {
   const params = new URLSearchParams({
     text,
@@ -2478,7 +2789,7 @@ async function copyText(text, successMessage) {
 function joinTournament(name, avatarId) {
   const existingPlayer = findPlayerByName(name);
   if (existingPlayer) return existingPlayer;
-  return addPlayer(name, "self", avatarId);
+  return linkProfileToPlayer(addPlayer(name, "self", avatarId));
 }
 
 function parsePlayerNames(value) {
@@ -2558,6 +2869,7 @@ function leaveCurrentTournament(options = {}) {
   }
 
   state.selectedPlayerId = null;
+  localLeftPlayerId = selectedPlayer.id;
   state.playerToken = null;
   pendingPlayerScores = [];
   persistSyncMetadata();
@@ -2567,6 +2879,36 @@ function leaveCurrentTournament(options = {}) {
     showWorkspace(isCurrentUserAdmin() ? "admin" : "tournament");
     render();
   }
+  return true;
+}
+
+async function toggleSelectedPlayerAvailability() {
+  const player = getPlayerById(state.selectedPlayerId);
+  if (!player) return false;
+  const isAway = player.availability === "away";
+  const message = isAway
+    ? t("messages.returnToTournamentConfirm", { name: player.name })
+    : t("messages.markAwayConfirm", { name: player.name });
+  if (!confirm(message)) return false;
+  const nextAvailability = isAway ? "active" : "away";
+  if (isSupabaseReady() && state.playerToken && state.id) {
+    const { data, error } = await supabaseClient.rpc("set_player_availability", {
+      p_tournament_id: state.id,
+      p_invite_code: state.inviteCode,
+      p_player_id: player.id,
+      p_availability: nextAvailability,
+      p_player_token: state.playerToken,
+    });
+    if (error || !data) {
+      handleRemoteError(error, t("messages.availabilityUpdateFailed"));
+      return false;
+    }
+    applyRemoteState(data, { source: "rpc", clearConflict: true });
+    return true;
+  }
+  player.availability = nextAvailability;
+  saveState({ remote: isCurrentUserAdmin() });
+  render();
   return true;
 }
 
@@ -2617,7 +2959,7 @@ function saveManualCupTeams(value) {
     const teamPlayers = [];
     for (const playerName of playerNames) {
       const player = findPlayerByName(playerName);
-      if (!player || !player.active) {
+      if (!player || !player.active || player.availability === "away") {
         alert(t("messages.cupPlayerNotFound", { name: playerName }));
         return;
       }
@@ -2645,6 +2987,7 @@ function endTournament() {
     });
   }
   state.status = "Avsluttet";
+  saveProfileHistory();
 }
 
 function updateCourtsFromInput(value) {
@@ -2696,7 +3039,7 @@ function generateRoundBlockReason() {
     if (state.settings.cupTeamSetupMode === "manual" && state.cupTeams.length < 2) {
       return t("messages.defineManualCupTeams");
     }
-    if (state.settings.cupTeamSetupMode === "auto" && state.players.filter((player) => player.active).length < 4) {
+    if (state.settings.cupTeamSetupMode === "auto" && state.players.filter((player) => player.active && player.availability !== "away").length < 4) {
       return t("messages.autoCupNeedsActivePlayers");
     }
   }
@@ -2802,7 +3145,7 @@ function generateFullTournamentSchedule() {
 }
 
 function generateCupTournament() {
-  const activePlayers = state.players.filter((player) => player.active);
+  const activePlayers = state.players.filter((player) => player.active && player.availability !== "away");
   const teams = cupTeamsForStart();
   if (teams.length < 2) {
     alert(state.settings.cupTeamSetupMode === "manual"
@@ -2855,7 +3198,7 @@ function createAutoCupTeams(players) {
 
 function cupTeamsForStart() {
   if (state.settings.cupTeamSetupMode === "manual") return state.cupTeams;
-  const activePlayers = state.players.filter((player) => player.active);
+  const activePlayers = state.players.filter((player) => player.active && player.availability !== "away");
   const pairedPlayers = activePlayers.slice(0, activePlayers.length - (activePlayers.length % 2));
   return createAutoCupTeams(pairedPlayers);
 }
@@ -3177,7 +3520,7 @@ function saveMatchResult(match, teamOne, teamTwo) {
 function saveSetResult(match, teamOne, teamTwo) {
   const validationError = validateSetScore(teamOne, teamTwo);
   if (validationError) {
-    alert(validationError);
+    alert(translateScoreValidationError(validationError, teamOne, teamTwo));
     return;
   }
 
@@ -3203,6 +3546,24 @@ function saveSetResult(match, teamOne, teamTwo) {
 
 function validateSetScore(teamOne, teamTwo) {
   return scoring.validateSetScore(teamOne, teamTwo, state.settings);
+}
+
+function translateScoreValidationError(message, teamOne, teamTwo) {
+  if (!message) return "";
+  if (message.includes("hele tall")) return t("messages.invalidScoreInteger");
+  if (message.includes("negativt")) return t("messages.invalidScoreNegative");
+  if (message.includes("uavgjort")) return t("messages.invalidScoreDraw");
+  if (message.includes("Sett må vinnes")) {
+    const gamesToWinSet = state.settings.gamesToWinSet ?? 6;
+    return t("messages.invalidScoreShape", {
+      gamesToWinSet,
+      tieBreakOne: gamesToWinSet + 1,
+      tieBreakTwo: gamesToWinSet - 1,
+      teamOne,
+      teamTwo,
+    });
+  }
+  return message;
 }
 
 function awardTennisPoint(match, teamIndex) {
@@ -3549,6 +3910,26 @@ function migrateLegacyLocalStorage() {
 function restoreInitialView() {
   const hasSavedTournament = Boolean(localStorage.getItem(storageKey));
   const params = new URLSearchParams(window.location.search);
+  const spectatorInviteCode = params.get(spectatorQueryKey);
+  if (spectatorInviteCode) {
+    spectatorMode = true;
+    setLocalRole("spectator");
+    if (hasTournamentForInvite(spectatorInviteCode.toUpperCase())) {
+      showWorkspace("tournament");
+      return;
+    }
+    if (supabaseClient) {
+      loadRemoteTournamentByInvite(spectatorInviteCode.toUpperCase()).then((loaded) => {
+        if (loaded) showWorkspace("tournament");
+        else showModule("setup-player");
+        render();
+      });
+      showWorkspace("tournament");
+      return;
+    }
+    showModule("setup-player");
+    return;
+  }
   const hasInviteUrl = params.has("join") || params.has("code");
   if (hasInviteUrl) {
     showModule("setup-player");
@@ -3586,6 +3967,8 @@ if (window.PADELSTAR_TEST_MODE) {
     statsForPlayer,
     playerTournamentState,
     leaveCurrentTournament,
+    createJoinLink,
+    createSpectatorLink,
     normalizeModule,
     setLocalRole,
     currentLocalRole,

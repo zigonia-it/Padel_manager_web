@@ -98,8 +98,48 @@
             <h3 id="resumeTitle">Fortsett turnering</h3>
             <p class="hint" id="resumeSummary" data-i18n="resume.defaultSummary">Det finnes en turnering lagret i denne nettleseren.</p>
           </div>
-          <button class="primary" id="resumeTournamentButton" type="button">Fortsett som admin</button>
+          <button class="primary" id="resumeTournamentButton" type="button" data-i18n="resume.continueAdmin">Fortsett som admin</button>
         </div>
+        <section class="panel profile-light-panel" aria-labelledby="profileLightTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow" data-i18n="profile.eyebrow">Min spiller</p>
+              <h3 id="profileLightTitle" data-i18n="profile.title">Spillerprofil</h3>
+            </div>
+            <span class="status-chip" id="profileDeletionStatus"></span>
+          </div>
+          <form id="profileForm" class="profile-form">
+            <label>
+              <span data-i18n="profile.name">Visningsnavn</span>
+              <input id="profileNameInput" name="profileName" type="text" maxlength="64" autocomplete="name"
+                data-i18n-placeholder="profile.namePlaceholder" placeholder="Navnet ditt">
+            </label>
+            <fieldset class="avatar-picker" id="profileAvatarPicker">
+              <legend data-i18n="profile.avatar">Avatar</legend>
+              <label><input type="radio" name="profileAvatarId" value="smash" checked><span data-i18n="avatar.smash">Smash</span></label>
+              <label><input type="radio" name="profileAvatarId" value="serve"><span data-i18n="avatar.serve">Serve</span></label>
+              <label><input type="radio" name="profileAvatarId" value="wall"><span data-i18n="avatar.wall">Vegg</span></label>
+              <label><input type="radio" name="profileAvatarId" value="lob"><span data-i18n="avatar.lob">Lob</span></label>
+            </fieldset>
+            <div class="button-row">
+              <button class="secondary" type="submit" data-i18n="profile.save">Lagre profil</button>
+              <button class="ghost danger-button" id="deleteProfileButton" type="button" data-i18n="profile.delete">Slett profil</button>
+              <button class="ghost hidden" id="cancelProfileDeletionButton" type="button" data-i18n="profile.cancelDelete">Angre sletting</button>
+            </div>
+          </form>
+          <div class="profile-stat-grid" id="profileStats"></div>
+          <div class="profile-history" id="profileHistory">
+            <label class="profile-history-filter">
+              <span data-i18n="profile.filter">Vis historikk</span>
+              <select id="profileHistoryFilter" aria-label="Vis historikk" data-i18n-aria-label="profile.filter">
+                <option value="all" data-i18n="profile.filterAll">Alle</option>
+                <option value="year" data-i18n="profile.filterYear">Siste år</option>
+                <option value="month" data-i18n="profile.filterMonth">Siste 30 dager</option>
+              </select>
+            </label>
+            <div id="profileHistoryList"></div>
+          </div>
+        </section>
       </section>
 
       <section class="setup-panel app-module hidden" id="setupAdminView" data-module="setup-admin"
@@ -198,6 +238,7 @@
             <span data-i18n="share.inviteCode">Invitasjonskode</span>
             <strong id="inviteCode">-----</strong>
           </div>
+          <span id="roleIndicator" class="role-indicator" data-i18n="role.spectator">Tilskuer</span>
         </div>
 
         <button class="workspace-menu-toggle" type="button" aria-label="Åpne visningsmeny" aria-expanded="false"
@@ -241,8 +282,8 @@
                 <label>
                   <span data-i18n="admin.tournamentFormat">Turneringsformat</span>
                   <select name="format">
-                    <option value="roundRobin">Round robin</option>
-                    <option value="cup">Cup</option>
+                    <option value="roundRobin" data-i18n="admin.roundRobinFormat">Round robin</option>
+                    <option value="cup" data-i18n="admin.cupFormat">Cup</option>
                   </select>
                 </label>
                 <label id="cupTeamSetupModeField">
@@ -275,8 +316,8 @@
                 <button class="secondary" type="submit" data-i18n="actions.saveRules">Lagre regler</button>
               </form>
               <div class="button-row">
-                <button class="primary" id="generateRoundButton" type="button">Start turnering</button>
-                <button class="secondary" id="completeRoundButton" type="button">Fullfør turnering</button>
+                <button class="primary" id="generateRoundButton" type="button" data-i18n="actions.startTournament">Start turnering</button>
+                <button class="secondary" id="completeRoundButton" type="button" data-i18n="actions.completeTournament">Fullfør turnering</button>
               </div>
               <div class="button-row">
                 <button class="secondary" id="exportBackupButton" type="button" data-i18n="actions.downloadBackup">Last ned backup</button>
@@ -312,10 +353,15 @@
                   <span data-i18n="share.joinLink">Join-lenke</span>
                   <input id="joinLink" type="text" readonly value="">
                 </div>
+                <div>
+                  <span data-i18n="share.spectatorLink">Tilskuerlenke</span>
+                  <input id="spectatorLink" type="text" readonly value="">
+                </div>
               </div>
               <div class="button-row">
                 <button class="secondary" id="copyInviteCodeButton" type="button" data-i18n="actions.copyCode">Kopier kode</button>
                 <button class="secondary" id="copyJoinLinkButton" type="button" data-i18n="actions.copyLink">Kopier lenke</button>
+                <button class="secondary" id="copySpectatorLinkButton" type="button" data-i18n="actions.copySpectatorLink">Kopier tilskuerlenke</button>
               </div>
               <p class="hint" id="copyStatus" data-i18n="share.joinHint">Scan QR-koden eller bruk lenken for å bli med i turneringen.</p>
               <button class="secondary hidden" id="refreshRemoteButton" type="button" data-i18n="refreshRemoteState">Last inn siste</button>
@@ -343,7 +389,7 @@
                 <form id="cupTeamForm">
                   <label>
                     <span data-i18n="cup.teamSetup">Lagoppsett</span>
-                    <textarea name="teamLines" rows="6" placeholder="Ada + Bo\nCato + Dina"></textarea>
+                    <textarea name="teamLines" rows="6" placeholder="Ada + Bo\nCato + Dina" data-i18n-placeholder="cup.teamLinesPlaceholder"></textarea>
                   </label>
                   <button class="secondary" type="submit" data-i18n="actions.saveCupTeams">Lagre cup-lag</button>
                 </form>
@@ -377,7 +423,10 @@
               <h3 data-i18n="player.yourStatus">Din status</h3>
             </div>
             <div class="player-identity-card" id="playerIdentityCard"></div>
-            <button class="ghost danger-button leave-tournament-button" id="leaveTournamentButton" type="button" data-i18n="actions.leaveTournament">Forlat turnering</button>
+            <div class="button-row player-session-actions">
+              <button class="ghost" id="toggleAvailabilityButton" type="button" data-i18n="actions.markAway">Meld deg ute</button>
+              <button class="ghost danger-button leave-tournament-button" id="leaveTournamentButton" type="button" data-i18n="actions.leaveTournament">Forlat turnering</button>
+            </div>
             <div class="status-grid player-status-grid" id="playerStatusGrid"></div>
           </div>
 
@@ -453,13 +502,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="translations.js?v=padelstar-i18n-3"></script>
+  <script src="translations.js?v=padelstar-i18n-6"></script>
   <script src="tournament-engine.js?v=padelstar-engine-1"></script>
   <script src="scoring-engine.js?v=padelstar-scoring-1"></script>
   <script src="state-manager.js?v=padelstar-state-1"></script>
   <script src="realtime-sync.js?v=padelstar-realtime-sync-1"></script>
   <script src="offline-storage.js?v=padelstar-offline-1"></script>
-  <script src="app.js?v=padelstar-session-3"></script>
+  <script src="profile-manager.js?v=padelstar-profile-1"></script>
+  <script src="app.js?v=padelstar-session-6"></script>
 </body>
 
 </html>

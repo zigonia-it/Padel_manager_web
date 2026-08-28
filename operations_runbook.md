@@ -1,6 +1,6 @@
 # Padelstar - Driftsrunbook
 
-Sist oppdatert: 2026-08-27
+Sist oppdatert: 2026-08-28
 
 Status: beta-runbook for statisk Vercel-hosting med Supabase live sync
 
@@ -38,6 +38,9 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync
 - Jobben sletter også rate-limit-rader som ikke er oppdatert på 24 timer.
 - Kontroller returverdien og verifiser at ingen aktive turneringer ble berørt. Første produksjonskjøring skal gjøres manuelt og loggføres.
 - Endre ikke 30-dagersvinduet før `data_retention.md` og personvernteksten er oppdatert og godkjent.
+- Fase 9-migreringen oppretter den idempotente `padelstar-retention-cleanup`-jobben i Supabase `pg_cron`, planlagt daglig kl. 03:15 UTC.
+- Jobben kjører `cleanup_expired_tournaments()` og `cleanup_expired_player_profiles()` fra betrodd databaseinfrastruktur, aldri fra klienten.
+- Kontroller `cron.job` etter migrering og loggfør returverdien uten profil-ID-er eller tokens.
 
 ## Backup og rollback
 

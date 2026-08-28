@@ -19,6 +19,7 @@ window.PadelstarState = (() => {
     nextState.cupTeams = Array.isArray(nextState.cupTeams) ? nextState.cupTeams : [];
     nextState.players = nextState.players.map((player, index) => ({
       active: true,
+      availability: "active",
       participantType: "player",
       accent: helpers.accents[index % helpers.accents.length],
       avatarId: helpers.defaultAvatarId,
@@ -29,6 +30,7 @@ window.PadelstarState = (() => {
     })).map((player, index) => ({
       ...player,
       accent: helpers.normalizeAccent(player.accent, index),
+      availability: player.availability === "away" ? "away" : "active",
     }));
     nextState.rounds = nextState.rounds.map((round) => ({
       ...round,

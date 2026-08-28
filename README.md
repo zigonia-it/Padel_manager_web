@@ -32,7 +32,7 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 
 Fase 7 er ferdig, og spiller kan nå forlate sin lokale spillerøkt uten å påvirke turneringen for andre. Fase 8 er startet med språkmotor før flere synlige UI-tekster legges til.
 
-- Flytte flere synlige tekster inn i språkmotoren, som nå støtter Bokmål, Nynorsk, English (International), Español, Deutsch og Français.
+- Kjøre den nye Supabase-migreringen for live spillerstatus, og gjennomføre browser-smoke av tilskuerlenke og ute/reist på deployet miljø.
 - Gi spilleren valg etter `Forlat turnering`: se som tilskuer, velg spiller igjen eller bli med på nytt.
 - La spiller markere seg som ute/reist uten å endre historiske kamper eller andre spilleres resultater.
 - Lage tilskuerlenke/read-only modus uten spillerstatus og skrivehandlinger.

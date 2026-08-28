@@ -27,10 +27,16 @@ const padelstarTranslations = {
     syncPending: "sender",
     actions: {
       leaveTournament: "Forlat turnering",
+      markAway: "Meld deg ute",
+      returnToTournament: "Bli med igjen",
+      viewAsSpectator: "Se som tilskuer",
+      choosePlayer: "Velg spiller",
+      joinAgain: "Bli med på nytt",
     },
     player: {
       leaveConfirm: "Forlate turneringen som {name}? Turneringen og spillerlisten beholdes for alle andre.{pendingScoreText}",
       leavePendingScores: " Ventende poeng fra denne enheten blir ikke sendt.",
+      away: "Ute/reist",
     },
     status: {
       connectionAria: "Tilkoblingsstatus: {status}",
@@ -190,6 +196,9 @@ Object.assign(padelstarTranslations.nb, {
   "nav.openViewMenu": "Åpne visningsmeny",
   "nav.closeViewMenu": "Lukk visningsmeny",
   "nav.viewAria": "Visning",
+  "role.admin": "Admin",
+  "role.player": "Spiller",
+  "role.spectator": "Tilskuer",
   "resume.localSaved": "Lagret lokalt",
   "resume.defaultSummary": "Det finnes en turnering lagret i denne nettleseren.",
   "resume.title": "Fortsett {name}",
@@ -218,6 +227,7 @@ Object.assign(padelstarTranslations.nb, {
   "share.qrCode": "QR-kode",
   "share.qrCodeAlt": "QR-kode for påmelding",
   "share.joinLink": "Join-lenke",
+  "share.spectatorLink": "Tilskuerlenke",
   "share.joinHint": "Scan QR-koden eller bruk lenken for å bli med i turneringen.",
   "admin.sectionsAria": "Adminseksjoner",
   "admin.control": "Styring",
@@ -227,12 +237,15 @@ Object.assign(padelstarTranslations.nb, {
   "admin.courtsInUse": "Baner i bruk",
   "admin.courtListPlaceholder": "1, 2 eller 3, 4, 16",
   "admin.tournamentFormat": "Turneringsformat",
+  "admin.roundRobinFormat": "Round robin",
+  "admin.cupFormat": "Cup",
   "admin.cupTeamSetup": "Cup-lagoppsett",
   "admin.tablePoints": "Tabellpoeng",
   "admin.gamesPerSet": "Games per sett",
   "admin.setsPerMatch": "Sett per match",
   "admin.lobbyPlayers": "Lobby / spillere",
   "admin.addPlayersPlaceholder": "Legg til én eller flere spillere",
+  "cup.teamLinesPlaceholder": "Ada + Bo\nCato + Dina",
   "admin.matchesHistory": "Kamper og historikk",
   "common.name": "Navn",
   "common.automatic": "Automatisk",
@@ -284,6 +297,7 @@ Object.assign(padelstarTranslations.nb, {
   "actions.resetTournament": "Nullstill turnering",
   "actions.copyCode": "Kopier kode",
   "actions.copyLink": "Kopier lenke",
+  "actions.copySpectatorLink": "Kopier tilskuerlenke",
   "actions.add": "Legg til",
   "actions.saveCupTeams": "Lagre cup-lag",
   "actions.close": "Lukk",
@@ -296,6 +310,8 @@ Object.assign(padelstarTranslations.nb, {
   "actions.updateResult": "Oppdater",
   "actions.setResult": "Set resultat",
   "actions.startMatch": "Start kamp",
+  "actions.startTournament": "Start turnering",
+  "actions.completeTournament": "Fullfør turnering",
   "actions.largeScore": "Stor score",
   "actions.undoResult": "Angre resultat",
   "actions.undoLast": "Angre siste",
@@ -323,6 +339,8 @@ Object.assign(padelstarTranslations.nb, {
   "player.registeredSelf": "Registrert selv",
   "player.joinedSelf": "Påmeldt selv",
   "player.addedByAdmin": "Lagt til av admin",
+  "player.away": "Ute/reist",
+  "player.leftDevice": "Har forlatt enhet",
   "tournament.overview": "Turneringsoversikt",
   "tournament.progressAria": "Turneringsfremdrift",
   "tournament.roundLabel": "Runde {round}",
@@ -408,6 +426,7 @@ Object.assign(padelstarTranslations.nb, {
   "messages.resetTournamentConfirm": "Nullstille turneringen? Turneringens lokale og nettlagrede data blir slettet.",
   "messages.inviteCodeRequired": "Skriv inn invitasjonskoden først.",
   "messages.remoteConflict": "Turneringen ble endret fra en annen admin. Last inn siste før du fortsetter.",
+  "messages.remoteStateUpdated": "Live-turneringen er oppdatert.",
   "messages.recoveredLocalTournament": "Gjenopprettet siste kjente lokale turnering etter en lagringsfeil.",
   "messages.remoteSaveFailed": "Turneringen kunne ikke lagres live akkurat nå. Den lokale kopien er beholdt.",
   "messages.joinFailed": "Kunne ikke melde deg på akkurat nå. Prøv igjen.",
@@ -429,6 +448,7 @@ Object.assign(padelstarTranslations.nb, {
   "messages.copyFallback": "Kunne ikke kopiere automatisk. Marker teksten og kopier manuelt.",
   "messages.inviteCopied": "Invitasjonskoden er kopiert.",
   "messages.joinLinkCopied": "Join-lenken er kopiert.",
+  "messages.spectatorLinkCopied": "Tilskuerlenken er kopiert.",
   "messages.duplicatePlayer": "{name} finnes allerede i spillerlisten.",
   "messages.removePlayersLocked": "Spillere kan ikke fjernes etter at kampoppsettet er startet i denne turneringen.",
   "messages.rulesLocked": "Turneringsreglene kan bare endres før første runde.",
@@ -449,6 +469,13 @@ Object.assign(padelstarTranslations.nb, {
   "messages.noUndo": "Det finnes ingen siste handling å angre for denne kampen.",
   "messages.cancelMatchConfirm": "Avbryte denne kampen? Den teller ikke i tabellen.",
   "messages.walkoverConfirm": "Registrere walkover til {team}?",
+  "messages.invalidScoreInteger": "Resultatet må være hele tall.",
+  "messages.invalidScoreNegative": "Resultatet kan ikke være negativt.",
+  "messages.invalidScoreDraw": "Resultatet kan ikke være uavgjort.",
+  "messages.invalidScoreShape": "Sett må vinnes {gamesToWinSet}-x med to games margin, eller {tieBreakOne}-{tieBreakTwo} / {tieBreakOne}-{gamesToWinSet}.",
+  "messages.markAwayConfirm": "Markere {name} som ute/reist? Spilleren blir ikke satt opp i nye runder, men historiske kamper beholdes.",
+  "messages.returnToTournamentConfirm": "Gjøre {name} tilgjengelig for nye runder igjen?",
+  "messages.availabilityUpdateFailed": "Kunne ikke oppdatere spillerstatus live akkurat nå. Prøv igjen når forbindelsen er tilbake.",
   "footer.developedBy": "Utviklet av Sigurd Steen Grødem",
   "footer.copyrightPrefix": "Copyright",
   "footer.rights": "All rights reserved.",
@@ -516,6 +543,119 @@ Object.assign(padelstarTranslations.nn, {
   "admin.lobbyPlayers": "Lobby / spelarar",
   "admin.addPlayersPlaceholder": "Legg til éin eller fleire spelarar",
   "admin.matchesHistory": "Kampar og historikk",
+});
+
+Object.assign(padelstarTranslations.en, {
+  "meta.description": "Padelstar - Padel Manager by Sigurd Steen Grodem / Zigonia IT. Manage padel tournaments, matches, courts and results.",
+  "nav.homeAria": "Go home", "nav.modulesAria": "Modules", "nav.home": "Home", "nav.create": "Create", "nav.join": "Join", "nav.admin": "Admin", "nav.player": "Player", "nav.tournament": "Tournament", "nav.frontPageAria": "Front page", "nav.openMenu": "Open menu", "nav.closeMenu": "Close menu", "nav.startChoicesAria": "Start choices", "nav.openViewMenu": "Open view menu", "nav.closeViewMenu": "Close view menu", "nav.viewAria": "View",
+  "role.admin": "Admin", "role.player": "Player", "role.spectator": "Spectator",
+  "resume.localSaved": "Saved locally", "resume.defaultSummary": "A tournament is saved in this browser.", "resume.title": "Continue {name}", "resume.adminSummary": "{players} players · {courts} courts · code {code}", "resume.summary": "{players} players · {courts} courts", "resume.continueAdmin": "Continue as admin", "resume.continueTournament": "Continue tournament",
+  "setup.createEyebrow": "Create", "setup.joinEyebrow": "Join", "setup.newTournament": "New tournament", "setup.tournamentName": "Tournament name", "setup.playersOptional": "Players, optional", "setup.playersOptionalPlaceholder": "Add players manually if someone does not have their own device.", "setup.adminParticipation": "Admin participation", "setup.adminPlays": "Admin plays", "setup.adminPlaysHint": "Choose this if the tournament creator will also have a player profile.", "setup.adminPlayerName": "Admin player name", "setup.courtCount": "Number of courts", "setup.playerNamePlaceholder": "Enter your name", "setup.yourAvatar": "Your avatar", "setup.yourName": "Your name", "setup.chooseAvatar": "Choose avatar", "setup.localJoinHint": "In this local version, the code works for the tournament created on this device.",
+  "share.title": "Share tournament", "share.inviteCode": "Invite code", "share.qrCode": "QR code", "share.qrCodeAlt": "QR code for joining", "share.joinLink": "Join link", "share.spectatorLink": "Spectator link", "share.joinHint": "Scan the QR code or use the link to join the tournament.",
+  "admin.sectionsAria": "Admin sections", "admin.control": "Control", "admin.share": "Share", "admin.players": "Players", "admin.matches": "Matches", "admin.courtsInUse": "Courts in use", "admin.courtListPlaceholder": "1, 2 or 3, 4, 16", "admin.tournamentFormat": "Tournament format", "admin.roundRobinFormat": "Round robin", "admin.cupFormat": "Cup", "admin.cupTeamSetup": "Cup team setup", "admin.tablePoints": "Table points", "admin.gamesPerSet": "Games per set", "admin.setsPerMatch": "Sets per match", "admin.lobbyPlayers": "Lobby / players", "admin.addPlayersPlaceholder": "Add one or more players", "admin.matchesHistory": "Matches and history",
+  "common.name": "Name", "common.automatic": "Automatic", "common.manual": "Manual", "common.matches": "Matches", "common.sets": "Sets", "common.games": "Games", "common.standings": "Standings", "common.rules": "Rules", "common.match": "Match", "common.round": "Round", "common.status": "Status", "common.points": "Points", "common.server": "Server", "common.court": "Court", "common.winner": "Winner", "common.ready": "Ready", "common.missing": "Missing", "common.waiting": "Waiting", "common.finished": "Finished", "common.completed": "Completed", "common.playing": "In progress", "common.active": "Active", "common.betweenRounds": "Between rounds", "common.cancelled": "Cancelled", "common.resting": "Resting", "common.next": "Next", "common.select": "Select", "common.player": "Player", "common.teamOne": "Team 1", "common.teamTwo": "Team 2", "common.single": "Singles", "common.double": "Doubles", "common.lobby": "Lobby", "common.against": "vs", "common.now": "Now", "common.none": "None", "common.minimumTwo": "At least 2", "common.teamCount": "{count} teams", "common.playingMatches": "Matches in progress",
+  "actions.createTournament": "Create tournament", "actions.joinTournament": "Join tournament", "actions.adminAddedMe": "Admin added me", "actions.update": "Update", "actions.saveRules": "Save rules", "actions.downloadBackup": "Download backup", "actions.importBackup": "Import backup", "actions.endTournament": "End tournament", "actions.resetTournament": "Reset tournament", "actions.copyCode": "Copy code", "actions.copyLink": "Copy link", "actions.copySpectatorLink": "Copy spectator link", "actions.add": "Add", "actions.saveCupTeams": "Save cup teams", "actions.close": "Close", "actions.save": "Save", "actions.remove": "Remove", "actions.removePlayerAria": "Remove {name}", "actions.editPlayerNameAria": "Edit name for {name}", "actions.playerAvatarAria": "Avatar for {name}", "actions.saveCourt": "Save court", "actions.updateResult": "Update", "actions.setResult": "Set result", "actions.startMatch": "Start match", "actions.startTournament": "Start tournament", "actions.completeTournament": "Finish tournament", "actions.largeScore": "Large score", "actions.undoResult": "Undo result", "actions.undoLast": "Undo last", "actions.cancelMatch": "Cancel match", "actions.leaveTournament": "Leave tournament", "actions.markAway": "Mark as away", "actions.returnToTournament": "Return to tournament", "actions.viewAsSpectator": "View as spectator", "actions.choosePlayer": "Choose player", "actions.joinAgain": "Join again",
+  "player.nextMatch": "Your next match", "player.chooseProfile": "Choose player profile", "player.chooseProfileHint": "The app will show your court, teammate and opponents.", "player.yourMatches": "Your matches", "player.yourStatus": "Your status", "player.currentPlayer": "Current player", "player.teammate": "Teammate", "player.opponents": "Opponents", "player.playingNow": "You are playing now", "player.tournamentFinished": "The tournament is finished", "player.restingThisRound": "Resting this round", "player.restingTitle": "{name}, you are sitting out now.", "player.waitingTitle": "{name}, you have no active match right now.", "player.identityEmpty": "Open the invite link, scan the QR code or choose Admin added me from the start page.", "player.adminPlays": "Admin plays", "player.registeredSelf": "Registered yourself", "player.joinedSelf": "Joined yourself", "player.addedByAdmin": "Added by admin", "player.away": "Away",
+  "tournament.overview": "Tournament overview", "tournament.progressAria": "Tournament progress", "tournament.roundLabel": "Round {round}", "tournament.nextRoundLabel": "Next is round {round}", "tournament.firstRoundReady": "Ready for the first round", "tournament.matchesFinished": "{finished}/{total} matches finished", "tournament.matchesFinishedShort": "{finished}/{total} finished", "tournament.playersReady": "{players} players ready · {courts} courts", "tournament.lobbyHeadline": "Share the code and fill the player list.", "tournament.noPlayers": "No players yet. Share code {code}, or add players manually.", "tournament.noRound": "Round details appear here when matches are generated.", "tournament.noMatches": "No matches yet. Generate the first round.", "tournament.noPlayerMatches": "You have no matches yet.", "tournament.choosePlayerForMatches": "Choose a player profile to see your matches.", "tournament.noLiveMatches": "No matches in progress yet.", "tournament.noMatchesPlaying": "No matches are in progress right now.", "tournament.standingsEmpty": "Standings appear when players are added.", "tournament.courtComing": "Court coming", "tournament.noCourtAssigned": "No court assigned", "tournament.thisRound": "This round", "tournament.noCourt": "No court", "tournament.allGenerated": "The whole tournament is generated", "tournament.finished": "The tournament has ended.", "tournament.cupFinished": "Cup finished", "tournament.cupFinishedReason": "The cup is finished.",
+  "messages.inviteCopied": "Invite code copied.", "messages.joinLinkCopied": "Join link copied.", "messages.spectatorLinkCopied": "Spectator link copied.", "messages.remoteStateUpdated": "Live tournament updated.", "messages.markAwayConfirm": "Mark {name} as away? The player will not be placed in new rounds, but historical matches remain.", "messages.returnToTournamentConfirm": "Make {name} available for new rounds again?", "messages.availabilityUpdateFailed": "Could not update player status live. Try again when the connection returns.",
+});
+
+Object.assign(padelstarTranslations.es, {
+  "meta.description": "Padelstar - Padel Manager de Sigurd Steen Grodem / Zigonia IT. Gestiona torneos, partidos, pistas y resultados de pádel.",
+  "nav.homeAria": "Ir al inicio", "nav.modulesAria": "Módulos", "nav.home": "Inicio", "nav.create": "Crear", "nav.join": "Unirse", "nav.admin": "Admin", "nav.player": "Jugador", "nav.tournament": "Torneo", "nav.frontPageAria": "Página principal", "nav.openMenu": "Abrir menú", "nav.closeMenu": "Cerrar menú", "nav.startChoicesAria": "Opciones de inicio", "nav.openViewMenu": "Abrir menú de vista", "nav.closeViewMenu": "Cerrar menú de vista", "nav.viewAria": "Vista", "role.admin": "Admin", "role.player": "Jugador", "role.spectator": "Espectador",
+  "resume.localSaved": "Guardado localmente", "resume.defaultSummary": "Hay un torneo guardado en este navegador.", "resume.title": "Continuar {name}", "resume.adminSummary": "{players} jugadores · {courts} pistas · código {code}", "resume.summary": "{players} jugadores · {courts} pistas", "resume.continueAdmin": "Continuar como admin", "resume.continueTournament": "Continuar torneo",
+  "setup.createEyebrow": "Crear", "setup.joinEyebrow": "Unirse", "setup.newTournament": "Nuevo torneo", "setup.tournamentName": "Nombre del torneo", "setup.playersOptional": "Jugadores, opcional", "setup.playersOptionalPlaceholder": "Añade jugadores manualmente si alguien no tiene su propio dispositivo.", "setup.adminParticipation": "Participación del admin", "setup.adminPlays": "El admin juega", "setup.adminPlaysHint": "Elige esto si quien crea el torneo también tendrá un perfil de jugador.", "setup.adminPlayerName": "Nombre del jugador admin", "setup.courtCount": "Número de pistas", "setup.playerNamePlaceholder": "Escribe tu nombre", "setup.yourAvatar": "Tu avatar", "setup.yourName": "Tu nombre", "setup.chooseAvatar": "Elige avatar", "setup.localJoinHint": "En esta versión local, el código funciona para el torneo creado en este dispositivo.",
+  "share.title": "Compartir torneo", "share.inviteCode": "Código de invitación", "share.qrCode": "Código QR", "share.qrCodeAlt": "Código QR para inscribirse", "share.joinLink": "Enlace para unirse", "share.spectatorLink": "Enlace de espectador", "share.joinHint": "Escanea el código QR o usa el enlace para unirte al torneo.",
+  "admin.sectionsAria": "Secciones de admin", "admin.control": "Control", "admin.share": "Compartir", "admin.players": "Jugadores", "admin.matches": "Partidos", "admin.courtsInUse": "Pistas en uso", "admin.courtListPlaceholder": "1, 2 o 3, 4, 16", "admin.tournamentFormat": "Formato del torneo", "admin.roundRobinFormat": "Todos contra todos", "admin.cupFormat": "Copa", "admin.cupTeamSetup": "Configuración de equipos de copa", "admin.tablePoints": "Puntos de tabla", "admin.gamesPerSet": "Juegos por set", "admin.setsPerMatch": "Sets por partido", "admin.lobbyPlayers": "Lobby / jugadores", "admin.addPlayersPlaceholder": "Añadir uno o más jugadores", "admin.matchesHistory": "Partidos e historial",
+  "common.name": "Nombre", "common.automatic": "Automático", "common.manual": "Manual", "common.matches": "Partidos", "common.sets": "Sets", "common.games": "Juegos", "common.standings": "Clasificación", "common.rules": "Reglas", "common.match": "Partido", "common.round": "Ronda", "common.status": "Estado", "common.points": "Puntos", "common.server": "Saque", "common.court": "Pista", "common.winner": "Ganador", "common.ready": "Listo", "common.missing": "Falta", "common.waiting": "Esperando", "common.finished": "Finalizado", "common.completed": "Completado", "common.playing": "En juego", "common.active": "Activos", "common.betweenRounds": "Entre rondas", "common.cancelled": "Cancelado", "common.resting": "Descanso", "common.next": "Siguiente", "common.select": "Seleccionar", "common.player": "Jugador", "common.teamOne": "Equipo 1", "common.teamTwo": "Equipo 2", "common.single": "Individual", "common.double": "Dobles", "common.lobby": "Lobby", "common.against": "contra", "common.now": "Ahora", "common.none": "Ninguno", "common.minimumTwo": "Al menos 2", "common.teamCount": "{count} equipos", "common.playingMatches": "Partidos en juego",
+  "actions.createTournament": "Crear torneo", "actions.joinTournament": "Unirse al torneo", "actions.adminAddedMe": "El admin me ha añadido", "actions.update": "Actualizar", "actions.saveRules": "Guardar reglas", "actions.downloadBackup": "Descargar copia", "actions.importBackup": "Importar copia", "actions.endTournament": "Terminar torneo", "actions.resetTournament": "Restablecer torneo", "actions.copyCode": "Copiar código", "actions.copyLink": "Copiar enlace", "actions.copySpectatorLink": "Copiar enlace de espectador", "actions.add": "Añadir", "actions.saveCupTeams": "Guardar equipos de copa", "actions.close": "Cerrar", "actions.save": "Guardar", "actions.remove": "Eliminar", "actions.removePlayerAria": "Eliminar a {name}", "actions.editPlayerNameAria": "Editar nombre de {name}", "actions.playerAvatarAria": "Avatar de {name}", "actions.saveCourt": "Guardar pista", "actions.updateResult": "Actualizar", "actions.setResult": "Establecer resultado", "actions.startMatch": "Iniciar partido", "actions.startTournament": "Iniciar torneo", "actions.completeTournament": "Terminar torneo", "actions.largeScore": "Marcador grande", "actions.undoResult": "Deshacer resultado", "actions.undoLast": "Deshacer último", "actions.cancelMatch": "Cancelar partido", "actions.leaveTournament": "Salir del torneo", "actions.markAway": "Marcar como ausente", "actions.returnToTournament": "Volver al torneo", "actions.viewAsSpectator": "Ver como espectador", "actions.choosePlayer": "Elegir jugador", "actions.joinAgain": "Volver a unirse",
+  "player.nextMatch": "Tu próximo partido", "player.chooseProfile": "Elige un perfil de jugador", "player.chooseProfileHint": "La app mostrará tu pista, compañero y oponentes.", "player.yourMatches": "Tus partidos", "player.yourStatus": "Tu estado", "player.currentPlayer": "Jugador actual", "player.teammate": "Compañero", "player.opponents": "Oponentes", "player.playingNow": "Estás jugando ahora", "player.tournamentFinished": "El torneo ha terminado", "player.restingThisRound": "Descanso esta ronda", "player.restingTitle": "{name}, ahora estás descansando.", "player.waitingTitle": "{name}, no tienes un partido activo ahora.", "player.identityEmpty": "Abre el enlace de invitación, escanea el código QR o elige El admin me ha añadido en la página inicial.", "player.adminPlays": "Juega el admin", "player.registeredSelf": "Registrado por sí mismo", "player.joinedSelf": "Se unió por sí mismo", "player.addedByAdmin": "Añadido por el admin", "player.away": "Ausente",
+  "tournament.overview": "Resumen del torneo", "tournament.progressAria": "Progreso del torneo", "tournament.roundLabel": "Ronda {round}", "tournament.nextRoundLabel": "La siguiente es la ronda {round}", "tournament.firstRoundReady": "Listo para la primera ronda", "tournament.matchesFinished": "{finished}/{total} partidos terminados", "tournament.matchesFinishedShort": "{finished}/{total} terminados", "tournament.playersReady": "{players} jugadores listos · {courts} pistas", "tournament.lobbyHeadline": "Comparte el código y completa la lista de jugadores.", "tournament.noPlayers": "Aún no hay jugadores. Comparte el código {code} o añade jugadores manualmente.", "tournament.noRound": "La ronda aparecerá aquí cuando se generen los partidos.", "tournament.noMatches": "Aún no hay partidos. Genera la primera ronda.", "tournament.noPlayerMatches": "Aún no tienes partidos.", "tournament.choosePlayerForMatches": "Elige un perfil para ver tus partidos.", "tournament.noLiveMatches": "Aún no hay partidos en juego.", "tournament.noMatchesPlaying": "Ahora no hay partidos en juego.", "tournament.standingsEmpty": "La clasificación aparecerá cuando se añadan jugadores.", "tournament.courtComing": "Pista pendiente", "tournament.noCourtAssigned": "Sin pista asignada", "tournament.thisRound": "Esta ronda", "tournament.noCourt": "Sin pista", "tournament.allGenerated": "Todo el torneo está generado", "tournament.finished": "El torneo ha terminado.", "tournament.cupFinished": "Copa terminada", "tournament.cupFinishedReason": "La copa ha terminado.",
+  "messages.inviteCopied": "Código de invitación copiado.", "messages.joinLinkCopied": "Enlace copiado.", "messages.spectatorLinkCopied": "Enlace de espectador copiado.", "messages.remoteStateUpdated": "Torneo en directo actualizado.", "messages.markAwayConfirm": "¿Marcar a {name} como ausente? No se incluirá en nuevas rondas, pero se conservarán sus partidos históricos.", "messages.returnToTournamentConfirm": "¿Hacer que {name} vuelva a estar disponible para nuevas rondas?", "messages.availabilityUpdateFailed": "No se pudo actualizar el estado del jugador. Inténtalo cuando vuelva la conexión.",
+  "avatar.smash": "Smash", "avatar.serve": "Saque", "avatar.wall": "Pared", "avatar.lob": "Globo",
+  "footer.developedBy": "Desarrollado por Sigurd Steen Grodem", "footer.copyrightPrefix": "Copyright", "footer.rights": "Todos los derechos reservados.", "footer.privacy": "Privacidad",
+});
+
+Object.assign(padelstarTranslations.en, {
+  "avatar.smash": "Smash", "avatar.serve": "Serve", "avatar.wall": "Wall", "avatar.lob": "Lob",
+  "footer.developedBy": "Developed by Sigurd Steen Grodem", "footer.copyrightPrefix": "Copyright", "footer.rights": "All rights reserved.", "footer.privacy": "Privacy",
+});
+
+Object.assign(padelstarTranslations.nn, {
+  "role.admin": "Admin", "role.player": "Spelar", "role.spectator": "Tilskodar",
+  "avatar.smash": "Smash", "avatar.serve": "Serve", "avatar.wall": "Vegg", "avatar.lob": "Lobb",
+  "share.spectatorLink": "Tilskodarlenkje", "actions.copySpectatorLink": "Kopier tilskodarlenkje", "actions.markAway": "Meld deg ute", "actions.returnToTournament": "Bli med igjen", "actions.viewAsSpectator": "Sjå som tilskodar", "actions.choosePlayer": "Vel spelar", "actions.joinAgain": "Bli med på nytt",
+  "player.away": "Ute/reist", "player.leftDevice": "Har forlatt eining", "messages.spectatorLinkCopied": "Tilskodarlenkja er kopiert.", "messages.remoteStateUpdated": "Live-turneringa er oppdatert.", "messages.markAwayConfirm": "Markere {name} som ute/reist? Spelaren blir ikkje sett opp i nye rundar, men historiske kampar blir tekne vare på.", "messages.returnToTournamentConfirm": "Gjere {name} tilgjengeleg for nye rundar igjen?", "messages.availabilityUpdateFailed": "Klarte ikkje å oppdatere spelarstatus live akkurat no.",
+  "footer.developedBy": "Utvikla av Sigurd Steen Grodem", "footer.copyrightPrefix": "Copyright", "footer.rights": "Alle rettar reserverte.", "footer.privacy": "Personvern",
+});
+
+Object.assign(padelstarTranslations.de, {
+  "role.admin": "Admin", "role.player": "Spieler", "role.spectator": "Zuschauer",
+  "nav.homeAria": "Zur Startseite", "nav.modulesAria": "Module", "nav.home": "Startseite", "nav.create": "Erstellen", "nav.join": "Beitreten", "nav.player": "Spieler", "nav.tournament": "Turnier", "nav.frontPageAria": "Startseite", "nav.openMenu": "Menü öffnen", "nav.closeMenu": "Menü schließen", "nav.startChoicesAria": "Startoptionen", "nav.viewAria": "Ansicht",
+  "setup.createEyebrow": "Erstellen", "setup.joinEyebrow": "Beitreten", "setup.newTournament": "Neues Turnier", "setup.tournamentName": "Turniername", "setup.playersOptional": "Spieler, optional", "setup.playersOptionalPlaceholder": "Spieler manuell hinzufügen, wenn jemand kein eigenes Gerät hat.", "setup.adminParticipation": "Admin-Teilnahme", "setup.adminPlays": "Admin spielt mit", "setup.adminPlaysHint": "Wähle dies, wenn der Turnierersteller auch ein Spielerprofil haben soll.", "setup.adminPlayerName": "Spielername des Admins", "setup.courtCount": "Anzahl der Plätze", "setup.playerNamePlaceholder": "Deinen Namen eingeben", "setup.yourAvatar": "Dein Avatar", "setup.yourName": "Dein Name", "setup.chooseAvatar": "Avatar wählen",
+  "share.inviteCode": "Einladungscode", "share.qrCode": "QR-Code", "share.qrCodeAlt": "QR-Code zur Anmeldung", "share.joinLink": "Beitrittslink", "share.spectatorLink": "Zuschauerlink", "share.title": "Turnier teilen", "share.joinHint": "QR-Code scannen oder den Link verwenden, um dem Turnier beizutreten.",
+  "common.name": "Name", "common.matches": "Spiele", "common.sets": "Sätze", "common.games": "Games", "common.standings": "Tabelle", "common.rules": "Regeln", "common.match": "Spiel", "common.round": "Runde", "common.status": "Status", "common.points": "Punkte", "common.court": "Platz", "common.waiting": "Wartet", "common.finished": "Fertig", "common.playing": "Läuft", "common.next": "Nächste", "common.player": "Spieler", "common.single": "Einzel", "common.double": "Doppel", "common.lobby": "Lobby",
+  "actions.createTournament": "Turnier erstellen", "actions.joinTournament": "Turnier beitreten", "actions.adminAddedMe": "Admin hat mich hinzugefügt", "actions.update": "Aktualisieren", "actions.saveRules": "Regeln speichern", "actions.copyCode": "Code kopieren", "actions.copyLink": "Link kopieren", "actions.copySpectatorLink": "Zuschauerlink kopieren", "actions.add": "Hinzufügen", "actions.save": "Speichern", "actions.remove": "Entfernen", "actions.startTournament": "Turnier starten", "actions.completeTournament": "Turnier beenden", "actions.leaveTournament": "Turnier verlassen", "actions.markAway": "Als abwesend markieren", "actions.returnToTournament": "Zum Turnier zurückkehren", "actions.viewAsSpectator": "Als Zuschauer ansehen", "actions.choosePlayer": "Spieler wählen", "actions.joinAgain": "Erneut beitreten",
+  "player.nextMatch": "Dein nächstes Spiel", "player.chooseProfile": "Spielerprofil wählen", "player.chooseProfileHint": "Die App zeigt deinen Platz, Partner und Gegner.", "player.yourMatches": "Deine Spiele", "player.yourStatus": "Dein Status", "player.currentPlayer": "Aktueller Spieler", "player.teammate": "Partner", "player.opponents": "Gegner", "player.playingNow": "Du spielst jetzt", "player.away": "Abwesend", "player.leftDevice": "Gerät verlassen",
+  "tournament.overview": "Turnierübersicht", "tournament.progressAria": "Turnierfortschritt", "tournament.roundLabel": "Runde {round}", "tournament.matchesFinished": "{finished}/{total} Spiele fertig", "tournament.noPlayers": "Noch keine Spieler. Code {code} teilen oder Spieler manuell hinzufügen.", "tournament.noMatches": "Noch keine Spiele. Erste Runde erstellen.", "tournament.courtComing": "Platz folgt", "tournament.noCourtAssigned": "Kein Platz zugewiesen", "tournament.finished": "Das Turnier ist beendet.",
+  "avatar.smash": "Smash", "avatar.serve": "Aufschlag", "avatar.wall": "Wand", "avatar.lob": "Lob", "footer.developedBy": "Entwickelt von Sigurd Steen Grodem", "footer.copyrightPrefix": "Copyright", "footer.rights": "Alle Rechte vorbehalten.", "footer.privacy": "Datenschutz",
+});
+
+Object.assign(padelstarTranslations.fr, {
+  "role.admin": "Admin", "role.player": "Joueur", "role.spectator": "Spectateur",
+  "nav.homeAria": "Accueil", "nav.modulesAria": "Modules", "nav.home": "Accueil", "nav.create": "Créer", "nav.join": "Rejoindre", "nav.player": "Joueur", "nav.tournament": "Tournoi", "nav.frontPageAria": "Page d’accueil", "nav.openMenu": "Ouvrir le menu", "nav.closeMenu": "Fermer le menu", "nav.startChoicesAria": "Options de démarrage", "nav.viewAria": "Vue",
+  "setup.createEyebrow": "Créer", "setup.joinEyebrow": "Rejoindre", "setup.newTournament": "Nouveau tournoi", "setup.tournamentName": "Nom du tournoi", "setup.playersOptional": "Joueurs, facultatif", "setup.playersOptionalPlaceholder": "Ajoutez les joueurs manuellement si quelqu’un n’a pas son propre appareil.", "setup.adminParticipation": "Participation de l’admin", "setup.adminPlays": "L’admin joue", "setup.adminPlaysHint": "Choisissez cette option si le créateur du tournoi aura aussi un profil joueur.", "setup.adminPlayerName": "Nom du joueur admin", "setup.courtCount": "Nombre de terrains", "setup.playerNamePlaceholder": "Saisissez votre nom", "setup.yourAvatar": "Votre avatar", "setup.yourName": "Votre nom", "setup.chooseAvatar": "Choisir un avatar",
+  "share.inviteCode": "Code d’invitation", "share.qrCode": "Code QR", "share.qrCodeAlt": "Code QR pour l’inscription", "share.joinLink": "Lien d’inscription", "share.spectatorLink": "Lien spectateur", "share.title": "Partager le tournoi", "share.joinHint": "Scannez le code QR ou utilisez le lien pour rejoindre le tournoi.",
+  "common.name": "Nom", "common.matches": "Matchs", "common.sets": "Sets", "common.games": "Jeux", "common.standings": "Classement", "common.rules": "Règles", "common.match": "Match", "common.round": "Manche", "common.status": "Statut", "common.points": "Points", "common.court": "Terrain", "common.waiting": "En attente", "common.finished": "Terminé", "common.playing": "En cours", "common.next": "Suivant", "common.player": "Joueur", "common.single": "Simple", "common.double": "Double", "common.lobby": "Lobby",
+  "actions.createTournament": "Créer le tournoi", "actions.joinTournament": "Rejoindre le tournoi", "actions.adminAddedMe": "L’admin m’a ajouté", "actions.update": "Mettre à jour", "actions.saveRules": "Enregistrer les règles", "actions.copyCode": "Copier le code", "actions.copyLink": "Copier le lien", "actions.copySpectatorLink": "Copier le lien spectateur", "actions.add": "Ajouter", "actions.save": "Enregistrer", "actions.remove": "Supprimer", "actions.startTournament": "Démarrer le tournoi", "actions.completeTournament": "Terminer le tournoi", "actions.leaveTournament": "Quitter le tournoi", "actions.markAway": "Me déclarer absent", "actions.returnToTournament": "Revenir au tournoi", "actions.viewAsSpectator": "Voir en spectateur", "actions.choosePlayer": "Choisir un joueur", "actions.joinAgain": "Rejoindre à nouveau",
+  "player.nextMatch": "Votre prochain match", "player.chooseProfile": "Choisir un profil joueur", "player.chooseProfileHint": "L’application affichera votre terrain, partenaire et adversaires.", "player.yourMatches": "Vos matchs", "player.yourStatus": "Votre statut", "player.currentPlayer": "Joueur actuel", "player.teammate": "Partenaire", "player.opponents": "Adversaires", "player.playingNow": "Vous jouez maintenant", "player.away": "Absent", "player.leftDevice": "A quitté l’appareil",
+  "tournament.overview": "Vue du tournoi", "tournament.progressAria": "Progression du tournoi", "tournament.roundLabel": "Manche {round}", "tournament.matchesFinished": "{finished}/{total} matchs terminés", "tournament.noPlayers": "Aucun joueur pour l’instant. Partagez le code {code} ou ajoutez des joueurs manuellement.", "tournament.noMatches": "Aucun match pour l’instant. Générez la première manche.", "tournament.courtComing": "Terrain à venir", "tournament.noCourtAssigned": "Aucun terrain attribué", "tournament.finished": "Le tournoi est terminé.",
+  "avatar.smash": "Smash", "avatar.serve": "Service", "avatar.wall": "Mur", "avatar.lob": "Lob", "footer.developedBy": "Développé par Sigurd Steen Grodem", "footer.copyrightPrefix": "Copyright", "footer.rights": "Tous droits réservés.", "footer.privacy": "Confidentialité",
+});
+
+Object.assign(padelstarTranslations.nb, {
+  "profile.eyebrow": "Min spiller",
+  "profile.title": "Spillerprofil",
+  "profile.name": "Visningsnavn",
+  "profile.namePlaceholder": "Navnet ditt",
+  "profile.avatar": "Avatar",
+  "profile.save": "Lagre profil",
+  "profile.delete": "Slett profil",
+  "profile.cancelDelete": "Angre sletting",
+  "profile.deleteConfirm": "Be om sletting av profilen? Profilen og historikken blir beholdt i 30 dager, og kan gjenopprettes før fristen.",
+  "profile.deletePending": "Slettes {date}",
+  "profile.tournaments": "Turneringer",
+  "profile.matches": "Kamper",
+  "profile.wins": "Seire",
+  "profile.points": "Poeng",
+  "profile.empty": "Opprett en profil for å samle din egen historikk på denne enheten.",
+  "profile.noHistory": "Avsluttede turneringer du deltar i blir vist her.",
+  "profile.historyTitle": "Tidligere turneringer",
+  "profile.historyDetail": "{placement}. plass · {points} poeng · {wins} seire av {matches} kamper",
+  "profile.filter": "Vis historikk",
+  "profile.filterAll": "Alle",
+  "profile.filterYear": "Siste år",
+  "profile.filterMonth": "Siste 30 dager",
+});
+
+Object.assign(padelstarTranslations.nn, {
+  "profile.eyebrow": "Min spelar", "profile.title": "Spelarprofil", "profile.name": "Visingsnamn", "profile.namePlaceholder": "Namnet ditt", "profile.avatar": "Avatar", "profile.save": "Lagre profil", "profile.delete": "Slett profil", "profile.cancelDelete": "Angre sletting", "profile.deleteConfirm": "Be om sletting av profilen? Profilen og historikken blir halden i 30 dagar og kan gjenopprettast før fristen.", "profile.deletePending": "Slettast {date}", "profile.tournaments": "Turneringar", "profile.matches": "Kampar", "profile.wins": "Sigrar", "profile.points": "Poeng", "profile.empty": "Opprett ein profil for å samle di eiga historikk på denne eininga.", "profile.noHistory": "Avslutta turneringar du deltek i blir viste her.", "profile.historyTitle": "Tidlegare turneringar", "profile.historyDetail": "{placement}. plass · {points} poeng · {wins} sigrar av {matches} kampar", "profile.filter": "Vis historikk", "profile.filterAll": "Alle", "profile.filterYear": "Siste år", "profile.filterMonth": "Siste 30 dagar",
+});
+
+Object.assign(padelstarTranslations.en, {
+  "profile.eyebrow": "My player", "profile.title": "Player profile", "profile.name": "Display name", "profile.namePlaceholder": "Your name", "profile.avatar": "Avatar", "profile.save": "Save profile", "profile.delete": "Delete profile", "profile.cancelDelete": "Undo deletion", "profile.deleteConfirm": "Request profile deletion? Your profile and history will be kept for 30 days and can be restored before the deadline.", "profile.deletePending": "Deletes {date}", "profile.tournaments": "Tournaments", "profile.matches": "Matches", "profile.wins": "Wins", "profile.points": "Points", "profile.empty": "Create a profile to keep your own history on this device.", "profile.noHistory": "Completed tournaments you play in will appear here.", "profile.historyTitle": "Previous tournaments", "profile.historyDetail": "{placement} place · {points} points · {wins} wins from {matches} matches", "profile.filter": "Show history", "profile.filterAll": "All", "profile.filterYear": "Last year", "profile.filterMonth": "Last 30 days",
+});
+
+Object.assign(padelstarTranslations.es, {
+  "profile.eyebrow": "Mi jugador", "profile.title": "Perfil de jugador", "profile.name": "Nombre visible", "profile.namePlaceholder": "Tu nombre", "profile.avatar": "Avatar", "profile.save": "Guardar perfil", "profile.delete": "Borrar perfil", "profile.cancelDelete": "Deshacer borrado", "profile.deleteConfirm": "¿Solicitar el borrado del perfil? El perfil y el historial se conservarán durante 30 días y podrán restaurarse antes de la fecha límite.", "profile.deletePending": "Se borra el {date}", "profile.tournaments": "Torneos", "profile.matches": "Partidos", "profile.wins": "Victorias", "profile.points": "Puntos", "profile.empty": "Crea un perfil para conservar tu historial en este dispositivo.", "profile.noHistory": "Aquí aparecerán los torneos terminados en los que participes.", "profile.historyTitle": "Torneos anteriores", "profile.historyDetail": "{placement}. puesto · {points} puntos · {wins} victorias de {matches} partidos", "profile.filter": "Ver historial", "profile.filterAll": "Todos", "profile.filterYear": "Último año", "profile.filterMonth": "Últimos 30 días",
+});
+
+Object.assign(padelstarTranslations.de, {
+  "profile.eyebrow": "Mein Spieler", "profile.title": "Spielerprofil", "profile.name": "Anzeigename", "profile.namePlaceholder": "Dein Name", "profile.avatar": "Avatar", "profile.save": "Profil speichern", "profile.delete": "Profil löschen", "profile.cancelDelete": "Löschung rückgängig", "profile.deleteConfirm": "Profil löschen? Profil und Verlauf bleiben 30 Tage erhalten und können vorher wiederhergestellt werden.", "profile.deletePending": "Löschung am {date}", "profile.tournaments": "Turniere", "profile.matches": "Spiele", "profile.wins": "Siege", "profile.points": "Punkte", "profile.empty": "Erstelle ein Profil, um deinen Verlauf auf diesem Gerät zu speichern.", "profile.noHistory": "Abgeschlossene Turniere, an denen du teilnimmst, erscheinen hier.", "profile.historyTitle": "Frühere Turniere", "profile.historyDetail": "Platz {placement} · {points} Punkte · {wins} Siege aus {matches} Spielen", "profile.filter": "Verlauf anzeigen", "profile.filterAll": "Alle", "profile.filterYear": "Letztes Jahr", "profile.filterMonth": "Letzte 30 Tage",
+});
+
+Object.assign(padelstarTranslations.fr, {
+  "profile.eyebrow": "Mon joueur", "profile.title": "Profil joueur", "profile.name": "Nom affiché", "profile.namePlaceholder": "Votre nom", "profile.avatar": "Avatar", "profile.save": "Enregistrer le profil", "profile.delete": "Supprimer le profil", "profile.cancelDelete": "Annuler la suppression", "profile.deleteConfirm": "Demander la suppression du profil ? Le profil et l’historique seront conservés 30 jours et pourront être restaurés avant la date limite.", "profile.deletePending": "Suppression le {date}", "profile.tournaments": "Tournois", "profile.matches": "Matchs", "profile.wins": "Victoires", "profile.points": "Points", "profile.empty": "Créez un profil pour conserver votre historique sur cet appareil.", "profile.noHistory": "Les tournois terminés auxquels vous participez apparaîtront ici.", "profile.historyTitle": "Tournois précédents", "profile.historyDetail": "{placement}e place · {points} points · {wins} victoires sur {matches} matchs", "profile.filter": "Afficher l’historique", "profile.filterAll": "Tous", "profile.filterYear": "Dernière année", "profile.filterMonth": "30 derniers jours",
 });
 const missingTranslationKeys = new Set();
 

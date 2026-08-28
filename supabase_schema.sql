@@ -1889,6 +1889,185 @@ grant execute on function public.admin_match_action(uuid, text, uuid, text, inte
 grant execute on function public.admin_undo_match(uuid, text, uuid, integer) to anon;
 grant execute on function public.delete_tournament(uuid, text) to anon;
 
+create or replace function public.set_player_availability_impl(
+  p_tournament_id uuid,
+  p_invite_code text,
+  p_player_id uuid,
+  p_availability text,
+  p_player_token text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+declare
+  current_state jsonb;
+  current_revision integer;
+  next_state jsonb;
+  next_players jsonb;
+begin
+  if p_tournament_id is null or p_invite_code is null or p_player_id is null
+    or p_availability not in ('active', 'away') or p_player_token is null
+    or length(trim(p_player_token)) < 32 then
+    raise exception 'Invalid player availability payload';
+  end if;
+  if not exists (
+    select 1 from public.player_sessions
+    where tournament_id = p_tournament_id and player_id = p_player_id
+      and token_hash = encode(extensions.digest(trim(p_player_token), 'sha256'), 'hex')
+  ) then
+    raise exception 'Player token mismatch';
+  end if;
+  select state, revision into current_state, current_revision
+  from public.tournaments
+  where id = p_tournament_id and invite_code = upper(trim(p_invite_code))
+  for update;
+  if current_state is null then raise exception 'Tournament not found'; end if;
+  select jsonb_agg(case when value->>'id' = p_player_id::text
+    then jsonb_set(value, '{availability}', to_jsonb(p_availability), true)
+    else value end)
+  into next_players from jsonb_array_elements(coalesce(current_state->'players', '[]'::jsonb)) value;
+  if next_players is null then raise exception 'Player not found'; end if;
+  next_state := jsonb_set(current_state, '{players}', next_players, true);
+  next_state := jsonb_set(next_state, '{revision}', to_jsonb(current_revision + 1), true);
+  update public.tournaments set state = next_state, revision = current_revision + 1
+  where id = p_tournament_id and revision = current_revision;
+  return next_state;
+end;
+$$;
+
+create or replace function public.set_player_availability(
+  p_tournament_id uuid, p_invite_code text, p_player_id uuid,
+  p_availability text, p_player_token text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+begin
+  if not public.consume_api_rate_limit('availability:' || coalesce(p_player_token, 'missing'), 30, 3600) then
+    raise exception 'Rate limit exceeded';
+  end if;
+  return public.set_player_availability_impl(p_tournament_id, p_invite_code, p_player_id, p_availability, p_player_token);
+end;
+$$;
+
+revoke all on function public.set_player_availability_impl(uuid, text, uuid, text, text) from public, anon, authenticated;
+revoke all on function public.set_player_availability(uuid, text, uuid, text, text) from public, authenticated;
+grant execute on function public.set_player_availability(uuid, text, uuid, text, text) to anon;
+
+-- Fase 9: local/server profile ownership, history and delayed deletion.
+create table if not exists public.player_profiles (
+  id uuid primary key,
+  token_hash text not null,
+  display_name text not null,
+  avatar_id text not null default 'smash',
+  deletion_requested_at timestamptz,
+  deletion_scheduled_for timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint player_profiles_name_length check (length(display_name) between 1 and 64),
+  constraint player_profiles_avatar check (avatar_id in ('smash', 'serve', 'wall', 'lob')),
+  constraint player_profiles_token_hash_length check (length(token_hash) = 64)
+);
+
+create table if not exists public.player_profile_history (
+  id uuid not null,
+  profile_id uuid not null references public.player_profiles(id) on delete cascade,
+  tournament_id uuid,
+  tournament_name text not null,
+  ended_at timestamptz not null,
+  placement integer,
+  points integer not null default 0,
+  matches integer not null default 0,
+  wins integer not null default 0,
+  sets integer not null default 0,
+  games integer not null default 0,
+  created_at timestamptz not null default now(),
+  primary key (profile_id, id),
+  constraint player_profile_history_numbers check (points >= 0 and matches >= 0 and wins >= 0 and sets >= 0 and games >= 0)
+);
+
+alter table public.player_profiles enable row level security;
+alter table public.player_profile_history enable row level security;
+revoke all privileges on table public.player_profiles from public, anon, authenticated;
+revoke all privileges on table public.player_profile_history from public, anon, authenticated;
+create index if not exists player_profile_history_profile_ended_idx on public.player_profile_history (profile_id, ended_at desc);
+
+create or replace function public.upsert_player_profile_impl(uuid, text, text, text)
+returns jsonb language plpgsql security definer set search_path = public, pg_catalog as $$
+declare existing_hash text; saved public.player_profiles; next_name text := trim(coalesce($3, '')); next_avatar text := case when $4 in ('smash', 'serve', 'wall', 'lob') then $4 else 'smash' end;
+begin
+  if $1 is null or $2 is null or length(trim($2)) < 32 or length(next_name) not between 1 and 64 then raise exception 'Invalid profile payload'; end if;
+  select token_hash into existing_hash from public.player_profiles where id = $1 for update;
+  if existing_hash is not null and existing_hash <> encode(extensions.digest(trim($2), 'sha256'), 'hex') then raise exception 'Profile token mismatch'; end if;
+  insert into public.player_profiles (id, token_hash, display_name, avatar_id) values ($1, encode(extensions.digest(trim($2), 'sha256'), 'hex'), next_name, next_avatar)
+  on conflict (id) do update set display_name = excluded.display_name, avatar_id = excluded.avatar_id, deletion_requested_at = null, deletion_scheduled_for = null, updated_at = now()
+  returning * into saved;
+  return jsonb_build_object('profile', jsonb_build_object('id', saved.id, 'displayName', saved.display_name, 'avatarId', saved.avatar_id, 'createdAt', saved.created_at, 'updatedAt', saved.updated_at, 'deletionRequestedAt', saved.deletion_requested_at, 'deletionScheduledFor', saved.deletion_scheduled_for));
+end; $$;
+
+create or replace function public.save_player_profile_history_impl(uuid, text, jsonb)
+returns boolean language plpgsql security definer set search_path = public, pg_catalog as $$
+begin
+  if $1 is null or $2 is null or length(trim($2)) < 32 or $3 is null or jsonb_typeof($3) <> 'object' then raise exception 'Invalid profile history payload'; end if;
+  if not exists (select 1 from public.player_profiles where id = $1 and token_hash = encode(extensions.digest(trim($2), 'sha256'), 'hex')) then raise exception 'Profile token mismatch'; end if;
+  insert into public.player_profile_history (id, profile_id, tournament_id, tournament_name, ended_at, placement, points, matches, wins, sets, games)
+  values (($3->>'id')::uuid, $1, ($3->>'id')::uuid, left(trim($3->>'tournamentName'), 120), ($3->>'endedAt')::timestamptz, nullif($3->>'placement', '')::integer, greatest(0, coalesce(($3->>'points')::integer, 0)), greatest(0, coalesce(($3->>'matches')::integer, 0)), greatest(0, coalesce(($3->>'wins')::integer, 0)), greatest(0, coalesce(($3->>'sets')::integer, 0)), greatest(0, coalesce(($3->>'games')::integer, 0)))
+  on conflict (profile_id, id) do update set tournament_name = excluded.tournament_name, ended_at = excluded.ended_at, placement = excluded.placement, points = excluded.points, matches = excluded.matches, wins = excluded.wins, sets = excluded.sets, games = excluded.games;
+  return true;
+end; $$;
+
+create or replace function public.request_player_profile_deletion_impl(uuid, text)
+returns timestamptz language plpgsql security definer set search_path = public, pg_catalog as $$
+declare scheduled timestamptz := now() + interval '30 days';
+begin update public.player_profiles set deletion_requested_at = now(), deletion_scheduled_for = scheduled, updated_at = now() where id = $1 and token_hash = encode(extensions.digest(trim(coalesce($2, '')), 'sha256'), 'hex') and length(trim(coalesce($2, ''))) >= 32; if not found then raise exception 'Profile token mismatch'; end if; return scheduled; end; $$;
+
+create or replace function public.cancel_player_profile_deletion_impl(uuid, text)
+returns boolean language plpgsql security definer set search_path = public, pg_catalog as $$
+begin update public.player_profiles set deletion_requested_at = null, deletion_scheduled_for = null, updated_at = now() where id = $1 and token_hash = encode(extensions.digest(trim(coalesce($2, '')), 'sha256'), 'hex') and length(trim(coalesce($2, ''))) >= 32; if not found then raise exception 'Profile token mismatch'; end if; return true; end; $$;
+
+create or replace function public.cleanup_expired_player_profiles(integer default 30)
+returns integer language plpgsql security definer set search_path = public, pg_catalog as $$
+declare deleted_count integer;
+begin if $1 is null or $1 < 1 or $1 > 3650 then raise exception 'Invalid retention window'; end if; delete from public.player_profiles where deletion_scheduled_for is not null and deletion_scheduled_for <= now() and deletion_requested_at <= now() - make_interval(days => $1); get diagnostics deleted_count = row_count; return deleted_count; end; $$;
+
+create or replace function public.upsert_player_profile(uuid, text, text, text)
+returns jsonb language plpgsql security definer set search_path = public, pg_catalog as $$ begin if not public.consume_api_rate_limit('profile:' || coalesce($2, 'missing'), 30, 3600) then raise exception 'Rate limit exceeded'; end if; return public.upsert_player_profile_impl($1, $2, $3, $4); end; $$;
+create or replace function public.save_player_profile_history(uuid, text, jsonb)
+returns boolean language plpgsql security definer set search_path = public, pg_catalog as $$ begin if not public.consume_api_rate_limit('profile-history:' || coalesce($2, 'missing'), 60, 3600) then raise exception 'Rate limit exceeded'; end if; return public.save_player_profile_history_impl($1, $2, $3); end; $$;
+create or replace function public.request_player_profile_deletion(uuid, text)
+returns timestamptz language plpgsql security definer set search_path = public, pg_catalog as $$ begin if not public.consume_api_rate_limit('profile-delete:' || coalesce($2, 'missing'), 10, 3600) then raise exception 'Rate limit exceeded'; end if; return public.request_player_profile_deletion_impl($1, $2); end; $$;
+create or replace function public.cancel_player_profile_deletion(uuid, text)
+returns boolean language plpgsql security definer set search_path = public, pg_catalog as $$ begin if not public.consume_api_rate_limit('profile-cancel-delete:' || coalesce($2, 'missing'), 10, 3600) then raise exception 'Rate limit exceeded'; end if; return public.cancel_player_profile_deletion_impl($1, $2); end; $$;
+
+revoke all on function public.upsert_player_profile_impl(uuid, text, text, text) from public, anon, authenticated;
+revoke all on function public.save_player_profile_history_impl(uuid, text, jsonb) from public, anon, authenticated;
+revoke all on function public.request_player_profile_deletion_impl(uuid, text) from public, anon, authenticated;
+revoke all on function public.cancel_player_profile_deletion_impl(uuid, text) from public, anon, authenticated;
+revoke all on function public.cleanup_expired_player_profiles(integer) from public, anon, authenticated;
+revoke all on function public.upsert_player_profile(uuid, text, text, text) from public, authenticated;
+revoke all on function public.save_player_profile_history(uuid, text, jsonb) from public, authenticated;
+revoke all on function public.request_player_profile_deletion(uuid, text) from public, authenticated;
+revoke all on function public.cancel_player_profile_deletion(uuid, text) from public, authenticated;
+grant execute on function public.upsert_player_profile(uuid, text, text, text) to anon;
+grant execute on function public.save_player_profile_history(uuid, text, jsonb) to anon;
+grant execute on function public.request_player_profile_deletion(uuid, text) to anon;
+grant execute on function public.cancel_player_profile_deletion(uuid, text) to anon;
+
+do $$
+begin
+  if exists (select 1 from pg_available_extensions where name = 'pg_cron') then
+    create extension if not exists pg_cron with schema extensions;
+    if not exists (select 1 from cron.job where jobname = 'padelstar-retention-cleanup') then
+      perform cron.schedule('padelstar-retention-cleanup', '15 3 * * *', $job$select public.cleanup_expired_tournaments(); select public.cleanup_expired_player_profiles();$job$);
+    end if;
+  end if;
+end;
+$$;
+
 alter default privileges for role postgres in schema public
   revoke select, insert, update, delete on tables from anon, authenticated, service_role;
 

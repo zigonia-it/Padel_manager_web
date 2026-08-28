@@ -1,6 +1,6 @@
 # Padelstar - Dataretensjon
 
-Sist oppdatert: 2026-08-27
+Sist oppdatert: 2026-08-28
 
 Status: beta-utkast, eierbeslutninger mottatt 2026-08-27
 
@@ -29,9 +29,10 @@ Følgende retensjon er godkjent som foreløpig beta-policy:
 
 Når brukerprofiler innføres, kan profil-eide turneringer og statistikk beholdes lenger som brukerens historikk. Ved sletting av
 profilen skal tilknyttede resterende data slettes etter 30 dager. Cleanup-jobben må da utvides med profilkobling før profiler
-kan lanseres; dagens schema har ikke brukerprofiler.
+kan lanseres. Fase 9 har nå en profil-light lokalt og private Supabase-tabeller for profilhistorikk; profilen bruker en lokalt
+lagret token som aldri legges i turneringsstate, historikk eller backup.
 
-Den implementerte interne cleanup-funksjonen sletter foreløpig bare turneringer som admin eksplisitt har satt til `Avsluttet`, og bruker `updated_at` som serverbasert tidsgrunnlag. Den sletter også rate-limit-rader eldre enn 24 timer. Jobben må kjøres fra betrodd Supabase-drift og er ikke tilgjengelig for klientroller.
+Den implementerte interne cleanup-funksjonen sletter turneringer som admin eksplisitt har satt til `Avsluttet`, og bruker `updated_at` som serverbasert tidsgrunnlag. Den sletter også rate-limit-rader eldre enn 24 timer. Profil-cleanup sletter profil og profilhistorikk når slettingsfristen er passert. Begge funksjonene kjøres av den betrodde `pg_cron`-jobben `padelstar-retention-cleanup`.
 
 ## Sletteprosedyre
 
@@ -41,10 +42,10 @@ Den implementerte interne cleanup-funksjonen sletter foreløpig bare turneringer
 4. Bekreft at tilhørende spillerøkter og rate-limit-data er borte dersom de er knyttet til turneringen.
 5. Be brukeren nullstille lokal turnering i appen eller tømme nettleserdata for å fjerne lokal kopi.
 
-## Neste fase: profilhistorikk
+## Profilhistorikk er implementert
 
-- Profilmodellen må definere hvilke turneringer og statistikk som eies av profilen.
-- Profilhistorikk kan beholdes lenger mens profilen består.
-- Ved profilsletting må alle tilknyttede data merkes for sletting og fjernes innen 30 dager.
-- Cleanup-jobben må utvides med profilkobling før profiler lanseres.
-- Cleanup-funksjonen må få en fast automatisk trigger i Supabase-drift eller annen godkjent jobb.
+- Profilmodellen definerer at profil-ID eier profilhistorikk med turneringsnavn, dato, plassering, poeng, kamper, seire, sett og games.
+- Profilhistorikk beholdes lenger mens profilen består.
+- Ved profilsletting merkes profilen for sletting og tilknyttet historikk fjernes innen 30 dager.
+- `cleanup_expired_player_profiles()` sletter profil og tilhørende historikk etter slettingsfristen.
+- `padelstar-retention-cleanup` er fast automatisk trigger i Supabase-drift.

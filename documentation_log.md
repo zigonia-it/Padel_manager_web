@@ -1,12 +1,62 @@
 # Padelstar - Dokumentasjonslogg
 
-Sist oppdatert: 2026-08-27
+Sist oppdatert: 2026-08-28
 
 Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padelstar.
 
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
+
+## 2026-08-28 - Fullførte Fase 8-funksjonene lokalt
+
+- La til etterflyt etter lokal forlatelse med `Se som tilskuer`, `Velg spiller` og `Bli med på nytt`.
+- La til separat spillerstatus `availability: active|away`; ute/reiste spillere beholdes i historikk, men ekskluderes fra nye round-robin- og cup-runder.
+- La til offentlig `?spectate=KODE`-lenke som bruker eksisterende offentlige oppslag og read-only rollevisning.
+- La til token-beskyttet Supabase-RPC `set_player_availability` med radlås, hash-verifisering og atomisk revisjon.
+- La til rolleindikator og mobil bunnnavigasjon for arbeidsflaten.
+- Oppdaterte PWA-cache til `padelstar-v55`, `padelstar-i18n-5` og `padelstar-session-5`.
+- Live «ute/reist» krever at `supabase/migrations/20260828090000_player_availability.sql` kjøres i Supabase.
+
+## 2026-08-28 - Fase 8 verifisert og migrert live
+
+- Synkroniserte Supabase-migreringshistorikken etter at liveprosjektet hadde eldre versjonsnumre enn arbeidskopien.
+- Kjørte `20260828090000_player_availability.sql` i det koblede prosjektet.
+- Kontrollerte at lokal og live migreringsliste nå er identisk.
+- Verifiserte med `npm test`: 43 passerte, 1 opt-in live-test hoppet over uten testvariabler.
+- Fase 8 er dermed ferdig. Neste planlagte fase er brukerprofiler, historikk og profilstyrt sletting.
+
+## 2026-08-28 - Startet ferdigstilling av Fase 9
+
+- La til lokal profil-light med stabil profil-ID, visningsnavn og avatar.
+- Join-skjemaet foreslår profilens navn/avatar uten å fjerne anonym join.
+- La til profilhistorikk for avsluttede turneringer med plassering, poeng, kamper, seire, sett og games.
+- La til profilside med samlet statistikk, historikkliste og 30 dagers slettestatus med angreknapp.
+- La til `player_profiles` og `player_profile_history` med RLS, tokenhash og private profil-RPC-er.
+- La til intern `cleanup_expired_player_profiles()` for sletting etter fristen.
+- Neste steg er live migrering, fast cleanup-jobb og browser-smoke for profilflyten.
+
+## 2026-08-28 - Fase 9 ferdigstilt
+
+- Kjørte profil- og historikkmigreringen live i Supabase.
+- La til egen korrigeringsmigrering slik at samme turnering kan lagres i flere profiler uten å blande historikk.
+- Opprettet og verifiserte `padelstar-retention-cleanup` i `cron.job`, daglig kl. 03:15 UTC.
+- La til historikkfilter for alle, siste år og siste 30 dager.
+- Verifiserte profiloppretting, reload/persistens og join-forslag i browser.
+- `npm test`: 47 tester totalt, 46 passerte og 1 opt-in live-test hoppet over uten live-testvariabler.
+- Fase 9 er ferdig. Neste planlagte fase er fase 10: UI-polish og mobil ergonomi.
+
+## 2026-08-28 - Gjorde all synlig apptekst oversettbar
+
+- Flyttet synlig tekst i hovedappen fra `index.html` og `app.js` til oversettelsesnøkler, inkludert knapper, valglister, dialoger, statusmeldinger, tomtilstander, ARIA-etiketter, placeholders og metabeskrivelse.
+- La inn automatisk test som samler alle `data-i18n*`- og `t(...)`-nøkler og verifiserer Bokmål-fallback.
+- Oversatte scorevalideringsfeil ved visning, mens scoringsmotoren fortsatt returnerer språkagnostiske valideringsmeldinger for kompatibilitet.
+- Bumpet PWA-cache til `padelstar-v54`, `padelstar-i18n-4` og `padelstar-session-4`.
+
+### Neste steg
+
+- Finpusse lengre oversettelser i Nynorsk, English (International), Español, Deutsch og Français.
+- Deretter fortsette etterflyten etter `Forlat turnering` med tilskuer, spillerbytte og ny join.
 
 ## 2026-08-27 - Startet Fase 8 med språkmotor
 
