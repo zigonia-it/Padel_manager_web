@@ -6,16 +6,24 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const serviceWorkerSource = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
-const stylesSource = fs.readFileSync(path.join(root, "styles.css"), "utf8");
+const stylesSource = fs.readFileSync(path.join(root, "styles", "styles.css"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v57/);
+  assert.match(serviceWorkerSource, /padelstar-v58/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
   assert.match(serviceWorkerSource, /event\.request\.mode === "navigate"/);
   assert.match(serviceWorkerSource, /caches\.match\("\.\/index\.html"\)/);
   assert.match(serviceWorkerSource, /"\.\/privacy\.html"/);
+});
+
+test("browser entrypoint uses the organized app and styles directories", () => {
+  assert.match(indexSource, /href="styles\/styles\.css/);
+  assert.match(indexSource, /src="app\/translations\.js/);
+  assert.match(indexSource, /src="app\/app\.js/);
+  assert.match(serviceWorkerSource, /"\.\/styles\/styles\.css/);
+  assert.match(serviceWorkerSource, /"\.\/app\/app\.js/);
 });
 
 test("service worker does not cache failed same-origin responses", () => {

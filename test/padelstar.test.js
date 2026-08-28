@@ -4,13 +4,14 @@ const path = require("node:path");
 const test = require("node:test");
 const vm = require("node:vm");
 
-const translationsPath = path.join(__dirname, "..", "translations.js");
-const tournamentEnginePath = path.join(__dirname, "..", "tournament-engine.js");
-const scoringEnginePath = path.join(__dirname, "..", "scoring-engine.js");
-const stateManagerPath = path.join(__dirname, "..", "state-manager.js");
-const realtimeSyncPath = path.join(__dirname, "..", "realtime-sync.js");
-const offlineStoragePath = path.join(__dirname, "..", "offline-storage.js");
-const appPath = path.join(__dirname, "..", "app.js");
+const appRoot = path.join(__dirname, "..", "app");
+const translationsPath = path.join(appRoot, "translations.js");
+const tournamentEnginePath = path.join(appRoot, "tournament-engine.js");
+const scoringEnginePath = path.join(appRoot, "scoring-engine.js");
+const stateManagerPath = path.join(appRoot, "state-manager.js");
+const realtimeSyncPath = path.join(appRoot, "realtime-sync.js");
+const offlineStoragePath = path.join(appRoot, "offline-storage.js");
+const appPath = path.join(appRoot, "app.js");
 const indexPath = path.join(__dirname, "..", "index.html");
 
 function collectTranslationKeys() {

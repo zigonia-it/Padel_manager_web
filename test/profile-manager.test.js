@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
 
-const source = fs.readFileSync(path.join(__dirname, "..", "profile-manager.js"), "utf8");
+const source = fs.readFileSync(path.join(__dirname, "..", "app", "profile-manager.js"), "utf8");
 
 function loadProfiles() {
   const storage = new Map();

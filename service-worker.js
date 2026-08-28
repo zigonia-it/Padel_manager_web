@@ -1,18 +1,18 @@
-const cacheName = "padelstar-v57";
+const cacheName = "padelstar-v58";
 
 const appShell = [
   "./",
   "./index.html",
   "./privacy.html",
-  "./styles.css?v=padelstar-mobile-1",
-  "./translations.js?v=padelstar-i18n-6",
-  "./tournament-engine.js?v=padelstar-engine-1",
-  "./scoring-engine.js?v=padelstar-scoring-1",
-  "./state-manager.js?v=padelstar-state-1",
-  "./realtime-sync.js?v=padelstar-realtime-sync-1",
-  "./offline-storage.js?v=padelstar-offline-1",
-  "./profile-manager.js?v=padelstar-profile-1",
-  "./app.js?v=padelstar-session-6",
+  "./styles/styles.css?v=padelstar-mobile-1",
+  "./app/translations.js?v=padelstar-i18n-6",
+  "./app/tournament-engine.js?v=padelstar-engine-1",
+  "./app/scoring-engine.js?v=padelstar-scoring-1",
+  "./app/state-manager.js?v=padelstar-state-1",
+  "./app/realtime-sync.js?v=padelstar-realtime-sync-1",
+  "./app/offline-storage.js?v=padelstar-offline-1",
+  "./app/profile-manager.js?v=padelstar-profile-1",
+  "./app/app.js?v=padelstar-session-6",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-256.png",

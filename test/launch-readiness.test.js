@@ -6,8 +6,8 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
-const retentionSource = fs.readFileSync(path.join(root, "data_retention.md"), "utf8");
-const runbookSource = fs.readFileSync(path.join(root, "operations_runbook.md"), "utf8");
+const retentionSource = fs.readFileSync(path.join(root, "docs", "data_retention.md"), "utf8");
+const runbookSource = fs.readFileSync(path.join(root, "docs", "operations_runbook.md"), "utf8");
 
 test("footer exposes the public privacy page", () => {
   assert.match(indexSource, /href="privacy\.html"/);

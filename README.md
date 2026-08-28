@@ -2,7 +2,7 @@
 
 Live app: https://padelstar.app
 
-Sist oppdatert: 2026-08-27
+Sist oppdatert: 2026-08-28
 
 Status: 0.2 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
@@ -30,14 +30,14 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 
 ## Neste steg i beta
 
-Fase 7 er ferdig, og spiller kan nå forlate sin lokale spillerøkt uten å påvirke turneringen for andre. Fase 8 er startet med språkmotor før flere synlige UI-tekster legges til.
+Fase 10 og Fase 11 er ferdige. Mobil arbeidsflatenavigasjon er en kompakt bunnrad som ikke dekker turneringsinnholdet, kampoversikter har statusfiltre, og prosjektet har ryddig struktur med `app/`, `styles/` og `docs/`.
 
 - Kjøre den nye Supabase-migreringen for live spillerstatus, og gjennomføre browser-smoke av tilskuerlenke og ute/reist på deployet miljø.
 - Gi spilleren valg etter `Forlat turnering`: se som tilskuer, velg spiller igjen eller bli med på nytt.
 - La spiller markere seg som ute/reist uten å endre historiske kamper eller andre spilleres resultater.
 - Lage tilskuerlenke/read-only modus uten spillerstatus og skrivehandlinger.
 - Deretter bygge brukerprofiler, lokal profil-light, lokal historikk, bedre sync-panel og profilstyrt sletting.
-- Etter dette kommer UI-polish for mobil admin, rolleindikatorer, kampkort, spillerens nå-kort, leaderboard, filtre, cup-bracket, tomtilstander og delingspanel.
+- Neste arbeid er kontrollert produksjonsverifisering og eventuelle forbedringer basert på faktisk bruk.
 - Filstruktur ryddes i en egen ren fase senere, med appkode i `app/`, styling i `styles/` og dokumentasjon i `docs/`.
 
 ## Roller og visninger
@@ -50,17 +50,17 @@ Fase 7 er ferdig, og spiller kan nå forlate sin lokale spillerøkt uten å påv
 ## Prosjektstruktur
 
 - `index.html` - appstruktur, metadata og moduler.
-- `styles.css` - responsivt design og Padelstar-visuell stil.
-- `translations.js` - språkmotor med strukturerte nøkler, variabler, fallback og manglende-nøkkel-sporing for brukerflate.
-- `tournament-engine.js` - ren scheduler- og teamlogikk for turneringsoppsett.
-- `scoring-engine.js` - ren scoring, settvalidering, poengsummer og leaderboard/statistikk.
-- `state-manager.js` - state-migrering, lokal sync-metadata, shared-state-sanitizing og remote-feilklassifisering.
-- `realtime-sync.js` - rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering.
-- `offline-storage.js` - IndexedDB-speiling av lokal state, rolle og sync-kø med localStorage som fallback.
+- `styles/styles.css` - responsivt design og Padelstar-visuell stil.
+- `app/translations.js` - språkmotor med strukturerte nøkler, variabler, fallback og manglende-nøkkel-sporing for brukerflate.
+- `app/tournament-engine.js` - ren scheduler- og teamlogikk for turneringsoppsett.
+- `app/scoring-engine.js` - ren scoring, settvalidering, poengsummer og leaderboard/statistikk.
+- `app/state-manager.js` - state-migrering, lokal sync-metadata, shared-state-sanitizing og remote-feilklassifisering.
+- `app/realtime-sync.js` - rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering.
+- `app/offline-storage.js` - IndexedDB-speiling av lokal state, rolle og sync-kø med localStorage som fallback.
 - `privacy.html` - offentlig beta-utkast for personvern.
-- `data_retention.md` - retensjon, sletting og profilhistorikk-policy.
-- `operations_runbook.md` - deploy, database, backup, rollback og produksjonssjekker.
-- `app.js` - browser-entrypoint, modulvisning, localStorage, Supabase-kall og tynne delegater til domenemodulene.
+- `docs/data_retention.md` - retensjon, sletting og profilhistorikk-policy.
+- `docs/operations_runbook.md` - deploy, database, backup, rollback og produksjonssjekker.
+- `app/app.js` - browser-entrypoint, modulvisning, localStorage, Supabase-kall og tynne delegater til domenemodulene.
 - `assets/` - logo, appikoner, designassets og fonter.
 - `manifest.webmanifest` - PWA-manifest.
 - `service-worker.js` - app-shell-cache for PWA.
@@ -109,10 +109,10 @@ https://padelstar.app
 
 ## Dokumentasjon
 
-- `development_plan.md` - aktiv arbeidsplan og neste tekniske prioriteringer.
-- `product_development.md` - produktretning, roller, turneringsregler og videre idéer.
-- `tournament_logic.md` - turneringslogikk hentet fra tidligere iOS-app.
-- `migration_notes.md` - notater for porting fra SwiftUI/iOS.
-- `documentation_log.md` - løpende logg over beslutninger og utført arbeid.
+- `docs/development_plan.md` - aktiv arbeidsplan og neste tekniske prioriteringer.
+- `docs/product_development.md` - produktretning, roller, turneringsregler og videre idéer.
+- `docs/tournament_logic.md` - turneringslogikk hentet fra tidligere iOS-app.
+- `docs/migration_notes.md` - notater for porting fra SwiftUI/iOS.
+- `docs/documentation_log.md` - løpende logg over beslutninger og utført arbeid.
 
-Prosjektregel: etter hver tydelige arbeidsøkt skal `documentation_log.md` oppdateres.
+Prosjektregel: etter hver tydelige arbeidsøkt skal `docs/documentation_log.md` oppdateres.
