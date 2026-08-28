@@ -2692,3 +2692,25 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Eventuell ekstern monitor for `/api/health`.
 - Eventuell senere migrering fra kompatibel admin-token til full konto-/tokenmodell.
 - Nye produktforbedringer må planlegges som egne initiativer.
+
+## 2026-08-29 - Planlagt Fase 16: synlig og visuelt sterk UI
+
+### Planlagt
+
+- Opprettet Fase 16 i `docs/development_plan.md` som første nye fase etter Fase 0–15.
+- Fasen kombinerer lesbarhet for svaksynte med en mer tydelig og sportslig visuell oppgradering.
+- Planen dekker separat prioritering for spiller, administrator og tilskuer.
+- Planen inkluderer audit av dagens skjermer, designsystem/tokens, high-contrast/daylight-variant, større tekst, status uten farge alene, fokus/tastatur, touchmål, redusert bevegelse og før-/etter-verifisering.
+
+### Researchgrunnlag
+
+- Apple HIG Accessibility, Typography, Layout og Color.
+- WCAG 2.2 med særlig vekt på kontrast, reflow, fokus og target size.
+- Apple Sports som referanse for raske, skannbare live-scoreflater.
+- Tournated som referanse for rollebaserte turneringsflater, live-resultater og rangering.
+
+### Beslutning før implementering
+
+- Mørk/gull beholdes som merkevare, men kontrast og lesbarhet har prioritet over dekor.
+- Det må avgjøres om high-contrast/daylight blir en egen brukerinnstilling eller følger systempreferanser.
+- Første visuelle fokus i hver rolle må velges før redesignarbeidet starter.
