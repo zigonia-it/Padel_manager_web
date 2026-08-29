@@ -2906,6 +2906,97 @@ Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er
 
 - `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
 - `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.
+
+## 2026-08-29 - Kompakt responsivt toppfelt
+
+### Gjort
+
+- Rettet mellomskjerm-layouten som ga et unødvendig høyt toppfelt etter at logoen ble separert fra menyen.
+- Byttet til et kompakt grid under 900 px med språkvelger og status på samme rad, og modulmenyen på raden under.
+- Hindret flex-strekking av språk- og statusfeltene, slik at toppfeltet beholder normal høyde.
+- Bumpet stylesheet- og service-worker-cache til `padelstar-ui-12` og `padelstar-v72`.
+
+### Verifisert
+
+- Visuell nettleserkontroll ved 806 x 916 bekrefter kompakt toppfelt uten logooverlapping.
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.
+
+## 2026-08-29 - Responsivt toppfelt uten logooverlapping
+
+### Gjort
+
+- Begrenset toppfeltets logo til tilgjengelig bredde og beholdt `height: auto`.
+- La inn en egen responsiv toppfelt-layout under 900 px der logo, modulmeny og språk/status får separate rader.
+- Sørget for at modulmenyen ikke kan presse seg inn over logoen ved mellomstore skjermbredder.
+- Bumpet stylesheet- og service-worker-cache til `padelstar-ui-11` og `padelstar-v71`.
+
+### Verifisert
+
+- Visuell nettleserkontroll ved 806 x 916 bekrefter at logo og meny ikke overlapper.
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.
+
+## 2026-08-29 - Hero-logo under navigasjonslinjen
+
+### Gjort
+
+- La inn en responsiv sikkerhetssone mellom landing-navigasjonen og hero-logoen.
+- Begrenset logoen med både tilgjengelig bredde og viewport-relatert høyde, slik at den ikke kan vokse inn i menylinjen.
+- La til egne intervaller for mellomstore skjermer, mobil og små mobilskjermer.
+- Bumpet stylesheet- og service-worker-cache til `padelstar-ui-10` og `padelstar-v70`.
+
+### Verifisert
+
+- Visuell nettleserkontroll ved 826 x 922 bekrefter at logoen ligger under navigasjonslinjen.
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.
+
+## 2026-08-29 - Samlet corner radius og overlay-clipping
+
+### Gjort
+
+- Innførte én felles `--surface-radius` for hovedpaneler, oppsettsflater, arbeidsflate, underpaneler og relevante innholdskort.
+- Klipper gradienter, pseudo-elementer og andre overlegg til samme avrundede form som panelet de ligger i.
+- Beholdt knapp-, avatar- og status-chip-radius separat der formen er en del av kontrollens funksjon.
+- Bumpet stylesheet- og service-worker-cache til `padelstar-ui-9` og `padelstar-v69`.
+
+### Verifisert
+
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.
+
+## 2026-08-29 - Fullbredde appflater for oppsett og arbeidsflate
+
+### Gjort
+
+- Utvidet opprett-, bli med- og turneringsflatene til samme fullbredde hovedpanel som forsiden.
+- La skjema- og arbeidsflateinnhold beholde en kontrollert indre bredde for lesbarhet, samtidig som bakgrunn, kant og visuell dybde fyller appens tilgjengelige bredde.
+- Beholdt responsiv tilpasning slik at ytterflaten fyller mobilbredden uten horisontal forskyvning.
+- Bumpet stylesheet- og service-worker-cache til `padelstar-ui-8` og `padelstar-v68`.
+
+### Verifisert
+
+- Visuell nettleserkontroll av opprett-siden ved 1440 x 900 og 390 x 844.
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.
 - Nettleserflyt ved 390 x 844: opprett aktiv turnering, åpne «Opprett» på nytt, og se at skjemaet vises uten å avslutte aktiv turnering.
 - Nettleserflyt: admin-spiller kan åpne Spiller-visningen og ser «Forlat turnering» fast i arbeidsflatehodet.
 - Mobilkontroll bekrefter at landinginnholdet ikke blir beskåret eller får horisontal overflow.
+
+## 2026-08-29 - Felles visuell stil for resten av appen
+
+### Gjort
+
+- Utvidet forsiden sitt gull- og mørke designsystem til oppsettsider, toppfelt, arbeidsflate, admin-underfaner, spillerflater og turneringspaneler.
+- Samlet toppnavigasjonen i samme innrammede og aktive knappestil som forsidens navigasjon.
+- La til en felles arbeidsflate rundt aktive moduler med diskret gullkant, dybde, luft og tydelig header.
+- Oppgraderte opprett- og bli med-skjemaene med samme hovedflate, paneldybde, overskriftshierarki og handlingsfokus som forsiden.
+- Harmoniserte paneler, statusfelt, rolleindikatorer og admin-underfaner uten å endre funksjonalitet eller navigasjonsmodell.
+- Bumpet stylesheet- og service-worker-cache til `padelstar-ui-7` og `padelstar-v67`.
+
+### Verifisert
+
+- Nettleserkontroll ved 390 x 844 viser sammenhengende stil og ingen beskåret oppsettsflate.
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.

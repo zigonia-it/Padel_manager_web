@@ -349,6 +349,25 @@ body:not(.workspace-active):not(.setup-active) .topbar {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+.brand-lockup,
+.brand-home-button {
+  min-width: 0;
+}
+
+.brand-lockup {
+  flex: 0 1 auto;
+}
+
+.brand-logo {
+  display: block;
+  width: min(220px, 100%);
+  max-width: 100%;
+  height: auto;
 }
 
 
@@ -363,6 +382,7 @@ body:not(.workspace-active):not(.setup-active) .topbar {
 
   gap: 6px;
   max-width: 540px;
+  min-width: 0;
 }
 
 .app-menu .module-link {
@@ -3793,7 +3813,6 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   }
 }
 
-
 /* =========================================================
    RESPONSIVE <= 900px
    ========================================================= */
@@ -4975,5 +4994,391 @@ h4,
 @media (prefers-reduced-motion: reduce) {
   .skip-link {
     transition: none;
+  }
+}
+
+/* =========================================================
+   SHARED PRODUCT SURFACE
+   ========================================================= */
+
+:root {
+  --surface-radius: 16px;
+}
+
+.intro,
+.topbar,
+.workspace,
+.setup-panel,
+.panel,
+.next-match,
+.setup-card,
+.admin-subtabs,
+.landing-links,
+.share-details > div,
+.status-grid > div,
+.round-summary > div,
+.match-card,
+.spectator-score-card,
+.cup-team-builder,
+.admin-identity-panel,
+.join-preview,
+.existing-player-box {
+  border-radius: var(--surface-radius);
+  background-clip: padding-box;
+}
+
+.intro,
+.topbar,
+.workspace,
+.setup-panel,
+.panel,
+.next-match,
+.setup-card,
+.admin-subtabs,
+.landing-links,
+.share-details > div,
+.status-grid > div,
+.round-summary > div,
+.match-card,
+.spectator-score-card,
+.cup-team-builder,
+.admin-identity-panel,
+.join-preview,
+.existing-player-box {
+  overflow: hidden;
+}
+
+.intro::before,
+.workspace::before,
+.setup-panel::before {
+  border-radius: inherit;
+}
+
+body.workspace-active,
+body.setup-active {
+  background:
+    linear-gradient(180deg, rgba(11, 5, 1, 0.34), rgba(11, 5, 1, 0.62)),
+    url("../assets/bg_img-1600.jpg") center top / cover fixed;
+}
+
+body.workspace-active .app-shell,
+body.setup-active .app-shell {
+  width: min(1440px, 100%);
+  padding-top: clamp(16px, 2.4vw, 30px);
+  padding-inline: clamp(14px, 3.2vw, 54px);
+}
+
+body.workspace-active .topbar,
+body.setup-active .topbar {
+  border: 1px solid rgba(var(--gold-bright-rgb), 0.34);
+  border-top: 2px solid rgba(var(--gold-bright-rgb), 0.72);
+  border-radius: var(--surface-radius);
+  padding: 10px;
+  background:
+    linear-gradient(135deg, rgba(48, 28, 9, 0.96), rgba(15, 7, 2, 0.96) 62%),
+    rgba(15, 7, 2, 0.94);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 150, 0.10),
+    0 18px 44px rgba(0, 0, 0, 0.34);
+}
+
+body.workspace-active .app-menu,
+body.setup-active .app-menu {
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(var(--gold-bright-rgb), 0.28);
+  border-radius: var(--surface-radius);
+  background: rgba(12, 5, 1, 0.62);
+}
+
+body.workspace-active .app-menu .module-link,
+body.setup-active .app-menu .module-link {
+  min-height: 40px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+body.workspace-active .app-menu .module-link:hover,
+body.setup-active .app-menu .module-link:hover {
+  background: rgba(var(--gold-rgb), 0.12);
+  color: var(--gold-light);
+}
+
+body.workspace-active .app-menu .module-link.active,
+body.setup-active .app-menu .module-link.active {
+  border: 1px solid rgba(var(--gold-bright-rgb), 0.52);
+  background: linear-gradient(180deg, rgba(var(--gold-rgb), 0.26), rgba(var(--gold-dark-rgb), 0.12));
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(var(--gold-rgb), 0.16);
+}
+
+body.workspace-active .language-picker select,
+body.setup-active .language-picker select,
+body.workspace-active .status-pill,
+body.setup-active .status-pill {
+  border-color: rgba(var(--gold-bright-rgb), 0.32);
+  background: rgba(12, 5, 1, 0.66);
+}
+
+body.workspace-active .workspace,
+body.setup-active .setup-panel {
+  position: relative;
+  width: 100%;
+  min-height: calc(100svh - 124px);
+  margin-inline: 0;
+  padding: clamp(18px, 3vw, 42px);
+  isolation: isolate;
+  border: 1px solid rgba(var(--gold-bright-rgb), 0.34);
+  border-radius: var(--surface-radius);
+  background:
+    linear-gradient(180deg, rgba(20, 8, 2, 0.64), rgba(10, 4, 1, 0.86)),
+    radial-gradient(circle at 50% 18%, rgba(var(--gold-rgb), 0.10), transparent 34rem),
+    transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 150, 0.08),
+    0 28px 70px rgba(0, 0, 0, 0.42);
+}
+
+body.workspace-active .workspace::before,
+body.setup-active .setup-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(23, 9, 1, 0.42), transparent 28%, transparent 72%, rgba(23, 9, 1, 0.38)),
+    linear-gradient(135deg, transparent 0 48%, rgba(var(--gold-bright-rgb), 0.06) 48.15% 48.35%, transparent 48.5% 100%);
+  pointer-events: none;
+}
+
+body.workspace-active .workspace {
+  display: grid;
+  align-content: start;
+  gap: clamp(16px, 2vw, 24px);
+}
+
+body.setup-active .setup-panel {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+body.workspace-active .workspace-header {
+  margin-bottom: 2px;
+  padding: clamp(16px, 2vw, 24px);
+  border: 1px solid rgba(var(--gold-bright-rgb), 0.34);
+  border-radius: var(--surface-radius);
+  background:
+    linear-gradient(135deg, rgba(54, 31, 8, 0.78), rgba(18, 8, 2, 0.92) 64%),
+    rgba(18, 8, 2, 0.84);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 150, 0.10),
+    0 14px 32px rgba(0, 0, 0, 0.28);
+}
+
+body.workspace-active .workspace-header h2,
+body.setup-active .setup-card h2 {
+  color: #fff4bd;
+  text-shadow: 0 4px 18px rgba(var(--gold-rgb), 0.16);
+}
+
+body.workspace-active .workspace-header h2::before {
+  height: 1.05em;
+  margin-right: 0.52rem;
+}
+
+body.workspace-active .admin-subtabs {
+  border-radius: var(--surface-radius);
+  padding: 5px;
+  background:
+    linear-gradient(180deg, rgba(48, 29, 10, 0.86), rgba(15, 7, 2, 0.94));
+}
+
+body.workspace-active .subtab {
+  min-height: 44px;
+  border-radius: 9px;
+}
+
+body.workspace-active .subtab.active {
+  background: linear-gradient(180deg, var(--gold-light), var(--gold-bright));
+  color: var(--ink-dark);
+}
+
+body.workspace-active .panel,
+body.workspace-active .next-match,
+body.setup-active .setup-card {
+  border-color: rgba(var(--gold-bright-rgb), 0.34);
+  border-radius: var(--surface-radius);
+  background:
+    linear-gradient(135deg, rgba(53, 31, 9, 0.62), rgba(17, 8, 2, 0.90) 58%),
+    rgba(17, 8, 2, 0.88);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 150, 0.09),
+    0 18px 40px rgba(0, 0, 0, 0.30);
+}
+
+body.setup-active .setup-card {
+  width: min(780px, 100%);
+  justify-self: center;
+  padding: clamp(22px, 4vw, 42px);
+  gap: 20px;
+}
+
+body.setup-active .setup-card > .eyebrow {
+  margin-bottom: -12px;
+  color: var(--gold-bright);
+}
+
+body.workspace-active .panel-heading,
+body.workspace-active .workspace-header-actions,
+body.setup-active .setup-card .button-row {
+  gap: 12px;
+}
+
+body.workspace-active .panel-heading > span,
+body.workspace-active .workspace-header .role-indicator,
+body.workspace-active .workspace-header .share-box {
+  border-color: rgba(var(--gold-bright-rgb), 0.34);
+  background: rgba(12, 5, 1, 0.46);
+}
+
+body.workspace-active .player-now-grid,
+body.workspace-active .player-profile-panel,
+body.workspace-active .spectator-score-card {
+  border-color: rgba(var(--gold-bright-rgb), 0.42);
+}
+
+@media (max-width: 760px) {
+  body.workspace-active .app-shell,
+  body.setup-active .app-shell {
+    padding-top: 10px;
+  }
+
+  body.workspace-active .topbar,
+  body.setup-active .topbar {
+    top: 8px;
+    margin-inline: 0;
+    border-radius: 14px;
+  }
+
+  body.workspace-active .workspace,
+  body.setup-active .setup-panel {
+    min-height: calc(100svh - 96px);
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  body.workspace-active .workspace::before,
+  body.setup-active .setup-panel::before {
+    border-radius: inherit;
+  }
+
+  body.workspace-active .workspace-header {
+    padding: 16px;
+  }
+
+  body.setup-active .setup-panel {
+    padding-block: 18px;
+  }
+
+  body.setup-active .setup-card {
+    padding: 20px 16px;
+  }
+}
+
+/* Keep the hero safely below the landing navigation at every viewport size. */
+
+body:not(.workspace-active):not(.setup-active) .intro-copy {
+  padding-top: clamp(100px, 13svh, 156px);
+}
+
+body:not(.workspace-active):not(.setup-active) .hero-logo {
+  width: min(40vw, 560px);
+  max-width: 100%;
+  max-height: min(42svh, 380px);
+  object-fit: contain;
+}
+
+@media (max-width: 760px) {
+  body:not(.workspace-active):not(.setup-active) .intro-copy {
+    padding-top: clamp(88px, 14svh, 132px);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .hero-logo {
+    width: min(78vw, 360px);
+    max-height: min(34svh, 280px);
+  }
+}
+
+@media (max-width: 430px) {
+  body:not(.workspace-active):not(.setup-active) .intro-copy {
+    padding-top: clamp(78px, 13svh, 112px);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .hero-logo {
+    width: min(78vw, 285px);
+    max-height: min(30svh, 220px);
+  }
+}
+
+@media (max-width: 900px) {
+  body.workspace-active .topbar,
+  body.setup-active .topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  body.workspace-active .brand-lockup,
+  body.setup-active .brand-lockup,
+  body.workspace-active .topbar-actions,
+  body.setup-active .topbar-actions {
+    width: 100%;
+  }
+
+  body.workspace-active .brand-lockup,
+  body.setup-active .brand-lockup {
+    justify-content: center;
+  }
+
+  body.workspace-active .brand-logo,
+  body.setup-active .brand-logo {
+    width: min(300px, 76vw);
+  }
+
+  body.workspace-active .topbar-actions,
+  body.setup-active .topbar-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    align-content: start;
+    justify-content: initial;
+    gap: 10px;
+  }
+
+  body.workspace-active .app-menu,
+  body.setup-active .app-menu {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    flex: initial;
+    width: 100%;
+    max-width: none;
+  }
+
+  body.workspace-active .language-picker,
+  body.setup-active .language-picker {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    width: 100%;
+  }
+
+  body.workspace-active .status-pill,
+  body.setup-active .status-pill {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
   }
 }
