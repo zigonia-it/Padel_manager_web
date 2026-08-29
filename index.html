@@ -14,7 +14,8 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/icons/padelstar-512.png">
   <link rel="icon" href="assets/icons/padelstar-256.png" type="image/png">
-  <link rel="preload" href="assets/padelstar_logo-480.png" as="image" fetchpriority="high">
+  <link rel="preload" href="assets/padelstar_logo-360.png" as="image" fetchpriority="high" media="(max-width: 760px)">
+  <link rel="preload" href="assets/padelstar_logo-480.png" as="image" fetchpriority="high" media="(min-width: 761px)">
   <link rel="preload" href="assets/bg_img-1600.jpg" as="image" fetchpriority="high">
   <style>
     .intro {
@@ -91,8 +92,11 @@
           </nav>
 
           <div class="intro-copy">
-            <img class="hero-logo" src="assets/padelstar_logo-480.png" alt="Padelstar" width="480" height="320"
-              fetchpriority="high">
+            <picture>
+              <source media="(max-width: 760px)" srcset="assets/padelstar_logo-360.png" width="360" height="240">
+              <img class="hero-logo" src="assets/padelstar_logo-480.png" alt="Padelstar" width="480" height="320"
+                fetchpriority="high">
+            </picture>
             <h2 id="startTitle">PADELSTAR</h2>
             <h4 class="version" data-i18n="app.version">v. 0.2 (Beta)</h4>
             <div class="landing-actions" aria-label="Startvalg" data-i18n-aria-label="nav.startChoicesAria">

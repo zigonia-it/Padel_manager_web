@@ -33,11 +33,13 @@ test("service worker does not cache failed same-origin responses", () => {
 
 test("app shell uses optimized startup images", () => {
   assert.match(indexSource, /assets\/padelstar_logo-480\.png/);
+  assert.match(indexSource, /assets\/padelstar_logo-360\.png/);
   assert.match(indexSource, /assets\/bg_img-1600\.jpg/);
   assert.match(indexSource, /assets\/padelstar_button-540\.png/);
   assert.match(indexSource, /assets\/zigonia-it_logo_gold-512\.png/);
   assert.match(stylesSource, /assets\/bg_img-1600\.jpg/);
   assert.match(serviceWorkerSource, /assets\/padelstar_logo-480\.png/);
+  assert.match(serviceWorkerSource, /assets\/padelstar_logo-360\.png/);
   assert.match(serviceWorkerSource, /assets\/padelstar_button-540\.png/);
   assert.match(serviceWorkerSource, /assets\/zigonia-it_logo_gold-512\.png/);
   assert.match(serviceWorkerSource, /assets\/bg_img-1600\.png/);
@@ -51,6 +53,7 @@ test("optimized startup image payload stays within the measured budget", () => {
   const startupImages = [
     "assets/bg_img-1600.png",
     "assets/padelstar_logo-480.png",
+    "assets/padelstar_logo-360.png",
     "assets/padelstar_button-540.png",
     "assets/zigonia-it_logo_gold-512.png",
   ];

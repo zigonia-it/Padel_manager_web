@@ -19,6 +19,7 @@ const appShell = [
   "./assets/icons/padelstar-256.png",
   "./assets/icons/padelstar-512.png",
   "./assets/padelstar_logo-480.png",
+  "./assets/padelstar_logo-360.png",
   "./assets/padelstar_button-540.png",
   "./assets/zigonia-it_logo_gold-512.png",
   "./assets/bg_img-1600.png",
