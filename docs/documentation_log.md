@@ -2762,3 +2762,21 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 
 - Kjør samme Lighthouse-profil på publisert URL etter deploy og isoler forskjellen mellom utviklingsserver og produksjon.
 - Reduser ubrukt JavaScript og finn årsaken til layoutskiftet i landingens hero før ytelsesmålet LCP under 2,5 sekunder og ytelse minst 90 kan godkjennes.
+
+## 2026-08-29 - Produksjonsverifisering etter Fase 16
+
+### Gjort
+
+- Pushet fase 16-endringene til `main` og verifiserte at `https://padelstar.app` serverer den nye responsive hero-logoen, komprimerte bakgrunnen, kritiske inline-geometrier og deferred/lazy Supabase-oppstart.
+- Bumpet service-worker-cache til `padelstar-v62` og stylesheet-cache til `padelstar-ui-3`, slik at installerte PWA-klienter får siste UI.
+
+### Produksjonsmåling
+
+- Lighthouse: ytelse **74/100**, tilgjengelighet **98/100**, SEO **100/100**, beste praksis **100/100**.
+- Core Web Vitals i målingen: FCP **3,0 s**, LCP **4,5 s**, Speed Index **5,0 s**, CLS **0,08**, TBT **10 ms**.
+- LCP er redusert fra rapportens **9,8 s** til **4,5 s**, og CLS-restproblemet er redusert fra **0** i mottatt baseline / **0,176** i første lokale reprodusering til **0,08** i produksjonsmålingen.
+
+### Status
+
+- UI-, tilgjengelighets- og første ytelsesrunde i Fase 16 er gjennomført og publisert.
+- Full ytelsesgodkjenning gjenstår: LCP må under **2,5 s** og ytelse opp til minst **90**. Lighthouse peker fortsatt på om lag **66 KiB** mulig besparelse i ubrukt JavaScript, hovedsakelig Supabase-klienten og deler av `app.js`.

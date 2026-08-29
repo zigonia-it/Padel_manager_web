@@ -62,7 +62,7 @@ Baseline skal brukes som før-måling. Den viser at innlastingen av den første 
 
 UI- og tilgjengelighetsdelen er gjennomført med sterkere tekstnivåer, fokusmarkering, stabile kontrollmål, mobil reflow, redusert blur/transparens, redusert bevegelse, tydeligere statusflater og komprimert hero-bakgrunn/logo. Systempreferanser brukes for økt kontrast, redusert transparens og redusert bevegelse.
 
-Gjenstående arbeid er en separat ytelsesrunde mot publisert URL. Lokal Lighthouse på utviklingsserveren etter endringene ga ytelse **62/100**, LCP **7,4 s**, FCP **3,2 s**, Speed Index **3,2 s**, CLS **0,176**, TBT **0 ms**, tilgjengelighet **98/100**, SEO **100/100** og beste praksis **96/100**. Målingen er ikke sammenlignbar nok med mottatt produksjonsrapport til å lukke ytelsesmålet; årsaken til layoutskiftet i landingens hero og ubrukt JavaScript må følges opp etter deploy.
+Produksjonsmålingen etter implementasjonen ga ytelse **74/100**, LCP **4,5 s**, FCP **3,0 s**, Speed Index **5,0 s**, CLS **0,08**, TBT **10 ms**, tilgjengelighet **98/100**, SEO **100/100** og beste praksis **100/100**. Dette er en vesentlig forbedring av LCP fra **9,8 s** til **4,5 s**, men ytelsesmålet LCP under 2,5 sekunder og ytelse minst 90 er fortsatt ikke nådd.
 
 #### Planlagt arbeid
 

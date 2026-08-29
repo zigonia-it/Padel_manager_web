@@ -1163,8 +1163,7 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   width: clamp(320px, 36vw, 680px);
   height: auto;
 
-  filter:
-    drop-shadow(0 24px 34px rgba(0, 0, 0, 0.60)) drop-shadow(0 0 26px rgba(var(--gold-bright-rgb), 0.14));
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.58));
 }
 
 .intro-copy h2 {
