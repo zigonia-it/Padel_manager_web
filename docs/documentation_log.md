@@ -2829,6 +2829,13 @@ Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er
 - `node --check app/app.js` og `git diff --check` passerte.
 - Regresjonstest bekrefter at tilskueren kan forlate økten uten lokal turneringskopi og uten endring av delt turneringsdata.
 
+## 2026-08-29 - Cacheoppdatering for avslutningsflyt
+
+- Bumpet service-worker-cache til `padelstar-v64`.
+- Bumpet app- og oversettelsesscript til `padelstar-session-7` og `padelstar-i18n-7`.
+- Dette sikrer at installerte PWA-klienter henter den nye spiller- og tilskuerflyten i stedet for å bruke tidligere cachet JavaScript.
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+
 ## 2026-08-29 - Forlate turnering og raske modulbytter
 
 ### Gjort
