@@ -2813,6 +2813,22 @@ Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er
 - `npm test`: 49 bestått, 1 forventet opt-in live-test hoppet over.
 - `node --check app/app.js`, `node --check service-worker.js` og `git diff --check` passerte.
 
+## 2026-08-29 - Avslutte tilskuervisning
+
+### Gjort
+
+- La til en tydelig «Forlat tilskuervisning»-knapp i turneringsoversikten.
+- Fjernet `spectate`-parameteren fra adressen ved avslutning, slik at en oppdatering ikke starter samme tilskuervisning på nytt.
+- Ryddet lokal tilskuersesjon og lokal turneringskopi når brukeren ikke har en annen aktiv rolle. Den delte turneringen påvirkes ikke.
+- Beholdt lokal admin-/spillerøkt dersom brukeren gikk inn i tilskuervisningen fra en slik rolle.
+- Oversatte den nye handlingen til Bokmål, nynorsk, engelsk, spansk, tysk og fransk.
+
+### Verifisert
+
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js` og `git diff --check` passerte.
+- Regresjonstest bekrefter at tilskueren kan forlate økten uten lokal turneringskopi og uten endring av delt turneringsdata.
+
 ## 2026-08-29 - Forlate turnering og raske modulbytter
 
 ### Gjort

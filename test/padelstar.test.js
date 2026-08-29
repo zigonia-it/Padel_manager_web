@@ -53,7 +53,8 @@ function loadPadelstar(options = {}) {
     addEventListener() {},
     clearTimeout() {},
     setTimeout() {},
-    location: { hostname: "localhost", origin: "http://localhost:8080", search: "" },
+    location: { hostname: "localhost", origin: "http://localhost:8080", href: "http://localhost:8080/?spectate=TEST1", search: "" },
+    history: { replaceState() {} },
   };
   const document = {
     querySelector: () => null,
@@ -461,6 +462,20 @@ test("spectator role can see tournament view but not admin or player modules", (
   assert.equal(api.normalizeModule("admin"), "tournament");
   assert.equal(api.normalizeModule("player"), "tournament");
   assert.equal(api.normalizeModule("tournament"), "tournament");
+});
+
+test("spectator can leave the viewing session without keeping a local tournament", () => {
+  const api = loadPadelstar();
+  makeTournament(api, ["Ada", "Bo"]);
+  api.saveState({ remote: false });
+  api.setLocalRole("spectator");
+
+  api.leaveSpectatorView();
+
+  assert.equal(api.localStorage.getItem("padelstar-demo"), null);
+  assert.equal(api.localStorage.getItem("padelstar-demo-last-good"), null);
+  assert.equal(api.localStorage.getItem("padelstar-role"), null);
+  assert.equal(api.normalizeModule("tournament"), "landing");
 });
 
 test("invite matching requires a saved local tournament unless remote state was loaded", () => {

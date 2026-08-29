@@ -68,6 +68,7 @@ profile = loadLocalProfile();
 let largeScoreMatchId = null;
 let activeModule = "landing";
 let spectatorMode = false;
+let spectatorPreviousRole = "spectator";
 let localLeftPlayerId = null;
 const supabaseSettings = window.PADELSTAR_SUPABASE ?? window.PADEL_MANAGER_SUPABASE ?? {};
 let supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
@@ -158,6 +159,7 @@ const elements = {
   adminMatches: document.querySelector("#adminMatches"),
   playerMatches: document.querySelector("#playerMatches"),
   spectatorMatches: document.querySelector("#spectatorMatches"),
+  leaveSpectatorButton: document.querySelector("#leaveSpectatorButton"),
   standingsList: document.querySelector("#standingsList"),
   rulesList: document.querySelector("#rulesList"),
   playerStandingsList: document.querySelector("#playerStandingsList"),
@@ -464,6 +466,7 @@ elements.adminIdentityForm?.addEventListener("submit", sendAdminSignInLink);
 elements.claimTournamentButton?.addEventListener("click", claimCurrentTournament);
 
 elements.leaveTournamentButton?.addEventListener("click", () => leaveCurrentTournament());
+elements.leaveSpectatorButton?.addEventListener("click", () => leaveSpectatorView());
 elements.toggleAvailabilityButton?.addEventListener("click", () => toggleSelectedPlayerAvailability());
 
 elements.resumeTournamentButton.addEventListener("click", () => {
@@ -1877,6 +1880,7 @@ function renderRoleVisibility() {
   elements.adminTab.classList.toggle("hidden", !isAdmin);
   elements.playerTab.classList.toggle("hidden", !canShowPlayer);
   elements.tournamentTab.classList.toggle("hidden", !tournamentIsActive);
+  elements.leaveSpectatorButton?.classList.toggle("hidden", !spectatorMode);
   elements.headerShareBox.classList.toggle("hidden", !isAdmin || activeModule !== "admin");
   if (elements.roleIndicator) {
     const role = isAdmin ? "admin" : state.selectedPlayerId && !spectatorMode ? "player" : "spectator";
@@ -3236,6 +3240,46 @@ function leaveCurrentTournament(options = {}) {
   return true;
 }
 
+function leaveSpectatorView() {
+  const previousRole = spectatorPreviousRole;
+  const shouldClearLocalView = previousRole === "spectator";
+  spectatorMode = false;
+
+  const url = new URL(window.location.href ?? window.location.origin);
+  url.searchParams.delete(spectatorQueryKey);
+  window.history?.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+
+  if (shouldClearLocalView) {
+    removeRealtimeChannel();
+    const language = state.settings?.language ?? "nb";
+    state = structuredClone(defaultTournament);
+    state.settings.language = language;
+    state.adminToken = null;
+    state.playerToken = null;
+    pendingAdminSync = false;
+    pendingPlayerScores = [];
+    remoteConflict = false;
+    localStorage.removeItem(storageKey);
+    localStorage.removeItem(recoveryStorageKey);
+    localStorage.removeItem(roleStorageKey);
+    localStorage.removeItem(syncStorageKey);
+    removeOfflineStorageKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
+    if (!window.PADELSTAR_TEST_MODE) {
+      elements.joinTournamentForm.reset();
+      syncCreateFormDefaults();
+      syncJoinPreview();
+    }
+  } else {
+    setLocalRole(previousRole);
+  }
+
+  spectatorPreviousRole = "spectator";
+  if (!window.PADELSTAR_TEST_MODE) {
+    showStart();
+    render();
+  }
+}
+
 async function toggleSelectedPlayerAvailability() {
   const player = getPlayerById(state.selectedPlayerId);
   if (!player) return false;
@@ -4266,6 +4310,7 @@ function restoreInitialView() {
   const params = new URLSearchParams(window.location.search);
   const spectatorInviteCode = params.get(spectatorQueryKey);
   if (spectatorInviteCode) {
+    spectatorPreviousRole = currentLocalRole();
     spectatorMode = true;
     setLocalRole("spectator");
     if (hasTournamentForInvite(spectatorInviteCode.toUpperCase())) {
@@ -4321,6 +4366,7 @@ if (window.PADELSTAR_TEST_MODE) {
     statsForPlayer,
     playerTournamentState,
     leaveCurrentTournament,
+    leaveSpectatorView,
     createJoinLink,
     createSpectatorLink,
     normalizeModule,

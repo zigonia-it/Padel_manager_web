@@ -499,7 +499,11 @@
 
         <section class="view-grid hidden" data-section="tournament">
           <div class="panel wide">
-            <h3 data-i18n="tournament.overview">Turneringsoversikt</h3>
+            <div class="panel-heading spectator-heading">
+              <h3 data-i18n="tournament.overview">Turneringsoversikt</h3>
+              <button class="ghost hidden" id="leaveSpectatorButton" type="button"
+                data-i18n="nav.leaveSpectator">Forlat tilskuervisning</button>
+            </div>
             <div class="matches" id="spectatorMatches"></div>
           </div>
           <div class="panel">
