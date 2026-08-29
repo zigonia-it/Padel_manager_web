@@ -2794,3 +2794,39 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 ### Konklusjon
 
 Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er ikke lenger en restpost fra fase 16; eventuelle nye forbedringer planlegges som en separat fase.
+
+## 2026-08-29 - Landing-layout og menyjustering
+
+### Gjort
+
+- Forankret forsidenavigasjonen i hero-flaten på desktop, slik at menyen følger innholdet og ikke oppleves som en løs kapsel over siden.
+- Samlet hero, logo, navigasjon og hovedhandlinger i en tydeligere, avrundet flate med roligere bakgrunn og mindre visuelt tomrom.
+- Gjorde desktop-menyen mer lesbar med større trykkmål, tydelig aktiv tilstand og jevnere avstand mellom valgene.
+- Beholdt mobilmenyen som kompakt hamburger-meny og verifiserte at 390 px visning ikke får horisontal overflow.
+- Bumpet stylesheet- og service-worker-cache til `padelstar-ui-4` og `padelstar-v63` slik at oppgraderingen når PWA-brukere.
+
+### Verifisert
+
+- Lokal browserkontroll ved 1440 x 900 og 390 x 844.
+- Desktop viser den nye hero-komposisjonen og menyen i riktig posisjon.
+- Mobil viser hamburger-meny, hovedhandlinger og korrekt viewport-bredde (`scrollWidth === innerWidth`).
+- `npm test`: 49 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check service-worker.js` og `git diff --check` passerte.
+
+## 2026-08-29 - Forlate turnering og raske modulbytter
+
+### Gjort
+
+- Rettet spillerflyten etter «Forlat turnering»: en vanlig spiller får nå fjernet lokal turneringskopi, recovery-kopi, rolle og ventende synkroniseringsdata.
+- Den eksterne turneringen endres ikke når en spiller forlater, slik at andre spillere og administrator fortsatt kan bruke den.
+- Etter forlating vises forsiden direkte, med fungerende innganger for «Bli med» og «Opprett».
+- Admin-spillere beholder turneringen når de bare forlater sin spillerrolle.
+- La inn et raskt innholdsbytte med kort fade/slide mellom appmodulene. Animasjonen deaktiveres automatisk ved `prefers-reduced-motion`.
+
+### Verifisert
+
+- Lokal nettleserflyt: opprett turnering, bli med som spiller, forlat turnering og returner til forsiden.
+- Etter forlating viser DOM-en forsiden, mens `padelstar-demo`, recovery-kopi og lokal rolle er fjernet.
+- Modulbytte mellom forsiden og «Ny turnering» skjer uten URL-endring og med `module-entering`-animasjonen.
+- `npm test`: 49 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check service-worker.js` og `git diff --check` passerte.

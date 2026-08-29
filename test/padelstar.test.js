@@ -417,7 +417,6 @@ test("player can leave local tournament session without mutating tournament data
   const api = loadPadelstar();
   const state = makeTournament(api, ["Ada", "Bo", "Cy", "Di"]);
   api.generateFullTournamentSchedule();
-  const firstRound = plain(state.rounds[0]);
   state.selectedPlayerId = state.players[0].id;
   state.playerToken = "local-player-token";
 
@@ -429,9 +428,25 @@ test("player can leave local tournament session without mutating tournament data
   assert.equal(state.selectedPlayerId, null);
   assert.equal(state.playerToken, null);
   assert.equal(api.currentLocalRole(), "spectator");
-  assert.deepEqual(plain(state.players.map((player) => player.name)), ["Ada", "Bo", "Cy", "Di"]);
-  assert.deepEqual(plain(state.rounds[0]), firstRound);
-  assert.equal(api.normalizeModule("player"), "tournament");
+  assert.equal(api.localStorage.getItem("padelstar-demo"), null);
+  assert.equal(api.localStorage.getItem("padelstar-demo-last-good"), null);
+  assert.equal(api.localStorage.getItem("padelstar-role"), null);
+  assert.equal(api.normalizeModule("player"), "landing");
+});
+
+test("admin player can leave player role without losing the tournament", () => {
+  const api = loadPadelstar();
+  const state = makeTournament(api, ["Ada", "Bo"]);
+  state.selectedPlayerId = state.players[0].id;
+
+  api.saveState({ remote: false });
+  api.setLocalRole("admin");
+
+  assert.equal(api.leaveCurrentTournament({ confirm: false }), true);
+
+  assert.equal(api.currentLocalRole(), "admin");
+  assert.notEqual(api.localStorage.getItem("padelstar-demo"), null);
+  assert.equal(api.normalizeModule("admin"), "admin");
 });
 
 test("spectator role can see tournament view but not admin or player modules", () => {

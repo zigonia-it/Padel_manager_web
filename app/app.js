@@ -93,6 +93,7 @@ let lastRemotePersistedSequence = 0;
 let isApplyingRemoteState = false;
 let remoteMutationSequence = 0;
 let remoteConflict = false;
+let moduleTransitionFrame = null;
 let pendingAdminSync = loadPendingAdminSync();
 let pendingPlayerScores = loadPendingPlayerScores();
 if (pendingAdminSync) remoteMutationSequence = 1;
@@ -1772,11 +1773,24 @@ function showModule(moduleName) {
   closeLandingMenu();
   closeWorkspaceMenu();
 
+  const activeSections = [];
   document.querySelectorAll(".app-module").forEach((section) => {
     const sectionModule = section.dataset.module;
     const isActive = sectionModule === requestedModule || (sectionModule === "workspace" && isWorkspaceActive);
     section.classList.toggle("hidden", !isActive);
+    section.classList.remove("module-entering");
+    if (isActive) activeSections.push(section);
   });
+
+  if (!window.PADELSTAR_TEST_MODE) {
+    window.cancelAnimationFrame?.(moduleTransitionFrame);
+    activeSections.forEach((section) => section.classList.add("module-entering"));
+    moduleTransitionFrame = window.requestAnimationFrame(() => {
+      moduleTransitionFrame = window.requestAnimationFrame(() => {
+        activeSections.forEach((section) => section.classList.remove("module-entering"));
+      });
+    });
+  }
 
   document.querySelectorAll("[data-section]").forEach((section) => {
     section.classList.toggle("hidden", section.dataset.section !== workspaceModule);
@@ -3170,6 +3184,8 @@ function leaveCurrentTournament(options = {}) {
   const selectedPlayer = getPlayerById(state.selectedPlayerId);
   if (!selectedPlayer) return false;
 
+  const wasAdmin = isCurrentUserAdmin();
+
   const shouldConfirm = options.confirm !== false;
   const pendingScoreText = pendingPlayerScores.length > 0
     ? t("player.leavePendingScores")
@@ -3185,11 +3201,36 @@ function leaveCurrentTournament(options = {}) {
   localLeftPlayerId = selectedPlayer.id;
   state.playerToken = null;
   pendingPlayerScores = [];
-  persistSyncMetadata();
-  setLocalRole(isCurrentUserAdmin() ? "admin" : "spectator");
-  saveState({ remote: false });
+
+  if (wasAdmin) {
+    persistSyncMetadata();
+    setLocalRole("admin");
+    saveState({ remote: false });
+  } else {
+    removeRealtimeChannel();
+    const language = state.settings?.language ?? "nb";
+    state = structuredClone(defaultTournament);
+    state.settings.language = language;
+    state.adminToken = null;
+    state.playerToken = null;
+    pendingAdminSync = false;
+    remoteConflict = false;
+    localStorage.removeItem(storageKey);
+    localStorage.removeItem(recoveryStorageKey);
+    localStorage.removeItem(roleStorageKey);
+    localStorage.removeItem(syncStorageKey);
+    removeOfflineStorageKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
+    if (!window.PADELSTAR_TEST_MODE) {
+      elements.joinTournamentForm.reset();
+      syncCreateFormDefaults();
+      syncJoinPreview();
+    }
+    spectatorMode = false;
+  }
+
   if (!window.PADELSTAR_TEST_MODE) {
-    showWorkspace(isCurrentUserAdmin() ? "admin" : "tournament");
+    if (wasAdmin) showWorkspace("admin");
+    else showStart();
     render();
   }
   return true;

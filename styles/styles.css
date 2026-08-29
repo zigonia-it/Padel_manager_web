@@ -3513,6 +3513,19 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   display: none !important;
 }
 
+.app-module {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.app-module.module-entering {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 
 /* =========================================================
    RESPONSIVE <= 760px
@@ -4588,5 +4601,117 @@ h4,
 
   button:not(:disabled):hover {
     transform: none;
+  }
+
+  .app-module,
+  .app-module.module-entering {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* =========================================================
+   LANDING COMPOSITION REFRESH
+   ========================================================= */
+
+@media (min-width: 901px) {
+  body:not(.workspace-active):not(.setup-active) .app-shell {
+    width: min(1440px, 100%);
+    padding-inline: clamp(24px, 3.2vw, 54px);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .start-panel {
+    gap: 24px;
+  }
+
+  body:not(.workspace-active):not(.setup-active) .intro {
+    min-height: min(820px, calc(100svh - 44px));
+    margin-top: 0;
+    padding: clamp(28px, 3vw, 48px);
+    border: 1px solid rgba(var(--gold-bright-rgb), 0.22);
+    border-radius: 22px;
+    background:
+      linear-gradient(180deg, rgba(20, 8, 2, 0.64), rgba(10, 4, 1, 0.86)),
+      radial-gradient(circle at 50% 36%, rgba(var(--gold-rgb), 0.12), transparent 34rem),
+      transparent;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 240, 150, 0.08),
+      0 28px 70px rgba(0, 0, 0, 0.42);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .intro::before {
+    background:
+      linear-gradient(90deg, rgba(23, 9, 1, 0.42), transparent 28%, transparent 72%, rgba(23, 9, 1, 0.38)),
+      linear-gradient(135deg, transparent 0 48%, rgba(var(--gold-bright-rgb), 0.08) 48.15% 48.35%, transparent 48.5% 100%);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .landing-nav {
+    position: absolute;
+    top: clamp(22px, 2.4vw, 38px);
+    left: clamp(24px, 3vw, 48px);
+    right: clamp(24px, 3vw, 48px);
+    align-items: center;
+  }
+
+  body:not(.workspace-active):not(.setup-active) .landing-nav-logo {
+    width: clamp(54px, 4.6vw, 72px);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .landing-links {
+    gap: 4px;
+    padding: 5px;
+    border-radius: 14px;
+    background: rgba(12, 5, 1, 0.86);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 240, 150, 0.07),
+      0 14px 30px rgba(0, 0, 0, 0.32);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .landing-links .module-link {
+    min-height: 44px;
+    padding: 0.56rem 0.82rem;
+    border-radius: 9px;
+    font-size: clamp(0.98rem, 1.25vw, 1.2rem);
+    letter-spacing: 0;
+    text-shadow: none;
+  }
+
+  body:not(.workspace-active):not(.setup-active) .landing-links .module-link:hover,
+  body:not(.workspace-active):not(.setup-active) .landing-links .module-link.active {
+    background: rgba(var(--gold-rgb), 0.16);
+    color: #ffffff;
+  }
+
+  body:not(.workspace-active):not(.setup-active) .landing-links .module-link.active::after {
+    left: 12px;
+    right: 12px;
+    bottom: 3px;
+    width: auto;
+    height: 3px;
+    transform: none;
+    background: var(--gold-bright);
+    border-radius: 999px;
+    filter: drop-shadow(0 0 7px rgba(var(--gold-bright-rgb), 0.52));
+  }
+
+  body:not(.workspace-active):not(.setup-active) .intro-copy {
+    gap: clamp(10px, 1.6vw, 18px);
+    padding-top: clamp(34px, 5vw, 72px);
+    padding-bottom: clamp(22px, 3vw, 42px);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .hero-logo {
+    width: min(40vw, 560px);
+  }
+
+  body:not(.workspace-active):not(.setup-active) .landing-actions {
+    width: min(100%, 560px);
+    gap: 12px;
+  }
+
+  body:not(.workspace-active):not(.setup-active) .landing-cta {
+    min-height: 64px;
+    font-size: clamp(1.18rem, 1.7vw, 1.55rem);
   }
 }
