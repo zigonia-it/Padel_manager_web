@@ -542,7 +542,8 @@
 
   </div>
 
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
   <script defer src="app/translations.js?v=padelstar-i18n-6"></script>
   <script defer src="app/tournament-engine.js?v=padelstar-engine-1"></script>

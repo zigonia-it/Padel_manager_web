@@ -70,7 +70,7 @@ let activeModule = "landing";
 let spectatorMode = false;
 let localLeftPlayerId = null;
 const supabaseSettings = window.PADELSTAR_SUPABASE ?? window.PADEL_MANAGER_SUPABASE ?? {};
-const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
+let supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
   ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
     auth: {
       persistSession: true,
@@ -79,6 +79,7 @@ const supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && windo
     },
   })
   : null;
+let supabaseClientActivated = false;
 let realtimeChannel = null;
 let realtimeTournamentId = null;
 let realtimeReconnectTimer = null;
@@ -213,21 +214,18 @@ const matchFilters = { admin: "all", player: "all" };
 
 function initializeApp() {
 observability?.installGlobalHandlers();
-  if (supabaseClient) {
-    supabaseClient.auth.onAuthStateChange(() => renderAdminIdentity());
-  }
+activateSupabaseClient();
+window.addEventListener("padelstar-supabase-ready", activateSupabaseClient, { once: true });
 syncLanguageOptions();
 syncCreateFormDefaults();
 syncJoinFormFromProfile();
 syncJoinPreview();
 renderProfile();
-void syncProfileHistoryRemote();
 prefillInviteCodeFromUrl();
 syncCopyrightYear();
 registerServiceWorker();
 syncConnectionStatus();
 showRecoveryNotice();
-connectRealtimeForCurrentState();
 
 window.addEventListener("online", handleOnline);
 window.addEventListener("offline", handleOffline);
@@ -576,6 +574,23 @@ document.addEventListener("keydown", (event) => {
     closeWorkspaceMenu();
   }
 });
+}
+
+function activateSupabaseClient() {
+  if (!supabaseClient && supabaseSettings.url && supabaseSettings.anonKey && window.supabase) {
+    supabaseClient = window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+      },
+    });
+  }
+  if (!supabaseClient || supabaseClientActivated) return;
+  supabaseClientActivated = true;
+  supabaseClient.auth.onAuthStateChange(() => renderAdminIdentity());
+  void syncProfileHistoryRemote();
+  connectRealtimeForCurrentState();
 }
 
 function closeLandingMenu() {
