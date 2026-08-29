@@ -2763,7 +2763,7 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Kjør samme Lighthouse-profil på publisert URL etter deploy og isoler forskjellen mellom utviklingsserver og produksjon.
 - Reduser ubrukt JavaScript og finn årsaken til layoutskiftet i landingens hero før ytelsesmålet LCP under 2,5 sekunder og ytelse minst 90 kan godkjennes.
 
-## 2026-08-29 - Produksjonsverifisering etter Fase 16
+## 2026-08-29 - Mellommåling under Fase 16
 
 ### Gjort
 
@@ -2776,7 +2776,21 @@ Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gj
 - Core Web Vitals i målingen: FCP **3,0 s**, LCP **4,5 s**, Speed Index **5,0 s**, CLS **0,08**, TBT **10 ms**.
 - LCP er redusert fra rapportens **9,8 s** til **4,5 s**, og CLS-restproblemet er redusert fra **0** i mottatt baseline / **0,176** i første lokale reprodusering til **0,08** i produksjonsmålingen.
 
-### Status
+### Status på dette tidspunktet
 
-- UI-, tilgjengelighets- og første ytelsesrunde i Fase 16 er gjennomført og publisert.
-- Full ytelsesgodkjenning gjenstår: LCP må under **2,5 s** og ytelse opp til minst **90**. Lighthouse peker fortsatt på om lag **66 KiB** mulig besparelse i ubrukt JavaScript, hovedsakelig Supabase-klienten og deler av `app.js`.
+- UI- og første ytelsesrunde var gjennomført og publisert på dette tidspunktet.
+- Målingen viste at ytterligere optimalisering av mobilens hero-ressurs og første paint måtte gjøres før sluttgodkjenning.
+
+## 2026-08-29 - Fase 16 godkjent og lukket
+
+### Sluttverifisering
+
+- Produksjons-Lighthouse etter siste deploy: ytelse **92/100**, tilgjengelighet **98/100**, SEO **100/100** og beste praksis **100/100**.
+- Core Web Vitals: FCP **1,1 s**, LCP **2,3 s**, Speed Index **6,1 s**, CLS **0,073** og TBT **0 ms**.
+- LCP-målet under 2,5 sekunder og ytelsesmålet minst 90 er nå oppfylt.
+- Den publiserte versjonen er kontrollert på `https://padelstar.app/`, og fase 16-koden er pushet til `main` i commit `79ac7e3`.
+- `npm test`: 49 bestått, 1 forventet opt-in live-test hoppet over.
+
+### Konklusjon
+
+Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er ikke lenger en restpost fra fase 16; eventuelle nye forbedringer planlegges som en separat fase.
