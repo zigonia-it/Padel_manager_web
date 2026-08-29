@@ -122,9 +122,10 @@ const elements = {
   copyrightYearRange: document.querySelector("#copyrightYearRange"),
   showExistingPlayersButton: document.querySelector("#showExistingPlayersButton"),
   existingPlayerList: document.querySelector("#existingPlayerList"),
-  adminTab: document.querySelector('[data-view="admin"]'),
-  playerTab: document.querySelector('[data-view="player"]'),
-  tournamentTab: document.querySelector('[data-view="tournament"]'),
+  adminTab: document.querySelector("#adminModuleLink"),
+  playerTab: document.querySelector("#playerModuleLink"),
+  tournamentTab: document.querySelector("#tournamentModuleLink"),
+  createTab: document.querySelector("#createModuleLink"),
   headerShareBox: document.querySelector(".workspace-header .share-box"),
   addPlayerForm: document.querySelector("#addPlayerForm"),
   courtSettingsForm: document.querySelector("#courtSettingsForm"),
@@ -159,12 +160,11 @@ const elements = {
   adminMatches: document.querySelector("#adminMatches"),
   playerMatches: document.querySelector("#playerMatches"),
   spectatorMatches: document.querySelector("#spectatorMatches"),
-  leaveSpectatorButton: document.querySelector("#leaveSpectatorButton"),
   standingsList: document.querySelector("#standingsList"),
   rulesList: document.querySelector("#rulesList"),
   playerStandingsList: document.querySelector("#playerStandingsList"),
   playerIdentityCard: document.querySelector("#playerIdentityCard"),
-  leaveTournamentButton: document.querySelector("#leaveTournamentButton"),
+  leaveSessionButton: document.querySelector("#leaveSessionButton"),
   toggleNotificationsButton: document.querySelector("#toggleNotificationsButton"),
   toggleAvailabilityButton: document.querySelector("#toggleAvailabilityButton"),
   playerNextMatch: document.querySelector("#playerNextMatch"),
@@ -196,8 +196,6 @@ const elements = {
   closeSetScoreButton: document.querySelector("#closeSetScoreButton"),
   landingMenuToggle: document.querySelector(".landing-menu-toggle"),
   landingLinks: document.querySelector("#landingLinks"),
-  workspaceMenuToggle: document.querySelector(".workspace-menu-toggle"),
-  workspaceTabs: document.querySelector("#workspaceTabs"),
   profileForm: document.querySelector("#profileForm"),
   profileNameInput: document.querySelector("#profileNameInput"),
   profileAvatarPicker: document.querySelector("#profileAvatarPicker"),
@@ -465,8 +463,10 @@ elements.resetTournamentButton.addEventListener("click", async () => {
 elements.adminIdentityForm?.addEventListener("submit", sendAdminSignInLink);
 elements.claimTournamentButton?.addEventListener("click", claimCurrentTournament);
 
-elements.leaveTournamentButton?.addEventListener("click", () => leaveCurrentTournament());
-elements.leaveSpectatorButton?.addEventListener("click", () => leaveSpectatorView());
+elements.leaveSessionButton?.addEventListener("click", () => {
+  if (spectatorMode) leaveSpectatorView();
+  else leaveCurrentTournament();
+});
 elements.toggleAvailabilityButton?.addEventListener("click", () => toggleSelectedPlayerAvailability());
 
 elements.resumeTournamentButton.addEventListener("click", () => {
@@ -555,27 +555,16 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  const workspaceToggle = clickTarget.closest(".workspace-menu-toggle");
-  if (workspaceToggle) {
-    event.preventDefault();
-    const isOpen = !document.body.classList.contains("workspace-menu-open");
-    setWorkspaceMenuOpen(isOpen);
-    return;
-  }
-
   if (!clickTarget.closest(".landing-links") && !clickTarget.closest(".landing-menu-toggle")) closeLandingMenu();
-  if (!clickTarget.closest(".tabs")) closeWorkspaceMenu();
 });
 
 window.addEventListener("hashchange", () => {
   closeLandingMenu();
-  closeWorkspaceMenu();
 });
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     closeLandingMenu();
-    closeWorkspaceMenu();
   }
 });
 }
@@ -601,23 +590,11 @@ function closeLandingMenu() {
   setLandingMenuOpen(false);
 }
 
-function closeWorkspaceMenu() {
-  setWorkspaceMenuOpen(false);
-}
-
 function setLandingMenuOpen(isOpen) {
   document.body.classList.toggle("landing-menu-open", isOpen);
   document.querySelectorAll(".landing-menu-toggle").forEach((toggle) => {
     toggle.setAttribute("aria-expanded", String(isOpen));
     toggle.setAttribute("aria-label", isOpen ? t("nav.closeMenu") : t("nav.openMenu"));
-  });
-}
-
-function setWorkspaceMenuOpen(isOpen) {
-  document.body.classList.toggle("workspace-menu-open", isOpen);
-  document.querySelectorAll(".workspace-menu-toggle").forEach((toggle) => {
-    toggle.setAttribute("aria-expanded", String(isOpen));
-    toggle.setAttribute("aria-label", isOpen ? t("nav.closeViewMenu") : t("nav.openViewMenu"));
   });
 }
 
@@ -1774,7 +1751,6 @@ function showModule(moduleName) {
   document.body.classList.toggle("workspace-active", isWorkspaceActive);
   document.body.classList.toggle("setup-active", requestedModule === "setup-admin" || requestedModule === "setup-player");
   closeLandingMenu();
-  closeWorkspaceMenu();
 
   const activeSections = [];
   document.querySelectorAll(".app-module").forEach((section) => {
@@ -1801,6 +1777,8 @@ function showModule(moduleName) {
 
   document.querySelectorAll("[data-module-link]").forEach((link) => {
     link.classList.toggle("active", link.dataset.moduleLink === requestedModule);
+    if (link.dataset.moduleLink === requestedModule) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
   });
 
   requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
@@ -1827,6 +1805,7 @@ function normalizeModule(moduleName) {
   if (requestedModule === "admin") return isCurrentUserAdmin() ? "admin" : fallbackTournamentModule();
   if (requestedModule === "player") return state.selectedPlayerId ? "player" : fallbackTournamentModule();
   if (requestedModule === "landing") return "landing";
+  if (requestedModule === "setup-admin") return "setup-admin";
   if (requestedModule === "setup-player") return "setup-player";
   if (requestedModule === "tournament") return "tournament";
 
@@ -1873,14 +1852,21 @@ function renderRoleVisibility() {
   const tournamentIsActive = hasActiveTournament();
   const canShowPlayer = Boolean(state.selectedPlayerId);
   const visibleModules = new Set(tournamentIsActive
-    ? ["landing", "tournament", "setup-player", ...(isAdmin ? ["admin"] : []), ...(canShowPlayer ? ["player"] : [])]
+    ? ["landing", "setup-admin", "setup-player", "tournament", ...(isAdmin ? ["admin"] : []), ...(canShowPlayer ? ["player"] : [])]
     : ["landing", "setup-admin", "setup-player"]);
   const workspaceModule = workspaceModuleFromActiveModule();
 
   elements.adminTab.classList.toggle("hidden", !isAdmin);
   elements.playerTab.classList.toggle("hidden", !canShowPlayer);
   elements.tournamentTab.classList.toggle("hidden", !tournamentIsActive);
-  elements.leaveSpectatorButton?.classList.toggle("hidden", !spectatorMode);
+  const canLeaveSession = spectatorMode || canShowPlayer;
+  elements.leaveSessionButton?.classList.toggle("hidden", !canLeaveSession);
+  if (elements.leaveSessionButton) {
+    elements.leaveSessionButton.dataset.i18n = spectatorMode
+      ? "nav.leaveSpectator"
+      : "actions.leaveTournament";
+    elements.leaveSessionButton.textContent = t(elements.leaveSessionButton.dataset.i18n);
+  }
   elements.headerShareBox.classList.toggle("hidden", !isAdmin || activeModule !== "admin");
   if (elements.roleIndicator) {
     const role = isAdmin ? "admin" : state.selectedPlayerId && !spectatorMode ? "player" : "spectator";
@@ -1891,6 +1877,8 @@ function renderRoleVisibility() {
     const moduleName = normalizeWorkspaceModule(link.dataset.moduleLink);
     link.classList.toggle("hidden", !visibleModules.has(moduleName));
     link.classList.toggle("active", moduleName === activeModule);
+    if (moduleName === activeModule) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
   });
 
   document.querySelectorAll("[data-section]").forEach((section) => {
@@ -1901,6 +1889,7 @@ function renderRoleVisibility() {
 function activateAdminPanel(panel) {
   document.querySelectorAll(".subtab").forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.adminPanel === panel);
+    tab.setAttribute("aria-selected", String(tab.dataset.adminPanel === panel));
   });
   document.querySelectorAll("[data-admin-panel-section]").forEach((section) => {
     section.classList.toggle("hidden", section.dataset.adminPanelSection !== panel);
@@ -2518,11 +2507,14 @@ function renderPlayerIdentity() {
 }
 
 function renderLeaveTournamentControl() {
-  if (!elements.leaveTournamentButton) return;
-  const hasSelectedPlayer = Boolean(getPlayerById(state.selectedPlayerId));
-  elements.leaveTournamentButton.classList.toggle("hidden", !hasSelectedPlayer);
-  elements.leaveTournamentButton.disabled = !hasSelectedPlayer;
-  elements.leaveTournamentButton.textContent = t("actions.leaveTournament");
+  if (!elements.leaveSessionButton) return;
+  const canLeaveSession = spectatorMode || Boolean(getPlayerById(state.selectedPlayerId));
+  elements.leaveSessionButton.classList.toggle("hidden", !canLeaveSession);
+  elements.leaveSessionButton.disabled = !canLeaveSession;
+  elements.leaveSessionButton.dataset.i18n = spectatorMode
+    ? "nav.leaveSpectator"
+    : "actions.leaveTournament";
+  elements.leaveSessionButton.textContent = t(elements.leaveSessionButton.dataset.i18n);
 }
 
 function renderAvailabilityControl() {

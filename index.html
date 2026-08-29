@@ -30,7 +30,7 @@
       .hero-logo { width: min(36vw, 480px); }
     }
   </style>
-  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-4">
+  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-6">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -38,6 +38,7 @@
 </head>
 
 <body>
+  <a class="skip-link" href="#app-main" data-i18n="nav.skipToContent">Hopp til innhold</a>
   <div class="app-shell">
     <header class="topbar">
       <div class="brand-lockup">
@@ -49,11 +50,11 @@
       <div class="topbar-actions">
         <nav class="app-menu" aria-label="Moduler" data-i18n-aria-label="nav.modulesAria">
           <button class="module-link" type="button" data-module-link="landing" data-i18n="nav.home">Hjem</button>
-          <button class="module-link" type="button" data-module-link="setup-admin" data-i18n="nav.create">Opprett</button>
+          <button id="createModuleLink" class="module-link" type="button" data-module-link="setup-admin" data-i18n="nav.create">Opprett</button>
           <button class="module-link" type="button" data-module-link="setup-player" data-i18n="nav.join">Bli med</button>
-          <button class="module-link" type="button" data-module-link="admin" data-i18n="nav.admin">Admin</button>
-          <button class="module-link" type="button" data-module-link="player" data-i18n="nav.player">Spiller</button>
-          <button class="module-link" type="button" data-module-link="tournament" data-i18n="nav.tournament">Turnering</button>
+          <button id="adminModuleLink" class="module-link" type="button" data-module-link="admin" data-i18n="nav.admin">Admin</button>
+          <button id="playerModuleLink" class="module-link" type="button" data-module-link="player" data-i18n="nav.player">Spiller</button>
+          <button id="tournamentModuleLink" class="module-link" type="button" data-module-link="tournament" data-i18n="nav.tournament">Turnering</button>
         </nav>
         <label class="language-picker">
           <span data-i18n="languageLabel">Språk</span>
@@ -70,9 +71,9 @@
       </div>
     </header>
 
-    <main>
+    <main id="app-main">
       <section class="start-panel app-module" id="startView" data-module="landing" aria-labelledby="startTitle">
-        <div class="intro" style="min-height:max(90svh,820px)">
+        <div class="intro">
           <nav class="landing-nav" aria-label="Forside" data-i18n-aria-label="nav.frontPageAria">
             <img class="landing-nav-logo" src="assets/icons/padelstar-256.png" alt="Padelstar" width="74" height="74">
             <button class="landing-menu-toggle" type="button" aria-label="Åpne meny" aria-expanded="false"
@@ -252,32 +253,23 @@
             <p class="eyebrow" id="roundLabel">Runde 1</p>
             <h2 id="tournamentTitle">Padelstar </h2>
           </div>
-          <div class="share-box">
-            <span data-i18n="share.inviteCode">Invitasjonskode</span>
-            <strong id="inviteCode">-----</strong>
+          <div class="workspace-header-actions">
+            <div class="share-box">
+              <span data-i18n="share.inviteCode">Invitasjonskode</span>
+              <strong id="inviteCode">-----</strong>
+            </div>
+            <span id="roleIndicator" class="role-indicator" data-i18n="role.spectator">Tilskuer</span>
+            <button class="ghost danger-button hidden" id="leaveSessionButton" type="button"
+              data-i18n="actions.leaveTournament">Forlat turnering</button>
           </div>
-          <span id="roleIndicator" class="role-indicator" data-i18n="role.spectator">Tilskuer</span>
         </div>
-
-        <button class="workspace-menu-toggle" type="button" aria-label="Åpne visningsmeny" aria-expanded="false"
-          aria-controls="workspaceTabs" data-i18n-aria-label="nav.openViewMenu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <nav class="tabs" id="workspaceTabs" aria-label="Visning" data-i18n-aria-label="nav.viewAria">
-          <button class="tab active module-link" type="button" data-module-link="admin" data-view="admin" data-i18n="nav.admin">Admin</button>
-          <button class="tab module-link" type="button" data-module-link="player" data-view="player" data-i18n="nav.player">Spiller</button>
-          <button class="tab module-link" type="button" data-module-link="tournament"
-            data-view="tournament" data-i18n="nav.tournament">Turnering</button>
-        </nav>
 
         <section class="view-grid" data-section="admin">
           <div class="admin-subtabs wide" role="tablist" aria-label="Adminseksjoner" data-i18n-aria-label="admin.sectionsAria">
-            <button class="subtab active" type="button" data-admin-panel="control" data-i18n="admin.control">Styring</button>
-            <button class="subtab" type="button" data-admin-panel="share" data-i18n="admin.share">Del</button>
-            <button class="subtab" type="button" data-admin-panel="players" data-i18n="admin.players">Spillere</button>
-            <button class="subtab" type="button" data-admin-panel="matches" data-i18n="admin.matches">Kamper</button>
+            <button class="subtab active" type="button" role="tab" aria-selected="true" data-admin-panel="control" data-i18n="admin.control">Styring</button>
+            <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="share" data-i18n="admin.share">Del</button>
+            <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="players" data-i18n="admin.players">Spillere</button>
+            <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="matches" data-i18n="admin.matches">Kamper</button>
           </div>
 
           <div class="panel command-panel">
@@ -470,7 +462,6 @@
             <div class="button-row player-session-actions">
               <button class="ghost" id="toggleNotificationsButton" type="button" data-i18n="actions.enableNotifications">Slå på varsler</button>
               <button class="ghost" id="toggleAvailabilityButton" type="button" data-i18n="actions.markAway">Meld deg ute</button>
-              <button class="ghost danger-button leave-tournament-button" id="leaveTournamentButton" type="button" data-i18n="actions.leaveTournament">Forlat turnering</button>
             </div>
             <div class="status-grid player-status-grid" id="playerStatusGrid"></div>
           </div>
@@ -501,8 +492,6 @@
           <div class="panel wide">
             <div class="panel-heading spectator-heading">
               <h3 data-i18n="tournament.overview">Turneringsoversikt</h3>
-              <button class="ghost hidden" id="leaveSpectatorButton" type="button"
-                data-i18n="nav.leaveSpectator">Forlat tilskuervisning</button>
             </div>
             <div class="matches" id="spectatorMatches"></div>
           </div>
@@ -563,7 +552,7 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-7"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-8"></script>
   <script defer src="app/tournament-engine.js?v=padelstar-engine-1"></script>
   <script defer src="app/scoring-engine.js?v=padelstar-scoring-1"></script>
   <script defer src="app/state-manager.js?v=padelstar-state-1"></script>
@@ -571,7 +560,7 @@
   <script defer src="app/offline-storage.js?v=padelstar-offline-1"></script>
   <script defer src="app/observability.js?v=padelstar-observability-1"></script>
   <script defer src="app/profile-manager.js?v=padelstar-profile-1"></script>
-  <script defer src="app/app.js?v=padelstar-session-7"></script>
+  <script defer src="app/app.js?v=padelstar-session-10"></script>
 </body>
 
 </html>

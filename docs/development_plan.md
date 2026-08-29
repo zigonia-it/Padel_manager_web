@@ -12,7 +12,6 @@ Padelstar er en plattformuavhengig PWA for administrasjon og gjennomføring av p
 
 ## Gjenstående arbeid
 
-
 ### 1. Valgfri ekstern driftsvarsling
 
 Vurdere om `/api/health` skal kobles til en ekstern monitor for aktiv varsling ved driftsfeil.

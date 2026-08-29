@@ -181,6 +181,7 @@ Object.assign(padelstarTranslations.nb, {
   "avatar.serve": "Serve",
   "avatar.wall": "Vegg",
   "avatar.lob": "Lob",
+  "nav.skipToContent": "Hopp til innhold",
   "nav.homeAria": "Gå til hjem",
   "nav.modulesAria": "Moduler",
   "nav.home": "Hjem",
@@ -207,8 +208,8 @@ Object.assign(padelstarTranslations.nb, {
   "resume.summary": "{players} spillere · {courts} baner",
   "resume.continueAdmin": "Fortsett som admin",
   "resume.continueTournament": "Fortsett turnering",
-  "setup.createEyebrow": "Create",
-  "setup.joinEyebrow": "Join",
+  "setup.createEyebrow": "Opprett",
+  "setup.joinEyebrow": "Bli med",
   "setup.newTournament": "Ny turnering",
   "setup.tournamentName": "Turneringsnavn",
   "setup.playersOptional": "Spillere, valgfritt",
@@ -485,6 +486,7 @@ Object.assign(padelstarTranslations.nb, {
 
 Object.assign(padelstarTranslations.nn, {
   "meta.description": "Padelstar - Padel Manager av Sigurd Steen Grødem / Zigonia IT. Administrer padelturneringar, kampar, baner og resultat.",
+  "nav.skipToContent": "Hopp til innhald",
   "nav.homeAria": "Gå til heim",
   "nav.modulesAria": "Modular",
   "nav.home": "Heim",
@@ -508,8 +510,8 @@ Object.assign(padelstarTranslations.nn, {
   "resume.summary": "{players} spelarar · {courts} baner",
   "resume.continueAdmin": "Hald fram som admin",
   "resume.continueTournament": "Hald fram med turnering",
-  "setup.createEyebrow": "Create",
-  "setup.joinEyebrow": "Join",
+  "setup.createEyebrow": "Opprett",
+  "setup.joinEyebrow": "Bli med",
   "setup.newTournament": "Ny turnering",
   "setup.tournamentName": "Turneringsnamn",
   "setup.playersOptional": "Spelarar, valfritt",
@@ -669,6 +671,17 @@ Object.assign(padelstarTranslations.de, {
 Object.assign(padelstarTranslations.fr, {
   "notifications.matchReadyTitle": "Votre match est prêt", "notifications.matchReadyBody": "Votre prochain match est prêt.", "notifications.matchPlayingBody": "Votre match est en cours.",
 });
+
+for (const [language, value] of Object.entries({
+  nb: "Hopp til innhold",
+  nn: "Hopp til innhald",
+  en: "Skip to content",
+  es: "Saltar al contenido",
+  de: "Zum Inhalt springen",
+  fr: "Aller au contenu",
+})) {
+  padelstarTranslations[language]["nav.skipToContent"] = value;
+}
 
 for (const [language, values] of Object.entries({
   nb: {

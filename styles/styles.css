@@ -4217,6 +4217,8 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   --surface-raised: #2b1808;
   --focus-ring: #ffffff;
   --line-strong: rgba(255, 212, 71, 0.54);
+  --accent-cool: #8de3d2;
+  --accent-cool-strong: #51c8b5;
 }
 
 html {
@@ -4227,7 +4229,7 @@ body {
   color: var(--text-primary);
   letter-spacing: 0;
   background:
-    linear-gradient(180deg, rgba(15, 7, 2, 0.84), rgba(15, 7, 2, 0.97)),
+    linear-gradient(180deg, rgba(12, 19, 18, 0.84), rgba(15, 7, 2, 0.97)),
     url("../assets/bg_img-1600.jpg") center top / cover fixed,
     var(--soft);
 }
@@ -4713,5 +4715,265 @@ h4,
   body:not(.workspace-active):not(.setup-active) .landing-cta {
     min-height: 64px;
     font-size: clamp(1.18rem, 1.7vw, 1.55rem);
+  }
+}
+
+/* =========================================================
+   PHASE 17: UNIFIED UI, NAVIGATION AND VISIBILITY
+   ========================================================= */
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 200;
+  min-height: 44px;
+  padding: 0.72rem 1rem;
+  border: 2px solid var(--focus-ring);
+  border-radius: 8px;
+  background: var(--surface-solid);
+  color: #ffffff;
+  transform: translateY(-180%);
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.topbar,
+.landing-nav {
+  border-color: rgba(255, 212, 71, 0.42);
+}
+
+.app-menu,
+.landing-links {
+  align-items: stretch;
+}
+
+.app-menu .module-link,
+.landing-links .module-link {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.inline-form {
+  flex-wrap: wrap;
+}
+
+.inline-form > label {
+  min-width: min(180px, 100%);
+  flex: 1 1 180px;
+}
+
+.inline-form > button {
+  flex: 0 1 auto;
+  min-width: 140px;
+  white-space: normal;
+}
+
+.button-row {
+  flex-wrap: wrap;
+}
+
+.button-row > button {
+  min-width: min(180px, 100%);
+  white-space: normal;
+}
+
+.panel,
+.setup-card,
+.admin-subtabs,
+.tabs {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 150, 0.08),
+    0 16px 34px rgba(0, 0, 0, 0.28);
+}
+
+.topbar {
+  border-top: 2px solid rgba(255, 212, 71, 0.68);
+  background:
+    linear-gradient(180deg, rgba(35, 20, 8, 0.98), rgba(17, 10, 4, 0.96));
+}
+
+.landing-nav {
+  padding-block: 8px;
+  border-bottom: 1px solid rgba(255, 212, 71, 0.24);
+}
+
+.intro {
+  border: 1px solid rgba(255, 212, 71, 0.44);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(47, 29, 10, 0.72), rgba(19, 8, 2, 0.9) 52%),
+    transparent;
+}
+
+.intro-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-actions .landing-cta:first-child {
+  border-color: rgba(255, 226, 112, 0.84);
+  background:
+    linear-gradient(180deg, var(--gold-light), var(--gold-bright));
+  color: #171006;
+  box-shadow: 0 14px 30px rgba(var(--gold-rgb), 0.2);
+}
+
+.landing-actions .landing-cta:first-child:hover {
+  border-color: #fff0a8;
+  box-shadow: 0 16px 34px rgba(var(--gold-rgb), 0.32);
+}
+
+.landing-cta-secondary {
+  border-width: 2px;
+}
+
+.tabs,
+.admin-subtabs {
+  border-color: rgba(255, 212, 71, 0.3);
+  background:
+    linear-gradient(180deg, rgba(48, 30, 11, 0.9), rgba(17, 9, 3, 0.96));
+}
+
+.tab.active,
+.subtab.active {
+  border-color: var(--gold-light);
+  background:
+    linear-gradient(180deg, var(--gold-light), var(--gold-bright));
+  color: #171006;
+  box-shadow: 0 10px 24px rgba(var(--gold-rgb), 0.28);
+  text-shadow: none;
+}
+
+.tab.active::after,
+.subtab.active::after {
+  display: none;
+}
+
+.panel-heading h3::before,
+.workspace-header h2::before {
+  content: "";
+  display: inline-block;
+  width: 0.42rem;
+  height: 1.2em;
+  margin-right: 0.6rem;
+  vertical-align: -0.18em;
+  border-radius: 4px;
+  background: var(--gold-bright);
+  box-shadow: 0 0 12px rgba(var(--gold-rgb), 0.28);
+}
+
+.status-pill,
+.role-indicator {
+  border-color: rgba(255, 212, 71, 0.46);
+}
+
+.status-pill:not(.offline),
+.role-indicator {
+  color: var(--gold-light);
+}
+
+.setup-panel,
+.workspace {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+}
+
+.workspace-header {
+  align-items: flex-start;
+}
+
+.workspace-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: min(100%, 360px);
+}
+
+.workspace-header-actions #leaveSessionButton {
+  min-height: 44px;
+  white-space: normal;
+}
+
+.workspace-header > :first-child {
+  min-width: 0;
+}
+
+.workspace-header h2 {
+  overflow-wrap: anywhere;
+}
+
+.admin-subtabs .subtab {
+  min-width: 0;
+  white-space: normal;
+  text-wrap: balance;
+}
+
+@media (min-width: 901px) {
+  .inline-form#courtSettingsForm {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+  }
+
+  .inline-form#tournamentSettingsForm {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+  }
+
+  .inline-form#tournamentSettingsForm > button {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .setup-panel,
+  .workspace {
+    width: 100%;
+  }
+
+  .inline-form > button,
+  .button-row > button {
+    width: 100%;
+  }
+
+  .inline-form > label {
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+
+  .workspace-header {
+    padding-right: 0;
+  }
+
+  .workspace-header .share-box,
+  .workspace-header .role-indicator,
+  .workspace-header-actions {
+    width: 100%;
+  }
+
+  .workspace-header-actions {
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .workspace-header-actions > * {
+    flex: 1 1 100%;
+  }
+
+  .workspace-active .tabs {
+    border-top: 1px solid var(--line-strong);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
   }
 }

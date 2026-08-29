@@ -2853,3 +2853,59 @@ Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er
 - Modulbytte mellom forsiden og «Ny turnering» skjer uten URL-endring og med `module-entering`-animasjonen.
 - `npm test`: 49 bestått, 1 forventet opt-in live-test hoppet over.
 - `node --check app/app.js`, `node --check service-worker.js` og `git diff --check` passerte.
+## 2026-08-29 - Fase 17: Samlet UI, navigasjon og synlighet
+
+### Gjort
+
+- La inn fase 17 i utviklingsplanen med konkrete krav for felles UI, navigasjon, lesbarhet, oversettelse, reflow og verifisering.
+- La til en oversettbar «Hopp til innhold»-lenke for tastatur- og hjelpemiddelnavigasjon.
+- La til `aria-current` på aktiv modulnavigasjon og korrekt `role="tab"`/`aria-selected` på adminseksjonene.
+- Rettet desktop-layouten slik at skjema- og handlingsknapper beholder lesbar tekst i stedet for å bli presset ned til ikonbredde.
+- Rettet mobilens skjemaoppsett slik at fleksibel desktop-bredde ikke blir til unødvendig stor høyde.
+- Samlet visuelle rammer for app-shell, oppsettsider, arbeidsflate, paneler og faner gjennom en felles fase-17-stilblokk.
+- Oversatte fase-17-teksten til alle seks støttede språk og rettet Bokmål-/Nynorsk-etikettene `Create` og `Join` til lokale tekster.
+- Bumpet stylesheet-, app-, oversettelses- og service-worker-cache for å distribuere endringene til installerte PWA-klienter.
+
+### Verifisert
+
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check app/translations.js`, `node --check service-worker.js` og `git diff --check` passerte.
+- Lokal nettleser kontrollert ved 1440, 390 og 320 px.
+- 320 px kontrollert uten horisontal overflow (`scrollWidth === innerWidth`).
+- Desktopkontroll bekrefter at `Oppdater`, `Lagre regler` og `Send innloggingslenke` har lesbar tekst og synlig trykkflate.
+- Mobilkontroll bekrefter kompakt skjemaoppsett, fungerende bunnnavigasjon og fortsatt lesbare hovedhandlinger.
+## 2026-08-29 - Fase 17 visuell oppgradering
+
+### Gjort
+
+- Gjorde fase 17 visuelt tydeligere etter kontroll av at første strukturelle runde ga for liten synlig forskjell.
+- La til en kjøligere sekundær aksent for status, toppfelt og primærhandlingen «Bli med», slik at gullfargen kan reserveres for merkevare og hovedfokus.
+- Gjorde aktiv modul- og adminfane til en tydelig fylt tilstand med høy kontrast.
+- Samlet landing-flaten med tydeligere kant, radius, paneldybde og skille mellom navigasjon og innhold.
+- La til visuell markør foran arbeidsflate- og paneloverskrifter for raskere skanning.
+
+### Verifisert
+
+- Ny nettleserrendering ved 1440 x 900 viser synlig endret landing-layout og tydeligere primær-/sekundærhandlinger.
+- Ny kontroll ved 390 x 844 viser at mobilmeny, hovedhandlinger og profil fortsatt ligger innenfor viewporten.
+- 390 px kontrollert uten horisontal overflow (`scrollWidth === innerWidth`).
+
+## 2026-08-29 - Samlet hovedmeny og fri navigasjon mellom turneringer
+
+### Gjort
+
+- Fjernet den overflødige arbeidsflatemenyen med Admin, Spiller og Turnering. Hovedmenyen i toppfeltet er nå eneste modulnavigasjon.
+- Lot «Opprett» og «Bli med» være tilgjengelig også når en lokal turnering er aktiv. «Opprett» åpner nå faktisk opprettelsesskjemaet uten at administrator må avslutte den aktive turneringen først.
+- Flyttet forlat-handlingen til arbeidsflatehodet, slik at spiller og tilskuer får en fast og synlig knapp uavhengig av hvilket innhold som vises.
+- Samlet spiller- og tilskuerflyten i én kontroll som velger riktig avslutningsfunksjon og returnerer brukeren til forsiden uten å påvirke andre spillere.
+- Harmoniserte fase-17-overstyringene tilbake med appens etablerte gull- og mørke uttrykk.
+- Rettet mobil landing slik at logo, knapper og navigasjon holder seg innenfor viewporten.
+- Bumpet app-, stil- og service-worker-cache etter endringene.
+
+### Verifisert
+
+- `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
+- `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.
+- Nettleserflyt ved 390 x 844: opprett aktiv turnering, åpne «Opprett» på nytt, og se at skjemaet vises uten å avslutte aktiv turnering.
+- Nettleserflyt: admin-spiller kan åpne Spiller-visningen og ser «Forlat turnering» fast i arbeidsflatehodet.
+- Mobilkontroll bekrefter at landinginnholdet ikke blir beskåret eller får horisontal overflow.
