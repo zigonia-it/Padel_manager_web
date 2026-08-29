@@ -36,7 +36,7 @@ test("app shell uses optimized startup images", () => {
   assert.match(indexSource, /assets\/bg_img-1600\.jpg/);
   assert.match(indexSource, /assets\/padelstar_button-540\.png/);
   assert.match(indexSource, /assets\/zigonia-it_logo_gold-512\.png/);
-  assert.match(stylesSource, /assets\/bg_img-1600\.png/);
+  assert.match(stylesSource, /assets\/bg_img-1600\.jpg/);
   assert.match(serviceWorkerSource, /assets\/padelstar_logo-480\.png/);
   assert.match(serviceWorkerSource, /assets\/padelstar_button-540\.png/);
   assert.match(serviceWorkerSource, /assets\/zigonia-it_logo_gold-512\.png/);

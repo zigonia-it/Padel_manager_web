@@ -92,7 +92,7 @@ body {
     linear-gradient(180deg,
       rgba(15, 7, 2, 0.72),
       rgba(15, 7, 2, 0.97)),
-    url("../assets/bg_img-1600.png") center top / cover fixed,
+    url("../assets/bg_img-1600.jpg") center top / cover fixed,
     var(--soft);
 
   color: var(--ink);
@@ -110,7 +110,7 @@ body.workspace-active {
     linear-gradient(90deg,
       rgba(15, 7, 2, 0.3),
       rgba(23, 9, 1, 0.76)),
-    url("../assets/bg_img-1600.png") center bottom / auto 150% fixed,
+    url("../assets/bg_img-1600.jpg") center bottom / auto 150% fixed,
     var(--soft);
 }
 
@@ -900,11 +900,11 @@ h3 {
   display: grid;
   grid-template-rows: auto 1fr;
 
-  width: 100vw;
+  width: 100%;
   min-height: 90svh;
 
   margin:
-    -22px calc(50% - 50vw) 0;
+    -22px 0 0;
 
   padding:
     clamp(22px, 3vw, 48px);
@@ -921,7 +921,7 @@ h3 {
     linear-gradient(180deg,
       rgba(15, 7, 2, 0.18),
       rgba(15, 7, 2, 0.48)),
-    url("../assets/bg_img-1600.png") center / 160% auto no-repeat;
+    transparent;
 
   box-shadow:
     0 30px 80px rgba(0, 0, 0, 0.58);
@@ -3622,7 +3622,7 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   }
 
   .intro {
-    width: 100vw;
+    width: 100%;
     min-height: 90svh;
 
     margin-top: -14px;
@@ -4412,7 +4412,7 @@ legend {
   background:
     linear-gradient(90deg, rgba(15, 7, 2, 0.76), rgba(15, 7, 2, 0.62)),
     linear-gradient(180deg, rgba(15, 7, 2, 0.12), rgba(15, 7, 2, 0.52)),
-    url("../assets/bg_img-1600.jpg") center / 160% auto no-repeat;
+    transparent;
 }
 
 .intro::before {
