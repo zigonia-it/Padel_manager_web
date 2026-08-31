@@ -3168,4 +3168,9 @@ Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er
 - `git diff --check` passerte.
 - Browser-smoke passerte på desktop, medium/tablet og mobil uten horisontal overflow.
 
-Commit og deploystatus fylles inn etter endelig diff-gjennomgang og push.
+### Commit og deploy
+
+- Opprydding: `4e9229d` (`Clean up project structure and consolidate UI`).
+- Responsiv smoke-testjustering: `8f3312d` (`Fix responsive browser smoke navigation`).
+- Pushet til `origin/main`.
+- GitHub Actions run `33448703426` passerte browser-smoke på desktop, medium og mobil, full test/syntakssjekk og GitHub Pages-deploy.
