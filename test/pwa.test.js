@@ -9,9 +9,10 @@ const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const stylesSource = fs.readFileSync(path.join(root, "styles", "styles.css"), "utf8");
 const responsiveStylesSource = fs.readFileSync(path.join(root, "styles", "responsive.css"), "utf8");
 const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js"), "utf8");
+const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v89/);
+  assert.match(serviceWorkerSource, /padelstar-v90/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -27,6 +28,8 @@ test("browser entrypoint uses the organized app and styles directories", () => {
   assert.match(indexSource, /src="app\/app\.js/);
   assert.match(serviceWorkerSource, /"\.\/styles\/styles\.css/);
   assert.match(serviceWorkerSource, /"\.\/styles\/responsive\.css/);
+  assert.match(privacySource, /href="styles\/privacy\.css/);
+  assert.match(serviceWorkerSource, /"\.\/styles\/privacy\.css/);
   assert.match(serviceWorkerSource, /"\.\/app\/app\.js/);
   assert.match(indexSource, /src="app\/ui-effects\.js/);
   assert.match(indexSource, /src="app\/remote-rpc\.js/);

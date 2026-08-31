@@ -4,25 +4,31 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#080706">
+  <meta name="theme-color" content="#08090b">
   <meta name="description" content="Personvern for Padelstar beta.">
   <meta name="robots" content="noindex">
   <title>Personvern - Padelstar</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/icons/padelstar-512.png">
   <link rel="icon" href="assets/icons/padelstar-256.png" type="image/png">
-  <link rel="stylesheet" href="styles/styles.css?v=padelstar-mobile-1">
+  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-35">
+  <link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-1">
 </head>
 
 <body>
   <main class="privacy-page">
-    <a class="privacy-back-link" href="./">Tilbake til Padelstar</a>
+    <header class="privacy-header">
+      <a href="./" aria-label="Tilbake til Padelstar">
+        <img class="privacy-brand" src="assets/main_logo.png" alt="Padelstar" width="640" height="426">
+      </a>
+      <a class="privacy-back-link" href="./">Tilbake til Padelstar</a>
+    </header>
     <article class="privacy-document" aria-labelledby="privacyTitle">
       <p class="eyebrow">Beta</p>
       <h1 id="privacyTitle">Personvern</h1>
       <p>
-        Padelstar er en beta for å opprette og følge små padelturneringer. Denne teksten beskriver hva appen lagrer,
-        hvorfor det lagres, og hvilke valg som må låses før bred offentlig bruk.
+        Padelstar er en beta for å opprette og følge små padelturneringer. Denne teksten beskriver hva løsningen lagrer,
+        hvorfor det lagres, hvor det lagres og hvilke rettigheter du har.
       </p>
 
       <h2>Hvem er ansvarlig?</h2>
@@ -34,29 +40,31 @@
       <h2>Hvilke opplysninger brukes?</h2>
       <p>
         Appen kan lagre turneringsnavn, invitasjonskode, spillernavn, avatarvalg, kampoppsett, resultater, rollevalg,
-        tekniske revisjoner og sikkerhetstokens for admin/spiller. Admin-token deles ikke i offentlig turneringsstate
-        eller backup. Spillertoken brukes for å beskytte spillerstyrt poengføring.
+        tekniske revisjoner, lokal brukerprofil og sikkerhetstokens for admin/spiller. Admin-token deles ikke i offentlig
+        turneringsstate eller backup. Spillertoken brukes for å beskytte spillerstyrt poengføring.
       </p>
 
       <h2>Hvorfor brukes opplysningene?</h2>
       <p>
         Opplysningene brukes for å administrere turneringen, vise riktige kamper og resultater, synkronisere mellom
-        enheter, beskytte skrivehandlinger og gjenopprette siste lokale state ved nettverks- eller lagringsfeil.
+        enheter, foreslå spillerens navn/avatar, beskytte skrivehandlinger og gjenopprette siste lokale state ved
+        nettverks- eller lagringsfeil.
       </p>
 
       <h2>Hvor lagres data?</h2>
       <p>
-        Lokalt lagres state i nettleseren med localStorage, en siste-kjente-gode kopi og IndexedDB-speiling der
-        nettleseren støtter det. Når live sync er aktiv, lagres delt turneringsstate i Supabase. Statiske filer leveres
-        fra Vercel, og Vercel Analytics kan brukes til enkel trafikkmåling.
+        Lokalt lagres turneringsstate, språkvalg, brukerprofil og profilhistorikk i nettleseren med localStorage, en
+        siste-kjente-gode kopi og IndexedDB-speiling der nettleseren støtter det. Når live sync eller profilhistorikk er
+        aktivert, lagres nødvendig delt data i Supabase. Statiske filer leveres fra Vercel, og Vercel Analytics kan brukes
+        til enkel trafikkmåling.
       </p>
 
       <h2>Lagringstid og sletting</h2>
       <p>
-        Anonyme og avsluttede turneringer beholdes i 30 dager for nødvendig oppfølging før de slettes. Når brukerprofiler
-        innføres, kan brukeren beholde tidligere turneringer og statistikk som del av sin historikk. Ved sletting av profilen
-        slettes tilknyttede resterende data etter 30 dager. Lokale data kan fjernes ved å nullstille turneringen eller tømme
-        nettleserdata.
+        Anonyme turneringer slettes innen 30 dager etter at admin avslutter turneringen. Spillerøkter og token-hasher
+        slettes sammen med turneringen. Profilhistorikk kan beholdes lenger mens profilen består; ved profilsletting slettes
+        tilknyttet historikk innen 30 dager. Lokale data kan fjernes ved å nullstille turneringen, slette profilen eller
+        tømme nettleserdata.
       </p>
 
       <h2>Dine valg</h2>
@@ -68,11 +76,12 @@
       <h2>Status</h2>
       <p>
         Admin kan valgfritt bruke Supabase Auth med innloggingslenke for å knytte en turnering til en konto. Spillere kan
-        valgfritt samtykke til lokale varsler på enheten. Varsler kan slås av igjen i spillerflaten.
+        opprette en lokal profil med visningsnavn og avatar, og kan valgfritt samtykke til lokale varsler på enheten.
+        Profilen og varslene kan slettes eller slås av igjen i spillerflaten.
       </p>
       <p>
-        Sist oppdatert 2026-08-28. Dette er et beta-utkast og skal gjennomgås av eier før bred bruk. Vercel Analytics beholdes
-        foreløpig for aggregert trafikkmåling.
+        Sist oppdatert 2026-09-01. Dette er fortsatt en beta-tekst og bør kvalitetssikres av behandlingsansvarlig før bred
+        bruk. Vercel Analytics beholdes foreløpig for aggregert trafikkmåling.
       </p>
     </article>
   </main>

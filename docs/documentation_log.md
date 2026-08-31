@@ -3174,3 +3174,20 @@ Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er
 - Responsiv smoke-testjustering: `8f3312d` (`Fix responsive browser smoke navigation`).
 - Pushet til `origin/main`.
 - GitHub Actions run `33448703426` passerte browser-smoke på desktop, medium og mobil, full test/syntakssjekk og GitHub Pages-deploy.
+
+## 2026-09-01 - Visuell og innholdsmessig oppdatering av personvern
+
+### Gjort
+
+- La til en egen `styles/privacy.css` med svart/mørkgrå flater, hvit tekst, nøytrale kanter og responsiv layout.
+- Fjernet arvet bakgrunnsoverlegg fra personvernsiden og la til tydelig Padelstar-header med tilbakekobling.
+- Oppdaterte teksten fra framtidige profiler til dagens implementerte lokale profil, profilhistorikk, språkvalg og varsler.
+- Presiserte 30-dagers retensjon for avsluttede anonyme turneringer og profilsletting.
+- Oppdaterte sist revidert-dato til 2026-09-01 og la siden inn i service-worker-app-shell.
+
+### Verifisert
+
+- Personvernsiden åpner med HTTP 200 lokalt ved 390×844.
+- Ingen horisontal overflow; bakgrunnsoverlegg er deaktivert og svart/mørkgrå bakgrunn er aktiv.
+- `npm test`: 66 bestått, 1 forventet opt-in live Supabase-test hoppet over.
+- `npm run check:syntax` og `git diff --check` passerte.

@@ -24,7 +24,17 @@ test("privacy page covers the beta data handling basics", () => {
   assert.match(privacySource, /localStorage/);
   assert.match(privacySource, /IndexedDB/);
   assert.match(privacySource, /Lagringstid og sletting/);
-  assert.match(privacySource, /beta-utkast/i);
+  assert.match(privacySource, /beta-tekst/i);
+});
+
+test("privacy page reflects the current profile and retention behavior", () => {
+  assert.match(privacySource, /lokal brukerprofil/i);
+  assert.match(privacySource, /profilhistorikk/i);
+  assert.match(privacySource, /språkvalg/i);
+  assert.match(privacySource, /innen 30 dager/i);
+  assert.match(privacySource, /2026-09-01/);
+  assert.match(privacySource, /styles\/privacy\.css/);
+  assert.match(privacySource, /theme-color" content="#08090b"/);
 });
 
 test("retention note records the approved beta policy and profile follow-up", () => {
