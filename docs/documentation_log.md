@@ -11,7 +11,17 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 - La til språkspesifikke oversettelser for poengknapper, kampoverskrifter, bane-aria-labels, resultatlinjer og pause-/break-tekst.
 - Endret standardnavnet ved opprettelse fra den stedsspesifikke `Risløkka Padel` til `Padelstar-turnering`.
 - Oppdaterte service-worker-cache og cache-busting for den nye oversettelsesdictionaryen.
-- Verifisert med `npm test` (68 bestått, 1 forventet live-Supabase-test hoppet over), syntakssjekk, `git diff --check` og mobil browser-smoke uten horisontal overflow.
+- Verifisert med `npm test` (69 bestått, 1 forventet live-Supabase-test hoppet over), syntakssjekk, `git diff --check` og mobil browser-smoke uten horisontal overflow.
+
+## 2026-09-01 - Isolerte språk-UI
+
+- Flyttet lasting av brukerens språk, DOM-oversettelser og språkvelger til `app/i18n-ui.js`.
+- Beholdt `app.js` som entrypoint med tynne delegater, og la den nye modulen i app-shell-cache.
+
+## 2026-09-01 - Fjernet duplisert CSS-baseline
+
+- Fjernet den gamle, dupliserte redesignblokken før den aktive globale stylesheet-blokken.
+- Beholdt ett samlet token-sett for aktiv klassisk blå visning og verifiserte desktop-, tablet- og mobilnavigasjon etter endringen.
 
 ## 2026-08-31 - Reference-match for Padelstar-logo
 

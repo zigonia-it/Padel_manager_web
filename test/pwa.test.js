@@ -11,9 +11,10 @@ const responsiveStylesSource = fs.readFileSync(path.join(root, "styles", "respon
 const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 const privacyI18nSource = fs.readFileSync(path.join(root, "app", "privacy-i18n.js"), "utf8");
+const i18nUiSource = fs.readFileSync(path.join(root, "app", "i18n-ui.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v92/);
+  assert.match(serviceWorkerSource, /padelstar-v93/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -34,6 +35,7 @@ test("browser entrypoint uses the organized app and styles directories", () => {
   assert.match(privacySource, /src="app\/privacy-i18n\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/privacy-i18n\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/app\.js/);
+  assert.match(serviceWorkerSource, /"\.\/app\/i18n-ui\.js/);
   assert.match(indexSource, /src="app\/ui-effects\.js/);
   assert.match(indexSource, /src="app\/remote-rpc\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/ui-effects\.js/);
@@ -46,6 +48,13 @@ test("privacy page follows the local user language preference", () => {
   assert.match(privacyI18nSource, /padelstar-language/);
   assert.match(privacyI18nSource, /localStorage\.setItem/);
   assert.match(privacyI18nSource, /translations\[languageCode\]/);
+});
+
+test("language DOM handling has its own module boundary", () => {
+  assert.match(i18nUiSource, /loadUserLanguage/);
+  assert.match(i18nUiSource, /applyLanguage/);
+  assert.match(i18nUiSource, /syncLanguageOptions/);
+  assert.match(i18nUiSource, /window\.PadelstarI18nUi/);
 });
 
 test("responsive navigation has one shared hamburger owner", () => {
@@ -65,9 +74,9 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-35/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-36/);
   assert.match(indexSource, /app\/app\.js\?v=padelstar-session-14/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-35/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-36/);
   assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-14/);
 });
 

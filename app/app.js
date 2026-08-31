@@ -45,6 +45,7 @@ const avatarOptions = [
   { id: "lob", labelKey: "avatar.lob" },
 ];
 const i18n = window.PadelstarI18n;
+const i18nUi = window.PadelstarI18nUi;
 const tournamentEngine = window.PadelstarTournamentEngine;
 const scoring = window.PadelstarScoring;
 const stateManager = window.PadelstarState;
@@ -889,11 +890,7 @@ function loadState() {
 }
 
 function loadUserLanguage(fallbackLanguage = "nb") {
-  const storedLanguage = localStorage.getItem(languageStorageKey);
-  const language = storedLanguage || fallbackLanguage;
-  const normalized = i18n?.normalizeLanguage(language) ?? language;
-  if (!storedLanguage) localStorage.setItem(languageStorageKey, normalized);
-  return normalized;
+  return i18nUi.loadUserLanguage({ storage: localStorage, storageKey: languageStorageKey, fallbackLanguage, i18n });
 }
 
 function loadSavedState(serializedState) {
@@ -2098,37 +2095,11 @@ function renderSyncControls() {
 }
 
 function applyLanguage() {
-  const language = i18n?.normalizeLanguage(state.settings.language) ?? state.settings.language ?? "nb";
-  state.settings.language = language;
-  document.documentElement.lang = i18n?.htmlLang(language) ?? (language === "en" ? "en" : "no");
-  if (elements.languageSelect) elements.languageSelect.value = language;
-  document.querySelectorAll("[data-i18n]").forEach((node) => {
-    node.textContent = t(node.dataset.i18n);
-  });
-  document.querySelectorAll("[data-i18n-aria-label]").forEach((node) => {
-    node.setAttribute("aria-label", t(node.dataset.i18nAriaLabel));
-  });
-  document.querySelectorAll("[data-i18n-placeholder]").forEach((node) => {
-    node.setAttribute("placeholder", t(node.dataset.i18nPlaceholder));
-  });
-  document.querySelectorAll("[data-i18n-alt]").forEach((node) => {
-    node.setAttribute("alt", t(node.dataset.i18nAlt));
-  });
-  document.querySelectorAll("[data-i18n-content]").forEach((node) => {
-    node.setAttribute("content", t(node.dataset.i18nContent));
-  });
-  applyTheme();
+  i18nUi.applyLanguage({ state, elements, i18n, translate: t, applyTheme });
 }
 
 function syncLanguageOptions() {
-  if (!elements.languageSelect || !i18n?.supportedLanguages) return;
-  elements.languageSelect.innerHTML = "";
-  i18n.supportedLanguages().forEach((language) => {
-    const option = document.createElement("option");
-    option.value = language.code;
-    option.textContent = language.label;
-    elements.languageSelect.append(option);
-  });
+  i18nUi.syncLanguageOptions({ select: elements.languageSelect, i18n });
 }
 
 function t(key, values = {}) {
