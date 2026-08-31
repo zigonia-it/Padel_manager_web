@@ -13,7 +13,7 @@ const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 const privacyI18nSource = fs.readFileSync(path.join(root, "app", "privacy-i18n.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v91/);
+  assert.match(serviceWorkerSource, /padelstar-v92/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -69,6 +69,11 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/app\.js\?v=padelstar-session-14/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-35/);
   assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-14/);
+});
+
+test("create form uses a generic default tournament name", () => {
+  assert.match(indexSource, /value="Padelstar-turnering"/);
+  assert.doesNotMatch(indexSource, /value="Risløkka Padel"/);
 });
 
 test("classic theme is the only available app theme", () => {

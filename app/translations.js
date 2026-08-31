@@ -632,6 +632,56 @@ Object.assign(padelstarTranslations.fr, {
   "avatar.smash": "Smash", "avatar.serve": "Service", "avatar.wall": "Mur", "avatar.lob": "Lob", "footer.developedBy": "Développé par Sigurd Steen Grodem", "footer.copyrightPrefix": "Copyright", "footer.rights": "Tous droits réservés.", "footer.privacy": "Confidentialité",
 });
 
+Object.assign(padelstarTranslations.nn, {
+  "score.matchup": "{teamOne} mot {teamTwo}",
+  "score.pointsLabel": "Poeng {team}",
+  "score.courtForMatch": "Bane for {teamOne} mot {teamTwo}",
+  "score.finishedPrefix": "Ferdig: {sets}",
+  "score.setsPrefix": "Sett: {sets}",
+  "score.currentSummary": "Sett: {sets} · Game: {game}",
+  "matches.restingPlayers": "Pause: {players}",
+});
+
+Object.assign(padelstarTranslations.en, {
+  "score.matchup": "{teamOne} vs {teamTwo}",
+  "score.pointsLabel": "Points {team}",
+  "score.courtForMatch": "Court for {teamOne} vs {teamTwo}",
+  "score.finishedPrefix": "Finished: {sets}",
+  "score.setsPrefix": "Sets: {sets}",
+  "score.currentSummary": "Sets: {sets} · Game: {game}",
+  "matches.restingPlayers": "Break: {players}",
+});
+
+Object.assign(padelstarTranslations.es, {
+  "score.matchup": "{teamOne} contra {teamTwo}",
+  "score.pointsLabel": "Puntos {team}",
+  "score.courtForMatch": "Pista para {teamOne} contra {teamTwo}",
+  "score.finishedPrefix": "Finalizado: {sets}",
+  "score.setsPrefix": "Sets: {sets}",
+  "score.currentSummary": "Sets: {sets} · Juego: {game}",
+  "matches.restingPlayers": "Descanso: {players}",
+});
+
+Object.assign(padelstarTranslations.de, {
+  "score.matchup": "{teamOne} gegen {teamTwo}",
+  "score.pointsLabel": "Punkte {team}",
+  "score.courtForMatch": "Platz für {teamOne} gegen {teamTwo}",
+  "score.finishedPrefix": "Fertig: {sets}",
+  "score.setsPrefix": "Sätze: {sets}",
+  "score.currentSummary": "Sätze: {sets} · Spiel: {game}",
+  "matches.restingPlayers": "Pause: {players}",
+});
+
+Object.assign(padelstarTranslations.fr, {
+  "score.matchup": "{teamOne} contre {teamTwo}",
+  "score.pointsLabel": "Points {team}",
+  "score.courtForMatch": "Terrain pour {teamOne} contre {teamTwo}",
+  "score.finishedPrefix": "Terminé : {sets}",
+  "score.setsPrefix": "Sets : {sets}",
+  "score.currentSummary": "Sets : {sets} · Jeu : {game}",
+  "matches.restingPlayers": "Pause : {players}",
+});
+
 Object.assign(padelstarTranslations.nb, {
   "profile.eyebrow": "Min spiller",
   "profile.title": "Spillerprofil",

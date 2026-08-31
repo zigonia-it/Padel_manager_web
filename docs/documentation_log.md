@@ -1,10 +1,17 @@
 # Padelstar - Dokumentasjonslogg
 
-Sist oppdatert: 2026-08-28
+Sist oppdatert: 2026-09-01
 
 Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padelstar.
+
+## 2026-09-01 - Oversatte kampkontroller og generisk turneringsnavn
+
+- La til språkspesifikke oversettelser for poengknapper, kampoverskrifter, bane-aria-labels, resultatlinjer og pause-/break-tekst.
+- Endret standardnavnet ved opprettelse fra den stedsspesifikke `Risløkka Padel` til `Padelstar-turnering`.
+- Oppdaterte service-worker-cache og cache-busting for den nye oversettelsesdictionaryen.
+- Verifisert med `npm test` (68 bestått, 1 forventet live-Supabase-test hoppet over), syntakssjekk, `git diff --check` og mobil browser-smoke uten horisontal overflow.
 
 ## 2026-08-31 - Reference-match for Padelstar-logo
 

@@ -61,7 +61,7 @@ const remoteRpc = (client, name, payload = {}) => {
 let profile = null;
 
 const defaultTournament = createTournament({
-  name: "Risløkka Padel",
+  name: "Padelstar-turnering",
   inviteCode: "P4K7D",
   players: [],
   courtCount: 1,

@@ -534,6 +534,13 @@ test("translations are loaded from the shared dictionary with Bokmål fallback",
   assert.equal(api.t("startTournament"), "Start tournament");
   assert.equal(api.t("actions.leaveTournament"), "Leave tournament");
   assert.equal(api.t("refreshRemoteState"), "Load latest");
+  assert.equal(api.i18n.translate("en", "score.pointsLabel", { team: "Elin & Håkon" }), "Points Elin & Håkon");
+  assert.equal(
+    api.i18n.translate("en", "score.courtForMatch", { teamOne: "Elin & Håkon", teamTwo: "Elisabeth & Tina" }),
+    "Court for Elin & Håkon vs Elisabeth & Tina",
+  );
+  assert.equal(api.i18n.translate("en", "score.matchup", { teamOne: "Ruben & Magnus", teamTwo: "Karoline & Lars" }), "Ruben & Magnus vs Karoline & Lars");
+  assert.equal(api.i18n.translate("en", "matches.restingPlayers", { players: "Sigurd" }), "Break: Sigurd");
   assert.equal(
     api.t("player.leaveConfirm", { name: "Ada", pendingScoreText: "" }),
     "Leave the tournament as Ada? The tournament and player list stay unchanged for everyone else.",
