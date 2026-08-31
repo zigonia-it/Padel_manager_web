@@ -46,6 +46,14 @@ const avatarOptions = [
 ];
 const i18n = window.PadelstarI18n;
 const i18nUi = window.PadelstarI18nUi;
+const storage = window.PadelstarStorage;
+const rendering = window.PadelstarRendering.create({
+  translate: (key, values) => t(key, values),
+  globalMatchNumber: (match) => globalMatchNumber(match),
+  setScoreText: (match) => setScoreText(match),
+  gameScoreText: (match) => gameScoreText(match),
+  escapeHtml: (value) => escapeHtml(value),
+});
 const tournamentEngine = window.PadelstarTournamentEngine;
 const scoring = window.PadelstarScoring;
 const stateManager = window.PadelstarState;
@@ -895,11 +903,8 @@ function loadUserLanguage(fallbackLanguage = "nb") {
 
 function loadSavedState(serializedState) {
   if (!serializedState) return null;
-  try {
-    return migrateState(JSON.parse(serializedState));
-  } catch {
-    return null;
-  }
+  const parsed = storage.parseJson(serializedState);
+  return parsed ? migrateState(parsed) : null;
 }
 
 function migrateState(nextState) {
@@ -969,8 +974,8 @@ function saveState(options = {}) {
 
 function persistLocalState() {
   const serializedState = JSON.stringify(state);
-  localStorage.setItem(storageKey, serializedState);
-  if (isValidTournamentState(state)) localStorage.setItem(recoveryStorageKey, serializedState);
+  storage.writeJson(localStorage, storageKey, state);
+  if (isValidTournamentState(state)) storage.writeJson(localStorage, recoveryStorageKey, state);
   mirrorStorageKeys([storageKey, recoveryStorageKey]);
 }
 
@@ -4294,14 +4299,7 @@ function tournamentStatusText(status) {
 }
 
 function matchContextText(match) {
-  const matchIndex = globalMatchNumber(match);
-  const sitOutCount = match.sittingOut?.length ?? 0;
-  const parts = [
-    t("tournament.roundLabel", { round: match.rotationNumber }),
-    matchIndex ? t("matches.matchNumber", { match: matchIndex }) : "",
-    sitOutCount ? t("matches.restingCount", { count: sitOutCount }) : "",
-  ].filter(Boolean);
-  return parts.join(" · ");
+  return rendering.matchContextText(match);
 }
 
 function globalMatchNumber(match) {
@@ -4310,13 +4308,7 @@ function globalMatchNumber(match) {
 }
 
 function primaryMatchHeadline(match) {
-  if (match.state === "finished" && match.winnerTeamIndex !== null) {
-    const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo;
-    if (match.isWalkover) return t("score.walkoverWinner", { winner: winner.displayName });
-    return t("score.matchWinner", { winner: winner.displayName, score: setScoreText(match) });
-  }
-  if (match.state === "cancelled") return t("score.matchCancelled");
-  return t("score.matchup", { teamOne: match.teamOne.displayName, teamTwo: match.teamTwo.displayName });
+  return rendering.primaryMatchHeadline(match);
 }
 
 function startingTeamText(match) {
@@ -4324,12 +4316,7 @@ function startingTeamText(match) {
 }
 
 function scoreSummary(match) {
-  if (match.isWalkover) return t("score.walkover");
-  if (match.completedSets.length) {
-    const sets = match.completedSets.map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ");
-    return match.state === "finished" ? t("score.finishedPrefix", { sets }) : t("score.setsPrefix", { sets });
-  }
-  return t("score.currentSummary", { sets: setScoreText(match), game: gameScoreText(match) });
+  return rendering.scoreSummary(match);
 }
 
 function setScoreText(match) {
@@ -4346,8 +4333,7 @@ function tennisPointLabel(value) {
 }
 
 function sittingOutSummary(match) {
-  if (!match.sittingOut?.length) return "";
-  return ` · ${t("matches.restingPlayers", { players: match.sittingOut.map((player) => escapeHtml(player.name)).join(", ") })}`;
+  return rendering.sittingOutSummary(match);
 }
 
 function escapeHtml(value) {

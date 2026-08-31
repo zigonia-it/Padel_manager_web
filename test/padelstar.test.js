@@ -7,6 +7,8 @@ const vm = require("node:vm");
 const appRoot = path.join(__dirname, "..", "app");
 const translationsPath = path.join(appRoot, "translations.js");
 const i18nUiPath = path.join(appRoot, "i18n-ui.js");
+const storagePath = path.join(appRoot, "storage.js");
+const renderingPath = path.join(appRoot, "rendering.js");
 const tournamentEnginePath = path.join(appRoot, "tournament-engine.js");
 const scoringEnginePath = path.join(appRoot, "scoring-engine.js");
 const stateManagerPath = path.join(appRoot, "state-manager.js");
@@ -83,6 +85,8 @@ function loadPadelstar(options = {}) {
 
   vm.runInContext(fs.readFileSync(translationsPath, "utf8"), context, { filename: translationsPath });
   vm.runInContext(fs.readFileSync(i18nUiPath, "utf8"), context, { filename: i18nUiPath });
+  vm.runInContext(fs.readFileSync(storagePath, "utf8"), context, { filename: storagePath });
+  vm.runInContext(fs.readFileSync(renderingPath, "utf8"), context, { filename: renderingPath });
   vm.runInContext(fs.readFileSync(tournamentEnginePath, "utf8"), context, { filename: tournamentEnginePath });
   vm.runInContext(fs.readFileSync(scoringEnginePath, "utf8"), context, { filename: scoringEnginePath });
   vm.runInContext(fs.readFileSync(stateManagerPath, "utf8"), context, { filename: stateManagerPath });

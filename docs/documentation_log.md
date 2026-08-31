@@ -18,6 +18,16 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 - Flyttet lasting av brukerens språk, DOM-oversettelser og språkvelger til `app/i18n-ui.js`.
 - Beholdt `app.js` som entrypoint med tynne delegater, og la den nye modulen i app-shell-cache.
 
+## 2026-09-01 - Isolerte JSON-persistens
+
+- Flyttet tolerant JSON-lesing og state-skriving til `app/storage.js`.
+- Beholdt migrering og recovery-policy i `app.js`, men samlet selve lagringsoperasjonene i én testbar modul.
+
+## 2026-09-01 - Isolerte felles kamp-rendering
+
+- Flyttet kampkontekst, kampoverskrift, resultatoppsummering og pauseoppsummering til `app/rendering.js`.
+- Eksponerte avhengighetene eksplisitt fra entrypointet, slik at oversettelser og scoring fortsatt bruker samme state.
+
 ## 2026-09-01 - Fjernet duplisert CSS-baseline
 
 - Fjernet den gamle, dupliserte redesignblokken før den aktive globale stylesheet-blokken.

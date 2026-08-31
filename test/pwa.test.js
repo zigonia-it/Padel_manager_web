@@ -12,9 +12,11 @@ const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js")
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 const privacyI18nSource = fs.readFileSync(path.join(root, "app", "privacy-i18n.js"), "utf8");
 const i18nUiSource = fs.readFileSync(path.join(root, "app", "i18n-ui.js"), "utf8");
+const storageSource = fs.readFileSync(path.join(root, "app", "storage.js"), "utf8");
+const renderingSource = fs.readFileSync(path.join(root, "app", "rendering.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v93/);
+  assert.match(serviceWorkerSource, /padelstar-v94/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -36,6 +38,8 @@ test("browser entrypoint uses the organized app and styles directories", () => {
   assert.match(serviceWorkerSource, /"\.\/app\/privacy-i18n\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/app\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/i18n-ui\.js/);
+  assert.match(serviceWorkerSource, /"\.\/app\/storage\.js/);
+  assert.match(serviceWorkerSource, /"\.\/app\/rendering\.js/);
   assert.match(indexSource, /src="app\/ui-effects\.js/);
   assert.match(indexSource, /src="app\/remote-rpc\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/ui-effects\.js/);
@@ -55,6 +59,19 @@ test("language DOM handling has its own module boundary", () => {
   assert.match(i18nUiSource, /applyLanguage/);
   assert.match(i18nUiSource, /syncLanguageOptions/);
   assert.match(i18nUiSource, /window\.PadelstarI18nUi/);
+});
+
+test("JSON persistence has its own storage module boundary", () => {
+  assert.match(storageSource, /readJson/);
+  assert.match(storageSource, /writeJson/);
+  assert.match(storageSource, /window\.PadelstarStorage/);
+});
+
+test("shared match rendering has its own module boundary", () => {
+  assert.match(renderingSource, /primaryMatchHeadline/);
+  assert.match(renderingSource, /scoreSummary/);
+  assert.match(renderingSource, /sittingOutSummary/);
+  assert.match(renderingSource, /window\.PadelstarRendering/);
 });
 
 test("responsive navigation has one shared hamburger owner", () => {
