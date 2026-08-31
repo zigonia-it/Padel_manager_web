@@ -1,5 +1,6 @@
 {
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "check:syntax": "for file in app/*.js api/*.js; do node --check \"$file\"; done"
   }
 }

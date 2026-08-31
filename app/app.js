@@ -2,6 +2,7 @@ const legacyStorageKey = "padel-manager-demo";
 const legacyRoleStorageKey = "padel-manager-role";
 const storageKey = "padelstar-demo";
 const roleStorageKey = "padelstar-role";
+const languageStorageKey = "padelstar-language";
 const profileStorageKey = "padelstar-profile";
 const profileHistoryStorageKey = "padelstar-profile-history";
 const notificationPreferenceKey = "padelstar-notifications";
@@ -51,6 +52,12 @@ const realtimeSync = window.PadelstarRealtime;
 const offlineStorage = window.PadelstarOfflineStorage;
 const profileManager = window.PadelstarProfiles;
 const observability = window.PadelstarObservability;
+const uiEffects = window.PadelstarUiEffects;
+const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history"]);
+const remoteRpc = (client, name, payload = {}) => {
+  if (!remoteReadRpcNames.has(name)) markSyncAttempt();
+  return window.PadelstarRemoteRpc.call(client, name, payload);
+};
 let profile = null;
 
 const defaultTournament = createTournament({
@@ -64,6 +71,7 @@ let recoveredFromLastGood = false;
 migrateLegacyLocalStorage();
 
 let state = loadState();
+state.settings.language = loadUserLanguage(state.settings?.language ?? "nb");
 profile = loadLocalProfile();
 let largeScoreMatchId = null;
 let activeModule = "landing";
@@ -89,14 +97,20 @@ let realtimeConnectionState = "disconnected";
 let realtimeConnectionGeneration = 0;
 let realtimeRefreshPromise = null;
 let remoteSaveTimer = null;
+let remoteRetryTimer = null;
+let remoteRetryAttempt = 0;
 let remoteWriteChain = Promise.resolve();
 let lastRemotePersistedSequence = 0;
 let isApplyingRemoteState = false;
 let remoteMutationSequence = 0;
 let remoteConflict = false;
 let moduleTransitionFrame = null;
+let toastTimer = null;
 let pendingAdminSync = loadPendingAdminSync();
 let pendingPlayerScores = loadPendingPlayerScores();
+const initialSyncMetadata = readSyncMetadata();
+let syncLastAttemptAt = initialSyncMetadata.lastAttemptAt ?? null;
+let syncLastError = initialSyncMetadata.lastError ?? null;
 if (pendingAdminSync) remoteMutationSequence = 1;
 let playerScoreQueueRunning = false;
 mirrorOfflineStorage();
@@ -119,6 +133,7 @@ const elements = {
   joinNamePreview: document.querySelector("#joinNamePreview"),
   avatarPicker: document.querySelector("#avatarPicker"),
   languageSelect: document.querySelector("#languageSelect"),
+  appMenuToggle: document.querySelector("#appMenuToggle"),
   copyrightYearRange: document.querySelector("#copyrightYearRange"),
   showExistingPlayersButton: document.querySelector("#showExistingPlayersButton"),
   existingPlayerList: document.querySelector("#existingPlayerList"),
@@ -149,6 +164,14 @@ const elements = {
   copySpectatorLinkButton: document.querySelector("#copySpectatorLinkButton"),
   shareTournamentButton: document.querySelector("#shareTournamentButton"),
   copyStatus: document.querySelector("#copyStatus"),
+  appToast: document.querySelector("#appToast"),
+  syncStatusDetail: document.querySelector("#syncStatusDetail"),
+  confirmDialog: document.querySelector("#appConfirmDialog"),
+  confirmMessage: document.querySelector("#appConfirmMessage"),
+  confirmCancel: document.querySelector("#appConfirmCancel"),
+  confirmAccept: document.querySelector("#appConfirmAccept"),
+  conflictActions: document.querySelector("#conflictActions"),
+  keepLocalBackupButton: document.querySelector("#keepLocalBackupButton"),
   refreshRemoteButton: document.querySelector("#refreshRemoteButton"),
   tournamentStatus: document.querySelector("#tournamentStatus"),
   adminLiveOverview: document.querySelector("#adminLiveOverview"),
@@ -194,8 +217,6 @@ const elements = {
   setScoreContext: document.querySelector("#setScoreContext"),
   setScoreOptions: document.querySelector("#setScoreOptions"),
   closeSetScoreButton: document.querySelector("#closeSetScoreButton"),
-  landingMenuToggle: document.querySelector(".landing-menu-toggle"),
-  landingLinks: document.querySelector("#landingLinks"),
   profileForm: document.querySelector("#profileForm"),
   profileNameInput: document.querySelector("#profileNameInput"),
   profileAvatarPicker: document.querySelector("#profileAvatarPicker"),
@@ -215,6 +236,8 @@ const matchFilters = { admin: "all", player: "all" };
 
 function initializeApp() {
 observability?.installGlobalHandlers();
+window.PadelstarNavigation?.initialize({ showModule, translate: t });
+applyTheme();
 activateSupabaseClient();
 window.addEventListener("padelstar-supabase-ready", activateSupabaseClient, { once: true });
 syncLanguageOptions();
@@ -226,9 +249,13 @@ prefillInviteCodeFromUrl();
 syncCopyrightYear();
 registerServiceWorker();
 syncConnectionStatus();
-showRecoveryNotice();
+  showRecoveryNotice();
 
-window.addEventListener("online", handleOnline);
+  elements.confirmDialog?.addEventListener("click", (event) => {
+    if (event.target === elements.confirmDialog) elements.confirmDialog.close("cancel");
+  });
+
+  window.addEventListener("online", handleOnline);
 window.addEventListener("offline", handleOffline);
 
 elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
@@ -237,7 +264,7 @@ elements.profileForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   saveLocalProfileFromForm();
 });
-elements.deleteProfileButton?.addEventListener("click", requestProfileDeletion);
+elements.deleteProfileButton?.addEventListener("click", () => void requestProfileDeletion());
 elements.cancelProfileDeletionButton?.addEventListener("click", cancelProfileDeletion);
 elements.profileHistoryFilter?.addEventListener("change", renderProfile);
 elements.adminMatchFilter?.addEventListener("change", (event) => {
@@ -251,7 +278,7 @@ elements.playerMatchFilter?.addEventListener("change", (event) => {
 elements.adminParticipatesInput.addEventListener("change", syncAdminPlayerChoice);
 elements.languageSelect.addEventListener("change", () => {
   state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
-  saveState();
+  localStorage.setItem(languageStorageKey, state.settings.language);
   applyLanguage();
   syncJoinPreview();
   render();
@@ -266,7 +293,7 @@ elements.createTournamentForm.addEventListener("submit", async (event) => {
   const playerNames = parsePlayerNames(formData.get("players"));
 
   if (adminParticipates && !adminPlayerName) {
-    alert(t("messages.adminNameRequired"));
+    showToast(t("messages.adminNameRequired"), "status-message-error");
     form.elements.adminPlayerName.focus();
     return;
   }
@@ -307,7 +334,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
   const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
 
   if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
-    alert(t("messages.tournamentNotFound", { code: inviteCode }));
+    showToast(t("messages.tournamentNotFound", { code: inviteCode }), "status-message-error");
     return;
   }
 
@@ -322,7 +349,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
   } else {
     const existingPlayer = findPlayerByName(playerName);
     if (!existingPlayer && state.rounds.length > 0) {
-      alert(t("messages.tournamentStartedAskAdmin"));
+      showToast(t("messages.tournamentStartedAskAdmin"), "status-message-error");
       return;
     }
     player = existingPlayer ?? joinTournament(playerName, avatarId);
@@ -343,7 +370,7 @@ elements.joinTournamentForm.addEventListener("submit", async (event) => {
 elements.addPlayerForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (state.rounds.length > 0) {
-    alert(t("messages.playersLocked"));
+    showToast(t("messages.playersLocked"), "status-message-error");
     return;
   }
   const formData = new FormData(event.currentTarget);
@@ -359,7 +386,7 @@ elements.addPlayerForm.addEventListener("submit", (event) => {
 elements.courtSettingsForm.addEventListener("submit", (event) => {
   event.preventDefault();
   if (getActiveRound()?.status === "active" || state.status === "Avsluttet") {
-    alert(t("messages.courtsLocked"));
+    showToast(t("messages.courtsLocked"), "status-message-error");
     return;
   }
   const courtList = new FormData(event.currentTarget).get("courtList");
@@ -394,7 +421,7 @@ elements.generateRoundButton.addEventListener("click", () => {
   if (!completingActiveRound) {
     const blockReason = generateRoundBlockReason();
     if (blockReason) {
-      alert(blockReason);
+      showToast(blockReason, "status-message-error");
       return;
     }
   }
@@ -415,8 +442,8 @@ elements.generateRoundButton.addEventListener("click", () => {
   render();
 });
 
-elements.completeRoundButton.addEventListener("click", () => {
-  if (!confirm(t("messages.finishTournamentConfirm"))) return;
+elements.completeRoundButton.addEventListener("click", async () => {
+  if (!await requestConfirmation(t("messages.finishTournamentConfirm"))) return;
   endTournament();
   saveState();
   render();
@@ -437,15 +464,20 @@ elements.refreshRemoteButton?.addEventListener("click", async () => {
   render();
 });
 
-elements.endTournamentButton.addEventListener("click", () => {
-  if (!confirm(t("messages.endTournamentConfirm"))) return;
+elements.keepLocalBackupButton?.addEventListener("click", () => {
+  exportBackup();
+  setRemoteNotice(t("messages.localBackupKept"));
+});
+
+elements.endTournamentButton.addEventListener("click", async () => {
+  if (!await requestConfirmation(t("messages.endTournamentConfirm"))) return;
   endTournament();
   saveState();
   render();
 });
 
 elements.resetTournamentButton.addEventListener("click", async () => {
-  if (!confirm(t("messages.resetTournamentConfirm"))) return;
+  if (!await requestConfirmation(t("messages.resetTournamentConfirm"))) return;
   await deleteRemoteTournament();
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
@@ -463,9 +495,9 @@ elements.resetTournamentButton.addEventListener("click", async () => {
 elements.adminIdentityForm?.addEventListener("submit", sendAdminSignInLink);
 elements.claimTournamentButton?.addEventListener("click", claimCurrentTournament);
 
-elements.leaveSessionButton?.addEventListener("click", () => {
+elements.leaveSessionButton?.addEventListener("click", async () => {
   if (spectatorMode) leaveSpectatorView();
-  else leaveCurrentTournament();
+  else await leaveCurrentTournamentWithDialog();
 });
 elements.toggleAvailabilityButton?.addEventListener("click", () => toggleSelectedPlayerAvailability());
 
@@ -492,7 +524,7 @@ elements.toggleNotificationsButton?.addEventListener("click", toggleNotification
 elements.showExistingPlayersButton.addEventListener("click", async () => {
   const inviteCode = elements.joinTournamentForm.elements.inviteCode.value.trim().toUpperCase();
   if (!inviteCode) {
-    alert(t("messages.inviteCodeRequired"));
+    showToast(t("messages.inviteCodeRequired"), "status-message-error");
     elements.joinTournamentForm.elements.inviteCode.focus();
     return;
   }
@@ -500,7 +532,7 @@ elements.showExistingPlayersButton.addEventListener("click", async () => {
   const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
 
   if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
-    alert(t("messages.tournamentNotFound", { code: inviteCode }));
+    showToast(t("messages.tournamentNotFound", { code: inviteCode }), "status-message-error");
     return;
   }
 
@@ -527,10 +559,6 @@ document.querySelectorAll(".subtab").forEach((tab) => {
   tab.addEventListener("click", () => activateAdminPanel(tab.dataset.adminPanel));
 });
 
-document.querySelectorAll("[data-module-link]").forEach((link) => {
-  link.addEventListener("click", () => showModule(link.dataset.moduleLink));
-});
-
 document.addEventListener("click", (event) => {
   const clickTarget = event.target instanceof Element ? event.target : null;
   if (!clickTarget) return;
@@ -547,26 +575,8 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  const landingToggle = clickTarget.closest(".landing-menu-toggle");
-  if (landingToggle) {
-    event.preventDefault();
-    const isOpen = !document.body.classList.contains("landing-menu-open");
-    setLandingMenuOpen(isOpen);
-    return;
-  }
-
-  if (!clickTarget.closest(".landing-links") && !clickTarget.closest(".landing-menu-toggle")) closeLandingMenu();
 });
 
-window.addEventListener("hashchange", () => {
-  closeLandingMenu();
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeLandingMenu();
-  }
-});
 }
 
 function activateSupabaseClient() {
@@ -584,18 +594,6 @@ function activateSupabaseClient() {
   supabaseClient.auth.onAuthStateChange(() => renderAdminIdentity());
   void syncProfileHistoryRemote();
   connectRealtimeForCurrentState();
-}
-
-function closeLandingMenu() {
-  setLandingMenuOpen(false);
-}
-
-function setLandingMenuOpen(isOpen) {
-  document.body.classList.toggle("landing-menu-open", isOpen);
-  document.querySelectorAll(".landing-menu-toggle").forEach((toggle) => {
-    toggle.setAttribute("aria-expanded", String(isOpen));
-    toggle.setAttribute("aria-label", isOpen ? t("nav.closeMenu") : t("nav.openMenu"));
-  });
 }
 
 function createTournament({ name, inviteCode, players, courtCount }) {
@@ -669,7 +667,7 @@ function persistLocalProfile() {
 
 async function syncProfileRemote() {
   if (!supabaseClient || !profile?.accessToken) return false;
-  const { data, error } = await supabaseClient.rpc("upsert_player_profile", {
+  const { data, error } = await remoteRpc(supabaseClient, "upsert_player_profile", {
     p_profile_id: profile.id,
     p_profile_token: profile.accessToken,
     p_display_name: profile.displayName,
@@ -689,7 +687,7 @@ async function syncProfileRemote() {
 async function syncProfileHistoryRemote(entry) {
   if (!supabaseClient || !profile?.accessToken) return false;
   if (!entry) return syncProfileHistoryRemoteRead();
-  const { error } = await supabaseClient.rpc("save_player_profile_history", {
+  const { error } = await remoteRpc(supabaseClient, "save_player_profile_history", {
     p_profile_id: profile.id,
     p_profile_token: profile.accessToken,
     p_history: entry,
@@ -702,7 +700,7 @@ async function syncProfileHistoryRemote(entry) {
 }
 
 async function syncProfileHistoryRemoteRead() {
-  const { data, error } = await supabaseClient.rpc("get_player_profile_history", {
+  const { data, error } = await remoteRpc(supabaseClient, "get_player_profile_history", {
     p_profile_id: profile.id,
     p_profile_token: profile.accessToken,
   });
@@ -771,8 +769,8 @@ function ensureProfileForJoin(displayName, avatarId) {
   void syncProfileRemote();
 }
 
-function requestProfileDeletion() {
-  if (!profile || !confirm(t("profile.deleteConfirm"))) return;
+async function requestProfileDeletion() {
+  if (!profile || !await requestConfirmation(t("profile.deleteConfirm"))) return;
   profile = profileManager.requestDeletion(profile);
   persistLocalProfile();
   void requestRemoteProfileDeletion();
@@ -835,7 +833,7 @@ function saveProfileHistory() {
 
 async function requestRemoteProfileDeletion() {
   if (!supabaseClient || !profile?.accessToken) return;
-  await supabaseClient.rpc("request_player_profile_deletion", {
+  await remoteRpc(supabaseClient, "request_player_profile_deletion", {
     p_profile_id: profile.id,
     p_profile_token: profile.accessToken,
   });
@@ -843,7 +841,7 @@ async function requestRemoteProfileDeletion() {
 
 async function cancelRemoteProfileDeletion() {
   if (!supabaseClient || !profile?.accessToken) return;
-  await supabaseClient.rpc("cancel_player_profile_deletion", {
+  await remoteRpc(supabaseClient, "cancel_player_profile_deletion", {
     p_profile_id: profile.id,
     p_profile_token: profile.accessToken,
   });
@@ -890,6 +888,14 @@ function loadState() {
   return structuredClone(defaultTournament);
 }
 
+function loadUserLanguage(fallbackLanguage = "nb") {
+  const storedLanguage = localStorage.getItem(languageStorageKey);
+  const language = storedLanguage || fallbackLanguage;
+  const normalized = i18n?.normalizeLanguage(language) ?? language;
+  if (!storedLanguage) localStorage.setItem(languageStorageKey, normalized);
+  return normalized;
+}
+
 function loadSavedState(serializedState) {
   if (!serializedState) return null;
   try {
@@ -931,12 +937,26 @@ function loadPendingPlayerScores() {
 }
 
 function persistSyncMetadata() {
-  stateManager.persistSyncMetadata(localStorage, syncStorageKey, pendingAdminSync, pendingPlayerScores);
+  stateManager.persistSyncMetadata(localStorage, syncStorageKey, pendingAdminSync, pendingPlayerScores, {
+    lastAttemptAt: syncLastAttemptAt,
+    lastError: syncLastError,
+  });
   mirrorStorageKeys([syncStorageKey]);
 }
 
 function hasPendingRemoteWrites() {
   return stateManager.hasPendingRemoteWrites(pendingAdminSync, pendingPlayerScores);
+}
+
+function markSyncAttempt() {
+  syncLastAttemptAt = new Date().toISOString();
+  syncLastError = null;
+  persistSyncMetadata();
+}
+
+function markSyncError(error) {
+  syncLastError = String(error?.message ?? error ?? "Ukjent synkroniseringsfeil").slice(0, 160);
+  persistSyncMetadata();
 }
 
 function saveState(options = {}) {
@@ -987,6 +1007,11 @@ function sanitizeSharedState(nextState) {
   return stateManager.sanitizeSharedState(nextState);
 }
 
+function getTournamentByInviteRpc(inviteCode) {
+  const rpcName = spectatorMode ? "get_spectator_tournament_by_code" : "get_tournament_by_code";
+  return remoteRpc(supabaseClient, rpcName, { p_invite_code: inviteCode });
+}
+
 function isConflictError(error) {
   return stateManager.isConflictError(error);
 }
@@ -996,8 +1021,52 @@ function isTransientRemoteError(error) {
 }
 
 function setRemoteNotice(message) {
-  if (elements.copyStatus) elements.copyStatus.textContent = message;
+  if (elements.copyStatus) {
+    elements.copyStatus.textContent = message;
+    elements.copyStatus.classList.remove("status-message-success", "status-message-warning", "status-message-error");
+    const messageText = String(message ?? "").toLowerCase();
+    const statusClass = /feil|error|konflikt|failed|ikke/.test(messageText)
+      ? "status-message-error"
+      : /venter|sender|pending|reconnecting|kobler/.test(messageText)
+        ? "status-message-warning"
+        : "status-message-success";
+    elements.copyStatus.classList.add(statusClass);
+    showToast(message, statusClass);
+  }
   renderSyncControls();
+}
+
+function requestConfirmation(message) {
+  const dialog = elements.confirmDialog;
+  if (!dialog || typeof dialog.showModal !== "function") {
+    return Promise.resolve(typeof window.confirm === "function" ? window.confirm(message) : true);
+  }
+
+  const previouslyFocused = document.activeElement;
+  elements.confirmMessage.textContent = message;
+  elements.confirmCancel.textContent = t("actions.close");
+  elements.confirmAccept.textContent = t("common.confirm");
+  dialog.returnValue = "cancel";
+  dialog.showModal();
+  elements.confirmAccept.focus();
+
+  return new Promise((resolve) => {
+    const finish = () => {
+      if (previouslyFocused && typeof previouslyFocused.focus === "function") previouslyFocused.focus();
+      resolve(dialog.returnValue === "accept");
+    };
+    dialog.addEventListener("close", finish, { once: true });
+  });
+}
+
+function showToast(message, statusClass = "status-message-success") {
+  if (!elements.appToast || !message) return;
+  window.clearTimeout(toastTimer);
+  elements.appToast.textContent = message;
+  elements.appToast.className = `app-toast is-visible ${statusClass}`;
+  toastTimer = window.setTimeout(() => {
+    elements.appToast.classList.remove("is-visible");
+  }, 4200);
 }
 
 function showRecoveryNotice() {
@@ -1017,14 +1086,29 @@ function markRemoteConflict() {
 }
 
 function handleRemoteError(error, fallback) {
+  markSyncError(error);
   observability?.error("remote_error", error, { transient: isTransientRemoteError(error) });
   if (isConflictError(error)) {
     markRemoteConflict();
     return;
   }
   setRemoteNotice(remoteErrorMessage(error, fallback));
-  if (isTransientRemoteError(error)) scheduleRealtimeReconnect();
+  if (isTransientRemoteError(error)) {
+    scheduleRealtimeReconnect();
+    scheduleRemoteRetry();
+  }
   syncConnectionStatus();
+}
+
+function scheduleRemoteRetry() {
+  if (!isSupabaseReady() || !navigator.onLine || !hasPendingRemoteWrites() || remoteRetryTimer) return;
+  const delays = [2000, 5000, 15000, 30000];
+  const delay = delays[Math.min(remoteRetryAttempt, delays.length - 1)];
+  remoteRetryAttempt += 1;
+  remoteRetryTimer = window.setTimeout(() => {
+    remoteRetryTimer = null;
+    flushPendingRemoteWrites();
+  }, delay);
 }
 
 function applyRemoteState(remoteState, options = {}) {
@@ -1058,6 +1142,7 @@ function applyRemoteState(remoteState, options = {}) {
   nextState.adminToken = adminToken;
   nextState.playerToken = playerToken;
   state = nextState;
+  state.settings.language = loadUserLanguage(state.settings?.language ?? "nb");
   saveState({ remote: false });
   if (options.clearConflict) {
     remoteConflict = false;
@@ -1071,12 +1156,12 @@ function applyRemoteState(remoteState, options = {}) {
 
 async function createRemoteTournament() {
   if (!isSupabaseReady()) return false;
-  const { data, error } = await supabaseClient.rpc("create_tournament", {
+  const { data, error } = await remoteRpc(supabaseClient, "create_tournament", {
     p_state: sanitizeSharedState(state),
     p_admin_token: state.adminToken,
   });
   if (error) {
-    alert(remoteErrorMessage(error, t("messages.remoteSaveFailed")));
+    showToast(remoteErrorMessage(error, t("messages.remoteSaveFailed")), "status-message-error");
     return false;
   }
   applyRemoteState({
@@ -1089,9 +1174,7 @@ async function createRemoteTournament() {
 
 async function loadRemoteTournamentByInvite(inviteCode) {
   if (!isSupabaseReady() || !inviteCode) return false;
-  const { data, error } = await supabaseClient.rpc("get_tournament_by_code", {
-    p_invite_code: inviteCode,
-  });
+  const { data, error } = await getTournamentByInviteRpc(inviteCode);
   if (error || !data) return false;
   applyRemoteState(data, { source: "refresh" });
   return true;
@@ -1101,16 +1184,16 @@ async function joinRemoteTournament(playerName, avatarId) {
   if (!isSupabaseReady()) return false;
   const player = linkProfileToPlayer(createPlayer(playerName, state.players.length, avatarId));
   player.joinedFrom = "self";
-  const { data, error } = await supabaseClient.rpc("join_tournament", {
+  const { data, error } = await remoteRpc(supabaseClient, "join_tournament", {
     p_invite_code: state.inviteCode,
     p_player: player,
   });
   if (error) {
-    alert(remoteErrorMessage(error, t("messages.joinFailed")));
+    showToast(remoteErrorMessage(error, t("messages.joinFailed")), "status-message-error");
     return false;
   }
   if (!data?.state || !data.playerToken || !data.playerId) {
-    alert(t("messages.securePlayerFailed"));
+    showToast(t("messages.securePlayerFailed"), "status-message-error");
     return false;
   }
   applyRemoteState(data.state);
@@ -1137,7 +1220,7 @@ async function saveRemoteState() {
   }
   const requestSequence = remoteMutationSequence;
   const expectedRevision = state.revision;
-  const { data, error } = await supabaseClient.rpc("save_tournament_state", {
+  const { data, error } = await remoteRpc(supabaseClient, "save_tournament_state", {
     p_tournament_id: state.id,
     p_admin_token: state.adminToken,
     p_state: sanitizeSharedState(state),
@@ -1153,6 +1236,9 @@ async function saveRemoteState() {
   if (!data) return false;
   lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
   if (requestSequence === remoteMutationSequence) {
+    remoteRetryAttempt = 0;
+    window.clearTimeout(remoteRetryTimer);
+    remoteRetryTimer = null;
     pendingAdminSync = false;
     persistSyncMetadata();
     applyRemoteState(data, { source: "rpc", clearConflict: true });
@@ -1199,7 +1285,7 @@ function queueRemoteMatchAction(match, action, teamIndex = null) {
           p_team_index: teamIndex,
           p_expected_revision: expectedRevision,
         };
-      const { data, error } = await supabaseClient.rpc(rpcName, rpcPayload);
+      const { data, error } = await remoteRpc(supabaseClient, rpcName, rpcPayload);
 
       if (error) {
         console.warn("Supabase admin match action failed", error);
@@ -1241,7 +1327,7 @@ function queueRemoteSetResult(match, teamOne, teamTwo) {
 
       const requestSequence = remoteMutationSequence;
       const expectedRevision = state.revision;
-      const { data, error } = await supabaseClient.rpc("admin_set_result", {
+      const { data, error } = await remoteRpc(supabaseClient, "admin_set_result", {
         p_tournament_id: state.id,
         p_admin_token: state.adminToken,
         p_match_id: match.id,
@@ -1288,7 +1374,7 @@ function queueRemoteRoundAdvance() {
       }
 
       const requestSequence = remoteMutationSequence;
-      const { data, error } = await supabaseClient.rpc("admin_advance_round", {
+      const { data, error } = await remoteRpc(supabaseClient, "admin_advance_round", {
         p_tournament_id: state.id,
         p_admin_token: state.adminToken,
         p_expected_revision: state.revision,
@@ -1333,7 +1419,7 @@ function queueRemoteCupAdvance() {
       }
 
       const requestSequence = remoteMutationSequence;
-      const { data, error } = await supabaseClient.rpc("admin_advance_cup", {
+      const { data, error } = await remoteRpc(supabaseClient, "admin_advance_cup", {
         p_tournament_id: state.id,
         p_admin_token: state.adminToken,
         p_expected_revision: state.revision,
@@ -1375,7 +1461,7 @@ async function processPlayerScoreQueue() {
   try {
     while (pendingPlayerScores.length > 0 && navigator.onLine) {
       const pendingScore = pendingPlayerScores[0];
-      const { data, error } = await supabaseClient.rpc("save_player_point", {
+      const { data, error } = await remoteRpc(supabaseClient, "save_player_point", {
         p_tournament_id: state.id,
         p_invite_code: state.inviteCode,
         p_player_id: state.selectedPlayerId,
@@ -1405,7 +1491,7 @@ async function processPlayerScoreQueue() {
 
 async function deleteRemoteTournament() {
   if (!isSupabaseReady() || !state.adminToken || !state.id) return false;
-  const { error } = await supabaseClient.rpc("delete_tournament", {
+  const { error } = await remoteRpc(supabaseClient, "delete_tournament", {
     p_tournament_id: state.id,
     p_admin_token: state.adminToken,
   });
@@ -1456,7 +1542,7 @@ async function claimCurrentTournament() {
     elements.adminIdentityNotice.textContent = t("admin.identitySignInFirst");
     return;
   }
-  const { data, error } = await supabaseClient.rpc("claim_tournament", {
+  const { data, error } = await remoteRpc(supabaseClient, "claim_tournament", {
     p_tournament_id: state.id,
     p_admin_token: state.adminToken,
   });
@@ -1529,9 +1615,7 @@ async function refreshRemoteState(reason = "reconnect") {
   if (realtimeRefreshPromise) return realtimeRefreshPromise;
 
   const tournamentId = state.id;
-  realtimeRefreshPromise = supabaseClient.rpc("get_tournament_by_code", {
-    p_invite_code: state.inviteCode,
-  }).then(({ data, error }) => {
+  realtimeRefreshPromise = getTournamentByInviteRpc(state.inviteCode).then(({ data, error }) => {
     if (error || !data || data.id !== tournamentId) {
       if (error) handleRemoteError(error, t("messages.fetchRemoteFailed"));
       return false;
@@ -1611,6 +1695,9 @@ function connectRealtimeForCurrentState() {
 }
 
 function handleOnline() {
+  remoteRetryAttempt = 0;
+  window.clearTimeout(remoteRetryTimer);
+  remoteRetryTimer = null;
   syncConnectionStatus();
   if (!isSupabaseReady() || !state.id || !hasActiveTournament()) return;
   window.clearTimeout(realtimeReconnectTimer);
@@ -1625,8 +1712,7 @@ function handleOffline() {
 }
 
 function exportBackup() {
-  const exportedState = structuredClone(state);
-  delete exportedState.playerToken;
+  const exportedState = sanitizeSharedState(state);
   const backup = {
     exportedAt: new Date().toISOString(),
     app: "Padelstar",
@@ -1658,7 +1744,7 @@ function importBackup(event) {
       render();
       elements.copyStatus.textContent = t("messages.backupImported");
     } catch {
-      alert(t("messages.importBackupFailed"));
+      showToast(t("messages.importBackupFailed"), "status-message-error");
     } finally {
       event.currentTarget.value = "";
     }
@@ -1750,8 +1836,6 @@ function showModule(moduleName) {
 
   document.body.classList.toggle("workspace-active", isWorkspaceActive);
   document.body.classList.toggle("setup-active", requestedModule === "setup-admin" || requestedModule === "setup-player");
-  closeLandingMenu();
-
   const activeSections = [];
   document.querySelectorAll(".app-module").forEach((section) => {
     const sectionModule = section.dataset.module;
@@ -1782,6 +1866,9 @@ function showModule(moduleName) {
   });
 
   requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+  if (!window.PADELSTAR_TEST_MODE) {
+    window.requestAnimationFrame(() => uiEffects?.focusModuleHeading(activeSections[0]));
+  }
   renderRoleVisibility();
 }
 
@@ -1970,7 +2057,7 @@ function syncConnectionStatus() {
   }
   elements.connectionStatus.textContent = t(statusKey);
   if (navigator.onLine && isSupabaseReady() && hasPendingRemoteWrites()) {
-    elements.connectionStatus.textContent += ` · ${t("syncPending")}`;
+    elements.connectionStatus.textContent += ` · ${t("syncPending")} (${pendingRemoteWriteCount()})`;
   }
   elements.connectionStatus.dataset.status = statusClass;
   elements.connectionStatus.setAttribute("aria-label", t("status.connectionAria", {
@@ -1979,11 +2066,35 @@ function syncConnectionStatus() {
   elements.connectionStatus.classList.toggle("offline", statusClass === "offline");
 }
 
+function applyTheme() {
+  document.body.dataset.theme = "classic";
+  const themeColor = document.querySelector('meta[name="theme-color"]');
+  themeColor?.setAttribute("content", "#07101d");
+}
+
+function pendingRemoteWriteCount() {
+  return Number(pendingAdminSync) + pendingPlayerScores.length;
+}
+
 function renderSyncControls() {
   if (!elements.refreshRemoteButton) return;
   const canRefresh = remoteConflict && isCurrentUserAdmin();
   elements.refreshRemoteButton.classList.toggle("hidden", !canRefresh);
   elements.refreshRemoteButton.textContent = t("refreshRemoteState");
+  elements.conflictActions?.classList.toggle("hidden", !canRefresh);
+  if (elements.syncStatusDetail) {
+    const pending = pendingRemoteWriteCount();
+    if (remoteConflict) {
+      elements.syncStatusDetail.textContent = t("messages.remoteConflict");
+    } else if (pending > 0) {
+      const attempted = syncLastAttemptAt ? new Date(syncLastAttemptAt).toLocaleTimeString(document.documentElement.lang || "nb-NO", { hour: "2-digit", minute: "2-digit" }) : t("common.none");
+      elements.syncStatusDetail.textContent = `${t("syncPending")} (${pending}) · ${attempted}`;
+    } else if (syncLastError) {
+      elements.syncStatusDetail.textContent = syncLastError;
+    } else {
+      elements.syncStatusDetail.textContent = "";
+    }
+  }
 }
 
 function applyLanguage() {
@@ -2006,6 +2117,7 @@ function applyLanguage() {
   document.querySelectorAll("[data-i18n-content]").forEach((node) => {
     node.setAttribute("content", t(node.dataset.i18nContent));
   });
+  applyTheme();
 }
 
 function syncLanguageOptions() {
@@ -2333,6 +2445,7 @@ function createSpectatorMatchCard(match) {
 function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly = false) {
   const card = document.createElement("article");
   card.className = `match-card match-${match.state} ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
+  card.dataset.matchId = match.id;
   card.setAttribute("style", teamAccentStyle(match.teamOne));
   const teamOneName = escapeHtml(match.teamOne.displayName);
   const teamTwoName = escapeHtml(match.teamTwo.displayName);
@@ -2431,9 +2544,9 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
       controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
       controls.querySelector(".large-score-button").addEventListener("click", () => openLargeScore(match.id));
       controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
-      controls.querySelector(".cancel-match-button").addEventListener("click", () => cancelMatch(match));
+      controls.querySelector(".cancel-match-button").addEventListener("click", () => void cancelMatch(match));
       controls.querySelectorAll(".walkover-button").forEach((button) => {
-        button.addEventListener("click", () => setWalkover(match, Number(button.dataset.walkoverTeam)));
+        button.addEventListener("click", () => void setWalkover(match, Number(button.dataset.walkoverTeam)));
       });
     }
     card.append(controls);
@@ -3070,7 +3183,7 @@ async function subscribeToPush() {
     const json = subscription.toJSON();
     localStorage.setItem(pushSubscriptionStorageKey, JSON.stringify(json));
     if (supabaseClient && state.playerToken && state.selectedPlayerId) {
-      const { error } = await supabaseClient.rpc("upsert_push_subscription", {
+    const { error } = await remoteRpc(supabaseClient, "upsert_push_subscription", {
         p_tournament_id: state.id,
         p_invite_code: state.inviteCode,
         p_player_id: state.selectedPlayerId,
@@ -3095,7 +3208,7 @@ async function unsubscribeFromPush() {
     const subscription = await registration.pushManager.getSubscription();
     if (subscription) await subscription.unsubscribe();
     if (serialized && supabaseClient && state.playerToken && state.selectedPlayerId) {
-      await supabaseClient.rpc("delete_push_subscription", {
+      await remoteRpc(supabaseClient, "delete_push_subscription", {
         p_tournament_id: state.id,
         p_player_id: state.selectedPlayerId,
         p_player_token: state.playerToken,
@@ -3147,7 +3260,7 @@ function updatePlayer(playerId, updates) {
 
   const duplicate = state.players.find((item) => item.id !== playerId && item.name.localeCompare(nextName, "nb", { sensitivity: "accent" }) === 0);
   if (duplicate) {
-    alert(t("messages.duplicatePlayer", { name: nextName }));
+    showToast(t("messages.duplicatePlayer", { name: nextName }), "status-message-error");
     return;
   }
 
@@ -3163,7 +3276,7 @@ function updatePlayer(playerId, updates) {
 
 function removePlayer(playerId) {
   if (state.rounds.length > 0) {
-    alert(t("messages.removePlayersLocked"));
+    showToast(t("messages.removePlayersLocked"), "status-message-error");
     return;
   }
   state.players = state.players.filter((player) => player.id !== playerId);
@@ -3272,6 +3385,19 @@ function leaveSpectatorView() {
   }
 }
 
+async function leaveCurrentTournamentWithDialog() {
+  const selectedPlayer = getPlayerById(state.selectedPlayerId);
+  if (!selectedPlayer) return false;
+  const pendingScoreText = pendingPlayerScores.length > 0
+    ? t("player.leavePendingScores")
+    : "";
+  const accepted = await requestConfirmation(t("player.leaveConfirm", {
+    name: selectedPlayer.name,
+    pendingScoreText,
+  }));
+  return accepted ? leaveCurrentTournament({ confirm: false }) : false;
+}
+
 async function toggleSelectedPlayerAvailability() {
   const player = getPlayerById(state.selectedPlayerId);
   if (!player) return false;
@@ -3279,10 +3405,10 @@ async function toggleSelectedPlayerAvailability() {
   const message = isAway
     ? t("messages.returnToTournamentConfirm", { name: player.name })
     : t("messages.markAwayConfirm", { name: player.name });
-  if (!confirm(message)) return false;
+  if (!await requestConfirmation(message)) return false;
   const nextAvailability = isAway ? "active" : "away";
   if (isSupabaseReady() && state.playerToken && state.id) {
-    const { data, error } = await supabaseClient.rpc("set_player_availability", {
+    const { data, error } = await remoteRpc(supabaseClient, "set_player_availability", {
       p_tournament_id: state.id,
       p_invite_code: state.inviteCode,
       p_player_id: player.id,
@@ -3304,7 +3430,7 @@ async function toggleSelectedPlayerAvailability() {
 
 function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMatch, pointMode, gamesToWinSet, setsToWinMatch }) {
   if (state.rounds.length > 0) {
-    alert(t("messages.rulesLocked"));
+    showToast(t("messages.rulesLocked"), "status-message-error");
     return;
   }
   if (!["roundRobin", "cup"].includes(format)) return;
@@ -3324,7 +3450,7 @@ function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMat
 
 function saveManualCupTeams(value) {
   if (state.rounds.length > 0 || state.status === "Avsluttet") {
-    alert(t("messages.cupTeamsLocked"));
+    showToast(t("messages.cupTeamsLocked"), "status-message-error");
     return;
   }
 
@@ -3333,7 +3459,7 @@ function saveManualCupTeams(value) {
     .map((line) => line.trim())
     .filter(Boolean);
   if (lines.length < 2) {
-    alert(t("messages.minimumCupTeams"));
+    showToast(t("messages.minimumCupTeams"), "status-message-error");
     return;
   }
 
@@ -3342,7 +3468,7 @@ function saveManualCupTeams(value) {
   for (const [index, line] of lines.entries()) {
     const playerNames = line.split("+").map((name) => name.trim()).filter(Boolean);
     if (playerNames.length < 1 || playerNames.length > 2) {
-      alert(t("messages.invalidCupTeamSize", { team: index + 1 }));
+      showToast(t("messages.invalidCupTeamSize", { team: index + 1 }), "status-message-error");
       return;
     }
 
@@ -3350,11 +3476,11 @@ function saveManualCupTeams(value) {
     for (const playerName of playerNames) {
       const player = findPlayerByName(playerName);
       if (!player || !player.active || player.availability === "away") {
-        alert(t("messages.cupPlayerNotFound", { name: playerName }));
+        showToast(t("messages.cupPlayerNotFound", { name: playerName }), "status-message-error");
         return;
       }
       if (usedPlayerIds.has(player.id)) {
-        alert(t("messages.cupPlayerDuplicate", { name: player.name }));
+        showToast(t("messages.cupPlayerDuplicate", { name: player.name }), "status-message-error");
         return;
       }
       usedPlayerIds.add(player.id);
@@ -3517,7 +3643,7 @@ function generateFullTournamentSchedule() {
 
   const schedule = state.schedule.length ? state.schedule : buildSchedule(state.players, state.settings.format);
   if (!schedule.length) {
-    alert(t("messages.needTwoPlayers"));
+    showToast(t("messages.needTwoPlayers"), "status-message-error");
     return;
   }
 
@@ -3526,7 +3652,7 @@ function generateFullTournamentSchedule() {
     .filter((round) => round.matches.length > 0);
 
   if (!state.rounds.length) {
-    alert(t("messages.noValidMatches"));
+    showToast(t("messages.noValidMatches"), "status-message-error");
     return;
   }
 
@@ -3538,9 +3664,9 @@ function generateCupTournament() {
   const activePlayers = state.players.filter((player) => player.active && player.availability !== "away");
   const teams = cupTeamsForStart();
   if (teams.length < 2) {
-    alert(state.settings.cupTeamSetupMode === "manual"
+    showToast(state.settings.cupTeamSetupMode === "manual"
       ? t("messages.manualCupNeedsTeams")
-      : t("messages.autoCupNeedsPlayers"));
+      : t("messages.autoCupNeedsPlayers"), "status-message-error");
     return;
   }
 
@@ -3860,7 +3986,7 @@ function captureMatchUndoState(match) {
 function undoMatch(match) {
   const undoState = match.lastScoredMatchState;
   if (!undoState?.match) {
-    alert(t("messages.noUndo"));
+    showToast(t("messages.noUndo"), "status-message-error");
     return;
   }
 
@@ -3910,7 +4036,7 @@ function saveMatchResult(match, teamOne, teamTwo) {
 function saveSetResult(match, teamOne, teamTwo) {
   const validationError = validateSetScore(teamOne, teamTwo);
   if (validationError) {
-    alert(translateScoreValidationError(validationError, teamOne, teamTwo));
+    showToast(translateScoreValidationError(validationError, teamOne, teamTwo), "status-message-error");
     return;
   }
 
@@ -3982,6 +4108,7 @@ function awardTennisPoint(match, teamIndex) {
   }
   render();
   renderLargeScore();
+  uiEffects?.flashMatchCards(match.id);
 }
 
 function awardGame(match, scoringTeam) {
@@ -4047,8 +4174,8 @@ function reopenMatch(match) {
   renderLargeScore();
 }
 
-function cancelMatch(match) {
-  if (!confirm(t("messages.cancelMatchConfirm"))) return;
+async function cancelMatch(match) {
+  if (!await requestConfirmation(t("messages.cancelMatchConfirm"))) return;
   if (isSupabaseReady()) {
     queueRemoteMatchAction(match, "cancel");
     return;
@@ -4064,10 +4191,10 @@ function cancelMatch(match) {
   renderLargeScore();
 }
 
-function setWalkover(match, teamIndex) {
+async function setWalkover(match, teamIndex) {
   if (![0, 1].includes(teamIndex) || ["finished", "cancelled"].includes(match.state)) return;
   const winningTeam = teamIndex === 0 ? match.teamOne : match.teamTwo;
-  if (!confirm(t("messages.walkoverConfirm", { team: winningTeam.displayName }))) return;
+  if (!await requestConfirmation(t("messages.walkoverConfirm", { team: winningTeam.displayName }))) return;
 
   if (isSupabaseReady()) {
     queueRemoteMatchAction(match, "walkover", teamIndex);
@@ -4275,7 +4402,7 @@ function appendEmptyText(container, emptyText) {
 
 function createInviteCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  return Array.from({ length: 5 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+  return Array.from({ length: 8 }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
 }
 
 function slugify(value) {

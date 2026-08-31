@@ -3,7 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://padelstar.app",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "authorization, content-type, x-padelstar-admin-token",
+  "Access-Control-Max-Age": "600",
+  "Vary": "Origin",
   "Content-Type": "application/json",
 };
 
@@ -49,7 +52,10 @@ Deno.serve(async (request) => {
   let removed = 0;
   for (const row of subscriptions ?? []) {
     try {
-      await webpush.sendNotification(row.subscription, JSON.stringify({ title: payload.title.slice(0, 80), body: payload.body.slice(0, 160), tag: payload.tag?.slice(0, 80) }));
+      await Promise.race([
+        webpush.sendNotification(row.subscription, JSON.stringify({ title: payload.title.slice(0, 80), body: payload.body.slice(0, 160), tag: payload.tag?.slice(0, 80) })),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Push delivery timed out")), 8000)),
+      ]);
       sent += 1;
     } catch (sendError) {
       const statusCode = Number((sendError as { statusCode?: number })?.statusCode);

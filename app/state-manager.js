@@ -96,7 +96,7 @@ window.PadelstarState = (() => {
       .map((item) => ({ matchId: item.matchId, teamIndex: item.teamIndex }));
   }
 
-  function persistSyncMetadata(storage, syncStorageKey, pendingAdminSync, pendingPlayerScores) {
+  function persistSyncMetadata(storage, syncStorageKey, pendingAdminSync, pendingPlayerScores, metadata = {}) {
     if (!pendingAdminSync && pendingPlayerScores.length === 0) {
       storage.removeItem(syncStorageKey);
       return;
@@ -104,6 +104,8 @@ window.PadelstarState = (() => {
     storage.setItem(syncStorageKey, JSON.stringify({
       admin: pendingAdminSync,
       playerScores: pendingPlayerScores,
+      lastAttemptAt: metadata.lastAttemptAt ?? null,
+      lastError: metadata.lastError ?? null,
     }));
   }
 
@@ -129,6 +131,7 @@ window.PadelstarState = (() => {
     delete sharedState.selectedPlayerId;
     delete sharedState.ownerUserId;
     delete sharedState.claimedAt;
+    if (sharedState.settings) delete sharedState.settings.language;
     return sharedState;
   }
 

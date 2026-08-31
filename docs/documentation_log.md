@@ -6,6 +6,127 @@ Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padelstar.
 
+## 2026-08-31 - Reference-match for Padelstar-logo
+
+- Laget `padelstar-logo-reference-match.png` med sølv/hvit metallic, dyp marineblå skygge, electric-blue highlights og diskret violet lys, matchet direkte mot brukerens referanse.
+- Brukte original-logoens transparente alpha-maske for å unngå innbakt sjakkbrett og bevare Padelstar-formen.
+- Cool sports-temaet bruker nå denne reference-match-logoen i hero-flaten; øvrige Padelstar- og Zigonia-assets bruker samme cool-metallic-retning.
+
+## 2026-08-31 - Cool metallic fargejustering
+
+- Brukte den valgte sølvblå/marineblå referanseretningen på Padelstar-logo, knapp/logo og app-ikon.
+- La til lysere `cool-metallic-light`-varianter uten å overskrive de mørkere eller originale filene.
+- Cool sports-temaet bruker nå de lysere sølvblå Padelstar-assetene, mens violet fortsatt brukes for interaksjon og coral for live-status.
+
+## 2026-08-31 - Lysere cool-metallic Zigonia-logo
+
+- Laget `zigonia-it-logo-cool-metallic-light.png` med lysere sølvblå highlights og samme cool-sports-uttrykk.
+- Oppdaterte cool sports-temaet til å bruke den lysere varianten, mens den mørkere varianten fortsatt ligger tilgjengelig.
+- Original Zigonia-logo og tidligere temaassets er beholdt urørt.
+
+## 2026-08-31 - Violet horisontal logo med skjold til venstre
+
+- Laget `assets/themed/cool-sports/padelstar-button-violet-logo-left.png` som en egen variant med skjoldet på venstre side og ordmerket til høyre.
+- Beholdt eksisterende høyreplasserte violet-variant og alle originale assets urørt.
+- Variasjonen er transparent PNG, kontrollert visuelt og lagt i service-worker-shellen.
+
+## 2026-08-31 - Cool sports asset-sett
+
+- Laget et separat `assets/themed/cool-sports/`-sett med violet Padelstar-logo, violet horisontal knapp/logo, violet app-ikon, red/coral logo, cool-metallic logo og cool-metallic Zigonia IT-logo.
+- Originale PNG-filer er ikke overskrevet eller endret; variantene har beholdt transparente alpha-kanaler og originale dimensjonsforhold.
+- Cool sports-temaet bytter asset-kilder dynamisk og reversibelt, mens klassisk mørk/gull fortsatt er tilgjengelig.
+- Runtime- og regresjonstester dekker asset-bytte, persistens og tilstedeværelse av variantfilene.
+
+## 2026-08-31 - Midlertidig temavelger for cool sports-tema
+
+- La til en tilgjengelig temaknapp i både landing-menyen og app-menyen.
+- Beholdt mørk/gull som standard og la til det alternative `cool-sports`-temaet fra `padelstar_reference_color_theme.md`.
+- Temaet lagres lokalt, kan byttes uten reload og oppdaterer `theme-color` og tilgjengelig knappetekst.
+- Holdt sports red/coral separat fra danger-red og lot originale logo-/bildeassets være urørt.
+- Verifisert med runtime-toggle, reload/persistens, `npm test`, syntax-check, diff-check og mobil browser-smoke.
+
+## 2026-08-31 - Fase 22 aktivert med referanseledet surface-pass
+
+- Inspiserte referansebildene i `Visual redesign/` og brukte dem som inspirasjon for layered surfaces, elevated cards, glass-effekter, større radii, statusdrevet live-innhold og tactile controls.
+- Beholdt Padelstars mørk/gull-identitet; blå/lilla uttrykk fra referansene ble ikke innført som ny grunnpalett.
+- La inn responsive compact/medium/expanded-prinsipper, premium workspace-flater, forbedret fokusstil, hover/press-transitions og støtte for redusert transparens.
+- Bumpet stylesheet-cache til `padelstar-ui-14` og service-worker-cache til `padelstar-v75`.
+- Verifisert med `npm test`, syntax-check, `git diff --check` og lokal browser-smoke for compact (390px), medium (768px) og expanded (1440px), inkludert horisontal-overflow-sjekk.
+- Endelig vurdering av fargepalett er bevisst utsatt til etter visuell verifisering av den nye strukturen.
+
+## 2026-08-31 - Tilgjengelig bekreftelsesdialog for kritiske adminhandlinger
+
+- La til en semantisk `<dialog>` med fokusretur og lukking ved klikk på bakgrunnen.
+- Knyttet dialogen til fullføring, avslutning og nullstilling av turnering.
+- Beholdt nettleser-fallback der dialog-API ikke er tilgjengelig.
+- La til regresjonstest for dialogens ARIA-kontrakt og verifiserte test, syntax og diff.
+- Migrerte gjenværende ikke-blokkerende feilmeldinger fra `alert()` til appens synlige status-toast; bekreftelser som fortsatt er synkrone er dokumentert som neste dialogsteg.
+
+## 2026-08-31 - Browser-smoke, RPC-seam og spectator-state
+
+- La til `scripts/browser-smoke.sh` og koblet den til Pages-deploy som desktop-/mobilmatrise.
+- Verifiserte smoken lokalt i 1440×1000 og 390×844 med lokal server og blokkert Supabase/CDN, slik at testen ikke oppretter produksjonsdata.
+- Isolerte alle Supabase RPC-kall bak `app/remote-rpc.js`.
+- La til `get_spectator_tournament_by_code` som whitelistet Supabase-migrasjon og koblet spectator-oppslag til den.
+- Migrasjonen er ikke kjørt mot produksjon uten eksplisitt godkjenning.
+
+## 2026-08-31 - Senere visuell redesignplan vurdert
+
+- Leste `padelstar_later_visual_redesign_plan.md` før videre fase-21-arbeid.
+- Planen er fortsatt utsatt og skal ikke blandes inn i den aktive fase-21/UI-planen før aktiveringskriteriene er oppfylt.
+- Nåværende arbeid begrenses derfor til tilgjengelighet, statusfeedback, moduloverganger og verifisering som allerede er definert i aktiv plan.
+
+## 2026-08-31 - Senere visuell redesignplan lagt inn som Fase 22
+
+- La `padelstar_later_visual_redesign_plan.md` inn som ny Fase 22 i `development_plan_next.md`.
+- Flyttet driftsovervåking/kontoavklaringer til Fase 23 og produktforbedringer til Fase 24.
+- Beholdt aktiveringsgaten: redesignen starter først etter at fase 21 er ferdigstilt og verifisert.
+
+## 2026-08-31 - Samlet neste utviklingsplan
+
+- Slo sammen `docs/development_plan.md`, tidligere faseplan og teknisk app-evaluering i `development_plan_next.md` i prosjektroten.
+- Prioriterte push/CORS, browser- og live-verifisering, CI, offline-/konfliktflyt, frontend-struktur, invite-sikkerhet, tilgjengelighet, driftsovervåking og senere produktforbedringer.
+- La inn akseptansekriterier og verifikasjonspunkter for fase 16–24.
+- Ingen appkode, database eller produksjonsdata ble endret.
+
+## 2026-08-31 - Plan for UI-forbedringer
+
+- Opprettet `ui_improvement_plan.md` i prosjektroten.
+- Planen prioriterer visuell harmonisering mellom landing og workspace, bedre moduloverganger, status- og scoring-mikrointeraksjoner, workspace-navigasjon, tilgjengelige dialoger og visuell regresjonstest.
+- Knyttet UI-planen til Fase 21 i `development_plan_next.md`.
+- Ingen appkode eller visuelle styles ble endret i denne arbeidsøkten.
+
+## 2026-08-31 - Gjennomførte første steg av fase 16–21
+
+- Kompletterte CORS-kontrakten for `push-send` med `POST, OPTIONS`, cache-varighet og origin-variasjon, og la inn timeout per push-levering.
+- Økte nye invitasjonskoder fra fem til åtte tegn, uten å bryte eksisterende koder som fortsatt støttes av serverformatet.
+- La til syntax-sjekk i npm-scripts og GitHub Pages-workflowen, samt grunnleggende sikkerhetsheaders i `vercel.json`.
+- La til automatisk retry av midlertidig feilet pending remote-sync med kontrollert backoff.
+- Forbedret UI med felles landing/workspace-overflater, modulovergang, fokusflyt, reduced-motion, sync-statusfeedback og score-highlight.
+- Verifiserte lokal browser-smoke for landing → opprett med Playwright. Lokal konsoll viste kun forventet Vercel Analytics-404.
+- `npm test`: 56 beståtte tester og 1 opt-in live-test hoppet over. `npm run check:syntax`, `vercel.json`-parse og `git diff --check` passerte.
+- Fase 16–21 er fortsatt markert delvis gjennomført der live-test, full browser-CI, større app.js-refaktorering eller full QA mangler.
+
+## 2026-08-31 - Isolerte UI-effekter
+
+- Flyttet moduloverskrift-fokus og score-highlight fra `app/app.js` til `app/ui-effects.js`.
+- La den nye modulen inn i HTML-entrypoint og service-worker-shell med egen cacheversjon.
+- Verifiserte at browser-smoke fortsatt starter landing og setup uten ny JavaScript-feil.
+- Oppdaterte README-prosjektstrukturen og PWA-regresjonstestene.
+
+### Livekontroll
+
+- `PADELSTAR_LIVE_SUPABASE=1 npm test` passerte med 58 av 58 tester.
+- Read-only CORS preflight mot deployet `push-send` svarte HTTP 200, men manglet fortsatt `Access-Control-Allow-Methods`; dette bekrefter at funksjonen ikke er deployet med den nye kildekoden ennå.
+- Deploy av Edge Function er ikke kjørt automatisk i denne økten.
+
+### Etter deploy
+
+- Deployet oppdatert `push-send` med `supabase functions deploy push-send --no-verify-jwt`.
+- Live preflight returnerte HTTP 200 med `Access-Control-Allow-Methods: POST, OPTIONS`, `Access-Control-Max-Age: 600` og korrekt origin.
+- Negativt POST-kall uten admin-token returnerte HTTP 401 uten å lekke interne detaljer.
+- Fase 16 er dermed gjennomført og live-verifisert.
+
 Regel: etter hver tydelige arbeidsøkt skal loggen oppdateres med hva som ble gjort, hvilke beslutninger som ble tatt, hvilke filer som ble endret, og hva som bør gjøres videre.
 
 ## 2026-08-28 - Startet Fase 10 med mobilnavigasjon
@@ -3000,3 +3121,51 @@ Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er
 - Nettleserkontroll ved 390 x 844 viser sammenhengende stil og ingen beskåret oppsettsflate.
 - `npm test`: 51 bestått, 1 forventet opt-in live-test hoppet over.
 - `node --check app/app.js`, `node --check app/translations.js` og `git diff --check` passerte.
+## 2026-08-31 - Cool-logoer bygget fra originale gullassets
+
+### Gjort
+
+- Forkastet den genererte reference-match-logoen som hovedasset fordi den kunne gi uskarphet og feil detaljer.
+- Laget nye separate cool-assets fra de originale transparente gullfilene: Padelstar hovedlogo, horisontal logo, ikon og Zigonia IT-logo.
+- Brukte referansen kun som fargeutgangspunkt: sølv/hvit metallic, dyp navy, kjølig blå og diskret lilla.
+- Oppdatert cool-temaet til å laste de nye originalbaserte assetene og bumpet service-worker-cache til `padelstar-v82`.
+
+### Verifisert
+
+- Nye logoer er RGBA PNG-filer med original form og transparens bevart.
+- `npm test`: 63 bestått, 1 forventet opt-in live-test hoppet over.
+- `npm run check:syntax` og `git diff --check` passerte.
+## 2026-08-31 - Cool-logo variantserie med blå/lilla highlights
+
+### Gjort
+
+- Laget en ny variantserie direkte fra de originale gull-logoene, uten genererte referansepiksler.
+- Lagt til mørkere navy-skygger, lysere sølvhøylys og tydeligere blå/lilla metallreflekser.
+- Oppdatert cool-temaet til å bruke `cool-highlight`-variantene for Padelstar-logo, knapp, ikon og Zigonia IT-logo.
+- Beholdt tidligere `cool-reference`-variantene tilgjengelig for sammenligning.
+- Bumpet service-worker-cache til `padelstar-v83`.
+
+### Verifisert
+
+- `npm test`: 63 bestått, 1 forventet opt-in live-test hoppet over.
+- `npm run check:syntax` og `git diff --check` passerte.
+
+## 2026-09-01 - Struktur- og navigasjonsopprydding
+
+### Gjort
+
+- Arkiverte overlappende planer under `docs/archive/plans/` og lokalt QA-materiale under `docs/archive/qa-screenshots/`.
+- Arkiverte gamle og usikre logo-/designutforskninger under `assets/archive/`, mens aktive PWA-assets er beholdt i `assets/`.
+- Oppdaterte README og la til arkivregler samt `Visual redesign/README.md` som tydelig referansearkiv.
+- Fjernet døde `cool-sports`-CSS-regler og samlet den responsive header-/hamburgerimplementasjonen i `styles/responsive.css`.
+- Flyttet felles hamburger-, Escape- og modulnavigasjon til `app/navigation.js`.
+- Oppdaterte app-shell og cacheversjon til `padelstar-v89`.
+
+### Verifisert
+
+- `npm test`: 65 bestått, 1 forventet opt-in live Supabase-test hoppet over.
+- `npm run check:syntax` passerte for alle app- og API-filer.
+- `git diff --check` passerte.
+- Browser-smoke passerte på desktop, medium/tablet og mobil uten horisontal overflow.
+
+Commit og deploystatus fylles inn etter endelig diff-gjennomgang og push.

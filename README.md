@@ -2,15 +2,16 @@
 
 Live app: https://padelstar.app
 
-Sist oppdatert: 2026-08-28
+Sist oppdatert: 2026-09-01
 
-Status: 0.2 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
+Status: 0.3 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
+
+Aktiv utviklingsplan ligger i `docs/development_plan.md`. Historiske planer og designutkast ligger i `docs/archive/`.
 
 Metadata:
 - Navn: Padelstar
 - Undertittel: Padel Manager
 - Utvikler: Sigurd Steen Grødem
-- Firma: Zigonia IT
 
 Padelstar er en responsiv PWA for å opprette, administrere og følge padelturneringer på mobil, nettbrett og desktop. Appen kan hostes som statiske filer, men bruker Supabase for delt turneringsdata, live sync og sanntidsoppdateringer mellom enheter.
 
@@ -43,7 +44,8 @@ Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og k
 ## Prosjektstruktur
 
 - `index.html` - appstruktur, metadata og moduler.
-- `styles/styles.css` - responsivt design og Padelstar-visuell stil.
+- `styles/styles.css` - base, tokens, layout og komponentstil for Padelstar.
+- `styles/responsive.css` - samlet responsiv toppbar, hamburger og språk-/modulmeny.
 - `app/translations.js` - språkmotor med strukturerte nøkler, variabler, fallback og manglende-nøkkel-sporing for brukerflate.
 - `app/tournament-engine.js` - ren scheduler- og teamlogikk for turneringsoppsett.
 - `app/scoring-engine.js` - ren scoring, settvalidering, poengsummer og leaderboard/statistikk.
@@ -51,6 +53,10 @@ Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og k
 - `app/realtime-sync.js` - rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering.
 - `app/offline-storage.js` - IndexedDB-speiling av lokal state, rolle og sync-kø med localStorage som fallback.
 - `app/observability.js` - rate-begrenset, personvernbevisst teknisk telemetry til Vercel Analytics.
+- `app/ui-effects.js` - isolerte, reduced-motion-kompatible fokus- og score-feedback-effekter.
+- `app/navigation.js` - felles modulnavigasjon, hamburger, Escape-lukking og aktiv meny.
+- `app/remote-rpc.js` - samlet transportseam for Supabase RPC-kall.
+- `scripts/browser-smoke.sh` - deterministisk desktop-/mobil-smoke med blokkert ekstern backend.
 - `api/health.js` - cachefri Vercel health-endpoint for ekstern monitorering.
 - `privacy.html` - offentlig beta-utkast for personvern.
 - `docs/data_retention.md` - retensjon, sletting og profilhistorikk-policy.
@@ -62,6 +68,9 @@ Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og k
 - `supabase-config.js` - Supabase URL/nøkkel for live sync.
 - `supabase_schema.sql` - databaseoppsett for live-turneringer.
 - `supabase/migrations/` - Supabase migration-filer.
+- `supabase/migrations/20260831120000_spectator_state_rpc.sql` - separat whitelistet spectator-oppslag.
+- `Visual redesign/` - referansearkiv for den visuelle redesignen, ikke aktiv runtime-kode.
+- `docs/archive/` - historiske planer og lokalt QA-materiale.
 
 ## Kjør lokalt
 

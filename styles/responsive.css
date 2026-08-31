@@ -1,0 +1,83 @@
+/* Responsive shell rules. Keep the compact header and drawer in one place. */
+
+@media (max-width: 900px) {
+  .topbar,
+  body.workspace-active .topbar,
+  body.setup-active .topbar {
+    position: relative;
+    align-items: center;
+    flex-direction: row;
+    overflow: visible;
+  }
+
+  .brand-lockup,
+  body.workspace-active .brand-lockup,
+  body.setup-active .brand-lockup {
+    width: auto;
+    justify-content: flex-start;
+  }
+
+  .topbar-actions,
+  body.workspace-active .topbar-actions,
+  body.setup-active .topbar-actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    width: auto;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .topbar-actions > .status-pill {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .topbar-actions > .app-menu-toggle {
+    display: grid;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .menu-drawer {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 30;
+    width: min(280px, calc(100vw - 28px));
+    padding: 10px;
+    border: 1px solid rgba(159, 207, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(5, 15, 28, 0.96);
+  }
+
+  body.app-menu-open .menu-drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .menu-drawer .language-picker {
+    display: block;
+    width: 100%;
+    order: 1;
+  }
+
+  .menu-drawer .app-menu {
+    display: none;
+    width: 100%;
+    max-width: none;
+    order: 2;
+  }
+
+  body.app-menu-open .menu-drawer .app-menu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 901px) {
+  .menu-drawer {
+    display: contents;
+  }
+}

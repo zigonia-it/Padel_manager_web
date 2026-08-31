@@ -176,7 +176,9 @@ const padelstarTranslations = {
 
 Object.assign(padelstarTranslations.nb, {
   "meta.description": "Padelstar - Padel Manager av Sigurd Steen Grødem / Zigonia IT. Administrer padelturneringer, kamper, baner og resultater.",
-  "app.version": "v. 0.2 (Beta)",
+  "app.version": "v. 0.3 (Beta)",
+  "hero.title": "Spill mer. Organiser mindre.",
+  "hero.subtitle": "Opprett turneringen, inviter spillerne og la Padelstar ordne med resten.",
   "avatar.smash": "Smash",
   "avatar.serve": "Serve",
   "avatar.wall": "Vegg",
@@ -288,6 +290,8 @@ Object.assign(padelstarTranslations.nb, {
   "common.minimumTwo": "Minst 2",
   "common.teamCount": "{count} lag",
   "common.playingMatches": "Pågående kamper",
+  "common.confirmAction": "Bekreft handling",
+  "common.confirm": "Bekreft",
   "actions.createTournament": "Opprett turnering",
   "actions.joinTournament": "Bli med i turnering",
   "actions.adminAddedMe": "Admin har lagt meg til",
@@ -428,6 +432,7 @@ Object.assign(padelstarTranslations.nb, {
   "messages.resetTournamentConfirm": "Nullstille turneringen? Turneringens lokale og nettlagrede data blir slettet.",
   "messages.inviteCodeRequired": "Skriv inn invitasjonskoden først.",
   "messages.remoteConflict": "Turneringen ble endret fra en annen admin. Last inn siste før du fortsetter.",
+  "messages.localBackupKept": "Lokal backup er lastet ned. Serverversjonen er fortsatt tilgjengelig.",
   "messages.remoteStateUpdated": "Live-turneringen er oppdatert.",
   "messages.recoveredLocalTournament": "Gjenopprettet siste kjente lokale turnering etter en lagringsfeil.",
   "messages.remoteSaveFailed": "Turneringen kunne ikke lagres live akkurat nå. Den lokale kopien er beholdt.",
@@ -486,6 +491,8 @@ Object.assign(padelstarTranslations.nb, {
 
 Object.assign(padelstarTranslations.nn, {
   "meta.description": "Padelstar - Padel Manager av Sigurd Steen Grødem / Zigonia IT. Administrer padelturneringar, kampar, baner og resultat.",
+  "hero.title": "Spel meir. Organiser mindre.",
+  "hero.subtitle": "Opprett turneringa, inviter spelarane og la Padelstar ordne med resten.",
   "nav.skipToContent": "Hopp til innhald",
   "nav.homeAria": "Gå til heim",
   "nav.modulesAria": "Modular",
@@ -551,6 +558,8 @@ Object.assign(padelstarTranslations.nn, {
 
 Object.assign(padelstarTranslations.en, {
   "meta.description": "Padelstar - Padel Manager by Sigurd Steen Grodem / Zigonia IT. Manage padel tournaments, matches, courts and results.",
+  "hero.title": "Play more. Organize less.",
+  "hero.subtitle": "Create the tournament, invite the players and let Padelstar take care of the rest.",
   "nav.homeAria": "Go home", "nav.modulesAria": "Modules", "nav.home": "Home", "nav.create": "Create", "nav.join": "Join", "nav.admin": "Admin", "nav.player": "Player", "nav.tournament": "Tournament", "nav.frontPageAria": "Front page", "nav.openMenu": "Open menu", "nav.closeMenu": "Close menu", "nav.startChoicesAria": "Start choices", "nav.openViewMenu": "Open view menu", "nav.closeViewMenu": "Close view menu", "nav.viewAria": "View", "nav.leaveSpectator": "Leave spectator view",
   "role.admin": "Admin", "role.player": "Player", "role.spectator": "Spectator",
   "resume.localSaved": "Saved locally", "resume.defaultSummary": "A tournament is saved in this browser.", "resume.title": "Continue {name}", "resume.adminSummary": "{players} players · {courts} courts · code {code}", "resume.summary": "{players} players · {courts} courts", "resume.continueAdmin": "Continue as admin", "resume.continueTournament": "Continue tournament",
@@ -566,6 +575,8 @@ Object.assign(padelstarTranslations.en, {
 
 Object.assign(padelstarTranslations.es, {
   "meta.description": "Padelstar - Padel Manager de Sigurd Steen Grodem / Zigonia IT. Gestiona torneos, partidos, pistas y resultados de pádel.",
+  "hero.title": "Juega más. Organiza menos.",
+  "hero.subtitle": "Crea el torneo, invita a los jugadores y deja que Padelstar se encargue del resto.",
   "nav.homeAria": "Ir al inicio", "nav.modulesAria": "Módulos", "nav.home": "Inicio", "nav.create": "Crear", "nav.join": "Unirse", "nav.admin": "Admin", "nav.player": "Jugador", "nav.tournament": "Torneo", "nav.frontPageAria": "Página principal", "nav.openMenu": "Abrir menú", "nav.closeMenu": "Cerrar menú", "nav.startChoicesAria": "Opciones de inicio", "nav.openViewMenu": "Abrir menú de vista", "nav.closeViewMenu": "Cerrar menú de vista", "nav.viewAria": "Vista", "nav.leaveSpectator": "Salir de la vista de espectador", "role.admin": "Admin", "role.player": "Jugador", "role.spectator": "Espectador",
   "resume.localSaved": "Guardado localmente", "resume.defaultSummary": "Hay un torneo guardado en este navegador.", "resume.title": "Continuar {name}", "resume.adminSummary": "{players} jugadores · {courts} pistas · código {code}", "resume.summary": "{players} jugadores · {courts} pistas", "resume.continueAdmin": "Continuar como admin", "resume.continueTournament": "Continuar torneo",
   "setup.createEyebrow": "Crear", "setup.joinEyebrow": "Unirse", "setup.newTournament": "Nuevo torneo", "setup.tournamentName": "Nombre del torneo", "setup.playersOptional": "Jugadores, opcional", "setup.playersOptionalPlaceholder": "Añade jugadores manualmente si alguien no tiene su propio dispositivo.", "setup.adminParticipation": "Participación del admin", "setup.adminPlays": "El admin juega", "setup.adminPlaysHint": "Elige esto si quien crea el torneo también tendrá un perfil de jugador.", "setup.adminPlayerName": "Nombre del jugador admin", "setup.courtCount": "Número de pistas", "setup.playerNamePlaceholder": "Escribe tu nombre", "setup.yourAvatar": "Tu avatar", "setup.yourName": "Tu nombre", "setup.chooseAvatar": "Elige avatar", "setup.localJoinHint": "En esta versión local, el código funciona para el torneo creado en este dispositivo.",
@@ -594,6 +605,8 @@ Object.assign(padelstarTranslations.nn, {
 });
 
 Object.assign(padelstarTranslations.de, {
+  "hero.title": "Mehr spielen. Weniger organisieren.",
+  "hero.subtitle": "Turnier erstellen, Spieler einladen und Padelstar den Rest erledigen lassen.",
   "role.admin": "Admin", "role.player": "Spieler", "role.spectator": "Zuschauer",
   "nav.homeAria": "Zur Startseite", "nav.modulesAria": "Module", "nav.home": "Startseite", "nav.create": "Erstellen", "nav.join": "Beitreten", "nav.player": "Spieler", "nav.tournament": "Turnier", "nav.frontPageAria": "Startseite", "nav.openMenu": "Menü öffnen", "nav.closeMenu": "Menü schließen", "nav.startChoicesAria": "Startoptionen", "nav.viewAria": "Ansicht", "nav.leaveSpectator": "Zuschaueransicht verlassen",
   "setup.createEyebrow": "Erstellen", "setup.joinEyebrow": "Beitreten", "setup.newTournament": "Neues Turnier", "setup.tournamentName": "Turniername", "setup.playersOptional": "Spieler, optional", "setup.playersOptionalPlaceholder": "Spieler manuell hinzufügen, wenn jemand kein eigenes Gerät hat.", "setup.adminParticipation": "Admin-Teilnahme", "setup.adminPlays": "Admin spielt mit", "setup.adminPlaysHint": "Wähle dies, wenn der Turnierersteller auch ein Spielerprofil haben soll.", "setup.adminPlayerName": "Spielername des Admins", "setup.courtCount": "Anzahl der Plätze", "setup.playerNamePlaceholder": "Deinen Namen eingeben", "setup.yourAvatar": "Dein Avatar", "setup.yourName": "Dein Name", "setup.chooseAvatar": "Avatar wählen",
@@ -606,6 +619,8 @@ Object.assign(padelstarTranslations.de, {
 });
 
 Object.assign(padelstarTranslations.fr, {
+  "hero.title": "Jouez plus. Organisez moins.",
+  "hero.subtitle": "Créez le tournoi, invitez les joueurs et laissez Padelstar s’occuper du reste.",
   "role.admin": "Admin", "role.player": "Joueur", "role.spectator": "Spectateur",
   "nav.homeAria": "Accueil", "nav.modulesAria": "Modules", "nav.home": "Accueil", "nav.create": "Créer", "nav.join": "Rejoindre", "nav.player": "Joueur", "nav.tournament": "Tournoi", "nav.frontPageAria": "Page d’accueil", "nav.openMenu": "Ouvrir le menu", "nav.closeMenu": "Fermer le menu", "nav.startChoicesAria": "Options de démarrage", "nav.viewAria": "Vue", "nav.leaveSpectator": "Quitter la vue spectateur",
   "setup.createEyebrow": "Créer", "setup.joinEyebrow": "Rejoindre", "setup.newTournament": "Nouveau tournoi", "setup.tournamentName": "Nom du tournoi", "setup.playersOptional": "Joueurs, facultatif", "setup.playersOptionalPlaceholder": "Ajoutez les joueurs manuellement si quelqu’un n’a pas son propre appareil.", "setup.adminParticipation": "Participation de l’admin", "setup.adminPlays": "L’admin joue", "setup.adminPlaysHint": "Choisissez cette option si le créateur du tournoi aura aussi un profil joueur.", "setup.adminPlayerName": "Nom du joueur admin", "setup.courtCount": "Nombre de terrains", "setup.playerNamePlaceholder": "Saisissez votre nom", "setup.yourAvatar": "Votre avatar", "setup.yourName": "Votre nom", "setup.chooseAvatar": "Choisir un avatar",

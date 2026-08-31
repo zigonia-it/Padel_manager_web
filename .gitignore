@@ -25,3 +25,8 @@ build/
 # Local test artifacts
 .playwright-cli/
 coverage/
+
+# Generated QA screenshots and local archive output
+output/
+docs/archive/qa-screenshots/
+**/.DS_Store
