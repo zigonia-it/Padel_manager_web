@@ -48,6 +48,25 @@ body:has(.privacy-page)::before {
   font-weight: 800;
 }
 
+.privacy-language {
+  display: grid;
+  gap: 5px;
+  color: #c4c9d0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.privacy-language select {
+  min-width: 140px;
+  padding: 8px 10px;
+  border: 1px solid #4a5058;
+  border-radius: 8px;
+  background: #101215;
+  color: #f4f5f7;
+}
+
 .privacy-document {
   display: grid;
   gap: 16px;

@@ -3135,6 +3135,13 @@ Fase 16 er ferdig implementert, verifisert og publisert. Videre ytelsesarbeid er
 - Nye logoer er RGBA PNG-filer med original form og transparens bevart.
 - `npm test`: 63 bestått, 1 forventet opt-in live-test hoppet over.
 - `npm run check:syntax` og `git diff --check` passerte.
+
+## 2026-09-01 - Språkstøtte på personvernsiden
+
+- Personvernsiden følger nå `padelstar-language`, samme lokale brukerpreferanse som hovedappen.
+- La til språkvelger og oversettelser for Bokmål, Nynorsk, engelsk, spansk, tysk og fransk.
+- Språkbytte oppdaterer sidetekst, dokumenttittel, HTML-språk og tilgjengelighetslabel uten å endre delt turneringsstate.
+- Testet med mobil viewport og engelsk språkvalg; siden viste oversatt tittel og beholdt ingen horisontal overflow.
 ## 2026-08-31 - Cool-logo variantserie med blå/lilla highlights
 
 ### Gjort

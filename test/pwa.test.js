@@ -10,9 +10,10 @@ const stylesSource = fs.readFileSync(path.join(root, "styles", "styles.css"), "u
 const responsiveStylesSource = fs.readFileSync(path.join(root, "styles", "responsive.css"), "utf8");
 const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
+const privacyI18nSource = fs.readFileSync(path.join(root, "app", "privacy-i18n.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v90/);
+  assert.match(serviceWorkerSource, /padelstar-v91/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -30,11 +31,21 @@ test("browser entrypoint uses the organized app and styles directories", () => {
   assert.match(serviceWorkerSource, /"\.\/styles\/responsive\.css/);
   assert.match(privacySource, /href="styles\/privacy\.css/);
   assert.match(serviceWorkerSource, /"\.\/styles\/privacy\.css/);
+  assert.match(privacySource, /src="app\/privacy-i18n\.js/);
+  assert.match(serviceWorkerSource, /"\.\/app\/privacy-i18n\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/app\.js/);
   assert.match(indexSource, /src="app\/ui-effects\.js/);
   assert.match(indexSource, /src="app\/remote-rpc\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/ui-effects\.js/);
   assert.match(serviceWorkerSource, /"\.\/app\/remote-rpc\.js/);
+});
+
+test("privacy page follows the local user language preference", () => {
+  assert.match(privacySource, /id="privacyLanguage"/);
+  assert.match(privacySource, /data-privacy-i18n="title"/);
+  assert.match(privacyI18nSource, /padelstar-language/);
+  assert.match(privacyI18nSource, /localStorage\.setItem/);
+  assert.match(privacyI18nSource, /translations\[languageCode\]/);
 });
 
 test("responsive navigation has one shared hamburger owner", () => {
