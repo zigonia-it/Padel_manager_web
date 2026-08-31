@@ -33,5 +33,8 @@ fi
 run_pw run-code "async (page) => { await page.route('**://cdn.jsdelivr.net/**', route => route.abort()); await page.route('**://*.supabase.co/**', route => route.abort()); await page.reload(); }"
 run_pw run-code "async (page) => { const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1); if (overflow) throw new Error('horizontal overflow detected'); }"
 run_pw run-code "async (page) => { await page.getByRole('button', { name: 'Opprett' }).last().click(); await page.getByRole('textbox', { name: 'Turneringsnavn' }).fill('Browser smoke'); await page.getByRole('textbox', { name: 'Spillere, valgfritt' }).fill('Ada\nBo'); await page.getByRole('button', { name: 'Opprett turnering' }).click(); await page.getByRole('button', { name: 'Start turnering' }).click(); }"
+if [[ "${PADELSTAR_SMOKE_VIEWPORT:-desktop}" != "desktop" ]]; then
+  run_pw run-code "async (page) => { const toggle = page.locator('#appMenuToggle'); if (await toggle.isVisible()) await toggle.click(); }"
+fi
 run_pw run-code "async (page) => { await page.getByRole('button', { name: 'Admin', exact: true }).click(); await page.getByRole('tab', { name: 'Kamper' }).click(); await page.getByRole('heading', { name: 'Kamper og historikk' }).waitFor(); }"
 run_pw close
