@@ -6,6 +6,14 @@ Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padelstar.
 
+## 2026-09-01 - Byttet til DiceBear Gaze-avatarer
+
+- Byttet avatarstil fra DiceBear `thumbs` til den offisielle `gaze`-stilen.
+- Beholdt deterministisk seed basert på avatarvalg og spillernavn, slik at samme spiller får samme avatar på tvers av visninger.
+- Oppdaterte app-script/cacheversjon til `padelstar-session-15` og `padelstar-v98`.
+- Verifisert med full testpakke (76 bestått, 1 forventet live-Supabase-test hoppet over), syntaxjekk og `git diff --check`.
+- Implementasjonscommit: `4fb4d00`. CI/deploy kjøres for denne committen.
+
 ## 2026-09-01 - Fjernet siste inline landing-overstyringer
 
 - Fjernet inline-CSS fra `index.html`; landingssiden bruker nå de delte stylesheet-lagene for intro og hero-layout.
