@@ -7,6 +7,10 @@ const root = path.join(__dirname, "..");
 const serviceWorkerSource = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const stylesSource = fs.readFileSync(path.join(root, "styles", "styles.css"), "utf8");
+const baseStylesSource = fs.readFileSync(path.join(root, "styles", "base.css"), "utf8");
+const layoutStylesSource = fs.readFileSync(path.join(root, "styles", "layout.css"), "utf8");
+const componentsStylesSource = fs.readFileSync(path.join(root, "styles", "components.css"), "utf8");
+const modulesStylesSource = fs.readFileSync(path.join(root, "styles", "modules.css"), "utf8");
 const responsiveStylesSource = fs.readFileSync(path.join(root, "styles", "responsive.css"), "utf8");
 const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
@@ -19,7 +23,7 @@ const adminActionsSource = fs.readFileSync(path.join(root, "app", "admin-actions
 const playerActionsSource = fs.readFileSync(path.join(root, "app", "player-actions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v96/);
+  assert.match(serviceWorkerSource, /padelstar-v97/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -30,10 +34,18 @@ test("service worker claims updates and keeps a navigation fallback", () => {
 
 test("browser entrypoint uses the organized app and styles directories", () => {
   assert.match(indexSource, /href="styles\/styles\.css/);
+  assert.match(indexSource, /href="styles\/base\.css/);
+  assert.match(indexSource, /href="styles\/layout\.css/);
+  assert.match(indexSource, /href="styles\/components\.css/);
+  assert.match(indexSource, /href="styles\/modules\.css/);
   assert.match(indexSource, /href="styles\/responsive\.css/);
   assert.match(indexSource, /src="app\/translations\.js/);
   assert.match(indexSource, /src="app\/app\.js/);
   assert.match(serviceWorkerSource, /"\.\/styles\/styles\.css/);
+  assert.match(serviceWorkerSource, /"\.\/styles\/base\.css/);
+  assert.match(serviceWorkerSource, /"\.\/styles\/layout\.css/);
+  assert.match(serviceWorkerSource, /"\.\/styles\/components\.css/);
+  assert.match(serviceWorkerSource, /"\.\/styles\/modules\.css/);
   assert.match(serviceWorkerSource, /"\.\/styles\/responsive\.css/);
   assert.match(privacySource, /href="styles\/privacy\.css/);
   assert.match(serviceWorkerSource, /"\.\/styles\/privacy\.css/);
@@ -110,9 +122,9 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-37/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-38/);
   assert.match(indexSource, /app\/app\.js\?v=padelstar-session-14/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-37/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-38/);
   assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-14/);
 });
 
@@ -134,6 +146,15 @@ test("classic theme is the only available app theme", () => {
 test("stylesheet has no archived phase cascades", () => {
   assert.doesNotMatch(stylesSource, /PHASE 16|PHASE 17|PHASE 22|Review correction/);
   assert.doesNotMatch(stylesSource, /coolSportsTheme|cool sports-tema/);
+});
+
+test("stylesheet responsibilities are split into active layers", () => {
+  assert.match(baseStylesSource, /DESIGN TOKENS/);
+  assert.match(layoutStylesSource, /APP SHELL/);
+  assert.match(componentsStylesSource, /TYPOGRAPHY/);
+  assert.match(modulesStylesSource, /WORKSPACE/);
+  assert.doesNotMatch(baseStylesSource, /APP SHELL/);
+  assert.doesNotMatch(layoutStylesSource, /\n   WORKSPACE\n/);
 });
 
 test("service worker does not cache failed same-origin responses", () => {

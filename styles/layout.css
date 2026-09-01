@@ -1,0 +1,229 @@
+/* =========================================================
+   APP SHELL
+   ========================================================= */
+
+.app-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+
+  padding:
+    22px max(16px, env(safe-area-inset-right)) 42px max(16px, env(safe-area-inset-left));
+
+  position: relative;
+  z-index: 1;
+}
+
+
+/* =========================================================
+   TOPBAR / WORKSPACE HEADER
+   ========================================================= */
+
+.topbar,
+.workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
+  margin-inline: -8px;
+  padding: 8px;
+
+  border:
+    1px solid rgba(var(--gold-light-rgb), 0.16);
+
+  border-radius: 0 0 8px 8px;
+
+  background:
+    linear-gradient(180deg,
+      rgba(35, 15, 4, 0.80),
+      rgba(15, 7, 2, 0.88));
+
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.36);
+
+  backdrop-filter: blur(18px);
+}
+
+body:not(.workspace-active):not(.setup-active) .topbar {
+  display: none;
+}
+
+.workspace-active .landing-nav {
+  display: none;
+}
+
+.workspace-active .topbar,
+.setup-active .topbar {
+  position: sticky;
+  top: 10px;
+  z-index: 20;
+  margin-bottom: 18px;
+}
+
+.workspace-active .brand-logo {
+  width: clamp(100px, 12vw, 156px);
+  max-height: 72px;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+.brand-lockup,
+.brand-home-button {
+  min-width: 0;
+}
+
+.brand-lockup {
+  flex: 0 1 auto;
+}
+
+.brand-logo {
+  display: block;
+  width: min(220px, 100%);
+  max-width: 100%;
+  height: auto;
+}
+
+
+/* =========================================================
+   APP MENU
+   ========================================================= */
+
+.app-menu {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 6px;
+  max-width: 540px;
+  min-width: 0;
+}
+
+.app-menu .module-link {
+  min-height: 38px;
+  padding: 0.5rem 0.72rem;
+
+  border:
+    1px solid rgba(var(--gold-light-rgb), 0.18);
+
+  background:
+    linear-gradient(180deg,
+      rgba(var(--gold-light-rgb), 0.035),
+      rgba(0, 0, 0, 0.14));
+
+  color: var(--muted);
+
+  font-size: 0.8rem;
+}
+
+.app-menu .module-link:hover {
+  border-color:
+    rgba(var(--gold-bright-rgb), 0.38);
+
+  color: var(--gold-light);
+
+  background:
+    rgba(var(--gold-rgb), 0.08);
+}
+
+.app-menu .module-link.active {
+  border-color:
+    rgba(var(--gold-bright-rgb), 0.58);
+
+  color: var(--gold-light);
+
+  background:
+    linear-gradient(180deg,
+      rgba(var(--gold-rgb), 0.18),
+      rgba(var(--gold-dark-rgb), 0.10));
+
+  box-shadow:
+    0 8px 18px rgba(var(--gold-rgb), 0.18);
+}
+
+
+/* =========================================================
+   LANGUAGE PICKER
+   ========================================================= */
+
+.language-picker {
+  display: grid;
+  gap: 0.28rem;
+  min-width: 138px;
+}
+
+.language-picker span {
+  color: var(--muted);
+
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.language-picker select {
+  min-height: 42px;
+
+  padding-top: 0.52rem;
+  padding-bottom: 0.52rem;
+
+  font-size: 0.82rem;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.brand-home-button {
+  display: flex;
+  align-items: center;
+  min-height: 0;
+  padding: 0;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+}
+
+button.brand-home-button:not(:disabled):hover {
+  transform: none;
+}
+
+.brand-home-button:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 4px;
+}
+
+.brand-logo {
+  display: block;
+  width: clamp(100px, 12vw, 156px);
+  height: auto;
+
+  object-fit: contain;
+
+  filter:
+    drop-shadow(0 10px 18px rgba(30, 120, 255, 0.24));
+}

@@ -44,7 +44,11 @@ Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og k
 ## Prosjektstruktur
 
 - `index.html` - appstruktur, metadata og moduler.
-- `styles/styles.css` - base, tokens, layout og komponentstil for Padelstar.
+- `styles/base.css` - design tokens, fonter, global reset og grunnleggende formelementer.
+- `styles/layout.css` - app-shell, toppbar, appmeny, språkvelger og merkevarelayout.
+- `styles/components.css` - typografi, landing/setup, kort, knapper og delte komponenter.
+- `styles/modules.css` - workspace-, admin-, spiller-, turnerings- og match-stil.
+- `styles/styles.css` - aktiv classic/theme- og tilgjengelighetskaskade.
 - `styles/responsive.css` - samlet responsiv toppbar, hamburger og språk-/modulmeny.
 - `app/translations.js` - språkmotor med strukturerte nøkler, variabler, fallback og manglende-nøkkel-sporing for brukerflate.
 - `app/tournament-engine.js` - ren scheduler- og teamlogikk for turneringsoppsett.

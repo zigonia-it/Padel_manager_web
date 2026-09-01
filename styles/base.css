@@ -1,0 +1,263 @@
+/* =========================================================
+   DESIGN TOKENS
+   ========================================================= */
+
+:root {
+  color-scheme: dark;
+  --font-ui: "Nunito", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Titillium Web", var(--font-ui);
+  --soft: #070d17;
+  --ink: #eef7ff;
+  --cream: #f4f9ff;
+  --ink-dark: #03101d;
+  --muted: #a9bfd5;
+  --silver-light: #a9bfd5;
+  --gold: #4fa8ff;
+  --gold-light: #d8efff;
+  --gold-bright: #62b6ff;
+  --gold-dark: #236ca8;
+  --gold-deep: #123a63;
+  --gold-rgb: 79, 168, 255;
+  --gold-light-rgb: 216, 239, 255;
+  --gold-bright-rgb: 98, 182, 255;
+  --gold-dark-rgb: 35, 108, 168;
+  --line: rgba(98, 182, 255, 0.30);
+  --finished: #8ee0ad;
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.52);
+  --ds-page: #070d17;
+  --ds-surface-0: rgba(12, 23, 39, 0.90);
+  --ds-surface-1: rgba(16, 31, 52, 0.94);
+  --ds-surface-2: rgba(26, 48, 77, 0.90);
+  --ds-glass: rgba(91, 173, 255, 0.09);
+  --ds-border: rgba(159, 207, 255, 0.20);
+  --ds-border-strong: rgba(91, 173, 255, 0.58);
+  --ds-text: #eef7ff;
+  --ds-text-muted: #a9bfd5;
+  --ds-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+  --ds-shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.24);
+  --player-accent: var(--gold);
+  --player-accent-light: var(--gold-light);
+  --player-accent-dark: var(--gold-dark);
+  --player-accent-rgb: var(--gold-rgb);
+}
+
+/* =========================================================
+   FONTS
+   ========================================================= */
+
+@font-face {
+  font-family: "Titillium Web";
+  src: url("../assets/fonts/TitilliumWeb-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: url("../assets/fonts/Nunito-VariableFont_wght.ttf") format("truetype");
+  font-weight: 200 1000;
+  font-display: swap;
+}
+
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 92px;
+}
+
+body {
+  position: relative;
+  margin: 0;
+  min-height: 100vh;
+
+  background:
+    linear-gradient(180deg,
+      rgba(15, 7, 2, 0.72),
+      rgba(15, 7, 2, 0.97)),
+    url("../assets/bg_img-1600.jpg") center top / cover fixed,
+    var(--soft);
+
+  color: var(--ink);
+  font-family: var(--font-ui);
+  letter-spacing: 0.015em;
+  line-height: 1.5;
+  overflow-x: clip;
+}
+
+body.workspace-active {
+  background:
+    linear-gradient(180deg,
+      rgba(15, 7, 2, 0.86),
+      rgba(15, 7, 2, 0.98)),
+    linear-gradient(90deg,
+      rgba(15, 7, 2, 0.3),
+      rgba(23, 9, 1, 0.76)),
+    url("../assets/bg_img-1600.jpg") center bottom / auto 150% fixed,
+    var(--soft);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(135deg,
+      transparent 0 46%,
+      rgba(var(--gold-bright-rgb), 0.12) 46.15% 46.45%,
+      transparent 46.6% 100%),
+    linear-gradient(45deg,
+      transparent 0 64%,
+      rgba(var(--gold-rgb), 0.08) 64.15% 64.45%,
+      transparent 64.6% 100%);
+
+  background-size: 340px 340px, 460px 460px;
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+
+
+/* =========================================================
+   FORM ELEMENTS
+   ========================================================= */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  letter-spacing: 0.01em;
+}
+
+button {
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.94rem;
+  line-height: 1.3;
+  padding: 0.88rem 1rem;
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+
+  border:
+    1px solid rgba(var(--gold-light-rgb), 0.34);
+
+  border-radius: 8px;
+
+  padding: 0.78rem 0.85rem;
+
+  background:
+    linear-gradient(180deg,
+      rgba(var(--gold-light-rgb), 0.045),
+      rgba(var(--gold-light-rgb), 0.018)),
+    rgba(23, 9, 1, 0.74);
+
+  color: var(--ink);
+
+  font-size: 1rem;
+  line-height: 1.5;
+
+  box-shadow:
+    inset 0 1px 0 rgba(var(--gold-light-rgb), 0.045);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+
+  border-color:
+    rgba(var(--gold-bright-rgb), 0.72);
+
+  box-shadow:
+    0 0 0 3px rgba(var(--gold-rgb), 0.12),
+    inset 0 1px 0 rgba(var(--gold-light-rgb), 0.06);
+}
+
+select {
+  min-height: 52px;
+  appearance: none;
+
+  background:
+    linear-gradient(45deg,
+      transparent 50%,
+      var(--gold-light) 50%) calc(100% - 18px) 50% / 7px 7px no-repeat,
+
+    linear-gradient(135deg,
+      var(--gold-light) 50%,
+      transparent 50%) calc(100% - 13px) 50% / 7px 7px no-repeat,
+
+    rgba(23, 9, 1, 0.74);
+
+  padding-right: 2.2rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(var(--gold-light-rgb), 0.40);
+}
+
+textarea {
+  resize: vertical;
+}
+
+label {
+  display: grid;
+  gap: 0.5rem;
+
+  color: var(--silver-light);
+
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+
+fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+legend {
+  margin-bottom: 0.58rem;
+
+  color: var(--silver-light);
+
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+}
+

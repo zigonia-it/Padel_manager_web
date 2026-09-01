@@ -1,10 +1,14 @@
-const cacheName = "padelstar-v96";
+const cacheName = "padelstar-v97";
 
 const appShell = [
   "./",
   "./index.html",
   "./privacy.html",
-  "./styles/styles.css?v=padelstar-ui-37",
+  "./styles/base.css?v=padelstar-base-1",
+  "./styles/layout.css?v=padelstar-layout-1",
+  "./styles/components.css?v=padelstar-components-1",
+  "./styles/modules.css?v=padelstar-modules-1",
+  "./styles/styles.css?v=padelstar-ui-38",
   "./styles/responsive.css?v=padelstar-responsive-1",
   "./styles/privacy.css?v=padelstar-privacy-1",
   "./app/translations.js?v=padelstar-i18n-11",
