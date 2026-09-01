@@ -6,6 +6,13 @@ Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padelstar.
 
+## 2026-09-01 - Fjernet historiske CSS-kaskader
+
+- Fjernet innvevde fase- og temakaskader fra `styles/styles.css`, slik at den aktive classic/blå designretningen har én tydelig sluttkaskade.
+- Gjeninnførte tilgjengelige skip-, toast- og dialogflater eksplisitt etter oppryddingen.
+- Rettet skjulte avatar-inputs slik at de ikke lager horisontal overflow, og økte stylesheet-cacheversjonen til `padelstar-ui-37`.
+- Verifisert med full testpakke (74 bestått, 1 forventet live-Supabase-test hoppet over), syntaxjekk, `git diff --check` og smoke på desktop, medium og mobil.
+
 ## 2026-09-01 - Isolerte admin- og spillerhandlinger
 
 - Flyttet regler, manuelle cup-lag og banekonfigurasjon til `app/admin-actions.js`.

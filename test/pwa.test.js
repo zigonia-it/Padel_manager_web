@@ -110,9 +110,9 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-36/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-37/);
   assert.match(indexSource, /app\/app\.js\?v=padelstar-session-14/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-36/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-37/);
   assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-14/);
 });
 
@@ -129,6 +129,11 @@ test("classic theme is the only available app theme", () => {
   assert.doesNotMatch(appSource, /coolSportsTheme|data-theme-toggle|data-cool-src/);
   assert.doesNotMatch(indexSource, /data-cool-src|Cool tema|cool sports-tema/);
   assert.doesNotMatch(serviceWorkerSource, /assets\/themed\/cool-sports/);
+});
+
+test("stylesheet has no archived phase cascades", () => {
+  assert.doesNotMatch(stylesSource, /PHASE 16|PHASE 17|PHASE 22|Review correction/);
+  assert.doesNotMatch(stylesSource, /coolSportsTheme|cool sports-tema/);
 });
 
 test("service worker does not cache failed same-origin responses", () => {

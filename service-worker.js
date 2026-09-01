@@ -4,7 +4,7 @@ const appShell = [
   "./",
   "./index.html",
   "./privacy.html",
-  "./styles/styles.css?v=padelstar-ui-36",
+  "./styles/styles.css?v=padelstar-ui-37",
   "./styles/responsive.css?v=padelstar-responsive-1",
   "./styles/privacy.css?v=padelstar-privacy-1",
   "./app/translations.js?v=padelstar-i18n-11",
