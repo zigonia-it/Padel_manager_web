@@ -33,6 +33,7 @@ test("service worker claims updates and keeps a navigation fallback", () => {
 });
 
 test("browser entrypoint uses the organized app and styles directories", () => {
+  assert.doesNotMatch(indexSource, /<style[\s>]/);
   assert.match(indexSource, /href="styles\/styles\.css/);
   assert.match(indexSource, /href="styles\/base\.css/);
   assert.match(indexSource, /href="styles\/layout\.css/);
