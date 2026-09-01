@@ -426,13 +426,6 @@
     text-align: center;
   }
 
-  .tab.active::after {
-    left: 14px;
-    right: auto;
-
-    transform: none;
-  }
-
   .view-grid {
     grid-template-columns: 1fr;
   }

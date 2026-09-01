@@ -156,28 +156,6 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
       transparent);
 }
 
-.tab.active::after {
-  content: "";
-
-  position: absolute;
-
-  left: 50%;
-  bottom: 2px;
-
-  width: 72px;
-  height: 8px;
-
-  transform:
-    translateX(-50%);
-
-  background:
-    url("../assets/New assets/menu_highlight.png") center / contain no-repeat;
-
-  filter:
-    drop-shadow(0 0 8px rgba(var(--gold-bright-rgb), 0.34));
-}
-
-
 /* =========================================================
    LISTS
    ========================================================= */

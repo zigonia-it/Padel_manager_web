@@ -24,7 +24,7 @@ const adminActionsSource = fs.readFileSync(path.join(root, "app", "admin-actions
 const playerActionsSource = fs.readFileSync(path.join(root, "app", "player-actions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v98/);
+  assert.match(serviceWorkerSource, /padelstar-v99/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -122,6 +122,12 @@ test("responsive navigation has one shared hamburger owner", () => {
   assert.doesNotMatch(indexSource, /id="mobile-header-overrides"/);
 });
 
+test("active navigation tabs do not render legacy underline decorations", () => {
+  assert.doesNotMatch(componentsStylesSource, /\.subtab\.active::after/);
+  assert.doesNotMatch(modulesStylesSource, /\.tab\.active::after/);
+  assert.match(layoutStylesSource, /\.app-menu-toggle span/);
+});
+
 test("active app files do not reference archived assets", () => {
   const activeSources = [indexSource, serviceWorkerSource, stylesSource, fs.readFileSync(path.join(root, "app", "app.js"), "utf8")];
   assert.ok(activeSources.every((source) => !source.includes("assets/archive/")));
@@ -129,9 +135,9 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-38/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-39/);
   assert.match(indexSource, /app\/app\.js\?v=padelstar-session-15/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-38/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-39/);
   assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-15/);
 });
 
