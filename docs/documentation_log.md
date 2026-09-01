@@ -13,6 +13,11 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 - Rettet skjulte avatar-inputs slik at de ikke lager horisontal overflow, og økte stylesheet-cacheversjonen til `padelstar-ui-37`.
 - Verifisert med full testpakke (74 bestått, 1 forventet live-Supabase-test hoppet over), syntaxjekk, `git diff --check` og smoke på desktop, medium og mobil.
 
+## 2026-09-01 - Gjeninnførte felles landing-meny
+
+- Landing-siden viser igjen den samme toppbaren og menyen som workspace-visningene.
+- Verifisert interaktivt på desktop og mobil, inkludert åpning av drawer og språkvelger.
+
 ## 2026-09-01 - Isolerte admin- og spillerhandlinger
 
 - Flyttet regler, manuelle cup-lag og banekonfigurasjon til `app/admin-actions.js`.

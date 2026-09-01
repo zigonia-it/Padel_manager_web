@@ -4161,6 +4161,11 @@ body[data-theme="classic"] .status-pill {
   background: rgba(5, 15, 28, 0.58);
 }
 
+/* The landing page uses the same app shell and menu as every workspace view. */
+body:not(.workspace-active):not(.setup-active) .topbar {
+  display: flex;
+}
+
 @media (max-width: 760px) {
   body[data-theme="classic"] .panel,
   body[data-theme="classic"] .next-match,
