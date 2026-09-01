@@ -12,6 +12,7 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 - Gjeninnførte tilgjengelige skip-, toast- og dialogflater eksplisitt etter oppryddingen.
 - Rettet skjulte avatar-inputs slik at de ikke lager horisontal overflow, og økte stylesheet-cacheversjonen til `padelstar-ui-38`.
 - Delte stylesheetet fysisk i `base.css`, `layout.css`, `components.css`, `modules.css` og den aktive theme-/tilgjengelighetsfilen `styles.css`, med samme cascade-rekkefølge i app og personvernside.
+- Implementasjonscommit: `3162806`. GitHub Actions deploy-run `33469354611` fullførte browser-smoke og GitHub Pages-deploy med grønt resultat.
 - Verifisert med full testpakke (74 bestått, 1 forventet live-Supabase-test hoppet over), syntaxjekk, `git diff --check` og smoke på desktop, medium og mobil.
 
 ## 2026-09-01 - Gjeninnførte felles landing-meny
