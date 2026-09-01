@@ -10,6 +10,8 @@ const i18nUiPath = path.join(appRoot, "i18n-ui.js");
 const storagePath = path.join(appRoot, "storage.js");
 const renderingPath = path.join(appRoot, "rendering.js");
 const remoteTournamentPath = path.join(appRoot, "remote-tournament.js");
+const adminActionsPath = path.join(appRoot, "admin-actions.js");
+const playerActionsPath = path.join(appRoot, "player-actions.js");
 const tournamentEnginePath = path.join(appRoot, "tournament-engine.js");
 const scoringEnginePath = path.join(appRoot, "scoring-engine.js");
 const stateManagerPath = path.join(appRoot, "state-manager.js");
@@ -89,6 +91,8 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(storagePath, "utf8"), context, { filename: storagePath });
   vm.runInContext(fs.readFileSync(renderingPath, "utf8"), context, { filename: renderingPath });
   vm.runInContext(fs.readFileSync(remoteTournamentPath, "utf8"), context, { filename: remoteTournamentPath });
+  vm.runInContext(fs.readFileSync(adminActionsPath, "utf8"), context, { filename: adminActionsPath });
+  vm.runInContext(fs.readFileSync(playerActionsPath, "utf8"), context, { filename: playerActionsPath });
   vm.runInContext(fs.readFileSync(tournamentEnginePath, "utf8"), context, { filename: tournamentEnginePath });
   vm.runInContext(fs.readFileSync(scoringEnginePath, "utf8"), context, { filename: scoringEnginePath });
   vm.runInContext(fs.readFileSync(stateManagerPath, "utf8"), context, { filename: stateManagerPath });

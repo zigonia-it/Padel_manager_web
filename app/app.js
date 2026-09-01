@@ -68,6 +68,32 @@ const remoteTournament = window.PadelstarRemoteTournament.create({
   errorMessage: (error, fallback) => remoteErrorMessage(error, fallback),
   translate: (key, values) => t(key, values),
 });
+const adminActions = window.PadelstarAdminActions.create({
+  getState: () => state,
+  translate: (key, values) => t(key, values),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  buildSchedule: (players, format) => buildSchedule(players, format),
+  createTeam: (players) => createTeam(players),
+  findPlayerByName: (name) => findPlayerByName(name),
+  saveState: (options) => saveState(options),
+  render: () => render(),
+  parseCourtNumbers: (value) => parseCourtNumbers(value),
+  randomUUID: () => crypto.randomUUID(),
+});
+const playerActions = window.PadelstarPlayerActions.create({
+  getState: () => state,
+  getPlayerById: (id) => getPlayerById(id),
+  requestConfirmation: (message) => requestConfirmation(message),
+  translate: (key, values) => t(key, values),
+  isSupabaseReady: () => isSupabaseReady(),
+  remoteRpc: (client, name, payload) => remoteRpc(client, name, payload),
+  getSupabaseClient: () => supabaseClient,
+  applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
+  handleRemoteError: (error, fallback) => handleRemoteError(error, fallback),
+  saveState: (options) => saveState(options),
+  isCurrentUserAdmin: () => isCurrentUserAdmin(),
+  render: () => render(),
+});
 const tournamentEngine = window.PadelstarTournamentEngine;
 const scoring = window.PadelstarScoring;
 const stateManager = window.PadelstarState;
@@ -3352,99 +3378,15 @@ async function leaveCurrentTournamentWithDialog() {
 }
 
 async function toggleSelectedPlayerAvailability() {
-  const player = getPlayerById(state.selectedPlayerId);
-  if (!player) return false;
-  const isAway = player.availability === "away";
-  const message = isAway
-    ? t("messages.returnToTournamentConfirm", { name: player.name })
-    : t("messages.markAwayConfirm", { name: player.name });
-  if (!await requestConfirmation(message)) return false;
-  const nextAvailability = isAway ? "active" : "away";
-  if (isSupabaseReady() && state.playerToken && state.id) {
-    const { data, error } = await remoteRpc(supabaseClient, "set_player_availability", {
-      p_tournament_id: state.id,
-      p_invite_code: state.inviteCode,
-      p_player_id: player.id,
-      p_availability: nextAvailability,
-      p_player_token: state.playerToken,
-    });
-    if (error || !data) {
-      handleRemoteError(error, t("messages.availabilityUpdateFailed"));
-      return false;
-    }
-    applyRemoteState(data, { source: "rpc", clearConflict: true });
-    return true;
-  }
-  player.availability = nextAvailability;
-  saveState({ remote: isCurrentUserAdmin() });
-  render();
-  return true;
+  return playerActions.toggleSelectedPlayerAvailability();
 }
 
-function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMatch, pointMode, gamesToWinSet, setsToWinMatch }) {
-  if (state.rounds.length > 0) {
-    showToast(t("messages.rulesLocked"), "status-message-error");
-    return;
-  }
-  if (!["roundRobin", "cup"].includes(format)) return;
-  if (!["auto", "manual"].includes(cupTeamSetupMode)) return;
-  if (!["matches", "sets", "games"].includes(pointMode)) return;
-  state.settings.format = format;
-  state.settings.cupTeamSetupMode = cupTeamSetupMode;
-  state.settings.includesThirdPlaceMatch = includesThirdPlaceMatch;
-  state.settings.pointMode = pointMode;
-  state.settings.gamesToWinSet = Math.max(1, Math.min(12, gamesToWinSet || 6));
-  state.settings.setsToWinMatch = Math.max(1, Math.min(5, setsToWinMatch || 1));
-  if (state.rounds.length === 0) {
-    state.cup = null;
-    state.schedule = buildSchedule(state.players, state.settings.format);
-  }
+function updateTournamentRules(options) {
+  return adminActions.updateTournamentRules(options);
 }
 
 function saveManualCupTeams(value) {
-  if (state.rounds.length > 0 || state.status === "Avsluttet") {
-    showToast(t("messages.cupTeamsLocked"), "status-message-error");
-    return;
-  }
-
-  const lines = String(value ?? "")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  if (lines.length < 2) {
-    showToast(t("messages.minimumCupTeams"), "status-message-error");
-    return;
-  }
-
-  const usedPlayerIds = new Set();
-  const teams = [];
-  for (const [index, line] of lines.entries()) {
-    const playerNames = line.split("+").map((name) => name.trim()).filter(Boolean);
-    if (playerNames.length < 1 || playerNames.length > 2) {
-      showToast(t("messages.invalidCupTeamSize", { team: index + 1 }), "status-message-error");
-      return;
-    }
-
-    const teamPlayers = [];
-    for (const playerName of playerNames) {
-      const player = findPlayerByName(playerName);
-      if (!player || !player.active || player.availability === "away") {
-        showToast(t("messages.cupPlayerNotFound", { name: playerName }), "status-message-error");
-        return;
-      }
-      if (usedPlayerIds.has(player.id)) {
-        showToast(t("messages.cupPlayerDuplicate", { name: player.name }), "status-message-error");
-        return;
-      }
-      usedPlayerIds.add(player.id);
-      teamPlayers.push(player);
-    }
-    teams.push(createTeam(teamPlayers));
-  }
-
-  state.cupTeams = teams;
-  saveState();
-  render();
+  return adminActions.saveManualCupTeams(value);
 }
 
 function endTournament() {
@@ -3460,16 +3402,7 @@ function endTournament() {
 }
 
 function updateCourtsFromInput(value) {
-  const courtNumbers = parseCourtNumbers(value);
-  const existingByNumber = new Map(state.courts.map((court) => [court.courtNumber, court]));
-  state.courts = courtNumbers.map((courtNumber) => {
-    return existingByNumber.get(courtNumber) ?? {
-      id: crypto.randomUUID(),
-      name: `Bane ${courtNumber}`,
-      courtNumber,
-      active: true,
-    };
-  });
+  return adminActions.updateCourtsFromInput(value);
 }
 
 function parseCourtNumbers(value) {

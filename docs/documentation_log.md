@@ -6,6 +6,13 @@ Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padelstar.
 
+## 2026-09-01 - Isolerte admin- og spillerhandlinger
+
+- Flyttet regler, manuelle cup-lag og banekonfigurasjon til `app/admin-actions.js`.
+- Flyttet spillerens tilgjengelighetsflyt til `app/player-actions.js`.
+- Oppdaterte app-shell, service-worker-cache, README og regresjonstester for de nye modulgrensene.
+- Verifisert med `npm test` (73 bestått, 1 forventet live-Supabase-test hoppet over), syntaxjekk, `git diff --check` og browser-smoke på desktop, medium og mobil.
+
 ## 2026-09-01 - Oversatte kampkontroller og generisk turneringsnavn
 
 - La til språkspesifikke oversettelser for poengknapper, kampoverskrifter, bane-aria-labels, resultatlinjer og pause-/break-tekst.

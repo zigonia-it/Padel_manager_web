@@ -15,9 +15,11 @@ const i18nUiSource = fs.readFileSync(path.join(root, "app", "i18n-ui.js"), "utf8
 const storageSource = fs.readFileSync(path.join(root, "app", "storage.js"), "utf8");
 const renderingSource = fs.readFileSync(path.join(root, "app", "rendering.js"), "utf8");
 const remoteTournamentSource = fs.readFileSync(path.join(root, "app", "remote-tournament.js"), "utf8");
+const adminActionsSource = fs.readFileSync(path.join(root, "app", "admin-actions.js"), "utf8");
+const playerActionsSource = fs.readFileSync(path.join(root, "app", "player-actions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v95/);
+  assert.match(serviceWorkerSource, /padelstar-v96/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -80,6 +82,15 @@ test("remote tournament operations have their own module boundary", () => {
   assert.match(remoteTournamentSource, /createTournament/);
   assert.match(remoteTournamentSource, /loadByInvite/);
   assert.match(remoteTournamentSource, /window\.PadelstarRemoteTournament/);
+});
+
+test("admin and player actions have explicit module boundaries", () => {
+  assert.match(adminActionsSource, /updateTournamentRules/);
+  assert.match(adminActionsSource, /saveManualCupTeams/);
+  assert.match(adminActionsSource, /updateCourtsFromInput/);
+  assert.match(adminActionsSource, /window\.PadelstarAdminActions/);
+  assert.match(playerActionsSource, /toggleSelectedPlayerAvailability/);
+  assert.match(playerActionsSource, /window\.PadelstarPlayerActions/);
 });
 
 test("responsive navigation has one shared hamburger owner", () => {

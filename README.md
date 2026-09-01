@@ -55,7 +55,13 @@ Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og k
 - `app/observability.js` - rate-begrenset, personvernbevisst teknisk telemetry til Vercel Analytics.
 - `app/ui-effects.js` - isolerte, reduced-motion-kompatible fokus- og score-feedback-effekter.
 - `app/navigation.js` - felles modulnavigasjon, hamburger, Escape-lukking og aktiv meny.
+- `app/i18n-ui.js` - brukerens lokale språkvalg og DOM-oversettelser.
+- `app/storage.js` - tolerant JSON-persistens og recovery-hjelpere.
+- `app/rendering.js` - felles tekst- og match-renderingshjelpere.
 - `app/remote-rpc.js` - samlet transportseam for Supabase RPC-kall.
+- `app/remote-tournament.js` - Supabase-operasjoner for oppretting, invitasjon og join.
+- `app/admin-actions.js` - adminregler, manuelle cup-lag og banekonfigurasjon.
+- `app/player-actions.js` - spillerens tilgjengelighetsflyt og remote/local oppdatering.
 - `scripts/browser-smoke.sh` - deterministisk desktop-/mobil-smoke med blokkert ekstern backend.
 - `api/health.js` - cachefri Vercel health-endpoint for ekstern monitorering.
 - `privacy.html` - offentlig beta-utkast for personvern.
