@@ -6,6 +6,13 @@ Status: løpende prosjektlogg
 
 Denne filen er den løpende prosjektloggen for Padelstar.
 
+## 2026-09-01 - Fjernet siste inline landing-overstyringer
+
+- Fjernet inline-CSS fra `index.html`; landingssiden bruker nå de delte stylesheet-lagene for intro og hero-layout.
+- La til en regresjonstest som sikrer at app-entrypointet ikke får tilbake inline style-overstyringer.
+- Verifisert med `npm test` (75 bestått, 1 forventet live-Supabase-test hoppet over), syntaxjekk, `git diff --check` og browser-smoke på desktop, medium og mobil.
+- Implementasjonscommit: `bd8a3ce`. GitHub Actions deploy-run `33469755226` fullførte alle browser-smoke-jobber og GitHub Pages-deploy med grønt resultat.
+
 ## 2026-09-01 - Fjernet historiske CSS-kaskader
 
 - Fjernet innvevde fase- og temakaskader fra `styles/styles.css`, slik at den aktive classic/blå designretningen har én tydelig sluttkaskade.
