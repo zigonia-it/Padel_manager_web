@@ -54,6 +54,20 @@ const rendering = window.PadelstarRendering.create({
   gameScoreText: (match) => gameScoreText(match),
   escapeHtml: (value) => escapeHtml(value),
 });
+const remoteTournament = window.PadelstarRemoteTournament.create({
+  isReady: () => isSupabaseReady(),
+  getState: () => state,
+  call: (name, payload) => remoteRpc(supabaseClient, name, payload),
+  getTournamentByInvite: (inviteCode) => getTournamentByInviteRpc(inviteCode),
+  sanitizeSharedState: (nextState) => sanitizeSharedState(nextState),
+  applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
+  createPlayer: (name, index, avatarId) => createPlayer(name, index, avatarId),
+  linkProfileToPlayer: (player) => linkProfileToPlayer(player),
+  saveState: (options) => saveState(options),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  errorMessage: (error, fallback) => remoteErrorMessage(error, fallback),
+  translate: (key, values) => t(key, values),
+});
 const tournamentEngine = window.PadelstarTournamentEngine;
 const scoring = window.PadelstarScoring;
 const stateManager = window.PadelstarState;
@@ -1157,52 +1171,15 @@ function applyRemoteState(remoteState, options = {}) {
 }
 
 async function createRemoteTournament() {
-  if (!isSupabaseReady()) return false;
-  const { data, error } = await remoteRpc(supabaseClient, "create_tournament", {
-    p_state: sanitizeSharedState(state),
-    p_admin_token: state.adminToken,
-  });
-  if (error) {
-    showToast(remoteErrorMessage(error, t("messages.remoteSaveFailed")), "status-message-error");
-    return false;
-  }
-  applyRemoteState({
-    ...data,
-    adminToken: state.adminToken,
-    selectedPlayerId: state.selectedPlayerId,
-  }, { source: "rpc", clearConflict: true });
-  return true;
+  return remoteTournament.createTournament();
 }
 
 async function loadRemoteTournamentByInvite(inviteCode) {
-  if (!isSupabaseReady() || !inviteCode) return false;
-  const { data, error } = await getTournamentByInviteRpc(inviteCode);
-  if (error || !data) return false;
-  applyRemoteState(data, { source: "refresh" });
-  return true;
+  return remoteTournament.loadByInvite(inviteCode);
 }
 
 async function joinRemoteTournament(playerName, avatarId) {
-  if (!isSupabaseReady()) return false;
-  const player = linkProfileToPlayer(createPlayer(playerName, state.players.length, avatarId));
-  player.joinedFrom = "self";
-  const { data, error } = await remoteRpc(supabaseClient, "join_tournament", {
-    p_invite_code: state.inviteCode,
-    p_player: player,
-  });
-  if (error) {
-    showToast(remoteErrorMessage(error, t("messages.joinFailed")), "status-message-error");
-    return false;
-  }
-  if (!data?.state || !data.playerToken || !data.playerId) {
-    showToast(t("messages.securePlayerFailed"), "status-message-error");
-    return false;
-  }
-  applyRemoteState(data.state);
-  state.playerToken = data.playerToken;
-  state.selectedPlayerId = data.playerId;
-  saveState({ remote: false });
-  return true;
+  return remoteTournament.join(playerName, avatarId);
 }
 
 function queueRemoteSave() {

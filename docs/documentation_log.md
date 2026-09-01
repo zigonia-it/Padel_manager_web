@@ -28,6 +28,11 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 - Flyttet kampkontekst, kampoverskrift, resultatoppsummering og pauseoppsummering til `app/rendering.js`.
 - Eksponerte avhengighetene eksplisitt fra entrypointet, slik at oversettelser og scoring fortsatt bruker samme state.
 
+## 2026-09-01 - Isolerte remote-turneringsoperasjoner
+
+- Flyttet remote create, join og invite-load til `app/remote-tournament.js` med eksplisitte callbacks for state, RPC og UI-feedback.
+- Beholdt øvrige kø-, konflikt- og realtime-regler i entrypointet til de kan flyttes med egne verifikasjonssteg.
+
 ## 2026-09-01 - Fjernet duplisert CSS-baseline
 
 - Fjernet den gamle, dupliserte redesignblokken før den aktive globale stylesheet-blokken.
