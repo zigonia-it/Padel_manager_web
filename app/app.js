@@ -2997,7 +2997,7 @@ function renderLargeScore() {
 
 function avatarUrl(player) {
   const seed = encodeURIComponent(`${player.avatarId ?? defaultAvatarId}-${player.name ?? "Padel"}`);
-  return `https://api.dicebear.com/10.x/thumbs/svg?seed=${seed}&size=64&borderRadius=50&backgroundColor=cc9414,616b7a,ebc761`;
+  return `https://api.dicebear.com/10.x/gaze/svg?seed=${seed}&size=64&backgroundColor=cc9414,616b7a,ebc761`;
 }
 
 function createJoinLink() {

@@ -14,6 +14,7 @@ const modulesStylesSource = fs.readFileSync(path.join(root, "styles", "modules.c
 const responsiveStylesSource = fs.readFileSync(path.join(root, "styles", "responsive.css"), "utf8");
 const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
+const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
 const privacyI18nSource = fs.readFileSync(path.join(root, "app", "privacy-i18n.js"), "utf8");
 const i18nUiSource = fs.readFileSync(path.join(root, "app", "i18n-ui.js"), "utf8");
 const storageSource = fs.readFileSync(path.join(root, "app", "storage.js"), "utf8");
@@ -23,7 +24,7 @@ const adminActionsSource = fs.readFileSync(path.join(root, "app", "admin-actions
 const playerActionsSource = fs.readFileSync(path.join(root, "app", "player-actions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v97/);
+  assert.match(serviceWorkerSource, /padelstar-v98/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -69,6 +70,11 @@ test("privacy page follows the local user language preference", () => {
   assert.match(privacyI18nSource, /padelstar-language/);
   assert.match(privacyI18nSource, /localStorage\.setItem/);
   assert.match(privacyI18nSource, /translations\[languageCode\]/);
+});
+
+test("player avatars use the DiceBear Gaze style", () => {
+  assert.match(appSource, /api\.dicebear\.com\/10\.x\/gaze\/svg/);
+  assert.doesNotMatch(appSource, /api\.dicebear\.com\/10\.x\/thumbs\/svg/);
 });
 
 test("language DOM handling has its own module boundary", () => {
@@ -124,9 +130,9 @@ test("active app files do not reference archived assets", () => {
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
   assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-38/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-14/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-15/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-38/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-14/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-15/);
 });
 
 test("create form uses a generic default tournament name", () => {

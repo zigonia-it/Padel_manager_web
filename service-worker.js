@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v97";
+const cacheName = "padelstar-v98";
 
 const appShell = [
   "./",
@@ -29,7 +29,7 @@ const appShell = [
   "./app/remote-rpc.js?v=padelstar-remote-rpc-1",
   "./app/ui-effects.js?v=padelstar-ui-effects-1",
   "./app/navigation.js?v=padelstar-navigation-1",
-  "./app/app.js?v=padelstar-session-14",
+  "./app/app.js?v=padelstar-session-15",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-256.png",
