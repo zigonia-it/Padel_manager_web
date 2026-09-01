@@ -12,6 +12,7 @@ Denne filen er den løpende prosjektloggen for Padelstar.
 - Flyttet spillerens tilgjengelighetsflyt til `app/player-actions.js`.
 - Oppdaterte app-shell, service-worker-cache, README og regresjonstester for de nye modulgrensene.
 - Verifisert med `npm test` (73 bestått, 1 forventet live-Supabase-test hoppet over), syntaxjekk, `git diff --check` og browser-smoke på desktop, medium og mobil.
+- Implementasjonscommit: `aa6ac30`. GitHub Actions deploy-run `33467944798` fullførte browser-smoke og GitHub Pages-deploy med grønt resultat.
 
 ## 2026-09-01 - Oversatte kampkontroller og generisk turneringsnavn
 
