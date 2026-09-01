@@ -1,14 +1,14 @@
-const cacheName = "padelstar-v99";
+const cacheName = "padelstar-v145";
 
 const appShell = [
   "./",
   "./index.html",
   "./privacy.html",
-  "./styles/base.css?v=padelstar-base-1",
-  "./styles/layout.css?v=padelstar-layout-2",
-  "./styles/components.css?v=padelstar-components-2",
-  "./styles/modules.css?v=padelstar-modules-2",
-  "./styles/styles.css?v=padelstar-ui-39",
+  "./styles/base.css?v=padelstar-base-2",
+  "./styles/layout.css?v=padelstar-layout-3",
+  "./styles/components.css?v=padelstar-components-3",
+  "./styles/modules.css?v=padelstar-modules-3",
+  "./styles/styles.css?v=padelstar-ui-81",
   "./styles/responsive.css?v=padelstar-responsive-1",
   "./styles/privacy.css?v=padelstar-privacy-1",
   "./app/translations.js?v=padelstar-i18n-11",
@@ -29,18 +29,20 @@ const appShell = [
   "./app/remote-rpc.js?v=padelstar-remote-rpc-1",
   "./app/ui-effects.js?v=padelstar-ui-effects-1",
   "./app/navigation.js?v=padelstar-navigation-1",
-  "./app/app.js?v=padelstar-session-15",
+  "./app/app.js?v=padelstar-session-23",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-256.png",
   "./assets/icons/padelstar-512.png",
   "./assets/main_logo.png",
-  "./assets/zigonia_logo.png",
+  "./assets/vs_icon",
+  "./padelstar-icon.png",
   "./assets/padelstar-icon.png",
   "./assets/bg_img-1600.png",
   "./assets/bg_img-1600.jpg",
   "./assets/New assets/menu_highlight.png",
   "./assets/fonts/TitilliumWeb-Bold.ttf",
+  "./assets/fonts/Anton-Regular.ttf",
   "./assets/fonts/Nunito-VariableFont_wght.ttf",
 ];
 

@@ -179,6 +179,7 @@ const elements = {
   adminPlayerNameField: document.querySelector("#adminPlayerNameField"),
   joinTournamentForm: document.querySelector("#joinTournamentForm"),
   joinAvatarPreview: document.querySelector("#joinAvatarPreview"),
+  joinAvatarPreviewFrame: document.querySelector("#joinAvatarPreviewFrame"),
   joinNamePreview: document.querySelector("#joinNamePreview"),
   avatarPicker: document.querySelector("#avatarPicker"),
   languageSelect: document.querySelector("#languageSelect"),
@@ -1800,6 +1801,7 @@ function syncJoinPreview() {
   const avatarId = new FormData(elements.joinTournamentForm).get("avatarId") || profile?.avatarId || defaultAvatarId;
   elements.joinNamePreview.textContent = name;
   elements.joinAvatarPreview.src = avatarUrl({ name, avatarId });
+  elements.joinAvatarPreviewFrame?.setAttribute("style", accentStyle(profile?.accent ?? "gold"));
 }
 
 function syncJoinFormFromProfile() {
@@ -2237,7 +2239,7 @@ function renderPlayers() {
     item.setAttribute("style", accentStyle(player.accent));
     item.innerHTML = `
       <span class="player-list-name">
-        <img class="avatar" src="${avatarUrl(player)}" alt="" width="34" height="34">
+        ${avatarMarkup(player, "avatar", 34)}
         <span class="player-name-badge">${escapeHtml(player.name)}</span>
         <small class="join-source-chip">${playerStatusLabel(player)}</small>
       </span>
@@ -2414,7 +2416,7 @@ function createSpectatorMatchCard(match) {
       </div>
     </div>
     <div class="spectator-score-bottom">
-      <span>${t("common.points")} ${escapeHtml(gameScoreText(match))}</span>
+      <span>${t("common.sets")} ${escapeHtml(setScoreText(match))}</span>
       <span>${t("common.games")} ${escapeHtml(setScoreText(match))}</span>
     </div>
   `;
@@ -2429,6 +2431,14 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
   const teamOneName = escapeHtml(match.teamOne.displayName);
   const teamTwoName = escapeHtml(match.teamTwo.displayName);
   const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
+  const pointControlsEnabled = editable && match.state !== "cancelled";
+  const sittingOut = sittingOutSummary(match);
+  const matchNote = [sittingOut, winner ? `<p class="winner-note">${t("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : ""]
+    .filter(Boolean)
+    .join("");
+  const pointControl = (teamIndex, teamName) => pointControlsEnabled
+    ? `<button class="scorecard-point-button" type="button" data-point-team="${teamIndex}" aria-label="${t("score.pointsLabel", { team: teamName })}" ${match.state === "finished" ? "disabled" : ""}>${tennisPointLabel(match.currentGame?.[teamIndex === 0 ? "teamOne" : "teamTwo"] ?? 0)}</button>`
+    : `<strong class="scorecard-point-value">${tennisPointLabel(match.currentGame?.[teamIndex === 0 ? "teamOne" : "teamTwo"] ?? 0)}</strong>`;
   card.innerHTML = `
     <div class="match-top">
       <div class="match-meta">
@@ -2443,53 +2453,39 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
     <div class="match-headline">
       <span>${escapeHtml(primaryMatchHeadline(match))}</span>
     </div>
-    <div class="teams">
-      <div class="team">
-        <small>${t("common.teamOne")}</small>
-        <strong style="${teamAccentStyle(match.teamOne)}">${teamDisplay(match.teamOne)}</strong>
-      </div>
-      <div class="versus">${t("common.against")}</div>
-      <div class="team">
-        <small>${t("common.teamTwo")}</small>
-        <strong style="${teamAccentStyle(match.teamTwo)}">${teamDisplay(match.teamTwo)}</strong>
-      </div>
+    <div class="scorecard-matchup">
+      <section class="scorecard-team scorecard-team-one" style="${teamAccentStyle(match.teamOne)}">
+        <h3>${t("common.teamOne")}</h3>
+        <div class="scorecard-players">${teamDisplay(match.teamOne, "scorecard")}</div>
+      </section>
+      <section class="scorecard-center" aria-label="${t("score.scoreboardAria")}">
+        <div class="scorecard-emblem" aria-hidden="true"><img src="padelstar-icon.png" alt="" width="54" height="54"></div>
+        <div class="scorecard-score-pair">
+          ${pointControl(0, teamOneName)}
+          <img class="scorecard-vs-icon" src="assets/vs_icon" alt="VS" width="88" height="58">
+          ${pointControl(1, teamTwoName)}
+        </div>
+      </section>
+      <section class="scorecard-team scorecard-team-two" style="${teamAccentStyle(match.teamTwo)}">
+        <h3>${t("common.teamTwo")}</h3>
+        <div class="scorecard-players">${teamDisplay(match.teamTwo, "scorecard")}</div>
+      </section>
     </div>
-    <div class="tennis-scoreboard" aria-label="${t("score.scoreboardAria")}">
-      <div>
-        <small>${t("common.games")}</small>
-        <strong>${setScoreText(match)}</strong>
-      </div>
-      <div>
-        <small>${t("common.points")}</small>
-        <strong>${gameScoreText(match)}</strong>
-      </div>
-      <div>
-        <small>${t("common.server")}</small>
-        <strong>${escapeHtml(startingTeamText(match))}</strong>
-      </div>
+    <div class="scorecard-stats" aria-label="${t("score.scoreboardAria")}">
+      <div><span class="scorecard-stat-icon" aria-hidden="true">◆</span><span>${t("common.games")}</span><strong>${setScoreText(match)}</strong></div>
+      <div><span class="scorecard-stat-icon" aria-hidden="true">✦</span><span>${t("common.points")}</span><strong>${gameScoreText(match)}</strong></div>
+      <div><span class="scorecard-stat-icon" aria-hidden="true">◎</span><span>${t("common.sets")}</span><strong>${setScoreText(match)}</strong></div>
     </div>
-    <div class="match-note">
-      <p class="hint">${scoreSummary(match)}${sittingOutSummary(match)}</p>
-      ${winner ? `<p class="winner-note">${t("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : ""}
-    </div>
+    ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
   `;
 
   if (editable && match.state !== "cancelled") {
     const controls = document.createElement("div");
     controls.className = "match-controls";
     controls.innerHTML = `
-      <div class="point-controls">
-        <button class="secondary point-button" type="button" data-point-team="0" ${match.state === "finished" ? "disabled" : ""}>${t("score.pointsLabel", { team: teamOneName })}</button>
-        <button class="secondary point-button" type="button" data-point-team="1" ${match.state === "finished" ? "disabled" : ""}>${t("score.pointsLabel", { team: teamTwoName })}</button>
-      </div>
       ${scoreOnly ? "" : `<div class="court-edit-row">
         <label>${t("common.court")} <input class="court-name-input" type="text" value="${escapeAttribute(match.courtName ?? "")}" placeholder="${t("common.court")}" aria-label="${t("score.courtForMatch", { teamOne: teamOneName, teamTwo: teamTwoName })}"></label>
         <button class="secondary save-court-button" type="button">${t("actions.saveCourt")}</button>
-      </div>
-      <div class="score-row">
-        <label>${teamOneName} <input type="number" min="0" max="99" value="${match.currentSet.teamOne}" aria-label="Games ${teamOneName}"></label>
-        <label>${teamTwoName} <input type="number" min="0" max="99" value="${match.currentSet.teamTwo}" aria-label="Games ${teamTwoName}"></label>
-        <button class="secondary save-score-button" type="button">${match.state === "finished" ? t("actions.updateResult") : t("actions.save")}</button>
       </div>
       <div class="button-row">
         <button class="secondary set-score-button" type="button">${t("actions.setResult")}</button>
@@ -2507,15 +2503,11 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
 
     if (!scoreOnly) {
       const courtInput = controls.querySelector(".court-name-input");
-      const [teamOneInput, teamTwoInput] = controls.querySelectorAll(".score-row input");
       controls.querySelector(".save-court-button").addEventListener("click", () => {
         updateMatchCourt(match, courtInput.value);
       });
-      controls.querySelector(".save-score-button").addEventListener("click", () => {
-        saveMatchResult(match, Number(teamOneInput.value), Number(teamTwoInput.value));
-      });
     }
-    controls.querySelectorAll("[data-point-team]").forEach((button) => {
+    card.querySelectorAll("[data-point-team]").forEach((button) => {
       button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.pointTeam)));
     });
     if (!scoreOnly) {
@@ -2556,7 +2548,7 @@ function renderStandingsList(container, matches) {
     item.innerHTML = `
       <span class="player-list-name">
         <span class="placement-badge">${index + 1}</span>
-        <img class="avatar" src="${avatarUrl(entry.player)}" alt="" width="34" height="34">
+        ${avatarMarkup(entry.player, "avatar", 34)}
         <span class="player-name-badge">${escapeHtml(entry.player.name)}</span>
       </span>
       <span class="standing-stats">
@@ -2588,7 +2580,7 @@ function renderPlayerIdentity() {
   elements.playerIdentityCard.setAttribute("style", accentStyle(player.accent));
   elements.playerIdentityCard.innerHTML = `
     <div class="player-identity-main">
-      <img class="avatar" src="${avatarUrl(player)}" alt="" width="44" height="44">
+      ${avatarMarkup(player, "avatar", 44)}
       <div>
         <span>${t("player.currentPlayer")}</span>
         <strong>${escapeHtml(player.name)}</strong>
@@ -2702,7 +2694,7 @@ function renderExistingPlayerList() {
     button.type = "button";
     button.className = "existing-player-button";
     button.setAttribute("style", accentStyle(player.accent));
-    button.innerHTML = `<img class="avatar" src="${avatarUrl(player)}" alt="" width="30" height="30"><span>${escapeHtml(player.name)}</span>`;
+    button.innerHTML = `${avatarMarkup(player, "avatar", 30)}<span>${escapeHtml(player.name)}</span>`;
     button.addEventListener("click", async () => {
       if (supabaseClient) {
         const joined = await joinRemoteTournament(player.name, player.avatarId);
@@ -2996,8 +2988,14 @@ function renderLargeScore() {
 }
 
 function avatarUrl(player) {
-  const seed = encodeURIComponent(`${player.avatarId ?? defaultAvatarId}-${player.name ?? "Padel"}`);
-  return `https://api.dicebear.com/10.x/gaze/svg?seed=${seed}&size=64&backgroundColor=cc9414,616b7a,ebc761`;
+  const seed = encodeURIComponent(`${player.name ?? "Sophie"}-${player.avatarId ?? defaultAvatarId}`);
+  return `https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=${seed}&size=128`;
+}
+
+function avatarMarkup(player, className = "avatar", size = 34) {
+  return `<span class="${className} avatar-frame" style="${accentStyle(player.accent)}" aria-hidden="true">
+    <img src="${avatarUrl(player)}" alt="" width="${size}" height="${size}">
+  </span>`;
 }
 
 function createJoinLink() {
@@ -3473,11 +3471,13 @@ function isEditableAdminMatch(match) {
   return Boolean(state.status !== "Avsluttet" && activeRound && activeRound.matches.some((roundMatch) => roundMatch.id === match.id));
 }
 
-function teamDisplay(team) {
+function teamDisplay(team, variant = "default") {
+  const avatarClass = variant === "scorecard" ? "avatar scorecard-avatar" : "avatar small-avatar";
+  const avatarSize = variant === "scorecard" ? 56 : 28;
   return team.players
     .map((player) => `
       <span class="team-player" style="${accentStyle(player.accent)}">
-        <img class="avatar small-avatar" src="${avatarUrl(player)}" alt="" width="28" height="28">
+        ${avatarMarkup(player, avatarClass, avatarSize)}
         <span class="team-player-badge">${escapeHtml(player.name)}</span>
       </span>
     `)

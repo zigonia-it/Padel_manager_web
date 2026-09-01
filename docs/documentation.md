@@ -119,7 +119,17 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - DiceBear-avatarer byttet fra `thumbs` til `gaze` med stabil seed (`4fb4d00`).
 - Aktiv-tab-understrek fjernet, hamburgerikonet gjort synlig med CSS og responsiv cache bumpet til `padelstar-v99` (`db0b5eb`).
 
+### 2026-09-02
+
+- Kampkortene fikk en samlet blå scorecard-stil med tydeligere lagflater, resultatfelt, VS-grafikk og kompakte kampkontroller.
+- Kampoversikter viser sett, games og poeng i separate felt, mens live tennispoeng kan føres direkte på kampkortet.
+- Avatar-renderingen ble samlet med stabile DiceBear-avatarer, fargede avatar-rammer og en ny Anton-font for den visuelle kampkortretningen.
+- Responsiv layout ble justert for små skjermer: hero og knapper fikk bedre vertikal plassering, kampoverskrifter og `NÅ`-chip unngår logooverlapp, og lange spillernavn brytes uten at avatarene flyttes vertikalt.
+- Gjenstående gull-/bruntonede bakgrunner ble erstattet med mørkblå flater. Ventestatus, admin-spillerliste, walkover-/avbryt-knapper, rundesammendrag og menyflater følger nå samme blå palett.
+- Fjernet overflødig footer-logo og ryddet bort eldre score-input-kaskader som ikke lenger brukes av den nye scorecard-renderingen.
+- PWA-cache og stylesheet-query-versjoner ble oppdatert til `padelstar-v145` og `padelstar-ui-81`.
+- Verifisering: `npm test` passerer med 77 beståtte tester og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
+
 ## Verifikasjonsprinsipp
 
 Hver ny oppføring skal inneholde hva som ble endret, hvilken brukerflyt som berøres, testresultater, commit-id og deploystatus. Nye funn eller åpne beslutninger føres i [development_plan.md](development_plan.md), ikke som skjulte TODO-er i historikken.
-

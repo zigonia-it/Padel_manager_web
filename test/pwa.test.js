@@ -24,7 +24,7 @@ const adminActionsSource = fs.readFileSync(path.join(root, "app", "admin-actions
 const playerActionsSource = fs.readFileSync(path.join(root, "app", "player-actions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v99/);
+  assert.match(serviceWorkerSource, /padelstar-v145/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
@@ -72,8 +72,9 @@ test("privacy page follows the local user language preference", () => {
   assert.match(privacyI18nSource, /translations\[languageCode\]/);
 });
 
-test("player avatars use the DiceBear Gaze style", () => {
-  assert.match(appSource, /api\.dicebear\.com\/10\.x\/gaze\/svg/);
+test("player avatars use the DiceBear Lorelei Neutral style", () => {
+  assert.match(appSource, /api\.dicebear\.com\/10\.x\/lorelei-neutral\/svg/);
+  assert.match(appSource, /avatarMarkup/);
   assert.doesNotMatch(appSource, /api\.dicebear\.com\/10\.x\/thumbs\/svg/);
 });
 
@@ -135,10 +136,10 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-39/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-15/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-39/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-15/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-81/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-23/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-81/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-23/);
 });
 
 test("create form uses a generic default tournament name", () => {
@@ -238,10 +239,8 @@ test("backup export uses the token-free state projection", () => {
 test("app shell uses optimized startup images", () => {
   assert.match(indexSource, /assets\/main_logo\.png/);
   assert.match(indexSource, /assets\/bg_img-1600\.jpg/);
-  assert.match(indexSource, /assets\/zigonia_logo\.png/);
   assert.match(stylesSource, /assets\/bg_img-1600\.jpg/);
   assert.match(serviceWorkerSource, /assets\/main_logo\.png/);
-  assert.match(serviceWorkerSource, /assets\/zigonia_logo\.png/);
   assert.match(serviceWorkerSource, /assets\/bg_img-1600\.png/);
   assert.doesNotMatch(serviceWorkerSource, /assets\/padelstar_logo-1200\.png/);
   assert.doesNotMatch(serviceWorkerSource, /assets\/padelstar_button-900\.png/);
@@ -253,7 +252,6 @@ test("optimized startup image payload stays within the measured budget", () => {
   const startupImages = [
     "assets/bg_img-1600.png",
     "assets/main_logo.png",
-    "assets/zigonia_logo.png",
   ];
   const totalBytes = startupImages.reduce((sum, file) => sum + fs.statSync(path.join(root, file)).size, 0);
 

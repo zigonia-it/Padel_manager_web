@@ -81,8 +81,8 @@ body {
 
   background:
     linear-gradient(180deg,
-      rgba(15, 7, 2, 0.72),
-      rgba(15, 7, 2, 0.97)),
+      rgba(3, 16, 34, 0.72),
+      rgba(3, 16, 34, 0.97)),
     url("../assets/bg_img-1600.jpg") center top / cover fixed,
     var(--soft);
 
@@ -96,11 +96,11 @@ body {
 body.workspace-active {
   background:
     linear-gradient(180deg,
-      rgba(15, 7, 2, 0.86),
-      rgba(15, 7, 2, 0.98)),
+      rgba(3, 16, 34, 0.86),
+      rgba(3, 16, 34, 0.98)),
     linear-gradient(90deg,
-      rgba(15, 7, 2, 0.3),
-      rgba(23, 9, 1, 0.76)),
+      rgba(3, 16, 34, 0.3),
+      rgba(5, 21, 43, 0.76)),
     url("../assets/bg_img-1600.jpg") center bottom / auto 150% fixed,
     var(--soft);
 }
@@ -181,7 +181,7 @@ select {
     linear-gradient(180deg,
       rgba(var(--gold-light-rgb), 0.045),
       rgba(var(--gold-light-rgb), 0.018)),
-    rgba(23, 9, 1, 0.74);
+    rgba(5, 21, 43, 0.74);
 
   color: var(--ink);
 
@@ -218,7 +218,7 @@ select {
       var(--gold-light) 50%,
       transparent 50%) calc(100% - 13px) 50% / 7px 7px no-repeat,
 
-    rgba(23, 9, 1, 0.74);
+    rgba(5, 21, 43, 0.74);
 
   padding-right: 2.2rem;
 }

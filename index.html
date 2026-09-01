@@ -15,11 +15,11 @@
   <link rel="apple-touch-icon" href="assets/icons/padelstar-512.png">
   <link rel="icon" href="assets/icons/padelstar-256.png" type="image/png">
   <link rel="preload" href="assets/bg_img-1600.jpg" as="image" fetchpriority="high">
-  <link rel="stylesheet" href="styles/base.css?v=padelstar-base-1">
-  <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-2">
-  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-2">
-  <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-2">
-  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-39">
+  <link rel="stylesheet" href="styles/base.css?v=padelstar-base-2">
+  <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-3">
+  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-3">
+  <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-3">
+  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-81">
   <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -217,7 +217,9 @@
               required data-i18n-placeholder="setup.playerNamePlaceholder">
           </label>
           <div class="join-preview" aria-live="polite">
-            <img class="avatar large-avatar" id="joinAvatarPreview" src="" alt="" width="48" height="48">
+            <span class="avatar large-avatar avatar-frame" id="joinAvatarPreviewFrame" aria-hidden="true">
+              <img id="joinAvatarPreview" src="" alt="" width="48" height="48">
+            </span>
             <div>
               <span data-i18n="setup.yourAvatar">Din avatar</span>
               <strong id="joinNamePreview" data-i18n="setup.yourName">Navnet ditt</strong>
@@ -583,10 +585,6 @@
         <span data-i18n="footer.rights">All rights reserved.</span>
       </p>
       <p><a href="privacy.html" data-i18n="footer.privacy">Personvern</a></p>
-      <p><br>
-        <img class="footer-developer-logo" src="assets/zigonia_logo.png" alt="Zigonia IT" width="800" height="328"
-          loading="lazy">
-      </p>
     </footer>
 
 
@@ -612,7 +610,7 @@
   <script defer src="app/remote-rpc.js?v=padelstar-remote-rpc-1"></script>
   <script defer src="app/ui-effects.js?v=padelstar-ui-effects-1"></script>
   <script defer src="app/navigation.js?v=padelstar-navigation-1"></script>
-  <script defer src="app/app.js?v=padelstar-session-15"></script>
+  <script defer src="app/app.js?v=padelstar-session-23"></script>
 </body>
 
 </html>
