@@ -12,14 +12,14 @@
   <meta name="author" content="Sigurd Steen Grødem, Zigonia IT">
   <title>Padelstar</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="assets/icons/padelstar-512.png">
-  <link rel="icon" href="assets/icons/padelstar-256.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/padelstar-icon.png">
+  <link rel="icon" href="assets/padelstar-icon.png" type="image/png">
   <link rel="preload" href="assets/bg_img-1600.jpg" as="image" fetchpriority="high">
   <link rel="stylesheet" href="styles/base.css?v=padelstar-base-2">
   <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-3">
   <link rel="stylesheet" href="styles/components.css?v=padelstar-components-3">
   <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-3">
-  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-81">
+  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-91">
   <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -133,14 +133,10 @@
             </label>
             <fieldset class="avatar-picker" id="profileAvatarPicker">
               <legend data-i18n="profile.avatar">Avatar</legend>
-              <label><input type="radio" name="profileAvatarId" value="smash" checked><span
-                  data-i18n="avatar.smash">Smash</span></label>
-              <label><input type="radio" name="profileAvatarId" value="serve"><span
-                  data-i18n="avatar.serve">Serve</span></label>
-              <label><input type="radio" name="profileAvatarId" value="wall"><span
-                  data-i18n="avatar.wall">Vegg</span></label>
-              <label><input type="radio" name="profileAvatarId" value="lob"><span
-                  data-i18n="avatar.lob">Lob</span></label>
+              <label><input type="radio" name="profileAvatarId" value="smash" checked><img src="https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=Sophie-smash&size=128" alt=""><span>Sophie</span></label>
+              <label><input type="radio" name="profileAvatarId" value="serve"><img src="https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=Aiden-serve&size=128" alt=""><span>Aiden</span></label>
+              <label><input type="radio" name="profileAvatarId" value="wall"><img src="https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=Luna-wall&size=128" alt=""><span>Luna</span></label>
+              <label><input type="radio" name="profileAvatarId" value="lob"><img src="https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=Milo-lob&size=128" alt=""><span>Milo</span></label>
             </fieldset>
             <div class="button-row">
               <button class="secondary" type="submit" data-i18n="profile.save">Lagre profil</button>
@@ -227,22 +223,10 @@
           </div>
           <fieldset class="avatar-picker" id="avatarPicker">
             <legend data-i18n="setup.chooseAvatar">Velg avatar</legend>
-            <label>
-              <input type="radio" name="avatarId" value="smash" checked>
-              <span data-i18n="avatar.smash">Smash</span>
-            </label>
-            <label>
-              <input type="radio" name="avatarId" value="serve">
-              <span data-i18n="avatar.serve">Serve</span>
-            </label>
-            <label>
-              <input type="radio" name="avatarId" value="wall">
-              <span data-i18n="avatar.wall">Vegg</span>
-            </label>
-            <label>
-              <input type="radio" name="avatarId" value="lob">
-              <span data-i18n="avatar.lob">Lob</span>
-            </label>
+            <label><input type="radio" name="avatarId" value="smash" checked><img src="https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=Sophie-smash&size=128" alt=""><span>Sophie</span></label>
+            <label><input type="radio" name="avatarId" value="serve"><img src="https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=Aiden-serve&size=128" alt=""><span>Aiden</span></label>
+            <label><input type="radio" name="avatarId" value="wall"><img src="https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=Luna-wall&size=128" alt=""><span>Luna</span></label>
+            <label><input type="radio" name="avatarId" value="lob"><img src="https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=Milo-lob&size=128" alt=""><span>Milo</span></label>
           </fieldset>
           <button class="secondary" type="submit" data-i18n="actions.joinTournament">Bli med i turnering</button>
           <div class="existing-player-box">
@@ -610,7 +594,7 @@
   <script defer src="app/remote-rpc.js?v=padelstar-remote-rpc-1"></script>
   <script defer src="app/ui-effects.js?v=padelstar-ui-effects-1"></script>
   <script defer src="app/navigation.js?v=padelstar-navigation-1"></script>
-  <script defer src="app/app.js?v=padelstar-session-23"></script>
+  <script defer src="app/app.js?v=padelstar-session-26"></script>
 </body>
 
 </html>

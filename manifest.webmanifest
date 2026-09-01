@@ -9,13 +9,13 @@
   "theme_color": "#0f0702",
   "icons": [
     {
-      "src": "assets/icons/padelstar-256.png",
-      "sizes": "256x256",
+      "src": "assets/padelstar-icon.png",
+      "sizes": "3000x3000",
       "type": "image/png"
     },
     {
-      "src": "assets/icons/padelstar-512.png",
-      "sizes": "512x512",
+      "src": "assets/padelstar-icon.png",
+      "sizes": "3000x3000",
       "type": "image/png"
     }
   ]

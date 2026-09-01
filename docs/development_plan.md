@@ -1,6 +1,6 @@
 # Padelstar – samlet utviklingsplan
 
-Sist oppdatert: 2026-09-01
+Sist oppdatert: 2026-09-02
 
 Status: aktivt operativt arbeidsdokument
 
@@ -21,7 +21,13 @@ Følgende er implementert og skal behandles som beskyttet funksjonalitet:
 - Supabase RPC-er med RLS, grants, tokenbinding, revisjonskontroll, rate limiting og automatisk retensjonsjobb.
 - Norsk bokmål, nynorsk, engelsk, spansk, tysk og fransk, med språkpreferanse per bruker/enhet og oversatt personvernside.
 - Felles responsiv toppbar, hamburger/drawer, språkvelger, modulnavigasjon og Escape-lukking.
-- Ett aktivt visuelt tema, konsoliderte CSS-lag og DiceBear Gaze-avatarer med deterministisk seed.
+- Ett aktivt visuelt tema, konsoliderte CSS-lag og DiceBear Lorelei Neutral-avatarer med deterministisk seed.
+- Avatarvelgeren bruker en tydelig, vertikal valgliste med forhåndsvisning og faste navn: Sophie, Aiden, Luna og Milo.
+- Blått scorecard-design med tydelig lag-/resultatstruktur, Anton kun på relevante scoretall, blå aktive statuser og individuelle spilleraccentfarger.
+- Responsiv scorecard-logikk som automatisk flytter avatar over spillernavn når navnet faktisk brytes over flere linjer, samt ekstra logo-safe-space i kampmetadata.
+- Admin-fanene `Styring`, `Del`, `Spillere` og `Kamper` bruker samme fullbredde layout på desktop og større nettbrett.
+- Workspace-headeren er transparent og lar sidens mørkeblå bakgrunn gå kontinuerlig bak turneringstittel, rolle og handlinger.
+- `assets/padelstar-icon.png` er felles ikonreferanse for favicon, Apple/iPhone-hjemskjerm, PWA-manifest, varsler og scorecard-emblem.
 - PWA-cache, GitHub Pages-verifisering, statisk hosting og eksisterende Vercel/Supabase-konfigurasjon.
 
 ## Ikke-forhandlingsbare krav
@@ -95,7 +101,7 @@ Disse starter ikke før scope, personvern og akseptansekriterier er besluttet:
 - PDF-eksport av tabell og resultat.
 - Utvidet profilhistorikk og karrierestatistikk.
 - Mer avansert offline-konflikthåndtering.
-- Eventuell egen avatarvelger/opplasting; DiceBear Gaze er gjeldende baseline.
+- Eventuell avataropplasting eller et større egendefinert avatarbibliotek; dagens avatarvelger og DiceBear Lorelei Neutral er gjeldende baseline.
 
 ## Dokumentasjons- og leveranseflyt
 

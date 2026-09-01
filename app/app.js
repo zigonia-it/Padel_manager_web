@@ -39,10 +39,10 @@ const accents = Object.keys(playerAccentPalette);
 const defaultAvatarId = "smash";
 const tennisPointLabels = ["0", "15", "30", "40", "A"];
 const avatarOptions = [
-  { id: "smash", labelKey: "avatar.smash" },
-  { id: "serve", labelKey: "avatar.serve" },
-  { id: "wall", labelKey: "avatar.wall" },
-  { id: "lob", labelKey: "avatar.lob" },
+  { id: "smash", name: "Sophie" },
+  { id: "serve", name: "Aiden" },
+  { id: "wall", name: "Luna" },
+  { id: "lob", name: "Milo" },
 ];
 const i18n = window.PadelstarI18n;
 const i18nUi = window.PadelstarI18nUi;
@@ -2255,7 +2255,7 @@ function renderPlayers() {
         <input name="playerName" type="text" value="${escapeAttribute(player.name)}" aria-label="${t("actions.editPlayerNameAria", { name: escapeAttribute(player.name) })}" required>
         <select name="avatarId" aria-label="${t("actions.playerAvatarAria", { name: escapeAttribute(player.name) })}">
           ${avatarOptions.map((avatar) => `
-            <option value="${avatar.id}" ${player.avatarId === avatar.id ? "selected" : ""}>${t(avatar.labelKey)}</option>
+            <option value="${avatar.id}" ${player.avatarId === avatar.id ? "selected" : ""}>${avatar.name}</option>
           `).join("")}
         </select>
         <button class="secondary icon-button" type="submit">${t("actions.save")}</button>
@@ -2345,7 +2345,25 @@ function renderMatches(matches) {
     (match) => createMatchCard(match, isEditablePlayerMatch(match, selectedPlayer), selectedPlayer?.id, true),
   );
   renderSpectatorMatches(matches);
+  scheduleWrappedScorecardPlayers();
 }
+
+let wrappedScorecardPlayersFrame = 0;
+
+function scheduleWrappedScorecardPlayers() {
+  cancelAnimationFrame(wrappedScorecardPlayersFrame);
+  wrappedScorecardPlayersFrame = requestAnimationFrame(() => {
+    document.querySelectorAll(".scorecard-players .team-player").forEach((playerRow) => {
+      const badge = playerRow.querySelector(".team-player-badge");
+      if (!badge) return;
+      const styles = getComputedStyle(badge);
+      const lineHeight = Number.parseFloat(styles.lineHeight) || Number.parseFloat(styles.fontSize) * 1.2;
+      playerRow.classList.toggle("name-wraps", badge.scrollHeight > lineHeight * 1.35);
+    });
+  });
+}
+
+window.addEventListener("resize", scheduleWrappedScorecardPlayers);
 
 function filterMatches(matches, filter) {
   if (filter === "active") return matches.filter((match) => match.state === "playing");
@@ -2443,7 +2461,6 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
     <div class="match-top">
       <div class="match-meta">
         <span>${escapeHtml(matchContextText(match))}</span>
-        ${match.state === "playing" ? `<span class="now-chip">${t("common.now")}</span>` : ""}
       </div>
       <div class="match-top-actions">
         <span class="match-court">${match.courtName ?? t("tournament.noCourtAssigned")}</span>
@@ -2459,7 +2476,7 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
         <div class="scorecard-players">${teamDisplay(match.teamOne, "scorecard")}</div>
       </section>
       <section class="scorecard-center" aria-label="${t("score.scoreboardAria")}">
-        <div class="scorecard-emblem" aria-hidden="true"><img src="padelstar-icon.png" alt="" width="54" height="54"></div>
+        <div class="scorecard-emblem" aria-hidden="true"><img src="assets/padelstar-icon.png" alt="" width="54" height="54"></div>
         <div class="scorecard-score-pair">
           ${pointControl(0, teamOneName)}
           <img class="scorecard-vs-icon" src="assets/vs_icon" alt="VS" width="88" height="58">

@@ -185,8 +185,7 @@ h3 {
 .avatar-picker {
   display: grid;
 
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: 1fr;
 
   gap: 8px;
 }
@@ -195,46 +194,57 @@ h3 {
   display: inline-flex;
 
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 
-  min-height: 44px;
+  min-height: 56px;
+
+  gap: 12px;
+
+  padding: 8px 12px;
 
   border:
-    1px solid rgba(var(--gold-light-rgb), 0.26);
+    1px solid var(--card-line);
 
-  border-radius: 8px;
+  border-radius: 12px;
 
   background:
-    rgba(5, 21, 43, 0.66);
+    rgba(2, 11, 25, 0.66);
 
-  color: var(--gold-light);
+  color: var(--card-blue-soft);
 
-  font-size: 0.82rem;
-  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.avatar-picker label img {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border: 2px solid var(--card-blue);
+  border-radius: 50%;
+  background: var(--card-blue-soft);
 }
 
 .avatar-picker label:hover {
-  border-color:
-    rgba(var(--gold-bright-rgb), 0.48);
+  border-color: var(--card-blue);
 
   background:
-    rgba(var(--gold-rgb), 0.08);
+    rgba(20, 124, 255, 0.08);
 }
 
 .avatar-picker label:has(input:checked) {
-  border-color:
-    rgba(var(--gold-light-rgb), 0.82);
+  border-color: var(--card-blue);
 
   background:
     linear-gradient(135deg,
-      var(--gold-light),
-      var(--gold-bright) 42%,
-      var(--gold));
+      rgba(223, 243, 255, 0.96),
+      rgba(92, 174, 255, 0.96));
 
   color: var(--ink-dark);
 
   box-shadow:
-    0 8px 22px rgba(var(--gold-rgb), 0.24);
+    0 8px 22px rgba(20, 124, 255, 0.24);
 }
 
 .avatar-picker input {

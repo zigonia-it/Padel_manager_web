@@ -6,6 +6,7 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const serviceWorkerSource = fs.readFileSync(path.join(root, "service-worker.js"), "utf8");
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const manifestSource = fs.readFileSync(path.join(root, "manifest.webmanifest"), "utf8");
 const stylesSource = fs.readFileSync(path.join(root, "styles", "styles.css"), "utf8");
 const baseStylesSource = fs.readFileSync(path.join(root, "styles", "base.css"), "utf8");
 const layoutStylesSource = fs.readFileSync(path.join(root, "styles", "layout.css"), "utf8");
@@ -24,13 +25,25 @@ const adminActionsSource = fs.readFileSync(path.join(root, "app", "admin-actions
 const playerActionsSource = fs.readFileSync(path.join(root, "app", "player-actions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v145/);
+  assert.match(serviceWorkerSource, /padelstar-v156/);
   assert.match(serviceWorkerSource, /profile-manager\.js/);
   assert.match(serviceWorkerSource, /self\.skipWaiting\(\)/);
   assert.match(serviceWorkerSource, /self\.clients\.claim\(\)/);
   assert.match(serviceWorkerSource, /event\.request\.mode === "navigate"/);
   assert.match(serviceWorkerSource, /caches\.match\("\.\/index\.html"\)/);
   assert.match(serviceWorkerSource, /"\.\/privacy\.html"/);
+});
+
+test("all active app icon surfaces use the shared Padelstar icon", () => {
+  assert.match(indexSource, /apple-touch-icon" href="assets\/padelstar-icon\.png/);
+  assert.match(indexSource, /rel="icon" href="assets\/padelstar-icon\.png/);
+  assert.match(privacySource, /apple-touch-icon" href="assets\/padelstar-icon\.png/);
+  assert.match(privacySource, /rel="icon" href="assets\/padelstar-icon\.png/);
+  assert.match(manifestSource, /"src": "assets\/padelstar-icon\.png"/);
+  assert.doesNotMatch(serviceWorkerSource, /assets\/icons\/padelstar-(256|512)\.png/);
+  assert.match(serviceWorkerSource, /icon: "\.\/assets\/padelstar-icon\.png"/);
+  assert.match(serviceWorkerSource, /badge: "\.\/assets\/padelstar-icon\.png"/);
+  assert.match(appSource, /src="assets\/padelstar-icon\.png"/);
 });
 
 test("browser entrypoint uses the organized app and styles directories", () => {
@@ -136,10 +149,10 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-81/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-23/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-81/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-23/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-91/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-26/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-91/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-26/);
 });
 
 test("create form uses a generic default tournament name", () => {

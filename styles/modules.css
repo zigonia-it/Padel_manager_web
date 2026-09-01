@@ -887,7 +887,6 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
    ========================================================= */
 
 .match-status,
-.now-chip,
 .status-chip {
   display: inline-flex;
 
@@ -912,7 +911,6 @@ body.workspace-menu-open .workspace-menu-toggle span:nth-child(3),
   letter-spacing: 0.01em;
 }
 
-.now-chip,
 .status-chip {
   width: fit-content;
 

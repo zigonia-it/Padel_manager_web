@@ -1,15 +1,16 @@
 # Padelstar – implementeringsdokumentasjon
 
-Sist oppdatert: 2026-09-01
+Sist oppdatert: 2026-09-02
 
 Dette er den aktive, kronologiske oversikten over tidligere implementeringer, beslutninger og verifiseringer. Den komplette eldre arbeidsloggen er bevart i [archive/history/documentation_log_legacy.md](archive/history/documentation_log_legacy.md). Planer som ikke lenger er operative ligger i [archive/plans/](archive/plans/).
 
 ## Gjeldende leveransestatus
 
 - `main` er publisert til `origin/main`.
-- Siste brukerrettede endring: DiceBear Gaze-avatarer, felles hamburgerikon og fjernet aktiv-tab-understrek.
-- Siste relevante commits: `4fb4d00` (Gaze-avatarer), `db0b5eb` (responsiv navigasjon), `4b69e5b` (dokumentasjon av Gaze-endring).
-- Lokalt: `npm test` passerer med 77 beståtte tester og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
+- Siste publiserte commit: `814a411` (blå scorecard-UI og dokumentasjon).
+- Siste brukerrettede baseline: DiceBear Lorelei Neutral-avatarer, navngitt avatarvalgliste, blått scorecard-design og responsiv status-/spillerlayout.
+- Lokale UI-justeringer etter siste push er ikke publisert ennå.
+- Lokalt: `npm test` passerer med 78 beståtte tester og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
 - CI/deploy er satt opp med browser-smoke for desktop, medium og mobil.
 
 ## Kronologisk historikk
@@ -116,7 +117,7 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - Felles menyjusteringer verifisert på desktop, medium og mobil.
 - Hero-tekst, versjon 0.3 Beta, språkmodul og generisk turneringsnavn oppdatert.
 - Kampkontroller, kampoverskrifter, baneetiketter, poeng og pause/break oversatt.
-- DiceBear-avatarer byttet fra `thumbs` til `gaze` med stabil seed (`4fb4d00`).
+- DiceBear-avatarer byttet fra `thumbs` til `lorelei-neutral` med stabil seed.
 - Aktiv-tab-understrek fjernet, hamburgerikonet gjort synlig med CSS og responsiv cache bumpet til `padelstar-v99` (`db0b5eb`).
 
 ### 2026-09-02
@@ -126,9 +127,21 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - Avatar-renderingen ble samlet med stabile DiceBear-avatarer, fargede avatar-rammer og en ny Anton-font for den visuelle kampkortretningen.
 - Responsiv layout ble justert for små skjermer: hero og knapper fikk bedre vertikal plassering, kampoverskrifter og `NÅ`-chip unngår logooverlapp, og lange spillernavn brytes uten at avatarene flyttes vertikalt.
 - Gjenstående gull-/bruntonede bakgrunner ble erstattet med mørkblå flater. Ventestatus, admin-spillerliste, walkover-/avbryt-knapper, rundesammendrag og menyflater følger nå samme blå palett.
+- Overflødig `NÅ`-chip ble fjernet fra kampkortene. Den kompakte chip-stilen ble flyttet til `Pågår` og `Venter`, slik at statusen vises én gang med tydelig blå styling.
+- Kampkortets toppfelt fikk større sikkerhetsmargin rundt den sentrerte logoen på smale bredder, slik at kampmetadata og status ikke overlapper merkevaren.
+- Spillerlinjene måler nå faktisk tekstbrytning ved rendering og vindusendring. Ved flersidige navn plasseres avatar over navnet automatisk på alle sidebredder.
+- Den siste røde rammen på aktive kampkort, fremhevede kamper og tilskuerkort ble endret til blå aktiv-status. Rødt er fortsatt reservert for avbryt/fare.
+- Admin-panelene `Styring`, `Del`, `Spillere` og `Kamper` bruker nå samme fullbredde layout på desktop og større nettbrettbredder.
+- Tilskuerkortets resultat-tall bruker nå Anton-fonten isolert til scoretallene; lag- og spillertekst beholder vanlig UI-typografi.
+- Hero-innholdet på hjemmesiden fikk dobbel vertikal avstand fra den faste menyen, med tilsvarende responsiv justering på mindre skjermer.
+- Tilskuerkortets scoretall fikk økt høyre innvendig luft, slik at tallet ikke ligger tett mot kanten.
+- Avstanden mellom avatar og spillernavn i tilskuerkortene ble også økt for bedre lesbarhet.
+- Avatarvelgeren i både påmelding og spillerprofil ble gjort om til en vertikal valgliste med synlig forhåndsvisning og faste navn: Sophie, Aiden, Luna og Milo. De eksisterende avatar-ID-ene (`smash`, `serve`, `wall`, `lob`) er beholdt for kompatibilitet.
+- Workspace-headeren på turneringssiden ble gjort transparent, slik at den følger samme sammenhengende mørkeblå flate som resten av siden.
+- Alle aktive appikonreferanser ble samlet til `assets/padelstar-icon.png`: favicon, Apple-touch-icon, PWA-manifest, varsler og scorecard-emblem.
 - Fjernet overflødig footer-logo og ryddet bort eldre score-input-kaskader som ikke lenger brukes av den nye scorecard-renderingen.
-- PWA-cache og stylesheet-query-versjoner ble oppdatert til `padelstar-v145` og `padelstar-ui-81`.
-- Verifisering: `npm test` passerer med 77 beståtte tester og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
+- PWA-cache og stylesheet-query-versjoner ble oppdatert videre til `padelstar-v156` og `padelstar-ui-91`.
+- Verifisering: `npm test` passerer med 78 beståtte tester og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
 
 ## Verifikasjonsprinsipp
 

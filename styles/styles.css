@@ -229,7 +229,6 @@
       repeat(2, minmax(0, 1fr));
   }
 
-  .avatar-picker,
   .status-grid,
   .round-summary,
   .player-status-grid,
@@ -566,9 +565,9 @@ body[data-theme="classic"] .rules-list > div {
 body[data-theme="classic"] .match-card.match-playing,
 body[data-theme="classic"] .highlight-match,
 body[data-theme="classic"] .spectator-score-card {
-  border-color: rgba(255, 113, 128, 0.74);
-  background: linear-gradient(135deg, rgba(255, 113, 128, 0.16), transparent 54%), rgba(13, 28, 49, 0.88);
-  box-shadow: 0 16px 36px rgba(255, 113, 128, 0.12);
+  border-color: rgba(20, 124, 255, 0.72);
+  background: linear-gradient(135deg, rgba(20, 124, 255, 0.16), transparent 54%), rgba(13, 28, 49, 0.88);
+  box-shadow: 0 16px 36px rgba(20, 124, 255, 0.12);
 }
 
 body[data-theme="classic"] .next-match {
@@ -1154,7 +1153,12 @@ body.workspace-active {
 
 .match-card .match-status {
   border-color: rgba(20, 124, 255, 0.72);
+  background: rgba(20, 124, 255, 0.12);
   color: var(--card-blue-soft);
+  min-height: 24px;
+  padding: 0.28rem 0.58rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
 }
 
 body[data-theme="classic"] .match-card.match-playing,
@@ -1220,8 +1224,9 @@ body[data-theme="classic"] .match-card.match-playing {
 
   .match-meta {
     min-width: 0;
-    max-width: min(220px, calc(50% - 20px));
-    flex: 1 1 50%;
+    width: calc(50% - 64px);
+    max-width: calc(50% - 64px);
+    flex: 0 1 calc(50% - 64px);
   }
 
   .match-meta > span:first-child {
@@ -1229,14 +1234,11 @@ body[data-theme="classic"] .match-card.match-playing {
     overflow-wrap: anywhere;
   }
 
-  .match-meta .now-chip {
-    margin-top: 2px;
-  }
-
   .match-top-actions {
     min-width: 0;
-    max-width: calc(50% - 8px);
-    flex: 0 1 50%;
+    width: calc(50% - 64px);
+    max-width: calc(50% - 64px);
+    flex: 0 1 calc(50% - 64px);
     justify-content: flex-end;
   }
 
@@ -1347,6 +1349,13 @@ body[data-theme="classic"] .match-card.match-playing {
   flex: 0 0 auto;
 }
 
+.scorecard-players .team-player.name-wraps {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
 .checkbox-card {
   border-color: rgba(96, 166, 255, 0.46);
   background:
@@ -1369,6 +1378,9 @@ body[data-theme="classic"] .match-card.match-playing {
 .workspace-header {
   min-width: 0;
   padding-inline: clamp(16px, 2vw, 26px);
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
 }
 
 .workspace-header > div:first-child {
@@ -1391,6 +1403,10 @@ body[data-theme="classic"] .match-card.match-playing {
 
 .workspace-header-actions .share-box {
   flex: 1 1 100%;
+}
+
+.view-grid[data-section="admin"] > .panel {
+  grid-column: 1 / -1;
 }
 
 .match-card .cancel-match-button,
@@ -1515,9 +1531,19 @@ body[data-theme="classic"] .match-card.match-playing {
   box-shadow: 0 16px 36px rgba(20, 124, 255, 0.14);
 }
 
+.spectator-score-teams > div > strong {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+}
+
 .spectator-score-teams > div {
   border-color: rgba(96, 166, 255, 0.28);
   background: linear-gradient(145deg, rgba(20, 124, 255, 0.16), rgba(3, 16, 34, 0.9));
+  padding-right: 26px;
+}
+
+.spectator-score-teams .team-player {
+  gap: 12px;
 }
 
 .scorecard-score-pair {
@@ -1715,16 +1741,21 @@ body[data-theme="classic"] .match-card.match-playing {
   .scorecard-vs-icon {
     width: clamp(96px, 48cqw, 128px);
   }
+
+  .scorecard-players .team-player.name-wraps {
+    align-items: center;
+    text-align: center;
+  }
 }
 
 /* Give the landing hero a little more breathing room below the fixed nav. */
 
 .intro-copy {
-  transform: translateY(clamp(18px, 4vh, 48px));
+  transform: translateY(clamp(36px, 8vh, 96px));
 }
 
 @media (max-width: 760px) {
   .intro-copy {
-    transform: translateY(clamp(8px, 2vh, 20px));
+    transform: translateY(clamp(16px, 4vh, 40px));
   }
 }
