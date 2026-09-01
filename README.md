@@ -6,7 +6,7 @@ Sist oppdatert: 2026-09-01
 
 Status: 0.3 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
-Aktiv utviklingsplan ligger i `docs/development_plan.md`. Historiske planer og designutkast ligger i `docs/archive/`.
+Aktiv utviklingsplan ligger i `docs/development_plan.md`, og kronologisk implementeringsdokumentasjon ligger i `docs/documentation.md`. Historiske planer, logger og designutkast ligger i `docs/archive/`.
 
 Metadata:
 - Navn: Padelstar
@@ -123,10 +123,10 @@ https://padelstar.app
 
 ## Dokumentasjon
 
-- `docs/development_plan.md` - aktiv arbeidsplan og neste tekniske prioriteringer.
+- `docs/development_plan.md` - samlet aktiv arbeidsplan, akseptansekriterier og åpne beslutninger.
 - `docs/product_development.md` - produktretning, roller, turneringsregler og videre idéer.
 - `docs/tournament_logic.md` - turneringslogikk hentet fra tidligere iOS-app.
-- `docs/migration_notes.md` - notater for porting fra SwiftUI/iOS.
-- `docs/documentation_log.md` - løpende logg over beslutninger og utført arbeid.
+- `docs/archive/history/migration_notes_legacy.md` - historiske notater for porting fra SwiftUI/iOS.
+- `docs/documentation.md` - kronologisk oversikt over beslutninger, implementeringer og verifikasjoner.
 
-Prosjektregel: etter hver tydelige arbeidsøkt skal `docs/documentation_log.md` oppdateres.
+Prosjektregel: etter hver tydelige arbeidsøkt skal `docs/documentation.md` oppdateres.

@@ -1,60 +1,114 @@
-# Padelstar - Utviklingsplan
+# Padelstar – samlet utviklingsplan
 
-Sist oppdatert: 2026-08-29
+Sist oppdatert: 2026-09-01
 
-Status: aktivt arbeidsdokument for gjenstående arbeid
+Status: aktivt operativt arbeidsdokument
 
-## Formål
+## Formål og styringsregel
 
-Dette dokumentet inneholder bare arbeid som ikke er gjennomført ennå, eller valg som må tas før et nytt arbeid starter. Gjennomførte faser, beslutninger, endrede filer og verifiseringer dokumenteres i [documentation_log.md](documentation_log.md).
+Dette dokumentet er den eneste aktive planen for videre arbeid. Det beskriver dagens baseline, åpne beslutninger, prioriterte faser, akseptansekriterier og verifikasjon. Gjennomført arbeid føres i [documentation.md](documentation.md) i kronologisk rekkefølge.
 
-Padelstar er en plattformuavhengig PWA for administrasjon og gjennomføring av padelturneringer. Produktretningen og det etablerte funksjonelle omfanget ligger i `product_development.md`.
+Padelstar er en plattformuavhengig vanilla-JavaScript-PWA for å opprette, dele, administrere og følge padelturneringer på mobil, nettbrett og desktop. Supabase brukes for valgfri live-synk, mens lokal lagring og service worker gir offline-fallback.
 
-## Gjenstående arbeid
+## Gjeldende baseline
 
-### 1. Valgfri ekstern driftsvarsling
+Følgende er implementert og skal behandles som beskyttet funksjonalitet:
 
-Vurdere om `/api/health` skal kobles til en ekstern monitor for aktiv varsling ved driftsfeil.
+- Round-robin med singles for små spillergrupper og partnerrotasjon for større grupper.
+- Cup-format med automatisk/manuelt lagoppsett, byes, bracket, bronsefinale, walkover og ett-stegs undo.
+- Admin-, spiller- og tilskuervisning med rollebasert synlighet og spillerstyrt poengføring.
+- Lokal state, recovery-kopi, offline-speiling, sync-kø, realtime reconnect og konfliktfeedback.
+- Supabase RPC-er med RLS, grants, tokenbinding, revisjonskontroll, rate limiting og automatisk retensjonsjobb.
+- Norsk bokmål, nynorsk, engelsk, spansk, tysk og fransk, med språkpreferanse per bruker/enhet og oversatt personvernside.
+- Felles responsiv toppbar, hamburger/drawer, språkvelger, modulnavigasjon og Escape-lukking.
+- Ett aktivt visuelt tema, konsoliderte CSS-lag og DiceBear Gaze-avatarer med deterministisk seed.
+- PWA-cache, GitHub Pages-verifisering, statisk hosting og eksisterende Vercel/Supabase-konfigurasjon.
 
-Før oppstart må følgende avklares:
+## Ikke-forhandlingsbare krav
 
-- leverandør og kostnad
-- varslingskanal og ansvarlig mottaker
-- databehandling og personvern
-- terskler for feil, treghet og gjentatte feil
+- Bevar eksisterende turnerings-, scoring-, join-, admin-, spiller-, tilskuer-, offline- og personvernflyt.
+- Ikke legg admin-token, spiller-token, service-role-nøkkel eller privat VAPID-nøkkel i klientkode, backup eller logger.
+- Ikke omskriv eller slett kjørte Supabase-migrasjoner. Nye databaseendringer er nye migrasjonsfiler.
+- Ikke bland brukerens språkpreferanse inn i delt turneringsstate.
+- Ikke slett usikre filer direkte; arkiver dem etter referansesøk.
+- Alle funksjonsendringer krever tester, `git diff --check`, dokumentasjon og verifisert deploy.
 
-### 2. Eventuell full konto- og tokenmigrering
+## Prioritert videre plan
 
-Vurdere om kompatibel admin-kontoknytting senere skal utvides til full erstatning av lokal admin-token.
+### Fase A – Fullfør strukturkonsolideringen
 
-Før oppstart må følgende avklares:
+Mål: gjøre modulgrensene reelle og holde `app/app.js` som en liten entrypoint.
 
-- obligatorisk eller valgfri konto for administrator
-- flere administratorer og rollemodell
-- sessionsutløp, tilbakekalling og enhetsbytte
-- migrering av eksisterende turneringer uten tap av tilgang
-- RLS- og recovery-strategi
+Arbeid:
 
-### 3. Produktforbedringer etter ny beslutning
+- Kartlegg gjenværende funksjoner i `app/app.js` etter ansvar: bootstrap, profil, remote, rendering, admin, spiller, turneringsdomene og UI-feedback.
+- Flytt én sammenhengende ansvarsenhet om gangen til eksisterende eller nye moduler.
+- Utvid modul-API-ene med eksplisitte avhengigheter, uten globale sideeffekter.
+- Fjern døde CSS-regler for historiske landing-/workspace-menyer og gamle temafaser når referansesøk bekrefter at de ikke brukes.
+- Hold `app/app.js` som entrypoint til slutt, og oppdater README, service worker og tester ved hver filflytting.
 
-Følgende kan vurderes som separate initiativer når de prioriteres:
+Akseptansekriterier:
 
-- mer avansert tiebreak- og poengføring
-- PDF-eksport av tabell og turneringsresultat
-- egen avatarvelger eller avataropplasting
-- utvidet historikk og karrierestatistikk
-- mer avansert offline-konflikthåndtering
+- Hver flyttet ansvarsenhet har en testbar modulgrense.
+- Ingen aktiv HTML-, JS-, CSS-, service-worker- eller dokumentasjonsreferanse peker til flyttede/arkiverte filer.
+- Ingen endring i brukerflyt eller Supabase-kontrakt.
 
-## Arbeidsregler
+### Fase B – Sikkerhets- og personvernverifisering
 
-- Ikke start et nytt punkt uten at scope, personvern, datalagring og akseptansekriterier er avklart.
-- Nye endringer skal testes, dokumenteres i `documentation_log.md` og publiseres med en sporbar commit.
-- Ingen hemmeligheter skal lagres i repoet eller i klientkode.
-- Vercel Analytics beholdes med mindre et nytt, uttrykkelig valg endrer dette.
-- Eksisterende brukerdata skal ikke brukes som testdata; midlertidige testdata skal kunne identifiseres og slettes.
+Mål: verifisere hele angrepsflaten etter strukturendringene.
 
-## Dokumentasjonsflyt
+Arbeid:
 
-1. Skriv plan og beslutningsport her før nytt arbeid starter.
-2. Flytt gjennomførte punkter til `documentation_log.md` etter verifisering.
-3. La denne filen inneholde bare åpne beslutninger og neste arbeid.
+- Kjør standard sikkerhetsskanning av repositoryet på siste commit.
+- Gjennomgå funn for secrets, DOM/XSS-sinks, Supabase RPC/RLS/grants, tokenbinding, service worker, cache og deploykonfigurasjon.
+- Rett validerte funn med minste nødvendige endring og legg til regresjonstest.
+- Kontroller at personverntekst, retensjonspolicy og implementert databasejobb fortsatt beskriver samme virkelighet.
+
+Akseptansekriterier:
+
+- Skanningen er fullført med dokumenterte funn eller eksplisitt dokumenterte begrensninger.
+- Alle reportable funn er rettet, akseptert med eierbeslutning eller blokkert med tydelig begrunnelse.
+- Ingen hemmeligheter eller private tokenverdier finnes i tracked filer.
+
+### Fase C – Produksjons- og brukerflytregresjon
+
+Mål: verifisere hele appen etter hver større endring.
+
+Påkrevd kontroll:
+
+- `npm test`
+- `npm run check:syntax`
+- `git diff --check`
+- Browser-smoke på desktop, medium/tablet og mobil.
+- Hamburger åpne/lukke, språkvelger i drawer, navigasjon, Escape, språk per bruker/enhet og offline fallback.
+- Opprett, join/QR, admin, spiller, tilskuer, poeng, kampstart, walkover, undo, realtime og retensjonsflyt.
+- Ingen horisontal overflow, avkuttede logoer eller skjulte fokusringer.
+- Service-worker-cache inneholder alle aktive shell-filer og ingen arkiverte filer.
+
+### Fase D – Valgstyrte produktforbedringer
+
+Disse starter ikke før scope, personvern og akseptansekriterier er besluttet:
+
+- Ekstern driftsvarsling for `/api/health`.
+- Full konto- og tokenmigrering for administratorer.
+- Mer avansert tiebreak/poengføring.
+- PDF-eksport av tabell og resultat.
+- Utvidet profilhistorikk og karrierestatistikk.
+- Mer avansert offline-konflikthåndtering.
+- Eventuell egen avatarvelger/opplasting; DiceBear Gaze er gjeldende baseline.
+
+## Dokumentasjons- og leveranseflyt
+
+1. Registrer beslutning og scope her før et nytt initiativ starter.
+2. Implementer i små, verifiserbare commits.
+3. Oppdater [documentation.md](documentation.md) med dato, endring, tester og commit/deploy.
+4. Arkiver erstattede planer under `docs/archive/plans/` og historiske logger under `docs/archive/history/`.
+5. Kjør full verifikasjon før push.
+6. Push til `origin/main` når brukerens arbeidsflyt uttrykkelig inkluderer publisering.
+
+## Eierbeslutninger som fortsatt er åpne
+
+- Skal ekstern monitor for health-endepunktet innføres, og hvem mottar varsler?
+- Skal admin-konto bli obligatorisk, eller skal lokal/tokenbasert tilgang beholdes?
+- Hvilke produktforbedringer skal prioriteres etter beta?
+- Skal Vercel Analytics beholdes etter beta-evalueringen?

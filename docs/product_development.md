@@ -14,8 +14,8 @@ Kildegrunnlag:
 
 - Eksisterende SwiftUI-prosjekt: `/Users/sigurd/Documents/Developer/PadelManager-main`
 - Nåværende webprosjekt: `/Users/sigurd/Documents/Developer/padel_manager_webapp`
-- Tidligere webplan: `development_plan.md`
-- Migreringsnotater: `migration_notes.md`
+- Aktiv webplan: `development_plan.md`; implementeringshistorikk: `documentation.md`
+- Historiske migreringsnotater: `archive/history/migration_notes_legacy.md`
 
 ## 1. Formål
 
