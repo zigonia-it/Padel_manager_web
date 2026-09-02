@@ -216,8 +216,8 @@
           <h2 id="setupAdminTitle" data-i18n="setup.newTournament">Ny turnering</h2>
           <label>
             <span data-i18n="setup.tournamentName">Turneringsnavn</span>
-            <input name="tournamentName" type="text" value="Padelstar-turnering" maxlength="80" autocomplete="off"
-              required>
+            <input name="tournamentName" type="text" placeholder="Padelstar-turnering" data-i18n-placeholder="setup.defaultTournamentName"
+              maxlength="80" autocomplete="off" required>
           </label>
           <label>
             <span data-i18n="setup.playersOptional">Spillere, valgfritt</span>
@@ -334,7 +334,7 @@
               </div>
               <div class="live-overview" id="adminLiveOverview"></div>
               <section class="tournament-assistant hidden" id="tournamentAssistant" aria-live="polite">
-                <div class="panel-heading"><h4>Tournament Assistant</h4></div>
+                <div class="panel-heading"><h4 data-i18n="assistant.title">Tournament Assistant</h4></div>
                 <ul id="tournamentAssistantFindings"></ul>
               </section>
               <div class="court-queue" id="courtQueue"></div>
@@ -353,12 +353,12 @@
                   <select name="format">
                     <option value="roundRobin" data-i18n="admin.roundRobinFormat">Round robin</option>
                     <option value="cup" data-i18n="admin.cupFormat">Cup</option>
-                    <option value="americano">Americano</option>
-                    <option value="teamAmericano">Team-Americano</option>
-                    <option value="mexicano">Mexicano</option>
-                    <option value="teamMexicano">Team-Mexicano</option>
-                    <option value="kingOfCourt">King of Court</option>
-                    <option value="groupsPlayoffs">Grupper + sluttspill</option>
+                    <option value="americano" data-i18n="admin.americanoFormat">Americano</option>
+                    <option value="teamAmericano" data-i18n="admin.teamAmericanoFormat">Team-Americano</option>
+                    <option value="mexicano" data-i18n="admin.mexicanoFormat">Mexicano</option>
+                    <option value="teamMexicano" data-i18n="admin.teamMexicanoFormat">Team-Mexicano</option>
+                    <option value="kingOfCourt" data-i18n="admin.kingOfCourtFormat">King of Court</option>
+                    <option value="groupsPlayoffs" data-i18n="admin.groupsPlayoffsFormat">Grupper + sluttspill</option>
                   </select>
                 </label>
                 <label id="cupTeamSetupModeField">
@@ -685,12 +685,12 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-15"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-16"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-2"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-1"></script>
   <script defer src="app/remote-tournament.js?v=padelstar-remote-tournament-1"></script>
-  <script defer src="app/admin-actions.js?v=padelstar-admin-actions-1"></script>
+  <script defer src="app/admin-actions.js?v=padelstar-admin-actions-2"></script>
   <script defer src="app/player-actions.js?v=padelstar-player-actions-1"></script>
   <script defer src="app/tournament-engine.js?v=padelstar-engine-1"></script>
   <script defer src="app/tournament-modes.js?v=padelstar-modes-1"></script>
@@ -710,7 +710,7 @@
   <script defer src="app/match-list.js?v=padelstar-match-list-1"></script>
   <script defer src="app/standings.js?v=padelstar-standings-1"></script>
   <script defer src="app/player-list.js?v=padelstar-player-list-1"></script>
-  <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-1"></script>
+  <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-2"></script>
   <script defer src="app/player-status.js?v=padelstar-player-status-1"></script>
   <script defer src="app/player-next-match.js?v=padelstar-player-next-match-1"></script>
   <script defer src="app/rules.js?v=padelstar-rules-1"></script>
@@ -722,7 +722,7 @@
   <script defer src="app/backup-ui.js?v=padelstar-backup-ui-1"></script>
   <script defer src="app/player-state.js?v=padelstar-player-state-1"></script>
   <script defer src="app/tournament-status.js?v=padelstar-tournament-status-1"></script>
-  <script defer src="app/scoring-engine.js?v=padelstar-scoring-1"></script>
+  <script defer src="app/scoring-engine.js?v=padelstar-scoring-2"></script>
   <script defer src="app/state-manager.js?v=padelstar-state-1"></script>
   <script defer src="app/realtime-sync.js?v=padelstar-realtime-sync-1"></script>
   <script defer src="app/offline-storage.js?v=padelstar-offline-1"></script>
@@ -736,7 +736,7 @@
   <script defer src="app/ui-effects.js?v=padelstar-ui-effects-1"></script>
   <script defer src="app/navigation.js?v=padelstar-navigation-1"></script>
   <script defer src="app/avatar-system.js?v=padelstar-avatar-system-1"></script>
-  <script defer src="app/pwa-install.js?v=padelstar-pwa-install-1"></script>
+  <script defer src="app/pwa-install.js?v=padelstar-pwa-install-2"></script>
   <script defer src="app/accent-system.js?v=padelstar-accent-system-1"></script>
   <script defer src="app/player-visuals.js?v=padelstar-player-visuals-1"></script>
   <script defer src="app/ui-feedback.js?v=padelstar-ui-feedback-1"></script>
@@ -753,7 +753,7 @@
   <script defer src="app/remote-state-write.js?v=padelstar-remote-state-write-1"></script>
   <script defer src="app/remote-admin-actions.js?v=padelstar-remote-admin-actions-1"></script>
   <script defer src="app/remote-player-score.js?v=padelstar-remote-player-score-1"></script>
-  <script defer src="app/score-actions.js?v=padelstar-score-actions-1"></script>
+  <script defer src="app/score-actions.js?v=padelstar-score-actions-2"></script>
   <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-1"></script>
   <script defer src="app/app-events.js?v=padelstar-app-events-1"></script>
   <script defer src="app/workspace-events.js?v=padelstar-workspace-events-1"></script>

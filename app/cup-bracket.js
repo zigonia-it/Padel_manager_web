@@ -20,7 +20,7 @@ window.PadelstarCupBracket = (() => {
         <section class="cup-bracket-round">
           <div class="cup-bracket-round-heading">
             <strong>${cupRoundTitle(round, index, bracket.rounds.length)}</strong>
-            <span>${round.byeTeams?.length ? `${round.byeTeams.length} bye` : ""}</span>
+            <span>${round.byeTeams?.length ? t("cup.byeCount", { count: round.byeTeams.length }) : ""}</span>
           </div>
           <div class="cup-bracket-slots">
             ${round.slots.map((slot) => renderCupBracketSlot(slot)).join("")}

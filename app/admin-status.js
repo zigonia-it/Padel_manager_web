@@ -27,7 +27,7 @@ window.PadelstarAdminStatus = (() => {
       const isFinished = state.status === "Avsluttet";
       const blockReason = generateRoundBlockReason();
       const nextRoundLabel = blockReason || (state.currentRound > 0 ? t("tournament.nextRoundLabel", { round: state.currentRound + 1 }) : t("tournament.firstRoundReady"));
-      const playerMode = state.settings.format === "cup" ? "Cup" : state.players.length >= 4 ? t("common.double") : state.players.length >= 2 ? t("common.single") : t("common.waiting");
+      const playerMode = state.settings.format === "cup" ? t("admin.cupFormat") : state.players.length >= 4 ? t("common.double") : state.players.length >= 2 ? t("common.single") : t("common.waiting");
       const progress = activeRound?.status === "active" ? roundProgress(activeRound) : null;
       const statusText = isFinished ? t("common.finished") : activeRound?.status === "active" ? t("common.playing") : hasStarted ? t("common.betweenRounds") : t("common.lobby");
       elements.lobbyStatus.innerHTML = `

@@ -1,11 +1,11 @@
 window.PadelstarScoring = (() => {
   function validateSetScore(teamOne, teamTwo, settings) {
     const gamesToWinSet = settings.gamesToWinSet ?? 6;
-    if (!Number.isInteger(teamOne) || !Number.isInteger(teamTwo)) return "Resultatet må være hele tall.";
-    if (teamOne < 0 || teamTwo < 0) return "Resultatet kan ikke være negativt.";
-    if (teamOne === teamTwo) return "Resultatet kan ikke være uavgjort.";
+    if (!Number.isInteger(teamOne) || !Number.isInteger(teamTwo)) return "messages.invalidScoreInteger";
+    if (teamOne < 0 || teamTwo < 0) return "messages.invalidScoreNegative";
+    if (teamOne === teamTwo) return "messages.invalidScoreDraw";
     if (!isSetComplete(teamOne, teamTwo, settings)) {
-      return `Sett må vinnes ${gamesToWinSet}-x med to games margin, eller ${gamesToWinSet + 1}-${gamesToWinSet - 1} / ${gamesToWinSet + 1}-${gamesToWinSet}.`;
+      return "messages.invalidScoreShape";
     }
     return "";
   }

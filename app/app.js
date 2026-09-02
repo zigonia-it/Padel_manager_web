@@ -871,7 +871,7 @@ renderProfile();
 prefillInviteCodeFromUrl();
 syncCopyrightYear();
 registerServiceWorker();
-window.PadelstarPwaInstall?.create({ documentRef: document, navigatorRef: navigator, windowRef: window }).initialize();
+window.PadelstarPwaInstall?.create({ documentRef: document, navigatorRef: navigator, windowRef: window, translate: (key, values) => t(key, values) }).initialize();
 syncConnectionStatus();
 accountAuth?.bind();
 void accountAuth?.refresh();
@@ -1189,7 +1189,7 @@ function markSyncAttempt() {
 }
 
 function markSyncError(error) {
-  syncLastError = String(error?.message ?? error ?? "Ukjent synkroniseringsfeil").slice(0, 160);
+  syncLastError = String(error?.message ?? error ?? "Unknown synchronization error").slice(0, 160);
   persistSyncMetadata();
 }
 
@@ -1631,7 +1631,23 @@ function renderSyncControls() {
 }
 
 function applyLanguage() {
+  localizeGeneratedCourtNames();
   i18nUi.applyLanguage({ state, elements, i18n, translate: t, applyTheme });
+}
+
+function localizeGeneratedCourtNames() {
+  const courtPattern = /^(Bane|Court|Pista|Platz|Terrain|Bana)\s+\d+$/i;
+  const courtName = (court) => `${t("common.court")} ${court.courtNumber}`;
+  const previousNames = new Map(state.courts.map((court) => [court.id, court.name]));
+  state.courts.forEach((court) => {
+    if (courtPattern.test(String(court.name ?? ""))) court.name = courtName(court);
+  });
+  state.rounds.flatMap((round) => round.matches ?? []).forEach((match) => {
+    if (courtPattern.test(String(match.courtName ?? ""))) {
+      const court = state.courts.find((item) => item.courtNumber === match.plannedCourtIndex + 1 || previousNames.get(item.id) === match.courtName);
+      if (court) match.courtName = courtName(court);
+    }
+  });
 }
 
 function syncLanguageOptions() {

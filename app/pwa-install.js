@@ -1,7 +1,7 @@
 (function initializePadelstarPwaInstall(global) {
   "use strict";
 
-  function create({ documentRef = global.document, navigatorRef = global.navigator, windowRef = global }) {
+  function create({ documentRef = global.document, navigatorRef = global.navigator, windowRef = global, translate = null }) {
     let deferredPrompt = null;
     let lastTrigger = null;
 
@@ -33,13 +33,14 @@
     }
 
     function instructions() {
+      const t = (key) => translate?.(key) ?? key;
       const labels = {
-        ios: ["iPhone / iPad", ["Åpne Padelstar i Safari.", "Trykk på Del-knappen.", "Velg «Legg til på Hjem-skjerm».", "Trykk «Legg til»." ]],
-        android: ["Android", ["Åpne Padelstar i Chrome.", "Åpne menyen ⋮.", "Velg «Installer app» eller «Legg til på startskjermen».", "Bekreft installasjonen."]],
-        windows: ["Windows", ["Åpne Padelstar i Edge eller Chrome.", "Åpne nettlesermenyen.", "Velg «Installer app» eller tilsvarende.", "Bekreft installasjonen."]],
-        macos: ["Mac", ["Åpne Padelstar i Safari.", "Velg Del.", "Velg «Legg til i Dock».", "Bekreft installasjonen."]],
-        chromeos: ["Chromebook", ["Åpne Padelstar i Chrome.", "Åpne menyen ⋮.", "Velg «Installer app».", "Bekreft installasjonen."]],
-        generic: ["Installer Padelstar", ["Åpne nettlesermenyen.", "Se etter «Installer app» eller «Legg til på startskjermen».", "Bekreft installasjonen."]],
+        ios: [t("pwa.iosTitle"), [t("pwa.iosStep1"), t("pwa.iosStep2"), t("pwa.iosStep3"), t("pwa.iosStep4")]],
+        android: [t("pwa.androidTitle"), [t("pwa.androidStep1"), t("pwa.androidStep2"), t("pwa.androidStep3"), t("pwa.androidStep4")]],
+        windows: [t("pwa.windowsTitle"), [t("pwa.windowsStep1"), t("pwa.windowsStep2"), t("pwa.windowsStep3"), t("pwa.windowsStep4")]],
+        macos: [t("pwa.macosTitle"), [t("pwa.macosStep1"), t("pwa.macosStep2"), t("pwa.macosStep3"), t("pwa.macosStep4")]],
+        chromeos: [t("pwa.chromeosTitle"), [t("pwa.chromeosStep1"), t("pwa.chromeosStep2"), t("pwa.chromeosStep3"), t("pwa.chromeosStep4")]],
+        generic: [t("pwa.genericTitle"), [t("pwa.genericStep1"), t("pwa.genericStep2"), t("pwa.genericStep3")]],
       };
       const [title, steps] = labels[platform()] ?? labels.generic;
       return `<h3>${title}</h3><ol>${steps.map((step) => `<li>${step}</li>`).join("")}</ol>`;

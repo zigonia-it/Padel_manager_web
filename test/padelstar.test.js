@@ -372,9 +372,9 @@ test("set validation accepts standard padel set shapes and rejects impossible sc
 
   assert.equal(api.validateSetScore(6, 4), "");
   assert.equal(api.validateSetScore(7, 6), "");
-  assert.match(api.validateSetScore(6, 6), /uavgjort/);
-  assert.match(api.validateSetScore(6, 5), /må vinnes/);
-  assert.match(api.validateSetScore(-1, 6), /negativt/);
+  assert.equal(api.validateSetScore(6, 6), "messages.invalidScoreDraw");
+  assert.equal(api.validateSetScore(6, 5), "messages.invalidScoreShape");
+  assert.equal(api.validateSetScore(-1, 6), "messages.invalidScoreNegative");
 });
 
 test("scoring engine calculates leaderboard without app.js state", () => {
@@ -395,7 +395,7 @@ test("scoring engine calculates leaderboard without app.js state", () => {
 
   const entries = api.scoring.leaderboardEntries([ada, bo], [match], "sets");
 
-  assert.equal(api.scoring.validateSetScore(6, 5, { gamesToWinSet: 6 }), "Sett må vinnes 6-x med to games margin, eller 7-5 / 7-6.");
+  assert.equal(api.scoring.validateSetScore(6, 5, { gamesToWinSet: 6 }), "messages.invalidScoreShape");
   assert.deepEqual(plain(api.scoring.pointsByPlayer([match], "matches")), { "player-0": 3 });
   assert.equal(entries[0].player.name, "Ada");
   assert.equal(entries[0].points, 2);

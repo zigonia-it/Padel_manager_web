@@ -40,10 +40,10 @@
     function translateScoreValidationError(message, teamOne, teamTwo) {
       if (!message) return "";
       const t = deps.t;
-      if (message.includes("hele tall")) return t("messages.invalidScoreInteger");
-      if (message.includes("negativt")) return t("messages.invalidScoreNegative");
-      if (message.includes("uavgjort")) return t("messages.invalidScoreDraw");
-      if (message.includes("Sett må vinnes")) {
+      if (message === "messages.invalidScoreInteger") return t(message);
+      if (message === "messages.invalidScoreNegative") return t(message);
+      if (message === "messages.invalidScoreDraw") return t(message);
+      if (message === "messages.invalidScoreShape") {
         const gamesToWinSet = deps.getState().settings.gamesToWinSet ?? 6;
         return t("messages.invalidScoreShape", {
           gamesToWinSet,

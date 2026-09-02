@@ -69,7 +69,7 @@ const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.j
 const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v211/);
+  assert.match(serviceWorkerSource, /padelstar-v213/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-1/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-1/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -132,8 +132,8 @@ test("score actions have their own mutation boundary", () => {
   assert.match(scoreActionsSource, /awardTennisPoint/);
   assert.match(scoreActionsSource, /saveSetResult/);
   assert.match(scoreActionsSource, /global\.PadelstarScoreActions/);
-  assert.match(indexSource, /app\/score-actions\.js\?v=padelstar-score-actions-1/);
-  assert.match(serviceWorkerSource, /app\/score-actions\.js\?v=padelstar-score-actions-1/);
+  assert.match(indexSource, /app\/score-actions\.js\?v=padelstar-score-actions-2/);
+  assert.match(serviceWorkerSource, /app\/score-actions\.js\?v=padelstar-score-actions-2/);
   assert.match(appSource, /scoreActions\.awardTennisPoint/);
 });
 
@@ -223,8 +223,8 @@ test("PWA install flow supports native prompts, standalone detection and platfor
   assert.match(indexSource, /id="installAppButton"/);
   assert.match(indexSource, /id="installModal"/);
   assert.match(indexSource, /id="installInstructions"/);
-  assert.match(indexSource, /app\/pwa-install\.js\?v=padelstar-pwa-install-1/);
-  assert.match(serviceWorkerSource, /app\/pwa-install\.js\?v=padelstar-pwa-install-1/);
+  assert.match(indexSource, /app\/pwa-install\.js\?v=padelstar-pwa-install-2/);
+  assert.match(serviceWorkerSource, /app\/pwa-install\.js\?v=padelstar-pwa-install-2/);
 });
 
 test("phase 1 keeps player registration automatic and live admin creation authenticated", () => {
@@ -451,8 +451,8 @@ test("player list rendering has its own player-management boundary", () => {
 test("cup bracket rendering has its own DOM boundary", () => {
   assert.match(cupBracketSource, /renderCupBracket/);
   assert.match(cupBracketSource, /window\.PadelstarCupBracket/);
-  assert.match(indexSource, /app\/cup-bracket\.js\?v=padelstar-cup-bracket-1/);
-  assert.match(serviceWorkerSource, /app\/cup-bracket\.js\?v=padelstar-cup-bracket-1/);
+  assert.match(indexSource, /app\/cup-bracket\.js\?v=padelstar-cup-bracket-2/);
+  assert.match(serviceWorkerSource, /app\/cup-bracket\.js\?v=padelstar-cup-bracket-2/);
   assert.match(appSource, /cupBracket\.renderCupBracket\(\)/);
 });
 
@@ -715,7 +715,7 @@ test("browser entrypoint and service worker use the same cache-busting versions"
 });
 
 test("create form uses a generic default tournament name", () => {
-  assert.match(indexSource, /value="Padelstar-turnering"/);
+  assert.match(indexSource, /data-i18n-placeholder="setup\.defaultTournamentName"/);
   assert.doesNotMatch(indexSource, /value="Risløkka Padel"/);
 });
 

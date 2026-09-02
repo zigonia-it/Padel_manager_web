@@ -852,6 +852,46 @@ for (const [language, values] of Object.entries({
   Object.assign(padelstarTranslations[language], values);
 }
 
+Object.assign(padelstarTranslations.nb, {
+  "setup.defaultTournamentName": "Padelstar-turnering",
+  "pwa.iosTitle": "iPhone / iPad", "pwa.iosStep1": "Åpne Padelstar i Safari.", "pwa.iosStep2": "Trykk på Del-knappen.", "pwa.iosStep3": "Velg «Legg til på Hjem-skjerm».", "pwa.iosStep4": "Trykk «Legg til».",
+  "pwa.androidTitle": "Android", "pwa.androidStep1": "Åpne Padelstar i Chrome.", "pwa.androidStep2": "Åpne menyen ⋮.", "pwa.androidStep3": "Velg «Installer app» eller «Legg til på startskjermen».", "pwa.androidStep4": "Bekreft installasjonen.",
+  "pwa.windowsTitle": "Windows", "pwa.windowsStep1": "Åpne Padelstar i Edge eller Chrome.", "pwa.windowsStep2": "Åpne nettlesermenyen.", "pwa.windowsStep3": "Velg «Installer app» eller tilsvarende.", "pwa.windowsStep4": "Bekreft installasjonen.",
+  "pwa.macosTitle": "Mac", "pwa.macosStep1": "Åpne Padelstar i Safari.", "pwa.macosStep2": "Velg Del.", "pwa.macosStep3": "Velg «Legg til i Dock».", "pwa.macosStep4": "Bekreft installasjonen.",
+  "pwa.chromeosTitle": "Chromebook", "pwa.chromeosStep1": "Åpne Padelstar i Chrome.", "pwa.chromeosStep2": "Åpne menyen ⋮.", "pwa.chromeosStep3": "Velg «Installer app».", "pwa.chromeosStep4": "Bekreft installasjonen.",
+  "pwa.genericTitle": "Installer Padelstar", "pwa.genericStep1": "Åpne nettlesermenyen.", "pwa.genericStep2": "Se etter «Installer app» eller «Legg til på startskjermen».", "pwa.genericStep3": "Bekreft installasjonen.",
+  "cup.byeCount": "{count} bye",
+  "assistant.title": "Turneringsassistent",
+  "admin.americanoFormat": "Americano",
+  "admin.teamAmericanoFormat": "Team-Americano",
+  "admin.mexicanoFormat": "Mexicano",
+  "admin.teamMexicanoFormat": "Team-Mexicano",
+  "admin.kingOfCourtFormat": "King of Court",
+  "admin.groupsPlayoffsFormat": "Grupper + sluttspill",
+});
+
+Object.assign(padelstarTranslations.en, {
+  "setup.defaultTournamentName": "Padelstar tournament",
+  "pwa.iosTitle": "iPhone / iPad", "pwa.iosStep1": "Open Padelstar in Safari.", "pwa.iosStep2": "Tap the Share button.", "pwa.iosStep3": "Choose “Add to Home Screen”.", "pwa.iosStep4": "Tap “Add”.",
+  "pwa.androidTitle": "Android", "pwa.androidStep1": "Open Padelstar in Chrome.", "pwa.androidStep2": "Open the menu ⋮.", "pwa.androidStep3": "Choose “Install app” or “Add to home screen”.", "pwa.androidStep4": "Confirm the installation.",
+  "pwa.windowsTitle": "Windows", "pwa.windowsStep1": "Open Padelstar in Edge or Chrome.", "pwa.windowsStep2": "Open the browser menu.", "pwa.windowsStep3": "Choose “Install app” or the equivalent option.", "pwa.windowsStep4": "Confirm the installation.",
+  "pwa.macosTitle": "Mac", "pwa.macosStep1": "Open Padelstar in Safari.", "pwa.macosStep2": "Choose Share.", "pwa.macosStep3": "Choose “Add to Dock”.", "pwa.macosStep4": "Confirm the installation.",
+  "pwa.chromeosTitle": "Chromebook", "pwa.chromeosStep1": "Open Padelstar in Chrome.", "pwa.chromeosStep2": "Open the menu ⋮.", "pwa.chromeosStep3": "Choose “Install app”.", "pwa.chromeosStep4": "Confirm the installation.",
+  "pwa.genericTitle": "Install Padelstar", "pwa.genericStep1": "Open the browser menu.", "pwa.genericStep2": "Look for “Install app” or “Add to home screen”.", "pwa.genericStep3": "Confirm the installation.",
+  "cup.byeCount": "{count} bye(s)",
+  "assistant.title": "Tournament assistant",
+  "admin.americanoFormat": "Americano",
+  "admin.teamAmericanoFormat": "Team Americano",
+  "admin.mexicanoFormat": "Mexicano",
+  "admin.teamMexicanoFormat": "Team Mexicano",
+  "admin.kingOfCourtFormat": "King of Court",
+  "admin.groupsPlayoffsFormat": "Groups + playoffs",
+  "messages.invalidScoreInteger": "Scores must be whole numbers.",
+  "messages.invalidScoreNegative": "Scores cannot be negative.",
+  "messages.invalidScoreDraw": "Scores cannot be tied.",
+  "messages.invalidScoreShape": "A set must be won {gamesToWinSet}-x with a two-game margin, or {tieBreakOne}-{tieBreakTwo} / {tieBreakOne}-{gamesToWinSet}.",
+});
+
 const missingTranslationKeys = new Set();
 
 function languageFor(language) {

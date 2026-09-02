@@ -65,7 +65,7 @@
       const existingByNumber = new Map(state.courts.map((court) => [court.courtNumber, court]));
       state.courts = courtNumbers.map((courtNumber) => existingByNumber.get(courtNumber) ?? {
         id: randomUUID(),
-        name: `Bane ${courtNumber}`,
+        name: `${translate("common.court")} ${courtNumber}`,
         courtNumber,
         active: true,
       });
