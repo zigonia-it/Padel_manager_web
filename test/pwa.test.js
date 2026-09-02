@@ -69,7 +69,7 @@ const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.j
 const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v205/);
+  assert.match(serviceWorkerSource, /padelstar-v206/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(serviceWorkerSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(indexSource, /app\/player-visuals\.js\?v=padelstar-player-visuals-1/);

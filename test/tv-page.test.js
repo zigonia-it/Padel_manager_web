@@ -22,6 +22,7 @@ test("TV mode has a dedicated responsive page", () => {
   assert.match(css, /grid-template-columns:\s*1\.08fr\s+1\.03fr\s+1\.08fr/);
   assert.match(css, /\.tv-title-wrap \{ position: absolute; left: 50%; transform: translateX\(-50%\)/);
   assert.match(css, /\.tv-header-lines \{ display: none; \}/);
+  assert.match(css, /\.tv-app \{[^}]*text-transform: uppercase/);
   assert.match(css, /@media \(max-width: 700px\)/);
   assert.match(css, /body\s*\{\s*overflow:\s*hidden/);
   assert.match(tvMode, /standingPlayer/);
