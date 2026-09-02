@@ -7,6 +7,10 @@
     elements.leaveSessionButton?.addEventListener("click", callbacks.leaveSession);
     elements.toggleAvailabilityButton?.addEventListener("click", callbacks.toggleAvailability);
     elements.resumeTournamentButton?.addEventListener("click", callbacks.resumeTournament);
+    elements.savedTournamentsList?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-tournament-id]");
+      if (button) callbacks.openSavedTournament?.(button.dataset.tournamentId);
+    });
     elements.copyInviteCodeButton?.addEventListener("click", callbacks.copyInviteCode);
     elements.copyJoinLinkButton?.addEventListener("click", callbacks.copyJoinLink);
     elements.copySpectatorLinkButton?.addEventListener("click", callbacks.copySpectatorLink);

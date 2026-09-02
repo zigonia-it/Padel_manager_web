@@ -32,14 +32,14 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync
 
 ## Retensjonsjobb
 
-- Retensjonsvinduet er 30 dager etter at admin eksplisitt avslutter turneringen (`state.status = 'Avsluttet'`).
+- Retensjonsvinduet er tidligst 30 dager etter at admin eksplisitt avslutter turneringen (`state.status = 'Avsluttet'`), og cleanup venter i tillegg til at statistikk for alle registrerte `profileId`-spillere finnes i `player_profile_history`.
 - Kjør `select public.cleanup_expired_tournaments();` fra betrodd Supabase-drift eller en kontrollert databasejobb.
 - Funksjonen er `SECURITY DEFINER`, men er tilbakekalt fra `public`, `anon` og `authenticated`; den skal ikke eksponeres i klienten.
 - Jobben sletter også rate-limit-rader som ikke er oppdatert på 24 timer.
 - Kontroller returverdien og verifiser at ingen aktive turneringer ble berørt. Første produksjonskjøring skal gjøres manuelt og loggføres.
 - Endre ikke 30-dagersvinduet før `data_retention.md` og personvernteksten er oppdatert og godkjent.
 - Fase 9-migreringen oppretter den idempotente `padelstar-retention-cleanup`-jobben i Supabase `pg_cron`, planlagt daglig kl. 03:15 UTC.
-- Jobben kjører `cleanup_expired_tournaments()` og `cleanup_expired_player_profiles()` fra betrodd databaseinfrastruktur, aldri fra klienten.
+- Jobben kjører `cleanup_expired_tournaments()` og `cleanup_expired_player_profiles()` fra betrodd databaseinfrastruktur, aldri fra klienten. Profil-cleanup sletter bare profiler med en eksplisitt `deletion_requested_at` og utløpt `deletion_scheduled_for`.
 - Kontroller `cron.job` etter migrering og loggfør returverdien uten profil-ID-er eller tokens.
 
 ## Backup og rollback

@@ -10,6 +10,7 @@ const notificationPreferenceKey = "padelstar-notifications";
 const pushSubscriptionStorageKey = "padelstar-push-subscription";
 const syncStorageKey = `${storageKey}-sync`;
 const recoveryStorageKey = `${storageKey}-last-good`;
+const tournamentLibraryStorageKey = "padelstar-tournament-library";
 const linkUtils = window.PadelstarLinks;
 const publicAppUrl = linkUtils.publicAppUrl;
 const spectatorQueryKey = linkUtils.spectatorQueryKey;
@@ -133,6 +134,7 @@ const defaultTournament = createTournament({
   courtCount: 1,
 });
 
+const hadStoredTournament = Boolean(localStorage.getItem(storageKey));
 let recoveredFromLastGood = false;
 migrateLegacyLocalStorage();
 
@@ -146,6 +148,13 @@ const stateBootstrap = window.PadelstarStateBootstrap.create({
   storageKey,
 });
 let state = stateBootstrap.loadState();
+const tournamentLibrary = window.PadelstarTournamentLibrary?.create({
+  storage,
+  localStorage,
+  migrateState: (nextState) => migrateState(nextState),
+  storageKey: tournamentLibraryStorageKey,
+}) ?? { get: () => null, list: () => [], remove: () => {}, upsert: () => {} };
+if (hadStoredTournament) tournamentLibrary.upsert(state);
 const eventLog = window.PadelstarTournamentEvents?.create({
   getActor: () => currentLocalRole(),
   getState: () => state,
@@ -330,10 +339,18 @@ const elements = {
   accountAuthPassword: document.querySelector("#accountAuthPassword"),
   accountAuthSignUp: document.querySelector("#accountAuthSignUp"),
   accountAuthSignedIn: document.querySelector("#accountAuthSignedIn"),
+  accountDetailsForm: document.querySelector("#accountDetailsForm"),
+  accountAuthAccountEmail: document.querySelector("#accountAuthAccountEmail"),
+  accountAuthNewPassword: document.querySelector("#accountAuthNewPassword"),
+  accountAuthPasswordConfirm: document.querySelector("#accountAuthPasswordConfirm"),
+  accountAuthDisplayName: document.querySelector("#accountAuthDisplayName"),
+  accountAuthEmailStatus: document.querySelector("#accountAuthEmailStatus"),
+  accountAuthCreated: document.querySelector("#accountAuthCreated"),
   accountAuthSignOut: document.querySelector("#accountAuthSignOut"),
   accountAuthIdentity: document.querySelector("#accountAuthIdentity"),
   accountAuthNotice: document.querySelector("#accountAuthNotice"),
   resumePanel: document.querySelector("#resumePanel"),
+  savedTournamentsList: document.querySelector("#savedTournamentsList"),
   resumeTitle: document.querySelector("#resumeTitle"),
   resumeSummary: document.querySelector("#resumeSummary"),
   resumeTournamentButton: document.querySelector("#resumeTournamentButton"),
@@ -356,9 +373,10 @@ const elements = {
   playerTab: document.querySelector("#playerModuleLink"),
   tournamentTab: document.querySelector("#tournamentModuleLink"),
   createTab: document.querySelector("#createModuleLink"),
-  headerShareBox: document.querySelector(".workspace-header .share-box"),
   addPlayerForm: document.querySelector("#addPlayerForm"),
   courtSettingsForm: document.querySelector("#courtSettingsForm"),
+  courtNamesForm: document.querySelector("#courtNamesForm"),
+  courtNamesList: document.querySelector("#courtNamesList"),
   tournamentSettingsForm: document.querySelector("#tournamentSettingsForm"),
   cupTeamSetupModeField: document.querySelector("#cupTeamSetupModeField"),
   cupThirdPlaceField: document.querySelector("#cupThirdPlaceField"),
@@ -369,7 +387,6 @@ const elements = {
   tournamentTitle: document.querySelector("#tournamentTitle"),
   roleIndicator: document.querySelector("#roleIndicator"),
   roundLabel: document.querySelector("#roundLabel"),
-  inviteCode: document.querySelector("#inviteCode"),
   adminInviteCode: document.querySelector("#adminInviteCode"),
   joinQrCode: document.querySelector("#joinQrCode"),
   joinLink: document.querySelector("#joinLink"),
@@ -444,6 +461,7 @@ const elements = {
   setScoreOptions: document.querySelector("#setScoreOptions"),
   closeSetScoreButton: document.querySelector("#closeSetScoreButton"),
   profileForm: document.querySelector("#profileForm"),
+  profileLightPanel: document.querySelector(".profile-light-panel"),
   profileNameInput: document.querySelector("#profileNameInput"),
   profileAvatarPicker: document.querySelector("#profileAvatarPicker"),
   profileStats: document.querySelector("#profileStats"),
@@ -605,6 +623,7 @@ const adminStatus = window.PadelstarAdminStatus.create({
   generateRoundBlockReason: () => generateRoundBlockReason(),
   getActiveRound: () => getActiveRound(),
   getLocalStorage: () => localStorage,
+  getSavedTournaments: () => tournamentLibrary.list(),
   getState: () => state,
   hasActiveTournament: () => hasActiveTournament(),
   hasPendingRemoteWrites: () => hasPendingRemoteWrites(),
@@ -706,7 +725,7 @@ const profileSession = window.PadelstarProfileSession.create({
   saveProfileHistory: () => saveProfileHistory(),
   saveState: (options) => saveState(options),
   syncJoinPreview: () => syncJoinPreview(),
-  syncAuthenticatedProfile: (nextProfile) => accountAuth?.syncProfile(nextProfile),
+  syncAuthenticatedProfile: (nextProfile) => accountAuth?.syncProfile(nextProfile, state.settings.language),
   translate: (key, values) => t(key, values),
   setProfile: (nextProfile) => { profile = nextProfile; },
 });
@@ -748,7 +767,18 @@ const adminIdentity = window.PadelstarAdminIdentity.create({
 const accountAuth = window.PadelstarAccountAuth?.create({
   getClient: () => supabaseClient,
   getElements: () => elements,
-  onAuthChange: () => { void renderAdminIdentity(); render(); },
+  getProfile: () => profile,
+  onAuthChange: () => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); },
+  onProfileLoaded: (remoteProfile) => {
+    profile = profile
+      ? profileManager.normalizeProfile({ ...profile, ...remoteProfile })
+      : profileManager.createProfile(remoteProfile.displayName, remoteProfile.avatarId);
+    profileSession.persistLocalProfile();
+    syncAdminPlayerNameFromProfile();
+    syncJoinFormFromProfile();
+    syncJoinPreview();
+    renderProfile();
+  },
   translate: (key, values) => t(key, values),
 });
 const remoteFeedback = window.PadelstarRemoteFeedback.create({
@@ -805,7 +835,7 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   createInviteCode: () => createInviteCode(),
   createRemoteTournament: () => createRemoteTournament(),
   createTournament: (options) => createTournament(options),
-  getAdminAuthUser: () => currentAuthUser(),
+  getAdminAuthUser: async () => accountAuth?.currentUser() ?? await accountAuth?.refresh() ?? currentAuthUser(),
   getAdminEmail: () => elements.createTournamentForm?.elements.adminEmail?.value.trim(),
   randomAvatarId: () => avatarSystem.randomId(),
   ensureProfileForJoin: (displayName, avatarId) => ensureProfileForJoin(displayName, avatarId),
@@ -820,6 +850,7 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   parsePlayerNames: (value) => parsePlayerNames(value),
   render: () => render(),
   saveState: (options) => saveState(options),
+  showAccount: () => showModule("account"),
   sendAdminSignInLink: async (email) => {
     const sent = await adminIdentity.sendSignInLink(email);
     showToast(sent ? t("admin.identityLinkSent") : t("admin.identityFailed"), sent ? "status-message-success" : "status-message-error");
@@ -854,6 +885,7 @@ const adminFormEvents = window.PadelstarAdminFormEvents?.create({
   startNextScheduledRound: () => startNextScheduledRound(),
   t: (key, values) => t(key, values),
   updateCourtsFromInput: (value) => updateCourtsFromInput(value),
+  updateCourtNames: (names) => updateCourtNames(names),
   updateTournamentRules: (options) => updateTournamentRules(options),
 });
 
@@ -924,6 +956,7 @@ elements.createAdminSignInLinkButton?.addEventListener("click", async () => {
 elements.languageSelect.addEventListener("change", () => {
   state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
   localStorage.setItem(languageStorageKey, state.settings.language);
+  if (profile) void accountAuth?.syncProfile(profile, state.settings.language);
   applyLanguage();
   syncJoinPreview();
   render();
@@ -955,6 +988,7 @@ elements.endTournamentButton.addEventListener("click", async () => {
 elements.resetTournamentButton.addEventListener("click", async () => {
   if (!await requestConfirmation(t("messages.resetTournamentConfirm"))) return;
   await deleteRemoteTournament();
+  tournamentLibrary.remove(state.id);
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
   localStorage.removeItem(recoveryStorageKey);
@@ -982,6 +1016,7 @@ window.PadelstarWorkspaceEvents?.bind({
       showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
       render();
     },
+    openSavedTournament: (tournamentId) => openSavedTournament(tournamentId),
     copyInviteCode: () => copyText(state.inviteCode, t("messages.inviteCopied")),
     copyJoinLink: () => copyText(createJoinLink(), t("messages.joinLinkCopied")),
     copySpectatorLink: () => copyText(createSpectatorLink(), t("messages.spectatorLinkCopied")),
@@ -1048,7 +1083,10 @@ function activateSupabaseClient() {
   }
   if (!supabaseClient || supabaseClientActivated) return;
   supabaseClientActivated = true;
-  supabaseClient.auth.onAuthStateChange(() => { void accountAuth?.refresh(); void renderAdminIdentity(); });
+  supabaseClient.auth.onAuthStateChange(() => {
+    // Defer follow-up auth calls so Supabase can release its auth lock first.
+    window.setTimeout(() => { void accountAuth?.refresh(); void renderAdminIdentity(); }, 0);
+  });
   void accountAuth?.refresh();
   void syncProfileHistoryRemote();
   connectRealtimeForCurrentState();
@@ -1205,12 +1243,40 @@ function saveState(options = {}) {
 }
 
 function persistLocalState() {
+  tournamentLibrary.upsert(state);
   persistence.writeTournamentState({
     state,
     stateKey: storageKey,
     recoveryKey: recoveryStorageKey,
     isValidState: isValidTournamentState,
   });
+}
+
+function openSavedTournament(tournamentId) {
+  const savedState = tournamentLibrary.get(tournamentId);
+  if (!savedState || savedState.id === state.id) {
+    if (savedState) {
+      showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
+      render();
+    }
+    return;
+  }
+  if (!isCurrentUserAdmin()) {
+    showToast(t("admin.identitySignInRequired"), "status-message-error");
+    return;
+  }
+  persistLocalState();
+  removeRealtimeChannel();
+  state = migrateState(savedState);
+  state.settings.language = loadUserLanguage(state.settings?.language ?? "nb");
+  pendingAdminSync = false;
+  pendingPlayerScores = [];
+  remoteConflict = false;
+  setLocalRole("admin");
+  saveState({ remote: false });
+  connectRealtimeForCurrentState();
+  showWorkspace("admin");
+  render();
 }
 
 function mirrorOfflineStorage() {
@@ -1402,7 +1468,7 @@ async function deleteRemoteTournament() {
   return true;
 }
 
-function currentAuthUser() { return adminIdentity.currentAuthUser(); }
+function currentAuthUser() { return accountAuth?.currentUser() ?? adminIdentity.currentAuthUser(); }
 function sendAdminSignInLink(event) { return adminIdentity.sendAdminSignInLink(event); }
 function claimCurrentTournament() { return adminIdentity.claimCurrentTournament(); }
 function renderAdminIdentity() { return adminIdentity.render(); }
@@ -1464,7 +1530,7 @@ function syncCreateFormDefaults() {
     .join("\n");
   elements.createTournamentForm.elements.courts.value = defaultTournament.courts.length;
   elements.createTournamentForm.elements.adminParticipates.checked = false;
-  elements.createTournamentForm.elements.adminPlayerName.value = "Admin";
+  elements.createTournamentForm.elements.adminPlayerName.value = profile?.displayName?.trim() || "Admin";
   syncAdminPlayerChoice();
 }
 
@@ -1472,6 +1538,12 @@ function syncAdminPlayerChoice() {
   const adminParticipates = elements.createTournamentForm.elements.adminParticipates.checked;
   elements.adminPlayerNameField.classList.toggle("hidden", !adminParticipates);
   elements.createTournamentForm.elements.adminPlayerName.required = adminParticipates;
+}
+
+function syncAdminPlayerNameFromProfile() {
+  const name = profile?.displayName?.trim();
+  const field = elements.createTournamentForm?.elements.adminPlayerName;
+  if (name && field && (!field.value.trim() || field.value.trim() === "Admin")) field.value = name;
 }
 
 function syncJoinPreview() {
@@ -1554,12 +1626,12 @@ function render() {
 
   const matches = getAllMatches();
   applyLanguage();
+  accountAuth?.render();
   renderProfile();
   renderStartResume();
   renderRoleVisibility();
   elements.tournamentTitle.textContent = state.name;
   elements.roundLabel.textContent = t("tournament.roundLabel", { round: Math.max(state.currentRound, 1) });
-  elements.inviteCode.textContent = state.inviteCode;
   elements.adminInviteCode.textContent = state.inviteCode;
   elements.joinLink.value = createJoinLink();
   if (elements.spectatorLink) elements.spectatorLink.value = createSpectatorLink();
@@ -1570,6 +1642,7 @@ function render() {
   elements.playerCount.textContent = t("players.count", { count: state.players.length });
   elements.matchCount.textContent = t("matches.count", { count: matches.length });
   elements.courtSettingsForm.elements.courtList.value = courtsInputValue();
+  renderCourtNames();
   elements.tournamentSettingsForm.elements.format.value = state.settings.format;
   elements.tournamentSettingsForm.elements.cupTeamSetupMode.value = state.settings.cupTeamSetupMode;
   elements.tournamentSettingsForm.elements.includesThirdPlaceMatch.checked = state.settings.includesThirdPlaceMatch;
@@ -2048,6 +2121,7 @@ function leaveCurrentTournament(options = {}) {
     saveState({ remote: false });
   } else {
     removeRealtimeChannel();
+    tournamentLibrary.remove(state.id);
     const language = state.settings?.language ?? "nb";
     state = structuredClone(defaultTournament);
     state.settings.language = language;
@@ -2087,6 +2161,7 @@ function leaveSpectatorView() {
 
   if (shouldClearLocalView) {
     removeRealtimeChannel();
+    tournamentLibrary.remove(state.id);
     const language = state.settings?.language ?? "nb";
     state = structuredClone(defaultTournament);
     state.settings.language = language;
@@ -2165,6 +2240,22 @@ function endTournament() {
 
 function updateCourtsFromInput(value) {
   return adminActions.updateCourtsFromInput(value);
+}
+
+function updateCourtNames(names) {
+  return adminActions.updateCourtNames(names);
+}
+
+function renderCourtNames() {
+  if (!elements.courtNamesList) return;
+  const locked = state.rounds.length > 0 || state.status === "Avsluttet";
+  elements.courtNamesList.innerHTML = state.courts.map((court) => `
+    <label class="court-name-row">
+      <span>${escapeHtml(t("common.court"))} ${court.courtNumber}</span>
+      <input name="courtName" type="text" maxlength="80" value="${escapeAttribute(court.name ?? "")}" placeholder="${escapeAttribute(t("common.court"))} ${court.courtNumber}" ${locked ? "disabled" : ""}>
+    </label>`).join("");
+  const submitButton = elements.courtNamesForm?.querySelector("button");
+  if (submitButton) submitButton.disabled = locked;
 }
 
 function parseCourtNumbers(value) {

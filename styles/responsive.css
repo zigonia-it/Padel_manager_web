@@ -66,6 +66,7 @@
   .menu-drawer .app-menu {
     display: none;
     width: 100%;
+    flex: 0 0 auto;
     max-width: none;
     order: 2;
   }

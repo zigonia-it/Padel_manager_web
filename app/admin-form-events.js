@@ -20,6 +20,7 @@
       startNextScheduledRound,
       t,
       updateCourtsFromInput,
+      updateCourtNames,
       updateTournamentRules,
     } = deps;
 
@@ -48,6 +49,18 @@
           return;
         }
         updateCourtsFromInput(new FormData(event.currentTarget).get("courtList"));
+        saveState();
+        deps.render();
+      });
+
+      elements.courtNamesForm?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const state = getState();
+        if (state.rounds.length > 0 || state.status === "Avsluttet") {
+          showToast(t("messages.courtsLocked"), "status-message-error");
+          return;
+        }
+        updateCourtNames(new FormData(event.currentTarget).getAll("courtName"));
         saveState();
         deps.render();
       });

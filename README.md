@@ -6,7 +6,7 @@ Sist oppdatert: 2026-09-02
 
 Status: 0.3 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
-Aktiv utviklingsplan ligger i `docs/Development/Padelstar-komplett-utviklingsplan.md`, og kronologisk implementeringsdokumentasjon ligger i `docs/documentation.md`. Historiske planer, logger og designutkast ligger i `docs/archive/`.
+Aktiv utviklingsplan ligger i `docs/Development/Padelstar-komplett-utviklingsplan.md`, kronologisk implementeringsdokumentasjon ligger i `docs/documentation.md`, og godkjente produktvalg med endringsvern ligger i `docs/Development/produktbeslutninger.md`. Historiske planer, logger og designutkast ligger i `docs/archive/`.
 
 Metadata:
 - Navn: Padelstar
@@ -29,6 +29,7 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 - Krever serverutstedt spillertoken for spillerstyrt poengføring mot Supabase.
 - Fungerer lokalt i nettleseren med localStorage fallback, siste-kjente-gode recovery-kopi og IndexedDB-speiling der nettleseren støtter det.
 - Har Web Share med kopieringsfallback, opt-in lokale PWA-varsler og admin-eierskap via Supabase Auth for live-turneringer.
+- Har en kort, flerspråklig bruksanvisning på `guide.html`, lenket fra hjemmesiden og tilgjengelig offline.
 
 ## Aktiv utviklingsretning
 
@@ -74,6 +75,8 @@ Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og k
 - `scripts/browser-smoke.sh` - deterministisk desktop-/mobil-smoke med blokkert ekstern backend.
 - `api/health.js` - cachefri Vercel health-endpoint for ekstern monitorering.
 - `privacy.html` - offentlig beta-utkast for personvern.
+- `guide.html` - kort flerspråklig bruksanvisning for brukere.
+- `app/guide-i18n.js` - oversettelser og språkvalg for bruksanvisningen.
 - `docs/data_retention.md` - retensjon, sletting og profilhistorikk-policy.
 - `docs/operations_runbook.md` - deploy, database, backup, rollback og produksjonssjekker.
 - `app/app.js` - browser-entrypoint, modulvisning, localStorage, Supabase-kall og tynne delegater til domenemodulene.
@@ -133,5 +136,6 @@ https://padelstar.app
 - `docs/tournament_logic.md` - turneringslogikk hentet fra tidligere iOS-app.
 - `docs/archive/history/migration_notes_legacy.md` - historiske notater for porting fra SwiftUI/iOS.
 - `docs/documentation.md` - kronologisk oversikt over beslutninger, implementeringer og verifikasjoner.
+- `docs/Development/produktbeslutninger.md` - godkjente produktvalg og krav om tillatelse før de endres.
 
 Prosjektregel: etter hver tydelige arbeidsøkt skal `docs/documentation.md` oppdateres.

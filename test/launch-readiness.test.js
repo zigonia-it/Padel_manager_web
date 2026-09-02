@@ -32,7 +32,7 @@ test("privacy page reflects the current profile and retention behavior", () => {
   assert.match(privacySource, /profilhistorikk/i);
   assert.match(privacySource, /språkvalg/i);
   assert.match(privacySource, /innen 30 dager/i);
-  assert.match(privacySource, /2026-09-01/);
+  assert.match(privacySource, /2026-09-03/);
   assert.match(privacySource, /styles\/privacy\.css/);
   assert.match(privacySource, /theme-color" content="#08090b"/);
 });

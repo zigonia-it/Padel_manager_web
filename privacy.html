@@ -47,21 +47,30 @@
       <h2 data-privacy-i18n="data">Hvilke opplysninger brukes?</h2>
       <p data-privacy-i18n="dataText">Appen kan lagre turneringsnavn, invitasjonskode, spillernavn, avatarvalg, kampoppsett, resultater, rollevalg, tekniske revisjoner, lokal brukerprofil og sikkerhetstokens for admin/spiller. Admin-token deles ikke i offentlig turneringsstate eller backup. Spillertoken brukes for å beskytte spillerstyrt poengføring.</p>
 
+      <h2 data-privacy-i18n="account">Konto og profil</h2>
+      <p data-privacy-i18n="accountText">Når du oppretter konto, behandles e-postadresse, passord og kontoens tekniske identifikator av Supabase Auth. Padelstar lagrer ikke passordet selv. I den private profiltabellen lagres visningsnavn, avatarvalg, foretrukket språk og tidsstempler. Profilhistorikk kan inneholde turneringsnavn, dato, plassering, poeng, kamper, seire, sett og games. Konto- og profilopplysninger brukes ikke til annonsering.</p>
+
       <h2 data-privacy-i18n="why">Hvorfor brukes opplysningene?</h2>
       <p data-privacy-i18n="whyText">Opplysningene brukes for å administrere turneringen, vise riktige kamper og resultater, synkronisere mellom enheter, foreslå spillerens navn/avatar, beskytte skrivehandlinger og gjenopprette siste lokale state ved nettverks- eller lagringsfeil.</p>
 
       <h2 data-privacy-i18n="storage">Hvor lagres data?</h2>
-      <p data-privacy-i18n="storageText">Lokalt lagres turneringsstate, språkvalg, brukerprofil og profilhistorikk i nettleseren med localStorage, en siste-kjente-gode kopi og IndexedDB-speiling der nettleseren støtter det. Når live sync eller profilhistorikk er aktivert, lagres nødvendig delt data i Supabase. Statiske filer leveres fra Vercel, og Vercel Analytics kan brukes til enkel trafikkmåling.</p>
+      <p data-privacy-i18n="storageText">Lokalt lagres turneringsstate, språkvalg, brukerprofil og profilhistorikk i nettleseren med localStorage, en siste-kjente-gode kopi og IndexedDB-speiling der nettleseren støtter det. Når live sync, konto eller profilhistorikk er aktivert, lagres nødvendig delt data i Supabase. Supabase Auth håndterer autentisering og passord. Statiske filer leveres fra Vercel, og Vercel Analytics kan brukes til enkel trafikkmåling.</p>
+
+      <h2 data-privacy-i18n="security">Sikkerhet og leverandører</h2>
+      <p data-privacy-i18n="securityText">Tilgang til kontoens profilopplysninger begrenses til den innloggede brukeren gjennom Supabase Auth og row-level security. Passord skal aldri deles med Padelstar eller andre. Supabase og Vercel brukes som tekniske leverandører; behandlingsansvarlig må sørge for nødvendige databehandleravtaler, sikkerhetsinnstillinger og vurdering av eventuelle overføringer utenfor EØS. Ingen sikkerhetsløsning kan garantere absolutt sikkerhet.</p>
 
       <h2 data-privacy-i18n="retention">Lagringstid og sletting</h2>
-      <p data-privacy-i18n="retentionText">Anonyme turneringer slettes innen 30 dager etter at admin avslutter turneringen. Gjestedeltakeres identitet, statistikk og kamp-/annen historikk fjernes fra lagret turneringsstate ved avslutning; registrerte spillere og admin kan beholde historikk. Spillerøkter og token-hasher slettes sammen med turneringen. Profilhistorikk kan beholdes lenger mens profilen består; ved profilsletting slettes tilknyttet historikk innen 30 dager. Lokale data kan fjernes ved å nullstille turneringen, slette profilen eller tømme nettleserdata.</p>
+      <p data-privacy-i18n="retentionText">Anonyme turneringer slettes innen 30 dager etter at den tidligste slettedatoen er nådd, og aldri før 30 dager etter at admin avslutter turneringen eller før statistikk for registrerte spillere er overført til profilhistorikken. Gjestedeltakeres identitet, statistikk og kamp-/annen historikk fjernes fra lagret turneringsstate ved avslutning; registrerte spillere og admin kan beholde historikk. Spillerøkter og token-hasher slettes sammen med turneringen. Spillerprofiler slettes ikke automatisk på grunn av alder; de slettes først 30 dager etter en eksplisitt slettingsforespørsel. Profilhistorikk beholdes frem til profilslettingen gjennomføres. Lokale data kan fjernes ved å nullstille turneringen, slette profilen eller tømme nettleserdata.</p>
 
       <h2 data-privacy-i18n="choices">Dine valg</h2>
       <p data-privacy-i18n="choicesText">Spillere bør bare bruke navn de er komfortable med at andre i turneringen ser. Be arrangøren eller behandlingsansvarlig om innsyn, retting eller sletting dersom noe er feil eller ikke lenger skal brukes.</p>
 
-      <h2 data-privacy-i18n="status">Status</h2>
-      <p data-privacy-i18n="statusText">Admin kan valgfritt bruke Supabase Auth med innloggingslenke for å knytte en turnering til en konto. Spillere kan opprette en lokal profil med visningsnavn og avatar, og kan valgfritt samtykke til lokale varsler på enheten. Profilen og varslene kan slettes eller slås av igjen i spillerflaten.</p>
-      <p data-privacy-i18n="updated">Sist oppdatert 2026-09-01. Dette er fortsatt en beta-tekst og bør kvalitetssikres av behandlingsansvarlig før bred bruk. Vercel Analytics beholdes foreløpig for aggregert trafikkmåling.</p>
+      <h2 data-privacy-i18n="rights">Dine GDPR-rettigheter</h2>
+      <p data-privacy-i18n="rightsText">Du kan be om innsyn, retting, sletting, begrensning av behandlingen og dataportabilitet når vilkårene i personvernforordningen er oppfylt. Du kan også protestere mot behandling basert på berettiget interesse og trekke tilbake samtykke for varsler. Henvendelser sendes til sigurd.grodem@live.no. Vi svarer uten ugrunnet opphold og normalt senest innen én måned. Du kan klage til Datatilsynet dersom du mener behandlingen bryter med regelverket.</p>
+
+      <h2 data-privacy-i18n="status">Behandlingsgrunnlag og valg</h2>
+      <p data-privacy-i18n="accountStatus">Kontoopplysninger behandles for å levere innlogging, profil og synkronisering av turneringer. Dette bygger på avtalen om å levere tjenesten; valgfrie varsler bygger på samtykke. Du kan slette konto eller profil og slå av varsler i appen eller ved å kontakte oss.</p>
+      <p data-privacy-i18n="updated">Sist oppdatert 2026-09-03. Dette er fortsatt en beta-tekst og bør kvalitetssikres av behandlingsansvarlig før bred bruk. Vercel Analytics beholdes foreløpig for aggregert trafikkmåling.</p>
     </article>
   </main>
 </body>

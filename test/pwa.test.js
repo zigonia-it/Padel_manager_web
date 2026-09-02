@@ -13,6 +13,7 @@ const layoutStylesSource = fs.readFileSync(path.join(root, "styles", "layout.css
 const componentsStylesSource = fs.readFileSync(path.join(root, "styles", "components.css"), "utf8");
 const modulesStylesSource = fs.readFileSync(path.join(root, "styles", "modules.css"), "utf8");
 const responsiveStylesSource = fs.readFileSync(path.join(root, "styles", "responsive.css"), "utf8");
+const uiConsistencyStylesSource = fs.readFileSync(path.join(root, "styles", "ui-consistency.css"), "utf8");
 const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
@@ -69,9 +70,9 @@ const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.j
 const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v214/);
-  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-3/);
-  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-3/);
+  assert.match(serviceWorkerSource, /padelstar-v239/);
+  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-11/);
+  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-11/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(serviceWorkerSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(indexSource, /app\/player-visuals\.js\?v=padelstar-player-visuals-1/);
@@ -140,8 +141,8 @@ test("score actions have their own mutation boundary", () => {
 test("workspace navigation has its own UI boundary", () => {
   assert.match(workspaceNavigationSource, /renderRoleVisibility/);
   assert.match(workspaceNavigationSource, /global\.PadelstarWorkspaceNavigation/);
-  assert.match(indexSource, /app\/workspace-navigation\.js\?v=padelstar-workspace-navigation-1/);
-  assert.match(serviceWorkerSource, /app\/workspace-navigation\.js\?v=padelstar-workspace-navigation-1/);
+  assert.match(indexSource, /app\/workspace-navigation\.js\?v=padelstar-workspace-navigation-3/);
+  assert.match(serviceWorkerSource, /app\/workspace-navigation\.js\?v=padelstar-workspace-navigation-3/);
   assert.match(appSource, /workspaceNavigation\.showModule/);
 });
 
@@ -230,6 +231,8 @@ test("PWA install flow supports native prompts, standalone detection and platfor
 test("phase 1 keeps player registration automatic and live admin creation authenticated", () => {
   assert.doesNotMatch(indexSource, /name="avatarId"/);
   assert.match(tournamentEntrySource, /getAdminAuthUser/);
+  assert.match(appSource, /getAdminAuthUser: async \(\) => accountAuth\?\.currentUser\(\)/);
+  assert.match(appSource, /showAccount: \(\) => showModule\("account"\)/);
   assert.match(tournamentEntrySource, /identitySignInRequired/);
   assert.match(tournamentEntrySource, /randomAvatarId/);
   assert.match(tournamentEntrySource, /ownerUserId/);
@@ -287,11 +290,11 @@ test("account profile uses automatic avatars without exposing an avatar picker",
   assert.match(profileUiSource, /profileAvatarPicker\?\.querySelectorAll/);
 });
 
-test("connection status is a dot indicator with green online and red offline states", () => {
+test("connection status is a dot indicator with green online and gray offline states", () => {
   assert.match(indexSource, /id="connectionStatus"/);
   assert.match(componentsStylesSource, /\.status-pill::before[\s\S]*border-radius: 50%/);
   assert.match(componentsStylesSource, /\.status-pill \{[\s\S]*color: #55e69a/);
-  assert.match(componentsStylesSource, /\.status-pill\.offline[\s\S]*color: #ff2f3f/);
+  assert.match(componentsStylesSource, /\.status-pill\.offline[\s\S]*color: #9aa7b8/);
 });
 
 test("local, disconnected and unavailable connections all use the offline label", () => {
@@ -306,8 +309,7 @@ test("TV module headings share one larger display style", () => {
 });
 
 test("navigation menu is contextual and uses TV Mode for the public tournament view", () => {
-  assert.match(workspaceNavigationSource, /const onLanding = activeModule === "landing"/);
-  assert.match(workspaceNavigationSource, /\.\.\.\(onLanding \? \[\] : \["setup-admin", "setup-player"\]\)/);
+  assert.match(workspaceNavigationSource, /"setup-admin",\n\s+"setup-player",/);
   assert.match(workspaceNavigationSource, /const canShowAdmin = tournamentIsActive && isAdmin/);
   assert.match(workspaceNavigationSource, /const canShowPlayer = tournamentIsActive && Boolean\(state\.selectedPlayerId\)/);
   assert.match(workspaceNavigationSource, /elements\.tournamentTab\.classList\.add\("hidden"\)/);
@@ -675,6 +677,12 @@ test("responsive navigation has one shared hamburger owner", () => {
   assert.doesNotMatch(indexSource, /id="mobile-header-overrides"/);
 });
 
+test("navigation binds module links independently of the responsive drawer", () => {
+  assert.match(navigationSource, /document\.querySelectorAll\("\[data-module-link\]"\)/);
+  assert.match(navigationSource, /if \(!toggle\) return/);
+  assert.match(uiConsistencyStylesSource, /\.language-picker > #languageSelect/);
+});
+
 test("active navigation tabs do not render legacy underline decorations", () => {
   assert.doesNotMatch(componentsStylesSource, /\.subtab\.active::after/);
   assert.doesNotMatch(modulesStylesSource, /\.tab\.active::after/);
@@ -689,7 +697,7 @@ test("active app files do not reference archived assets", () => {
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
   assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-92/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-28/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-37/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-1/);
@@ -700,7 +708,7 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-1/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-92/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-28/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-37/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-1/);
@@ -755,6 +763,14 @@ test("phase 4-6 modules are wired into the shared app shell", () => {
   assert.match(indexSource, /value="groupsPlayoffs"/);
   assert.match(serviceWorkerSource, /app\/historical-records\.js\?v=padelstar-history-1/);
   assert.match(appSource, /PadelstarHistoricalRecords\.record/);
+});
+
+test("admin workspace keeps sharing and player management under control", () => {
+  assert.equal((indexSource.match(/class="subtab/g) || []).length, 2);
+  assert.match(indexSource, /data-admin-panel="control"[\s\S]*data-admin-panel="matches"/);
+  assert.doesNotMatch(indexSource, /data-admin-panel="share"|data-admin-panel="players"/);
+  assert.equal((indexSource.match(/data-admin-panel-section="control"/g) || []).length, 3);
+  assert.match(indexSource, /class="admin-panel admin-integrated-panel" data-admin-panel-section="control"/);
 });
 
 test("module transitions support reduced motion and preserve focus intent", () => {

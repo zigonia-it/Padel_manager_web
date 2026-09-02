@@ -18,7 +18,11 @@
         return translate("score.matchWinner", { winner: winner.displayName, score: setScoreText(match) });
       }
       if (match.state === "cancelled") return translate("score.matchCancelled");
-      return translate("score.matchup", { teamOne: match.teamOne.displayName, teamTwo: match.teamTwo.displayName });
+      const teamOne = match.teamOne.displayName;
+      const teamTwo = match.teamTwo.displayName;
+      return translate("score.matchup", { teamOne, teamTwo })
+        .replace(teamOne, `${teamOne}\u00a0\u00a0`)
+        .replace(teamTwo, `\u00a0\u00a0${teamTwo}`);
     }
 
     function scoreSummary(match) {

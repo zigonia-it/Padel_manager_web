@@ -48,12 +48,10 @@
     }
 
     function loadLocalProfile() {
-      const saved = profileManager?.loadProfile(storage(), profileStorageKey);
-      if (saved && profileManager?.shouldDelete(saved)) {
-        purgeLocalProfile();
-        return null;
-      }
-      return saved;
+      // A profile is only deleted after an explicit deletion request has been
+      // processed by the trusted server cleanup job. Never purge it merely
+      // because a local timestamp has passed.
+      return profileManager?.loadProfile(storage(), profileStorageKey);
     }
 
     function persistLocalProfile() {

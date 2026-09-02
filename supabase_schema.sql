@@ -1967,7 +1967,18 @@ begin
 
   delete from public.tournaments
   where state->>'status' = 'Avsluttet'
-    and coalesce(retention_expires_at, updated_at + make_interval(days => p_retention_days)) <= now();
+    and coalesce(retention_expires_at, updated_at + make_interval(days => p_retention_days)) <= now()
+    and not exists (
+      select 1
+      from jsonb_array_elements(coalesce(public.tournaments.state->'players', '[]'::jsonb)) as player
+      where player->>'profileId' is not null
+        and not exists (
+          select 1
+          from public.player_profile_history as history
+          where history.profile_id::text = player->>'profileId'
+            and history.tournament_id = public.tournaments.id
+        )
+    );
 
   get diagnostics deleted_tournaments = row_count;
 

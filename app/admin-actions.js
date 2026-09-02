@@ -71,7 +71,20 @@
       });
     }
 
-    return { updateTournamentRules, saveManualCupTeams, updateCourtsFromInput };
+    function updateCourtNames(names) {
+      const state = getState();
+      const previousNames = new Map(state.courts.map((court) => [court.id, court.name]));
+      state.courts.forEach((court, index) => {
+        const requestedName = String(names[index] ?? "").trim();
+        court.name = requestedName || `${translate("common.court")} ${court.courtNumber}`;
+      });
+      state.rounds.flatMap((round) => round.matches ?? []).forEach((match) => {
+        const court = state.courts.find((item) => previousNames.get(item.id) === match.courtName);
+        if (court) match.courtName = court.name;
+      });
+    }
+
+    return { updateTournamentRules, saveManualCupTeams, updateCourtsFromInput, updateCourtNames };
   }
 
   window.PadelstarAdminActions = { create };

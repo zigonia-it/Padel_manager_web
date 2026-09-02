@@ -15,13 +15,13 @@
   <link rel="apple-touch-icon" href="assets/icons/padelstar-icon.png">
   <link rel="icon" href="assets/icons/padelstar-icon.png" type="image/png">
   <link rel="preload" href="assets/backgrounds/bg_img-1600.jpg" as="image" fetchpriority="high">
-  <link rel="stylesheet" href="styles/base.css?v=padelstar-base-2">
-  <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-4">
-  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-9">
+  <link rel="stylesheet" href="styles/base.css?v=padelstar-base-3">
+  <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-6">
+  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-12">
   <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-8">
   <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-92">
   <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
-  <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-3">
+  <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-11">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -60,16 +60,16 @@
         <div class="menu-drawer">
           <nav class="app-menu" id="appMenu" aria-label="Moduler" data-i18n-aria-label="nav.modulesAria">
             <button class="module-link" type="button" data-module-link="landing" data-i18n="nav.home">Hjem</button>
-            <button id="createModuleLink" class="module-link" type="button" data-module-link="setup-admin"
-              data-i18n="nav.create">Opprett</button>
-            <button id="signInModuleLink" class="module-link" type="button" data-module-link="account"
-              data-focus-target="profileNameInput" data-i18n="nav.account">Konto</button>
             <button class="module-link" type="button" data-module-link="setup-player" data-i18n="nav.join">Bli
               med</button>
+            <button id="createModuleLink" class="module-link" type="button" data-module-link="setup-admin"
+              data-i18n="nav.create">Opprett</button>
             <button id="adminModuleLink" class="module-link" type="button" data-module-link="admin"
               data-i18n="nav.admin">Admin</button>
             <button id="playerModuleLink" class="module-link" type="button" data-module-link="player"
               data-i18n="nav.player">Spiller</button>
+            <button id="signInModuleLink" class="module-link" type="button" data-module-link="account"
+              data-focus-target="profileNameInput" data-i18n="nav.account">Konto</button>
             <button id="tournamentModuleLink" class="module-link" type="button" data-module-link="tournament"
               data-i18n="nav.tournament">Turnering</button>
             <button id="tvModeMenuButton" class="module-link" type="button" data-action="tv-mode"
@@ -89,7 +89,8 @@
                 <span class="language-current-flag" aria-hidden="true">🇳🇴</span>
                 <span class="language-current-name">Bokmål</span>
               </summary>
-              <div class="language-options" role="listbox" aria-label="Språk" data-i18n-aria-label="languageLabel"></div>
+              <div class="language-options" role="listbox" aria-label="Språk" data-i18n-aria-label="languageLabel">
+              </div>
             </details>
           </label>
         </div>
@@ -115,11 +116,12 @@
                 med</button>
               <button class="landing-cta landing-cta-secondary" type="button" data-module-link="setup-admin"
                 data-i18n="nav.create">Opprett</button>
-            <button class="landing-cta landing-cta-secondary" type="button" data-module-link="account"
-              data-focus-target="profileNameInput" data-i18n="nav.account">Konto</button>
+              <button class="landing-cta landing-cta-secondary" type="button" data-module-link="account"
+                data-focus-target="profileNameInput" data-i18n="nav.account">Konto</button>
             </div>
             <button class="secondary install-app-button" id="installAppButton" type="button" hidden
               data-i18n="pwa.install">Installer Padelstar på din enhet</button>
+            <a class="secondary guide-link" href="guide.html" data-i18n="guide.link">Bruksanvisning</a>
 
           </div>
 
@@ -128,12 +130,12 @@
         <div class="panel resume-panel hidden" id="resumePanel">
           <div>
             <p class="eyebrow" data-i18n="resume.localSaved">Lagret lokalt</p>
-            <h3 id="resumeTitle" data-i18n="resume.continueTournament">Fortsett turnering</h3>
-            <p class="hint" id="resumeSummary" data-i18n="resume.defaultSummary">Det finnes en turnering lagret i denne
-              nettleseren.</p>
+            <h3 data-i18n="resume.title">Dine turneringer</h3>
+            <span id="resumeTitle" data-i18n="resume.continueTournament" hidden>Fortsett turnering</span>
+            <span id="resumeSummary" data-i18n="resume.defaultSummary" hidden></span>
+            <p class="hint" data-i18n="resume.defaultSummary">Lagrede turneringer du kan åpne igjen på denne enheten.</p>
           </div>
-          <button class="primary" id="resumeTournamentButton" type="button" data-i18n="resume.continueAdmin">Fortsett
-            som admin</button>
+          <div class="saved-tournaments-list" id="savedTournamentsList"></div>
         </div>
       </section>
 
@@ -142,7 +144,8 @@
         <div class="panel account-intro">
           <p class="eyebrow" data-i18n="account.eyebrow">Personlig konto</p>
           <h2 id="accountTitle" data-i18n="account.title">Konto</h2>
-          <p class="hint" data-i18n="account.hint">Opprett eller oppdater spillerprofilen din for å ta vare på egen statistikk og historikk.</p>
+          <p class="hint" data-i18n="account.hint">Opprett eller oppdater spillerprofilen din for å ta vare på egen
+            statistikk og historikk.</p>
         </div>
         <section class="panel account-auth-panel hidden" id="accountAuthPanel" aria-labelledby="accountAuthTitle">
           <div class="panel-heading">
@@ -159,20 +162,46 @@
             </label>
             <label>
               <span data-i18n="account.password">Passord</span>
-              <input id="accountAuthPassword" name="password" type="password" autocomplete="current-password" minlength="6" required>
+              <input id="accountAuthPassword" name="password" type="password" autocomplete="current-password"
+                minlength="6" required>
             </label>
             <div class="button-row">
               <button class="secondary" type="submit" data-i18n="account.signIn">Logg inn</button>
-              <button class="ghost" id="accountAuthSignUp" type="button" data-i18n="account.signUp">Opprett konto</button>
+              <button class="ghost" id="accountAuthSignUp" type="button" data-i18n="account.signUp">Opprett
+                konto</button>
             </div>
           </form>
           <div class="button-row hidden" id="accountAuthSignedIn">
-            <span class="hint" data-i18n="account.authSignedInAs">Innlogget som konto.</span>
+            <div class="account-auth-summary">
+              <span class="eyebrow" data-i18n="account.authSignedInAs">Innlogget som</span>
+              <strong id="accountAuthDisplayName">—</strong>
+              <span class="hint" id="accountAuthEmailStatus"></span>
+            </div>
+            <form id="accountDetailsForm" class="account-details-form">
+              <label>
+                <span data-i18n="account.email">E-post</span>
+                <input id="accountAuthAccountEmail" name="email" type="email" autocomplete="email" required>
+              </label>
+              <label>
+                <span data-i18n="account.newPassword">Nytt passord</span>
+                <input id="accountAuthNewPassword" name="newPassword" type="password" autocomplete="new-password"
+                  minlength="6" data-i18n-placeholder="account.newPasswordPlaceholder" placeholder="La stå tomt for å beholde passordet">
+              </label>
+              <label>
+                <span data-i18n="account.confirmPassword">Bekreft passord</span>
+                <input id="accountAuthPasswordConfirm" name="passwordConfirm" type="password" autocomplete="new-password"
+                  minlength="6" data-i18n-placeholder="account.confirmPasswordPlaceholder" placeholder="Skriv passordet på nytt">
+              </label>
+              <div class="button-row">
+                <button class="secondary" id="accountAuthSave" type="submit" data-i18n="account.saveChanges">Lagre endringer</button>
+                <span class="hint" id="accountAuthCreated"></span>
+              </div>
+            </form>
             <button class="ghost" id="accountAuthSignOut" type="button" data-i18n="account.signOut">Logg ut</button>
           </div>
           <p class="hint status-message" id="accountAuthNotice" aria-live="polite"></p>
         </section>
-        <section class="panel profile-light-panel" aria-labelledby="profileLightTitle">
+        <section class="panel profile-light-panel hidden" aria-labelledby="profileLightTitle">
           <div class="panel-heading">
             <div>
               <p class="eyebrow" data-i18n="profile.eyebrow">Min spiller</p>
@@ -216,8 +245,8 @@
           <h2 id="setupAdminTitle" data-i18n="setup.newTournament">Ny turnering</h2>
           <label>
             <span data-i18n="setup.tournamentName">Turneringsnavn</span>
-            <input name="tournamentName" type="text" placeholder="Padelstar-turnering" data-i18n-placeholder="setup.defaultTournamentName"
-              maxlength="80" autocomplete="off" required>
+            <input name="tournamentName" type="text" placeholder="Padelstar-turnering"
+              data-i18n-placeholder="setup.defaultTournamentName" maxlength="80" autocomplete="off" required>
           </label>
           <label>
             <span data-i18n="setup.playersOptional">Spillere, valgfritt</span>
@@ -246,9 +275,11 @@
           </label>
           <p class="hint" data-i18n="admin.identityRequired">Admin må være innlogget før en live-turnering kan
             opprettes.</p>
-          <button class="ghost hidden" id="createAdminSignInLinkButton" type="button" data-i18n="actions.sendAdminLink">Send
+          <button class="ghost hidden" id="createAdminSignInLinkButton" type="button"
+            data-i18n="actions.sendAdminLink">Send
             innloggingslenke</button>
-          <button class="ghost" id="createAccountAuthButton" type="button" data-i18n="account.openLogin">Logg inn med konto</button>
+          <button class="ghost" id="createAccountAuthButton" type="button" data-i18n="account.openLogin">Logg inn med
+            konto</button>
           <label>
             <span data-i18n="setup.courtCount">Antall baner</span>
             <input name="courts" type="number" min="1" max="12" value="1" required>
@@ -299,15 +330,11 @@
             <h2 id="tournamentTitle">Padelstar </h2>
           </div>
           <div class="workspace-header-actions">
-            <div class="share-box">
-              <span data-i18n="share.inviteCode">Invitasjonskode</span>
-              <strong id="inviteCode">-----</strong>
-            </div>
             <span id="roleIndicator" class="role-indicator" data-i18n="role.spectator">Tilskuer</span>
             <button class="ghost danger-button hidden" id="leaveSessionButton" type="button"
               data-i18n="actions.leaveTournament">Forlat turnering</button>
-            <img class="tv-mode-wordmark" src="assets/logos/main_logo_without_icon.png"
-              alt="Padelstar" width="1500" height="352">
+            <img class="tv-mode-wordmark" src="assets/logos/main_logo_without_icon.png" alt="Padelstar" width="1500"
+              height="352">
             <img class="tv-mode-logo" src="assets/icons/padelstar-icon.png" alt="Padelstar" width="3000" height="3000">
             <button class="ghost" id="tvModeButton" type="button" data-i18n="actions.tvMode">TV Mode</button>
           </div>
@@ -316,12 +343,9 @@
         <section class="view-grid" data-section="admin">
           <div class="admin-subtabs wide" role="tablist" aria-label="Adminseksjoner"
             data-i18n-aria-label="admin.sectionsAria">
+            data-i18n-aria-label="admin.sectionsAria">
             <button class="subtab active" type="button" role="tab" aria-selected="true" data-admin-panel="control"
               data-i18n="admin.control">Styring</button>
-            <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="share"
-              data-i18n="admin.share">Del</button>
-            <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="players"
-              data-i18n="admin.players">Spillere</button>
             <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="matches"
               data-i18n="admin.matches">Kamper</button>
           </div>
@@ -334,7 +358,9 @@
               </div>
               <div class="live-overview" id="adminLiveOverview"></div>
               <section class="tournament-assistant hidden" id="tournamentAssistant" aria-live="polite">
-                <div class="panel-heading"><h4 data-i18n="assistant.title">Tournament Assistant</h4></div>
+                <div class="panel-heading">
+                  <h4 data-i18n="assistant.title">Tournament Assistant</h4>
+                </div>
                 <ul id="tournamentAssistantFindings"></ul>
               </section>
               <div class="court-queue" id="courtQueue"></div>
@@ -346,6 +372,14 @@
                     data-i18n-placeholder="admin.courtListPlaceholder">
                 </label>
                 <button class="secondary" type="submit" data-i18n="actions.update">Oppdater</button>
+              </form>
+              <form class="court-names-form" id="courtNamesForm">
+                <div class="panel-heading">
+                  <h4 data-i18n="common.court">Bane</h4>
+                  <span data-i18n="admin.courtsInUse">Baner i bruk</span>
+                </div>
+                <div class="court-names-list" id="courtNamesList"></div>
+                <button class="secondary" type="submit" data-i18n="actions.saveRules">Lagre regler</button>
               </form>
               <form class="inline-form" id="tournamentSettingsForm">
                 <label>
@@ -424,7 +458,8 @@
                   <button class="secondary" type="submit" data-i18n="actions.sendAdminLink">Send
                     innloggingslenke</button>
                 </form>
-                <button class="ghost" id="adminAccountAuthButton" type="button" data-i18n="account.openLogin">Logg inn med konto</button>
+                <button class="ghost" id="adminAccountAuthButton" type="button" data-i18n="account.openLogin">Logg inn
+                  med konto</button>
                 <button class="ghost hidden" id="claimTournamentButton" type="button"
                   data-i18n="actions.claimTournament">Knytt til min konto</button>
                 <p class="hint" id="adminIdentityNotice" aria-live="polite"></p>
@@ -433,7 +468,7 @@
           </div>
 
           <div class="panel share-panel">
-            <div class="admin-panel hidden" data-admin-panel-section="share">
+            <div class="admin-panel admin-integrated-panel" data-admin-panel-section="control">
               <div class="panel-heading">
                 <h3 data-i18n="share.title">Del turnering</h3>
                 <span data-i18n="localPwa">Lokal</span>
@@ -484,7 +519,7 @@
           </div>
 
           <div class="panel">
-            <div class="admin-panel hidden" data-admin-panel-section="players">
+            <div class="admin-panel admin-integrated-panel" data-admin-panel-section="control">
               <div class="panel-heading">
                 <h3 data-i18n="admin.lobbyPlayers">Lobby / spillere</h3>
                 <span id="playerCount">0</span>
@@ -566,7 +601,8 @@
               </label>
               <button class="secondary" type="submit" data-i18n="actions.submitResult">Send resultat</button>
             </form>
-            <p class="hint" id="playerResultHint" data-i18n="score.playerSubmitHint">Begge lag kan sende inn. Ulike resultater må avklares av admin.</p>
+            <p class="hint" id="playerResultHint" data-i18n="score.playerSubmitHint">Begge lag kan sende inn. Ulike
+              resultater må avklares av admin.</p>
           </div>
 
           <div class="panel player-profile-panel">
@@ -676,7 +712,7 @@
         <span data-i18n="footer.copyrightPrefix">Copyright</span> &copy; <span id="copyrightYearRange">2026</span>.
         <span data-i18n="footer.rights">All rights reserved.</span>
       </p>
-      <p><a href="privacy.html" data-i18n="footer.privacy">Personvern</a></p>
+      <p><a href="guide.html" data-i18n="guide.link">Bruksanvisning</a> · <a href="privacy.html" data-i18n="footer.privacy">Personvern</a></p>
     </footer>
 
 
@@ -685,10 +721,10 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-16"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-21"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-2"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
-  <script defer src="app/rendering.js?v=padelstar-rendering-1"></script>
+  <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
   <script defer src="app/remote-tournament.js?v=padelstar-remote-tournament-1"></script>
   <script defer src="app/admin-actions.js?v=padelstar-admin-actions-2"></script>
   <script defer src="app/player-actions.js?v=padelstar-player-actions-1"></script>
@@ -734,7 +770,7 @@
   <script defer src="app/profile-manager.js?v=padelstar-profile-1"></script>
   <script defer src="app/remote-rpc.js?v=padelstar-remote-rpc-1"></script>
   <script defer src="app/ui-effects.js?v=padelstar-ui-effects-1"></script>
-  <script defer src="app/navigation.js?v=padelstar-navigation-1"></script>
+  <script defer src="app/navigation.js?v=padelstar-navigation-2"></script>
   <script defer src="app/avatar-system.js?v=padelstar-avatar-system-1"></script>
   <script defer src="app/pwa-install.js?v=padelstar-pwa-install-2"></script>
   <script defer src="app/accent-system.js?v=padelstar-accent-system-1"></script>
@@ -742,11 +778,12 @@
   <script defer src="app/ui-feedback.js?v=padelstar-ui-feedback-1"></script>
   <script defer src="app/notification-system.js?v=padelstar-notification-system-1"></script>
   <script defer src="app/profile-session.js?v=padelstar-profile-session-1"></script>
-  <script defer src="app/account-auth.js?v=padelstar-account-auth-1"></script>
+  <script defer src="app/account-auth.js?v=padelstar-account-auth-6"></script>
   <script defer src="app/match-card.js?v=padelstar-match-card-1"></script>
   <script defer src="app/backup-format.js?v=padelstar-backup-format-1"></script>
   <script defer src="app/link-utils.js?v=padelstar-link-utils-1"></script>
   <script defer src="app/tournament-state.js?v=padelstar-tournament-state-1"></script>
+  <script defer src="app/tournament-library.js?v=padelstar-tournament-library-2"></script>
   <script defer src="app/state-bootstrap.js?v=padelstar-state-bootstrap-1"></script>
   <script defer src="app/module-routing.js?v=padelstar-module-routing-1"></script>
   <script defer src="app/session-policy.js?v=padelstar-session-policy-1"></script>
@@ -754,14 +791,14 @@
   <script defer src="app/remote-admin-actions.js?v=padelstar-remote-admin-actions-1"></script>
   <script defer src="app/remote-player-score.js?v=padelstar-remote-player-score-1"></script>
   <script defer src="app/score-actions.js?v=padelstar-score-actions-2"></script>
-  <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-1"></script>
+  <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-3"></script>
   <script defer src="app/app-events.js?v=padelstar-app-events-1"></script>
   <script defer src="app/workspace-events.js?v=padelstar-workspace-events-1"></script>
   <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-1"></script>
   <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-1"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-1"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-1"></script>
-  <script defer src="app/app.js?v=padelstar-session-28"></script>
+  <script defer src="app/app.js?v=padelstar-session-37"></script>
 </body>
 
 </html>

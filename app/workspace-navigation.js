@@ -70,11 +70,11 @@
       const tournamentIsActive = deps.hasActiveTournament();
       const canShowAdmin = tournamentIsActive && isAdmin;
       const canShowPlayer = tournamentIsActive && Boolean(state.selectedPlayerId);
-      const onLanding = activeModule === "landing";
       const visibleModules = new Set([
         "landing",
         "account",
-        ...(onLanding ? [] : ["setup-admin", "setup-player"]),
+        "setup-admin",
+        "setup-player",
         ...(canShowAdmin ? ["admin"] : []),
         ...(canShowPlayer ? ["player"] : []),
       ]);
@@ -91,7 +91,6 @@
         elements.leaveSessionButton.dataset.i18n = deps.getSpectatorMode() ? "nav.leaveSpectator" : "actions.leaveTournament";
         elements.leaveSessionButton.textContent = deps.t(elements.leaveSessionButton.dataset.i18n);
       }
-      elements.headerShareBox.classList.toggle("hidden", !isAdmin || activeModule !== "admin");
       if (elements.roleIndicator) {
         const role = isAdmin ? "admin" : state.selectedPlayerId && !deps.getSpectatorMode() ? "player" : "spectator";
         elements.roleIndicator.textContent = deps.t(`role.${role}`);
@@ -109,12 +108,16 @@
     }
 
     function activateAdminPanel(panel) {
+      const availablePanels = new Set(
+        Array.from(document.querySelectorAll(".subtab"), (tab) => tab.dataset.adminPanel),
+      );
+      const activePanel = availablePanels.has(panel) ? panel : "control";
       document.querySelectorAll(".subtab").forEach((tab) => {
-        tab.classList.toggle("active", tab.dataset.adminPanel === panel);
-        tab.setAttribute("aria-selected", String(tab.dataset.adminPanel === panel));
+        tab.classList.toggle("active", tab.dataset.adminPanel === activePanel);
+        tab.setAttribute("aria-selected", String(tab.dataset.adminPanel === activePanel));
       });
       document.querySelectorAll("[data-admin-panel-section]").forEach((section) => {
-        section.classList.toggle("hidden", section.dataset.adminPanelSection !== panel);
+        section.classList.toggle("hidden", section.dataset.adminPanelSection !== activePanel);
       });
     }
 

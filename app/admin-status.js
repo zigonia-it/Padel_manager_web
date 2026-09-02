@@ -1,5 +1,5 @@
 window.PadelstarAdminStatus = (() => {
-  function create({ canGenerateRound, elements, generateRoundBlockReason, getActiveRound, getLocalStorage, getState, hasActiveTournament, hasPendingRemoteWrites, isSupabaseReady, isCurrentUserAdmin, pendingRemoteWriteCount, realtimeConnectionState, roundProgress, storageKey, syncLastAttemptAt, syncLastError, remoteConflict, t }) {
+  function create({ canGenerateRound, elements, generateRoundBlockReason, getActiveRound, getLocalStorage, getSavedTournaments, getState, hasActiveTournament, hasPendingRemoteWrites, isSupabaseReady, isCurrentUserAdmin, pendingRemoteWriteCount, realtimeConnectionState, roundProgress, storageKey, syncLastAttemptAt, syncLastError, remoteConflict, t }) {
     function renderSyncControls() {
       if (!elements.refreshRemoteButton) return;
       const canRefresh = remoteConflict() && isCurrentUserAdmin();
@@ -38,15 +38,26 @@ window.PadelstarAdminStatus = (() => {
 
     function renderStartResume() {
       const state = getState();
-      const hasSavedTournament = Boolean(getLocalStorage().getItem(storageKey));
+      const tournaments = getSavedTournaments?.() ?? [];
+      const hasSavedTournament = Boolean(getLocalStorage().getItem(storageKey)) || tournaments.length > 0;
       elements.resumePanel.classList.toggle("hidden", !hasSavedTournament);
-      if (!hasSavedTournament) return;
-      const isAdmin = isCurrentUserAdmin();
-      elements.resumeTitle.textContent = t("resume.title", { name: state.name });
-      elements.resumeSummary.textContent = isAdmin
-        ? t("resume.adminSummary", { players: state.players.length, courts: state.courts.length, code: state.inviteCode })
-        : t("resume.summary", { players: state.players.length, courts: state.courts.length });
-      elements.resumeTournamentButton.textContent = isAdmin ? t("resume.continueAdmin") : t("resume.continueTournament");
+      if (!hasSavedTournament || !elements.savedTournamentsList) return;
+      elements.savedTournamentsList.replaceChildren();
+      tournaments.forEach((entry) => {
+        const item = document.createElement("article");
+        item.className = "saved-tournament-item";
+        const name = document.createElement("strong");
+        name.textContent = entry.state.name;
+        const summary = document.createElement("span");
+        summary.textContent = `${entry.state.players.length} ${t("resume.players")} · ${entry.state.courts.length} ${t("resume.courts")} · ${entry.state.inviteCode}`;
+        const button = document.createElement("button");
+        button.className = "secondary";
+        button.type = "button";
+        button.dataset.tournamentId = entry.id;
+        button.textContent = entry.id === state.id && isCurrentUserAdmin() ? t("resume.continueAdmin") : t("resume.openTournament");
+        item.append(name, summary, button);
+        elements.savedTournamentsList.append(item);
+      });
     }
 
     function syncConnectionStatus() {

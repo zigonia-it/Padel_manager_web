@@ -1,6 +1,20 @@
 # Padelstar – implementeringsdokumentasjon
 
-Sist oppdatert: 2026-09-02
+Sist oppdatert: 2026-09-03
+
+## Gjeldende produktbeslutninger
+
+De brukerrettede valgene som skal bevares gjennom nye faser er samlet i [produktbeslutninger og endringsvern](Development/produktbeslutninger.md). Dokumentet er styrende for menyrekkefølge og felles layout, roller, innlogget profilnavn, flerspråklig brukerflate, flerturneringsflyt, retensjon/GDPR og bruksanvisningen. Nye faser må få uttrykkelig godkjenning før de endrer et av disse valgene.
+
+## 2026-09-03 – siste leveranse
+
+- Laget `guide.html` med en kort bruksanvisning for admin, spiller med profil, gjestespiller og tilskuer.
+- Bruksanvisningen støtter Bokmål, Nynorsk, engelsk, spansk, tysk og fransk gjennom `app/guide-i18n.js`, og er lagt i PWA-cache for offline-lesing.
+- Lagt til oversatt guide-lenke på hjemmesiden og i footeren.
+- Dokumentert samlet produktstatus: felles meny/layout, profil- og Supabase Auth-flyt, profilnavn som gjenbrukes, flerturneringslagring, tre spillerroller, retensjon og GDPR-prinsipper.
+- Opprettet [produktbeslutninger og endringsvern](Development/produktbeslutninger.md), som krever uttrykkelig godkjenning før nye faser endrer de avtalte valgene.
+- Rettet navigasjonsbinding slik at meny- og startknapper ikke er avhengige av hamburgerkontrollen, og fjernet dobbelt språkfelt ved å cache-buste den visuelle språkvelgeren og service worker.
+- Verifisert med `node --check app/guide-i18n.js`, `git diff --check` og `npm test`: 175 beståtte tester, 1 forventet live-Supabase-test hoppet over.
 
 Dette er den aktive, kronologiske oversikten over tidligere implementeringer, beslutninger og verifiseringer. Den komplette eldre arbeidsloggen er bevart i [archive/history/documentation_log_legacy.md](archive/history/documentation_log_legacy.md). Planer som ikke lenger er operative ligger i [archive/plans/](archive/plans/).
 

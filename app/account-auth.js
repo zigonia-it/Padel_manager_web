@@ -1,7 +1,7 @@
 (function initializeAccountAuth(global) {
   "use strict";
 
-  function create({ getClient, getElements, translate, onAuthChange }) {
+  function create({ getClient, getElements, getProfile, onProfileLoaded, translate, onAuthChange }) {
     let user = null;
 
     function notice(message, error = false) {
@@ -19,7 +19,9 @@
         const result = await client.auth.getUser();
         user = result.data?.user ?? null;
       } catch { user = null; }
+      if (user) await loadRemoteProfile(user);
       render();
+      onAuthChange?.(user);
       return user;
     }
 
@@ -31,16 +33,35 @@
       } catch { /* Auth must remain usable even before the profile migration is deployed. */ }
     }
 
-    async function syncProfile(nextProfile) {
+    async function loadRemoteProfile(nextUser) {
+      const client = getClient();
+      if (!client || !nextUser?.id || typeof client.from !== "function") return null;
+      try {
+        const { data, error } = await client.from("profiles")
+          .select("display_name, avatar_id")
+          .eq("id", nextUser.id)
+          .maybeSingle();
+        if (!error && data?.display_name?.trim()) {
+          const remoteProfile = { displayName: data.display_name.trim(), avatarId: data.avatar_id };
+          onProfileLoaded?.(remoteProfile);
+          return remoteProfile;
+        }
+      } catch { /* Keep the local profile usable when the remote profile is unavailable. */ }
+      return null;
+    }
+
+    async function syncProfile(nextProfile, preferredLanguage) {
       if (!user || !nextProfile) return false;
       const client = getClient();
       if (!client || typeof client.from !== "function") return false;
       try {
-        const { error } = await client.from("profiles").upsert({
+        const profilePayload = {
           id: user.id,
           display_name: nextProfile.displayName,
           avatar_id: nextProfile.avatarId,
-        }, { onConflict: "id" });
+        };
+        if (preferredLanguage) profilePayload.preferred_language = preferredLanguage;
+        const { error } = await client.from("profiles").upsert(profilePayload, { onConflict: "id" });
         return !error;
       } catch { return false; }
     }
@@ -56,6 +77,7 @@
       if (error) { notice(translate("account.authFailed"), true); return false; }
       user = data.user;
       await ensureRemoteProfile(user);
+      await loadRemoteProfile(user);
       notice(translate("account.authSignedIn"));
       form.elements.password.value = "";
       render();
@@ -74,6 +96,7 @@
       if (error) { notice(translate("account.authFailed"), true); return false; }
       user = data.user ?? null;
       await ensureRemoteProfile(user);
+      if (user) await loadRemoteProfile(user);
       elements.accountAuthPassword.value = "";
       notice(data.session ? translate("account.authSignedIn") : translate("account.authConfirmEmail"));
       render();
@@ -93,24 +116,83 @@
       return true;
     }
 
+    async function updateAccount(event) {
+      event.preventDefault();
+      if (!user) return false;
+      const elements = getElements();
+      const form = event.currentTarget;
+      const email = form.elements.email.value.trim();
+      const password = form.elements.newPassword.value;
+      const passwordConfirm = form.elements.passwordConfirm.value;
+      if (password && password !== passwordConfirm) {
+        notice(translate("account.passwordMismatch"), true);
+        return false;
+      }
+      const payload = {};
+      if (email && email !== user.email) payload.email = email;
+      if (password) payload.password = password;
+      if (Object.keys(payload).length === 0) {
+        notice(translate("account.noChanges"));
+        return true;
+      }
+      const client = getClient();
+      if (!client) { notice(translate("account.authUnavailable"), true); return false; }
+      const { data, error } = await client.auth.updateUser(payload);
+      if (error) { notice(translate("account.authUpdateFailed"), true); return false; }
+      user = data.user ?? { ...user, ...(payload.email ? { email: payload.email } : {}) };
+      form.elements.newPassword.value = "";
+      form.elements.passwordConfirm.value = "";
+      notice(payload.email ? translate("account.authEmailChangePending") : translate("account.authUpdated"));
+      render();
+      onAuthChange?.(user);
+      return true;
+    }
+
     function render() {
       const elements = getElements();
       if (!elements.accountAuthPanel) return;
+      const profileName = getProfile?.()?.displayName?.trim();
+      const metadataName = user?.user_metadata?.display_name?.trim();
+      const emailName = user?.email?.split("@")[0]?.trim();
+      const signedInName = profileName || metadataName || emailName || translate("account.accountUser");
       elements.accountAuthPanel.classList.remove("hidden");
+      elements.profileLightPanel?.classList.toggle("hidden", !user);
       elements.accountAuthSignedIn.classList.toggle("hidden", !user);
       elements.accountAuthForm.classList.toggle("hidden", Boolean(user));
       elements.accountAuthSignOut.classList.toggle("hidden", !user);
       elements.accountAuthIdentity.textContent = user?.email ?? "";
+      if (elements.accountAuthAccountEmail && user) elements.accountAuthAccountEmail.value = user.email ?? "";
+      if (elements.accountAuthDisplayName) elements.accountAuthDisplayName.textContent = signedInName;
+      if (elements.accountAuthEmailStatus) {
+        elements.accountAuthEmailStatus.textContent = user
+          ? user.email_confirmed_at ? translate("account.emailConfirmed") : translate("account.emailNotConfirmed")
+          : "";
+      }
+      if (elements.accountAuthCreated) {
+        elements.accountAuthCreated.textContent = user?.created_at
+          ? translate("account.memberSince", { date: new Date(user.created_at).toLocaleDateString(document.documentElement.lang || "nb-NO") })
+          : "";
+      }
+      if (elements.createAccountAuthButton) {
+        elements.createAccountAuthButton.textContent = user
+          ? translate("account.authSignedInAs", { name: signedInName })
+          : translate("account.openLogin");
+      }
     }
 
     function bind() {
       const elements = getElements();
       elements.accountAuthForm?.addEventListener("submit", signIn);
+      elements.accountDetailsForm?.addEventListener("submit", updateAccount);
       elements.accountAuthSignUp?.addEventListener("click", () => void signUp());
       elements.accountAuthSignOut?.addEventListener("click", () => void signOut());
     }
 
-    return { bind, ensureRemoteProfile, refresh, render, signIn, signOut, signUp, syncProfile };
+    function currentUser() {
+      return user;
+    }
+
+    return { bind, currentUser, ensureRemoteProfile, loadRemoteProfile, refresh, render, signIn, signOut, signUp, syncProfile, updateAccount };
   }
 
   global.PadelstarAccountAuth = { create };

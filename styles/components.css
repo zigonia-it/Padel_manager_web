@@ -106,8 +106,8 @@ h3 {
 }
 
 .status-pill.offline {
-  border-color: rgba(168, 59, 54, 0.48);
-  color: #ff2f3f;
+  border-color: rgba(139, 152, 170, 0.42);
+  color: #9aa7b8;
 }
 
 .status-pill[data-status="connecting"],
@@ -357,6 +357,39 @@ h3 {
   align-content: start;
 }
 
+.court-names-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(var(--gold-light-rgb), 0.14);
+}
+
+.court-names-list {
+  display: grid;
+  gap: 10px;
+}
+
+.court-name-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.court-name-row > span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .court-name-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
 .share-details {
   display: grid;
   gap: 12px;
@@ -443,8 +476,39 @@ h3 {
 }
 
 .resume-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.saved-tournaments-list {
+  display: grid;
+  gap: 10px;
+}
+
+.saved-tournament-item {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 16px;
   align-items: center;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(2, 15, 33, 0.56);
+}
+
+.saved-tournament-item strong,
+.saved-tournament-item span {
+  min-width: 0;
+}
+
+.saved-tournament-item span {
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.saved-tournament-item button {
+  grid-column: 2;
+  grid-row: 1 / span 2;
 }
 
 .intro {
@@ -763,6 +827,18 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   width: min(92vw, 640px);
 }
 
+.guide-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 800;
+}
+
 .landing-actions > :last-child:nth-child(odd) {
   grid-column: 1 / -1;
   justify-self: center;
@@ -955,7 +1031,7 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
   display: grid;
 
   grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+    repeat(2, minmax(0, 1fr));
 
   gap: 8px;
 
@@ -1073,6 +1149,53 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
 
 .account-auth-panel .inline-form .button-row {
   flex: 0 0 auto;
+}
+
+.account-auth-panel #accountAuthSignedIn {
+  display: grid;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.account-auth-summary {
+  display: grid;
+  gap: 3px;
+  padding: 14px 16px;
+  border: 1px solid rgba(var(--gold-light-rgb), 0.24);
+  border-radius: 10px;
+  background: rgba(var(--gold-rgb), 0.055);
+}
+
+.account-auth-summary strong {
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  text-transform: uppercase;
+}
+
+.account-details-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.account-details-form > label:first-child {
+  grid-column: 1 / -1;
+}
+
+.account-details-form .button-row {
+  grid-column: 1 / -1;
+  justify-content: space-between;
+}
+
+.account-details-form input {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .account-details-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .panel-heading,

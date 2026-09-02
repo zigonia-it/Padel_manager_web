@@ -31,10 +31,36 @@ body.landing-active {
 
 body.landing-active .intro,
 body[data-theme="classic"].landing-active .intro {
-  background-image:
-    radial-gradient(circle at 50% 36%, rgba(18, 191, 255, 0.12), transparent 32rem),
-    linear-gradient(180deg, rgba(2, 11, 28, 0.22), rgba(2, 8, 18, 0.56)) !important;
-  background-color: #06152c;
+  background: transparent !important;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* Setup pages use the same quiet navy canvas as the admin workspace. */
+body.setup-active {
+  background:
+    linear-gradient(180deg,
+      rgba(3, 16, 34, 0.86),
+      rgba(3, 16, 34, 0.98)),
+    linear-gradient(90deg,
+      rgba(3, 16, 34, 0.3),
+      rgba(5, 21, 43, 0.76)),
+    var(--soft);
+}
+
+/* Keep setup wrappers from creating a second, oversized card around the
+   actual create/join form. */
+body.setup-active .setup-panel {
+  padding-block: 0 24px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Separate the account cards so their borders do not visually merge. */
+body.setup-active .account-panel {
+  display: grid;
+  gap: 18px;
 }
 
 body:not(.landing-active) {
@@ -67,6 +93,26 @@ body:not(.landing-active) .topbar {
 
 body:not(.landing-active) .site-footer {
   color: var(--ui-muted);
+}
+
+/* Workspace pages should sit directly on the shared navy canvas. Their
+   actual panels provide the visual grouping; the old outer surface made the
+   admin/player heading look like a separate oversized card. */
+body.workspace-active[data-theme="classic"] .workspace,
+body.workspace-active[data-theme="classic"] .workspace-header,
+body.workspace-active .workspace,
+body.workspace-active .workspace-header {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Keep the navigation header the same size on workspace pages as on the
+   landing page. The workspace-specific logo enlargement made the whole menu
+   appear taller and inconsistent between views. */
+body.workspace-active .brand-logo {
+  width: clamp(54px, 5.5vw, 78px);
+  max-height: 78px;
 }
 
 body:not(.landing-active) .workspace-header {
@@ -177,7 +223,7 @@ body:not(.landing-active) .button-secondary:hover:not(:disabled) {
   min-width: 54px;
 }
 
-.language-picker-enhanced > #languageSelect {
+.language-picker > #languageSelect {
   position: absolute;
   width: 1px;
   height: 1px;

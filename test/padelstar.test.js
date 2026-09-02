@@ -664,6 +664,9 @@ test("translations are loaded from the shared dictionary with Bokmål fallback",
   const api = loadPadelstar();
   const state = makeTournament(api, ["Ada", "Bo"], { settings: { language: "en" } });
 
+  for (const [language, label] of Object.entries({ nb: "Profil", nn: "Profil", en: "Profile", es: "Perfil", de: "Profil", fr: "Profil", sv: "Profil", da: "Profil" })) {
+    assert.equal(api.i18n.translate(language, "nav.account"), label);
+  }
   assert.equal(api.t("startTournament"), "Start tournament");
   assert.equal(api.t("actions.leaveTournament"), "Leave tournament");
   assert.equal(api.t("refreshRemoteState"), "Load latest");
@@ -680,8 +683,8 @@ test("translations are loaded from the shared dictionary with Bokmål fallback",
   );
   assert.equal(api.i18n.has("en", "status.connectionAria"), true);
   assert.equal(api.i18n.htmlLang("en"), "en");
-  assert.equal(api.i18n.translate("sv", "queue.title"), "Banekø");
-  assert.equal(api.i18n.translate("da", "queue.title"), "Banekø");
+  assert.equal(api.i18n.translate("sv", "queue.title"), "Bokö");
+  assert.equal(api.i18n.translate("da", "queue.title"), "Bane kø");
   assert.equal(api.i18n.translate("es", "profile.avatar"), "Avatar");
   assert.equal(api.i18n.translate("de", "admin.sectionsAria"), "Admin sections");
   assert.equal(api.i18n.translate("fr", "admin.sectionsAria"), "Admin sections");
