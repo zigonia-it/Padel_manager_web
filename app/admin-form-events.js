@@ -86,12 +86,12 @@
         if (state.rounds.length === 0) {
           generateFullTournamentSchedule();
         } else if (isSupabaseReady() && completingActiveRound) {
-          if (state.settings.format === "roundRobin") queueRemoteRoundAdvance();
+          if (state.settings.format !== "cup") queueRemoteRoundAdvance();
           if (state.settings.format === "cup") queueRemoteCupAdvance();
           return;
         } else {
           if (completingActiveRound) {
-            activeRound.status = "finished";
+            activeRound.status = "completed";
             state.status = "Runde fullført";
           }
           startNextScheduledRound();

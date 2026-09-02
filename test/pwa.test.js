@@ -16,6 +16,7 @@ const responsiveStylesSource = fs.readFileSync(path.join(root, "styles", "respon
 const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
+const translationsSource = fs.readFileSync(path.join(root, "app", "translations.js"), "utf8");
 const avatarSystemSource = fs.readFileSync(path.join(root, "app", "avatar-system.js"), "utf8");
 const accentSystemSource = fs.readFileSync(path.join(root, "app", "accent-system.js"), "utf8");
 const uiFeedbackSource = fs.readFileSync(path.join(root, "app", "ui-feedback.js"), "utf8");
@@ -65,17 +66,18 @@ const tournamentEntrySource = fs.readFileSync(path.join(root, "app", "tournament
 const adminFormEventsSource = fs.readFileSync(path.join(root, "app", "admin-form-events.js"), "utf8");
 const matchActionsSource = fs.readFileSync(path.join(root, "app", "match-actions.js"), "utf8");
 const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.js"), "utf8");
+const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v170/);
+  assert.match(serviceWorkerSource, /padelstar-v203/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(serviceWorkerSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(indexSource, /app\/player-visuals\.js\?v=padelstar-player-visuals-1/);
   assert.match(serviceWorkerSource, /app\/player-visuals\.js\?v=padelstar-player-visuals-1/);
   assert.match(indexSource, /app\/tournament-runtime\.js\?v=padelstar-tournament-runtime-1/);
   assert.match(serviceWorkerSource, /app\/tournament-runtime\.js\?v=padelstar-tournament-runtime-1/);
-  assert.match(indexSource, /app\/workspace-overview\.js\?v=padelstar-workspace-overview-1/);
-  assert.match(serviceWorkerSource, /app\/workspace-overview\.js\?v=padelstar-workspace-overview-1/);
+  assert.match(indexSource, /app\/workspace-overview\.js\?v=padelstar-workspace-overview-2/);
+  assert.match(serviceWorkerSource, /app\/workspace-overview\.js\?v=padelstar-workspace-overview-2/);
   assert.match(indexSource, /app\/match-list\.js\?v=padelstar-match-list-1/);
   assert.match(serviceWorkerSource, /app\/match-list\.js\?v=padelstar-match-list-1/);
   assert.match(serviceWorkerSource, /padelstar-avatar-system-1/);
@@ -198,15 +200,121 @@ test("initial URL and session view restoration has its own boundary", () => {
 });
 
 test("all active app icon surfaces use the shared Padelstar icon", () => {
-  assert.match(indexSource, /apple-touch-icon" href="assets\/padelstar-icon\.png/);
-  assert.match(indexSource, /rel="icon" href="assets\/padelstar-icon\.png/);
-  assert.match(privacySource, /apple-touch-icon" href="assets\/padelstar-icon\.png/);
-  assert.match(privacySource, /rel="icon" href="assets\/padelstar-icon\.png/);
-  assert.match(manifestSource, /"src": "assets\/padelstar-icon\.png"/);
-  assert.doesNotMatch(serviceWorkerSource, /assets\/icons\/padelstar-(256|512)\.png/);
-  assert.match(serviceWorkerSource, /icon: "\.\/assets\/padelstar-icon\.png"/);
-  assert.match(serviceWorkerSource, /badge: "\.\/assets\/padelstar-icon\.png"/);
-  assert.match(matchCardSource, /src="assets\/padelstar-icon\.png"/);
+  assert.match(indexSource, /apple-touch-icon" href="assets\/icons\/padelstar-icon\.png/);
+  assert.match(indexSource, /rel="icon" href="assets\/icons\/padelstar-icon\.png/);
+  assert.match(privacySource, /apple-touch-icon" href="assets\/icons\/padelstar-icon\.png/);
+  assert.match(privacySource, /rel="icon" href="assets\/icons\/padelstar-icon\.png/);
+  assert.match(manifestSource, /"src": "assets\/icons\/padelstar-192\.png"/);
+  assert.match(manifestSource, /"src": "assets\/icons\/padelstar-maskable-512\.png"/);
+  assert.match(serviceWorkerSource, /assets\/icons\/padelstar-192\.png/);
+  assert.match(serviceWorkerSource, /assets\/icons\/padelstar-512\.png/);
+  assert.match(serviceWorkerSource, /icon: "\.\/assets\/icons\/padelstar-icon\.png"/);
+  assert.match(serviceWorkerSource, /badge: "\.\/assets\/icons\/padelstar-icon\.png"/);
+  assert.match(matchCardSource, /src="assets\/icons\/padelstar-icon\.png"/);
+});
+
+test("PWA install flow supports native prompts, standalone detection and platform fallback", () => {
+  assert.match(pwaInstallSource, /beforeinstallprompt/);
+  assert.match(pwaInstallSource, /appinstalled/);
+  assert.match(pwaInstallSource, /display-mode: standalone/);
+  assert.match(pwaInstallSource, /iphone\|ipad\|ipod/);
+  assert.match(indexSource, /id="installAppButton"/);
+  assert.match(indexSource, /id="installModal"/);
+  assert.match(indexSource, /id="installInstructions"/);
+  assert.match(indexSource, /app\/pwa-install\.js\?v=padelstar-pwa-install-1/);
+  assert.match(serviceWorkerSource, /app\/pwa-install\.js\?v=padelstar-pwa-install-1/);
+});
+
+test("phase 1 keeps player registration automatic and live admin creation authenticated", () => {
+  assert.doesNotMatch(indexSource, /name="avatarId"/);
+  assert.match(tournamentEntrySource, /getAdminAuthUser/);
+  assert.match(tournamentEntrySource, /identitySignInRequired/);
+  assert.match(tournamentEntrySource, /randomAvatarId/);
+  assert.match(tournamentEntrySource, /ownerUserId/);
+  assert.match(fs.readFileSync(path.join(root, "supabase_schema.sql"), "utf8"), /owner_user_id, claimed_at/);
+  assert.match(appSource, /detectSessionInUrl: true/);
+  assert.match(indexSource, /id="createAdminSignInLinkButton"/);
+});
+
+test("home and menu expose account and TV Mode entry points", () => {
+  assert.match(indexSource, /id="signInModuleLink"[^>]*data-module-link="account"[^>]*data-focus-target="profileNameInput"/);
+  assert.match(indexSource, /id="adminEmail"[^>]*name="adminEmail"/);
+  assert.match(indexSource, /id="tvModeMenuButton"[^>]*data-action="tv-mode"/);
+  assert.match(navigationSource, /focusTarget/);
+  assert.match(appSource, /tvModeMenuButton/);
+});
+
+test("TV Mode is a full-viewport read-only layout across aspect ratios", () => {
+  assert.match(indexSource, /class="tv-mode-logo"[^>]*src="assets\/icons\/padelstar-icon\.png"/);
+  assert.equal((indexSource.match(/id="tvModeButton"/g) ?? []).length, 1);
+  assert.match(indexSource, /workspace-header-actions[\s\S]*id="tvModeButton"/);
+  assert.match(modulesStylesSource, /\.tv-mode \.app-shell[\s\S]*height: 100dvh/);
+  assert.match(modulesStylesSource, /\.tv-mode \.site-footer/);
+  assert.match(modulesStylesSource, /\.tv-mode \.workspace-header #roleIndicator/);
+  assert.match(modulesStylesSource, /\.tv-mode \.workspace-header #leaveSessionButton/);
+  assert.match(modulesStylesSource, /top: clamp\(10px, 1\.5vw, 24px\)/);
+  assert.match(modulesStylesSource, /\.tv-mode \.tv-queue-panel \.court-queue[\s\S]*padding-top: 0/);
+  assert.match(modulesStylesSource, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
+  assert.doesNotMatch(modulesStylesSource, /@media \(max-width: 1000px\), \(max-aspect-ratio: 3 \/ 2\)/);
+  assert.match(modulesStylesSource, /text-transform: uppercase/);
+});
+
+test("branding uses the shield icon in the menu and the wordmark in the hero", () => {
+  assert.match(indexSource, /class="brand-logo" src="assets\/icons\/padelstar-icon\.png"/);
+  assert.match(indexSource, /class="hero-logo-wordmark"[\s\S]*src="assets\/logos\/main_logo_without_icon\.png"/);
+  assert.match(componentsStylesSource, /\.hero-logo-wordmark[\s\S]*aspect-ratio: 1500 \/ 352/);
+});
+
+test("TV header uses the icon and the standalone wordmark", () => {
+  assert.match(indexSource, /class="tv-mode-wordmark"[\s\S]*main_logo_without_icon\.png/);
+  assert.match(indexSource, /class="tv-mode-logo"[\s\S]*assets\/icons\/padelstar-icon\.png/);
+  assert.match(modulesStylesSource, /\.tv-mode \.tv-mode-wordmark[\s\S]*display: block/);
+});
+
+test("account entry opens a separate profile module and landing actions center odd buttons", () => {
+  assert.match(indexSource, /id="signInModuleLink"[^>]*data-module-link="account"[^>]*data-i18n="nav.account"/);
+  assert.match(indexSource, /id="accountView"[^>]*data-module="account"/);
+  assert.match(indexSource, /id="profileForm"/);
+  assert.match(componentsStylesSource, /\.landing-actions > :last-child:nth-child\(odd\)[\s\S]*width: 50%/);
+  assert.match(moduleRoutingSource, /"account"/);
+});
+
+test("account profile uses automatic avatars without exposing an avatar picker", () => {
+  assert.doesNotMatch(indexSource, /id="profileAvatarPicker"/);
+  assert.match(profileSessionSource, /\| defaultAvatarId/);
+  assert.match(profileUiSource, /profileAvatarPicker\?\.querySelectorAll/);
+});
+
+test("connection status is a dot indicator with green online and red offline states", () => {
+  assert.match(indexSource, /id="connectionStatus"/);
+  assert.match(componentsStylesSource, /\.status-pill::before[\s\S]*border-radius: 50%/);
+  assert.match(componentsStylesSource, /\.status-pill \{[\s\S]*color: #55e69a/);
+  assert.match(componentsStylesSource, /\.status-pill\.offline[\s\S]*color: #ff2f3f/);
+});
+
+test("local, disconnected and unavailable connections all use the offline label", () => {
+  assert.match(adminStatusSource, /const statusKey = isOnline \? "realtimeConnected" : "offline"/);
+  assert.match(adminStatusSource, /const statusClass = isOnline \? "connected" : "offline"/);
+  assert.match(translationsSource, /localPwa: "Offline"/);
+});
+
+test("TV module headings share one larger display style", () => {
+  assert.match(modulesStylesSource, /\.tv-mode \.panel-heading h3[\s\S]*font-family: var\(--font-display\)/);
+  assert.match(modulesStylesSource, /\.tv-mode \.spectator-live-group > h4[\s\S]*font-size: clamp\(1rem, 1\.25vw, 1\.35rem\)/);
+});
+
+test("navigation menu is contextual and uses TV Mode for the public tournament view", () => {
+  assert.match(workspaceNavigationSource, /const onLanding = activeModule === "landing"/);
+  assert.match(workspaceNavigationSource, /\.\.\.\(onLanding \? \[\] : \["setup-admin", "setup-player"\]\)/);
+  assert.match(workspaceNavigationSource, /const canShowAdmin = tournamentIsActive && isAdmin/);
+  assert.match(workspaceNavigationSource, /const canShowPlayer = tournamentIsActive && Boolean\(state\.selectedPlayerId\)/);
+  assert.match(workspaceNavigationSource, /elements\.tournamentTab\.classList\.add\("hidden"\)/);
+});
+
+test("rules are available in the player workspace, not the public tournament view", () => {
+  assert.match(indexSource, /data-section="player"[\s\S]*player-rules-panel[\s\S]*id="rulesList"/);
+  const tournamentSection = indexSource.match(/<section class="view-grid hidden" data-section="tournament"[\s\S]*?<\/section>/)?.[0] ?? "";
+  assert.doesNotMatch(tournamentSection, /id="rulesList"/);
 });
 
 test("browser entrypoint uses the organized app and styles directories", () => {
@@ -402,8 +510,8 @@ test("admin status rendering has its own lobby and sync boundary", () => {
   assert.match(adminStatusSource, /renderStartResume/);
   assert.match(adminStatusSource, /syncConnectionStatus/);
   assert.match(adminStatusSource, /window\.PadelstarAdminStatus/);
-  assert.match(indexSource, /app\/admin-status\.js\?v=padelstar-admin-status-1/);
-  assert.match(serviceWorkerSource, /app\/admin-status\.js\?v=padelstar-admin-status-1/);
+  assert.match(indexSource, /app\/admin-status\.js\?v=padelstar-admin-status-2/);
+  assert.match(serviceWorkerSource, /app\/admin-status\.js\?v=padelstar-admin-status-2/);
   assert.match(appSource, /adminStatus\.renderLobbyStatus\(\)/);
 });
 
@@ -573,8 +681,8 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-91/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-27/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-92/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-28/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-1/);
@@ -584,8 +692,8 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/state-bootstrap\.js\?v=padelstar-state-bootstrap-1/);
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-1/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-91/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-27/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-92/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-28/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-1/);
@@ -631,6 +739,15 @@ test("stylesheet responsibilities are split into active layers", () => {
 test("service worker does not cache failed same-origin responses", () => {
   assert.match(serviceWorkerSource, /if \(!response \|\| !response\.ok\) return response;/);
   assert.match(serviceWorkerSource, /cache\.put\(event\.request, responseToCache\)/);
+});
+
+test("phase 4-6 modules are wired into the shared app shell", () => {
+  assert.match(indexSource, /app\/player-statistics\.js\?v=padelstar-player-statistics-1/);
+  assert.match(indexSource, /app\/tournament-insights\.js\?v=padelstar-insights-1/);
+  assert.match(indexSource, /app\/historical-records\.js\?v=padelstar-history-1/);
+  assert.match(indexSource, /value="groupsPlayoffs"/);
+  assert.match(serviceWorkerSource, /app\/historical-records\.js\?v=padelstar-history-1/);
+  assert.match(appSource, /PadelstarHistoricalRecords\.record/);
 });
 
 test("module transitions support reduced motion and preserve focus intent", () => {
@@ -694,11 +811,11 @@ test("backup export uses the token-free state projection", () => {
 });
 
 test("app shell uses optimized startup images", () => {
-  assert.match(indexSource, /assets\/main_logo\.png/);
-  assert.match(indexSource, /assets\/bg_img-1600\.jpg/);
-  assert.match(stylesSource, /assets\/bg_img-1600\.jpg/);
-  assert.match(serviceWorkerSource, /assets\/main_logo\.png/);
-  assert.match(serviceWorkerSource, /assets\/bg_img-1600\.png/);
+  assert.match(indexSource, /assets\/logos\/main_logo\.png/);
+  assert.match(indexSource, /assets\/backgrounds\/bg_img-1600\.jpg/);
+  assert.match(stylesSource, /assets\/backgrounds\/bg_img-1600\.jpg/);
+  assert.match(serviceWorkerSource, /assets\/logos\/main_logo\.png/);
+  assert.match(serviceWorkerSource, /assets\/backgrounds\/bg_img-1600\.jpg/);
   assert.doesNotMatch(serviceWorkerSource, /assets\/padelstar_logo-1200\.png/);
   assert.doesNotMatch(serviceWorkerSource, /assets\/padelstar_button-900\.png/);
   assert.doesNotMatch(serviceWorkerSource, /assets\/zigonia-it_logo_gold\.png/);
@@ -707,8 +824,8 @@ test("app shell uses optimized startup images", () => {
 
 test("optimized startup image payload stays within the measured budget", () => {
   const startupImages = [
-    "assets/bg_img-1600.png",
-    "assets/main_logo.png",
+    "assets/backgrounds/bg_img-1600.jpg",
+    "assets/logos/main_logo.png",
   ];
   const totalBytes = startupImages.reduce((sum, file) => sum + fs.statSync(path.join(root, file)).size, 0);
 

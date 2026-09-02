@@ -259,7 +259,8 @@ button.brand-home-button:not(:disabled):hover {
 
 .brand-logo {
   display: block;
-  width: clamp(100px, 12vw, 156px);
+  width: clamp(54px, 5.5vw, 78px);
+  max-height: 78px;
   height: auto;
 
   object-fit: contain;

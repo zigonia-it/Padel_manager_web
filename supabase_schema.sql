@@ -167,13 +167,15 @@ begin
   saved_state := p_state - 'adminToken' - 'playerToken' - 'selectedPlayerId' - 'revision';
   saved_state := jsonb_set(saved_state, '{revision}', '0'::jsonb, true);
 
-  insert into public.tournaments (id, invite_code, admin_token, state, revision)
-  values (next_id, next_invite_code, p_admin_token, saved_state, 0)
+  insert into public.tournaments (id, invite_code, admin_token, state, revision, owner_user_id, claimed_at)
+  values (next_id, next_invite_code, p_admin_token, saved_state, 0, auth.uid(), case when auth.uid() is null then null else now() end)
   on conflict (id) do update
   set invite_code = excluded.invite_code,
       admin_token = excluded.admin_token,
       state = excluded.state,
-      revision = 0;
+      revision = 0,
+      owner_user_id = coalesce(public.tournaments.owner_user_id, excluded.owner_user_id),
+      claimed_at = coalesce(public.tournaments.claimed_at, excluded.claimed_at);
 
   return saved_state;
 end;
@@ -191,6 +193,60 @@ as $$
   from public.tournaments as t
   where t.invite_code = upper(trim(p_invite_code))
   limit 1;
+$$;
+
+create or replace function public.tournament_match_uses_only_retained_players(
+  p_match jsonb,
+  p_retained_ids text[]
+)
+returns boolean
+language plpgsql
+immutable
+set search_path = public, pg_catalog
+as $$
+declare
+  item jsonb;
+  player_id text;
+  found_player boolean := false;
+begin
+  for item in select value from jsonb_array_elements(coalesce(p_match->'teamOne'->'players', '[]'::jsonb) || coalesce(p_match->'teamTwo'->'players', '[]'::jsonb)) loop
+    player_id := item->>'id';
+    if player_id is null or not (player_id = any(p_retained_ids)) then return false; end if;
+    found_player := true;
+  end loop;
+  for player_id in select value from jsonb_array_elements_text(coalesce(p_match->'team1', '[]'::jsonb) || coalesce(p_match->'team2', '[]'::jsonb)) loop
+    if not (player_id = any(p_retained_ids)) then return false; end if;
+    found_player := true;
+  end loop;
+  return found_player;
+end;
+$$;
+
+create or replace function public.sanitize_ended_tournament_state(p_state jsonb)
+returns jsonb
+language plpgsql
+immutable
+set search_path = public, pg_catalog
+as $$
+declare
+  retained_ids text[];
+  result jsonb := p_state;
+begin
+  if p_state is null or p_state->>'status' <> 'Avsluttet' then return p_state; end if;
+  select coalesce(array_agg(value->>'id'), array[]::text[]) into retained_ids
+  from jsonb_array_elements(coalesce(p_state->'players', '[]'::jsonb))
+  where value->>'guest' is distinct from 'true'
+    and coalesce(value->>'participantType', '') <> 'guest'
+    and (value->>'profileId' is not null
+      or value->>'userId' is not null
+      or value->>'participantType' in ('admin', 'admin-player')
+      or value->>'joinedFrom' in ('admin', 'admin-self'));
+
+  result := jsonb_set(result, '{players}', coalesce((select jsonb_agg(value) from jsonb_array_elements(coalesce(p_state->'players', '[]'::jsonb)) where value->>'id' = any(retained_ids)), '[]'::jsonb), true);
+  result := jsonb_set(result, '{rounds}', coalesce((select jsonb_agg(jsonb_set(round_value, '{matches}', coalesce((select jsonb_agg(match_value) from jsonb_array_elements(coalesce(round_value->'matches', '[]'::jsonb)) where public.tournament_match_uses_only_retained_players(match_value, retained_ids)), '[]'::jsonb), true)) from jsonb_array_elements(coalesce(p_state->'rounds', '[]'::jsonb)) round_value), '[]'::jsonb), true);
+  result := jsonb_set(result, '{schedule}', coalesce((select jsonb_agg(value) from jsonb_array_elements(coalesce(p_state->'schedule', '[]'::jsonb)) where public.tournament_match_uses_only_retained_players(value, retained_ids)), '[]'::jsonb), true);
+  return result - 'schedulerHistory' - 'scoreSubmissions' - 'events' - 'playerToken' - 'selectedPlayerId';
+end;
 $$;
 
 drop function if exists public.save_tournament_state(uuid, text, jsonb);
@@ -218,7 +274,7 @@ begin
     raise exception 'Invalid tournament state payload';
   end if;
 
-  saved_state := p_state - 'adminToken' - 'playerToken' - 'selectedPlayerId' - 'revision';
+  saved_state := public.sanitize_ended_tournament_state(p_state - 'adminToken' - 'playerToken' - 'selectedPlayerId' - 'revision');
 
   update public.tournaments as t
   set state = jsonb_set(saved_state, '{revision}', to_jsonb(t.revision + 1), true),
@@ -296,7 +352,8 @@ begin
         'name', player_name,
         'avatarId', player_avatar,
         'active', true,
-        'participantType', 'player',
+        'participantType', 'guest',
+        'guest', true,
         'joinStatus', 'joined',
         'joinedFrom', 'self',
         'createdAt', now()
@@ -1650,9 +1707,45 @@ begin
     raise exception 'Rate limit exceeded';
   end if;
 
-  return public.join_tournament_impl(p_invite_code, p_player);
+  return public.join_tournament_authenticated_impl(p_invite_code, p_player);
 end;
 $$;
+
+create or replace function public.join_tournament_authenticated_impl(
+  p_invite_code text,
+  p_player jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, pg_catalog
+as $$
+declare
+  result jsonb;
+  tournament_id uuid;
+  current_state jsonb;
+  player_id uuid;
+  authenticated_user uuid := auth.uid();
+begin
+  if authenticated_user is null then
+    return public.join_tournament_impl(p_invite_code, p_player);
+  end if;
+  select id, state into tournament_id, current_state
+  from public.tournaments
+  where invite_code = upper(trim(p_invite_code))
+  for update;
+  if current_state is null then raise exception 'Tournament not found'; end if;
+  result := public.join_tournament_impl(p_invite_code, p_player);
+  player_id := (result->>'playerId')::uuid;
+  update public.tournaments t
+  set state = jsonb_set(t.state, '{players}', coalesce((select jsonb_agg(case when value->>'id' = player_id::text then value || jsonb_build_object('userId', authenticated_user, 'guest', false, 'participantType', 'player') else value end) from jsonb_array_elements(coalesce(t.state->'players', '[]'::jsonb)) value), '[]'::jsonb), true)
+  where t.id = tournament_id
+  returning state into current_state;
+  return jsonb_set(result, '{state}', current_state, true);
+end;
+$$;
+
+revoke all on function public.join_tournament_authenticated_impl(text, jsonb) from public, anon, authenticated;
 
 create or replace function public.save_player_point(
   p_tournament_id uuid,
@@ -2000,6 +2093,27 @@ revoke all on function public.set_player_availability_impl(uuid, text, uuid, tex
 revoke all on function public.set_player_availability(uuid, text, uuid, text, text) from public, authenticated;
 grant execute on function public.set_player_availability(uuid, text, uuid, text, text) to anon;
 
+-- Authenticated accounts keep a 1:1 profile row; tournament guest profiles remain separate.
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  display_name text,
+  avatar_id text not null default 'smash',
+  preferred_language text not null default 'nb',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint profiles_display_name_length check (display_name is null or length(trim(display_name)) between 1 and 64),
+  constraint profiles_avatar check (avatar_id in ('smash', 'serve', 'wall', 'lob'))
+);
+alter table public.profiles enable row level security;
+revoke all on table public.profiles from public, anon;
+grant select, insert, update on table public.profiles to authenticated;
+drop policy if exists profiles_select_own on public.profiles;
+drop policy if exists profiles_insert_own on public.profiles;
+drop policy if exists profiles_update_own on public.profiles;
+create policy profiles_select_own on public.profiles for select to authenticated using (id = auth.uid());
+create policy profiles_insert_own on public.profiles for insert to authenticated with check (id = auth.uid());
+create policy profiles_update_own on public.profiles for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
+
 -- Fase 9: local/server profile ownership, history and delayed deletion.
 create table if not exists public.player_profiles (
   id uuid primary key,
@@ -2191,6 +2305,57 @@ begin
   end if;
 end;
 $$;
+
+create or replace function public.submit_match_result_impl(p_tournament_id uuid, p_invite_code text, p_player_id uuid, p_match_id uuid, p_team_one integer, p_team_two integer, p_player_token text)
+returns jsonb language plpgsql security definer set search_path = public, pg_catalog as $$
+declare current_state jsonb; current_revision integer; round_value jsonb; match_value jsonb; player_value jsonb; submission_value jsonb; submissions jsonb := '[]'::jsonb; events jsonb := '[]'::jsonb; match_found boolean := false; player_in_match boolean := false; next_status text := 'pending'; same_score boolean; has_submission boolean := false; has_different boolean := false; round_index integer; match_index integer;
+begin
+  if p_tournament_id is null or p_player_id is null or p_match_id is null or p_team_one is null or p_team_two is null or p_team_one < 0 or p_team_two < 0 or p_player_token is null then raise exception 'Invalid match result payload'; end if;
+  select state, revision into current_state, current_revision from public.tournaments where id = p_tournament_id and invite_code = upper(trim(p_invite_code)) for update;
+  if current_state is null then raise exception 'Tournament not found'; end if;
+  if current_state->>'status' = 'Avsluttet' then raise exception 'Tournament has ended'; end if;
+  if not exists (select 1 from public.player_sessions where tournament_id = p_tournament_id and player_id = p_player_id and token_hash = encode(extensions.digest(trim(p_player_token), 'sha256'), 'hex')) then raise exception 'Player token mismatch'; end if;
+  for round_value, round_index in select value, ordinality - 1 from jsonb_array_elements(coalesce(current_state->'rounds', '[]'::jsonb)) with ordinality loop
+    for match_value, match_index in select value, ordinality - 1 from jsonb_array_elements(coalesce(round_value->'matches', '[]'::jsonb)) with ordinality loop
+      if match_value->>'id' = p_match_id::text then
+        match_found := true;
+        for player_value in select value from jsonb_array_elements(coalesce(match_value->'teamOne'->'players', '[]'::jsonb) || coalesce(match_value->'teamTwo'->'players', '[]'::jsonb)) loop
+          if player_value->>'id' = p_player_id::text then player_in_match := true; end if;
+        end loop;
+      end if;
+    end loop;
+  end loop;
+  if not match_found or not player_in_match then raise exception 'Player cannot submit this match result'; end if;
+  submissions := coalesce(current_state->'scoreSubmissions', '[]'::jsonb);
+  for submission_value in select value from jsonb_array_elements(submissions) loop
+    if submission_value->>'matchId' = p_match_id::text and coalesce(submission_value->>'status', 'pending') in ('pending', 'confirmed', 'conflict') then
+      same_score := (submission_value->>'teamOne')::integer = p_team_one and (submission_value->>'teamTwo')::integer = p_team_two;
+      if same_score then has_submission := true; else has_different := true; end if;
+    end if;
+  end loop;
+  if has_different then next_status := 'conflict'; elsif has_submission then next_status := 'confirmed'; end if;
+  match_value := jsonb_set(match_value, '{scoreStatus}', to_jsonb(case when next_status = 'conflict' then 'score_conflict' else next_status end), true);
+  current_state := jsonb_set(current_state, ARRAY['rounds', round_index::text, 'matches', match_index::text], match_value, true);
+  submissions := submissions || jsonb_build_array(jsonb_build_object('id', gen_random_uuid(), 'matchId', p_match_id, 'teamOne', p_team_one, 'teamTwo', p_team_two, 'submittedBy', p_player_id, 'status', next_status, 'submittedAt', now()));
+  current_state := jsonb_set(current_state, '{scoreSubmissions}', submissions, true);
+  events := (coalesce(current_state->'events', '[]'::jsonb) || jsonb_build_array(jsonb_build_object('id', gen_random_uuid(), 'tournamentId', p_tournament_id, 'eventType', 'score_submitted', 'entityType', 'match', 'entityId', p_match_id, 'actorId', p_player_id, 'payload', jsonb_build_object('teamOne', p_team_one, 'teamTwo', p_team_two, 'status', next_status), 'createdAt', now())));
+  current_state := jsonb_set(current_state, '{events}', (select jsonb_agg(value) from jsonb_array_elements(events) with ordinality where ordinality > greatest(0, jsonb_array_length(events) - 200)), true);
+  current_state := jsonb_set(current_state, '{revision}', to_jsonb(current_revision + 1), true);
+  update public.tournaments set state = current_state, revision = current_revision + 1, updated_at = now() where id = p_tournament_id;
+  return current_state;
+end; $$;
+
+create or replace function public.submit_match_result(p_tournament_id uuid, p_invite_code text, p_player_id uuid, p_match_id uuid, p_team_one integer, p_team_two integer, p_player_token text)
+returns jsonb language plpgsql security definer set search_path = public, pg_catalog as $$
+begin
+  if p_player_token is null or trim(p_player_token) !~ '^[0-9a-f]{48}$' then raise exception 'Invalid player result payload'; end if;
+  if not public.consume_api_rate_limit('player-result:' || trim(p_player_token), 60, 60) then raise exception 'Rate limit exceeded'; end if;
+  return public.submit_match_result_impl(p_tournament_id, p_invite_code, p_player_id, p_match_id, p_team_one, p_team_two, p_player_token);
+end; $$;
+
+revoke all on function public.submit_match_result_impl(uuid, text, uuid, uuid, integer, integer, text) from public, anon, authenticated;
+revoke all on function public.submit_match_result(uuid, text, uuid, uuid, integer, integer, text) from public, authenticated;
+grant execute on function public.submit_match_result(uuid, text, uuid, uuid, integer, integer, text) to anon;
 
 alter default privileges for role postgres in schema public
   revoke select, insert, update, delete on tables from anon, authenticated, service_role;

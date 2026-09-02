@@ -5,7 +5,7 @@ window.PadelstarProfileUi = (() => {
       const profile = getProfile();
       if (!elements.profileForm || !profileManager) return;
       elements.profileNameInput.value = profile?.displayName ?? "";
-      elements.profileAvatarPicker.querySelectorAll("input[name=profileAvatarId]").forEach((input) => {
+      elements.profileAvatarPicker?.querySelectorAll("input[name=profileAvatarId]").forEach((input) => {
         input.checked = input.value === (profile?.avatarId ?? defaultAvatarId);
       });
       const pendingDeletion = Boolean(profile?.deletionScheduledFor);
@@ -23,9 +23,15 @@ window.PadelstarProfileUi = (() => {
       const filter = elements.profileHistoryFilter?.value ?? "all";
       const cutoff = filter === "month" ? Date.now() - 30 * 86400000 : filter === "year" ? Date.now() - 365 * 86400000 : 0;
       const filteredHistory = history.filter((entry) => !cutoff || new Date(entry.endedAt ?? entry.recordedAt).getTime() >= cutoff);
+      const matchSummary = (entry) => (entry.matchRecords ?? []).map((match) => {
+        const first = (match.teamOne?.players ?? []).map((player) => escapeHtml(player.name)).join(" & ") || "—";
+        const second = (match.teamTwo?.players ?? []).map((player) => escapeHtml(player.name)).join(" & ") || "—";
+        const score = (match.completedSets ?? []).map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ");
+        return `<li>${first} <span aria-hidden="true">×</span> ${second}${score ? ` <small>${escapeHtml(score)}</small>` : ""}</li>`;
+      }).join("");
       elements.profileHistoryList.innerHTML = filteredHistory.length === 0
         ? `<p class="hint">${t("profile.noHistory")}</p>`
-        : `<h4>${t("profile.historyTitle")}</h4><ul class="profile-history-list">${filteredHistory.map((entry) => `<li><div><strong>${escapeHtml(entry.tournamentName)}</strong><small>${entry.endedAt ? new Date(entry.endedAt).toLocaleDateString(document.documentElement.lang || "nb-NO") : ""}</small></div><span>${t("profile.historyDetail", { placement: entry.placement ?? "-", points: entry.points, wins: entry.wins, matches: entry.matches })}</span></li>`).join("")}</ul>`;
+        : `<h4>${t("profile.historyTitle")}</h4><ul class="profile-history-list">${filteredHistory.map((entry) => `<li><div><strong>${escapeHtml(entry.tournamentName)}</strong><small>${entry.endedAt ? new Date(entry.endedAt).toLocaleDateString(document.documentElement.lang || "nb-NO") : ""}</small></div><span>${t("profile.historyDetail", { placement: entry.placement ?? "-", points: entry.points, wins: entry.wins, matches: entry.matches })}</span>${matchSummary(entry) ? `<details><summary>${t("common.matches")}</summary><ul>${matchSummary(entry)}</ul></details>` : ""}</li>`).join("")}</ul>`;
     }
     return { renderProfile };
   }

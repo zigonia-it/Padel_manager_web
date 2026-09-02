@@ -121,7 +121,7 @@ Tilskuer får ikke personlige varsler.
 2. Systemet genererer en turnerings-ID og en kort invitasjonskode.
 3. Administrator deler invitasjonskode, lenke eller QR-kode.
 4. Spillerne åpner appen på egen enhet og skriver inn invitasjonskoden eller scanner QR-koden.
-5. Spilleren skriver inn navnet sitt og velger en avatar.
+5. Spilleren skriver inn navnet sitt; appen tildeler automatisk en avatar.
 6. Spilleren legges til i turneringens deltakerliste med navn og avatar.
 7. Administrator ser spillerne dukke opp i listen og kan korrigere, fjerne eller legge til spillere manuelt.
 8. Administrator legger eventuelt inn seg selv hvis administrator også skal spille.
@@ -166,13 +166,13 @@ Spillerens påmeldingsskjerm er enkel:
 
 1. Skriv inn invitasjonskode eller scan QR.
 2. Skriv inn navn.
-3. Velg avatar.
+3. Appen tildeler en avatar automatisk.
 4. Se bekreftelse: "Du er med".
 5. Vent på at administrator starter turneringen.
 
 ## 5.3 Avatarer
 
-Spillere bør kunne velge en enkel avatar når de melder seg på. Avatar vises ved siden av navnet i lobbyen, spillerlisten, kampkort, tabell og personlig spilleroversikt.
+Spillere får automatisk en enkel avatar når de melder seg på. Avatar vises ved siden av navnet i lobbyen, spillerlisten, kampkort, tabell og personlig spilleroversikt.
 
 MVP-variant:
 

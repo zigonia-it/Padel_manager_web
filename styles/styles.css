@@ -154,6 +154,10 @@
     grid-template-columns: 1fr;
   }
 
+  .landing-actions > :last-child:nth-child(odd) {
+    width: 100%;
+  }
+
   .landing-cta {
     min-height: 54px;
 
@@ -494,7 +498,7 @@ body[data-theme="classic"] {
   background:
     radial-gradient(circle at 76% -8%, rgba(71, 155, 255, 0.16), transparent 34rem),
     linear-gradient(180deg, rgba(7, 13, 23, 0.84), rgba(7, 13, 23, 0.97)),
-    url("../assets/bg_img-1600.jpg") center top / cover fixed;
+    url("../assets/backgrounds/bg_img-1600.jpg") center top / cover fixed;
 }
 
 body[data-theme="classic"] .topbar,
@@ -515,7 +519,7 @@ body[data-theme="classic"] .intro {
 body[data-theme="classic"] .intro {
   background:
     linear-gradient(120deg, rgba(8, 17, 30, 0.95), rgba(12, 28, 48, 0.82) 62%, rgba(46, 89, 143, 0.34)),
-    url("../assets/bg_img-1600.jpg") center / cover;
+    url("../assets/backgrounds/bg_img-1600.jpg") center / cover;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
@@ -596,6 +600,17 @@ body[data-theme="classic"] .share-box,
 body[data-theme="classic"] .status-pill {
   border-color: rgba(98, 182, 255, 0.28);
   background: rgba(5, 15, 28, 0.58);
+}
+
+body[data-theme="classic"] .status-pill {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.setup-active .account-panel {
+  padding-top: clamp(28px, 5vw, 72px);
+  scroll-margin-top: 110px;
 }
 
 /* The landing page uses the same app shell and menu as every workspace view. */

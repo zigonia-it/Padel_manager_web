@@ -26,6 +26,7 @@ Følgende retensjon er godkjent som foreløpig beta-policy:
 - Rate-limit-rader: slettes løpende eller holdes kortvarig nok til misbruksvern.
 - Lokale data: beholdes på brukerens enhet til turneringen nullstilles eller nettleserdata tømmes.
 - Backup-filer: styres av den som laster dem ned.
+- Gjestedeltakere: kan brukes i live-turneringen, men gjestens identitet, statistikk og kamp-/annen historikk fjernes fra lagret turneringsstate når admin avslutter. Registrerte spillere med profilkobling og admin-deltakeren kan beholde historikk.
 
 Når brukerprofiler innføres, kan profil-eide turneringer og statistikk beholdes lenger som brukerens historikk. Ved sletting av
 profilen skal tilknyttede resterende data slettes etter 30 dager. Cleanup-jobben må da utvides med profilkobling før profiler

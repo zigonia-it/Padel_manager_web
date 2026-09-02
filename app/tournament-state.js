@@ -1,12 +1,12 @@
 (function initializeTournamentState(global) {
   function create(deps) {
-    const { accents, buildSchedule, defaultAvatarId, randomUUID, now = () => new Date().toISOString() } = deps;
+    const { accents, buildSchedule, defaultAvatarId, randomAvatarId = () => defaultAvatarId, randomUUID, now = () => new Date().toISOString() } = deps;
 
-    function createPlayer(name, index, avatarId = defaultAvatarId) {
+    function createPlayer(name, index, avatarId = null) {
       return {
         id: randomUUID(),
         name,
-        avatarId,
+        avatarId: avatarId ?? randomAvatarId(),
         accent: accents[index % accents.length],
         active: true,
         availability: "active",
@@ -18,7 +18,7 @@
     }
 
     function createTournament({ name, inviteCode, players, courtCount }) {
-      const tournamentPlayers = players.map((playerName, index) => createPlayer(playerName, index, defaultAvatarId));
+      const tournamentPlayers = players.map((playerName, index) => createPlayer(playerName, index));
       return {
         id: randomUUID(),
         adminToken: randomUUID(),
@@ -31,6 +31,7 @@
           setsToWinMatch: 1,
           pointMode: "matches",
           format: "roundRobin",
+          seasonId: null,
           cupTeamSetupMode: "auto",
           includesThirdPlaceMatch: false,
           language: "nb",
@@ -43,6 +44,9 @@
         })),
         players: tournamentPlayers,
         schedule: buildSchedule(tournamentPlayers, "roundRobin"),
+        schedulerHistory: { partners: {}, opponents: {}, matches: [], byes: [] },
+        events: [],
+        scoreSubmissions: [],
         rounds: [],
         cup: null,
         cupTeams: [],

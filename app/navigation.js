@@ -21,6 +21,9 @@
       link.addEventListener("click", () => {
         showModule(link.dataset.moduleLink);
         closeMenu();
+        if (link.dataset.focusTarget) {
+          window.requestAnimationFrame(() => document.getElementById(link.dataset.focusTarget)?.focus());
+        }
       });
     });
 

@@ -15,6 +15,7 @@
       reopenMatch,
       setScoreText,
       setWalkover,
+      scoreConflict,
       sittingOutSummary,
       startMatch,
       teamAccentStyle,
@@ -34,7 +35,7 @@
       const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
       const pointControlsEnabled = editable && match.state !== "cancelled";
       const sittingOut = sittingOutSummary(match);
-      const matchNote = [sittingOut, winner ? `<p class="winner-note">${translate("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : ""]
+      const matchNote = [sittingOut, winner ? `<p class="winner-note">${translate("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : "", scoreConflict?.(match) ? `<p class="match-conflict">${translate("score.conflictAdminHint")}</p>` : ""]
         .filter(Boolean)
         .join("");
       const pointControl = (teamIndex, teamName) => pointControlsEnabled
@@ -59,10 +60,10 @@
         <div class="scorecard-players">${teamDisplay(match.teamOne, "scorecard")}</div>
       </section>
       <section class="scorecard-center" aria-label="${translate("score.scoreboardAria")}">
-        <div class="scorecard-emblem" aria-hidden="true"><img src="assets/padelstar-icon.png" alt="" width="54" height="54"></div>
+        <div class="scorecard-emblem" aria-hidden="true"><img src="assets/icons/padelstar-icon.png" alt="" width="54" height="54"></div>
         <div class="scorecard-score-pair">
           ${pointControl(0, teamOneName)}
-          <img class="scorecard-vs-icon" src="assets/vs_icon" alt="VS" width="88" height="58">
+          <img class="scorecard-vs-icon" src="assets/icons/vs_icon" alt="VS" width="88" height="58">
           ${pointControl(1, teamTwoName)}
         </div>
       </section>

@@ -15,6 +15,7 @@ const lifecycleSql = readSql("supabase/migrations/20260828121000_tournament_life
 const profileFixSql = readSql("supabase/migrations/20260828122000_profile_history_fixes.sql");
 const pushSql = readSql("supabase/migrations/20260828130000_push_subscriptions.sql");
 const retentionCronSql = readSql("supabase/migrations/20260828103000_retention_cron.sql");
+const guestRetentionSql = readSql("supabase/migrations/20260902120000_guest_history_retention.sql");
 
 function readSql(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -50,6 +51,21 @@ test("public tables keep RLS enabled and private token/rate-limit tables revoked
   );
 });
 
+test("ended tournament writes sanitize guest history server-side", () => {
+  assertContains(guestRetentionSql, /create or replace function public\.sanitize_ended_tournament_state/);
+  assertContains(guestRetentionSql, /tournament_match_uses_only_retained_players/);
+  assertContains(guestRetentionSql, /return result - 'schedulerhistory' - 'scoresubmissions' - 'events'/);
+  assertContains(schemaSql, /saved_state := public\.sanitize_ended_tournament_state/);
+});
+
+test("player result RPC persists conflict status and audit event", () => {
+  const resultSql = readSql("supabase/migrations/20260902130000_player_result_submissions.sql");
+  assertContains(resultSql, /submit_match_result/);
+  assertContains(resultSql, /scorestatus/);
+  assertContains(resultSql, /score_submitted/);
+  assertContains(schemaSql, /create or replace function public\.submit_match_result_impl/);
+});
+
 test("anon select grant on tournaments excludes admin_token", () => {
   assertContains(
     schemaSql,
@@ -70,6 +86,7 @@ test("public RPC wrappers are rate limited and private implementations stay revo
     "save_tournament_state",
     "join_tournament",
     "save_player_point",
+    "submit_match_result",
     "set_player_availability",
     "admin_advance_cup",
     "admin_advance_round",
@@ -93,6 +110,7 @@ test("public RPC wrappers are rate limited and private implementations stay revo
     "save_tournament_state_impl(uuid, text, jsonb, integer)",
     "join_tournament_impl(text, jsonb)",
     "save_player_point_impl(uuid, text, uuid, uuid, integer, text)",
+    "submit_match_result_impl(uuid, text, uuid, uuid, integer, integer, text)",
     "set_player_availability_impl(uuid, text, uuid, text, text)",
     "admin_advance_cup_impl(uuid, text, integer)",
     "admin_advance_round_impl(uuid, text, integer)",
@@ -128,7 +146,7 @@ test("admin state writes use expected revision and strip local-only secrets", ()
   assertContains(block, /revision = t\.revision \+ 1/, "admin state writes must increment revision atomically");
   assertContains(
     block,
-    /saved_state := p_state - 'admintoken' - 'playertoken' - 'selectedplayerid' - 'revision'/,
+    /saved_state := public\.sanitize_ended_tournament_state\(p_state - 'admintoken' - 'playertoken' - 'selectedplayerid' - 'revision'\)/,
     "admin state writes must strip local-only fields",
   );
 });

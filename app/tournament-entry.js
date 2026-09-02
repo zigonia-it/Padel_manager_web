@@ -5,7 +5,10 @@
     const {
       createInviteCode,
       createTournament,
-      defaultAvatarId,
+      randomAvatarId,
+      getAdminAuthUser,
+      getAdminEmail,
+      sendAdminSignInLink,
       ensureProfileForJoin,
       findPlayerByName,
       getClient,
@@ -21,6 +24,7 @@
       setLocalRole,
       setState,
       showToast,
+      showAccount,
       showWorkspace,
       syncJoinPreview,
       t,
@@ -29,6 +33,15 @@
     async function handleCreate(event) {
       event.preventDefault();
       const form = event.currentTarget;
+      let adminUser = null;
+      if (getAdminAuthUser && getClient()) {
+        adminUser = await getAdminAuthUser();
+        if (!adminUser) {
+          showAccount?.();
+          showToast(t("admin.identitySignInRequired"), "status-message-error");
+          return;
+        }
+      }
       const formData = new FormData(form);
       const adminParticipates = formData.get("adminParticipates") === "on";
       const adminPlayerName = formData.get("adminPlayerName").trim();
@@ -49,6 +62,7 @@
         players: tournamentPlayers,
         courtCount: Number(formData.get("courts")),
       });
+      if (adminUser?.id) nextState.ownerUserId = adminUser.id;
 
       if (adminParticipates) {
         nextState.players[0].joinedFrom = "admin-self";
@@ -71,7 +85,7 @@
       const formData = new FormData(form);
       const inviteCode = formData.get("inviteCode").trim().toUpperCase();
       const playerName = formData.get("playerName").trim();
-      const avatarId = formData.get("avatarId") || defaultAvatarId;
+      const avatarId = randomAvatarId();
       const client = getClient();
       const loadedRemote = client ? await loadRemoteTournamentByInvite(inviteCode) : false;
 

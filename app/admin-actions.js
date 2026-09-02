@@ -6,7 +6,7 @@
         showToast(translate("messages.rulesLocked"), "status-message-error");
         return;
       }
-      if (!["roundRobin", "cup"].includes(format)) return;
+      if (!(window.PadelstarTournamentModes?.supportedFormats ?? ["roundRobin", "cup"]).includes(format)) return;
       if (!["auto", "manual"].includes(cupTeamSetupMode)) return;
       if (!["matches", "sets", "games"].includes(pointMode)) return;
       state.settings.format = format;

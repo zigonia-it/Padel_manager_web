@@ -51,19 +51,10 @@ window.PadelstarAdminStatus = (() => {
 
     function syncConnectionStatus() {
       const state = getState();
-      let statusKey = "realtimeConnected";
-      let statusClass = "connected";
-      if (!navigator.onLine) {
-        statusKey = "offline";
-        statusClass = "offline";
-      } else if (!isSupabaseReady()) {
-        statusKey = "localPwa";
-        statusClass = "local";
-      } else if (state.id && hasActiveTournament()) {
-        const connectionState = realtimeConnectionState();
-        statusKey = `realtime${connectionState.charAt(0).toUpperCase()}${connectionState.slice(1)}`;
-        statusClass = connectionState;
-      }
+      const connectionState = state.id && hasActiveTournament() ? realtimeConnectionState() : "connected";
+      const isOnline = navigator.onLine && isSupabaseReady() && connectionState === "connected";
+      const statusKey = isOnline ? "realtimeConnected" : "offline";
+      const statusClass = isOnline ? "connected" : "offline";
       elements.connectionStatus.textContent = t(statusKey);
       if (navigator.onLine && isSupabaseReady() && hasPendingRemoteWrites()) {
         elements.connectionStatus.textContent += ` · ${t("syncPending")} (${pendingRemoteWriteCount()})`;

@@ -22,6 +22,7 @@
       saveProfileHistory,
       saveState,
       syncJoinPreview,
+      syncAuthenticatedProfile = () => Promise.resolve(false),
       translate,
       setProfile,
     } = dependencies;
@@ -155,6 +156,7 @@
         ? profileManager.normalizeProfile({ ...currentProfile, displayName, avatarId, deletionRequestedAt: null, deletionScheduledFor: null })
         : profileManager.createProfile(displayName, avatarId));
       persistLocalProfile();
+      void syncAuthenticatedProfile(profile());
       void syncProfileRemote();
       const selectedPlayer = getPlayerById(state().selectedPlayerId);
       if (selectedPlayer) {

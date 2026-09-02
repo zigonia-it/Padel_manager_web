@@ -2,11 +2,11 @@
 
 Live app: https://padelstar.app
 
-Sist oppdatert: 2026-09-01
+Sist oppdatert: 2026-09-02
 
 Status: 0.3 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
-Aktiv utviklingsplan ligger i `docs/development_plan.md`, og kronologisk implementeringsdokumentasjon ligger i `docs/documentation.md`. Historiske planer, logger og designutkast ligger i `docs/archive/`.
+Aktiv utviklingsplan ligger i `docs/Development/Padelstar-komplett-utviklingsplan.md`, og kronologisk implementeringsdokumentasjon ligger i `docs/documentation.md`. Historiske planer, logger og designutkast ligger i `docs/archive/`.
 
 Metadata:
 - Navn: Padelstar
@@ -28,7 +28,11 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 - Synkroniserer turneringsstate live via Supabase når live-config er aktiv.
 - Krever serverutstedt spillertoken for spillerstyrt poengføring mot Supabase.
 - Fungerer lokalt i nettleseren med localStorage fallback, siste-kjente-gode recovery-kopi og IndexedDB-speiling der nettleseren støtter det.
-- Har Web Share med kopieringsfallback, opt-in lokale PWA-varsler og valgfri admin-kontoknytting via Supabase Auth.
+- Har Web Share med kopieringsfallback, opt-in lokale PWA-varsler og admin-eierskap via Supabase Auth for live-turneringer.
+
+## Aktiv utviklingsretning
+
+Masterplanen ligger i `docs/Development/Padelstar-komplett-utviklingsplan.md`. Første leveranse følger fase 1 og dekker stabilisering, admin-eierskap, PWA-installasjon, QR-/join-flyt, banenavn, spillerresultater, profiler og dynamisk arbeidsflate. Fase 2 og 3 bygges først etter at fase 1 er verifisert.
 
 ## Status etter Fase 12–15
 
@@ -52,6 +56,7 @@ Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og k
 - `styles/responsive.css` - samlet responsiv toppbar, hamburger og språk-/modulmeny.
 - `app/translations.js` - språkmotor med strukturerte nøkler, variabler, fallback og manglende-nøkkel-sporing for brukerflate.
 - `app/tournament-engine.js` - ren scheduler- og teamlogikk for turneringsoppsett.
+- `app/pwa-install.js` - installasjonsknapp, native prompt og plattformtilpasset PWA-fallback.
 - `app/scoring-engine.js` - ren scoring, settvalidering, poengsummer og leaderboard/statistikk.
 - `app/state-manager.js` - state-migrering, lokal sync-metadata, shared-state-sanitizing og remote-feilklassifisering.
 - `app/realtime-sync.js` - rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering.
@@ -79,7 +84,7 @@ Fase 0–15 er ferdige. Fase 15 inkluderer Web Share, lokale opt-in-varsler og k
 - `supabase_schema.sql` - databaseoppsett for live-turneringer.
 - `supabase/migrations/` - Supabase migration-filer.
 - `supabase/migrations/20260831120000_spectator_state_rpc.sql` - separat whitelistet spectator-oppslag.
-- `Visual redesign/` - referansearkiv for den visuelle redesignen, ikke aktiv runtime-kode.
+- `assets/archive/visual-redesign/` - referansearkiv for den visuelle redesignen, ikke aktiv runtime-kode.
 - `docs/archive/` - historiske planer og lokalt QA-materiale.
 
 ## Kjør lokalt
@@ -123,7 +128,7 @@ https://padelstar.app
 
 ## Dokumentasjon
 
-- `docs/development_plan.md` - samlet aktiv arbeidsplan, akseptansekriterier og åpne beslutninger.
+- `docs/Development/Padelstar-komplett-utviklingsplan.md` - samlet aktiv arbeidsplan, akseptansekriterier og åpne beslutninger.
 - `docs/product_development.md` - produktretning, roller, turneringsregler og videre idéer.
 - `docs/tournament_logic.md` - turneringslogikk hentet fra tidligere iOS-app.
 - `docs/archive/history/migration_notes_legacy.md` - historiske notater for porting fra SwiftUI/iOS.

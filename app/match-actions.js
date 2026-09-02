@@ -44,6 +44,7 @@
         return;
       }
       const restoredMatch = structuredClone(undoState.match);
+      deps.recordEvent?.("match_undone", "match", match.id, { restoredState: restoredMatch.state });
       delete match.lastScoredMatchState;
       Object.assign(match, restoredMatch);
       if (undoState.nextWaitingMatch) {
@@ -67,6 +68,8 @@
         return;
       }
       match.state = "playing";
+      deps.recordEvent?.("match_started", "match", match.id, { courtId: match.courtId, courtName: match.courtName });
+      match.status = "active";
       saveState();
       render();
       renderLargeScore();
@@ -82,6 +85,7 @@
         return;
       }
       match.state = "playing";
+      match.status = "active";
       match.completedSets = [];
       match.currentSet = { teamOne: 0, teamTwo: 0 };
       match.currentGame = { teamOne: 0, teamTwo: 0 };
@@ -101,6 +105,8 @@
         return;
       }
       match.state = "cancelled";
+      match.status = "cancelled";
+      deps.recordEvent?.("match_cancelled", "match", match.id, {});
       match.completedSets = [];
       match.winnerTeamIndex = null;
       match.isWalkover = false;
@@ -121,6 +127,8 @@
       }
       match.lastScoredMatchState = captureMatchUndoState(match);
       match.state = "finished";
+      match.status = "completed";
+      deps.recordEvent?.("match_walkover", "match", match.id, { winnerTeamIndex: teamIndex });
       match.completedSets = [];
       match.currentSet = { teamOne: 0, teamTwo: 0 };
       match.currentGame = { teamOne: 0, teamTwo: 0 };

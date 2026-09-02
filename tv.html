@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="nb">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#020b1c">
+  <title>Padelstar TV</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/padelstar-icon.png" type="image/png">
+  <link rel="stylesheet" href="styles/tv.css?v=padelstar-tv-1">
+</head>
+
+<body class="tv-page">
+  <main class="tv-app" aria-live="polite">
+    <header class="tv-header">
+      <img class="tv-brand" src="assets/logos/tv-brand.png" alt="Padelstar">
+      <span class="tv-header-lines" aria-hidden="true"></span>
+      <div class="tv-title-wrap"><span id="tvRoundLabel">RUNDE 1</span>
+        <h1 id="tvTournamentTitle">PADELSTAR</h1>
+      </div>
+      <span class="tv-header-lines tv-header-lines-right" aria-hidden="true"></span>
+      <time id="tvClock" class="tv-clock" datetime="">00:00</time>
+    </header>
+
+    <section class="tv-columns">
+      <section class="tv-panel tv-live-panel" aria-labelledby="liveTitle">
+        <h2 id="liveTitle"><span class="live-dot"></span>LIVE <em>– PÅGÅR NÅ</em></h2>
+        <div id="tvLiveMatches" class="tv-card-list"></div>
+      </section>
+      <section class="tv-panel tv-next-panel" aria-labelledby="nextTitle">
+        <h2 id="nextTitle"><span class="heading-icon">◷</span>NESTE KAMP</h2>
+        <div id="tvNextMatches" class="tv-card-list"></div>
+      </section>
+      <section class="tv-panel tv-standing-panel" aria-labelledby="standingTitle">
+        <h2 id="standingTitle"><span class="heading-icon">♜</span>STILLING</h2>
+        <div class="tv-table-head">
+          <span>#</span><span>SPILLER</span><span>KAMPER</span><span>SEIER</span><span>POENG</span><span>DIFF</span>
+        </div>
+        <ol id="tvStandings" class="tv-standings"></ol>
+      </section>
+    </section>
+
+    <footer class="tv-footer">
+      <div><span class="footer-icon">◎</span><strong id="tvProgress">RUNDE 1 / 1</strong></div>
+      <div><span class="footer-icon">♟</span><strong id="tvPlayerProgress">0 / 0</strong><span>KAMPER FERDIG</span>
+      </div>
+      <p id="tvMessage">GODE KAMPER. GODE ØYEBLIKK.</p>
+      <div class="tv-footer-status"><span class="live-dot"></span><strong id="tvStatus">LIVE</strong></div>
+      <button id="tvExitButton" type="button">TILBAKE</button>
+    </footer>
+  </main>
+  <script src="supabase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="app/tv-mode.js?v=padelstar-tv-mode-1"></script>
+</body>
+
+</html>

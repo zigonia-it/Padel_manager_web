@@ -8,7 +8,7 @@ Dette er den aktive, kronologiske oversikten over tidligere implementeringer, be
 
 - `main` er publisert til GitHub `origin/main`.
 - Siste GitHub-commit: `9c0a7b7` (fase A–D-modularisering, verifisering og dokumentasjon).
-- Siste brukerrettede baseline: DiceBear Lorelei Neutral-avatarer, navngitt avatarvalgliste, blått scorecard-design og responsiv status-/spillerlayout.
+- Siste brukerrettede baseline: DiceBear Lorelei Neutral-avatarer, automatisk avatar ved spillerregistrering, blått scorecard-design og responsiv status-/spillerlayout.
 - Nyeste lokale strukturendring: avataransvar, accent-system, player-visuals, workspace-overview, UI-feedback, notification-system, profil-session, match-card, persistence, admin-identity, remote-feedback, realtime-connection, tournament-rounds, tournament-runtime, backup-format, lenke-/QR-generering, state-konstruksjon, state-bootstrap, modulruting og session-policy er isolert i egne app-moduler.
 - Den gamle duplikate kampkort-renderingen er fjernet fra `app/app.js`; entrypointen bruker nå den eksplisitte `app/match-card.js`-grensen.
 - GitHub-push er gjennomført; Vercel-produksjonsdeploy venter på separat deploy-godkjenning.
@@ -17,6 +17,7 @@ Dette er den aktive, kronologiske oversikten over tidligere implementeringer, be
 - Fase A er fortsatt under gjennomføring lokalt; Fase B–D er lokalt verifisert. Avatar-, accent-, player-visuals-, workspace-overview-, UI-feedback-, notification-, profil-session-, match-card-, match-actions-, initial-view-, persistence-, admin-identity-, remote-feedback-, realtime-connection-, tournament-rounds-, tournament-runtime-, backup-, lenke-, state-konstruksjons-, recovery-bootstrap-, modulruting-, session-policy-, remote-state-write-, remote-admin-actions-, remote-player-score-, score-actions-, workspace-navigation-, app-events-, workspace-events-, tournament-entry- og admin-form-events-logikken er flyttet til egne moduler, setup-sidene bruker samme innholdsflate som workspace-sidene, runtime-kontroll passerer på 1440, 768 og 390 px, og full verifisering passerer med 125 tester (124 bestått, 1 forventet skip), syntaks- og diff-sjekk.
 - Fase B-diffskanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført på arbeidskopien: 51 endrede filer og 4 sikkerhetsflater gjennomgått, ingen reportable funn. Live Supabase-flyt er ikke kjørt i denne offline-verifiseringen og forblir dekket av én forventet skip-test.
 - Fase D UI-/språkgjennomgang er utført mot aktive HTML-, CSS- og JavaScript-filer. Eksisterende motor- og oversettelsesregresjoner passerer, initiale synlige fallback-tekster er bundet til oversettelsesnøkler, og browser-smoke bekrefter aktiv JavaScript-runtime og ingen overflow på desktop, medium eller mobil.
+- Fase 1-arbeidet startet etter masterplanen `docs/Development/Padelstar-komplett-utviklingsplan.md`: spillerregistrering bruker automatisk stabil avatar, PWA-installasjon har native prompt og plattformfallback, manifestet bruker riktige ikonstørrelser, og live-turneringer krever innlogget admin før opprettelse. Eierfeltet settes ved opprettelse når Supabase Auth er aktiv.
 
 ## Kronologisk historikk
 
@@ -180,7 +181,7 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - Avstanden mellom avatar og spillernavn i tilskuerkortene ble også økt for bedre lesbarhet.
 - Avatarvelgeren i både påmelding og spillerprofil ble gjort om til en vertikal valgliste med synlig forhåndsvisning og faste navn: Sophie, Aiden, Luna og Milo. De eksisterende avatar-ID-ene (`smash`, `serve`, `wall`, `lob`) er beholdt for kompatibilitet.
 - Workspace-headeren på turneringssiden ble gjort transparent, slik at den følger samme sammenhengende mørkeblå flate som resten av siden.
-- Alle aktive appikonreferanser ble samlet til `assets/padelstar-icon.png`: favicon, Apple-touch-icon, PWA-manifest, varsler og scorecard-emblem.
+- Alle aktive appikonreferanser ble samlet til `assets/icons/padelstar-icon.png`: favicon, Apple-touch-icon, PWA-manifest, varsler og scorecard-emblem.
 - Fjernet overflødig footer-logo og ryddet bort eldre score-input-kaskader som ikke lenger brukes av den nye scorecard-renderingen.
 - PWA-cache og stylesheet-query-versjoner ble oppdatert videre til `padelstar-v159`, `padelstar-session-27` og `padelstar-ui-91`.
 - PWA-cache ble bumpet til `padelstar-v164` etter at lokal persistence ble flyttet til egen app-shell-modul.
@@ -203,4 +204,4 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 
 ## Verifikasjonsprinsipp
 
-Hver ny oppføring skal inneholde hva som ble endret, hvilken brukerflyt som berøres, testresultater, commit-id og deploystatus. Nye funn eller åpne beslutninger føres i [development_plan.md](development_plan.md), ikke som skjulte TODO-er i historikken.
+Hver ny oppføring skal inneholde hva som ble endret, hvilken brukerflyt som berøres, testresultater, commit-id og deploystatus. Nye funn eller åpne beslutninger føres i [Padelstar-komplett-utviklingsplan.md](Development/Padelstar-komplett-utviklingsplan.md), ikke som skjulte TODO-er i historikken.

@@ -294,8 +294,10 @@ test("generating a round assigns only available courts to live matches", () => {
 
   assert.equal(state.rounds.length, 5);
   assert.equal(state.rounds[0].status, "active");
-  assert.equal(state.rounds[0].matches.length, 1);
+  assert.equal(state.rounds[0].matches.length, 3);
   assert.equal(state.rounds[0].matches[0].state, "playing");
+  assert.equal(state.rounds[0].matches.filter((match) => match.state === "playing").length, 1);
+  assert.equal(state.rounds[0].matches.filter((match) => match.state === "waiting").length, 2);
   assert.equal(state.currentRound, 1);
 });
 

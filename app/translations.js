@@ -13,7 +13,7 @@ const padelstarTranslations = {
   nb: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Språk",
-    localPwa: "Lokal",
+    localPwa: "Offline",
     offline: "Offline",
     startTournament: "Start turnering",
     startNextRound: "Start neste runde",
@@ -45,7 +45,7 @@ const padelstarTranslations = {
   nn: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Språk",
-    localPwa: "Lokal",
+    localPwa: "Offline",
     offline: "Fråkopla",
     startTournament: "Start turnering",
     startNextRound: "Start neste runde",
@@ -71,7 +71,7 @@ const padelstarTranslations = {
   en: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Language",
-    localPwa: "Local",
+    localPwa: "Offline",
     offline: "Offline",
     startTournament: "Start tournament",
     startNextRound: "Start next round",
@@ -97,7 +97,7 @@ const padelstarTranslations = {
   es: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Idioma",
-    localPwa: "Local",
+    localPwa: "Offline",
     offline: "Sin conexión",
     startTournament: "Iniciar torneo",
     startNextRound: "Iniciar siguiente ronda",
@@ -123,7 +123,7 @@ const padelstarTranslations = {
   de: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Sprache",
-    localPwa: "Lokal",
+    localPwa: "Offline",
     offline: "Offline",
     startTournament: "Turnier starten",
     startNextRound: "Nächste Runde starten",
@@ -149,7 +149,7 @@ const padelstarTranslations = {
   fr: {
     brandEyebrow: "Padel Manager",
     languageLabel: "Langue",
-    localPwa: "Local",
+    localPwa: "Hors ligne",
     offline: "Hors ligne",
     startTournament: "Démarrer le tournoi",
     startNextRound: "Démarrer la manche suivante",
@@ -175,6 +175,28 @@ const padelstarTranslations = {
 };
 
 Object.assign(padelstarTranslations.nb, {
+  "score.playerSubmitTitle": "Registrer kampresultat",
+  "score.playerSubmitMatch": "Kamp",
+  "score.teamOneGames": "Lag 1",
+  "score.teamTwoGames": "Lag 2",
+  "score.playerSubmitHint": "Begge lag kan sende inn. Ulike resultater må avklares av admin.",
+  "score.conflict": "Konflikt",
+  "score.confirmed": "Bekreftet",
+  "score.conflictHint": "Resultatkonflikt: admin må avklare resultatet.",
+  "score.conflictAdminHint": "Resultatkonflikt – bruk ‘Sett resultat’ for å korrigere.",
+  "score.submissionsTitle": "Resultatforslag",
+  "score.useSubmission": "Bruk resultat",
+  "score.submitted": "Resultatet er sendt inn.",
+  "actions.submitResult": "Send resultat",
+  "actions.tvMode": "TV Mode",
+  "actions.exitTvMode": "Avslutt TV Mode",
+  "queue.title": "Banekø",
+  "queue.courts": "{count} baner",
+  "queue.inProgress": "Pågår",
+  "queue.free": "Ledig",
+  "queue.next": "Neste",
+  "queue.later": "Deretter",
+  "queue.empty": "Ingen kamper i kø akkurat nå.",
   "meta.description": "Padelstar - Padel Manager av Sigurd Steen Grødem / Zigonia IT. Administrer padelturneringer, kamper, baner og resultater.",
   "app.version": "v. 0.3 (Beta)",
   "hero.title": "Spill mer. Organiser mindre.",
@@ -189,6 +211,25 @@ Object.assign(padelstarTranslations.nb, {
   "nav.home": "Hjem",
   "nav.create": "Opprett",
   "nav.join": "Bli med",
+  "nav.login": "Logg inn",
+  "nav.account": "Konto",
+  "account.eyebrow": "Personlig konto",
+  "account.title": "Konto",
+  "account.hint": "Opprett eller oppdater spillerprofilen din for å ta vare på egen statistikk og historikk.",
+  "account.authEyebrow": "Innlogging",
+  "account.authTitle": "Konto med passord",
+  "account.email": "E-post",
+  "account.password": "Passord",
+  "account.signIn": "Logg inn",
+  "account.signUp": "Opprett konto",
+  "account.signOut": "Logg ut",
+  "account.authSignedInAs": "Innlogget som konto.",
+  "account.authSignedIn": "Du er nå logget inn.",
+  "account.authSignedOut": "Du er logget ut.",
+  "account.authConfirmEmail": "Sjekk e-posten for å bekrefte kontoen før du logger inn.",
+  "account.authUnavailable": "Konto-innlogging er ikke tilgjengelig akkurat nå.",
+  "account.authFailed": "Innlogging kunne ikke fullføres. Kontroller e-post og passord.",
+  "account.openLogin": "Logg inn med konto",
   "nav.admin": "Admin",
   "nav.player": "Spiller",
   "nav.tournament": "Turnering",
@@ -309,6 +350,8 @@ Object.assign(padelstarTranslations.nb, {
   "actions.close": "Lukk",
   "actions.save": "Lagre",
   "actions.remove": "Fjern",
+  "actions.replacePlayer": "Bytt",
+  "messages.replacePlayerPrompt": "Nytt navn som erstatter {name}",
   "actions.removePlayerAria": "Fjern {name}",
   "actions.editPlayerNameAria": "Endre navn for {name}",
   "actions.playerAvatarAria": "Avatar for {name}",
@@ -560,7 +603,7 @@ Object.assign(padelstarTranslations.en, {
   "meta.description": "Padelstar - Padel Manager by Sigurd Steen Grodem / Zigonia IT. Manage padel tournaments, matches, courts and results.",
   "hero.title": "Play more. Organize less.",
   "hero.subtitle": "Create the tournament, invite the players and let Padelstar take care of the rest.",
-  "nav.homeAria": "Go home", "nav.modulesAria": "Modules", "nav.home": "Home", "nav.create": "Create", "nav.join": "Join", "nav.admin": "Admin", "nav.player": "Player", "nav.tournament": "Tournament", "nav.frontPageAria": "Front page", "nav.openMenu": "Open menu", "nav.closeMenu": "Close menu", "nav.startChoicesAria": "Start choices", "nav.openViewMenu": "Open view menu", "nav.closeViewMenu": "Close view menu", "nav.viewAria": "View", "nav.leaveSpectator": "Leave spectator view",
+  "nav.homeAria": "Go home", "nav.modulesAria": "Modules", "nav.home": "Home", "nav.create": "Create", "nav.login": "Sign in", "nav.join": "Join", "nav.admin": "Admin", "nav.player": "Player", "nav.tournament": "Tournament", "nav.frontPageAria": "Front page", "nav.openMenu": "Open menu", "nav.closeMenu": "Close menu", "nav.startChoicesAria": "Start choices", "nav.openViewMenu": "Open view menu", "nav.closeViewMenu": "Close view menu", "nav.viewAria": "View", "nav.leaveSpectator": "Leave spectator view",
   "role.admin": "Admin", "role.player": "Player", "role.spectator": "Spectator",
   "resume.localSaved": "Saved locally", "resume.defaultSummary": "A tournament is saved in this browser.", "resume.title": "Continue {name}", "resume.adminSummary": "{players} players · {courts} courts · code {code}", "resume.summary": "{players} players · {courts} courts", "resume.continueAdmin": "Continue as admin", "resume.continueTournament": "Continue tournament",
   "setup.createEyebrow": "Create", "setup.joinEyebrow": "Join", "setup.newTournament": "New tournament", "setup.tournamentName": "Tournament name", "setup.playersOptional": "Players, optional", "setup.playersOptionalPlaceholder": "Add players manually if someone does not have their own device.", "setup.adminParticipation": "Admin participation", "setup.adminPlays": "Admin plays", "setup.adminPlaysHint": "Choose this if the tournament creator will also have a player profile.", "setup.adminPlayerName": "Admin player name", "setup.courtCount": "Number of courts", "setup.playerNamePlaceholder": "Enter your name", "setup.yourAvatar": "Your avatar", "setup.yourName": "Your name", "setup.chooseAvatar": "Choose avatar", "setup.localJoinHint": "In this local version, the code works for the tournament created on this device.",
@@ -746,6 +789,17 @@ for (const [language, value] of Object.entries({
   fr: "Aller au contenu",
 })) {
   padelstarTranslations[language]["nav.skipToContent"] = value;
+}
+
+for (const [language, values] of Object.entries({
+  nb: { "pwa.install": "Installer Padelstar på din enhet", "pwa.installTitle": "Installer Padelstar", "account.eyebrow": "Personlig konto", "account.title": "Konto", "account.hint": "Opprett eller oppdater spillerprofilen din for å ta vare på egen statistikk og historikk.", "setup.avatarAssigned": "En avatar tildeles automatisk når du blir registrert.", "admin.identityRequired": "Admin må være innlogget før en live-turnering kan opprettes.", "admin.identitySignInRequired": "Logg inn med admin-kontoen før du oppretter en live-turnering.", "admin.identityEmailRequired": "Skriv inn admin-e-postadressen først." },
+  nn: { "pwa.install": "Installer Padelstar", "pwa.installTitle": "Installer Padelstar", "setup.avatarAssigned": "Ein avatar blir tildelt automatisk når du blir registrert.", "admin.identityRequired": "Admin må vere innlogga før ein live-turnering kan opprettast.", "admin.identitySignInRequired": "Logg inn med admin-kontoen før du opprettar ei live-turnering." },
+  en: { "pwa.install": "Install Padelstar", "pwa.installTitle": "Install Padelstar", "setup.avatarAssigned": "An avatar is assigned automatically when you join.", "admin.identityRequired": "The admin must be signed in before a live tournament can be created.", "admin.identitySignInRequired": "Sign in with the admin account before creating a live tournament." },
+  es: { "pwa.install": "Instalar Padelstar", "pwa.installTitle": "Instalar Padelstar", "setup.avatarAssigned": "Se asigna un avatar automáticamente al unirte.", "admin.identityRequired": "El administrador debe iniciar sesión antes de crear un torneo en vivo.", "admin.identitySignInRequired": "Inicia sesión con la cuenta de administrador antes de crear un torneo en vivo." },
+  de: { "pwa.install": "Padelstar installieren", "pwa.installTitle": "Padelstar installieren", "setup.avatarAssigned": "Beim Beitritt wird automatisch ein Avatar zugewiesen.", "admin.identityRequired": "Der Admin muss angemeldet sein, bevor ein Live-Turnier erstellt werden kann.", "admin.identitySignInRequired": "Melde dich mit dem Admin-Konto an, bevor du ein Live-Turnier erstellst." },
+  fr: { "pwa.install": "Installer Padelstar", "pwa.installTitle": "Installer Padelstar", "setup.avatarAssigned": "Un avatar est attribué automatiquement lors de votre inscription.", "admin.identityRequired": "L’administrateur doit être connecté avant de créer un tournoi en direct.", "admin.identitySignInRequired": "Connectez-vous avec le compte admin avant de créer un tournoi en direct." },
+})) {
+  Object.assign(padelstarTranslations[language], values);
 }
 
 for (const [language, values] of Object.entries({

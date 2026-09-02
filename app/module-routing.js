@@ -13,11 +13,11 @@
     function normalizeModule(moduleName) {
       const requestedModule = normalizeWorkspaceModule(moduleName);
       if (!hasActiveTournament()) {
-        return ["setup-admin", "setup-player"].includes(requestedModule) ? requestedModule : "landing";
+        return ["setup-admin", "setup-player", "account"].includes(requestedModule) ? requestedModule : "landing";
       }
       if (requestedModule === "admin") return isCurrentUserAdmin() ? "admin" : fallbackTournamentModule();
       if (requestedModule === "player") return hasSelectedPlayer() ? "player" : fallbackTournamentModule();
-      if (["landing", "setup-admin", "setup-player", "tournament"].includes(requestedModule)) return requestedModule;
+      if (["landing", "setup-admin", "setup-player", "account", "tournament"].includes(requestedModule)) return requestedModule;
       return fallbackTournamentModule();
     }
 

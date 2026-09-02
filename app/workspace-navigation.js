@@ -25,7 +25,7 @@
       if (requestedModule === "setup-player") deps.syncJoinPreview();
 
       document.body.classList.toggle("workspace-active", isWorkspaceActive);
-      document.body.classList.toggle("setup-active", requestedModule === "setup-admin" || requestedModule === "setup-player");
+      document.body.classList.toggle("setup-active", requestedModule === "setup-admin" || requestedModule === "setup-player" || requestedModule === "account");
       const activeSections = [];
       document.querySelectorAll(".app-module").forEach((section) => {
         const isActive = section.dataset.module === requestedModule || (section.dataset.module === "workspace" && isWorkspaceActive);
@@ -47,7 +47,7 @@
       document.querySelectorAll("[data-section]").forEach((section) => {
         section.classList.toggle("hidden", section.dataset.section !== workspaceModule);
       });
-      document.querySelectorAll("[data-module-link]").forEach((link) => {
+      document.querySelectorAll("#appMenu [data-module-link]").forEach((link) => {
         link.classList.toggle("active", link.dataset.moduleLink === requestedModule);
         if (link.dataset.moduleLink === requestedModule) link.setAttribute("aria-current", "page");
         else link.removeAttribute("aria-current");
@@ -64,18 +64,26 @@
     function renderRoleVisibility() {
       const elements = deps.getElements();
       const state = deps.getState();
+      const activeModule = deps.getActiveModule();
       const isAdmin = deps.isCurrentUserAdmin() && !deps.getSpectatorMode();
       const tournamentIsActive = deps.hasActiveTournament();
-      const canShowPlayer = Boolean(state.selectedPlayerId);
-      const visibleModules = new Set(tournamentIsActive
-        ? ["landing", "setup-admin", "setup-player", "tournament", ...(isAdmin ? ["admin"] : []), ...(canShowPlayer ? ["player"] : [])]
-        : ["landing", "setup-admin", "setup-player"]);
+      const canShowAdmin = tournamentIsActive && isAdmin;
+      const canShowPlayer = tournamentIsActive && Boolean(state.selectedPlayerId);
+      const onLanding = activeModule === "landing";
+      const visibleModules = new Set([
+        "landing",
+        "account",
+        ...(onLanding ? [] : ["setup-admin", "setup-player"]),
+        ...(canShowAdmin ? ["admin"] : []),
+        ...(canShowPlayer ? ["player"] : []),
+      ]);
       const workspaceModule = deps.workspaceModuleFromActiveModule();
-      const activeModule = deps.getActiveModule();
 
-      elements.adminTab.classList.toggle("hidden", !isAdmin);
+      elements.adminTab.classList.toggle("hidden", !canShowAdmin);
       elements.playerTab.classList.toggle("hidden", !canShowPlayer);
-      elements.tournamentTab.classList.toggle("hidden", !tournamentIsActive);
+      // TV Mode is the public tournament view; keep the old tournament link out of the menu.
+      elements.tournamentTab.classList.add("hidden");
+      elements.tvModeMenuButton?.classList.toggle("hidden", !tournamentIsActive);
       const canLeaveSession = deps.getSpectatorMode() || canShowPlayer;
       elements.leaveSessionButton?.classList.toggle("hidden", !canLeaveSession);
       if (elements.leaveSessionButton) {
@@ -87,7 +95,7 @@
         const role = isAdmin ? "admin" : state.selectedPlayerId && !deps.getSpectatorMode() ? "player" : "spectator";
         elements.roleIndicator.textContent = deps.t(`role.${role}`);
       }
-      document.querySelectorAll("[data-module-link]").forEach((link) => {
+      document.querySelectorAll("#appMenu [data-module-link]").forEach((link) => {
         const moduleName = deps.normalizeWorkspaceModule(link.dataset.moduleLink);
         link.classList.toggle("hidden", !visibleModules.has(moduleName));
         link.classList.toggle("active", moduleName === activeModule);

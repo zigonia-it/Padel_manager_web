@@ -20,11 +20,13 @@
       match.currentSet = { teamOne, teamTwo };
       match.currentGame = { teamOne: 0, teamTwo: 0 };
       match.completedSets.push({ teamOne, teamTwo });
+      deps.resolveScoreSubmission?.(match.id, teamOne, teamTwo);
       if (hasMatchWinner(match)) {
         deps.finishMatch(match);
       } else {
         match.currentSet = { teamOne: 0, teamTwo: 0 };
         match.state = "playing";
+        match.status = "active";
       }
       deps.saveState();
       deps.render();
@@ -57,7 +59,10 @@
     function awardTennisPoint(match, teamIndex) {
       if (["finished", "cancelled"].includes(match.state)) return;
       match.lastScoredMatchState = deps.captureMatchUndoState(match);
-      if (match.state === "waiting") match.state = "playing";
+      if (match.state === "waiting") {
+        match.state = "playing";
+        match.status = "active";
+      }
       const scoringTeam = teamIndex === 0 ? "teamOne" : "teamTwo";
       const otherTeam = teamIndex === 0 ? "teamTwo" : "teamOne";
       const scoringPoints = match.currentGame[scoringTeam] ?? 0;

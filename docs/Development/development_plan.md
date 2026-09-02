@@ -27,7 +27,7 @@ Følgende er implementert og skal behandles som beskyttet funksjonalitet:
 - Responsiv scorecard-logikk som automatisk flytter avatar over spillernavn når navnet faktisk brytes over flere linjer, samt ekstra logo-safe-space i kampmetadata.
 - Admin-fanene `Styring`, `Del`, `Spillere` og `Kamper`, samt setup-sidene `Opprett` og `Bli med`, bruker samme fullbredde innholdsflate på desktop og større nettbrett.
 - Workspace-headeren er transparent og lar sidens mørkeblå bakgrunn gå kontinuerlig bak turneringstittel, rolle og handlinger.
-- `assets/padelstar-icon.png` er felles ikonreferanse for favicon, Apple/iPhone-hjemskjerm, PWA-manifest, varsler og scorecard-emblem.
+- `assets/icons/padelstar-icon.png` er felles ikonreferanse for favicon, Apple/iPhone-hjemskjerm, PWA-manifest, varsler og scorecard-emblem.
 - Avatar-/profilkonfigurasjonen er flyttet til `app/avatar-system.js`; app-entrypointen bruker den delte modulen for avatar-ID-er, navn og DiceBear-URL-er.
 - Lenke- og QR-generering er flyttet til `app/link-utils.js`; join-/tilskuerparametre og lokal/offentlig URL-policy har én testbar modulgrense.
 - Ren konstruksjon av spiller- og turneringsstate er flyttet til `app/tournament-state.js`; entrypointen beholder kun avhengighetskoblingen til turneringsmotoren.

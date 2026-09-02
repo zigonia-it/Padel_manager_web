@@ -45,6 +45,8 @@
       const state = getState();
       const player = linkProfileToPlayer(createPlayer(playerName, state.players.length, avatarId));
       player.joinedFrom = "self";
+      player.guest = true;
+      player.participantType = "guest";
       const { data, error } = await call("join_tournament", {
         p_invite_code: state.inviteCode,
         p_player: player,

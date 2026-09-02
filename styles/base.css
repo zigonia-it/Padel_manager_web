@@ -83,7 +83,7 @@ body {
     linear-gradient(180deg,
       rgba(3, 16, 34, 0.72),
       rgba(3, 16, 34, 0.97)),
-    url("../assets/bg_img-1600.jpg") center top / cover fixed,
+    url("../assets/backgrounds/bg_img-1600.jpg") center top / cover fixed,
     var(--soft);
 
   color: var(--ink);
@@ -101,7 +101,7 @@ body.workspace-active {
     linear-gradient(90deg,
       rgba(3, 16, 34, 0.3),
       rgba(5, 21, 43, 0.76)),
-    url("../assets/bg_img-1600.jpg") center bottom / auto 150% fixed,
+    url("../assets/backgrounds/bg_img-1600.jpg") center bottom / auto 150% fixed,
     var(--soft);
 }
 

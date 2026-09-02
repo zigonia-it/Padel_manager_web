@@ -4,7 +4,7 @@ window.PadelstarState = (() => {
       ...defaults.settings,
       ...(nextState.settings ?? {}),
     };
-    if (!["roundRobin", "cup"].includes(nextState.settings.format)) nextState.settings.format = "roundRobin";
+    if (!(window.PadelstarTournamentModes?.supportedFormats ?? ["roundRobin", "cup"]).includes(nextState.settings.format)) nextState.settings.format = "roundRobin";
     if (!["auto", "manual"].includes(nextState.settings.cupTeamSetupMode)) nextState.settings.cupTeamSetupMode = "auto";
     nextState.settings.includesThirdPlaceMatch = Boolean(nextState.settings.includesThirdPlaceMatch);
     nextState.adminToken ??= null;
@@ -14,6 +14,15 @@ window.PadelstarState = (() => {
     nextState.players ??= [];
     nextState.courts ??= structuredClone(defaults.courts);
     nextState.schedule ??= helpers.buildSchedule(nextState.players, nextState.settings.format);
+    nextState.schedulerHistory = {
+      partners: {},
+      opponents: {},
+      matches: [],
+      byes: [],
+      ...(nextState.schedulerHistory ?? {}),
+    };
+    nextState.events = Array.isArray(nextState.events) ? nextState.events.slice(-200) : [];
+    nextState.scoreSubmissions = Array.isArray(nextState.scoreSubmissions) ? nextState.scoreSubmissions.slice(-200) : [];
     nextState.rounds ??= [];
     nextState.cup ??= null;
     nextState.cupTeams = Array.isArray(nextState.cupTeams) ? nextState.cupTeams : [];
@@ -60,6 +69,7 @@ window.PadelstarState = (() => {
       teamTwo: helpers.createTeam(match.team2.map(helpers.getPlayerById).filter(Boolean)),
       sittingOut: [],
       state: match.status === "Completed" ? "finished" : match.status === "Active" ? "playing" : "waiting",
+      status: match.status === "Completed" ? "completed" : match.status === "Active" ? "active" : "scheduled",
       completedSets: [],
       currentSet: {
         teamOne: match.scoreTeam1 ?? 0,

@@ -21,7 +21,7 @@
     windowRef.addEventListener("online", handleOnline);
     windowRef.addEventListener("offline", handleOffline);
     elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
-    elements.avatarPicker.addEventListener("change", syncJoinPreview);
+    elements.avatarPicker?.addEventListener("change", syncJoinPreview);
     elements.closeLargeScoreButton.addEventListener("click", closeLargeScore);
     elements.largeScoreDialog.addEventListener("click", (event) => {
       if (event.target === elements.largeScoreDialog) closeLargeScore();

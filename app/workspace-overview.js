@@ -12,6 +12,7 @@ window.PadelstarWorkspaceOverview = (() => {
     roundProgress,
     setScoreText,
     translate,
+    assistantFindings = () => [],
   }) {
     function renderAdminLiveOverview(matches) {
       if (!elements.adminLiveOverview) return;
@@ -50,6 +51,15 @@ window.PadelstarWorkspaceOverview = (() => {
     <div class="progress-track" aria-label="${translate("tournament.progressAria")}"><span style="width: ${progressPercent}%"></span></div>`;
     }
 
+    function renderAssistant() {
+      const panel = elements.tournamentAssistant;
+      const list = elements.tournamentAssistantFindings;
+      if (!panel || !list) return;
+      const findings = assistantFindings(getState());
+      panel.classList.toggle("hidden", findings.length === 0);
+      list.innerHTML = findings.map((finding) => `<li class="assistant-${escapeHtml(finding.severity)}">${escapeHtml(finding.code.replaceAll("_", " "))}</li>`).join("");
+    }
+
     function renderCupTeamBuilder() {
       if (!elements.cupTeamBuilder) return;
       const state = getState();
@@ -81,7 +91,7 @@ window.PadelstarWorkspaceOverview = (() => {
     <div><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(item.value)}</strong><small>${escapeHtml(item.detail)}</small></div>`).join("");
     }
 
-    return { renderAdminLiveOverview, renderCupTeamBuilder, renderRoundSummary };
+    return { renderAdminLiveOverview, renderAssistant, renderCupTeamBuilder, renderRoundSummary };
   }
 
   return { create };

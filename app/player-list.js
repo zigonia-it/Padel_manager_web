@@ -3,7 +3,6 @@ window.PadelstarPlayerList = (() => {
     accentStyle,
     appendEmptyText,
     avatarMarkup,
-    avatarOptions,
     document,
     elements,
     escapeAttribute,
@@ -15,6 +14,7 @@ window.PadelstarPlayerList = (() => {
     playerStatusLabel,
     render,
     removePlayer,
+    replacePlayer,
     saveState,
     setLocalRole,
     showWorkspace,
@@ -47,6 +47,7 @@ window.PadelstarPlayerList = (() => {
       </span>
       <span class="player-actions">
         <strong>${t("standings.pointsShort", { points: entry?.points ?? 0 })}</strong>
+        ${lobbyLocked ? `<button class="icon-button replace-player-button" type="button">${t("actions.replacePlayer")}</button>` : ""}
         <button class="icon-button danger-button" type="button" aria-label="${t("actions.removePlayerAria", { name: escapeHtml(player.name) })}" ${lobbyLocked ? "disabled" : ""}>${t("actions.remove")}</button>
       </span>`;
         if (!lobbyLocked) {
@@ -54,18 +55,19 @@ window.PadelstarPlayerList = (() => {
           editor.className = "player-edit-grid";
           editor.innerHTML = `
         <input name="playerName" type="text" value="${escapeAttribute(player.name)}" aria-label="${t("actions.editPlayerNameAria", { name: escapeAttribute(player.name) })}" required>
-        <select name="avatarId" aria-label="${t("actions.playerAvatarAria", { name: escapeAttribute(player.name) })}">
-          ${avatarOptions.map((avatar) => `<option value="${avatar.id}" ${player.avatarId === avatar.id ? "selected" : ""}>${avatar.name}</option>`).join("")}
-        </select>
         <button class="secondary icon-button" type="submit">${t("actions.save")}</button>`;
           editor.addEventListener("submit", (event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
-            updatePlayer(player.id, { name: formData.get("playerName").trim(), avatarId: formData.get("avatarId") });
+            updatePlayer(player.id, { name: formData.get("playerName").trim() });
           });
           item.append(editor);
         }
         item.querySelector(".danger-button").addEventListener("click", () => removePlayer(player.id));
+        item.querySelector(".replace-player-button")?.addEventListener("click", () => {
+          const replacementName = globalThis.prompt(t("messages.replacePlayerPrompt", { name: player.name }));
+          if (replacementName) replacePlayer(player.id, replacementName);
+        });
         elements.playersList.append(item);
       });
     }

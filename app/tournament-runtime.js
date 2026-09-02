@@ -10,7 +10,8 @@ window.PadelstarTournamentRuntime = (() => {
     setsWonByTeam,
     now = () => new Date().toISOString(),
     randomUUID = () => crypto.randomUUID(),
-    rounds,
+      rounds,
+      recordEvent,
     showToast,
     translate,
     uniquePlayers,
@@ -22,13 +23,28 @@ window.PadelstarTournamentRuntime = (() => {
 
     function createScheduledRound(roundPlan, roundNumber) {
       const currentState = state();
-      const matchPlan = generateRoundMatches(roundPlan.teams, roundNumber, roundPlan.sittingOut);
+      const plannedMatchups = roundPlan.matchups?.length
+        ? (window.PadelstarTournamentScheduler?.orderMatchups(roundPlan.teams, currentState.schedulerHistory) ?? roundPlan.matchups)
+        : [];
+      const queuedMatchups = plannedMatchups.length && window.PadelstarTournamentScheduler
+        ? window.PadelstarTournamentScheduler.createQueue(plannedMatchups, Math.max(1, currentState.courts.length)).flat()
+        : plannedMatchups;
+      const matchPlan = queuedMatchups.length
+        ? queuedMatchups.flatMap((matchup) => generateRoundMatches([matchup.teamOne, matchup.teamTwo], roundNumber, roundPlan.sittingOut).map((match) => ({
+          ...match,
+          queueWave: matchup.queueWave,
+          plannedCourtIndex: matchup.plannedCourtIndex,
+          queuePosition: matchup.queuePosition,
+        })))
+        : generateRoundMatches(roundPlan.teams, roundNumber, roundPlan.sittingOut);
       const matches = matchPlan.map((match, index) => ({
         ...match,
         isThirdPlaceMatch: false,
-        courtId: currentState.courts[index % currentState.courts.length]?.id ?? null,
-        courtName: currentState.courts[index % currentState.courts.length]?.name ?? null,
+        courtId: null,
+        courtName: null,
+        queuePosition: match.queuePosition ?? index + 1,
         state: "waiting",
+        status: "scheduled",
       }));
       const playingPlayerIds = new Set(matches.flatMap((match) => matchPlayers(match).map((player) => player.id)));
       const sittingOut = uniquePlayers([
@@ -51,6 +67,7 @@ window.PadelstarTournamentRuntime = (() => {
         courtId: currentState.courts[matchIndex % currentState.courts.length]?.id ?? null,
         courtName: currentState.courts[matchIndex % currentState.courts.length]?.name ?? null,
         state: "waiting",
+        status: "scheduled",
       };
     }
 
@@ -126,7 +143,7 @@ window.PadelstarTournamentRuntime = (() => {
     function createNextCupRound() {
       const currentState = state();
       const previousRound = currentState.rounds.at(-1);
-      if (!previousRound || previousRound.status !== "finished") return null;
+      if (!previousRound || !["finished", "completed"].includes(previousRound.status)) return null;
       const previousBracketRound = getCupBracketRound(previousRound.roundNumber);
       const regularMatches = previousRound.matches.filter((match) => !match.isThirdPlaceMatch);
       const advancing = rounds.advancingTeams(previousRound, previousBracketRound, currentState.cup?.byeTeams ?? []);
@@ -197,9 +214,14 @@ window.PadelstarTournamentRuntime = (() => {
 
     function activateNextWaitingMatch(match) {
       const activeRound = getActiveRound();
-      const nextWaitingMatch = activeRound?.matches.find((item) => item.state === "waiting");
+      const activePlayerIds = new Set(activeRound?.matches
+        .filter((item) => item.state === "playing" || item.status === "active")
+        .flatMap((item) => window.PadelstarTournamentScheduler?.matchPlayerIds(item) ?? []) ?? []);
+      const nextWaitingMatch = window.PadelstarTournamentScheduler?.findNextPlayableMatch(activeRound?.matches, activePlayerIds)
+        ?? activeRound?.matches.find((item) => item.state === "waiting");
       if (!nextWaitingMatch) return null;
       nextWaitingMatch.state = "playing";
+      nextWaitingMatch.status = "active";
       nextWaitingMatch.courtId = match.courtId;
       nextWaitingMatch.courtName = match.courtName;
       return nextWaitingMatch;
@@ -214,7 +236,7 @@ window.PadelstarTournamentRuntime = (() => {
       const isFinalRound = finalRoundNumber ? activeRound.roundNumber === finalRoundNumber : !cupCanAdvance();
       if (!isFinalRound) return;
       const finalMatch = activeRound.matches.find((match) => !match.isThirdPlaceMatch);
-      activeRound.status = "finished";
+      activeRound.status = "completed";
       currentState.status = "Cup ferdig";
       currentState.cup.winnerTeam = finalMatch?.winnerTeamIndex === 0
         ? finalMatch.teamOne
@@ -224,10 +246,15 @@ window.PadelstarTournamentRuntime = (() => {
     function finishMatch(match) {
       const currentState = state();
       match.state = "finished";
+      match.status = "completed";
       match.currentGame = { teamOne: 0, teamTwo: 0 };
       match.winnerTeamIndex = setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1;
       match.isWalkover = false;
       match.completedAt = now();
+      recordEvent?.("match_completed", "match", match.id, { winnerTeamIndex: match.winnerTeamIndex, isWalkover: false });
+      if (window.PadelstarTournamentScheduler) {
+        currentState.schedulerHistory = window.PadelstarTournamentScheduler.recordMatchHistory(currentState.schedulerHistory, match);
+      }
       activateNextWaitingMatch(match);
       markCupCompleteIfDone();
       return currentState;

@@ -1,5 +1,5 @@
 window.PadelstarPlayerState = (() => {
-  function create({ buildSchedule, createPlayer, createTeam, defaultAvatarId, findPlayerByName, getPlayerById, getState, render, saveState, showToast, t }) {
+  function create({ buildSchedule, createPlayer, createTeam, defaultAvatarId, findPlayerByName, getPlayerById, getState, recordEvent, render, saveState, showToast, t }) {
     function parsePlayerNames(value) {
       return String(value).split(/[\n,;]+/).map((name) => name.trim()).filter(Boolean);
     }
@@ -11,7 +11,7 @@ window.PadelstarPlayerState = (() => {
       return player;
     }
     function addPlayers(names, joinedFrom) {
-      names.forEach((name) => { if (!findPlayerByName(name)) addPlayer(name, joinedFrom, defaultAvatarId); });
+      names.forEach((name) => { if (!findPlayerByName(name)) addPlayer(name, joinedFrom); });
     }
     function updatePlayer(playerId, updates) {
       const state = getState();
@@ -38,7 +38,34 @@ window.PadelstarPlayerState = (() => {
       saveState();
       render();
     }
-    return { addPlayer, addPlayers, parsePlayerNames, removePlayer, updatePlayer };
+    function replacePlayer(playerId, replacementName) {
+      const state = getState();
+      const outgoing = getPlayerById(playerId);
+      const name = String(replacementName ?? "").trim();
+      if (!outgoing || !name || state.status === "Avsluttet") return null;
+      if (findPlayerByName(name)) {
+        showToast(t("messages.duplicatePlayer", { name }), "status-message-error");
+        return null;
+      }
+      const replacement = { ...createPlayer(name, state.players.length), joinedFrom: "admin-replacement", replacedPlayerId: playerId };
+      outgoing.active = false;
+      outgoing.availability = "away";
+      outgoing.replacedBy = replacement.id;
+      state.players.push(replacement);
+      recordEvent?.("player_replaced", "player", playerId, { replacementPlayerId: replacement.id, replacementName: replacement.name });
+      const replaceInTeam = (team) => createTeam((team?.players ?? []).map((player) => player.id === playerId ? replacement : player));
+      state.cupTeams = state.cupTeams.map((team) => replaceInTeam(team));
+      state.rounds.forEach((round) => round.matches.forEach((match) => {
+        if (!["waiting", "scheduled", "ready"].includes(match.state) && !["scheduled", "ready"].includes(match.status)) return;
+        if (match.teamOne?.players.some((player) => player.id === playerId)) match.teamOne = replaceInTeam(match.teamOne);
+        if (match.teamTwo?.players.some((player) => player.id === playerId)) match.teamTwo = replaceInTeam(match.teamTwo);
+      }));
+      state.schedule = buildSchedule(state.players, state.settings.format);
+      saveState();
+      render();
+      return replacement;
+    }
+    return { addPlayer, addPlayers, parsePlayerNames, removePlayer, replacePlayer, updatePlayer };
   }
   return { create };
 })();

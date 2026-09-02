@@ -42,3 +42,11 @@ test("profile history is isolated and aggregated without exposing tournament sta
   assert.deepEqual(JSON.parse(JSON.stringify(api.summarizeHistory(own))), { tournaments: 1, wins: 2, matches: 3, points: 4, sets: 3, games: 18 });
   assert.equal(Object.hasOwn(own[0], "adminToken"), false);
 });
+
+test("profile history accepts registered match records without requiring tournament state", () => {
+  const { api, storage } = loadProfiles();
+  api.recordHistory(storage, "history", { id: "t3", profileId: "profile-1", matchRecords: [{ id: "m1", teamOne: { players: [{ profileId: "profile-1", name: "Ada" }] }, teamTwo: { players: [] } }] });
+  const entry = api.historyForProfile(api.loadHistory(storage, "history"), "profile-1")[0];
+  assert.equal(entry.matchRecords[0].teamOne.players[0].profileId, "profile-1");
+  assert.equal(Object.hasOwn(entry, "players"), false);
+});

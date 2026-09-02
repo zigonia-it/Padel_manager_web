@@ -2,6 +2,11 @@
   "use strict";
 
   function create(deps) {
+    function recordAdminEvent(eventType, entityType, entityId, payload) {
+      deps.recordEvent?.(eventType, entityType, entityId, payload);
+      deps.saveState?.();
+    }
+
     function canWrite(offlineMessage) {
       const state = deps.getState();
       if (!deps.isSupabaseReady() || !deps.isCurrentUserAdmin() || !state.adminToken || !state.id) return false;
@@ -45,6 +50,7 @@
 
     function queueRemoteMatchAction(match, action, teamIndex = null) {
       if (!canWrite("messages.offlineAdminChange")) return;
+      recordAdminEvent(action === "undo" ? "match_undo_requested" : `match_${action}`, "match", match.id, { teamIndex });
       enqueue(action === "undo" ? "admin_undo_match" : "admin_match_action", () => {
         const state = deps.getState();
         if (action === "undo") return {
@@ -66,6 +72,7 @@
 
     function queueRemoteSetResult(match, teamOne, teamTwo) {
       if (!canWrite("messages.offlineSetResult")) return;
+      recordAdminEvent("result_corrected", "match", match.id, { teamOne, teamTwo });
       enqueue("admin_set_result", () => {
         const state = deps.getState();
         return {
@@ -81,6 +88,7 @@
 
     function queueRemoteRoundAdvance() {
       if (!canWrite("messages.offlineNextRound")) return;
+      recordAdminEvent("round_advance_requested", "round", null, {});
       enqueue("admin_advance_round", () => {
         const state = deps.getState();
         return { p_tournament_id: state.id, p_admin_token: state.adminToken, p_expected_revision: state.revision };
@@ -89,6 +97,7 @@
 
     function queueRemoteCupAdvance() {
       if (!canWrite("messages.offlineNextCupRound")) return;
+      recordAdminEvent("cup_advance_requested", "round", null, {});
       enqueue("admin_advance_cup", () => {
         const state = deps.getState();
         return { p_tournament_id: state.id, p_admin_token: state.adminToken, p_expected_revision: state.revision };

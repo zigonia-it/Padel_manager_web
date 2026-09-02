@@ -14,13 +14,16 @@
 
     async function sendAdminSignInLink(event) {
       event.preventDefault();
+      return sendSignInLink(getElements().adminIdentityEmail.value.trim());
+    }
+
+    async function sendSignInLink(email) {
       const elements = getElements();
       const client = getClient();
       if (!client) {
         elements.adminIdentityNotice.textContent = translate("admin.identityUnavailable");
-        return;
+        return false;
       }
-      const email = elements.adminIdentityEmail.value.trim();
       const { error } = await client.auth.signInWithOtp({
         email,
         options: { emailRedirectTo: global.location.origin },
@@ -29,6 +32,7 @@
         ? remoteErrorMessage(error, translate("admin.identityFailed"))
         : translate("admin.identityLinkSent");
       if (!error) observability?.emit("admin_signin_link_requested");
+      return !error;
     }
 
     async function claimCurrentTournament() {
@@ -72,12 +76,15 @@
         : user
           ? translate("admin.identitySignedIn")
           : translate("admin.identityToken");
-      elements.adminIdentityForm.classList.toggle("hidden", claimed);
+      // Account authentication is handled by the shared Konto view with email and password.
+      // Keep the legacy magic-link form disabled so admin access cannot drift between auth flows.
+      elements.adminIdentityForm?.classList.add("hidden");
+      elements.adminAccountAuthButton?.classList.toggle("hidden", Boolean(user));
       elements.claimTournamentButton.classList.toggle("hidden", claimed || !user);
       if (claimed) elements.adminIdentityNotice.textContent = user.email ?? "";
     }
 
-    return { claimCurrentTournament, currentAuthUser, render, sendAdminSignInLink };
+    return { claimCurrentTournament, currentAuthUser, render, sendAdminSignInLink, sendSignInLink };
   }
 
   global.PadelstarAdminIdentity = { create };

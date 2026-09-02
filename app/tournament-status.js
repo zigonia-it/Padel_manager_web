@@ -1,7 +1,7 @@
 window.PadelstarTournamentStatus = (() => {
   function create({ cupCanAdvance, cupCanFinalize, getActiveRound, getNextScheduledRound, getState, t }) {
     function canCompleteRound(round) {
-      return Boolean(round && round.status !== "finished" && round.matches.length > 0
+      return Boolean(round && !["finished", "completed"].includes(round.status) && round.matches.length > 0
         && round.matches.every((match) => ["finished", "cancelled"].includes(match.state)));
     }
     function roundProgress(round) {
