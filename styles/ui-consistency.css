@@ -31,9 +31,10 @@ body.landing-active {
 
 body.landing-active .intro,
 body[data-theme="classic"].landing-active .intro {
-  background:
+  background-image:
     radial-gradient(circle at 50% 36%, rgba(18, 191, 255, 0.12), transparent 32rem),
-    linear-gradient(180deg, rgba(2, 11, 28, 0.22), rgba(2, 8, 18, 0.56));
+    linear-gradient(180deg, rgba(2, 11, 28, 0.22), rgba(2, 8, 18, 0.56)) !important;
+  background-color: #06152c;
 }
 
 body:not(.landing-active) {
