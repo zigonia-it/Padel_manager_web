@@ -12,6 +12,7 @@ Dette er en kort sporbar status for arbeidet som er kontrollert mot [Padelstar-k
 - TV Mode ligger på egen `tv.html` med separat CSS/runtime, responsiv layout, offline-status, roterende meldinger og historikkvennlig tilbakeknapp.
 - Aktive assets ligger under `assets/` sortert i `logos/`, `backgrounds/`, `icons/`, `ui/` og `fonts/`. Arkivmateriale ligger under `assets/archive/` og brukes ikke av runtime.
 - Ikke-forside-modulene bruker nå et felles UI-lag med TV Mode som visuell referanse: mørk marineblå flate, kjølige blå borders, 12–14 px radius, felles typografihierarki og dempet modul-animasjon. Forsiden har fortsatt eget uttrykk, men bruker ikke lenger fotografisk bakgrunn.
+- Språkfallback følger region: Bokmål, Nynorsk, svensk og dansk faller tilbake til Bokmål, mens engelsk, spansk, tysk og fransk faller tilbake til English før global Bokmål-fallback ved manglende nøkkel.
 
 ## Bevisst senere arbeid fra masterplanen
 

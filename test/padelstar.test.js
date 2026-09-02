@@ -680,6 +680,11 @@ test("translations are loaded from the shared dictionary with Bokmål fallback",
   );
   assert.equal(api.i18n.has("en", "status.connectionAria"), true);
   assert.equal(api.i18n.htmlLang("en"), "en");
+  assert.equal(api.i18n.translate("sv", "queue.title"), "Banekø");
+  assert.equal(api.i18n.translate("da", "queue.title"), "Banekø");
+  assert.equal(api.i18n.translate("es", "profile.avatar"), "Avatar");
+  assert.equal(api.i18n.translate("de", "admin.sectionsAria"), "Admin sections");
+  assert.equal(api.i18n.translate("fr", "admin.sectionsAria"), "Admin sections");
   assert.equal(api.i18n.normalizeLanguage("international-en"), "nb");
   assert.equal(
     JSON.stringify(api.i18n.supportedLanguages().map((language) => language.code)),

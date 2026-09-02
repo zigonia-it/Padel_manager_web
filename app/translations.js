@@ -1,14 +1,14 @@
 const fallbackLanguage = "nb";
 
 const padelstarLanguageMeta = [
-  { code: "nb", label: "Bokmål", flag: "🇳🇴", htmlLang: "nb" },
-  { code: "nn", label: "Nynorsk", flag: "🇳🇴", htmlLang: "nn" },
-  { code: "en", label: "English", flag: "🇬🇧", htmlLang: "en" },
-  { code: "es", label: "Español", flag: "🇪🇸", htmlLang: "es" },
-  { code: "de", label: "Deutsch", flag: "🇩🇪", htmlLang: "de" },
-  { code: "fr", label: "Français", flag: "🇫🇷", htmlLang: "fr" },
-  { code: "sv", label: "Svenska", flag: "🇸🇪", htmlLang: "sv" },
-  { code: "da", label: "Dansk", flag: "🇩🇰", htmlLang: "da" },
+  { code: "nb", label: "Bokmål", flag: "🇳🇴", fallback: "nb", htmlLang: "nb" },
+  { code: "nn", label: "Nynorsk", flag: "🇳🇴", fallback: "nb", htmlLang: "nn" },
+  { code: "en", label: "English", flag: "🇬🇧", fallback: "en", htmlLang: "en" },
+  { code: "es", label: "Español", flag: "🇪🇸", fallback: "en", htmlLang: "es" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪", fallback: "en", htmlLang: "de" },
+  { code: "fr", label: "Français", flag: "🇫🇷", fallback: "en", htmlLang: "fr" },
+  { code: "sv", label: "Svenska", flag: "🇸🇪", fallback: "nb", htmlLang: "sv" },
+  { code: "da", label: "Dansk", flag: "🇩🇰", fallback: "nb", htmlLang: "da" },
 ];
 
 const padelstarTranslations = {
@@ -859,8 +859,12 @@ function languageFor(language) {
     ?? padelstarLanguageMeta.find((entry) => entry.code === fallbackLanguage);
 }
 
+function fallbackLanguageFor(language) {
+  return languageFor(language).fallback ?? fallbackLanguage;
+}
+
 function dictionaryFor(language) {
-  return padelstarTranslations[languageFor(language).code] ?? padelstarTranslations[fallbackLanguage];
+  return padelstarTranslations[fallbackLanguageFor(language)] ?? padelstarTranslations[fallbackLanguage];
 }
 
 function lookupValue(dictionary, key) {
@@ -894,9 +898,9 @@ window.PadelstarI18n = {
   },
   translate(language, key, values = {}) {
     const resolvedLanguage = languageFor(language).code;
-    const primary = lookupValue(padelstarTranslations[resolvedLanguage], key);
-    const fallback = lookupValue(padelstarTranslations[fallbackLanguage], key);
-    const value = primary ?? fallback;
+    const fallback = fallbackLanguageFor(resolvedLanguage);
+    const candidates = [...new Set([resolvedLanguage, fallback, fallbackLanguage])];
+    const value = candidates.map((candidate) => lookupValue(padelstarTranslations[candidate], key)).find((entry) => entry != null);
     if (value == null) {
       missingTranslationKeys.add(`${resolvedLanguage}:${key}`);
       return key;
@@ -904,8 +908,9 @@ window.PadelstarI18n = {
     return interpolate(value, values);
   },
   has(language, key) {
-    return lookupValue(dictionaryFor(language), key) != null
-      || lookupValue(padelstarTranslations[fallbackLanguage], key) != null;
+    const resolvedLanguage = languageFor(language).code;
+    return [...new Set([resolvedLanguage, fallbackLanguageFor(resolvedLanguage), fallbackLanguage])]
+      .some((candidate) => lookupValue(padelstarTranslations[candidate], key) != null);
   },
   missingKeys() {
     return Array.from(missingTranslationKeys);
