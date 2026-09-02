@@ -683,7 +683,7 @@ test("translations are loaded from the shared dictionary with Bokmål fallback",
   assert.equal(api.i18n.normalizeLanguage("international-en"), "nb");
   assert.equal(
     JSON.stringify(api.i18n.supportedLanguages().map((language) => language.code)),
-    JSON.stringify(["nb", "nn", "en", "es", "de", "fr"]),
+    JSON.stringify(["nb", "nn", "en", "es", "de", "fr", "sv", "da"]),
   );
   assert.equal(
     api.i18n.supportedLanguages().filter((language) => language.code === "en").length,

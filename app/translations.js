@@ -7,6 +7,8 @@ const padelstarLanguageMeta = [
   { code: "es", label: "Español", flag: "🇪🇸", htmlLang: "es" },
   { code: "de", label: "Deutsch", flag: "🇩🇪", htmlLang: "de" },
   { code: "fr", label: "Français", flag: "🇫🇷", htmlLang: "fr" },
+  { code: "sv", label: "Svenska", flag: "🇸🇪", htmlLang: "sv" },
+  { code: "da", label: "Dansk", flag: "🇩🇰", htmlLang: "da" },
 ];
 
 const padelstarTranslations = {
@@ -171,6 +173,31 @@ const padelstarTranslations = {
     status: {
       connectionAria: "État de connexion : {status}",
     },
+  },
+  sv: {
+    brandEyebrow: "Padel Manager",
+    languageLabel: "Språk",
+    localPwa: "Offline",
+    offline: "Offline",
+    startTournament: "Starta turnering",
+    startNextRound: "Starta nästa omgång",
+    finishTournament: "Slutför turnering",
+    realtimeConnected: "Online",
+    realtimeDisconnected: "Frånkopplad",
+    actions: { leaveTournament: "Lämna turneringen" },
+    status: { connectionAria: "Anslutningsstatus: {status}" },
+  },
+  da: {
+    brandEyebrow: "Padel Manager",
+    languageLabel: "Sprog",
+    localPwa: "Offline",
+    startTournament: "Start turnering",
+    startNextRound: "Start næste runde",
+    finishTournament: "Afslut turnering",
+    realtimeConnected: "Online",
+    realtimeDisconnected: "Afbrudt",
+    actions: { leaveTournament: "Forlad turneringen" },
+    status: { connectionAria: "Forbindelsesstatus: {status}" },
   },
 };
 
