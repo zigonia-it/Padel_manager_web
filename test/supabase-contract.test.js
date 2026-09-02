@@ -113,11 +113,11 @@ test("public RPC wrappers are rate limited and private implementations stay revo
 
 test("spectator reads use a dedicated whitelisted RPC", () => {
   const migration = fs.readFileSync(path.join(root, "supabase", "migrations", "20260831120000_spectator_state_rpc.sql"), "utf8");
-  const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
+  const remoteFeedbackSource = fs.readFileSync(path.join(root, "app", "remote-feedback.js"), "utf8");
   assert.match(migration, /get_spectator_tournament_by_code/);
   assert.match(migration, /jsonb_build_object/);
   assert.match(migration, /revoke all on function public\.get_spectator_tournament_by_code/);
-  assert.match(appSource, /spectatorMode \? "get_spectator_tournament_by_code"/);
+  assert.match(remoteFeedbackSource, /getSpectatorMode\(\) \? "get_spectator_tournament_by_code"/);
 });
 
 test("admin state writes use expected revision and strip local-only secrets", () => {

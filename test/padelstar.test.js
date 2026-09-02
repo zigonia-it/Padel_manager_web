@@ -12,11 +12,54 @@ const renderingPath = path.join(appRoot, "rendering.js");
 const remoteTournamentPath = path.join(appRoot, "remote-tournament.js");
 const adminActionsPath = path.join(appRoot, "admin-actions.js");
 const playerActionsPath = path.join(appRoot, "player-actions.js");
+const avatarSystemPath = path.join(appRoot, "avatar-system.js");
+const accentSystemPath = path.join(appRoot, "accent-system.js");
+const uiFeedbackPath = path.join(appRoot, "ui-feedback.js");
+const notificationSystemPath = path.join(appRoot, "notification-system.js");
+const profileSessionPath = path.join(appRoot, "profile-session.js");
+const matchCardPath = path.join(appRoot, "match-card.js");
+const backupFormatPath = path.join(appRoot, "backup-format.js");
+const linkUtilsPath = path.join(appRoot, "link-utils.js");
+const tournamentStatePath = path.join(appRoot, "tournament-state.js");
+const stateBootstrapPath = path.join(appRoot, "state-bootstrap.js");
+const moduleRoutingPath = path.join(appRoot, "module-routing.js");
+const sessionPolicyPath = path.join(appRoot, "session-policy.js");
 const tournamentEnginePath = path.join(appRoot, "tournament-engine.js");
+const tournamentRoundsPath = path.join(appRoot, "tournament-rounds.js");
+const playerVisualsPath = path.join(appRoot, "player-visuals.js");
+const tournamentRuntimePath = path.join(appRoot, "tournament-runtime.js");
+const workspaceOverviewPath = path.join(appRoot, "workspace-overview.js");
+const matchListPath = path.join(appRoot, "match-list.js");
+const standingsPath = path.join(appRoot, "standings.js");
+const playerListPath = path.join(appRoot, "player-list.js");
+const cupBracketPath = path.join(appRoot, "cup-bracket.js");
+const playerStatusPath = path.join(appRoot, "player-status.js");
+const playerNextMatchPath = path.join(appRoot, "player-next-match.js");
+const rulesPath = path.join(appRoot, "rules.js");
+const playerControlsPath = path.join(appRoot, "player-controls.js");
+const largeScorePath = path.join(appRoot, "large-score.js");
+const setScoreDialogPath = path.join(appRoot, "set-score-dialog.js");
+const adminStatusPath = path.join(appRoot, "admin-status.js");
+const profileUiPath = path.join(appRoot, "profile-ui.js");
+const backupUiPath = path.join(appRoot, "backup-ui.js");
+const playerStatePath = path.join(appRoot, "player-state.js");
+const tournamentStatusPath = path.join(appRoot, "tournament-status.js");
 const scoringEnginePath = path.join(appRoot, "scoring-engine.js");
 const stateManagerPath = path.join(appRoot, "state-manager.js");
 const realtimeSyncPath = path.join(appRoot, "realtime-sync.js");
 const offlineStoragePath = path.join(appRoot, "offline-storage.js");
+const persistencePath = path.join(appRoot, "persistence.js");
+const adminIdentityPath = path.join(appRoot, "admin-identity.js");
+const remoteFeedbackPath = path.join(appRoot, "remote-feedback.js");
+const realtimeConnectionPath = path.join(appRoot, "realtime-connection.js");
+const remoteStateWritePath = path.join(appRoot, "remote-state-write.js");
+const remoteAdminActionsPath = path.join(appRoot, "remote-admin-actions.js");
+const remotePlayerScorePath = path.join(appRoot, "remote-player-score.js");
+const scoreActionsPath = path.join(appRoot, "score-actions.js");
+const workspaceNavigationPath = path.join(appRoot, "workspace-navigation.js");
+const appEventsPath = path.join(appRoot, "app-events.js");
+const matchActionsPath = path.join(appRoot, "match-actions.js");
+const initialViewPath = path.join(appRoot, "initial-view.js");
 const appPath = path.join(appRoot, "app.js");
 const indexPath = path.join(__dirname, "..", "index.html");
 
@@ -93,18 +136,64 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(remoteTournamentPath, "utf8"), context, { filename: remoteTournamentPath });
   vm.runInContext(fs.readFileSync(adminActionsPath, "utf8"), context, { filename: adminActionsPath });
   vm.runInContext(fs.readFileSync(playerActionsPath, "utf8"), context, { filename: playerActionsPath });
+  vm.runInContext(fs.readFileSync(avatarSystemPath, "utf8"), context, { filename: avatarSystemPath });
+  vm.runInContext(fs.readFileSync(accentSystemPath, "utf8"), context, { filename: accentSystemPath });
+  vm.runInContext(fs.readFileSync(uiFeedbackPath, "utf8"), context, { filename: uiFeedbackPath });
+  vm.runInContext(fs.readFileSync(notificationSystemPath, "utf8"), context, { filename: notificationSystemPath });
+  vm.runInContext(fs.readFileSync(profileSessionPath, "utf8"), context, { filename: profileSessionPath });
+  vm.runInContext(fs.readFileSync(matchCardPath, "utf8"), context, { filename: matchCardPath });
+  vm.runInContext(fs.readFileSync(backupFormatPath, "utf8"), context, { filename: backupFormatPath });
+  vm.runInContext(fs.readFileSync(linkUtilsPath, "utf8"), context, { filename: linkUtilsPath });
+  vm.runInContext(fs.readFileSync(tournamentStatePath, "utf8"), context, { filename: tournamentStatePath });
+  vm.runInContext(fs.readFileSync(stateBootstrapPath, "utf8"), context, { filename: stateBootstrapPath });
+  vm.runInContext(fs.readFileSync(moduleRoutingPath, "utf8"), context, { filename: moduleRoutingPath });
+  vm.runInContext(fs.readFileSync(sessionPolicyPath, "utf8"), context, { filename: sessionPolicyPath });
   vm.runInContext(fs.readFileSync(tournamentEnginePath, "utf8"), context, { filename: tournamentEnginePath });
+  vm.runInContext(fs.readFileSync(tournamentRoundsPath, "utf8"), context, { filename: tournamentRoundsPath });
+  vm.runInContext(fs.readFileSync(playerVisualsPath, "utf8"), context, { filename: playerVisualsPath });
+  vm.runInContext(fs.readFileSync(tournamentRuntimePath, "utf8"), context, { filename: tournamentRuntimePath });
+  vm.runInContext(fs.readFileSync(workspaceOverviewPath, "utf8"), context, { filename: workspaceOverviewPath });
+  vm.runInContext(fs.readFileSync(matchListPath, "utf8"), context, { filename: matchListPath });
+  vm.runInContext(fs.readFileSync(standingsPath, "utf8"), context, { filename: standingsPath });
+  vm.runInContext(fs.readFileSync(playerListPath, "utf8"), context, { filename: playerListPath });
+  vm.runInContext(fs.readFileSync(cupBracketPath, "utf8"), context, { filename: cupBracketPath });
+  vm.runInContext(fs.readFileSync(playerStatusPath, "utf8"), context, { filename: playerStatusPath });
+  vm.runInContext(fs.readFileSync(playerNextMatchPath, "utf8"), context, { filename: playerNextMatchPath });
+  vm.runInContext(fs.readFileSync(rulesPath, "utf8"), context, { filename: rulesPath });
+  vm.runInContext(fs.readFileSync(playerControlsPath, "utf8"), context, { filename: playerControlsPath });
+  vm.runInContext(fs.readFileSync(largeScorePath, "utf8"), context, { filename: largeScorePath });
+  vm.runInContext(fs.readFileSync(setScoreDialogPath, "utf8"), context, { filename: setScoreDialogPath });
+  vm.runInContext(fs.readFileSync(adminStatusPath, "utf8"), context, { filename: adminStatusPath });
+  vm.runInContext(fs.readFileSync(profileUiPath, "utf8"), context, { filename: profileUiPath });
+  vm.runInContext(fs.readFileSync(backupUiPath, "utf8"), context, { filename: backupUiPath });
+  vm.runInContext(fs.readFileSync(playerStatePath, "utf8"), context, { filename: playerStatePath });
+  vm.runInContext(fs.readFileSync(tournamentStatusPath, "utf8"), context, { filename: tournamentStatusPath });
   vm.runInContext(fs.readFileSync(scoringEnginePath, "utf8"), context, { filename: scoringEnginePath });
   vm.runInContext(fs.readFileSync(stateManagerPath, "utf8"), context, { filename: stateManagerPath });
   vm.runInContext(fs.readFileSync(realtimeSyncPath, "utf8"), context, { filename: realtimeSyncPath });
   vm.runInContext(fs.readFileSync(offlineStoragePath, "utf8"), context, { filename: offlineStoragePath });
+  vm.runInContext(fs.readFileSync(persistencePath, "utf8"), context, { filename: persistencePath });
+  vm.runInContext(fs.readFileSync(adminIdentityPath, "utf8"), context, { filename: adminIdentityPath });
+  vm.runInContext(fs.readFileSync(remoteFeedbackPath, "utf8"), context, { filename: remoteFeedbackPath });
+  vm.runInContext(fs.readFileSync(realtimeConnectionPath, "utf8"), context, { filename: realtimeConnectionPath });
+  vm.runInContext(fs.readFileSync(remoteStateWritePath, "utf8"), context, { filename: remoteStateWritePath });
+  vm.runInContext(fs.readFileSync(remoteAdminActionsPath, "utf8"), context, { filename: remoteAdminActionsPath });
+  vm.runInContext(fs.readFileSync(remotePlayerScorePath, "utf8"), context, { filename: remotePlayerScorePath });
+  vm.runInContext(fs.readFileSync(scoreActionsPath, "utf8"), context, { filename: scoreActionsPath });
+  vm.runInContext(fs.readFileSync(workspaceNavigationPath, "utf8"), context, { filename: workspaceNavigationPath });
+  vm.runInContext(fs.readFileSync(matchActionsPath, "utf8"), context, { filename: matchActionsPath });
+  vm.runInContext(fs.readFileSync(initialViewPath, "utf8"), context, { filename: initialViewPath });
   vm.runInContext(fs.readFileSync(appPath, "utf8"), context, { filename: appPath });
   return Object.assign(window.PadelstarTest, {
     engine: window.PadelstarTournamentEngine,
     scoring: window.PadelstarScoring,
     stateManager: window.PadelstarState,
+    storage: window.PadelstarStorage,
     realtime: window.PadelstarRealtime,
     offlineStorage: window.PadelstarOfflineStorage,
+    persistence: window.PadelstarPersistence,
+    links: window.PadelstarLinks,
+    initialView: window.PadelstarInitialView,
     localStorage,
   });
 }
@@ -372,6 +461,36 @@ test("offline storage module keeps localStorage as fallback without IndexedDB", 
   assert.deepEqual(plain(await api.offlineStorage.mirrorFromLocalStorage(["padelstar-demo"], api.localStorage)), [null]);
 });
 
+test("persistence module writes recovery state and delegates offline cleanup", async () => {
+  const api = loadPadelstar();
+  const mirrored = [];
+  const removed = [];
+  const persistence = api.persistence.create({
+    storage: api.storage,
+    localStorage: api.localStorage,
+    offlineStorage: {
+      isSupported: () => true,
+      mirrorFromLocalStorage: async (keys) => { mirrored.push(keys); },
+      removeRecord: async (key) => { removed.push(key); },
+    },
+  });
+  const state = { id: "tournament-1", players: [], rounds: [] };
+
+  persistence.writeTournamentState({
+    state,
+    stateKey: "current",
+    recoveryKey: "recovery",
+    isValidState: () => true,
+  });
+  persistence.removeKeys(["current", "recovery"]);
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.deepEqual(plain(JSON.parse(api.localStorage.getItem("current"))), state);
+  assert.deepEqual(plain(JSON.parse(api.localStorage.getItem("recovery"))), state);
+  assert.deepEqual(plain(mirrored), [["current", "recovery"]]);
+  assert.deepEqual(removed, ["current", "recovery"]);
+});
+
 test("leaderboard ranks match winners by configured point mode", () => {
   const api = loadPadelstar();
   const state = makeTournament(api, ["Ada", "Bo", "Cy", "Di"], { settings: { pointMode: "matches" } });
@@ -596,9 +715,50 @@ test("spectator links use a dedicated read-only query parameter", () => {
   assert.doesNotMatch(api.createSpectatorLink(), /[?&]join=/);
 });
 
+test("link utility keeps local join and spectator URLs isolated", () => {
+  const api = loadPadelstar();
+  const location = { hostname: "localhost", origin: "http://localhost:8080" };
+
+  assert.equal(api.links.createJoinLink({ location, inviteCode: "TEST1" }), "http://localhost:8080/?join=TEST1");
+  assert.equal(api.links.createSpectatorLink({ location, inviteCode: "TEST1" }), "http://localhost:8080/?spectate=TEST1");
+  assert.match(api.links.createQrCodeUrl("http://localhost:8080/?join=TEST1"), /quickchart\.io\/qr\?/);
+});
+
 test("all visible app translation keys have Bokmål fallback text", () => {
   const api = loadPadelstar();
   const missingKeys = collectTranslationKeys().filter((key) => !api.i18n.has("nb", key));
 
   assert.deepEqual(missingKeys, []);
+});
+
+test("initial view boundary routes join URLs and saved sessions", () => {
+  const { initialView } = loadPadelstar();
+  const calls = [];
+  const callbacks = {
+    currentLocalRole: () => "player",
+    hasSelectedPlayer: () => true,
+    hasSupabaseClient: () => false,
+    hasTournamentForInvite: () => false,
+    isCurrentUserAdmin: () => false,
+    loadRemoteTournamentByInvite: async () => false,
+    render: () => calls.push("render"),
+    setLocalRole: (role) => calls.push(`role:${role}`),
+    setSpectatorMode: (value) => calls.push(`spectator:${value}`),
+    setSpectatorPreviousRole: (role) => calls.push(`previous:${role}`),
+    showModule: (moduleName) => calls.push(`module:${moduleName}`),
+    showWorkspace: (view) => calls.push(`workspace:${view}`),
+  };
+  initialView.restore({
+    windowRef: { location: { search: "?join=ABCD" } },
+    storage: { getItem: () => null },
+    keys: { storageKey: "state", spectatorQueryKey: "spectate" },
+    callbacks,
+  });
+  assert.deepEqual(calls, ["module:setup-player"]);
+});
+
+test("initial visible fallback labels are translation-bound", () => {
+  const htmlSource = fs.readFileSync(indexPath, "utf8");
+  assert.match(htmlSource, /id="connectionStatus"[^>]*data-i18n="localPwa"/);
+  assert.match(htmlSource, /id="resumeTitle"[^>]*data-i18n="resume\.continueTournament"/);
 });

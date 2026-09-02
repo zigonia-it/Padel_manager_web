@@ -9,41 +9,28 @@ const notificationPreferenceKey = "padelstar-notifications";
 const pushSubscriptionStorageKey = "padelstar-push-subscription";
 const syncStorageKey = `${storageKey}-sync`;
 const recoveryStorageKey = `${storageKey}-last-good`;
-const publicAppUrl = "https://padelstar.app/";
-const spectatorQueryKey = "spectate";
-const playerAccentPalette = {
-  blue: "#1a59f2",
-  orange: "#e67a0a",
-  mint: "#148f42",
-  pink: "#d12e52",
-  indigo: "#7030d1",
-  teal: "#0a8080",
-  red: "#c70a33",
-  yellow: "#b88c00",
-  gold: "#f0b52e",
-  silver: "#616b7a",
-  bronze: "#9e560f",
-  sapphire: "#052e9e",
-  emerald: "#0a7538",
-  garnet: "#991020",
-  amethyst: "#8524b8",
-  onyx: "#1f2126",
-};
-const legacyAccentMap = {
-  green: "mint",
-  clay: "bronze",
-  navy: "sapphire",
-  coral: "orange",
-};
-const accents = Object.keys(playerAccentPalette);
-const defaultAvatarId = "smash";
+const linkUtils = window.PadelstarLinks;
+const publicAppUrl = linkUtils.publicAppUrl;
+const spectatorQueryKey = linkUtils.spectatorQueryKey;
+const accentSystem = window.PadelstarAccentSystem;
+const playerAccentPalette = accentSystem.palette;
+const legacyAccentMap = accentSystem.legacyAccentMap;
+const accents = accentSystem.accents;
+const avatarSystem = window.PadelstarAvatarSystem;
+const playerVisuals = window.PadelstarPlayerVisuals.create({
+  avatarUrl: (player) => avatarSystem.url(player),
+  accentStyle: (accent) => accentSystem.accentStyle(accent),
+  escapeHtml: (value) => escapeHtml(value),
+});
+const defaultAvatarId = avatarSystem.defaultAvatarId;
+const tournamentState = window.PadelstarTournamentState.create({
+  accents,
+  buildSchedule: (...args) => window.PadelstarTournamentEngine.buildSchedule(...args),
+  defaultAvatarId,
+  randomUUID: () => crypto.randomUUID(),
+});
 const tennisPointLabels = ["0", "15", "30", "40", "A"];
-const avatarOptions = [
-  { id: "smash", name: "Sophie" },
-  { id: "serve", name: "Aiden" },
-  { id: "wall", name: "Luna" },
-  { id: "lob", name: "Milo" },
-];
+const avatarOptions = avatarSystem.options;
 const i18n = window.PadelstarI18n;
 const i18nUi = window.PadelstarI18nUi;
 const storage = window.PadelstarStorage;
@@ -95,10 +82,28 @@ const playerActions = window.PadelstarPlayerActions.create({
   render: () => render(),
 });
 const tournamentEngine = window.PadelstarTournamentEngine;
+const tournamentRounds = window.PadelstarTournamentRounds;
+const tournamentRuntime = window.PadelstarTournamentRuntime.create({
+  activateRound: (round) => activateRound(round),
+  buildSchedule: (players, format) => buildSchedule(players, format),
+  canCompleteRound: (round) => canCompleteRound(round),
+  createTeam: (players) => createTeam(players),
+  generateRoundMatches: (teams, rotationNumber, sittingOut) => generateRoundMatches(teams, rotationNumber, sittingOut),
+  getActiveRound: () => getActiveRound(),
+  getLocalStorage: () => localStorage,
+  getState: () => state,
+  matchPlayers: (match) => matchPlayers(match),
+  rounds: tournamentRounds,
+  setsWonByTeam: (match, teamIndex) => setsWonByTeam(match, teamIndex),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  translate: (key, values) => t(key, values),
+  uniquePlayers: (players) => uniquePlayers(players),
+});
 const scoring = window.PadelstarScoring;
 const stateManager = window.PadelstarState;
 const realtimeSync = window.PadelstarRealtime;
 const offlineStorage = window.PadelstarOfflineStorage;
+const persistence = window.PadelstarPersistence.create({ storage, localStorage, offlineStorage });
 const profileManager = window.PadelstarProfiles;
 const observability = window.PadelstarObservability;
 const uiEffects = window.PadelstarUiEffects;
@@ -119,14 +124,153 @@ const defaultTournament = createTournament({
 let recoveredFromLastGood = false;
 migrateLegacyLocalStorage();
 
-let state = loadState();
+const stateBootstrap = window.PadelstarStateBootstrap.create({
+  defaultState: defaultTournament,
+  localStorage,
+  migrateState: (nextState) => migrateState(nextState),
+  parseJson: (serializedState) => storage.parseJson(serializedState),
+  recoveryStorageKey,
+  setRecoveredFromLastGood: (value) => { recoveredFromLastGood = value; },
+  storageKey,
+});
+let state = stateBootstrap.loadState();
+const backupFormat = window.PadelstarBackupFormat.create({
+  isValidState: (candidate) => isValidTournamentState(candidate),
+  migrateState: (candidate) => migrateState(candidate),
+  sanitizeState: (candidate) => sanitizeSharedState(candidate),
+});
 state.settings.language = loadUserLanguage(state.settings?.language ?? "nb");
-profile = loadLocalProfile();
 let largeScoreMatchId = null;
 let activeModule = "landing";
 let spectatorMode = false;
 let spectatorPreviousRole = "spectator";
 let localLeftPlayerId = null;
+const sessionPolicy = window.PadelstarSessionPolicy.create({
+  localStorage,
+  mirrorStorageKeys: (keys) => persistence.mirrorKeys(keys),
+  roleStorageKey,
+  state: () => state,
+  storageKey,
+});
+const moduleRouting = window.PadelstarModuleRouting.create({
+  hasActiveTournament: () => hasActiveTournament(),
+  isCurrentUserAdmin: () => isCurrentUserAdmin(),
+  hasSelectedPlayer: () => Boolean(state.selectedPlayerId),
+  getActiveModule: () => activeModule,
+});
+const remoteStateWrite = window.PadelstarRemoteStateWrite.create({
+  applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
+  getMutationSequence: () => remoteMutationSequence,
+  getState: () => state,
+  getSupabaseClient: () => supabaseClient,
+  handleRemoteError: (error, fallback) => handleRemoteError(error, fallback),
+  isConflictError: (error) => isConflictError(error),
+  isOnline: () => navigator.onLine,
+  isSupabaseReady: () => isSupabaseReady(),
+  persistSyncMetadata: () => persistSyncMetadata(),
+  remoteRpc,
+  resetRemoteRetry: () => {
+    remoteRetryAttempt = 0;
+    window.clearTimeout(remoteRetryTimer);
+    remoteRetryTimer = null;
+  },
+  saveLocalRevision: (revision) => {
+    state.revision = revision;
+    saveState({ remote: false });
+  },
+  sanitizeSharedState: (nextState) => sanitizeSharedState(nextState),
+  setLastPersistedSequence: (sequence) => {
+    lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, sequence);
+  },
+  setPendingAdminSync: (pending) => { pendingAdminSync = pending; },
+  setRemoteConflict: () => markRemoteConflict(),
+  syncConnectionStatus: () => syncConnectionStatus(),
+  t: (key, values) => t(key, values),
+});
+const remoteAdminActions = window.PadelstarRemoteAdminActions.create({
+  applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
+  clearRemoteSaveTimer: () => {
+    window.clearTimeout(remoteSaveTimer);
+    remoteSaveTimer = null;
+  },
+  enqueueRemoteWrite: (operation) => {
+    remoteWriteChain = remoteWriteChain.catch(() => {}).then(operation);
+  },
+  getLastPersistedSequence: () => lastRemotePersistedSequence,
+  getMutationSequence: () => remoteMutationSequence,
+  getState: () => state,
+  getSupabaseClient: () => supabaseClient,
+  handleRemoteError: (error, fallback) => handleRemoteError(error, fallback),
+  isCurrentUserAdmin: () => isCurrentUserAdmin(),
+  isOnline: () => navigator.onLine,
+  isSupabaseReady: () => isSupabaseReady(),
+  persistSyncMetadata: () => persistSyncMetadata(),
+  remoteRpc,
+  saveLocalRevision: (revision) => {
+    state.revision = revision;
+    saveState({ remote: false });
+  },
+  saveRemoteState: () => saveRemoteState(),
+  sendPushNotification: (kind, matchId) => sendPushNotification(kind, matchId),
+  setLastPersistedSequence: (sequence) => {
+    lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, sequence);
+  },
+  setPendingAdminSync: (pending) => { pendingAdminSync = pending; },
+  setRemoteNotice: (message) => setRemoteNotice(message),
+  syncConnectionStatus: () => syncConnectionStatus(),
+  t: (key, values) => t(key, values),
+});
+const remotePlayerScore = window.PadelstarRemotePlayerScore.create({
+  addPendingScore: (score) => pendingPlayerScores.push(score),
+  applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
+  getPendingScores: () => pendingPlayerScores,
+  getState: () => state,
+  getSupabaseClient: () => supabaseClient,
+  handleRemoteError: (error, fallback) => handleRemoteError(error, fallback),
+  isOnline: () => navigator.onLine,
+  isSupabaseReady: () => isSupabaseReady(),
+  persistSyncMetadata: () => persistSyncMetadata(),
+  removeFirstPendingScore: () => { pendingPlayerScores.shift(); },
+  remoteRpc,
+  render: () => render(),
+  syncConnectionStatus: () => syncConnectionStatus(),
+  t: (key, values) => t(key, values),
+});
+const scoreActions = window.PadelstarScoreActions.create({
+  captureMatchUndoState: (match) => captureMatchUndoState(match),
+  currentLocalRole: () => currentLocalRole(),
+  finishMatch: (match) => finishMatch(match),
+  flashMatchCards: (matchId) => uiEffects?.flashMatchCards(matchId),
+  getState: () => state,
+  isSupabaseReady: () => isSupabaseReady(),
+  matchIncludesPlayer: (match, playerId) => matchIncludesPlayer(match, playerId),
+  queuePlayerScore: (matchId, teamIndex) => queuePlayerScore(matchId, teamIndex),
+  queueRemoteSetResult: (match, teamOne, teamTwo) => queueRemoteSetResult(match, teamOne, teamTwo),
+  render: () => render(),
+  renderLargeScore: () => renderLargeScore(),
+  saveState: () => saveState(),
+  scoring,
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  t: (key, values) => t(key, values),
+});
+const workspaceNavigation = window.PadelstarWorkspaceNavigation.create({
+  focusModuleHeading: (section) => uiEffects?.focusModuleHeading(section),
+  getActiveModule: () => activeModule,
+  getElements: () => elements,
+  getSpectatorMode: () => spectatorMode,
+  getState: () => state,
+  hasActiveTournament: () => hasActiveTournament(),
+  isCurrentUserAdmin: () => isCurrentUserAdmin(),
+  isTestMode: () => Boolean(window.PADELSTAR_TEST_MODE),
+  normalizeModule: (moduleName) => normalizeModule(moduleName),
+  normalizeWorkspaceModule: (view) => normalizeWorkspaceModule(view),
+  prefillJoinForm: (inviteCode) => prefillJoinForm(inviteCode),
+  requestAnimationFrame: (callback) => requestAnimationFrame(callback),
+  setActiveModule: (moduleName) => { activeModule = moduleName; },
+  syncJoinPreview: () => syncJoinPreview(),
+  t: (key, values) => t(key, values),
+  workspaceModuleFromActiveModule: () => workspaceModuleFromActiveModule(),
+});
 const supabaseSettings = window.PADELSTAR_SUPABASE ?? window.PADEL_MANAGER_SUPABASE ?? {};
 let supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
   ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
@@ -138,13 +282,6 @@ let supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.
   })
   : null;
 let supabaseClientActivated = false;
-let realtimeChannel = null;
-let realtimeTournamentId = null;
-let realtimeReconnectTimer = null;
-let realtimeReconnectAttempt = 0;
-let realtimeConnectionState = "disconnected";
-let realtimeConnectionGeneration = 0;
-let realtimeRefreshPromise = null;
 let remoteSaveTimer = null;
 let remoteRetryTimer = null;
 let remoteRetryAttempt = 0;
@@ -153,15 +290,12 @@ let lastRemotePersistedSequence = 0;
 let isApplyingRemoteState = false;
 let remoteMutationSequence = 0;
 let remoteConflict = false;
-let moduleTransitionFrame = null;
-let toastTimer = null;
 let pendingAdminSync = loadPendingAdminSync();
 let pendingPlayerScores = loadPendingPlayerScores();
 const initialSyncMetadata = readSyncMetadata();
 let syncLastAttemptAt = initialSyncMetadata.lastAttemptAt ?? null;
 let syncLastError = initialSyncMetadata.lastError ?? null;
 if (pendingAdminSync) remoteMutationSequence = 1;
-let playerScoreQueueRunning = false;
 mirrorOfflineStorage();
 
 const elements = {
@@ -281,8 +415,379 @@ const elements = {
   playerMatchFilter: document.querySelector("#playerMatchFilter"),
 };
 
+const workspaceOverview = window.PadelstarWorkspaceOverview.create({
+  appendEmptyText: (container, text) => appendEmptyText(container, text),
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  gameScoreText: (match) => gameScoreText(match),
+  getActiveRound: () => getActiveRound(),
+  getState: () => state,
+  matchContextText: (match) => matchContextText(match),
+  matchStateText: (matchState) => matchStateText(matchState),
+  primaryMatchHeadline: (match) => primaryMatchHeadline(match),
+  roundProgress: (round) => roundProgress(round),
+  storageKey,
+  setScoreText: (match) => setScoreText(match),
+  translate: (key, values) => t(key, values),
+});
+const matchList = window.PadelstarMatchList.create({
+  appendEmptyText: (container, text) => appendEmptyText(container, text),
+  document,
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  matchContextText: (match) => matchContextText(match),
+  setScoreText: (match) => setScoreText(match),
+  t: (key, values) => t(key, values),
+  teamAccentStyle: (team) => teamAccentStyle(team),
+  teamDisplay: (team, variant) => teamDisplay(team, variant),
+});
+const standings = window.PadelstarStandings.create({
+  accentStyle: (accent) => accentStyle(accent),
+  appendEmptyText: (container, text) => appendEmptyText(container, text),
+  avatarMarkup: (player, className, size) => avatarMarkup(player, className, size),
+  document,
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  leaderboardEntries: (matches) => leaderboardEntries(matches),
+  t: (key, values) => t(key, values),
+});
+const playerList = window.PadelstarPlayerList.create({
+  accentStyle: (accent) => accentStyle(accent),
+  appendEmptyText: (container, text) => appendEmptyText(container, text),
+  avatarMarkup: (player, className, size) => avatarMarkup(player, className, size),
+  avatarOptions,
+  document,
+  elements,
+  escapeAttribute: (value) => escapeAttribute(value),
+  escapeHtml: (value) => escapeHtml(value),
+  getAllMatches: () => getAllMatches(),
+  getSupabaseClient: () => supabaseClient,
+  getState: () => state,
+  joinRemoteTournament: (name, avatarId) => joinRemoteTournament(name, avatarId),
+  leaderboardEntries: (matches) => leaderboardEntries(matches),
+  playerStatusLabel: (player) => playerStatusLabel(player),
+  removePlayer: (playerId) => removePlayer(playerId),
+  render: () => render(),
+  saveState: (options) => saveState(options),
+  setLocalRole: (role) => setLocalRole(role),
+  showWorkspace: (view) => showWorkspace(view),
+  t: (key, values) => t(key, values),
+  updatePlayer: (playerId, updates) => updatePlayer(playerId, updates),
+});
+const cupBracket = window.PadelstarCupBracket.create({
+  document,
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  getMatchById: (matchId) => getMatchById(matchId),
+  getState: () => state,
+  matchStateText: (matchState) => matchStateText(matchState),
+  t: (key, values) => t(key, values),
+});
+const playerStatus = window.PadelstarPlayerStatus.create({
+  elements,
+  getPlayerById: (id) => getPlayerById(id),
+  getState: () => state,
+  matchIncludesPlayer: (match, playerId) => matchIncludesPlayer(match, playerId),
+  playerTournamentState: (player, matches) => playerTournamentState(player, matches),
+  pointsByPlayer: (matches, pointMode) => pointsByPlayer(matches, pointMode),
+  statsForPlayer: (player, matches) => statsForPlayer(player, matches),
+  t: (key, values) => t(key, values),
+});
+const playerNextMatch = window.PadelstarPlayerNextMatch.create({
+  accentStyle: (accent) => accentStyle(accent),
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  gameScoreText: (match) => gameScoreText(match),
+  getActiveRound: () => getActiveRound(),
+  getPlayerById: (id) => getPlayerById(id),
+  getState: () => state,
+  matchContextText: (match) => matchContextText(match),
+  notifyPlayerMatch: (match, kind) => notifyPlayerMatch(match, kind),
+  playerPlacement: (player, matches) => playerPlacement(player, matches),
+  playerTournamentState: (player, matches) => playerTournamentState(player, matches),
+  scoreSummary: (match) => scoreSummary(match),
+  t: (key, values) => t(key, values),
+});
+const rules = window.PadelstarRules.create({
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  getState: () => state,
+  t: (key, values) => t(key, values),
+});
+const playerControls = window.PadelstarPlayerControls.create({
+  accentStyle: (accent) => accentStyle(accent),
+  avatarMarkup: (player, className, size) => avatarMarkup(player, className, size),
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  getPlayerById: (id) => getPlayerById(id),
+  getState: () => state,
+  getSpectatorMode: () => spectatorMode,
+  t: (key, values) => t(key, values),
+});
+const largeScore = window.PadelstarLargeScore.create({
+  awardTennisPoint: (match, teamIndex) => awardTennisPoint(match, teamIndex),
+  closeLargeScore: () => closeLargeScore(),
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  getMatchById: (matchId) => getMatchById(matchId),
+  getState: () => state,
+  gameScoreText: (match) => gameScoreText(match),
+  matchContextText: (match) => matchContextText(match),
+  setScoreText: (match) => setScoreText(match),
+  startingTeamText: (match) => startingTeamText(match),
+  teamAccentStyle: (team) => teamAccentStyle(team),
+  teamDisplay: (team) => teamDisplay(team),
+  tennisPointLabel: (points) => tennisPointLabel(points),
+  t: (key, values) => t(key, values),
+});
+const setScoreDialog = window.PadelstarSetScoreDialog.create({
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  getMatchById: (matchId) => getMatchById(matchId),
+  getState: () => state,
+  saveSetResult: (match, teamOne, teamTwo) => saveSetResult(match, teamOne, teamTwo),
+  t: (key, values) => t(key, values),
+});
+const adminStatus = window.PadelstarAdminStatus.create({
+  canGenerateRound: () => canGenerateRound(),
+  elements,
+  generateRoundBlockReason: () => generateRoundBlockReason(),
+  getActiveRound: () => getActiveRound(),
+  getLocalStorage: () => localStorage,
+  getState: () => state,
+  hasActiveTournament: () => hasActiveTournament(),
+  hasPendingRemoteWrites: () => hasPendingRemoteWrites(),
+  isSupabaseReady: () => isSupabaseReady(),
+  isCurrentUserAdmin: () => isCurrentUserAdmin(),
+  pendingRemoteWriteCount: () => pendingRemoteWriteCount(),
+  realtimeConnectionState: () => realtimeConnection.getConnectionState(),
+  roundProgress: (round) => roundProgress(round),
+  storageKey,
+  syncLastAttemptAt: () => syncLastAttemptAt,
+  syncLastError: () => syncLastError,
+  remoteConflict: () => remoteConflict,
+  t: (key, values) => t(key, values),
+});
+const profileUi = window.PadelstarProfileUi.create({
+  defaultAvatarId,
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  getLocalStorage: () => localStorage,
+  getProfile: () => profile,
+  getProfileManager: () => profileManager,
+  profileHistoryStorageKey,
+  t: (key, values) => t(key, values),
+});
+const backupUi = window.PadelstarBackupUi.create({
+  backupFormat,
+  elements,
+  getState: () => state,
+  render: () => render(),
+  saveState: () => saveState(),
+  setLocalRole: (role) => setLocalRole(role),
+  setState: (nextState) => { state = nextState; },
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  showWorkspace: (view) => showWorkspace(view),
+  slugify: (value) => slugify(value),
+  t: (key, values) => t(key, values),
+});
+const playerState = window.PadelstarPlayerState.create({
+  buildSchedule: (players, format) => buildSchedule(players, format),
+  createPlayer: (name, index, avatarId) => createPlayer(name, index, avatarId),
+  createTeam: (players) => createTeam(players),
+  defaultAvatarId,
+  findPlayerByName: (name) => findPlayerByName(name),
+  getPlayerById: (id) => getPlayerById(id),
+  getState: () => state,
+  render: () => render(),
+  saveState: () => saveState(),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  t: (key, values) => t(key, values),
+});
+const tournamentStatus = window.PadelstarTournamentStatus.create({
+  cupCanAdvance: () => cupCanAdvance(),
+  cupCanFinalize: () => cupCanFinalize(),
+  getActiveRound: () => getActiveRound(),
+  getNextScheduledRound: () => getNextScheduledRound(),
+  getState: () => state,
+  t: (key, values) => t(key, values),
+});
+
+const uiFeedback = window.PadelstarUiFeedback.create({
+  elements,
+  translate: (key, values) => t(key, values),
+});
+const notificationSystem = window.PadelstarNotificationSystem.create({
+  getElements: () => elements,
+  getLocalStorage: () => localStorage,
+  getNotificationPreferenceKey: () => notificationPreferenceKey,
+  getObservability: () => observability,
+  getPushSubscriptionStorageKey: () => pushSubscriptionStorageKey,
+  getState: () => state,
+  getSupabaseClient: () => supabaseClient,
+  getSupabaseSettings: () => supabaseSettings,
+  getSpectatorMode: () => spectatorMode,
+  remoteRpc,
+  translate: (key, values) => t(key, values),
+});
+const profileSession = window.PadelstarProfileSession.create({
+  defaultAvatarId,
+  getElements: () => elements,
+  getIsCurrentUserAdmin: () => isCurrentUserAdmin(),
+  getLocalStorage: () => localStorage,
+  getObservability: () => observability,
+  getPlayerById: (id) => getPlayerById(id),
+  getProfile: () => profile,
+  getState: () => state,
+  getSupabaseClient: () => supabaseClient,
+  mirrorStorageKeys: (keys) => persistence.mirrorKeys(keys),
+  profileHistoryStorageKey,
+  profileManager,
+  profileStorageKey,
+  removeOfflineStorageKeys: (keys) => persistence.removeKeys(keys),
+  remoteRpc,
+  render: () => render(),
+  renderProfile: () => renderProfile(),
+  requestConfirmation: (message) => requestConfirmation(message),
+  saveProfileHistory: () => saveProfileHistory(),
+  saveState: (options) => saveState(options),
+  syncJoinPreview: () => syncJoinPreview(),
+  translate: (key, values) => t(key, values),
+  setProfile: (nextProfile) => { profile = nextProfile; },
+});
+profile = profileSession.loadLocalProfile();
+const matchCard = window.PadelstarMatchCard.create({
+  awardTennisPoint: (match, teamIndex) => awardTennisPoint(match, teamIndex),
+  cancelMatch: (match) => cancelMatch(match),
+  escapeAttribute: (value) => escapeAttribute(value),
+  escapeHtml: (value) => escapeHtml(value),
+  gameScoreText: (match) => gameScoreText(match),
+  matchContextText: (match) => matchContextText(match),
+  matchIncludesPlayer: (match, playerId) => matchIncludesPlayer(match, playerId),
+  matchStateText: (stateName) => matchStateText(stateName),
+  openLargeScore: (matchId) => openLargeScore(matchId),
+  openSetScoreDialog: (matchId) => openSetScoreDialog(matchId),
+  primaryMatchHeadline: (match) => primaryMatchHeadline(match),
+  reopenMatch: (match) => reopenMatch(match),
+  setScoreText: (match) => setScoreText(match),
+  setWalkover: (match, teamIndex) => setWalkover(match, teamIndex),
+  sittingOutSummary: (match) => sittingOutSummary(match),
+  startMatch: (match) => startMatch(match),
+  teamAccentStyle: (team) => teamAccentStyle(team),
+  teamDisplay: (team, variant) => teamDisplay(team, variant),
+  tennisPointLabel: (value) => tennisPointLabel(value),
+  translate: (key, values) => t(key, values),
+  updateMatchCourt: (match, courtName) => updateMatchCourt(match, courtName),
+});
+const adminIdentity = window.PadelstarAdminIdentity.create({
+  getClient: () => supabaseClient,
+  getElements: () => elements,
+  getState: () => state,
+  isAdmin: () => isCurrentUserAdmin(),
+  observability,
+  remoteErrorMessage,
+  remoteRpc,
+  saveState: (options) => saveState(options),
+  translate: (key, values) => t(key, values),
+});
+const remoteFeedback = window.PadelstarRemoteFeedback.create({
+  getClient: () => supabaseClient,
+  getElements: () => elements,
+  getNavigator: () => navigator,
+  getSpectatorMode: () => spectatorMode,
+  isConflictError: (error) => isConflictError(error),
+  isTransientRemoteError: (error) => isTransientRemoteError(error),
+  markSyncAttempt: () => markSyncAttempt(),
+  remoteRpc,
+  renderSyncControls: () => renderSyncControls(),
+  sanitizeSharedState: (nextState) => sanitizeSharedState(nextState),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  stateManager,
+  translate: (key, values) => t(key, values),
+});
+const realtimeConnection = window.PadelstarRealtimeConnection.create({
+  applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
+  flushPendingRemoteWrites: () => flushPendingRemoteWrites(),
+  getClient: () => supabaseClient,
+  getInviteState: (inviteCode) => getTournamentByInviteRpc(inviteCode),
+  getNavigator: () => navigator,
+  getState: () => state,
+  handleRemoteError: (error, fallback) => handleRemoteError(error, fallback),
+  hasActiveTournament: () => hasActiveTournament(),
+  isReady: () => isSupabaseReady(),
+  observability,
+  onConnectionStateChange: () => syncConnectionStatus(),
+  realtimeSync,
+  translate: (key, values) => t(key, values),
+});
+
 let pendingSetScoreMatchId = null;
 const matchFilters = { admin: "all", player: "all" };
+const matchActions = window.PadelstarMatchActions.create({
+  activateNextWaitingMatch: (match) => activateNextWaitingMatch(match),
+  getActiveRound: () => getActiveRound(),
+  getMatchById: (matchId) => getMatchById(matchId),
+  getRoundForMatch: (match) => getRoundForMatch(match),
+  getState: () => state,
+  isSupabaseReady: () => isSupabaseReady(),
+  markCupCompleteIfDone: () => markCupCompleteIfDone(),
+  queueRemoteMatchAction: (match, action, teamIndex) => queueRemoteMatchAction(match, action, teamIndex),
+  render: () => render(),
+  renderLargeScore: () => renderLargeScore(),
+  requestConfirmation: (message) => requestConfirmation(message),
+  saveState: () => saveState(),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  t: (key, values) => t(key, values),
+});
+const initialView = window.PadelstarInitialView;
+const tournamentEntry = window.PadelstarTournamentEntry?.create({
+  createInviteCode: () => createInviteCode(),
+  createRemoteTournament: () => createRemoteTournament(),
+  createTournament: (options) => createTournament(options),
+  defaultAvatarId,
+  ensureProfileForJoin: (displayName, avatarId) => ensureProfileForJoin(displayName, avatarId),
+  findPlayerByName: (name) => findPlayerByName(name),
+  getClient: () => supabaseClient,
+  getState: () => state,
+  hasTournamentForInvite: (inviteCode, loadedRemote) => hasTournamentForInvite(inviteCode, loadedRemote),
+  joinRemoteTournament: (playerName, avatarId) => joinRemoteTournament(playerName, avatarId),
+  joinTournament: (playerName, avatarId) => joinTournament(playerName, avatarId),
+  linkProfileToPlayer: (player) => linkProfileToPlayer(player),
+  loadRemoteTournamentByInvite: (inviteCode) => loadRemoteTournamentByInvite(inviteCode),
+  parsePlayerNames: (value) => parsePlayerNames(value),
+  render: () => render(),
+  saveState: (options) => saveState(options),
+  setLocalRole: (role) => setLocalRole(role),
+  setState: (nextState) => { state = nextState; },
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  showWorkspace: (view) => showWorkspace(view),
+  syncJoinPreview: () => syncJoinPreview(),
+  t: (key, values) => t(key, values),
+});
+const adminFormEvents = window.PadelstarAdminFormEvents?.create({
+  addPlayers: (names, joinedFrom) => addPlayers(names, joinedFrom),
+  canCompleteRound: (round) => canCompleteRound(round),
+  endTournament: () => endTournament(),
+  exportBackup: () => exportBackup(),
+  generateFullTournamentSchedule: () => generateFullTournamentSchedule(),
+  generateRoundBlockReason: () => generateRoundBlockReason(),
+  getActiveRound: () => getActiveRound(),
+  getState: () => state,
+  importBackup: (event) => importBackup(event),
+  isSupabaseReady: () => isSupabaseReady(),
+  parsePlayerNames: (value) => parsePlayerNames(value),
+  queueRemoteCupAdvance: () => queueRemoteCupAdvance(),
+  queueRemoteRoundAdvance: () => queueRemoteRoundAdvance(),
+  render: () => render(),
+  requestConfirmation: (message) => requestConfirmation(message),
+  saveManualCupTeams: (value) => saveManualCupTeams(value),
+  saveState: (options) => saveState(options),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  startNextScheduledRound: () => startNextScheduledRound(),
+  t: (key, values) => t(key, values),
+  updateCourtsFromInput: (value) => updateCourtsFromInput(value),
+  updateTournamentRules: (options) => updateTournamentRules(options),
+});
 
 function initializeApp() {
 observability?.installGlobalHandlers();
@@ -301,15 +806,6 @@ registerServiceWorker();
 syncConnectionStatus();
   showRecoveryNotice();
 
-  elements.confirmDialog?.addEventListener("click", (event) => {
-    if (event.target === elements.confirmDialog) elements.confirmDialog.close("cancel");
-  });
-
-  window.addEventListener("online", handleOnline);
-window.addEventListener("offline", handleOffline);
-
-elements.joinTournamentForm.elements.playerName.addEventListener("input", syncJoinPreview);
-elements.avatarPicker.addEventListener("change", syncJoinPreview);
 elements.profileForm?.addEventListener("submit", (event) => {
   event.preventDefault();
   saveLocalProfileFromForm();
@@ -334,178 +830,9 @@ elements.languageSelect.addEventListener("change", () => {
   render();
 });
 
-elements.createTournamentForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  const formData = new FormData(form);
-  const adminParticipates = formData.get("adminParticipates") === "on";
-  const adminPlayerName = formData.get("adminPlayerName").trim();
-  const playerNames = parsePlayerNames(formData.get("players"));
+tournamentEntry?.bind(elements);
 
-  if (adminParticipates && !adminPlayerName) {
-    showToast(t("messages.adminNameRequired"), "status-message-error");
-    form.elements.adminPlayerName.focus();
-    return;
-  }
-
-  const tournamentPlayers = adminParticipates
-    ? [adminPlayerName, ...playerNames.filter((name) => name.toLowerCase() !== adminPlayerName.toLowerCase())]
-    : playerNames;
-
-  state = createTournament({
-    name: formData.get("tournamentName").trim(),
-    inviteCode: createInviteCode(),
-    players: tournamentPlayers,
-    courtCount: Number(formData.get("courts")),
-  });
-
-  if (adminParticipates) {
-    state.players[0].joinedFrom = "admin-self";
-    state.players[0].participantType = "admin-player";
-    linkProfileToPlayer(state.players[0]);
-    state.selectedPlayerId = state.players[0].id;
-  }
-
-  setLocalRole("admin");
-  saveState({ remote: false });
-  await createRemoteTournament();
-  showWorkspace();
-  render();
-});
-
-elements.joinTournamentForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  const formData = new FormData(form);
-  const inviteCode = formData.get("inviteCode").trim().toUpperCase();
-  const playerName = formData.get("playerName").trim();
-  const avatarId = formData.get("avatarId") || defaultAvatarId;
-
-  const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
-
-  if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
-    showToast(t("messages.tournamentNotFound", { code: inviteCode }), "status-message-error");
-    return;
-  }
-
-  if (!playerName) return;
-  ensureProfileForJoin(playerName, avatarId);
-
-  let player;
-  if (supabaseClient) {
-    const joined = await joinRemoteTournament(playerName, avatarId);
-    if (!joined) return;
-    player = findPlayerByName(playerName);
-  } else {
-    const existingPlayer = findPlayerByName(playerName);
-    if (!existingPlayer && state.rounds.length > 0) {
-      showToast(t("messages.tournamentStartedAskAdmin"), "status-message-error");
-      return;
-    }
-    player = existingPlayer ?? joinTournament(playerName, avatarId);
-  }
-
-  if (!player) return;
-  state.selectedPlayerId = player.id;
-  setLocalRole("player");
-  saveState({ remote: false });
-
-  showWorkspace("player");
-  form.reset();
-  syncJoinPreview();
-  saveState({ remote: !supabaseClient });
-  render();
-});
-
-elements.addPlayerForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  if (state.rounds.length > 0) {
-    showToast(t("messages.playersLocked"), "status-message-error");
-    return;
-  }
-  const formData = new FormData(event.currentTarget);
-  const names = parsePlayerNames(formData.get("playerName"));
-  if (names.length === 0) return;
-
-  addPlayers(names, "admin");
-  event.currentTarget.reset();
-  saveState();
-  render();
-});
-
-elements.courtSettingsForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  if (getActiveRound()?.status === "active" || state.status === "Avsluttet") {
-    showToast(t("messages.courtsLocked"), "status-message-error");
-    return;
-  }
-  const courtList = new FormData(event.currentTarget).get("courtList");
-  updateCourtsFromInput(courtList);
-  saveState();
-  render();
-});
-
-elements.tournamentSettingsForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const formData = new FormData(event.currentTarget);
-  updateTournamentRules({
-    format: formData.get("format"),
-    cupTeamSetupMode: formData.get("cupTeamSetupMode"),
-    includesThirdPlaceMatch: formData.get("includesThirdPlaceMatch") === "on",
-    pointMode: formData.get("pointMode"),
-    gamesToWinSet: Number(formData.get("gamesToWinSet")),
-    setsToWinMatch: Number(formData.get("setsToWinMatch")),
-  });
-  saveState();
-  render();
-});
-
-elements.cupTeamForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  saveManualCupTeams(new FormData(event.currentTarget).get("teamLines"));
-});
-
-elements.generateRoundButton.addEventListener("click", () => {
-  const activeRound = getActiveRound();
-  const completingActiveRound = activeRound?.status === "active" && canCompleteRound(activeRound);
-  if (!completingActiveRound) {
-    const blockReason = generateRoundBlockReason();
-    if (blockReason) {
-      showToast(blockReason, "status-message-error");
-      return;
-    }
-  }
-  if (state.rounds.length === 0) {
-    generateFullTournamentSchedule();
-  } else if (isSupabaseReady() && completingActiveRound) {
-    if (state.settings.format === "roundRobin") queueRemoteRoundAdvance();
-    if (state.settings.format === "cup") queueRemoteCupAdvance();
-    return;
-  } else {
-    if (completingActiveRound) {
-      activeRound.status = "finished";
-      state.status = "Runde fullført";
-    }
-    startNextScheduledRound();
-  }
-  saveState();
-  render();
-});
-
-elements.completeRoundButton.addEventListener("click", async () => {
-  if (!await requestConfirmation(t("messages.finishTournamentConfirm"))) return;
-  endTournament();
-  saveState();
-  render();
-});
-
-elements.exportBackupButton.addEventListener("click", exportBackup);
-
-elements.importBackupButton.addEventListener("click", () => {
-  elements.backupFileInput.click();
-});
-
-elements.backupFileInput.addEventListener("change", importBackup);
+adminFormEvents?.bind(elements);
 
 elements.refreshRemoteButton?.addEventListener("click", async () => {
   elements.refreshRemoteButton.disabled = true;
@@ -534,7 +861,7 @@ elements.resetTournamentButton.addEventListener("click", async () => {
   localStorage.removeItem(recoveryStorageKey);
   localStorage.removeItem(roleStorageKey);
   localStorage.removeItem(syncStorageKey);
-  removeOfflineStorageKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
+  persistence.removeKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
   syncCreateFormDefaults();
   elements.joinTournamentForm.reset();
   syncJoinPreview();
@@ -542,36 +869,57 @@ elements.resetTournamentButton.addEventListener("click", async () => {
   render();
 });
 
-elements.adminIdentityForm?.addEventListener("submit", sendAdminSignInLink);
-elements.claimTournamentButton?.addEventListener("click", claimCurrentTournament);
-
-elements.leaveSessionButton?.addEventListener("click", async () => {
-  if (spectatorMode) leaveSpectatorView();
-  else await leaveCurrentTournamentWithDialog();
-});
-elements.toggleAvailabilityButton?.addEventListener("click", () => toggleSelectedPlayerAvailability());
-
-elements.resumeTournamentButton.addEventListener("click", () => {
-  showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
-  render();
-});
-
-elements.copyInviteCodeButton.addEventListener("click", () => {
-  copyText(state.inviteCode, t("messages.inviteCopied"));
-});
-
-elements.copyJoinLinkButton.addEventListener("click", () => {
-  copyText(createJoinLink(), t("messages.joinLinkCopied"));
-});
-
-elements.copySpectatorLinkButton?.addEventListener("click", () => {
-  copyText(createSpectatorLink(), t("messages.spectatorLinkCopied"));
+window.PadelstarWorkspaceEvents?.bind({
+  elements,
+  callbacks: {
+    sendAdminSignInLink,
+    claimTournament: claimCurrentTournament,
+    leaveSession: async () => {
+      if (spectatorMode) leaveSpectatorView();
+      else await leaveCurrentTournamentWithDialog();
+    },
+    toggleAvailability: () => toggleSelectedPlayerAvailability(),
+    resumeTournament: () => {
+      showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
+      render();
+    },
+    copyInviteCode: () => copyText(state.inviteCode, t("messages.inviteCopied")),
+    copyJoinLink: () => copyText(createJoinLink(), t("messages.joinLinkCopied")),
+    copySpectatorLink: () => copyText(createSpectatorLink(), t("messages.spectatorLinkCopied")),
+    shareTournament: shareCurrentTournament,
+    toggleNotifications,
+    showExistingPlayers: showExistingPlayers,
+  },
 });
 
-elements.shareTournamentButton?.addEventListener("click", shareCurrentTournament);
-elements.toggleNotificationsButton?.addEventListener("click", toggleNotifications);
+  window.PadelstarAppEvents?.bind({
+    elements,
+    documentRef: document,
+    windowRef: window,
+    callbacks: {
+      activateAdminPanel,
+      activatePlayerAction: (playerAction) => {
+        if (playerAction === "spectate") showWorkspace("tournament");
+        if (playerAction === "choose") showModule("setup-player");
+        if (playerAction === "rejoin") {
+          prefillJoinForm(state.inviteCode);
+          showModule("setup-player");
+        }
+      },
+      closeLargeScore,
+      closeSetScoreDialog,
+      handleOnline,
+      handleOffline,
+      render,
+      setPendingSetScoreMatchId: (matchId) => { pendingSetScoreMatchId = matchId; },
+      setLargeScoreMatchId: (matchId) => { largeScoreMatchId = matchId; },
+      syncJoinPreview,
+    },
+  });
 
-elements.showExistingPlayersButton.addEventListener("click", async () => {
+}
+
+async function showExistingPlayers() {
   const inviteCode = elements.joinTournamentForm.elements.inviteCode.value.trim().toUpperCase();
   if (!inviteCode) {
     showToast(t("messages.inviteCodeRequired"), "status-message-error");
@@ -580,7 +928,6 @@ elements.showExistingPlayersButton.addEventListener("click", async () => {
   }
 
   const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
-
   if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
     showToast(t("messages.tournamentNotFound", { code: inviteCode }), "status-message-error");
     return;
@@ -588,45 +935,6 @@ elements.showExistingPlayersButton.addEventListener("click", async () => {
 
   elements.existingPlayerList.classList.toggle("hidden");
   renderExistingPlayerList();
-});
-
-elements.closeLargeScoreButton.addEventListener("click", closeLargeScore);
-elements.largeScoreDialog.addEventListener("click", (event) => {
-  if (event.target === elements.largeScoreDialog) closeLargeScore();
-});
-elements.largeScoreDialog.addEventListener("close", () => {
-  largeScoreMatchId = null;
-});
-elements.closeSetScoreButton.addEventListener("click", closeSetScoreDialog);
-elements.setScoreDialog.addEventListener("click", (event) => {
-  if (event.target === elements.setScoreDialog) closeSetScoreDialog();
-});
-elements.setScoreDialog.addEventListener("close", () => {
-  pendingSetScoreMatchId = null;
-});
-
-document.querySelectorAll(".subtab").forEach((tab) => {
-  tab.addEventListener("click", () => activateAdminPanel(tab.dataset.adminPanel));
-});
-
-document.addEventListener("click", (event) => {
-  const clickTarget = event.target instanceof Element ? event.target : null;
-  if (!clickTarget) return;
-
-  const playerAction = clickTarget.closest("[data-player-action]")?.dataset.playerAction;
-  if (playerAction) {
-    if (playerAction === "spectate") showWorkspace("tournament");
-    if (playerAction === "choose") showModule("setup-player");
-    if (playerAction === "rejoin") {
-      prefillJoinForm(state.inviteCode);
-      showModule("setup-player");
-    }
-    render();
-    return;
-  }
-
-});
-
 }
 
 function activateSupabaseClient() {
@@ -647,198 +955,25 @@ function activateSupabaseClient() {
 }
 
 function createTournament({ name, inviteCode, players, courtCount }) {
-  const tournamentPlayers = players.map((playerName, index) => createPlayer(playerName, index, defaultAvatarId));
-  return {
-    id: crypto.randomUUID(),
-    adminToken: crypto.randomUUID(),
-    name,
-    inviteCode,
-    status: "Klar",
-    currentRound: 0,
-    settings: {
-      gamesToWinSet: 6,
-      setsToWinMatch: 1,
-      pointMode: "matches",
-      format: "roundRobin",
-      cupTeamSetupMode: "auto",
-      includesThirdPlaceMatch: false,
-      language: "nb",
-    },
-    courts: Array.from({ length: courtCount }, (_, index) => ({
-      id: crypto.randomUUID(),
-      name: `Bane ${index + 1}`,
-      courtNumber: index + 1,
-      active: true,
-    })),
-    players: tournamentPlayers,
-    schedule: buildSchedule(tournamentPlayers, "roundRobin"),
-    rounds: [],
-    cup: null,
-    cupTeams: [],
-    revision: 0,
-    selectedPlayerId: null,
-    playerToken: null,
-  };
+  return tournamentState.createTournament({ name, inviteCode, players, courtCount });
 }
 
 function createPlayer(name, index, avatarId = defaultAvatarId) {
-  return {
-    id: crypto.randomUUID(),
-    name,
-    avatarId,
-    accent: accents[index % accents.length],
-    active: true,
-    availability: "active",
-    participantType: "player",
-    joinStatus: "joined",
-    joinedFrom: "manual",
-    createdAt: new Date().toISOString(),
-  };
+  return tournamentState.createPlayer(name, index, avatarId);
 }
 
-function loadLocalProfile() {
-  const saved = profileManager?.loadProfile(localStorage, profileStorageKey);
-  if (saved && profileManager?.shouldDelete(saved)) {
-    purgeLocalProfile();
-    return null;
-  }
-  return saved;
-}
-
-function persistLocalProfile() {
-  if (!profile) {
-    localStorage.removeItem(profileStorageKey);
-    removeOfflineStorageKeys([profileStorageKey, profileHistoryStorageKey]);
-    return;
-  }
-  localStorage.setItem(profileStorageKey, JSON.stringify(profile));
-  mirrorStorageKeys([profileStorageKey, profileHistoryStorageKey]);
-}
-
-async function syncProfileRemote() {
-  if (!supabaseClient || !profile?.accessToken) return false;
-  const { data, error } = await remoteRpc(supabaseClient, "upsert_player_profile", {
-    p_profile_id: profile.id,
-    p_profile_token: profile.accessToken,
-    p_display_name: profile.displayName,
-    p_avatar_id: profile.avatarId,
-  });
-  if (error) {
-    console.warn("Profile sync failed", error);
-    return false;
-  }
-  if (data?.profile) {
-    profile = profileManager.normalizeProfile({ ...profile, ...data.profile });
-    persistLocalProfile();
-  }
-  return true;
-}
-
-async function syncProfileHistoryRemote(entry) {
-  if (!supabaseClient || !profile?.accessToken) return false;
-  if (!entry) return syncProfileHistoryRemoteRead();
-  const { error } = await remoteRpc(supabaseClient, "save_player_profile_history", {
-    p_profile_id: profile.id,
-    p_profile_token: profile.accessToken,
-    p_history: entry,
-  });
-  if (error) {
-    console.warn("Profile history sync failed", error);
-    return false;
-  }
-  return true;
-}
-
-async function syncProfileHistoryRemoteRead() {
-  const { data, error } = await remoteRpc(supabaseClient, "get_player_profile_history", {
-    p_profile_id: profile.id,
-    p_profile_token: profile.accessToken,
-  });
-  if (error) {
-    observability?.error("profile_history_read_failed", error);
-    return false;
-  }
-  let entries = Array.isArray(data) ? data : [];
-  if (typeof data === "string") {
-    try {
-      entries = JSON.parse(data);
-    } catch {
-      entries = [];
-    }
-  }
-  if (!Array.isArray(entries)) entries = [];
-  entries.forEach((entry) => profileManager.recordHistory(localStorage, profileHistoryStorageKey, entry));
-  mirrorStorageKeys([profileHistoryStorageKey]);
-  renderProfile();
-  return true;
-}
-
-function purgeLocalProfile() {
-  profile = null;
-  localStorage.removeItem(profileStorageKey);
-  localStorage.removeItem(profileHistoryStorageKey);
-  removeOfflineStorageKeys([profileStorageKey, profileHistoryStorageKey]);
-}
-
-function profileAvatarIdFromForm() {
-  return new FormData(elements.profileForm).get("profileAvatarId") || defaultAvatarId;
-}
-
-function saveLocalProfileFromForm() {
-  const displayName = elements.profileNameInput.value.trim();
-  if (!displayName) {
-    elements.profileNameInput.focus();
-    return;
-  }
-  profile = profile
-    ? profileManager.normalizeProfile({ ...profile, displayName, avatarId: profileAvatarIdFromForm(), deletionRequestedAt: null, deletionScheduledFor: null })
-    : profileManager.createProfile(displayName, profileAvatarIdFromForm());
-  persistLocalProfile();
-  void syncProfileRemote();
-  const selectedPlayer = getPlayerById(state.selectedPlayerId);
-  if (selectedPlayer) {
-    selectedPlayer.profileId = profile.id;
-    if (state.rounds.length === 0) {
-      selectedPlayer.name = profile.displayName;
-      selectedPlayer.avatarId = profile.avatarId;
-    }
-    saveState({ remote: isCurrentUserAdmin() });
-  }
-  saveProfileHistory();
-  renderProfile();
-  syncJoinPreview();
-  render();
-}
-
-function ensureProfileForJoin(displayName, avatarId) {
-  if (!profile) profile = profileManager.createProfile(displayName, avatarId);
-  else if (!profile.displayName || profile.displayName === displayName) {
-    profile = profileManager.normalizeProfile({ ...profile, displayName, avatarId, deletionRequestedAt: null, deletionScheduledFor: null });
-  }
-  persistLocalProfile();
-  void syncProfileRemote();
-}
-
-async function requestProfileDeletion() {
-  if (!profile || !await requestConfirmation(t("profile.deleteConfirm"))) return;
-  profile = profileManager.requestDeletion(profile);
-  persistLocalProfile();
-  void requestRemoteProfileDeletion();
-  renderProfile();
-}
-
-function cancelProfileDeletion() {
-  if (!profile) return;
-  profile = profileManager.cancelDeletion(profile);
-  persistLocalProfile();
-  void cancelRemoteProfileDeletion();
-  renderProfile();
-}
-
-function linkProfileToPlayer(player) {
-  if (player && profile) player.profileId = profile.id;
-  return player;
-}
+function loadLocalProfile() { return profileSession.loadLocalProfile(); }
+function persistLocalProfile() { return profileSession.persistLocalProfile(); }
+function syncProfileRemote() { return profileSession.syncProfileRemote(); }
+function syncProfileHistoryRemote(entry) { return profileSession.syncProfileHistoryRemote(entry); }
+function syncProfileHistoryRemoteRead() { return profileSession.syncProfileHistoryRemoteRead(); }
+function purgeLocalProfile() { return profileSession.purgeLocalProfile(); }
+function profileAvatarIdFromForm() { return profileSession.profileAvatarIdFromForm(); }
+function saveLocalProfileFromForm() { return profileSession.saveLocalProfileFromForm(); }
+function ensureProfileForJoin(displayName, avatarId) { return profileSession.ensureProfileForJoin(displayName, avatarId); }
+function requestProfileDeletion() { return profileSession.requestProfileDeletion(); }
+function cancelProfileDeletion() { return profileSession.cancelProfileDeletion(); }
+function linkProfileToPlayer(player) { return profileSession.linkProfileToPlayer(player); }
 
 function profileHistoryEntry() {
   if (!profile || state.status !== "Avsluttet") return null;
@@ -877,76 +1012,23 @@ function saveProfileHistory() {
   const entry = profileHistoryEntry();
   if (!entry) return;
   profileManager.recordHistory(localStorage, profileHistoryStorageKey, entry);
-  mirrorStorageKeys([profileHistoryStorageKey]);
+  persistence.mirrorKeys([profileHistoryStorageKey]);
   void syncProfileHistoryRemote(entry);
 }
 
-async function requestRemoteProfileDeletion() {
-  if (!supabaseClient || !profile?.accessToken) return;
-  await remoteRpc(supabaseClient, "request_player_profile_deletion", {
-    p_profile_id: profile.id,
-    p_profile_token: profile.accessToken,
-  });
-}
-
-async function cancelRemoteProfileDeletion() {
-  if (!supabaseClient || !profile?.accessToken) return;
-  await remoteRpc(supabaseClient, "cancel_player_profile_deletion", {
-    p_profile_id: profile.id,
-    p_profile_token: profile.accessToken,
-  });
-}
+function requestRemoteProfileDeletion() { return profileSession.requestRemoteProfileDeletion(); }
+function cancelRemoteProfileDeletion() { return profileSession.cancelRemoteProfileDeletion(); }
 
 function renderProfile() {
-  if (!elements.profileForm || !profileManager) return;
-  elements.profileNameInput.value = profile?.displayName ?? "";
-  elements.profileAvatarPicker.querySelectorAll("input[name=profileAvatarId]").forEach((input) => {
-    input.checked = input.value === (profile?.avatarId ?? defaultAvatarId);
-  });
-  const pendingDeletion = Boolean(profile?.deletionScheduledFor);
-  elements.profileDeletionStatus.textContent = pendingDeletion
-    ? t("profile.deletePending", { date: new Date(profile.deletionScheduledFor).toLocaleDateString(document.documentElement.lang || "nb-NO") })
-    : "";
-  elements.profileDeletionStatus.classList.toggle("hidden", !pendingDeletion);
-  elements.deleteProfileButton.classList.toggle("hidden", !profile || pendingDeletion);
-  elements.cancelProfileDeletionButton.classList.toggle("hidden", !pendingDeletion);
-  const history = profileManager.historyForProfile(profileManager.loadHistory(localStorage, profileHistoryStorageKey), profile?.id);
-  const summary = profileManager.summarizeHistory(history);
-  elements.profileStats.innerHTML = profile ? [
-    [t("profile.tournaments"), summary.tournaments],
-    [t("profile.matches"), summary.matches],
-    [t("profile.wins"), summary.wins],
-    [t("profile.points"), summary.points],
-  ].map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("") : `<p class="hint">${t("profile.empty")}</p>`;
-  const filter = elements.profileHistoryFilter?.value ?? "all";
-  const cutoff = filter === "month" ? Date.now() - 30 * 86400000 : filter === "year" ? Date.now() - 365 * 86400000 : 0;
-  const filteredHistory = history.filter((entry) => !cutoff || new Date(entry.endedAt ?? entry.recordedAt).getTime() >= cutoff);
-  elements.profileHistoryList.innerHTML = filteredHistory.length === 0
-    ? `<p class="hint">${t("profile.noHistory")}</p>`
-    : `<h4>${t("profile.historyTitle")}</h4><ul class="profile-history-list">${filteredHistory.map((entry) => `<li><div><strong>${escapeHtml(entry.tournamentName)}</strong><small>${entry.endedAt ? new Date(entry.endedAt).toLocaleDateString(document.documentElement.lang || "nb-NO") : ""}</small></div><span>${t("profile.historyDetail", { placement: entry.placement ?? "-", points: entry.points, wins: entry.wins, matches: entry.matches })}</span></li>`).join("")}</ul>`;
-}
-
-function loadState() {
-  const stored = localStorage.getItem(storageKey);
-  const recovered = loadSavedState(stored);
-  if (recovered) return recovered;
-  const recoveryState = loadSavedState(localStorage.getItem(recoveryStorageKey));
-  if (recoveryState) {
-    recoveredFromLastGood = true;
-    return recoveryState;
-  }
-  return structuredClone(defaultTournament);
+  profileUi.renderProfile();
 }
 
 function loadUserLanguage(fallbackLanguage = "nb") {
   return i18nUi.loadUserLanguage({ storage: localStorage, storageKey: languageStorageKey, fallbackLanguage, i18n });
 }
 
-function loadSavedState(serializedState) {
-  if (!serializedState) return null;
-  const parsed = storage.parseJson(serializedState);
-  return parsed ? migrateState(parsed) : null;
-}
+function loadState() { return stateBootstrap.loadState(); }
+function loadSavedState(serializedState) { return stateBootstrap.loadSavedState(serializedState); }
 
 function migrateState(nextState) {
   return stateManager.migrateState(nextState, defaultTournament, stateManagerDependencies());
@@ -984,7 +1066,7 @@ function persistSyncMetadata() {
     lastAttemptAt: syncLastAttemptAt,
     lastError: syncLastError,
   });
-  mirrorStorageKeys([syncStorageKey]);
+  persistence.mirrorKeys([syncStorageKey]);
 }
 
 function hasPendingRemoteWrites() {
@@ -1014,103 +1096,48 @@ function saveState(options = {}) {
 }
 
 function persistLocalState() {
-  const serializedState = JSON.stringify(state);
-  storage.writeJson(localStorage, storageKey, state);
-  if (isValidTournamentState(state)) storage.writeJson(localStorage, recoveryStorageKey, state);
-  mirrorStorageKeys([storageKey, recoveryStorageKey]);
+  persistence.writeTournamentState({
+    state,
+    stateKey: storageKey,
+    recoveryKey: recoveryStorageKey,
+    isValidState: isValidTournamentState,
+  });
 }
 
 function mirrorOfflineStorage() {
-  mirrorStorageKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
-}
-
-function mirrorStorageKeys(keys) {
-  if (!offlineStorage?.isSupported()) return;
-  offlineStorage.mirrorFromLocalStorage(keys, localStorage).catch((error) => {
-    console.warn("IndexedDB mirror failed", error);
-  });
-}
-
-function removeOfflineStorageKeys(keys) {
-  if (!offlineStorage?.isSupported()) return;
-  Promise.all(keys.map((key) => offlineStorage.removeRecord(key))).catch((error) => {
-    console.warn("IndexedDB cleanup failed", error);
-  });
+  persistence.mirrorKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
 }
 
 function isSupabaseReady() {
-  return Boolean(supabaseClient);
+  return remoteFeedback.isSupabaseReady();
 }
 
 function remoteErrorMessage(error, fallback) {
-  return stateManager.remoteErrorMessage(error, fallback);
+  return remoteFeedback.remoteErrorMessage(error, fallback);
 }
 
 function sanitizeSharedState(nextState) {
-  return stateManager.sanitizeSharedState(nextState);
+  return remoteFeedback.sanitizeSharedState(nextState);
 }
 
 function getTournamentByInviteRpc(inviteCode) {
-  const rpcName = spectatorMode ? "get_spectator_tournament_by_code" : "get_tournament_by_code";
-  return remoteRpc(supabaseClient, rpcName, { p_invite_code: inviteCode });
+  return remoteFeedback.getTournamentByInviteRpc(inviteCode);
 }
 
 function isConflictError(error) {
-  return stateManager.isConflictError(error);
+  return remoteFeedback.conflictError(error);
 }
 
 function isTransientRemoteError(error) {
-  return stateManager.isTransientRemoteError(error, navigator.onLine);
+  return remoteFeedback.transientRemoteError(error);
 }
 
 function setRemoteNotice(message) {
-  if (elements.copyStatus) {
-    elements.copyStatus.textContent = message;
-    elements.copyStatus.classList.remove("status-message-success", "status-message-warning", "status-message-error");
-    const messageText = String(message ?? "").toLowerCase();
-    const statusClass = /feil|error|konflikt|failed|ikke/.test(messageText)
-      ? "status-message-error"
-      : /venter|sender|pending|reconnecting|kobler/.test(messageText)
-        ? "status-message-warning"
-        : "status-message-success";
-    elements.copyStatus.classList.add(statusClass);
-    showToast(message, statusClass);
-  }
-  renderSyncControls();
+  remoteFeedback.setRemoteNotice(message);
 }
 
-function requestConfirmation(message) {
-  const dialog = elements.confirmDialog;
-  if (!dialog || typeof dialog.showModal !== "function") {
-    return Promise.resolve(typeof window.confirm === "function" ? window.confirm(message) : true);
-  }
-
-  const previouslyFocused = document.activeElement;
-  elements.confirmMessage.textContent = message;
-  elements.confirmCancel.textContent = t("actions.close");
-  elements.confirmAccept.textContent = t("common.confirm");
-  dialog.returnValue = "cancel";
-  dialog.showModal();
-  elements.confirmAccept.focus();
-
-  return new Promise((resolve) => {
-    const finish = () => {
-      if (previouslyFocused && typeof previouslyFocused.focus === "function") previouslyFocused.focus();
-      resolve(dialog.returnValue === "accept");
-    };
-    dialog.addEventListener("close", finish, { once: true });
-  });
-}
-
-function showToast(message, statusClass = "status-message-success") {
-  if (!elements.appToast || !message) return;
-  window.clearTimeout(toastTimer);
-  elements.appToast.textContent = message;
-  elements.appToast.className = `app-toast is-visible ${statusClass}`;
-  toastTimer = window.setTimeout(() => {
-    elements.appToast.classList.remove("is-visible");
-  }, 4200);
-}
+function requestConfirmation(message) { return uiFeedback.requestConfirmation(message); }
+function showToast(message, statusClass = "status-message-success") { return uiFeedback.showToast(message, statusClass); }
 
 function showRecoveryNotice() {
   if (!recoveredFromLastGood) return;
@@ -1191,7 +1218,7 @@ function applyRemoteState(remoteState, options = {}) {
     remoteConflict = false;
     setRemoteNotice(t("messages.remoteStateUpdated"));
   }
-  if (previousTournamentId !== state.id || !realtimeChannel) connectRealtimeForCurrentState();
+  if (previousTournamentId !== state.id || !realtimeConnection.hasChannel()) connectRealtimeForCurrentState();
   render();
   isApplyingRemoteState = false;
   return true;
@@ -1219,280 +1246,31 @@ function queueRemoteSave() {
 }
 
 async function saveRemoteState() {
-  if (!isSupabaseReady() || !state.adminToken || !state.id) return false;
-  if (!navigator.onLine) {
-    syncConnectionStatus();
-    return false;
-  }
-  const requestSequence = remoteMutationSequence;
-  const expectedRevision = state.revision;
-  const { data, error } = await remoteRpc(supabaseClient, "save_tournament_state", {
-    p_tournament_id: state.id,
-    p_admin_token: state.adminToken,
-    p_state: sanitizeSharedState(state),
-    p_expected_revision: expectedRevision,
-  });
-  if (error) {
-    console.warn("Supabase sync failed", error);
-    if (isConflictError(error) && requestSequence === remoteMutationSequence) markRemoteConflict();
-    else handleRemoteError(error, t("messages.syncFailed"));
-    return false;
-  }
-
-  if (!data) return false;
-  lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
-  if (requestSequence === remoteMutationSequence) {
-    remoteRetryAttempt = 0;
-    window.clearTimeout(remoteRetryTimer);
-    remoteRetryTimer = null;
-    pendingAdminSync = false;
-    persistSyncMetadata();
-    applyRemoteState(data, { source: "rpc", clearConflict: true });
-  } else if (state.id === data.id && Number.isInteger(data.revision)) {
-    state.revision = data.revision;
-    saveState({ remote: false });
-  }
-  return true;
+  return remoteStateWrite.saveRemoteState();
 }
 
 function queueRemoteMatchAction(match, action, teamIndex = null) {
-  if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
-  if (!navigator.onLine) {
-    setRemoteNotice(t("messages.offlineAdminChange"));
-    syncConnectionStatus();
-    return;
-  }
-
-  window.clearTimeout(remoteSaveTimer);
-  remoteSaveTimer = null;
-  remoteWriteChain = remoteWriteChain
-    .catch(() => {})
-    .then(async () => {
-      if (remoteMutationSequence > lastRemotePersistedSequence) {
-        const saved = await saveRemoteState();
-        if (!saved) return;
-      }
-
-      const requestSequence = remoteMutationSequence;
-      const expectedRevision = state.revision;
-      const rpcName = action === "undo" ? "admin_undo_match" : "admin_match_action";
-      const rpcPayload = action === "undo"
-        ? {
-          p_tournament_id: state.id,
-          p_admin_token: state.adminToken,
-          p_match_id: match.id,
-          p_expected_revision: expectedRevision,
-        }
-        : {
-          p_tournament_id: state.id,
-          p_admin_token: state.adminToken,
-          p_match_id: match.id,
-          p_action: action,
-          p_team_index: teamIndex,
-          p_expected_revision: expectedRevision,
-        };
-      const { data, error } = await remoteRpc(supabaseClient, rpcName, rpcPayload);
-
-      if (error) {
-        console.warn("Supabase admin match action failed", error);
-        handleRemoteError(error, t("messages.matchUpdateFailed"));
-        return;
-      }
-
-      if (!data) return;
-      lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
-      if (requestSequence === remoteMutationSequence) {
-        pendingAdminSync = false;
-        persistSyncMetadata();
-        applyRemoteState(data, { source: "rpc", clearConflict: true });
-        if (action === "start") void sendPushNotification("match_started", match.id);
-      } else if (state.id === data.id && Number.isInteger(data.revision)) {
-        state.revision = data.revision;
-        saveState({ remote: false });
-      }
-    });
+  return remoteAdminActions.queueRemoteMatchAction(match, action, teamIndex);
 }
 
 function queueRemoteSetResult(match, teamOne, teamTwo) {
-  if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
-  if (!navigator.onLine) {
-    setRemoteNotice(t("messages.offlineSetResult"));
-    syncConnectionStatus();
-    return;
-  }
-
-  window.clearTimeout(remoteSaveTimer);
-  remoteSaveTimer = null;
-  remoteWriteChain = remoteWriteChain
-    .catch(() => {})
-    .then(async () => {
-      if (remoteMutationSequence > lastRemotePersistedSequence) {
-        const saved = await saveRemoteState();
-        if (!saved) return;
-      }
-
-      const requestSequence = remoteMutationSequence;
-      const expectedRevision = state.revision;
-      const { data, error } = await remoteRpc(supabaseClient, "admin_set_result", {
-        p_tournament_id: state.id,
-        p_admin_token: state.adminToken,
-        p_match_id: match.id,
-        p_team_one_score: teamOne,
-        p_team_two_score: teamTwo,
-        p_expected_revision: expectedRevision,
-      });
-
-      if (error) {
-        console.warn("Supabase set result failed", error);
-        handleRemoteError(error, t("messages.setResultFailed"));
-        return;
-      }
-
-      if (!data) return;
-      lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
-      if (requestSequence === remoteMutationSequence) {
-        pendingAdminSync = false;
-        persistSyncMetadata();
-        applyRemoteState(data, { source: "rpc", clearConflict: true });
-      } else if (state.id === data.id && Number.isInteger(data.revision)) {
-        state.revision = data.revision;
-        saveState({ remote: false });
-      }
-    });
+  return remoteAdminActions.queueRemoteSetResult(match, teamOne, teamTwo);
 }
 
 function queueRemoteRoundAdvance() {
-  if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
-  if (!navigator.onLine) {
-    setRemoteNotice(t("messages.offlineNextRound"));
-    syncConnectionStatus();
-    return;
-  }
-
-  window.clearTimeout(remoteSaveTimer);
-  remoteSaveTimer = null;
-  remoteWriteChain = remoteWriteChain
-    .catch(() => {})
-    .then(async () => {
-      if (remoteMutationSequence > lastRemotePersistedSequence) {
-        const saved = await saveRemoteState();
-        if (!saved) return;
-      }
-
-      const requestSequence = remoteMutationSequence;
-      const { data, error } = await remoteRpc(supabaseClient, "admin_advance_round", {
-        p_tournament_id: state.id,
-        p_admin_token: state.adminToken,
-        p_expected_revision: state.revision,
-      });
-
-      if (error) {
-        console.warn("Supabase round advance failed", error);
-        handleRemoteError(error, t("messages.nextRoundFailed"));
-        return;
-      }
-
-      if (!data) return;
-      lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
-      if (requestSequence === remoteMutationSequence) {
-        pendingAdminSync = false;
-        persistSyncMetadata();
-        applyRemoteState(data, { source: "rpc", clearConflict: true });
-        void sendPushNotification("round_ready");
-      } else if (state.id === data.id && Number.isInteger(data.revision)) {
-        state.revision = data.revision;
-        saveState({ remote: false });
-      }
-    });
+  return remoteAdminActions.queueRemoteRoundAdvance();
 }
 
 function queueRemoteCupAdvance() {
-  if (!isSupabaseReady() || !isCurrentUserAdmin() || !state.adminToken || !state.id) return;
-  if (!navigator.onLine) {
-    setRemoteNotice(t("messages.offlineNextCupRound"));
-    syncConnectionStatus();
-    return;
-  }
-
-  window.clearTimeout(remoteSaveTimer);
-  remoteSaveTimer = null;
-  remoteWriteChain = remoteWriteChain
-    .catch(() => {})
-    .then(async () => {
-      if (remoteMutationSequence > lastRemotePersistedSequence) {
-        const saved = await saveRemoteState();
-        if (!saved) return;
-      }
-
-      const requestSequence = remoteMutationSequence;
-      const { data, error } = await remoteRpc(supabaseClient, "admin_advance_cup", {
-        p_tournament_id: state.id,
-        p_admin_token: state.adminToken,
-        p_expected_revision: state.revision,
-      });
-
-      if (error) {
-        console.warn("Supabase cup advance failed", error);
-        handleRemoteError(error, t("messages.nextCupRoundFailed"));
-        return;
-      }
-
-      if (!data) return;
-      lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, requestSequence);
-      if (requestSequence === remoteMutationSequence) {
-        pendingAdminSync = false;
-        persistSyncMetadata();
-        applyRemoteState(data, { source: "rpc", clearConflict: true });
-        void sendPushNotification("round_ready");
-      } else if (state.id === data.id && Number.isInteger(data.revision)) {
-        state.revision = data.revision;
-        saveState({ remote: false });
-      }
-    });
+  return remoteAdminActions.queueRemoteCupAdvance();
 }
 
 function queuePlayerScore(matchId, teamIndex) {
-  if (!isSupabaseReady() || !state.id || !state.inviteCode || !state.selectedPlayerId || !state.playerToken) return;
-  pendingPlayerScores.push({ matchId, teamIndex });
-  persistSyncMetadata();
-  syncConnectionStatus();
-  processPlayerScoreQueue();
+  return remotePlayerScore.queuePlayerScore(matchId, teamIndex);
 }
 
 async function processPlayerScoreQueue() {
-  if (playerScoreQueueRunning || !navigator.onLine || !isSupabaseReady()) return;
-  if (!state.id || !state.inviteCode || !state.selectedPlayerId || !state.playerToken) return;
-
-  playerScoreQueueRunning = true;
-  try {
-    while (pendingPlayerScores.length > 0 && navigator.onLine) {
-      const pendingScore = pendingPlayerScores[0];
-      const { data, error } = await remoteRpc(supabaseClient, "save_player_point", {
-        p_tournament_id: state.id,
-        p_invite_code: state.inviteCode,
-        p_player_id: state.selectedPlayerId,
-        p_match_id: pendingScore.matchId,
-        p_team_index: pendingScore.teamIndex,
-        p_player_token: state.playerToken,
-      });
-
-      if (error) {
-        console.warn("Supabase player score sync failed", error);
-        handleRemoteError(error, t("messages.pointSyncFailed"));
-        break;
-      }
-
-      pendingPlayerScores.shift();
-      persistSyncMetadata();
-      if (data && pendingPlayerScores.length === 0) {
-        applyRemoteState(data, { source: "rpc", clearConflict: true });
-      }
-    }
-  } finally {
-    playerScoreQueueRunning = false;
-    syncConnectionStatus();
-    render();
-  }
+  return remotePlayerScore.processPlayerScoreQueue();
 }
 
 async function deleteRemoteTournament() {
@@ -1513,132 +1291,15 @@ async function deleteRemoteTournament() {
   return true;
 }
 
-async function currentAuthUser() {
-  if (!supabaseClient) return null;
-  try {
-    const { data } = await supabaseClient.auth.getUser();
-    return data?.user ?? null;
-  } catch (error) {
-    observability?.error("auth_session_read_failed", error);
-    return null;
-  }
-}
+function currentAuthUser() { return adminIdentity.currentAuthUser(); }
+function sendAdminSignInLink(event) { return adminIdentity.sendAdminSignInLink(event); }
+function claimCurrentTournament() { return adminIdentity.claimCurrentTournament(); }
+function renderAdminIdentity() { return adminIdentity.render(); }
 
-async function sendAdminSignInLink(event) {
-  event.preventDefault();
-  if (!supabaseClient) {
-    elements.adminIdentityNotice.textContent = t("admin.identityUnavailable");
-    return;
-  }
-  const email = elements.adminIdentityEmail.value.trim();
-  const { error } = await supabaseClient.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: window.location.origin },
-  });
-  elements.adminIdentityNotice.textContent = error
-    ? remoteErrorMessage(error, t("admin.identityFailed"))
-    : t("admin.identityLinkSent");
-  if (!error) observability?.emit("admin_signin_link_requested");
-}
-
-async function claimCurrentTournament() {
-  if (!supabaseClient || !state.id || !state.adminToken) return;
-  const user = await currentAuthUser();
-  if (!user) {
-    elements.adminIdentityNotice.textContent = t("admin.identitySignInFirst");
-    return;
-  }
-  const { data, error } = await remoteRpc(supabaseClient, "claim_tournament", {
-    p_tournament_id: state.id,
-    p_admin_token: state.adminToken,
-  });
-  if (error) {
-    elements.adminIdentityNotice.textContent = remoteErrorMessage(error, t("admin.identityFailed"));
-    observability?.error("admin_claim_failed", error);
-    return;
-  }
-  state.ownerUserId = data?.ownerUserId ?? user.id;
-  state.claimedAt = data?.claimedAt ?? new Date().toISOString();
-  saveState({ remote: false });
-  elements.adminIdentityNotice.textContent = t("admin.identityClaimed");
-  observability?.emit("admin_tournament_claimed");
-  renderAdminIdentity();
-}
-
-async function renderAdminIdentity() {
-  if (!elements.adminIdentityPanel) return;
-  const admin = isCurrentUserAdmin();
-  elements.adminIdentityPanel.classList.toggle("hidden", !admin);
-  if (!admin) return;
-  const user = await currentAuthUser();
-  const claimed = Boolean(state.ownerUserId && user?.id === state.ownerUserId);
-  elements.adminIdentityStatus.textContent = claimed ? t("admin.identityClaimedShort") : user ? t("admin.identitySignedIn") : t("admin.identityToken");
-  elements.adminIdentityForm.classList.toggle("hidden", claimed);
-  elements.claimTournamentButton.classList.toggle("hidden", claimed || !user);
-  if (claimed) elements.adminIdentityNotice.textContent = user.email ?? "";
-}
-
-function setRealtimeConnectionState(nextState) {
-  realtimeConnectionState = nextState;
-  syncConnectionStatus();
-}
-
-function removeRealtimeChannel() {
-  window.clearTimeout(realtimeReconnectTimer);
-  realtimeReconnectTimer = null;
-  realtimeConnectionGeneration += 1;
-  if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
-  realtimeChannel = null;
-  realtimeTournamentId = null;
-}
-
-function scheduleRealtimeReconnect() {
-  if (!isSupabaseReady() || !state.id || !hasActiveTournament() || !navigator.onLine) {
-    setRealtimeConnectionState("disconnected");
-    return;
-  }
-  if (realtimeReconnectTimer) return;
-
-  if (realtimeChannel) {
-    const staleChannel = realtimeChannel;
-    realtimeChannel = null;
-    realtimeTournamentId = null;
-    realtimeConnectionGeneration += 1;
-    supabaseClient.removeChannel(staleChannel);
-  }
-
-  const backoff = realtimeSync.backoffForAttempt(realtimeReconnectAttempt);
-  realtimeReconnectAttempt += 1;
-  setRealtimeConnectionState("reconnecting");
-  realtimeReconnectTimer = window.setTimeout(() => {
-    realtimeReconnectTimer = null;
-    connectRealtimeForCurrentState();
-  }, backoff);
-}
-
-async function refreshRemoteState(reason = "reconnect") {
-  if (!isSupabaseReady() || !state.id || !state.inviteCode || !navigator.onLine) return false;
-  if (realtimeRefreshPromise) return realtimeRefreshPromise;
-
-  const tournamentId = state.id;
-  realtimeRefreshPromise = getTournamentByInviteRpc(state.inviteCode).then(({ data, error }) => {
-    if (error || !data || data.id !== tournamentId) {
-      if (error) handleRemoteError(error, t("messages.fetchRemoteFailed"));
-      return false;
-    }
-    return applyRemoteState(data, {
-      source: "refresh",
-      clearConflict: reason === "manual",
-    });
-  }).catch((error) => {
-    handleRemoteError(error, t("messages.fetchRemoteFailed"));
-    return false;
-  }).finally(() => {
-    realtimeRefreshPromise = null;
-  });
-
-  return realtimeRefreshPromise;
-}
+function setRealtimeConnectionState(nextState) { return realtimeConnection.setConnectionState(nextState); }
+function removeRealtimeChannel() { return realtimeConnection.removeChannel(); }
+function scheduleRealtimeReconnect() { return realtimeConnection.scheduleReconnect(); }
+function refreshRemoteState(reason = "reconnect") { return realtimeConnection.refresh(reason); }
 
 function flushPendingRemoteWrites() {
   if (!isSupabaseReady() || !navigator.onLine) return;
@@ -1651,111 +1312,18 @@ function flushPendingRemoteWrites() {
   processPlayerScoreQueue();
 }
 
-function connectRealtimeForCurrentState() {
-  if (!isSupabaseReady() || !state.id || !hasActiveTournament()) {
-    setRealtimeConnectionState("connected");
-    return;
-  }
-  if (realtimeChannel && realtimeTournamentId === state.id) return;
-  removeRealtimeChannel();
+function connectRealtimeForCurrentState() { return realtimeConnection.connect(); }
 
-  const tournamentId = state.id;
-  const generation = ++realtimeConnectionGeneration;
-  realtimeTournamentId = tournamentId;
-  setRealtimeConnectionState(realtimeSync.connectionStateForAttempt(realtimeReconnectAttempt));
-  let channel;
-  channel = supabaseClient
-    .channel(realtimeSync.channelName(tournamentId))
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "tournaments",
-        filter: `id=eq.${tournamentId}`,
-      },
-      (payload) => {
-        if (generation !== realtimeConnectionGeneration || channel !== realtimeChannel) return;
-        if (payload.new?.state) {
-          applyRemoteState({
-            ...payload.new.state,
-            revision: payload.new.revision ?? payload.new.state.revision,
-          }, { source: "realtime" });
-        }
-      },
-    );
-  realtimeChannel = channel;
-    channel.subscribe((status, error) => {
-    if (generation !== realtimeConnectionGeneration || channel !== realtimeChannel) return;
-    if (realtimeSync.isSubscribed(status)) {
-      realtimeReconnectAttempt = 0;
-      setRealtimeConnectionState("connected");
-      refreshRemoteState("reconnect").finally(flushPendingRemoteWrites);
-    } else if (realtimeSync.shouldReconnect(status)) {
-      if (status !== "CLOSED") console.warn("Supabase realtime channel failed", error);
-      if (error) observability?.error("realtime_error", error, { status });
-      setRealtimeConnectionState(status === "CLOSED" ? "disconnected" : "error");
-      scheduleRealtimeReconnect();
-    }
-  });
-}
+function handleOnline() { return realtimeConnection.handleOnline(); }
 
-function handleOnline() {
-  remoteRetryAttempt = 0;
-  window.clearTimeout(remoteRetryTimer);
-  remoteRetryTimer = null;
-  syncConnectionStatus();
-  if (!isSupabaseReady() || !state.id || !hasActiveTournament()) return;
-  window.clearTimeout(realtimeReconnectTimer);
-  realtimeReconnectTimer = null;
-  connectRealtimeForCurrentState();
-  flushPendingRemoteWrites();
-}
-
-function handleOffline() {
-  removeRealtimeChannel();
-  setRealtimeConnectionState("disconnected");
-}
+function handleOffline() { return realtimeConnection.handleOffline(); }
 
 function exportBackup() {
-  const exportedState = sanitizeSharedState(state);
-  const backup = {
-    exportedAt: new Date().toISOString(),
-    app: "Padelstar",
-    version: 1,
-    tournament: exportedState,
-  };
-  const file = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(file);
-  link.download = `${slugify(state.name)}-${state.inviteCode}-backup.json`;
-  link.click();
-  URL.revokeObjectURL(link.href);
+  backupUi.exportBackup();
 }
 
 function importBackup(event) {
-  const [file] = event.currentTarget.files;
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.addEventListener("load", () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      const importedState = parsed.tournament ?? parsed;
-      if (!isValidTournamentState(importedState)) throw new Error("Invalid backup");
-      state = migrateState(importedState);
-      setLocalRole("admin");
-      saveState();
-      showWorkspace("admin");
-      render();
-      elements.copyStatus.textContent = t("messages.backupImported");
-    } catch {
-      showToast(t("messages.importBackupFailed"), "status-message-error");
-    } finally {
-      event.currentTarget.value = "";
-    }
-  });
-  reader.readAsText(file);
+  backupUi.importBackup(event);
 }
 
 function registerServiceWorker() {
@@ -1824,170 +1392,38 @@ function prefillJoinForm(inviteCode) {
 }
 
 function showStart() {
-  showModule("landing");
+  return workspaceNavigation.showStart();
 }
 
 function showWorkspace(view = "admin") {
-  showModule(normalizeWorkspaceModule(view));
+  return workspaceNavigation.showWorkspace(view);
 }
 
 function showModule(moduleName) {
-  const requestedModule = normalizeModule(moduleName);
-  activeModule = requestedModule;
-  const workspaceModule = workspaceModuleFromActiveModule();
-  const isWorkspaceActive = Boolean(workspaceModule);
-  if (requestedModule === "setup-player" && hasActiveTournament() && !elements.joinTournamentForm.elements.inviteCode.value) {
-    prefillJoinForm(state.inviteCode);
-  }
-  if (requestedModule === "setup-player") syncJoinPreview();
-
-  document.body.classList.toggle("workspace-active", isWorkspaceActive);
-  document.body.classList.toggle("setup-active", requestedModule === "setup-admin" || requestedModule === "setup-player");
-  const activeSections = [];
-  document.querySelectorAll(".app-module").forEach((section) => {
-    const sectionModule = section.dataset.module;
-    const isActive = sectionModule === requestedModule || (sectionModule === "workspace" && isWorkspaceActive);
-    section.classList.toggle("hidden", !isActive);
-    section.classList.remove("module-entering");
-    if (isActive) activeSections.push(section);
-  });
-
-  if (!window.PADELSTAR_TEST_MODE) {
-    window.cancelAnimationFrame?.(moduleTransitionFrame);
-    activeSections.forEach((section) => section.classList.add("module-entering"));
-    moduleTransitionFrame = window.requestAnimationFrame(() => {
-      moduleTransitionFrame = window.requestAnimationFrame(() => {
-        activeSections.forEach((section) => section.classList.remove("module-entering"));
-      });
-    });
-  }
-
-  document.querySelectorAll("[data-section]").forEach((section) => {
-    section.classList.toggle("hidden", section.dataset.section !== workspaceModule);
-  });
-
-  document.querySelectorAll("[data-module-link]").forEach((link) => {
-    link.classList.toggle("active", link.dataset.moduleLink === requestedModule);
-    if (link.dataset.moduleLink === requestedModule) link.setAttribute("aria-current", "page");
-    else link.removeAttribute("aria-current");
-  });
-
-  requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
-  if (!window.PADELSTAR_TEST_MODE) {
-    window.requestAnimationFrame(() => uiEffects?.focusModuleHeading(activeSections[0]));
-  }
-  renderRoleVisibility();
+  return workspaceNavigation.showModule(moduleName);
 }
 
 function activateTab(view) {
-  showModule(normalizeWorkspaceModule(view));
+  return workspaceNavigation.activateTab(view);
 }
 
-function normalizeWorkspaceModule(view) {
-  if (view === "spectator") return "tournament";
-  return view;
-}
+function normalizeWorkspaceModule(view) { return moduleRouting.normalizeWorkspaceModule(view); }
+function normalizeModule(moduleName) { return moduleRouting.normalizeModule(moduleName); }
+function fallbackTournamentModule() { return moduleRouting.fallbackTournamentModule(); }
+function workspaceModuleFromActiveModule() { return moduleRouting.workspaceModuleFromActiveModule(); }
 
-function normalizeModule(moduleName) {
-  const requestedModule = normalizeWorkspaceModule(moduleName);
-  const tournamentIsActive = hasActiveTournament();
-
-  if (!tournamentIsActive) {
-    return ["setup-admin", "setup-player"].includes(requestedModule) ? requestedModule : "landing";
-  }
-
-  if (requestedModule === "admin") return isCurrentUserAdmin() ? "admin" : fallbackTournamentModule();
-  if (requestedModule === "player") return state.selectedPlayerId ? "player" : fallbackTournamentModule();
-  if (requestedModule === "landing") return "landing";
-  if (requestedModule === "setup-admin") return "setup-admin";
-  if (requestedModule === "setup-player") return "setup-player";
-  if (requestedModule === "tournament") return "tournament";
-
-  return fallbackTournamentModule();
-}
-
-function fallbackTournamentModule() {
-  if (isCurrentUserAdmin()) return "admin";
-  if (state.selectedPlayerId) return "player";
-  return "tournament";
-}
-
-function workspaceModuleFromActiveModule() {
-  return ["admin", "player", "tournament"].includes(activeModule) ? activeModule : null;
-}
-
-function hasActiveTournament() {
-  return Boolean(localStorage.getItem(storageKey));
-}
-
-function isCurrentUserAdmin() {
-  return Boolean(state.adminToken && localStorage.getItem(storageKey) && currentLocalRole() === "admin");
-}
-
-function hasTournamentForInvite(inviteCode, loadedRemote = false) {
-  return Boolean(inviteCode && inviteCode === state.inviteCode && (loadedRemote || localStorage.getItem(storageKey)));
-}
-
-function setLocalRole(role) {
-  localStorage.setItem(roleStorageKey, role);
-  mirrorStorageKeys([roleStorageKey]);
-}
-
-function currentLocalRole() {
-  const storedRole = localStorage.getItem(roleStorageKey);
-  if (storedRole) return storedRole;
-  if (state.adminToken) return "admin";
-  if (state.selectedPlayerId) return "player";
-  return "spectator";
-}
+function hasActiveTournament() { return sessionPolicy.hasActiveTournament(); }
+function isCurrentUserAdmin() { return sessionPolicy.isCurrentUserAdmin(); }
+function hasTournamentForInvite(inviteCode, loadedRemote = false) { return sessionPolicy.hasTournamentForInvite(inviteCode, loadedRemote); }
+function setLocalRole(role) { return sessionPolicy.setLocalRole(role); }
+function currentLocalRole() { return sessionPolicy.currentLocalRole(); }
 
 function renderRoleVisibility() {
-  const isAdmin = isCurrentUserAdmin() && !spectatorMode;
-  const tournamentIsActive = hasActiveTournament();
-  const canShowPlayer = Boolean(state.selectedPlayerId);
-  const visibleModules = new Set(tournamentIsActive
-    ? ["landing", "setup-admin", "setup-player", "tournament", ...(isAdmin ? ["admin"] : []), ...(canShowPlayer ? ["player"] : [])]
-    : ["landing", "setup-admin", "setup-player"]);
-  const workspaceModule = workspaceModuleFromActiveModule();
-
-  elements.adminTab.classList.toggle("hidden", !isAdmin);
-  elements.playerTab.classList.toggle("hidden", !canShowPlayer);
-  elements.tournamentTab.classList.toggle("hidden", !tournamentIsActive);
-  const canLeaveSession = spectatorMode || canShowPlayer;
-  elements.leaveSessionButton?.classList.toggle("hidden", !canLeaveSession);
-  if (elements.leaveSessionButton) {
-    elements.leaveSessionButton.dataset.i18n = spectatorMode
-      ? "nav.leaveSpectator"
-      : "actions.leaveTournament";
-    elements.leaveSessionButton.textContent = t(elements.leaveSessionButton.dataset.i18n);
-  }
-  elements.headerShareBox.classList.toggle("hidden", !isAdmin || activeModule !== "admin");
-  if (elements.roleIndicator) {
-    const role = isAdmin ? "admin" : state.selectedPlayerId && !spectatorMode ? "player" : "spectator";
-    elements.roleIndicator.textContent = t(`role.${role}`);
-  }
-
-  document.querySelectorAll("[data-module-link]").forEach((link) => {
-    const moduleName = normalizeWorkspaceModule(link.dataset.moduleLink);
-    link.classList.toggle("hidden", !visibleModules.has(moduleName));
-    link.classList.toggle("active", moduleName === activeModule);
-    if (moduleName === activeModule) link.setAttribute("aria-current", "page");
-    else link.removeAttribute("aria-current");
-  });
-
-  document.querySelectorAll("[data-section]").forEach((section) => {
-    section.classList.toggle("hidden", section.dataset.section !== workspaceModule);
-  });
+  return workspaceNavigation.renderRoleVisibility();
 }
 
 function activateAdminPanel(panel) {
-  document.querySelectorAll(".subtab").forEach((tab) => {
-    tab.classList.toggle("active", tab.dataset.adminPanel === panel);
-    tab.setAttribute("aria-selected", String(tab.dataset.adminPanel === panel));
-  });
-  document.querySelectorAll("[data-admin-panel-section]").forEach((section) => {
-    section.classList.toggle("hidden", section.dataset.adminPanelSection !== panel);
-  });
+  return workspaceNavigation.activateAdminPanel(panel);
 }
 
 function render() {
@@ -2050,27 +1486,7 @@ function render() {
 }
 
 function syncConnectionStatus() {
-  let statusKey = "realtimeConnected";
-  let statusClass = "connected";
-  if (!navigator.onLine) {
-    statusKey = "offline";
-    statusClass = "offline";
-  } else if (!isSupabaseReady()) {
-    statusKey = "localPwa";
-    statusClass = "local";
-  } else if (state.id && hasActiveTournament()) {
-    statusKey = `realtime${realtimeConnectionState.charAt(0).toUpperCase()}${realtimeConnectionState.slice(1)}`;
-    statusClass = realtimeConnectionState;
-  }
-  elements.connectionStatus.textContent = t(statusKey);
-  if (navigator.onLine && isSupabaseReady() && hasPendingRemoteWrites()) {
-    elements.connectionStatus.textContent += ` · ${t("syncPending")} (${pendingRemoteWriteCount()})`;
-  }
-  elements.connectionStatus.dataset.status = statusClass;
-  elements.connectionStatus.setAttribute("aria-label", t("status.connectionAria", {
-    status: elements.connectionStatus.textContent,
-  }));
-  elements.connectionStatus.classList.toggle("offline", statusClass === "offline");
+  adminStatus.syncConnectionStatus();
 }
 
 function applyTheme() {
@@ -2084,24 +1500,7 @@ function pendingRemoteWriteCount() {
 }
 
 function renderSyncControls() {
-  if (!elements.refreshRemoteButton) return;
-  const canRefresh = remoteConflict && isCurrentUserAdmin();
-  elements.refreshRemoteButton.classList.toggle("hidden", !canRefresh);
-  elements.refreshRemoteButton.textContent = t("refreshRemoteState");
-  elements.conflictActions?.classList.toggle("hidden", !canRefresh);
-  if (elements.syncStatusDetail) {
-    const pending = pendingRemoteWriteCount();
-    if (remoteConflict) {
-      elements.syncStatusDetail.textContent = t("messages.remoteConflict");
-    } else if (pending > 0) {
-      const attempted = syncLastAttemptAt ? new Date(syncLastAttemptAt).toLocaleTimeString(document.documentElement.lang || "nb-NO", { hour: "2-digit", minute: "2-digit" }) : t("common.none");
-      elements.syncStatusDetail.textContent = `${t("syncPending")} (${pending}) · ${attempted}`;
-    } else if (syncLastError) {
-      elements.syncStatusDetail.textContent = syncLastError;
-    } else {
-      elements.syncStatusDetail.textContent = "";
-    }
-  }
+  adminStatus.renderSyncControls();
 }
 
 function applyLanguage() {
@@ -2118,211 +1517,27 @@ function t(key, values = {}) {
 }
 
 function renderStartResume() {
-  const hasSavedTournament = Boolean(localStorage.getItem(storageKey));
-  elements.resumePanel.classList.toggle("hidden", !hasSavedTournament);
-  if (!hasSavedTournament) return;
-
-  const isAdmin = isCurrentUserAdmin();
-  elements.resumeTitle.textContent = t("resume.title", { name: state.name });
-  elements.resumeSummary.textContent = isAdmin
-    ? t("resume.adminSummary", { players: state.players.length, courts: state.courts.length, code: state.inviteCode })
-    : t("resume.summary", { players: state.players.length, courts: state.courts.length });
-  elements.resumeTournamentButton.textContent = isAdmin ? t("resume.continueAdmin") : t("resume.continueTournament");
+  adminStatus.renderStartResume();
 }
 
 function renderLobbyStatus() {
-  const minimumPlayersReady = state.players.length >= 2;
-  const hasCourts = state.courts.length >= 1;
-  const hasStarted = state.rounds.length > 0;
-  const activeRound = getActiveRound();
-  const isFinished = state.status === "Avsluttet";
-  const blockReason = generateRoundBlockReason();
-  const nextRoundLabel = blockReason || (state.currentRound > 0
-    ? t("tournament.nextRoundLabel", { round: state.currentRound + 1 })
-    : t("tournament.firstRoundReady"));
-  const playerMode = state.settings.format === "cup"
-    ? "Cup"
-    : state.players.length >= 4 ? t("common.double") : state.players.length >= 2 ? t("common.single") : t("common.waiting");
-  const progress = activeRound?.status === "active" ? roundProgress(activeRound) : null;
-  const statusText = isFinished ? t("common.finished") : activeRound?.status === "active" ? t("common.playing") : hasStarted ? t("common.betweenRounds") : t("common.lobby");
-
-  elements.lobbyStatus.innerHTML = `
-    <div class="${minimumPlayersReady ? "ready" : "waiting"}">
-      <span>${t("admin.players")}</span>
-      <strong>${state.players.length}</strong>
-      <small>${minimumPlayersReady ? playerMode : t("common.minimumTwo")}</small>
-    </div>
-    <div class="${hasCourts ? "ready" : "waiting"}">
-      <span>${t("admin.courtsInUse")}</span>
-      <strong>${state.courts.length}</strong>
-      <small>${hasCourts ? t("common.ready") : t("common.missing")}</small>
-    </div>
-    <div class="${canGenerateRound() ? "ready" : "waiting"}">
-      <span>${t("common.status")}</span>
-      <strong>${statusText}</strong>
-      <small>${progress ? t("tournament.matchesFinished", { finished: progress.finished, total: progress.total }) : nextRoundLabel}</small>
-    </div>
-  `;
-}
-
-function renderAdminLiveOverview(matches) {
-  if (!elements.adminLiveOverview) return;
-
-  const activeRound = getActiveRound();
-  const liveMatches = activeRound?.status === "active" ? activeRound.matches : matches;
-  const playingMatches = liveMatches.filter((match) => match.state === "playing");
-  const waitingMatches = liveMatches.filter((match) => match.state === "waiting");
-  const finishedMatches = matches.filter((match) => match.state === "finished");
-  const progress = activeRound ? roundProgress(activeRound) : { total: matches.length, finished: finishedMatches.length };
-  const progressPercent = progress.total ? Math.round((progress.finished / progress.total) * 100) : 0;
-  const spotlightMatch = playingMatches[0] ?? waitingMatches[0] ?? matches.at(-1);
-
-  if (!spotlightMatch) {
-    elements.adminLiveOverview.innerHTML = `
-      <div class="overview-main">
-        <span class="status-chip waiting">${t("common.lobby")}</span>
-        <strong>${t("tournament.lobbyHeadline")}</strong>
-        <small>${t("tournament.playersReady", { players: state.players.length, courts: state.courts.length })}</small>
-      </div>
-      <div class="progress-track" aria-label="${t("tournament.progressAria")}">
-        <span style="width: 0%"></span>
-      </div>
-    `;
-    return;
-  }
-
-  elements.adminLiveOverview.innerHTML = `
-    <div class="overview-main">
-      <span class="status-chip ${spotlightMatch.state}">${matchStateText(spotlightMatch.state)}</span>
-      <strong>${escapeHtml(primaryMatchHeadline(spotlightMatch))}</strong>
-      <small>${escapeHtml(matchContextText(spotlightMatch))} · ${escapeHtml(setScoreText(spotlightMatch))} ${t("common.games")} · ${escapeHtml(gameScoreText(spotlightMatch))}</small>
-    </div>
-    <div class="overview-stats">
-      <div>
-        <span>${t("common.active")}</span>
-        <strong>${playingMatches.length}</strong>
-      </div>
-      <div>
-        <span>${t("common.next")}</span>
-        <strong>${waitingMatches.length}</strong>
-      </div>
-      <div>
-        <span>${t("common.finished")}</span>
-        <strong>${finishedMatches.length}</strong>
-      </div>
-    </div>
-    <div class="progress-track" aria-label="${t("tournament.progressAria")}">
-      <span style="width: ${progressPercent}%"></span>
-    </div>
-  `;
+  adminStatus.renderLobbyStatus();
 }
 
 function renderPlayers() {
-  const standings = leaderboardEntries(getAllMatches());
-  const lobbyLocked = state.rounds.length > 0;
-  elements.playersList.innerHTML = "";
-  if (state.players.length === 0) {
-    const item = document.createElement("li");
-    item.className = "empty-list-item";
-    item.innerHTML = `
-      <span>
-        ${t("tournament.noPlayers", { code: state.inviteCode })}
-      </span>
-    `;
-    elements.playersList.append(item);
-    return;
-  }
-  state.players.forEach((player) => {
-    const entry = standings.find((item) => item.player.id === player.id);
-    const item = document.createElement("li");
-    item.className = lobbyLocked ? "" : "editable-player";
-    item.setAttribute("style", accentStyle(player.accent));
-    item.innerHTML = `
-      <span class="player-list-name">
-        ${avatarMarkup(player, "avatar", 34)}
-        <span class="player-name-badge">${escapeHtml(player.name)}</span>
-        <small class="join-source-chip">${playerStatusLabel(player)}</small>
-      </span>
-      <span class="player-actions">
-        <strong>${t("standings.pointsShort", { points: entry?.points ?? 0 })}</strong>
-        <button class="icon-button danger-button" type="button" aria-label="${t("actions.removePlayerAria", { name: escapeHtml(player.name) })}" ${lobbyLocked ? "disabled" : ""}>${t("actions.remove")}</button>
-      </span>
-    `;
-    if (!lobbyLocked) {
-      const editor = document.createElement("form");
-      editor.className = "player-edit-grid";
-      editor.innerHTML = `
-        <input name="playerName" type="text" value="${escapeAttribute(player.name)}" aria-label="${t("actions.editPlayerNameAria", { name: escapeAttribute(player.name) })}" required>
-        <select name="avatarId" aria-label="${t("actions.playerAvatarAria", { name: escapeAttribute(player.name) })}">
-          ${avatarOptions.map((avatar) => `
-            <option value="${avatar.id}" ${player.avatarId === avatar.id ? "selected" : ""}>${avatar.name}</option>
-          `).join("")}
-        </select>
-        <button class="secondary icon-button" type="submit">${t("actions.save")}</button>
-      `;
-      editor.addEventListener("submit", (event) => {
-        event.preventDefault();
-        updatePlayer(player.id, {
-          name: new FormData(event.currentTarget).get("playerName").trim(),
-          avatarId: new FormData(event.currentTarget).get("avatarId"),
-        });
-      });
-      item.append(editor);
-    }
-    item.querySelector(".danger-button").addEventListener("click", () => removePlayer(player.id));
-    elements.playersList.append(item);
-  });
+  playerList.renderPlayers();
+}
+
+function renderAdminLiveOverview(matches) {
+  return workspaceOverview.renderAdminLiveOverview(matches);
 }
 
 function renderCupTeamBuilder() {
-  if (!elements.cupTeamBuilder) return;
-  const isCup = state.settings.format === "cup";
-  const isManual = state.settings.cupTeamSetupMode === "manual";
-  const isLocked = state.rounds.length > 0 || state.status === "Avsluttet";
-  elements.cupTeamBuilder.classList.toggle("hidden", !isCup || !isManual);
-  elements.cupTeamSummary.textContent = t("common.teamCount", { count: state.cupTeams.length });
-  const teamLines = state.cupTeams
-    .map((team) => team.players.map((player) => player.name).join(" + "))
-    .join("\n");
-  elements.cupTeamForm.elements.teamLines.value = teamLines;
-  elements.cupTeamForm.elements.teamLines.disabled = isLocked;
-  elements.cupTeamForm.querySelector("button").disabled = isLocked;
+  return workspaceOverview.renderCupTeamBuilder();
 }
 
 function renderRoundSummary() {
-  const activeRound = getActiveRound();
-  elements.roundSummary.innerHTML = "";
-  if (!activeRound || activeRound.matches.length === 0) {
-    appendEmptyText(elements.roundSummary, t("tournament.noRound"));
-    return;
-  }
-
-  const progress = roundProgress(activeRound);
-  const summaryItems = [
-    {
-      label: t("common.round"),
-      value: activeRound.roundNumber,
-      detail: activeRound.status === "active" ? t("common.playing") : t("common.completed"),
-    },
-    {
-      label: t("common.matches"),
-      value: activeRound.matches.length,
-      detail: t("tournament.matchesFinishedShort", { finished: progress.finished, total: progress.total }),
-    },
-    {
-      label: t("common.resting"),
-      value: activeRound.sittingOut?.length ?? 0,
-      detail: activeRound.sittingOut?.length ? activeRound.sittingOut.map((player) => player.name).join(", ") : t("common.none"),
-    },
-  ];
-
-  elements.roundSummary.innerHTML = summaryItems.map((item) => `
-    <div>
-      <span>${escapeHtml(item.label)}</span>
-      <strong>${escapeHtml(item.value)}</strong>
-      <small>${escapeHtml(item.detail)}</small>
-    </div>
-  `).join("");
+  return workspaceOverview.renderRoundSummary();
 }
 
 function renderMatches(matches) {
@@ -2330,21 +1545,21 @@ function renderMatches(matches) {
   const playerMatches = selectedPlayer
     ? matches.filter((match) => matchIncludesPlayer(match, selectedPlayer.id))
     : [];
-  const filteredAdminMatches = filterMatches(matches, matchFilters.admin);
-  const filteredPlayerMatches = filterMatches(playerMatches, matchFilters.player);
-  renderGroupedMatches(
+  const filteredAdminMatches = matchList.filterMatches(matches, matchFilters.admin);
+  const filteredPlayerMatches = matchList.filterMatches(playerMatches, matchFilters.player);
+  matchList.renderGroupedMatches(
     elements.adminMatches,
     filteredAdminMatches,
     t("tournament.noMatches"),
     (match) => createMatchCard(match, isEditableAdminMatch(match)),
   );
-  renderGroupedMatches(
+  matchList.renderGroupedMatches(
     elements.playerMatches,
     filteredPlayerMatches,
     selectedPlayer ? t("tournament.noPlayerMatches") : t("tournament.choosePlayerForMatches"),
     (match) => createMatchCard(match, isEditablePlayerMatch(match, selectedPlayer), selectedPlayer?.id, true),
   );
-  renderSpectatorMatches(matches);
+  matchList.renderSpectatorMatches(matches);
   scheduleWrappedScorecardPlayers();
 }
 
@@ -2365,182 +1580,8 @@ function scheduleWrappedScorecardPlayers() {
 
 window.addEventListener("resize", scheduleWrappedScorecardPlayers);
 
-function filterMatches(matches, filter) {
-  if (filter === "active") return matches.filter((match) => match.state === "playing");
-  if (filter === "next") return matches.filter((match) => match.state === "waiting");
-  if (filter === "finished") return matches.filter((match) => ["finished", "cancelled"].includes(match.state));
-  return matches;
-}
-
-function renderGroupedMatches(container, matches, emptyText, cardFactory) {
-  container.innerHTML = "";
-  if (matches.length === 0) {
-    appendEmptyText(container, emptyText);
-    return;
-  }
-
-  const groups = [
-    { title: t("common.playing"), matches: matches.filter((match) => match.state === "playing") },
-    { title: t("common.waiting"), matches: matches.filter((match) => match.state === "waiting") },
-    { title: t("common.finished"), matches: matches.filter((match) => ["finished", "cancelled"].includes(match.state)) },
-  ].filter((group) => group.matches.length > 0);
-
-  groups.forEach((group) => {
-    const section = document.createElement("section");
-    section.className = "match-group";
-    section.innerHTML = `<h4>${group.title}</h4>`;
-    section.append(...group.matches.map(cardFactory));
-    container.append(section);
-  });
-}
-
-function renderSpectatorMatches(matches) {
-  elements.spectatorMatches.innerHTML = "";
-  const playingMatches = matches.filter((match) => match.state === "playing");
-  if (playingMatches.length === 0) {
-    const waitingMatches = matches.filter((match) => match.state === "waiting");
-    if (waitingMatches.length === 0) {
-      appendEmptyText(elements.spectatorMatches, t("tournament.noLiveMatches"));
-      return;
-    }
-    appendEmptyText(elements.spectatorMatches, t("tournament.noMatchesPlaying"));
-    return;
-  }
-
-  const section = document.createElement("section");
-  section.className = "match-group spectator-live-group";
-  section.innerHTML = `<h4>${t("common.playingMatches")}</h4>`;
-  section.append(...playingMatches.map(createSpectatorMatchCard));
-  elements.spectatorMatches.append(section);
-}
-
-function createSpectatorMatchCard(match) {
-  const card = document.createElement("article");
-  card.className = "spectator-score-card";
-  card.setAttribute("style", teamAccentStyle(match.teamOne));
-  card.innerHTML = `
-    <div class="spectator-score-top">
-      <span>${escapeHtml(matchContextText(match))}</span>
-      <strong>${match.courtName ?? t("tournament.courtComing")}</strong>
-    </div>
-    <div class="spectator-score-teams">
-      <div style="${teamAccentStyle(match.teamOne)}">
-        <span>${teamDisplay(match.teamOne)}</span>
-        <strong>${match.currentSet.teamOne}</strong>
-      </div>
-      <div style="${teamAccentStyle(match.teamTwo)}">
-        <span>${teamDisplay(match.teamTwo)}</span>
-        <strong>${match.currentSet.teamTwo}</strong>
-      </div>
-    </div>
-    <div class="spectator-score-bottom">
-      <span>${t("common.sets")} ${escapeHtml(setScoreText(match))}</span>
-      <span>${t("common.games")} ${escapeHtml(setScoreText(match))}</span>
-    </div>
-  `;
-  return card;
-}
-
 function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly = false) {
-  const card = document.createElement("article");
-  card.className = `match-card match-${match.state} ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
-  card.dataset.matchId = match.id;
-  card.setAttribute("style", teamAccentStyle(match.teamOne));
-  const teamOneName = escapeHtml(match.teamOne.displayName);
-  const teamTwoName = escapeHtml(match.teamTwo.displayName);
-  const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
-  const pointControlsEnabled = editable && match.state !== "cancelled";
-  const sittingOut = sittingOutSummary(match);
-  const matchNote = [sittingOut, winner ? `<p class="winner-note">${t("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : ""]
-    .filter(Boolean)
-    .join("");
-  const pointControl = (teamIndex, teamName) => pointControlsEnabled
-    ? `<button class="scorecard-point-button" type="button" data-point-team="${teamIndex}" aria-label="${t("score.pointsLabel", { team: teamName })}" ${match.state === "finished" ? "disabled" : ""}>${tennisPointLabel(match.currentGame?.[teamIndex === 0 ? "teamOne" : "teamTwo"] ?? 0)}</button>`
-    : `<strong class="scorecard-point-value">${tennisPointLabel(match.currentGame?.[teamIndex === 0 ? "teamOne" : "teamTwo"] ?? 0)}</strong>`;
-  card.innerHTML = `
-    <div class="match-top">
-      <div class="match-meta">
-        <span>${escapeHtml(matchContextText(match))}</span>
-      </div>
-      <div class="match-top-actions">
-        <span class="match-court">${match.courtName ?? t("tournament.noCourtAssigned")}</span>
-        <span class="match-status ${match.state}">${matchStateText(match.state)}</span>
-      </div>
-    </div>
-    <div class="match-headline">
-      <span>${escapeHtml(primaryMatchHeadline(match))}</span>
-    </div>
-    <div class="scorecard-matchup">
-      <section class="scorecard-team scorecard-team-one" style="${teamAccentStyle(match.teamOne)}">
-        <h3>${t("common.teamOne")}</h3>
-        <div class="scorecard-players">${teamDisplay(match.teamOne, "scorecard")}</div>
-      </section>
-      <section class="scorecard-center" aria-label="${t("score.scoreboardAria")}">
-        <div class="scorecard-emblem" aria-hidden="true"><img src="assets/padelstar-icon.png" alt="" width="54" height="54"></div>
-        <div class="scorecard-score-pair">
-          ${pointControl(0, teamOneName)}
-          <img class="scorecard-vs-icon" src="assets/vs_icon" alt="VS" width="88" height="58">
-          ${pointControl(1, teamTwoName)}
-        </div>
-      </section>
-      <section class="scorecard-team scorecard-team-two" style="${teamAccentStyle(match.teamTwo)}">
-        <h3>${t("common.teamTwo")}</h3>
-        <div class="scorecard-players">${teamDisplay(match.teamTwo, "scorecard")}</div>
-      </section>
-    </div>
-    <div class="scorecard-stats" aria-label="${t("score.scoreboardAria")}">
-      <div><span class="scorecard-stat-icon" aria-hidden="true">◆</span><span>${t("common.games")}</span><strong>${setScoreText(match)}</strong></div>
-      <div><span class="scorecard-stat-icon" aria-hidden="true">✦</span><span>${t("common.points")}</span><strong>${gameScoreText(match)}</strong></div>
-      <div><span class="scorecard-stat-icon" aria-hidden="true">◎</span><span>${t("common.sets")}</span><strong>${setScoreText(match)}</strong></div>
-    </div>
-    ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
-  `;
-
-  if (editable && match.state !== "cancelled") {
-    const controls = document.createElement("div");
-    controls.className = "match-controls";
-    controls.innerHTML = `
-      ${scoreOnly ? "" : `<div class="court-edit-row">
-        <label>${t("common.court")} <input class="court-name-input" type="text" value="${escapeAttribute(match.courtName ?? "")}" placeholder="${t("common.court")}" aria-label="${t("score.courtForMatch", { teamOne: teamOneName, teamTwo: teamTwoName })}"></label>
-        <button class="secondary save-court-button" type="button">${t("actions.saveCourt")}</button>
-      </div>
-      <div class="button-row">
-        <button class="secondary set-score-button" type="button">${t("actions.setResult")}</button>
-        <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>${t("actions.startMatch")}</button>
-        <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>${t("actions.largeScore")}</button>
-        <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.lastScoredMatchState ? "disabled" : ""}>${match.state === "finished" ? t("actions.undoResult") : t("actions.undoLast")}</button>
-        <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${t("actions.cancelMatch")}</button>
-        <div class="walkover-row">
-          <span>${t("score.walkover")}</span>
-          <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="${t("score.walkoverForAria", { team: teamOneName })}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
-          <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="${t("score.walkoverForAria", { team: teamTwoName })}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
-        </div>
-      </div>`}
-    `;
-
-    if (!scoreOnly) {
-      const courtInput = controls.querySelector(".court-name-input");
-      controls.querySelector(".save-court-button").addEventListener("click", () => {
-        updateMatchCourt(match, courtInput.value);
-      });
-    }
-    card.querySelectorAll("[data-point-team]").forEach((button) => {
-      button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.pointTeam)));
-    });
-    if (!scoreOnly) {
-      controls.querySelector(".set-score-button").addEventListener("click", () => openSetScoreDialog(match.id));
-      controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
-      controls.querySelector(".large-score-button").addEventListener("click", () => openLargeScore(match.id));
-      controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
-      controls.querySelector(".cancel-match-button").addEventListener("click", () => void cancelMatch(match));
-      controls.querySelectorAll(".walkover-button").forEach((button) => {
-        button.addEventListener("click", () => void setWalkover(match, Number(button.dataset.walkoverTeam)));
-      });
-    }
-    card.append(controls);
-  }
-
-  return card;
+  return matchCard.createMatchCard(match, editable, highlightedPlayerId, scoreOnly);
 }
 
 function isEditablePlayerMatch(match, player) {
@@ -2548,85 +1589,19 @@ function isEditablePlayerMatch(match, player) {
 }
 
 function renderStandings(matches) {
-  renderStandingsList(elements.standingsList, matches);
-  renderStandingsList(elements.playerStandingsList, matches);
-}
-
-function renderStandingsList(container, matches) {
-  container.innerHTML = "";
-  const entries = leaderboardEntries(matches);
-  if (entries.length === 0) {
-    appendEmptyText(container, t("tournament.standingsEmpty"));
-    return;
-  }
-  entries.forEach((entry, index) => {
-    const item = document.createElement("li");
-    item.setAttribute("style", accentStyle(entry.player.accent));
-    item.innerHTML = `
-      <span class="player-list-name">
-        <span class="placement-badge">${index + 1}</span>
-        ${avatarMarkup(entry.player, "avatar", 34)}
-        <span class="player-name-badge">${escapeHtml(entry.player.name)}</span>
-      </span>
-      <span class="standing-stats">
-        <strong>${t("standings.pointsShort", { points: entry.points })}</strong>
-        <small>${t("standings.detail", { played: entry.matchesPlayed, wins: entry.matchWins, sets: entry.setsWon, games: entry.gamesWon })}</small>
-      </span>
-    `;
-    container.append(item);
-  });
+  standings.renderStandings(matches);
 }
 
 function renderPlayerIdentity() {
-  const player = getPlayerById(state.selectedPlayerId);
-  if (!player) {
-    elements.playerIdentityCard.removeAttribute("style");
-    elements.playerIdentityCard.innerHTML = `
-      <div class="empty-list-item">
-        ${t("player.identityEmpty")}
-      </div>
-    `;
-    return;
-  }
-
-  const joinSourceLabel = player.joinedFrom === "admin-self"
-    ? t("player.adminPlays")
-    : player.joinedFrom === "self"
-      ? t("player.registeredSelf")
-      : t("player.addedByAdmin");
-  elements.playerIdentityCard.setAttribute("style", accentStyle(player.accent));
-  elements.playerIdentityCard.innerHTML = `
-    <div class="player-identity-main">
-      ${avatarMarkup(player, "avatar", 44)}
-      <div>
-        <span>${t("player.currentPlayer")}</span>
-        <strong>${escapeHtml(player.name)}</strong>
-      </div>
-    </div>
-    <span class="join-source-chip">${joinSourceLabel}</span>
-  `;
+  playerControls.renderPlayerIdentity();
 }
 
 function renderLeaveTournamentControl() {
-  if (!elements.leaveSessionButton) return;
-  const canLeaveSession = spectatorMode || Boolean(getPlayerById(state.selectedPlayerId));
-  elements.leaveSessionButton.classList.toggle("hidden", !canLeaveSession);
-  elements.leaveSessionButton.disabled = !canLeaveSession;
-  elements.leaveSessionButton.dataset.i18n = spectatorMode
-    ? "nav.leaveSpectator"
-    : "actions.leaveTournament";
-  elements.leaveSessionButton.textContent = t(elements.leaveSessionButton.dataset.i18n);
+  playerControls.renderLeaveTournamentControl();
 }
 
 function renderAvailabilityControl() {
-  if (!elements.toggleAvailabilityButton) return;
-  const player = getPlayerById(state.selectedPlayerId);
-  const isAway = player?.availability === "away";
-  elements.toggleAvailabilityButton.classList.toggle("hidden", !player);
-  elements.toggleAvailabilityButton.disabled = !player;
-  elements.toggleAvailabilityButton.textContent = isAway
-    ? t("actions.returnToTournament")
-    : t("actions.markAway");
+  playerControls.renderAvailabilityControl();
 }
 
 function playerStatusLabel(player) {
@@ -2643,198 +1618,15 @@ function playerStatusLabel(player) {
 }
 
 function renderCupBracket() {
-  if (!elements.cupBracket) return;
-  const bracket = state.settings.format === "cup" ? state.cup?.bracket : null;
-  elements.cupBracket.classList.toggle("hidden", !bracket?.rounds?.length);
-  if (!bracket?.rounds?.length) {
-    elements.cupBracket.innerHTML = "";
-    return;
-  }
-
-  elements.cupBracket.innerHTML = `
-    <div class="panel-heading">
-      <h3>${t("cup.bracket")}</h3>
-      <span>${t("cup.teamSlots", { count: bracket.bracketSize })}</span>
-    </div>
-    <div class="cup-bracket-rounds">
-      ${bracket.rounds.map((round, index) => `
-        <section class="cup-bracket-round">
-          <div class="cup-bracket-round-heading">
-            <strong>${cupRoundTitle(round, index, bracket.rounds.length)}</strong>
-            <span>${round.byeTeams?.length ? `${round.byeTeams.length} bye` : ""}</span>
-          </div>
-          <div class="cup-bracket-slots">
-            ${round.slots.map((slot) => renderCupBracketSlot(slot)).join("")}
-            ${round.thirdPlaceSlot ? renderCupBracketSlot(round.thirdPlaceSlot, true) : ""}
-          </div>
-          ${round.byeTeams?.length ? `<p class="cup-bracket-byes">${t("cup.bye", { teams: round.byeTeams.map((team) => escapeHtml(team.displayName)).join(", ") })}</p>` : ""}
-        </section>
-      `).join("")}
-    </div>
-  `;
-}
-
-function cupRoundTitle(round, index, totalRounds) {
-  if (totalRounds === 1) return t("cup.final");
-  if (index === 0) return t("cup.firstRound");
-  if (index === totalRounds - 1) return t("cup.final");
-  if (index === totalRounds - 2) return t("cup.semiFinal");
-  return t("tournament.roundLabel", { round: round.roundNumber });
-}
-
-function renderCupBracketSlot(slot, isThirdPlace = false) {
-  if (!slot || slot.type === "pending") {
-    return `<div class="cup-bracket-slot pending"><span>${isThirdPlace ? t("cup.thirdPlaceMatch") : t("cup.waitingForWinners")}</span></div>`;
-  }
-  const match = getMatchById(slot.matchId);
-  if (!match) return `<div class="cup-bracket-slot pending"><span>${t("cup.waitingForMatch")}</span></div>`;
-  const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
-  return `
-    <div class="cup-bracket-slot ${match.state}">
-      <span class="cup-bracket-slot-label">${isThirdPlace ? t("cup.thirdPlaceMatch") : matchStateText(match.state)}</span>
-      <strong>${escapeHtml(match.teamOne.displayName)}</strong>
-      <strong>${escapeHtml(match.teamTwo.displayName)}</strong>
-      ${winner ? `<small>${t("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</small>` : ""}
-    </div>
-  `;
+  cupBracket.renderCupBracket();
 }
 
 function renderExistingPlayerList() {
-  if (!elements.existingPlayerList || elements.existingPlayerList.classList.contains("hidden")) return;
-  elements.existingPlayerList.innerHTML = "";
-  if (state.players.length === 0) {
-    appendEmptyText(elements.existingPlayerList, t("players.noneAddedYet"));
-    return;
-  }
-  state.players.forEach((player) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "existing-player-button";
-    button.setAttribute("style", accentStyle(player.accent));
-    button.innerHTML = `${avatarMarkup(player, "avatar", 30)}<span>${escapeHtml(player.name)}</span>`;
-    button.addEventListener("click", async () => {
-      if (supabaseClient) {
-        const joined = await joinRemoteTournament(player.name, player.avatarId);
-        if (!joined) return;
-      } else {
-        state.selectedPlayerId = player.id;
-      }
-      setLocalRole("player");
-      saveState({ remote: false });
-      showWorkspace("player");
-      render();
-    });
-    elements.existingPlayerList.append(button);
-  });
+  playerList.renderExistingPlayerList();
 }
 
 function renderPlayerNextMatch(matches) {
-  const player = getPlayerById(state.selectedPlayerId);
-  if (!player) {
-    elements.playerNextMatch.removeAttribute("style");
-    elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">${t("player.nextMatch")}</p>
-      <h3>${t("player.chooseProfile")}</h3>
-      <p>${t("player.chooseProfileHint")}</p>
-      <div class="button-row player-empty-actions">
-        <button class="secondary" type="button" data-player-action="spectate">${t("actions.viewAsSpectator")}</button>
-        <button class="secondary" type="button" data-player-action="choose">${t("actions.choosePlayer")}</button>
-        <button class="ghost" type="button" data-player-action="rejoin">${t("actions.joinAgain")}</button>
-      </div>
-    `;
-    return;
-  }
-
-  if (state.status === "Avsluttet") {
-    const placement = playerPlacement(player, matches);
-    elements.playerNextMatch.setAttribute("style", accentStyle(player.accent));
-    elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">${t("player.tournamentFinished")}</p>
-      <h3>${placement ? t("player.finishedWithPlacement", { name: escapeHtml(player.name), placement }) : t("player.finishedWithoutPlacement", { name: escapeHtml(player.name) })}</h3>
-      <p>${t("player.checkFinalStandings")}</p>
-    `;
-    return;
-  }
-
-  const playerState = playerTournamentState(player, matches);
-  elements.playerNextMatch.setAttribute("style", accentStyle(player.accent));
-
-  if (playerState.kind === "resting") {
-    const activeRound = getActiveRound();
-    elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">${t("player.restingThisRound")}</p>
-      <h3>${t("player.restingTitle", { name: escapeHtml(player.name) })}</h3>
-      <div class="player-now-grid">
-        <div>
-          <span>${t("common.round")}</span>
-          <strong>${activeRound?.roundNumber ?? "-"}</strong>
-        </div>
-        <div>
-          <span>${t("common.status")}</span>
-          <strong>${t("common.resting")}</strong>
-        </div>
-      </div>
-      <p>${t("player.restingHint")}</p>
-    `;
-    return;
-  }
-
-  if (!playerState.match) {
-    elements.playerNextMatch.innerHTML = `
-      <p class="eyebrow">${t("common.waiting")}</p>
-      <h3>${t("player.waitingTitle", { name: escapeHtml(player.name) })}</h3>
-      <div class="player-now-grid">
-        <div>
-          <span>${t("common.status")}</span>
-          <strong>${t("common.waiting")}</strong>
-        </div>
-        <div>
-          <span>${t("common.round")}</span>
-          <strong>${Math.max(state.currentRound, 1)}</strong>
-        </div>
-      </div>
-      <p>${t("player.waitingHint")}</p>
-    `;
-    return;
-  }
-
-  const match = playerState.match;
-  notifyPlayerMatch(match, playerState.kind);
-  const isTeamOne = match.teamOne.players.some((item) => item.id === player.id);
-  const ownTeam = isTeamOne ? match.teamOne : match.teamTwo;
-  const opponents = isTeamOne ? match.teamTwo : match.teamOne;
-  const teammate = ownTeam.players.find((item) => item.id !== player.id);
-  const opponentNames = opponents.players.map((opponent) => escapeHtml(opponent.name)).join(" & ");
-  const statusLabel = playerState.kind === "playing" ? t("player.playingNow") : t("player.nextMatch");
-  const ownScore = isTeamOne ? match.currentSet.teamOne : match.currentSet.teamTwo;
-  const opponentScore = isTeamOne ? match.currentSet.teamTwo : match.currentSet.teamOne;
-
-  elements.playerNextMatch.innerHTML = `
-    <p class="eyebrow">${statusLabel}</p>
-    <h3>${match.courtName ?? t("tournament.courtComing")}</h3>
-    <div class="player-now-grid">
-      <div>
-        <span>${t("player.teammate")}</span>
-        <strong>${teammate ? escapeHtml(teammate.name) : t("common.single")}</strong>
-      </div>
-      <div>
-        <span>${t("player.opponents")}</span>
-        <strong>${opponentNames}</strong>
-      </div>
-      <div>
-        <span>${t("common.games")}</span>
-        <strong>${ownScore}-${opponentScore}</strong>
-      </div>
-      <div>
-        <span>${t("common.points")}</span>
-        <strong>${gameScoreText(match)}</strong>
-      </div>
-    </div>
-    <div class="next-match-summary">
-      <span>${escapeHtml(matchContextText(match))}</span>
-      <span>${scoreSummary(match)}</span>
-    </div>
-  `;
+  playerNextMatch.renderPlayerNextMatch(matches);
 }
 
 function notifyPlayerMatch(match, kind) {
@@ -2852,80 +1644,11 @@ function notifyPlayerMatch(match, kind) {
 }
 
 function renderPlayerStatus(matches) {
-  const player = getPlayerById(state.selectedPlayerId);
-  if (!player) {
-    elements.playerStatusGrid.innerHTML = `
-      <div class="waiting">
-        <span>${t("common.status")}</span>
-        <strong>${t("common.select")}</strong>
-        <small>${t("common.player")}</small>
-      </div>
-    `;
-    return;
-  }
-
-  const playerMatches = matches.filter((match) => matchIncludesPlayer(match, player.id));
-  const stats = statsForPlayer(player, matches);
-  const nextState = playerTournamentState(player, matches);
-  const statusText = {
-    playing: t("common.playing"),
-    waiting: t("common.next"),
-    resting: t("common.resting"),
-    idle: t("common.waiting"),
-  }[nextState.kind] ?? t("common.waiting");
-
-  elements.playerStatusGrid.innerHTML = `
-    <div class="${nextState.kind === "playing" ? "ready" : "waiting"}">
-      <span>${t("common.status")}</span>
-      <strong>${state.status === "Avsluttet" ? t("common.finished") : statusText}</strong>
-      <small>${nextState.match?.courtName ?? (nextState.kind === "resting" ? t("tournament.thisRound") : t("tournament.noCourt"))}</small>
-    </div>
-    <div class="ready">
-      <span>${t("common.points")}</span>
-      <strong>${pointsByPlayer(matches, state.settings.pointMode)[player.id] ?? 0}</strong>
-      <small>${t("standings.wins", { wins: stats.matchWins })}</small>
-    </div>
-    <div class="ready">
-      <span>${t("common.matches")}</span>
-      <strong>${playerMatches.length}</strong>
-      <small>${t("standings.played", { played: stats.matchesPlayed })}</small>
-    </div>
-  `;
+  playerStatus.renderPlayerStatus(matches);
 }
 
 function renderRules() {
-  if (!elements.rulesList) return;
-  const pointModeText = {
-    matches: t("rules.rankingMatches"),
-    sets: t("rules.rankingSets"),
-    games: t("rules.rankingGames"),
-  }[state.settings.pointMode] ?? t("rules.rankingFallback");
-
-  const rules = [
-    {
-      title: t("rules.tennisPointsTitle"),
-      text: t("rules.tennisPointsText"),
-    },
-    {
-      title: t("rules.setsTitle"),
-      text: t("rules.setsText", { sets: state.settings.setsToWinMatch, games: state.settings.gamesToWinSet }),
-    },
-    {
-      title: t("rules.rankingTitle"),
-      text: t("rules.rankingText", { pointModeText }),
-    },
-    {
-      title: t("rules.restTitle"),
-      text: t("rules.restText"),
-    },
-  ];
-
-  elements.rulesList.innerHTML = rules.map((rule) => `
-    <div>
-      <strong>${escapeHtml(rule.title)}</strong>
-      <p>${escapeHtml(rule.text)}</p>
-    </div>
-  `).join("");
+  rules.renderRules();
 }
 
 function openLargeScore(matchId) {
@@ -2937,27 +1660,11 @@ function openLargeScore(matchId) {
 }
 
 function openSetScoreDialog(matchId) {
-  const match = getMatchById(matchId);
-  if (!match || ["finished", "cancelled"].includes(match.state)) return;
-  pendingSetScoreMatchId = matchId;
-  elements.setScoreTitle.textContent = t("score.setResultTitle");
-  elements.setScoreContext.textContent = t("score.matchup", { teamOne: match.teamOne.displayName, teamTwo: match.teamTwo.displayName });
-  elements.setScoreOptions.innerHTML = quickScoreButtons(match.teamOne.displayName, match.teamTwo.displayName);
-  elements.setScoreOptions.querySelectorAll("[data-score]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const selectedMatch = getMatchById(pendingSetScoreMatchId);
-      if (!selectedMatch) return;
-      const [teamOne, teamTwo] = button.dataset.score.split("-").map(Number);
-      saveSetResult(selectedMatch, teamOne, teamTwo);
-      closeSetScoreDialog();
-    });
-  });
-  elements.setScoreDialog.showModal();
+  setScoreDialog.openSetScoreDialog(matchId);
 }
 
 function closeSetScoreDialog() {
-  pendingSetScoreMatchId = null;
-  elements.setScoreDialog.close();
+  setScoreDialog.closeSetScoreDialog();
 }
 
 function closeLargeScore() {
@@ -2965,101 +1672,27 @@ function closeLargeScore() {
 }
 
 function renderLargeScore() {
-  if (!largeScoreMatchId || !elements.largeScoreDialog.open) return;
-  const match = getMatchById(largeScoreMatchId);
-  if (!match || match.state !== "playing") {
-    closeLargeScore();
-    return;
-  }
-
-  elements.largeScoreSurface.setAttribute("style", teamAccentStyle(match.teamOne));
-  elements.largeScoreContext.textContent = `${matchContextText(match)} · ${match.courtName ?? t("tournament.noCourtAssigned")}`;
-  elements.largeScoreTitle.textContent = t("score.matchup", { teamOne: match.teamOne.displayName, teamTwo: match.teamTwo.displayName });
-  elements.largeScoreBoard.innerHTML = [match.teamOne, match.teamTwo].map((team, index) => {
-    const teamKey = index === 0 ? "teamOne" : "teamTwo";
-    return `
-      <button class="large-score-team" type="button" data-large-score-team="${index}" style="${teamAccentStyle(team)}">
-        <span>${teamDisplay(team)}</span>
-        <strong>${match.currentSet[teamKey]}</strong>
-        <small>${tennisPointLabel(match.currentGame[teamKey])}</small>
-      </button>
-    `;
-  }).join("");
-  elements.largeScoreActions.innerHTML = `
-    <div>
-      <span>${t("common.games")}</span>
-      <strong>${setScoreText(match)}</strong>
-    </div>
-    <div>
-      <span>${t("common.points")}</span>
-      <strong>${gameScoreText(match)}</strong>
-    </div>
-    <div>
-      <span>${t("common.server")}</span>
-      <strong>${escapeHtml(startingTeamText(match))}</strong>
-    </div>
-  `;
-  elements.largeScoreBoard.querySelectorAll("[data-large-score-team]").forEach((button) => {
-    button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.largeScoreTeam)));
-  });
+  largeScore.renderLargeScore(largeScoreMatchId);
 }
 
 function avatarUrl(player) {
-  const seed = encodeURIComponent(`${player.name ?? "Sophie"}-${player.avatarId ?? defaultAvatarId}`);
-  return `https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=${seed}&size=128`;
+  return playerVisuals.avatarUrl?.(player) ?? avatarSystem.url(player);
 }
 
 function avatarMarkup(player, className = "avatar", size = 34) {
-  return `<span class="${className} avatar-frame" style="${accentStyle(player.accent)}" aria-hidden="true">
-    <img src="${avatarUrl(player)}" alt="" width="${size}" height="${size}">
-  </span>`;
+  return playerVisuals.avatarMarkup(player, className, size);
 }
 
 function createJoinLink() {
-  const isLocalDevelopment = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
-  const url = new URL(isLocalDevelopment ? window.location.origin : publicAppUrl);
-  url.searchParams.set("join", state.inviteCode);
-  url.hash = "";
-  return url.toString();
+  return linkUtils.createJoinLink({ location: window.location, inviteCode: state.inviteCode });
 }
 
 function createSpectatorLink() {
-  const isLocalDevelopment = ["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
-  const url = new URL(isLocalDevelopment ? window.location.origin : publicAppUrl);
-  url.searchParams.set(spectatorQueryKey, state.inviteCode);
-  url.hash = "";
-  return url.toString();
+  return linkUtils.createSpectatorLink({ location: window.location, inviteCode: state.inviteCode });
 }
 
 function createQrCodeUrl(text) {
-  const params = new URLSearchParams({
-    text,
-    size: "360",
-    margin: "2",
-    format: "svg",
-    dark: "16130e",
-    light: "fbf5e6",
-    ecLevel: "Q",
-  });
-  return `https://quickchart.io/qr?${params.toString()}`;
-}
-
-function quickScoreButtons(teamOneName, teamTwoName) {
-  const gamesToWinSet = state.settings.gamesToWinSet ?? 6;
-  const scores = [
-    ...Array.from({ length: Math.max(1, gamesToWinSet - 1) }, (_, index) => [gamesToWinSet, index]),
-    [gamesToWinSet + 1, gamesToWinSet - 1],
-    [gamesToWinSet + 1, gamesToWinSet],
-  ];
-
-  return [
-    ...scores.map(([teamOne, teamTwo]) => quickScoreButton(teamOne, teamTwo, teamOneName)),
-    ...scores.map(([teamOne, teamTwo]) => quickScoreButton(teamTwo, teamOne, teamTwoName)),
-  ].join("");
-}
-
-function quickScoreButton(teamOne, teamTwo, winnerName) {
-  return `<button class="quick-score-button" type="button" data-score="${teamOne}-${teamTwo}">${teamOne}-${teamTwo} ${escapeHtml(winnerName)}</button>`;
+  return linkUtils.createQrCodeUrl(text);
 }
 
 async function copyText(text, successMessage) {
@@ -3094,126 +1727,35 @@ async function shareCurrentTournament() {
 }
 
 async function sendPushNotification(kind, matchId = null) {
-  if (!supabaseClient || !state.id || !state.adminToken || !supabaseClient.functions) return;
-  const copy = kind === "match_started"
-    ? {
-      title: t("notifications.matchReadyTitle"),
-      body: t("notifications.matchPlayingBody"),
-    }
-    : {
-      title: t("notifications.matchReadyTitle"),
-      body: t("notifications.matchReadyBody"),
-    };
-  try {
-    const { error } = await supabaseClient.functions.invoke("push-send", {
-      body: {
-        tournamentId: state.id,
-        title: copy.title,
-        body: copy.body,
-        tag: `padelstar-${kind}-${matchId ?? state.currentRound}`,
-      },
-      headers: { "x-padelstar-admin-token": state.adminToken },
-    });
-    if (error) throw error;
-    observability?.emit("push_notification_sent", { kind });
-  } catch (error) {
-    observability?.error("push_notification_failed", error, { kind });
-  }
+  return notificationSystem.sendPushNotification(kind, matchId);
 }
 
 function notificationsSupported() {
-  return "Notification" in window && "serviceWorker" in navigator;
+  return notificationSystem.notificationsSupported();
 }
 
 function notificationsEnabled() {
-  return localStorage.getItem(notificationPreferenceKey) === "enabled" && Notification.permission === "granted";
+  return notificationSystem.notificationsEnabled();
 }
 
 function renderNotificationControl() {
-  const button = elements.toggleNotificationsButton;
-  if (!button) return;
-  button.classList.toggle("hidden", !state.selectedPlayerId || spectatorMode || !notificationsSupported());
-  button.textContent = notificationsEnabled() ? t("actions.disableNotifications") : t("actions.enableNotifications");
+  return notificationSystem.renderNotificationControl();
 }
 
 async function toggleNotifications() {
-  if (!notificationsSupported()) return;
-  if (notificationsEnabled()) {
-    await unsubscribeFromPush();
-    localStorage.removeItem(notificationPreferenceKey);
-    renderNotificationControl();
-    return;
-  }
-  const permission = await Notification.requestPermission();
-  if (permission !== "granted") {
-    elements.copyStatus.textContent = t("messages.notificationsDenied");
-    return;
-  }
-  await subscribeToPush();
-  localStorage.setItem(notificationPreferenceKey, "enabled");
-  renderNotificationControl();
-  observability?.emit("notifications_enabled");
-  const registration = await navigator.serviceWorker.ready;
-  registration.active?.postMessage({
-    type: "padelstar-show-notification",
-    title: t("notifications.enabledTitle"),
-    body: t("notifications.enabledBody"),
-    tag: "padelstar-notifications-enabled",
-  });
+  return notificationSystem.toggleNotifications();
 }
 
 function base64ToUint8Array(value) {
-  const padded = `${value}${"=".repeat((4 - value.length % 4) % 4)}`.replace(/-/g, "+").replace(/_/g, "/");
-  return Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+  return notificationSystem.base64ToUint8Array(value);
 }
 
 async function subscribeToPush() {
-  const publicKey = String(supabaseSettings.vapidPublicKey ?? "").trim();
-  if (!publicKey || !navigator.serviceWorker?.ready) return null;
-  try {
-    const registration = await navigator.serviceWorker.ready;
-    if (!registration.pushManager) return null;
-    const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: base64ToUint8Array(publicKey) });
-    const json = subscription.toJSON();
-    localStorage.setItem(pushSubscriptionStorageKey, JSON.stringify(json));
-    if (supabaseClient && state.playerToken && state.selectedPlayerId) {
-    const { error } = await remoteRpc(supabaseClient, "upsert_push_subscription", {
-        p_tournament_id: state.id,
-        p_invite_code: state.inviteCode,
-        p_player_id: state.selectedPlayerId,
-        p_player_token: state.playerToken,
-        p_subscription: json,
-      });
-      if (error) throw error;
-    }
-    observability?.emit("push_subscription_enabled");
-    return subscription;
-  } catch (error) {
-    observability?.error("push_subscription_failed", error);
-    localStorage.removeItem(pushSubscriptionStorageKey);
-    return null;
-  }
+  return notificationSystem.subscribeToPush();
 }
 
 async function unsubscribeFromPush() {
-  const serialized = localStorage.getItem(pushSubscriptionStorageKey);
-  try {
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    if (subscription) await subscription.unsubscribe();
-    if (serialized && supabaseClient && state.playerToken && state.selectedPlayerId) {
-      await remoteRpc(supabaseClient, "delete_push_subscription", {
-        p_tournament_id: state.id,
-        p_player_id: state.selectedPlayerId,
-        p_player_token: state.playerToken,
-        p_endpoint: JSON.parse(serialized).endpoint,
-      });
-    }
-  } catch (error) {
-    observability?.error("push_subscription_delete_failed", error);
-  } finally {
-    localStorage.removeItem(pushSubscriptionStorageKey);
-  }
+  return notificationSystem.unsubscribeFromPush();
 }
 
 function joinTournament(name, avatarId) {
@@ -3223,64 +1765,23 @@ function joinTournament(name, avatarId) {
 }
 
 function parsePlayerNames(value) {
-  return String(value)
-    .split(/[\n,;]+/)
-    .map((name) => name.trim())
-    .filter(Boolean);
+  return playerState.parsePlayerNames(value);
 }
 
 function addPlayers(names, joinedFrom) {
-  names.forEach((name) => {
-    if (!findPlayerByName(name)) addPlayer(name, joinedFrom, defaultAvatarId);
-  });
+  playerState.addPlayers(names, joinedFrom);
 }
 
 function addPlayer(name, joinedFrom, avatarId) {
-  const player = {
-    ...createPlayer(name, state.players.length, avatarId),
-    joinedFrom,
-  };
-  state.players.push(player);
-  state.schedule = buildSchedule(state.players, state.settings.format);
-  return player;
+  return playerState.addPlayer(name, joinedFrom, avatarId);
 }
 
 function updatePlayer(playerId, updates) {
-  const player = getPlayerById(playerId);
-  if (!player || state.rounds.length > 0) return;
-
-  const nextName = updates.name?.trim();
-  if (!nextName) return;
-
-  const duplicate = state.players.find((item) => item.id !== playerId && item.name.localeCompare(nextName, "nb", { sensitivity: "accent" }) === 0);
-  if (duplicate) {
-    showToast(t("messages.duplicatePlayer", { name: nextName }), "status-message-error");
-    return;
-  }
-
-  player.name = nextName;
-  player.avatarId = updates.avatarId || player.avatarId || defaultAvatarId;
-  state.cupTeams = state.cupTeams.map((team) => createTeam(
-    team.players.map((teamPlayer) => teamPlayer.id === playerId ? player : teamPlayer),
-  ));
-  state.schedule = buildSchedule(state.players, state.settings.format);
-  saveState();
-  render();
+  playerState.updatePlayer(playerId, updates);
 }
 
 function removePlayer(playerId) {
-  if (state.rounds.length > 0) {
-    showToast(t("messages.removePlayersLocked"), "status-message-error");
-    return;
-  }
-  state.players = state.players.filter((player) => player.id !== playerId);
-  if (state.selectedPlayerId === playerId) state.selectedPlayerId = null;
-  state.cupTeams = state.cupTeams
-    .map((team) => createTeam(team.players.filter((teamPlayer) => teamPlayer.id !== playerId)))
-    .filter((team) => team.players.length > 0);
-  state.schedule = buildSchedule(state.players, state.settings.format);
-  saveState();
-  render();
+  playerState.removePlayer(playerId);
 }
 
 function leaveCurrentTournament(options = {}) {
@@ -3322,7 +1823,7 @@ function leaveCurrentTournament(options = {}) {
     localStorage.removeItem(recoveryStorageKey);
     localStorage.removeItem(roleStorageKey);
     localStorage.removeItem(syncStorageKey);
-    removeOfflineStorageKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
+  persistence.removeKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
     if (!window.PADELSTAR_TEST_MODE) {
       elements.joinTournamentForm.reset();
       syncCreateFormDefaults();
@@ -3362,7 +1863,7 @@ function leaveSpectatorView() {
     localStorage.removeItem(recoveryStorageKey);
     localStorage.removeItem(roleStorageKey);
     localStorage.removeItem(syncStorageKey);
-    removeOfflineStorageKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
+    persistence.removeKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
     if (!window.PADELSTAR_TEST_MODE) {
       elements.joinTournamentForm.reset();
       syncCreateFormDefaults();
@@ -3435,52 +1936,23 @@ function courtsInputValue() {
 }
 
 function canGenerateRound() {
-  return !generateRoundBlockReason();
+  return tournamentStatus.canGenerateRound();
 }
 
 function tournamentActionText() {
-  if (state.rounds.length === 0) return t("startTournament");
-  const activeRound = getActiveRound();
-  if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return t("score.playAllMatchesFirst");
-  if (getNextScheduledRound()) return t("startNextRound");
-  if (cupCanAdvance() || cupCanFinalize()) return t("startNextRound");
-  if (state.settings.format === "cup" && state.status === "Cup ferdig") return t("tournament.cupFinished");
-  return t("tournament.allGenerated");
+  return tournamentStatus.tournamentActionText();
 }
 
 function generateRoundBlockReason() {
-  const activeRound = getActiveRound();
-  if (state.status === "Avsluttet") return t("tournament.finished");
-  if (state.players.length < 2) return t("messages.needTwoPlayersStart");
-  if (state.settings.format === "cup") {
-    if (state.settings.cupTeamSetupMode === "manual" && state.cupTeams.length < 2) {
-      return t("messages.defineManualCupTeams");
-    }
-    if (state.settings.cupTeamSetupMode === "auto" && state.players.filter((player) => player.active && player.availability !== "away").length < 4) {
-      return t("messages.autoCupNeedsActivePlayers");
-    }
-  }
-  if (state.courts.length < 1) return t("messages.needCourt");
-  if (activeRound?.status === "active" && !canCompleteRound(activeRound)) return t("messages.finishMatchesBeforeNext");
-  if (state.rounds.length > 0 && !getNextScheduledRound() && !cupCanAdvance() && !cupCanFinalize()) {
-    return state.settings.format === "cup" && state.status === "Cup ferdig"
-      ? t("tournament.cupFinishedReason")
-      : t("tournament.allGenerated");
-  }
-  return "";
+  return tournamentStatus.generateRoundBlockReason();
 }
 
 function canCompleteRound(round) {
-  if (!round || round.status === "finished") return false;
-  return round.matches.length > 0 && round.matches.every((match) => ["finished", "cancelled"].includes(match.state));
+  return tournamentStatus.canCompleteRound(round);
 }
 
 function roundProgress(round) {
-  if (!round) return null;
-  return {
-    total: round.matches.length,
-    finished: round.matches.filter((match) => ["finished", "cancelled"].includes(match.state)).length,
-  };
+  return tournamentStatus.roundProgress(round);
 }
 
 function isEditableAdminMatch(match) {
@@ -3489,302 +1961,19 @@ function isEditableAdminMatch(match) {
 }
 
 function teamDisplay(team, variant = "default") {
-  const avatarClass = variant === "scorecard" ? "avatar scorecard-avatar" : "avatar small-avatar";
-  const avatarSize = variant === "scorecard" ? 56 : 28;
-  return team.players
-    .map((player) => `
-      <span class="team-player" style="${accentStyle(player.accent)}">
-        ${avatarMarkup(player, avatarClass, avatarSize)}
-        <span class="team-player-badge">${escapeHtml(player.name)}</span>
-      </span>
-    `)
-    .join("");
+  return playerVisuals.teamDisplay(team, variant);
 }
 
 function accentStyle(accent) {
-  const base = playerAccentPalette[normalizeAccent(accent)] ?? playerAccentPalette.gold;
-  const light = mixHex(base, "#ffffff", 0.28);
-  const dark = mixHex(base, "#000000", 0.18);
-  const [r, g, b] = hexToRgb(base);
-  return `--player-accent: ${base}; --player-accent-light: ${light}; --player-accent-dark: ${dark}; --player-accent-rgb: ${r}, ${g}, ${b};`;
+  return accentSystem.accentStyle(accent);
 }
 
 function teamAccentStyle(team) {
-  return accentStyle(team.accent ?? team.players[0]?.accent);
+  return playerVisuals.teamAccentStyle(team);
 }
 
 function normalizeAccent(accent, fallbackIndex = 0) {
-  if (playerAccentPalette[accent]) return accent;
-  if (legacyAccentMap[accent]) return legacyAccentMap[accent];
-  return accents[fallbackIndex % accents.length];
-}
-
-function hexToRgb(hex) {
-  const normalized = hex.replace("#", "");
-  return [
-    Number.parseInt(normalized.slice(0, 2), 16),
-    Number.parseInt(normalized.slice(2, 4), 16),
-    Number.parseInt(normalized.slice(4, 6), 16),
-  ];
-}
-
-function rgbToHex([r, g, b]) {
-  return `#${[r, g, b].map((value) => Math.round(value).toString(16).padStart(2, "0")).join("")}`;
-}
-
-function mixHex(hex, targetHex, amount) {
-  const source = hexToRgb(hex);
-  const target = hexToRgb(targetHex);
-  return rgbToHex(source.map((value, index) => value + (target[index] - value) * amount));
-}
-
-function generateFullTournamentSchedule() {
-  if (state.settings.format === "cup") {
-    generateCupTournament();
-    return;
-  }
-
-  const schedule = state.schedule.length ? state.schedule : buildSchedule(state.players, state.settings.format);
-  if (!schedule.length) {
-    showToast(t("messages.needTwoPlayers"), "status-message-error");
-    return;
-  }
-
-  state.rounds = schedule
-    .map((roundPlan, index) => createScheduledRound(roundPlan, index + 1))
-    .filter((round) => round.matches.length > 0);
-
-  if (!state.rounds.length) {
-    showToast(t("messages.noValidMatches"), "status-message-error");
-    return;
-  }
-
-  activateRound(state.rounds[0]);
-  state.status = "Runde pågår";
-}
-
-function generateCupTournament() {
-  const activePlayers = state.players.filter((player) => player.active && player.availability !== "away");
-  const teams = cupTeamsForStart();
-  if (teams.length < 2) {
-    showToast(state.settings.cupTeamSetupMode === "manual"
-      ? t("messages.manualCupNeedsTeams")
-      : t("messages.autoCupNeedsPlayers"), "status-message-error");
-    return;
-  }
-
-  const bracketSize = nextPowerOfTwo(teams.length);
-  const seededTeams = shuffleItems(teams);
-  const byeCount = bracketSize - seededTeams.length;
-  const byeTeams = seededTeams.slice(0, byeCount);
-  const teamPlayerIds = new Set(teams.flatMap((team) => team.players.map((player) => player.id)));
-  const firstRound = createScheduledRound({
-    teams: seededTeams.slice(byeCount),
-    sittingOut: [
-      ...activePlayers.filter((player) => !teamPlayerIds.has(player.id)),
-      ...byeTeams.flatMap((team) => team.players),
-    ],
-  }, 1);
-
-  state.cup = {
-    teamSetupMode: "auto",
-    includesThirdPlaceMatch: state.settings.includesThirdPlaceMatch,
-    bracketSize,
-    byeTeams,
-    bracket: createCupBracket({
-      bracketSize,
-      firstRound,
-      byeTeams,
-      includesThirdPlaceMatch: state.settings.includesThirdPlaceMatch,
-    }),
-  };
-  state.rounds = firstRound.matches.length ? [firstRound] : [];
-
-  if (!state.rounds.length) {
-    state.status = "Cup ferdig";
-    return;
-  }
-
-  activateRound(state.rounds[0]);
-  state.status = "Runde pågår";
-}
-
-function createAutoCupTeams(players) {
-  return Array.from({ length: Math.floor(players.length / 2) }, (_, index) => {
-    return createTeam([players[index * 2], players[index * 2 + 1]]);
-  });
-}
-
-function cupTeamsForStart() {
-  if (state.settings.cupTeamSetupMode === "manual") return state.cupTeams;
-  const activePlayers = state.players.filter((player) => player.active && player.availability !== "away");
-  const pairedPlayers = activePlayers.slice(0, activePlayers.length - (activePlayers.length % 2));
-  return createAutoCupTeams(pairedPlayers);
-}
-
-function createCupBracket({ bracketSize, firstRound, byeTeams, includesThirdPlaceMatch }) {
-  const totalRounds = Math.max(1, Math.log2(bracketSize));
-  const rounds = [{
-    roundNumber: 1,
-    slots: firstRound.matches.map((match) => ({ type: "match", matchId: match.id })),
-    byeTeams,
-    thirdPlaceSlot: null,
-  }];
-
-  for (let roundNumber = 2; roundNumber <= totalRounds; roundNumber += 1) {
-    rounds.push({
-      roundNumber,
-      slots: Array.from({ length: Math.max(1, bracketSize / 2 ** roundNumber) }, () => ({ type: "pending" })),
-      byeTeams: [],
-      thirdPlaceSlot: roundNumber === totalRounds && includesThirdPlaceMatch ? { type: "pending" } : null,
-    });
-  }
-
-  return {
-    bracketSize,
-    includesThirdPlaceMatch,
-    rounds,
-    finalMatchId: null,
-    thirdPlaceMatchId: null,
-  };
-}
-
-function createNextCupRound() {
-  const previousRound = state.rounds.at(-1);
-  if (!previousRound || previousRound.status !== "finished") return null;
-
-  const previousBracketRound = getCupBracketRound(previousRound.roundNumber);
-  const regularMatches = previousRound.matches.filter((match) => !match.isThirdPlaceMatch);
-  const advancingTeams = [
-    ...(previousBracketRound?.byeTeams ?? state.cup?.byeTeams ?? []),
-    ...regularMatches
-      .filter((match) => match.state === "finished" && match.winnerTeamIndex !== null)
-      .map((match) => match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo),
-  ];
-  const losingTeams = regularMatches
-    .filter((match) => match.state === "finished" && match.winnerTeamIndex !== null)
-    .map((match) => match.winnerTeamIndex === 0 ? match.teamTwo : match.teamOne);
-  state.cup.byeTeams = [];
-  if (advancingTeams.length < 2) {
-    state.cup.winnerTeam = advancingTeams[0] ?? null;
-    return null;
-  }
-
-  const nextBracketRound = state.cup.bracket?.rounds?.find((round) => round.roundNumber > previousRound.roundNumber);
-  const nextRoundNumber = nextBracketRound?.roundNumber ?? previousRound.roundNumber + 1;
-  const nextRound = createScheduledRound({ teams: advancingTeams, sittingOut: [] }, nextRoundNumber);
-  const isFinalRound = nextBracketRound
-    ? nextRoundNumber === state.cup.bracket.rounds.at(-1)?.roundNumber
-    : advancingTeams.length === 2;
-  let thirdPlaceMatch = null;
-
-  if (isFinalRound && state.cup.includesThirdPlaceMatch && losingTeams.length >= 2) {
-    thirdPlaceMatch = createScheduledMatch(
-      losingTeams[0],
-      losingTeams[1],
-      nextRoundNumber,
-      nextRound.matches.length,
-      true,
-    );
-    nextRound.matches.push(thirdPlaceMatch);
-  }
-
-  if (nextBracketRound) {
-    nextBracketRound.slots = nextRound.matches
-      .filter((match) => !match.isThirdPlaceMatch)
-      .map((match) => ({ type: "match", matchId: match.id }));
-    nextBracketRound.byeTeams = [];
-    nextBracketRound.thirdPlaceSlot = thirdPlaceMatch
-      ? { type: "match", matchId: thirdPlaceMatch.id }
-      : nextBracketRound.thirdPlaceSlot && nextBracketRound.thirdPlaceSlot.type === "pending"
-        ? null
-        : nextBracketRound.thirdPlaceSlot;
-    if (isFinalRound) {
-      state.cup.bracket.finalMatchId = nextRound.matches.find((match) => !match.isThirdPlaceMatch)?.id ?? null;
-      state.cup.bracket.thirdPlaceMatchId = thirdPlaceMatch?.id ?? null;
-    }
-  }
-
-  return nextRound;
-}
-
-function cupCanAdvance() {
-  if (state.settings.format !== "cup") return false;
-  const round = state.rounds.at(-1);
-  if (!round || (round.status !== "finished" && !(round.status === "active" && canCompleteRound(round)))) return false;
-  const bracketRound = getCupBracketRound(round.roundNumber);
-  const advancingTeams = [
-    ...(bracketRound?.byeTeams ?? state.cup?.byeTeams ?? []),
-    ...round.matches
-      .filter((match) => !match.isThirdPlaceMatch)
-      .filter((match) => match.state === "finished" && match.winnerTeamIndex !== null)
-      .map((match) => match.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo),
-  ];
-  return advancingTeams.length > 1;
-}
-
-function cupCanFinalize() {
-  if (state.settings.format !== "cup") return false;
-  const round = state.rounds.at(-1);
-  if (!round || round.status !== "active" || !canCompleteRound(round)) return false;
-  const finalRoundNumber = state.cup?.bracket?.rounds?.at(-1)?.roundNumber;
-  return finalRoundNumber ? round.roundNumber === finalRoundNumber : true;
-}
-
-function getCupBracketRound(roundNumber) {
-  return state.cup?.bracket?.rounds?.find((round) => round.roundNumber === roundNumber) ?? null;
-}
-
-function nextPowerOfTwo(value) {
-  return 2 ** Math.ceil(Math.log2(value));
-}
-
-function shuffleItems(items) {
-  const shuffled = [...items];
-  for (let index = shuffled.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
-  }
-  return shuffled;
-}
-
-function createScheduledRound(roundPlan, roundNumber) {
-  const matchPlan = generateRoundMatches(roundPlan.teams, roundNumber, roundPlan.sittingOut);
-  const matches = matchPlan.map((match, index) => ({
-    ...match,
-    isThirdPlaceMatch: false,
-    courtId: state.courts[index % state.courts.length]?.id ?? null,
-    courtName: state.courts[index % state.courts.length]?.name ?? null,
-    state: "waiting",
-  }));
-  const playingPlayerIds = new Set(matches.flatMap((match) => matchPlayers(match).map((player) => player.id)));
-  const sittingOut = uniquePlayers([
-    ...roundPlan.sittingOut,
-    ...roundPlan.teams.flatMap((team) => team.players).filter((player) => !playingPlayerIds.has(player.id)),
-  ]);
-  matches.forEach((match) => {
-    match.sittingOut = sittingOut;
-  });
-
-  return {
-    id: crypto.randomUUID(),
-    roundNumber,
-    status: "scheduled",
-    createdAt: new Date().toISOString(),
-    sittingOut,
-    matches,
-  };
-}
-
-function createScheduledMatch(teamOne, teamTwo, roundNumber, matchIndex, isThirdPlaceMatch = false) {
-  const match = generateRoundMatches([teamOne, teamTwo], roundNumber, [])[0];
-  return {
-    ...match,
-    isThirdPlaceMatch,
-    courtId: state.courts[matchIndex % state.courts.length]?.id ?? null,
-    courtName: state.courts[matchIndex % state.courts.length]?.name ?? null,
-    state: "waiting",
-  };
+  return accentSystem.normalizeAccent(accent, fallbackIndex);
 }
 
 function activateRound(round) {
@@ -3808,21 +1997,28 @@ function getNextScheduledRound() {
   return state.rounds.find((round) => round.status === "scheduled");
 }
 
-function startNextScheduledRound() {
-  const nextRound = getNextScheduledRound();
-  if (nextRound) {
-    activateRound(nextRound);
-    return;
-  }
-  if (state.settings.format !== "cup") return;
+function generateFullTournamentSchedule() {
+  return tournamentRuntime.generateFullTournamentSchedule();
+}
 
-  const nextCupRound = createNextCupRound();
-  if (!nextCupRound) {
-    state.status = "Cup ferdig";
-    return;
-  }
-  state.rounds.push(nextCupRound);
-  activateRound(nextCupRound);
+function generateCupTournament() {
+  return tournamentRuntime.generateCupTournament();
+}
+
+function createNextCupRound() {
+  return tournamentRuntime.createNextCupRound();
+}
+
+function cupCanAdvance() {
+  return tournamentRuntime.cupCanAdvance();
+}
+
+function cupCanFinalize() {
+  return tournamentRuntime.cupCanFinalize();
+}
+
+function startNextScheduledRound() {
+  return tournamentRuntime.startNextScheduledRound();
 }
 
 function buildSchedule(players, format = "roundRobin") {
@@ -3850,283 +2046,71 @@ function createTeam(players) {
 }
 
 function finishMatch(match) {
-  match.state = "finished";
-  match.currentGame = { teamOne: 0, teamTwo: 0 };
-  match.winnerTeamIndex = setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1;
-  match.isWalkover = false;
-  match.completedAt = new Date().toISOString();
-
-  activateNextWaitingMatch(match);
-  markCupCompleteIfDone();
+  return tournamentRuntime.finishMatch(match);
 }
 
 function activateNextWaitingMatch(match) {
-  const activeRound = getActiveRound();
-  const nextWaitingMatch = activeRound?.matches.find((item) => item.state === "waiting");
-  if (!nextWaitingMatch) return null;
-  nextWaitingMatch.state = "playing";
-  nextWaitingMatch.courtId = match.courtId;
-  nextWaitingMatch.courtName = match.courtName;
-  return nextWaitingMatch;
+  return tournamentRuntime.activateNextWaitingMatch(match);
 }
 
 function captureMatchUndoState(match) {
-  const activeRound = getRoundForMatch(match);
-  const matchSnapshot = structuredClone(match);
-  delete matchSnapshot.lastScoredMatchState;
-  const nextWaitingMatch = activeRound?.matches.find((item) => item.id !== match.id && item.state === "waiting");
-  return {
-    match: matchSnapshot,
-    nextWaitingMatch: nextWaitingMatch ? structuredClone(nextWaitingMatch) : null,
-    roundId: activeRound?.id ?? null,
-    roundStatus: activeRound?.status ?? null,
-    tournamentStatus: state.status,
-    revision: state.revision,
-    cupWinnerTeam: state.cup?.winnerTeam ? structuredClone(state.cup.winnerTeam) : null,
-  };
+  return matchActions.captureMatchUndoState(match);
 }
 
 function undoMatch(match) {
-  const undoState = match.lastScoredMatchState;
-  if (!undoState?.match) {
-    showToast(t("messages.noUndo"), "status-message-error");
-    return;
-  }
-
-  const restoredMatch = structuredClone(undoState.match);
-  delete match.lastScoredMatchState;
-  Object.assign(match, restoredMatch);
-
-  if (undoState.nextWaitingMatch) {
-    const nextMatch = getMatchById(undoState.nextWaitingMatch.id);
-    if (nextMatch) Object.assign(nextMatch, structuredClone(undoState.nextWaitingMatch));
-  }
-
-  const round = state.rounds.find((item) => item.id === undoState.roundId);
-  if (round && undoState.roundStatus) round.status = undoState.roundStatus;
-  if (undoState.tournamentStatus) state.status = undoState.tournamentStatus;
-  if (state.cup) state.cup.winnerTeam = undoState.cupWinnerTeam ? structuredClone(undoState.cupWinnerTeam) : null;
-  saveState();
-  render();
-  renderLargeScore();
+  return matchActions.undoMatch(match);
 }
 
 function markCupCompleteIfDone() {
-  if (state.settings.format !== "cup") return;
-  const activeRound = getActiveRound();
-  if (!activeRound || !canCompleteRound(activeRound)) return;
-
-  const finalRoundNumber = state.cup?.bracket?.rounds?.at(-1)?.roundNumber;
-  const isFinalRound = finalRoundNumber
-    ? activeRound.roundNumber === finalRoundNumber
-    : !cupCanAdvance();
-  if (!isFinalRound) return;
-
-  const finalMatch = activeRound.matches.find((match) => !match.isThirdPlaceMatch);
-  activeRound.status = "finished";
-  state.status = "Cup ferdig";
-  state.cup.winnerTeam = finalMatch?.winnerTeamIndex === 0
-    ? finalMatch.teamOne
-    : finalMatch?.winnerTeamIndex === 1
-      ? finalMatch.teamTwo
-      : null;
+  return tournamentRuntime.markCupCompleteIfDone();
 }
 
 function saveMatchResult(match, teamOne, teamTwo) {
-  saveSetResult(match, teamOne, teamTwo);
+  return scoreActions.saveMatchResult(match, teamOne, teamTwo);
 }
 
 function saveSetResult(match, teamOne, teamTwo) {
-  const validationError = validateSetScore(teamOne, teamTwo);
-  if (validationError) {
-    showToast(translateScoreValidationError(validationError, teamOne, teamTwo), "status-message-error");
-    return;
-  }
-
-  if (isSupabaseReady()) {
-    queueRemoteSetResult(match, teamOne, teamTwo);
-    return;
-  }
-
-  match.lastScoredMatchState = captureMatchUndoState(match);
-  match.currentSet = { teamOne, teamTwo };
-  match.currentGame = { teamOne: 0, teamTwo: 0 };
-  match.completedSets.push({ teamOne, teamTwo });
-  if (hasMatchWinner(match)) {
-    finishMatch(match);
-  } else {
-    match.currentSet = { teamOne: 0, teamTwo: 0 };
-    match.state = "playing";
-  }
-  saveState();
-  render();
-  renderLargeScore();
+  return scoreActions.saveSetResult(match, teamOne, teamTwo);
 }
 
 function validateSetScore(teamOne, teamTwo) {
-  return scoring.validateSetScore(teamOne, teamTwo, state.settings);
-}
-
-function translateScoreValidationError(message, teamOne, teamTwo) {
-  if (!message) return "";
-  if (message.includes("hele tall")) return t("messages.invalidScoreInteger");
-  if (message.includes("negativt")) return t("messages.invalidScoreNegative");
-  if (message.includes("uavgjort")) return t("messages.invalidScoreDraw");
-  if (message.includes("Sett må vinnes")) {
-    const gamesToWinSet = state.settings.gamesToWinSet ?? 6;
-    return t("messages.invalidScoreShape", {
-      gamesToWinSet,
-      tieBreakOne: gamesToWinSet + 1,
-      tieBreakTwo: gamesToWinSet - 1,
-      teamOne,
-      teamTwo,
-    });
-  }
-  return message;
+  return scoreActions.validateSetScore(teamOne, teamTwo);
 }
 
 function awardTennisPoint(match, teamIndex) {
-  if (["finished", "cancelled"].includes(match.state)) return;
-  match.lastScoredMatchState = captureMatchUndoState(match);
-  if (match.state === "waiting") match.state = "playing";
-
-  const scoringTeam = teamIndex === 0 ? "teamOne" : "teamTwo";
-  const otherTeam = teamIndex === 0 ? "teamTwo" : "teamOne";
-  const scoringPoints = match.currentGame[scoringTeam] ?? 0;
-  const otherPoints = match.currentGame[otherTeam] ?? 0;
-
-  if (scoringPoints === 4 || (scoringPoints === 3 && otherPoints < 3)) {
-    awardGame(match, scoringTeam);
-  } else if (scoringPoints === 3 && otherPoints === 3) {
-    match.currentGame[scoringTeam] = 4;
-  } else if (otherPoints === 4) {
-    match.currentGame[otherTeam] = 3;
-  } else {
-    match.currentGame[scoringTeam] = scoringPoints + 1;
-  }
-
-  saveState();
-  if (currentLocalRole() === "player" && matchIncludesPlayer(match, state.selectedPlayerId)) {
-    queuePlayerScore(match.id, teamIndex);
-  }
-  render();
-  renderLargeScore();
-  uiEffects?.flashMatchCards(match.id);
-}
-
-function awardGame(match, scoringTeam) {
-  match.currentSet[scoringTeam] += 1;
-  match.currentGame = { teamOne: 0, teamTwo: 0 };
-
-  if (isSetComplete(match.currentSet.teamOne, match.currentSet.teamTwo)) {
-    match.completedSets.push({ ...match.currentSet });
-    if (hasMatchWinner(match)) {
-      finishMatch(match);
-    } else {
-      match.currentSet = { teamOne: 0, teamTwo: 0 };
-    }
-  }
+  return scoreActions.awardTennisPoint(match, teamIndex);
 }
 
 function isSetComplete(teamOne, teamTwo) {
-  return scoring.isSetComplete(teamOne, teamTwo, state.settings);
+  return scoreActions.isSetComplete(teamOne, teamTwo);
 }
 
 function hasMatchWinner(match) {
-  return scoring.hasMatchWinner(match, state.settings);
+  return scoreActions.hasMatchWinner(match);
 }
 
 function setsWonByTeam(match, teamIndex) {
-  return scoring.setsWonByTeam(match, teamIndex);
+  return scoreActions.setsWonByTeam(match, teamIndex);
 }
 
 function startMatch(match) {
-  const activeRound = getActiveRound();
-  if (!activeRound || activeRound.status !== "active") return;
-  if (isSupabaseReady()) {
-    queueRemoteMatchAction(match, "start");
-    return;
-  }
-  match.state = "playing";
-  saveState();
-  render();
-  renderLargeScore();
+  return matchActions.startMatch(match);
 }
 
 function reopenMatch(match) {
-  if (isSupabaseReady()) {
-    queueRemoteMatchAction(match, "undo");
-    return;
-  }
-
-  if (match.lastScoredMatchState) {
-    undoMatch(match);
-    return;
-  }
-
-  match.state = "playing";
-  match.completedSets = [];
-  match.currentSet = { teamOne: 0, teamTwo: 0 };
-  match.currentGame = { teamOne: 0, teamTwo: 0 };
-  match.winnerTeamIndex = null;
-  match.isWalkover = false;
-  match.lastScoredMatchState = null;
-  match.completedAt = null;
-  saveState();
-  render();
-  renderLargeScore();
+  return matchActions.reopenMatch(match);
 }
 
 async function cancelMatch(match) {
-  if (!await requestConfirmation(t("messages.cancelMatchConfirm"))) return;
-  if (isSupabaseReady()) {
-    queueRemoteMatchAction(match, "cancel");
-    return;
-  }
-  match.state = "cancelled";
-  match.completedSets = [];
-  match.winnerTeamIndex = null;
-  match.isWalkover = false;
-  match.completedAt = new Date().toISOString();
-  activateNextWaitingMatch(match);
-  saveState();
-  render();
-  renderLargeScore();
+  return matchActions.cancelMatch(match);
 }
 
 async function setWalkover(match, teamIndex) {
-  if (![0, 1].includes(teamIndex) || ["finished", "cancelled"].includes(match.state)) return;
-  const winningTeam = teamIndex === 0 ? match.teamOne : match.teamTwo;
-  if (!await requestConfirmation(t("messages.walkoverConfirm", { team: winningTeam.displayName }))) return;
-
-  if (isSupabaseReady()) {
-    queueRemoteMatchAction(match, "walkover", teamIndex);
-    return;
-  }
-
-  match.lastScoredMatchState = captureMatchUndoState(match);
-  match.state = "finished";
-  match.completedSets = [];
-  match.currentSet = { teamOne: 0, teamTwo: 0 };
-  match.currentGame = { teamOne: 0, teamTwo: 0 };
-  match.winnerTeamIndex = teamIndex;
-  match.isWalkover = true;
-  match.completedAt = new Date().toISOString();
-  activateNextWaitingMatch(match);
-  markCupCompleteIfDone();
-  saveState();
-  render();
-  renderLargeScore();
+  return matchActions.setWalkover(match, teamIndex);
 }
 
 function updateMatchCourt(match, courtName) {
-  const nextCourtName = courtName.trim();
-  match.courtName = nextCourtName || null;
-  const matchingCourt = state.courts.find((court) => court.name.localeCompare(nextCourtName, "nb", { sensitivity: "accent" }) === 0);
-  match.courtId = matchingCourt?.id ?? match.courtId ?? null;
-  saveState();
-  render();
-  renderLargeScore();
+  return matchActions.updateMatchCourt(match, courtName);
 }
 
 function leaderboardEntries(matches) {
@@ -4309,42 +2293,25 @@ function migrateLegacyLocalStorage() {
 }
 
 function restoreInitialView() {
-  const hasSavedTournament = Boolean(localStorage.getItem(storageKey));
-  const params = new URLSearchParams(window.location.search);
-  const spectatorInviteCode = params.get(spectatorQueryKey);
-  if (spectatorInviteCode) {
-    spectatorPreviousRole = currentLocalRole();
-    spectatorMode = true;
-    setLocalRole("spectator");
-    if (hasTournamentForInvite(spectatorInviteCode.toUpperCase())) {
-      showWorkspace("tournament");
-      return;
-    }
-    if (supabaseClient) {
-      loadRemoteTournamentByInvite(spectatorInviteCode.toUpperCase()).then((loaded) => {
-        if (loaded) showWorkspace("tournament");
-        else showModule("setup-player");
-        render();
-      });
-      showWorkspace("tournament");
-      return;
-    }
-    showModule("setup-player");
-    return;
-  }
-  const hasInviteUrl = params.has("join") || params.has("code");
-  if (hasInviteUrl) {
-    showModule("setup-player");
-    return;
-  }
-  if (!hasSavedTournament) return;
-
-  if (isCurrentUserAdmin()) {
-    showWorkspace("admin");
-    return;
-  }
-
-  showWorkspace(state.selectedPlayerId ? "player" : "spectator");
+  return initialView.restore({
+    windowRef: window,
+    storage: localStorage,
+    keys: { storageKey, spectatorQueryKey },
+    callbacks: {
+      currentLocalRole: () => currentLocalRole(),
+      hasSelectedPlayer: () => Boolean(state.selectedPlayerId),
+      hasSupabaseClient: () => Boolean(supabaseClient),
+      hasTournamentForInvite: (inviteCode) => hasTournamentForInvite(inviteCode),
+      isCurrentUserAdmin: () => isCurrentUserAdmin(),
+      loadRemoteTournamentByInvite: (inviteCode) => loadRemoteTournamentByInvite(inviteCode),
+      render: () => render(),
+      setLocalRole: (role) => setLocalRole(role),
+      setSpectatorMode: (enabled) => { spectatorMode = enabled; },
+      setSpectatorPreviousRole: (role) => { spectatorPreviousRole = role; },
+      showModule: (moduleName) => showModule(moduleName),
+      showWorkspace: (view) => showWorkspace(view),
+    },
+  });
 }
 
 if (window.PADELSTAR_TEST_MODE) {
@@ -4381,7 +2348,7 @@ if (window.PADELSTAR_TEST_MODE) {
     saveState,
     t,
     i18n,
-    nextPowerOfTwo,
+    nextPowerOfTwo: tournamentRounds.nextPowerOfTwo,
     wasRecoveredFromLastGood: () => recoveredFromLastGood,
     getState: () => state,
     setState: (nextState) => {

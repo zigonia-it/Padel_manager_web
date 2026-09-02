@@ -25,9 +25,29 @@ Følgende er implementert og skal behandles som beskyttet funksjonalitet:
 - Avatarvelgeren bruker en tydelig, vertikal valgliste med forhåndsvisning og faste navn: Sophie, Aiden, Luna og Milo.
 - Blått scorecard-design med tydelig lag-/resultatstruktur, Anton kun på relevante scoretall, blå aktive statuser og individuelle spilleraccentfarger.
 - Responsiv scorecard-logikk som automatisk flytter avatar over spillernavn når navnet faktisk brytes over flere linjer, samt ekstra logo-safe-space i kampmetadata.
-- Admin-fanene `Styring`, `Del`, `Spillere` og `Kamper` bruker samme fullbredde layout på desktop og større nettbrett.
+- Admin-fanene `Styring`, `Del`, `Spillere` og `Kamper`, samt setup-sidene `Opprett` og `Bli med`, bruker samme fullbredde innholdsflate på desktop og større nettbrett.
 - Workspace-headeren er transparent og lar sidens mørkeblå bakgrunn gå kontinuerlig bak turneringstittel, rolle og handlinger.
 - `assets/padelstar-icon.png` er felles ikonreferanse for favicon, Apple/iPhone-hjemskjerm, PWA-manifest, varsler og scorecard-emblem.
+- Avatar-/profilkonfigurasjonen er flyttet til `app/avatar-system.js`; app-entrypointen bruker den delte modulen for avatar-ID-er, navn og DiceBear-URL-er.
+- Lenke- og QR-generering er flyttet til `app/link-utils.js`; join-/tilskuerparametre og lokal/offentlig URL-policy har én testbar modulgrense.
+- Ren konstruksjon av spiller- og turneringsstate er flyttet til `app/tournament-state.js`; entrypointen beholder kun avhengighetskoblingen til turneringsmotoren.
+- Lokal state-bootstrap med recovery-fallback er flyttet til `app/state-bootstrap.js`; migrering og persistence beholdes i state-/storage-modulene.
+- Modulnavn-normalisering og rollebasert navigasjonsfallback er flyttet til `app/module-routing.js`; UI-entrypointen kobler inn aktuell state og rollepolicy.
+- Session-/rollepolicy for aktiv turnering, invitasjonskontroll og lokal rolle er flyttet til `app/session-policy.js`.
+- Accent-palett, legacy-mapping og CSS-variabler for spillerfarger er flyttet til `app/accent-system.js`.
+- Bekreftelsesdialog og toast-feedback er flyttet til `app/ui-feedback.js`; remote-feil- og sync-policy ligger fortsatt i entrypointen.
+- Backup-serialisering og validerende parsing er flyttet til `app/backup-format.js`, slik at tokenfri eksport fortsatt har en egen testbar grense.
+- Push-varsler, service-worker-abonnement og tokenbundet subscription-synk er flyttet til `app/notification-system.js`, med injiserte browser-, storage- og RPC-avhengigheter.
+- Profilens lokale/remote livssyklus er flyttet til `app/profile-session.js`; profilrendering og turneringsspesifikk historikk beholdes separat, mens lagring, join-kobling og slettingsflyt har eksplisitte avhengigheter.
+- Scorecardets kampkort er flyttet til `app/match-card.js`; DOM-struktur og kampkontroller får eksplisitte formatterings- og handlingsavhengigheter.
+- Lokal persistence og IndexedDB-speiling er flyttet til `app/persistence.js`, slik at lagringsansvaret ikke lenger ligger direkte i entrypointen.
+- Admin-identitetens sign-in-link, claim og statusvisning er flyttet til `app/admin-identity.js`, med eksplisitt klient-, state-, RPC- og UI-injeksjon.
+- Remote-feedback, invite-oppslag og sanitert delt state er flyttet til `app/remote-feedback.js`, med separat status- og RPC-policy.
+- Realtime kanal-, reconnect-, refresh- og online/offline-livssyklus er flyttet til `app/realtime-connection.js`.
+- Rene cup-runde-hjelpere for bracket-oppsett, seeding/shuffle og viderekomne lag er flyttet til `app/tournament-rounds.js`.
+- Felles avatar-, lag- og spiller-markup er flyttet til `app/player-visuals.js` med eksplisitte avhengigheter.
+- Opprettelse av runder, cup-bracket og overgang til neste turneringsrunde er flyttet til `app/tournament-runtime.js`; state og app-operasjoner injiseres.
+- Admin live-overview, cup-team-builder og round-summary-rendering er flyttet til `app/workspace-overview.js` med eksplisitte avhengigheter.
 - PWA-cache, GitHub Pages-verifisering, statisk hosting og eksisterende Vercel/Supabase-konfigurasjon.
 
 ## Ikke-forhandlingsbare krav
@@ -38,6 +58,47 @@ Følgende er implementert og skal behandles som beskyttet funksjonalitet:
 - Ikke bland brukerens språkpreferanse inn i delt turneringsstate.
 - Ikke slett usikre filer direkte; arkiver dem etter referansesøk.
 - Alle funksjonsendringer krever tester, `git diff --check`, dokumentasjon og verifisert deploy.
+
+### Gjeldende fasegjennomføring
+
+Oppdatert verifiseringsnotat: siste diff-skanning `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført med komplett dekning av 51 endrede kilde-/konfigurasjonsfiler og ingen reportable funn. Dette erstatter de eldre skanningsreferansene nedenfor.
+
+Siste Fase A-grense: appens globale event-wiring er flyttet til `app/app-events.js`, mens kampfiltrering, gruppering og tilskuerkort-rendering ligger i `app/match-list.js` med eksplisitte DOM-, oversettelses- og renderingsavhengigheter.
+
+Leaderboard-/tabell-rendering er også flyttet til `app/standings.js`; `app.js` beholder kun orkestreringen.
+
+Admin-spillerliste med redigering, avatarvalg og fjerning er flyttet til `app/player-list.js`.
+
+Cup-bracketets DOM-rendering er flyttet til `app/cup-bracket.js`.
+
+Spiller-dashboardets statuskort er flyttet til `app/player-status.js`.
+
+Spillerens neste-kamp-rendering er flyttet til `app/player-next-match.js`.
+
+Regel-renderingen er flyttet til `app/rules.js`.
+
+Spilleridentitet, øktkontroll og tilgjengelighetskontroll er flyttet til `app/player-controls.js`.
+
+Fullscore-dialogens rendering er flyttet til `app/large-score.js`.
+
+Settresultat-dialogen og hurtigresultater er flyttet til `app/set-score-dialog.js`.
+
+Lobby-status og sync-status-kontroller er flyttet til `app/admin-status.js`.
+
+Profilkort og profilhistorikk-rendering er flyttet til `app/profile-ui.js`.
+
+Backup-import og backup-eksport UI er flyttet til `app/backup-ui.js`.
+
+Spiller-state-operasjoner for parsing, add, update og remove er flyttet til `app/player-state.js`.
+
+Turneringsstatus, rundeblokkering og fremdriftskontroll er flyttet til `app/tournament-status.js`.
+
+Remote state persistence for debouncede admin-lagringer er flyttet til `app/remote-state-write.js`, mens den eksisterende felles skrivekøen beholdes i entrypointen for å sikre riktig rekkefølge mot match- og score-RPC-er.
+
+- Fase A: pågår. Avataransvar, lenke-/QR-generering, rene cup-runde-hjelpere, felles spiller-/lagmarkup, turnerings-runtime, workspace-overview-rendering, remote state persistence, admin-RPC-mutasjoner, spillerens poengkø, scoring-sideeffekter og global event-wiring er nå egne moduler. Videre oppdeling av den resterende `app/app.js` må gjøres trinnvis med regresjon etter hver grense.
+- Fase B: lokalt verifisert. Diff-skanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført for 51 endrede filer med komplett dekning, ingen reportable funn og ingen åpne kandidater. Live Supabase-flyten er fortsatt ikke kjørt i lokal offline-verifisering og dekkes av den forventede skip-testen.
+- Fase C: lokalt verifisert på kode-, DOM- og runtime-nivå. Testpakken (125 tester: 124 bestått, 1 forventet skip), syntakssjekken og diff-sjekken passerer; browser-smoke fullfører opprettelse, start, hamburger på responsiv visning, adminnavigasjon og kampvisning på 1440, 768 og 390 px uten horisontal overflow. Desktop-smoke bekrefter også setup-bredden. CI/deploy må fortsatt bekrefte samme kontroll etter publisering.
+- Fase D: lokalt gjennomgått. Visuelle kaskader, status-/avatar-styling, oversettelsesnøkler og turneringsmotorens eksisterende regresjonstester er kontrollert. Initiale synlige fallback-tekster er bundet til oversettelsesnøkler, og aktiv JavaScript-runtime er nå bekreftet gjennom browser-smoke på alle tre viewportene.
 
 ## Prioritert videre plan
 
@@ -91,7 +152,16 @@ Påkrevd kontroll:
 - Ingen horisontal overflow, avkuttede logoer eller skjulte fokusringer.
 - Service-worker-cache inneholder alle aktive shell-filer og ingen arkiverte filer.
 
-### Fase D – Valgstyrte produktforbedringer
+### Fase D – UI og språk
+
+Arbeidet er gjennomført lokalt mot gjeldende scope. Gjenstående produksjonsverifisering følger Fase C/CI:
+
+- Gå over alle ui elementer, sjekk spacing, overlapp og om noe fremdeles bruker eldre stil.
+- Sjekk at alle funksjoner i appen fungerer og gir riktig output.
+- dobbeltsjekk at turneringsmotoren gjør det den skal med tanke på referanseappens funksjoner
+- Sjekk at alle tekst linjer som ikke er bestemt hardcoded faktisk oversettes.
+
+### Fase E – Valgstyrte produktforbedringer
 
 Disse starter ikke før scope, personvern og akseptansekriterier er besluttet:
 

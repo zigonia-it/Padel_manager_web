@@ -809,7 +809,7 @@ body.landing-menu-open .landing-menu-toggle span:nth-child(3),
 }
 
 .setup-card {
-  width: min(640px, 100%);
+  width: 100%;
 }
 
 .setup-card h2 {

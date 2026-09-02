@@ -7,13 +7,50 @@ Dette er den aktive, kronologiske oversikten over tidligere implementeringer, be
 ## Gjeldende leveransestatus
 
 - `main` er publisert til `origin/main`.
-- Siste publiserte commit: `814a411` (blå scorecard-UI og dokumentasjon).
+- Siste publiserte commit: `8e7158a` (responsiv UI og samlet appikon).
 - Siste brukerrettede baseline: DiceBear Lorelei Neutral-avatarer, navngitt avatarvalgliste, blått scorecard-design og responsiv status-/spillerlayout.
+- Nyeste lokale strukturendring: avataransvar, accent-system, player-visuals, workspace-overview, UI-feedback, notification-system, profil-session, match-card, persistence, admin-identity, remote-feedback, realtime-connection, tournament-rounds, tournament-runtime, backup-format, lenke-/QR-generering, state-konstruksjon, state-bootstrap, modulruting og session-policy er isolert i egne app-moduler.
+- Den gamle duplikate kampkort-renderingen er fjernet fra `app/app.js`; entrypointen bruker nå den eksplisitte `app/match-card.js`-grensen.
 - Lokale UI-justeringer etter siste push er ikke publisert ennå.
-- Lokalt: `npm test` passerer med 78 beståtte tester og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
-- CI/deploy er satt opp med browser-smoke for desktop, medium og mobil.
+- Lokalt: `npm test` passerer med 125 tester: 124 beståtte og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
+- CI/deploy er satt opp med browser-smoke for desktop, medium og mobil; lokal browser-smoke fullfører opprettelse, start, hamburger på responsiv visning, adminnavigasjon og kampvisning på 1440, 768 og 390 px uten horisontal overflow. Eksterne CDN/Supabase-kall blokkeres bevisst i smoke-testen.
+- Fase A er fortsatt under gjennomføring lokalt; Fase B–D er lokalt verifisert. Avatar-, accent-, player-visuals-, workspace-overview-, UI-feedback-, notification-, profil-session-, match-card-, match-actions-, initial-view-, persistence-, admin-identity-, remote-feedback-, realtime-connection-, tournament-rounds-, tournament-runtime-, backup-, lenke-, state-konstruksjons-, recovery-bootstrap-, modulruting-, session-policy-, remote-state-write-, remote-admin-actions-, remote-player-score-, score-actions-, workspace-navigation-, app-events-, workspace-events-, tournament-entry- og admin-form-events-logikken er flyttet til egne moduler, setup-sidene bruker samme innholdsflate som workspace-sidene, runtime-kontroll passerer på 1440, 768 og 390 px, og full verifisering passerer med 125 tester (124 bestått, 1 forventet skip), syntaks- og diff-sjekk.
+- Fase B-diffskanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført på arbeidskopien: 51 endrede filer og 4 sikkerhetsflater gjennomgått, ingen reportable funn. Live Supabase-flyt er ikke kjørt i denne offline-verifiseringen og forblir dekket av én forventet skip-test.
+- Fase D UI-/språkgjennomgang er utført mot aktive HTML-, CSS- og JavaScript-filer. Eksisterende motor- og oversettelsesregresjoner passerer, initiale synlige fallback-tekster er bundet til oversettelsesnøkler, og browser-smoke bekrefter aktiv JavaScript-runtime og ingen overflow på desktop, medium eller mobil.
 
 ## Kronologisk historikk
+
+Siste verifisering: diff-skanning `c880f147-9773-4ca0-b64f-875b842a8194` er fullført med komplett dekning av 47 endrede kilde-/konfigurasjonsfiler og ingen reportable funn. Workspace-overview-rendering er isolert i `app/workspace-overview.js`, debounced remote state persistence i `app/remote-state-write.js`, admin-RPC-mutasjoner i `app/remote-admin-actions.js`, spillerens remote-poengkø i `app/remote-player-score.js`, scoring-sideeffekter i `app/score-actions.js`, workspace-navigasjon i `app/workspace-navigation.js`, global event-wiring i `app/app-events.js`, kamp-livssyklus i `app/match-actions.js`, og initial URL-/session-visning i `app/initial-view.js`.
+
+Kampfiltrering, kampgruppering og tilskuerkort-rendering er nå isolert i `app/match-list.js`; `app.js` beholder kun orkestreringen av disse visningene.
+
+Tabell- og leaderboard-rendering er isolert i `app/standings.js` med eksplisitte avhengigheter for accent, avatar, oversettelser og DOM.
+
+Admin-spillerlisten er isolert i `app/player-list.js`, inkludert redigering, avatarvalg, fjerning og valg av eksisterende spillere.
+
+Cup-bracket-renderingen er isolert i `app/cup-bracket.js`; entrypointen leverer state, oversettelser og kampoppslag.
+
+Spillerstatuskortet er isolert i `app/player-status.js`, med eksplisitte state-, scoring- og oversettelsesavhengigheter.
+
+Spillerens neste-kamp-rendering er isolert i `app/player-next-match.js`, med eksplisitte state-, kamp-, spiller- og oversettelsesavhengigheter.
+
+Regel-renderingen er isolert i `app/rules.js`, med eksplisitte DOM-, state- og oversettelsesavhengigheter.
+
+Spilleridentitet og øktkontroller er isolert i `app/player-controls.js`, med eksplisitte state-, avatar-, DOM- og oversettelsesavhengigheter.
+
+Fullscore-dialogens rendering er isolert i `app/large-score.js`, med eksplisitte kamp-, scoring-, DOM- og oversettelsesavhengigheter.
+
+Settresultat-dialogen er isolert i `app/set-score-dialog.js`, med eksplisitte kamp-, state-, DOM- og oversettelsesavhengigheter.
+
+Lobby- og sync-status-rendering er isolert i `app/admin-status.js`, med eksplisitte state-, remote-status-, turnerings- og oversettelsesavhengigheter.
+
+Profilkort og profilhistorikk-rendering er isolert i `app/profile-ui.js`, med eksplisitte profil-, lagrings-, DOM- og oversettelsesavhengigheter.
+
+Backup-import og backup-eksport UI er isolert i `app/backup-ui.js`, med eksplisitte format-, state-, fil- og feedback-avhengigheter.
+
+Spiller-state-operasjoner er isolert i `app/player-state.js`, med eksplisitte state-, schedule-, team-, persistence- og feedback-avhengigheter.
+
+Turneringsstatuslogikken er isolert i `app/tournament-status.js`, med eksplisitte state-, round-, cup- og oversettelsesavhengigheter.
 
 Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert fra eldste til nyeste. Detaljer, endrede filer og eldre testutskrifter finnes i arkivet.
 
@@ -104,7 +141,6 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - Cool sports-tema og midlertidig temavelger vurdert og senere fjernet som aktiv avhengighet.
 - Senere visuell redesignplan vurdert og registrert som historisk referanse.
 - Reference-match for Padelstar-logo og Zigonia-logo gjennomført.
-- Felles classic/blå visuell retning etablert.
 
 ### 2026-09-01
 
@@ -132,7 +168,13 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - Spillerlinjene måler nå faktisk tekstbrytning ved rendering og vindusendring. Ved flersidige navn plasseres avatar over navnet automatisk på alle sidebredder.
 - Den siste røde rammen på aktive kampkort, fremhevede kamper og tilskuerkort ble endret til blå aktiv-status. Rødt er fortsatt reservert for avbryt/fare.
 - Admin-panelene `Styring`, `Del`, `Spillere` og `Kamper` bruker nå samme fullbredde layout på desktop og større nettbrettbredder.
+- Setup-sidene `Opprett` og `Bli med` bruker nå samme fullbredde innholdsflate som workspace-sidene, også ved responsive bredder.
 - Tilskuerkortets resultat-tall bruker nå Anton-fonten isolert til scoretallene; lag- og spillertekst beholder vanlig UI-typografi.
+- Fase A-strukturarbeidet ble videreført med eksplisitt `match-card`-modul og fjerning av legacy-duplikat i entrypointen.
+- Admin-identitetsflyten ble flyttet til `app/admin-identity.js`, og den oppdaterte app-shell-cachen ble bumpet til `padelstar-v165`.
+- Remote-feedback og RPC-policy ble flyttet til `app/remote-feedback.js`, og app-shell-cachen ble bumpet til `padelstar-v166`.
+- Realtime-livssyklusen ble flyttet til `app/realtime-connection.js`, cup-runde-hjelperne til `app/tournament-rounds.js`, felles spiller-/lagmarkup til `app/player-visuals.js`, turnerings-runtime til `app/tournament-runtime.js`, og app-shell-cachen ble bumpet til `padelstar-v168`.
+- Lokal sluttverifisering etter strukturendringen passerte med 97 tester (96 bestått, 1 forventet skip), syntaks- og diff-sjekk, samt browser-smoke på desktop, medium og mobil.
 - Hero-innholdet på hjemmesiden fikk dobbel vertikal avstand fra den faste menyen, med tilsvarende responsiv justering på mindre skjermer.
 - Tilskuerkortets scoretall fikk økt høyre innvendig luft, slik at tallet ikke ligger tett mot kanten.
 - Avstanden mellom avatar og spillernavn i tilskuerkortene ble også økt for bedre lesbarhet.
@@ -140,8 +182,24 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - Workspace-headeren på turneringssiden ble gjort transparent, slik at den følger samme sammenhengende mørkeblå flate som resten av siden.
 - Alle aktive appikonreferanser ble samlet til `assets/padelstar-icon.png`: favicon, Apple-touch-icon, PWA-manifest, varsler og scorecard-emblem.
 - Fjernet overflødig footer-logo og ryddet bort eldre score-input-kaskader som ikke lenger brukes av den nye scorecard-renderingen.
-- PWA-cache og stylesheet-query-versjoner ble oppdatert videre til `padelstar-v156` og `padelstar-ui-91`.
-- Verifisering: `npm test` passerer med 78 beståtte tester og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
+- PWA-cache og stylesheet-query-versjoner ble oppdatert videre til `padelstar-v159`, `padelstar-session-27` og `padelstar-ui-91`.
+- PWA-cache ble bumpet til `padelstar-v164` etter at lokal persistence ble flyttet til egen app-shell-modul.
+- Avatar-/profilvalgene bruker nå `app/avatar-system.js` som felles modul for Sophie, Aiden, Luna og Milo, mens eksisterende avatar-ID-er beholdes for lagret state og synkronisering.
+- Join-lenker, tilskuerlenker og QR-URL-er bruker nå `app/link-utils.js`, med separat kontroll av lokal utviklings-URL og offentlig produksjons-URL.
+- Turneringsstate-konstruksjonen bruker nå `app/tournament-state.js`, med direkte regresjonsdekning via appens eksisterende opprettelsesflyt og modulgrensekontroll.
+- Recovery-lasting og parsing bruker nå `app/state-bootstrap.js`, med eksplisitt dekning av modulgrense og fortsatt recovery-fallback.
+- Rollebasert modulvalg og fallback bruker nå `app/module-routing.js`, med eksplisitt dekning av policygrensen og eksisterende navigasjonsregresjoner.
+- Aktiv turnering, invitasjonskontroll og lokal rolle bruker nå `app/session-policy.js`, med eksplisitt modulgrensekontroll.
+- Spilleraccent-palett og kompatibilitet med eldre accent-ID-er bruker nå `app/accent-system.js`, med egen regresjonskontroll.
+- Bekreftelser og toast-meldinger bruker nå `app/ui-feedback.js`, med tilgjengelig dialogfokus og auto-skjuling av statusmeldinger bevart.
+- Backup-eksport og import bruker nå `app/backup-format.js`; validering og tokenfri serialisering er testet uavhengig av DOM-filflyten.
+- Sluttkontroll for fase A–D i arbeidskopien: `npm test` 89 tester / 88 bestått / 1 forventet skip, `npm run check:syntax` og `git diff --check` passerer. Arbeidskopien er ikke publisert etter denne kontrollen.
+- Push-varsler og subscription-livssyklus er isolert i `app/notification-system.js`; `npm test` 90 tester / 89 bestått / 1 forventet skip, `npm run check:syntax` og `git diff --check` passerer. Arbeidskopien er ikke publisert etter denne kontrollen.
+- Browser-smoke er kjørt lokalt på desktop (1440), medium (768) og mobil (390); opprett/start/admin/kampflyt og responsive hamburgersteg passerer. Eksterne CDN/Supabase-kall ble blokkert som testforutsetning.
+- Profil-session er isolert og browser-smoke er kjørt på nytt etter endringen; desktop, medium og mobil passerer samme opprett/start/admin/kampflyt.
+- Match-card-modulen er koblet inn og browser-smoke er kjørt på nytt; desktop, medium og mobil passerer opprett/start/admin/kampflyt uten horisontal overflow.
+- Browser-smoke-scriptet starter på `about:blank` og bruker lokale 204-test-svar for CDN, Supabase og Insights før appnavigering; smoke-kjøringen er dermed fri for forventet nettverksstøy.
+- Verifisering: `npm test` passerer med 82 beståtte tester og én forventet live-Supabase-test hoppet over; `npm run check:syntax` og `git diff --check` passerer. Lokal statisk browser-kontroll viser desktop (1440 px), medium (768 px) og mobil (390 px) uten horisontal overflow; aktiv JavaScript-runtime kunne ikke bekreftes i testtilkoblingen.
 
 ## Verifikasjonsprinsipp
 

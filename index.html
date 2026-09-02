@@ -17,7 +17,7 @@
   <link rel="preload" href="assets/bg_img-1600.jpg" as="image" fetchpriority="high">
   <link rel="stylesheet" href="styles/base.css?v=padelstar-base-2">
   <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-3">
-  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-3">
+  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-4">
   <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-3">
   <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-91">
   <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
@@ -82,7 +82,7 @@
             </select>
           </label>
         </div>
-        <div class="status-pill" id="connectionStatus" aria-live="polite">Lokal</div>
+        <div class="status-pill" id="connectionStatus" aria-live="polite" data-i18n="localPwa">Lokal</div>
       </div>
     </header>
 
@@ -110,7 +110,7 @@
         <div class="panel resume-panel hidden" id="resumePanel">
           <div>
             <p class="eyebrow" data-i18n="resume.localSaved">Lagret lokalt</p>
-            <h3 id="resumeTitle">Fortsett turnering</h3>
+            <h3 id="resumeTitle" data-i18n="resume.continueTournament">Fortsett turnering</h3>
             <p class="hint" id="resumeSummary" data-i18n="resume.defaultSummary">Det finnes en turnering lagret i denne
               nettleseren.</p>
           </div>
@@ -585,16 +585,62 @@
   <script defer src="app/admin-actions.js?v=padelstar-admin-actions-1"></script>
   <script defer src="app/player-actions.js?v=padelstar-player-actions-1"></script>
   <script defer src="app/tournament-engine.js?v=padelstar-engine-1"></script>
+  <script defer src="app/tournament-rounds.js?v=padelstar-rounds-1"></script>
+  <script defer src="app/tournament-runtime.js?v=padelstar-tournament-runtime-1"></script>
+  <script defer src="app/workspace-overview.js?v=padelstar-workspace-overview-1"></script>
+  <script defer src="app/match-list.js?v=padelstar-match-list-1"></script>
+  <script defer src="app/standings.js?v=padelstar-standings-1"></script>
+  <script defer src="app/player-list.js?v=padelstar-player-list-1"></script>
+  <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-1"></script>
+  <script defer src="app/player-status.js?v=padelstar-player-status-1"></script>
+  <script defer src="app/player-next-match.js?v=padelstar-player-next-match-1"></script>
+  <script defer src="app/rules.js?v=padelstar-rules-1"></script>
+  <script defer src="app/player-controls.js?v=padelstar-player-controls-1"></script>
+  <script defer src="app/large-score.js?v=padelstar-large-score-1"></script>
+  <script defer src="app/set-score-dialog.js?v=padelstar-set-score-dialog-1"></script>
+  <script defer src="app/admin-status.js?v=padelstar-admin-status-1"></script>
+  <script defer src="app/profile-ui.js?v=padelstar-profile-ui-1"></script>
+  <script defer src="app/backup-ui.js?v=padelstar-backup-ui-1"></script>
+  <script defer src="app/player-state.js?v=padelstar-player-state-1"></script>
+  <script defer src="app/tournament-status.js?v=padelstar-tournament-status-1"></script>
   <script defer src="app/scoring-engine.js?v=padelstar-scoring-1"></script>
   <script defer src="app/state-manager.js?v=padelstar-state-1"></script>
   <script defer src="app/realtime-sync.js?v=padelstar-realtime-sync-1"></script>
   <script defer src="app/offline-storage.js?v=padelstar-offline-1"></script>
+  <script defer src="app/persistence.js?v=padelstar-persistence-1"></script>
+  <script defer src="app/admin-identity.js?v=padelstar-admin-identity-1"></script>
+  <script defer src="app/remote-feedback.js?v=padelstar-remote-feedback-1"></script>
+  <script defer src="app/realtime-connection.js?v=padelstar-realtime-connection-1"></script>
   <script defer src="app/observability.js?v=padelstar-observability-1"></script>
   <script defer src="app/profile-manager.js?v=padelstar-profile-1"></script>
   <script defer src="app/remote-rpc.js?v=padelstar-remote-rpc-1"></script>
   <script defer src="app/ui-effects.js?v=padelstar-ui-effects-1"></script>
   <script defer src="app/navigation.js?v=padelstar-navigation-1"></script>
-  <script defer src="app/app.js?v=padelstar-session-26"></script>
+  <script defer src="app/avatar-system.js?v=padelstar-avatar-system-1"></script>
+  <script defer src="app/accent-system.js?v=padelstar-accent-system-1"></script>
+  <script defer src="app/player-visuals.js?v=padelstar-player-visuals-1"></script>
+  <script defer src="app/ui-feedback.js?v=padelstar-ui-feedback-1"></script>
+  <script defer src="app/notification-system.js?v=padelstar-notification-system-1"></script>
+  <script defer src="app/profile-session.js?v=padelstar-profile-session-1"></script>
+  <script defer src="app/match-card.js?v=padelstar-match-card-1"></script>
+  <script defer src="app/backup-format.js?v=padelstar-backup-format-1"></script>
+  <script defer src="app/link-utils.js?v=padelstar-link-utils-1"></script>
+  <script defer src="app/tournament-state.js?v=padelstar-tournament-state-1"></script>
+  <script defer src="app/state-bootstrap.js?v=padelstar-state-bootstrap-1"></script>
+  <script defer src="app/module-routing.js?v=padelstar-module-routing-1"></script>
+  <script defer src="app/session-policy.js?v=padelstar-session-policy-1"></script>
+  <script defer src="app/remote-state-write.js?v=padelstar-remote-state-write-1"></script>
+  <script defer src="app/remote-admin-actions.js?v=padelstar-remote-admin-actions-1"></script>
+  <script defer src="app/remote-player-score.js?v=padelstar-remote-player-score-1"></script>
+  <script defer src="app/score-actions.js?v=padelstar-score-actions-1"></script>
+  <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-1"></script>
+  <script defer src="app/app-events.js?v=padelstar-app-events-1"></script>
+  <script defer src="app/workspace-events.js?v=padelstar-workspace-events-1"></script>
+  <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-1"></script>
+  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-1"></script>
+  <script defer src="app/match-actions.js?v=padelstar-match-actions-1"></script>
+  <script defer src="app/initial-view.js?v=padelstar-initial-view-1"></script>
+  <script defer src="app/app.js?v=padelstar-session-27"></script>
 </body>
 
 </html>
