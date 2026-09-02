@@ -6,12 +6,12 @@ html, body { width: 100%; height: 100%; margin: 0; }
 body { overflow: hidden; color: var(--ink); font-family: "Nunito", system-ui, sans-serif; background: linear-gradient(180deg, rgba(2, 11, 28, .96), rgba(3, 16, 34, .99)), url("../assets/backgrounds/bg_img-1600.jpg") center / cover fixed; }
 button { font: inherit; color: inherit; }
 .tv-app { width: min(100%, 1680px); height: 100dvh; margin: auto; padding: clamp(18px, 1.8vw, 32px) clamp(20px, 2.2vw, 38px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: clamp(14px, 1.4vw, 24px); }
-.tv-header { position: relative; display: grid; grid-template-columns: minmax(190px, 1fr) auto minmax(190px, 1fr) auto auto; align-items: center; gap: clamp(16px, 2vw, 34px); min-height: 62px; }
+.tv-header { position: relative; display: grid; grid-template-columns: minmax(190px, 1fr) auto; align-items: center; gap: clamp(16px, 2vw, 34px); min-height: 62px; }
 .tv-brand { width: clamp(170px, 14vw, 250px); height: auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.45)); }
 .tv-title-wrap { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; white-space: nowrap; }
 .tv-title-wrap span { display: block; margin: 0 0 2px; color: #dce8f8; font-size: clamp(.9rem, 1vw, 1.25rem); font-weight: 800; letter-spacing: .14em; text-align: center; }
 .tv-title-wrap h1 { margin: 0; font-family: "Titillium Web", sans-serif; font-size: clamp(2.2rem, 4vw, 4.2rem); line-height: .92; letter-spacing: .035em; text-transform: uppercase; text-align: center; }
-.tv-header-lines { width: clamp(40px, 4vw, 74px); height: 23px; border-top: 2px solid var(--blue); border-bottom: 2px solid var(--blue); position: relative; opacity: .8; }
+.tv-header-lines { display: none; }
 .tv-header-lines::after { content: ""; position: absolute; top: 9px; left: 10%; right: -20%; border-top: 2px solid var(--blue); }
 .tv-header-lines-right { transform: scaleX(-1); }
 .tv-clock { font-family: "Titillium Web", sans-serif; font-size: clamp(1.5rem, 2.2vw, 2.6rem); font-variant-numeric: tabular-nums; white-space: nowrap; }
