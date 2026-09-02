@@ -26,6 +26,7 @@
 
       document.body.classList.toggle("workspace-active", isWorkspaceActive);
       document.body.classList.toggle("setup-active", requestedModule === "setup-admin" || requestedModule === "setup-player" || requestedModule === "account");
+      document.body.classList.toggle("landing-active", requestedModule === "landing");
       const activeSections = [];
       document.querySelectorAll(".app-module").forEach((section) => {
         const isActive = section.dataset.module === requestedModule || (section.dataset.module === "workspace" && isWorkspaceActive);

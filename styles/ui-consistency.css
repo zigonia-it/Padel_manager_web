@@ -1,0 +1,185 @@
+/* =========================================================
+   SHARED UI CONSISTENCY LAYER
+
+   TV Mode is the visual reference for the application surfaces:
+   dark navy, cool blue borders, restrained shadows and a clear
+   display/body type hierarchy. The landing page is intentionally
+   excluded from the surface rules below.
+   ========================================================= */
+
+:root {
+  --ui-ink: #f3f6ff;
+  --ui-muted: #9fb4d2;
+  --ui-blue: #12bfff;
+  --ui-blue-soft: #63b5ff;
+  --ui-line: rgba(99, 181, 255, 0.42);
+  --ui-panel: rgba(3, 20, 49, 0.76);
+  --ui-card: rgba(5, 27, 63, 0.88);
+  --ui-radius: 14px;
+  --ui-card-radius: 12px;
+  --ui-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 16px 36px rgba(0, 0, 0, 0.24);
+}
+
+/* The front page should reveal the blue base and geometric overlay without
+   the photographic background competing with the hero content. */
+body.landing-active {
+  background-image:
+    radial-gradient(circle at 50% -10%, rgba(18, 191, 255, 0.14), transparent 34rem),
+    linear-gradient(180deg, #020b1c 0%, #06152c 56%, #020812 100%);
+  background-attachment: fixed;
+}
+
+body.landing-active .intro,
+body[data-theme="classic"].landing-active .intro {
+  background:
+    radial-gradient(circle at 50% 36%, rgba(18, 191, 255, 0.12), transparent 32rem),
+    linear-gradient(180deg, rgba(2, 11, 28, 0.22), rgba(2, 8, 18, 0.56));
+}
+
+body:not(.landing-active) {
+  --line: var(--ui-line);
+  --gold: #4fa8ff;
+  --gold-light: #d8efff;
+  --gold-bright: #62b6ff;
+  --muted: var(--ui-muted);
+  --ink: var(--ui-ink);
+}
+
+/* Shared shell, header, footer and module surfaces. */
+body:not(.landing-active) .topbar,
+body:not(.landing-active) .setup-card,
+body:not(.landing-active) .app-module:not(#startView) .panel,
+body:not(.landing-active) .app-module:not(#startView) .next-match,
+body:not(.landing-active) .app-module:not(#startView) .admin-subtabs {
+  border-color: var(--ui-line);
+  border-radius: var(--ui-radius);
+  background:
+    linear-gradient(145deg, rgba(18, 109, 184, 0.12), transparent 42%),
+    var(--ui-panel);
+  box-shadow: var(--ui-shadow);
+}
+
+body:not(.landing-active) .topbar {
+  border-radius: 0 0 var(--ui-radius) var(--ui-radius);
+  background: rgba(3, 20, 49, 0.88);
+}
+
+body:not(.landing-active) .site-footer {
+  color: var(--ui-muted);
+}
+
+body:not(.landing-active) .workspace-header {
+  margin-bottom: 20px;
+}
+
+body:not(.landing-active) .workspace-header h2,
+body:not(.landing-active) .account-intro h2,
+body:not(.landing-active) .setup-card h2 {
+  color: var(--ui-ink);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.35rem);
+  letter-spacing: 0.025em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+body:not(.landing-active) .panel-heading h3,
+body:not(.landing-active) .app-module:not(#startView) .panel > h3,
+body:not(.landing-active) .setup-card h3 {
+  color: var(--ui-ink);
+  font-family: var(--font-display);
+  font-size: clamp(1.18rem, 1.65vw, 1.55rem);
+  letter-spacing: 0.035em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+body:not(.landing-active) .eyebrow,
+body:not(.landing-active) .panel-heading .eyebrow {
+  color: var(--ui-blue-soft);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body:not(.landing-active) .app-module:not(#startView) .panel,
+body:not(.landing-active) .app-module:not(#startView) .next-match,
+body:not(.landing-active) .setup-card {
+  gap: 16px;
+  padding: clamp(16px, 2vw, 22px);
+}
+
+body:not(.landing-active) .app-module:not(#startView) .match-card,
+body:not(.landing-active) .app-module:not(#startView) .status-grid > div,
+body:not(.landing-active) .app-module:not(#startView) .round-summary > div,
+body:not(.landing-active) .app-module:not(#startView) .profile-stat-grid > div,
+body:not(.landing-active) .app-module:not(#startView) .rules-list > div,
+body:not(.landing-active) .app-module:not(#startView) .admin-identity-panel,
+body:not(.landing-active) .app-module:not(#startView) .cup-team-builder,
+body:not(.landing-active) .app-module:not(#startView) .cup-bracket {
+  border-color: rgba(99, 181, 255, 0.30);
+  border-radius: var(--ui-card-radius);
+  background: var(--ui-card);
+}
+
+body:not(.landing-active) input,
+body:not(.landing-active) textarea,
+body:not(.landing-active) select {
+  border-color: rgba(99, 181, 255, 0.36);
+  border-radius: 10px;
+  background: rgba(2, 13, 31, 0.78);
+  color: var(--ui-ink);
+}
+
+body:not(.landing-active) button,
+body:not(.landing-active) .module-link,
+body:not(.landing-active) .subtab {
+  border-radius: 10px;
+}
+
+body:not(.landing-active) button:focus-visible,
+body:not(.landing-active) input:focus-visible,
+body:not(.landing-active) textarea:focus-visible,
+body:not(.landing-active) select:focus-visible {
+  outline: 2px solid var(--ui-blue);
+  outline-offset: 2px;
+}
+
+body:not(.landing-active) button.secondary,
+body:not(.landing-active) .button-secondary {
+  border-color: var(--ui-line);
+  background: rgba(5, 27, 63, 0.78);
+  color: var(--ui-ink);
+}
+
+body:not(.landing-active) button.secondary:hover:not(:disabled),
+body:not(.landing-active) .button-secondary:hover:not(:disabled) {
+  border-color: var(--ui-blue);
+  background: rgba(18, 191, 255, 0.14);
+}
+
+body:not(.landing-active) .app-module.module-entering {
+  animation: ui-module-enter 180ms ease both;
+}
+
+@keyframes ui-module-enter {
+  from { opacity: 0.72; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:not(.landing-active) .app-module,
+  body:not(.landing-active) .app-module.module-entering {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 760px) {
+  body:not(.landing-active) .workspace-header h2,
+  body:not(.landing-active) .account-intro h2,
+  body:not(.landing-active) .setup-card h2 {
+    font-size: clamp(1.8rem, 8vw, 2.55rem);
+  }
+}

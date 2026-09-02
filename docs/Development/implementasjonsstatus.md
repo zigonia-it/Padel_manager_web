@@ -11,7 +11,10 @@ Dette er en kort sporbar status for arbeidet som er kontrollert mot [Padelstar-k
 - Fase 2–6-modulene, turneringsformater, statistikk, historikk, hendelser, ratingberegning, varsler og PWA-grunnlag er koblet inn i appen og dekkes av testene.
 - TV Mode ligger på egen `tv.html` med separat CSS/runtime, responsiv layout, offline-status, roterende meldinger og historikkvennlig tilbakeknapp.
 - Aktive assets ligger under `assets/` sortert i `logos/`, `backgrounds/`, `icons/`, `ui/` og `fonts/`. Arkivmateriale ligger under `assets/archive/` og brukes ikke av runtime.
+- Ikke-forside-modulene bruker nå et felles UI-lag med TV Mode som visuell referanse: mørk marineblå flate, kjølige blå borders, 12–14 px radius, felles typografihierarki og dempet modul-animasjon. Forsiden har fortsatt eget uttrykk, men bruker ikke lenger fotografisk bakgrunn.
 
 ## Bevisst senere arbeid fra masterplanen
 
 Masterplanen markerer ratingdatabase/liga, gjest-til-konto-konvertering og enkelte avanserte offline-/analyseutvidelser som senere arbeid. Disse er ikke behandlet som mangler i denne leveransen.
+
+TV Mode skal senere kunne følge språket til brukeren som aktiverer visningen. Metoden velges ved implementering ut fra den da gjeldende navigasjons- og synkroniseringsløsningen, slik at språkverdien overføres robust uten å gjøre TV-siden avhengig av intern app-state.
