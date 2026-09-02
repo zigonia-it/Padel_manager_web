@@ -69,7 +69,7 @@ const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.j
 const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v207/);
+  assert.match(serviceWorkerSource, /padelstar-v208/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-1/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-1/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -630,6 +630,9 @@ test("language DOM handling has its own module boundary", () => {
   assert.match(i18nUiSource, /applyLanguage/);
   assert.match(i18nUiSource, /syncLanguageOptions/);
   assert.match(i18nUiSource, /window\.PadelstarI18nUi/);
+  assert.match(indexSource, /id="languageMenu"/);
+  assert.match(i18nUiSource, /language-option/);
+  assert.match(translationsSource, /flag: "🇬🇧"/);
 });
 
 test("JSON persistence has its own storage module boundary", () => {

@@ -159,6 +159,82 @@ body:not(.landing-active) .button-secondary:hover:not(:disabled) {
   background: rgba(18, 191, 255, 0.14);
 }
 
+/* Closed: flag only. Open: flag and translated language name. The native
+   select remains available until the enhancement is built and is hidden only
+   after the custom menu has been populated. */
+.language-menu {
+  position: relative;
+  min-width: 54px;
+}
+
+.language-picker-enhanced > #languageSelect {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.language-current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  min-width: 54px;
+  padding: 0.52rem 0.72rem;
+  border: 1px solid rgba(99, 181, 255, 0.36);
+  border-radius: 10px;
+  background: rgba(2, 13, 31, 0.78);
+  cursor: pointer;
+  font-size: 1.2rem;
+  list-style: none;
+}
+
+.language-current::-webkit-details-marker { display: none; }
+.language-current::after { content: "⌄"; margin-left: 0.35rem; color: var(--ui-muted); font-size: 0.78rem; }
+.language-menu[open] .language-current::after { content: "⌃"; }
+.language-menu[open] .language-current-name { display: inline; margin-left: 0.3rem; font-size: 0.78rem; }
+.language-current-name { display: none; }
+
+.language-options {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  display: grid;
+  min-width: 190px;
+  padding: 6px;
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-card-radius);
+  background: rgba(3, 20, 49, 0.98);
+  box-shadow: var(--ui-shadow);
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+  min-height: 38px;
+  padding: 0.45rem 0.6rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-ink);
+  text-align: left;
+}
+
+.language-option:hover,
+.language-option[aria-selected="true"] {
+  background: rgba(18, 191, 255, 0.14);
+}
+
+@media (max-width: 900px) {
+  .language-options { right: auto; left: 0; }
+}
+
 body:not(.landing-active) .app-module.module-entering {
   animation: ui-module-enter 180ms ease both;
 }

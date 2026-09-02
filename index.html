@@ -84,6 +84,13 @@
               <option value="es">Español</option>
               <option value="fr">Français</option>
             </select>
+            <details class="language-menu" id="languageMenu">
+              <summary class="language-current" aria-label="Velg språk" data-i18n-aria-label="languageLabel">
+                <span class="language-current-flag" aria-hidden="true">🇳🇴</span>
+                <span class="language-current-name">Bokmål</span>
+              </summary>
+              <div class="language-options" role="listbox" aria-label="Språk" data-i18n-aria-label="languageLabel"></div>
+            </details>
           </label>
         </div>
         <div class="status-pill" id="connectionStatus" aria-live="polite" data-i18n="localPwa">Lokal</div>
@@ -679,7 +686,7 @@
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
   <script defer src="app/translations.js?v=padelstar-i18n-12"></script>
-  <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-1"></script>
+  <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-2"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-1"></script>
   <script defer src="app/remote-tournament.js?v=padelstar-remote-tournament-1"></script>

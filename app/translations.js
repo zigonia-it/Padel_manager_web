@@ -1,12 +1,12 @@
 const fallbackLanguage = "nb";
 
 const padelstarLanguageMeta = [
-  { code: "nb", label: "Bokmål", htmlLang: "nb" },
-  { code: "nn", label: "Nynorsk", htmlLang: "nn" },
-  { code: "en", label: "English (International)", htmlLang: "en" },
-  { code: "es", label: "Español", htmlLang: "es" },
-  { code: "de", label: "Deutsch", htmlLang: "de" },
-  { code: "fr", label: "Français", htmlLang: "fr" },
+  { code: "nb", label: "Bokmål", flag: "🇳🇴", htmlLang: "nb" },
+  { code: "nn", label: "Nynorsk", flag: "🇳🇴", htmlLang: "nn" },
+  { code: "en", label: "English (International)", flag: "🇬🇧", htmlLang: "en" },
+  { code: "es", label: "Español", flag: "🇪🇸", htmlLang: "es" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪", htmlLang: "de" },
+  { code: "fr", label: "Français", flag: "🇫🇷", htmlLang: "fr" },
 ];
 
 const padelstarTranslations = {
