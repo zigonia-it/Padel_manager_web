@@ -3,7 +3,7 @@ const fallbackLanguage = "nb";
 const padelstarLanguageMeta = [
   { code: "nb", label: "Bokmål", flag: "🇳🇴", htmlLang: "nb" },
   { code: "nn", label: "Nynorsk", flag: "🇳🇴", htmlLang: "nn" },
-  { code: "en", label: "English (International)", flag: "🇬🇧", htmlLang: "en" },
+  { code: "en", label: "English", flag: "🇬🇧", htmlLang: "en" },
   { code: "es", label: "Español", flag: "🇪🇸", htmlLang: "es" },
   { code: "de", label: "Deutsch", flag: "🇩🇪", htmlLang: "de" },
   { code: "fr", label: "Français", flag: "🇫🇷", htmlLang: "fr" },
