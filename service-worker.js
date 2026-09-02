@@ -8,7 +8,7 @@ const appShell = [
   "./styles/base.css?v=padelstar-base-2",
   "./styles/layout.css?v=padelstar-layout-4",
   "./styles/components.css?v=padelstar-components-9",
-  "./styles/tv.css?v=padelstar-tv-1",
+  "./styles/tv.css?v=padelstar-tv-2",
   "./assets/logos/main_logo_without_icon.png",
   "./assets/icons/padelstar-icon.png",
   "./assets/logos/tv-brand.png",
