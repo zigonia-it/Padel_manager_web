@@ -6,12 +6,12 @@ Dette er den aktive, kronologiske oversikten over tidligere implementeringer, be
 
 ## Gjeldende leveransestatus
 
-- `main` er publisert til `origin/main`.
-- Siste publiserte commit: `8e7158a` (responsiv UI og samlet appikon).
+- `main` er publisert til GitHub `origin/main`.
+- Siste GitHub-commit: `9c0a7b7` (fase A–D-modularisering, verifisering og dokumentasjon).
 - Siste brukerrettede baseline: DiceBear Lorelei Neutral-avatarer, navngitt avatarvalgliste, blått scorecard-design og responsiv status-/spillerlayout.
 - Nyeste lokale strukturendring: avataransvar, accent-system, player-visuals, workspace-overview, UI-feedback, notification-system, profil-session, match-card, persistence, admin-identity, remote-feedback, realtime-connection, tournament-rounds, tournament-runtime, backup-format, lenke-/QR-generering, state-konstruksjon, state-bootstrap, modulruting og session-policy er isolert i egne app-moduler.
 - Den gamle duplikate kampkort-renderingen er fjernet fra `app/app.js`; entrypointen bruker nå den eksplisitte `app/match-card.js`-grensen.
-- Lokale UI-justeringer etter siste push er ikke publisert ennå.
+- GitHub-push er gjennomført; Vercel-produksjonsdeploy venter på separat deploy-godkjenning.
 - Lokalt: `npm test` passerer med 125 tester: 124 beståtte og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
 - CI/deploy er satt opp med browser-smoke for desktop, medium og mobil; lokal browser-smoke fullfører opprettelse, start, hamburger på responsiv visning, adminnavigasjon og kampvisning på 1440, 768 og 390 px uten horisontal overflow. Eksterne CDN/Supabase-kall blokkeres bevisst i smoke-testen.
 - Fase A er fortsatt under gjennomføring lokalt; Fase B–D er lokalt verifisert. Avatar-, accent-, player-visuals-, workspace-overview-, UI-feedback-, notification-, profil-session-, match-card-, match-actions-, initial-view-, persistence-, admin-identity-, remote-feedback-, realtime-connection-, tournament-rounds-, tournament-runtime-, backup-, lenke-, state-konstruksjons-, recovery-bootstrap-, modulruting-, session-policy-, remote-state-write-, remote-admin-actions-, remote-player-score-, score-actions-, workspace-navigation-, app-events-, workspace-events-, tournament-entry- og admin-form-events-logikken er flyttet til egne moduler, setup-sidene bruker samme innholdsflate som workspace-sidene, runtime-kontroll passerer på 1440, 768 og 390 px, og full verifisering passerer med 125 tester (124 bestått, 1 forventet skip), syntaks- og diff-sjekk.
