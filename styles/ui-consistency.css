@@ -146,6 +146,15 @@ body:not(.landing-active) select:focus-visible {
   outline-offset: 2px;
 }
 
+/* Route changes focus the module heading for screen readers. Keep that
+   programmatic focus quiet visually, while retaining the outline when a
+   browser accessibility mode exposes keyboard focus. */
+body:not(.landing-active) h1[tabindex="-1"]:focus:not(:focus-visible),
+body:not(.landing-active) h2[tabindex="-1"]:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
 body:not(.landing-active) button.secondary,
 body:not(.landing-active) .button-secondary {
   border-color: var(--ui-line);
