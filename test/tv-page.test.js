@@ -16,6 +16,8 @@ test("TV mode has a dedicated responsive page", () => {
   assert.match(tv, /styles\/tv\.css/);
   assert.match(tv, /app\/tv-mode\.js/);
   assert.match(tv, /assets\/logos\/tv-brand\.png/);
+  assert.match(tv, /assets\/icons\/Games@0\.5x\.png/);
+  assert.match(tv, /assets\/icons\/Match win@0\.5x\.png/);
   assert.match(app, /tv\.html\$\{inviteCode\}/);
   assert.match(css, /grid-template-columns:\s*1\.08fr\s+1\.03fr\s+1\.08fr/);
   assert.match(css, /@media \(max-width: 700px\)/);

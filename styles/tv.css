@@ -21,7 +21,7 @@ button { font: inherit; color: inherit; }
 .tv-panel h2 { display: flex; align-items: center; gap: .55em; margin: 0 0 clamp(10px, 1vw, 16px); font-family: "Titillium Web", sans-serif; font-size: clamp(1.12rem, 1.45vw, 1.7rem); letter-spacing: .035em; line-height: 1; }
 .tv-panel h2 em { color: var(--ink); font-style: normal; }
 .live-dot { display: inline-block; width: .72em; height: .72em; flex: 0 0 auto; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 .18em rgba(18,191,255,.12); }
-.heading-icon { color: #d6e9ff; font-family: sans-serif; font-size: 1.15em; }
+.heading-icon { width: clamp(1.25rem, 1.8vw, 2rem); height: clamp(1.25rem, 1.8vw, 2rem); flex: 0 0 auto; object-fit: contain; filter: drop-shadow(0 0 5px rgba(18,191,255,.25)); }
 .tv-card-list { min-height: 0; display: grid; gap: 8px; overflow: auto; scrollbar-width: none; }
 .tv-card-list::-webkit-scrollbar, .tv-standings::-webkit-scrollbar { display: none; }
 .tv-match-card { min-height: 0; padding: clamp(10px, .8vw, 15px); border: 1px solid rgba(89,174,255,.5); border-radius: 12px; background: var(--card); overflow: hidden; }
