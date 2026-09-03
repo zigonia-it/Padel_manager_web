@@ -6,6 +6,17 @@ Sist oppdatert: 2026-09-03
 
 De brukerrettede valgene som skal bevares gjennom nye faser er samlet i [produktbeslutninger og endringsvern](Development/produktbeslutninger.md). Dokumentet er styrende for menyrekkefølge og felles layout, roller, innlogget profilnavn, flerspråklig brukerflate, flerturneringsflyt, retensjon/GDPR og bruksanvisningen. Nye faser må få uttrykkelig godkjenning før de endrer et av disse valgene.
 
+Gjeldende produktversjon: **0.4 (Beta)**.
+
+## 2026-09-03 – versjon 0.4 og funksjonskontroll
+
+- Oppdaterte aktiv versjonsmerking fra `0.3` til `0.4 (Beta)` i app, språkfallback, README og produktdokumentasjon.
+- Kontrollerte navigasjons- og startknappene etter forrige feilretting; modul-lenker bindes uavhengig av hamburgerkontrollen.
+- Fant og rettet den konkrete initialiseringsfeilen som stoppet all knappnavigasjon: flerturneringsbiblioteket leste `getItem` fra feil storage-objekt og kastet en TypeError før appen bandt hendelser.
+- Kontrollerte språkvelgeren; den tekniske native-velgeren skjules når den visuelle språkvelgeren brukes, slik at bare én språkvelger vises.
+- Bumpet service-worker-cache til `padelstar-v240` for å sikre at funksjonsrettingen og versjonsendringen lastes hos brukere.
+- Verifisert med `node --check app/guide-i18n.js`, `node --check app/navigation.js`, `npm test` og `git diff --check`: 175 beståtte tester, 1 forventet live-Supabase-test hoppet over.
+
 ## 2026-09-03 – siste leveranse
 
 - Laget `guide.html` med en kort bruksanvisning for admin, spiller med profil, gjestespiller og tilskuer.

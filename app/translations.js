@@ -225,7 +225,7 @@ Object.assign(padelstarTranslations.nb, {
   "queue.later": "Deretter",
   "queue.empty": "Ingen kamper i kø akkurat nå.",
   "meta.description": "Padelstar - Padel Manager av Sigurd Steen Grødem / Zigonia IT. Administrer padelturneringer, kamper, baner og resultater.",
-  "app.version": "v. 0.3 (Beta)",
+  "app.version": "v. 0.4 (Beta)",
   "hero.title": "Spill mer. Organiser mindre.",
   "hero.subtitle": "Opprett turneringen, inviter spillerne og la Padelstar ordne med resten.",
   "avatar.smash": "Smash",

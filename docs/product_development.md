@@ -1,8 +1,8 @@
 # Padelstar - Produktutviklingsdokument
 
-Sist oppdatert: 2026-08-28
+Sist oppdatert: 2026-09-03
 
-Status: aktivt arbeidsdokument for web/PWA-versjonen
+Status: aktivt arbeidsdokument for web/PWA-versjonen, produktversjon 0.4 (Beta)
 
 Metadata:
 - Navn: Padelstar

@@ -5,7 +5,7 @@
     const empty = () => ({ version: 1, tournaments: [] });
 
     function read() {
-      const parsed = storage.parseJson(storage.getItem(storageKey));
+      const parsed = storage.readJson(localStorage, storageKey);
       if (!parsed || !Array.isArray(parsed.tournaments)) return empty();
       return {
         version: 1,

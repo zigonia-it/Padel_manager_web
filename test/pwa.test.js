@@ -15,6 +15,7 @@ const modulesStylesSource = fs.readFileSync(path.join(root, "styles", "modules.c
 const responsiveStylesSource = fs.readFileSync(path.join(root, "styles", "responsive.css"), "utf8");
 const uiConsistencyStylesSource = fs.readFileSync(path.join(root, "styles", "ui-consistency.css"), "utf8");
 const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js"), "utf8");
+const tournamentLibrarySource = fs.readFileSync(path.join(root, "app", "tournament-library.js"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
 const translationsSource = fs.readFileSync(path.join(root, "app", "translations.js"), "utf8");
@@ -70,7 +71,7 @@ const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.j
 const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v239/);
+  assert.match(serviceWorkerSource, /padelstar-v240/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-11/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-11/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -681,6 +682,11 @@ test("navigation binds module links independently of the responsive drawer", () 
   assert.match(navigationSource, /document\.querySelectorAll\("\[data-module-link\]"\)/);
   assert.match(navigationSource, /if \(!toggle\) return/);
   assert.match(uiConsistencyStylesSource, /\.language-picker > #languageSelect/);
+});
+
+test("tournament library reads and writes through the supplied local storage", () => {
+  assert.match(tournamentLibrarySource, /storage\.readJson\(localStorage, storageKey\)/);
+  assert.match(tournamentLibrarySource, /storage\.writeJson\(localStorage, storageKey, library\)/);
 });
 
 test("active navigation tabs do not render legacy underline decorations", () => {

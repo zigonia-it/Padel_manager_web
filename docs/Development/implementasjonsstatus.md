@@ -2,6 +2,8 @@
 
 Dette er en kort sporbar status for arbeidet som er kontrollert mot [Padelstar-komplett-utviklingsplan.md](Padelstar-komplett-utviklingsplan.md). Masterplanen gjelder ved motstrid.
 
+Gjeldende produktversjon: **0.4 (Beta)**.
+
 ## Kontrollert og implementert
 
 - Admin-oppretting krever passordbasert Supabase-innlogging når Supabase er aktiv.
