@@ -169,6 +169,7 @@ let state = stateBootstrap.loadState();
 let languageController;
 let sessionController;
 let remoteStateController;
+let remoteSyncController;
 const tournamentLibrary = window.PadelstarTournamentLibrary?.create({
   storage,
   localStorage,
@@ -1283,7 +1284,7 @@ function handleRemoteError(error, fallback) {
   syncConnectionStatus();
 }
 
-function scheduleRemoteRetry() {
+function legacyScheduleRemoteRetry() {
   if (!isSupabaseReady() || !navigator.onLine || !hasPendingRemoteWrites() || remoteRetryTimer) return;
   const delays = [2000, 5000, 15000, 30000];
   const delay = delays[Math.min(remoteRetryAttempt, delays.length - 1)];
@@ -1362,7 +1363,7 @@ async function joinRemoteTournament(playerName, avatarId) {
   return remoteTournament.join(playerName, avatarId);
 }
 
-function queueRemoteSave() {
+function legacyQueueRemoteSave() {
   if (!isSupabaseReady() || isApplyingRemoteState || !state.adminToken || !state.id) return;
   window.clearTimeout(remoteSaveTimer);
   remoteSaveTimer = window.setTimeout(() => {
@@ -1427,7 +1428,7 @@ function removeRealtimeChannel() { return realtimeConnection.removeChannel(); }
 function scheduleRealtimeReconnect() { return realtimeConnection.scheduleReconnect(); }
 function refreshRemoteState(reason = "reconnect") { return realtimeConnection.refresh(reason); }
 
-function flushPendingRemoteWrites() {
+function legacyFlushPendingRemoteWrites() {
   if (!isSupabaseReady() || !navigator.onLine) return;
   if (pendingAdminSync && isCurrentUserAdmin()) {
     if (remoteMutationSequence <= lastRemotePersistedSequence) {
@@ -1437,6 +1438,10 @@ function flushPendingRemoteWrites() {
   }
   processPlayerScoreQueue();
 }
+
+function scheduleRemoteRetry() { return remoteSyncController?.scheduleRemoteRetry() ?? legacyScheduleRemoteRetry(); }
+function queueRemoteSave() { return remoteSyncController?.queueRemoteSave() ?? legacyQueueRemoteSave(); }
+function flushPendingRemoteWrites() { return remoteSyncController?.flushPendingRemoteWrites() ?? legacyFlushPendingRemoteWrites(); }
 
 function connectRealtimeForCurrentState() { return realtimeConnection.connect(); }
 
@@ -2457,6 +2462,29 @@ remoteStateController = window.PadelstarRemoteStateController.create({
   render,
   saveProfileHistory,
   translate: (key, values) => t(key, values),
+});
+remoteSyncController = window.PadelstarRemoteSyncController.create({
+  windowRef: window,
+  isSupabaseReady,
+  isOnline: () => navigator.onLine,
+  hasPendingRemoteWrites,
+  isApplyingRemoteState: () => isApplyingRemoteState,
+  hasAdminTokenAndTournament: () => Boolean(state.adminToken && state.id),
+  isCurrentUserAdmin,
+  getRemoteMutationSequence: () => remoteMutationSequence,
+  getLastRemotePersistedSequence: () => lastRemotePersistedSequence,
+  setRemoteMutationSequence: (value) => { remoteMutationSequence = value; },
+  getRemoteSaveTimer: () => remoteSaveTimer,
+  setRemoteSaveTimer: (value) => { remoteSaveTimer = value; },
+  getRemoteRetryTimer: () => remoteRetryTimer,
+  setRemoteRetryTimer: (value) => { remoteRetryTimer = value; },
+  getRemoteRetryAttempt: () => remoteRetryAttempt,
+  setRemoteRetryAttempt: (value) => { remoteRetryAttempt = value; },
+  getRemoteWriteChain: () => remoteWriteChain,
+  setRemoteWriteChain: (value) => { remoteWriteChain = value; },
+  saveRemoteState,
+  processPlayerScoreQueue,
+  scheduleRealtimeReconnect,
 });
 
 const appInit = window.PadelstarAppInit.create({

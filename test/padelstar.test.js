@@ -11,6 +11,7 @@ const utilitiesPath = path.join(appRoot, "core", "utilities.js");
 const languageControllerPath = path.join(appRoot, "core", "language-controller.js");
 const sessionControllerPath = path.join(appRoot, "core", "session-controller.js");
 const remoteStateControllerPath = path.join(appRoot, "core", "remote-state-controller.js");
+const remoteSyncControllerPath = path.join(appRoot, "core", "remote-sync-controller.js");
 const domElementsPath = path.join(appRoot, "bootstrap", "dom-elements.js");
 const appMetaPath = path.join(appRoot, "bootstrap", "app-meta.js");
 const bootstrapEventsPath = path.join(appRoot, "bootstrap", "app-events.js");
@@ -155,6 +156,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(languageControllerPath, "utf8"), context, { filename: languageControllerPath });
   vm.runInContext(fs.readFileSync(sessionControllerPath, "utf8"), context, { filename: sessionControllerPath });
   vm.runInContext(fs.readFileSync(remoteStateControllerPath, "utf8"), context, { filename: remoteStateControllerPath });
+  vm.runInContext(fs.readFileSync(remoteSyncControllerPath, "utf8"), context, { filename: remoteSyncControllerPath });
   vm.runInContext(fs.readFileSync(domElementsPath, "utf8"), context, { filename: domElementsPath });
   vm.runInContext(fs.readFileSync(appMetaPath, "utf8"), context, { filename: appMetaPath });
   vm.runInContext(fs.readFileSync(bootstrapEventsPath, "utf8"), context, { filename: bootstrapEventsPath });
@@ -227,6 +229,7 @@ function loadPadelstar(options = {}) {
     languageController: window.PadelstarLanguageController,
     sessionController: window.PadelstarSessionController,
     remoteStateController: window.PadelstarRemoteStateController,
+    remoteSyncController: window.PadelstarRemoteSyncController,
     domElements: window.PadelstarDomElements,
     appMeta: window.PadelstarAppMeta,
     bootstrapEvents: window.PadelstarBootstrapEvents,

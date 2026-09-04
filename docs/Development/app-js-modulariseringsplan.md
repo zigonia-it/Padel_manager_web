@@ -2,7 +2,7 @@
 
 **Sist kartlagt:** 2026-09-04  
 **Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
-**Status:** Remote state-delgrensen er gjennomført og verifisert. Fase A er fortsatt pågående fordi remote sync/retry og resterende composition-root-ansvar ikke er ferdig gjennomgått.
+**Status:** Remote state- og sync-delgrensene er gjennomført og verifisert. Fase A er fortsatt pågående fordi legacy-fallbacker og resterende composition-root-ansvar må ryddes og revalideres samlet.
 
 ## 1. Konklusjon
 
@@ -153,6 +153,8 @@ Følgende skal ikke være første refaktorering:
 - **Fase 10-verifikasjon:** fokuserte app-/PWA-/session-tester passerte med 130/130, full testpakke passerte med 207 beståtte tester og 1 forventet live-Supabase-skip (208 totalt), samt full syntakssjekk og `git diff --check`. Eksisterende local/admin/spectator-leave-regresjoner passerer i app-harnesset.
 - **Remote state-delgrense, 2026-09-04:** `applyRemoteState` og konfliktmarkering er flyttet til `app/core/remote-state-controller.js`. Appens eksisterende remote-tournament/RPC-moduler bruker fortsatt samme callback-kontrakt.
 - **Remote state-verifikasjon:** isolert test bekrefter stale-revisjon, RPC-oppdatering og bevaring av selected player, admin-token, player-token og owner-identitet. Fokuserte tester passerte med 131/131, full testpakke med 209 beståtte tester og 1 forventet live-Supabase-skip (210 totalt), syntax/diff passerte, og browser reload viste aktiv remote-state-controller. Live Supabase er fortsatt ikke verifisert uten eksplisitt live-miljø.
+- **Remote sync-delgrense, 2026-09-04:** debounce, skrivekø, retry/backoff og pending-write flush er flyttet til `app/core/remote-sync-controller.js`. RPC- og scorekø-modulene beholder sine eksisterende API-er.
+- **Remote sync-verifikasjon:** isolert sync-test bekrefter 350 ms debounce og sekvensjustering ved flush. Full testpakke passerte med 211 beståtte tester og 1 forventet live-Supabase-skip (212 totalt), syntax/diff passerte, og browser viste aktiv state- og sync-controller i desktop/tablet/mobil-størrelser. Live Supabase/Auth/RPC/Realtime er fortsatt ikke verifisert uten eksplisitt live-miljø.
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 

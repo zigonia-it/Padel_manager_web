@@ -91,6 +91,7 @@ const appShell = [
   "./app/core/language-controller.js?v=padelstar-language-controller-1",
   "./app/core/session-controller.js?v=padelstar-session-controller-1",
   "./app/core/remote-state-controller.js?v=padelstar-remote-state-controller-1",
+  "./app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1",
   "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-1",
   "./app/bootstrap/app-meta.js?v=padelstar-app-meta-1",
   "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-1",
