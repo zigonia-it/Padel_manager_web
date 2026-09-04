@@ -18,6 +18,7 @@ const navigationSource = fs.readFileSync(path.join(root, "app", "navigation.js")
 const tournamentLibrarySource = fs.readFileSync(path.join(root, "app", "tournament-library.js"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
+const utilitiesSource = fs.readFileSync(path.join(root, "app", "core", "utilities.js"), "utf8");
 const translationsSource = fs.readFileSync(path.join(root, "app", "translations.js"), "utf8");
 const avatarSystemSource = fs.readFileSync(path.join(root, "app", "avatar-system.js"), "utf8");
 const accentSystemSource = fs.readFileSync(path.join(root, "app", "accent-system.js"), "utf8");
@@ -887,8 +888,7 @@ test("browser smoke is wired into the Pages deployment gate", () => {
 });
 
 test("new invite codes use the stronger eight-character format", () => {
-  const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
-  assert.match(appSource, /Array\.from\(\{ length: 8 \}/);
+  assert.match(utilitiesSource, /Array\.from\(\{ length: 8 \}/);
   assert.match(indexSource, /maxlength="8"/);
 });
 

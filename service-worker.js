@@ -87,6 +87,7 @@ const appShell = [
   "./app/account-auth.js?v=padelstar-account-auth-6",
   "./app/config/storage-keys.js?v=padelstar-storage-keys-1",
   "./app/config/supabase-config.js?v=padelstar-supabase-config-1",
+  "./app/core/utilities.js?v=padelstar-utilities-1",
   "./app/match-card.js?v=padelstar-match-card-1",
   "./app/backup-format.js?v=padelstar-backup-format-1",
   "./app/link-utils.js?v=padelstar-link-utils-1",

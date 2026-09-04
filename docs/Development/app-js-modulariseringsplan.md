@@ -2,7 +2,7 @@
 
 **Sist kartlagt:** 2026-09-04  
 **Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
-**Status:** Fase 2 (konfigurasjonsgrense) er gjennomført og verifisert. Fase A er fortsatt pågående fordi resterende entrypoint-orkestrering ikke er ferdig flyttet.
+**Status:** Fase 3 (rene hjelpefunksjoner) er gjennomført og verifisert. Fase A er fortsatt pågående fordi resterende entrypoint-orkestrering ikke er ferdig flyttet.
 
 ## 1. Konklusjon
 
@@ -135,6 +135,8 @@ Følgende skal ikke være første refaktorering:
 - **Fase 2, 2026-09-04:** storage-nøkler er flyttet til `app/config/storage-keys.js`, og Supabase-config-lesing er flyttet til `app/config/supabase-config.js`. HTML- og service-worker-referanser er oppdatert, og `package.json` sin syntakssjekk dekker nå også underkataloger.
 - **Fase 2-verifikasjon:** isolerte config-tester, full testpakke (189 bestått, 1 forventet live-skip), full syntakssjekk og `git diff --check` passerte. Begge nye scriptressurser svarte HTTP 200 lokalt, og nettleseren bekreftet at storage-registry og Supabase-config-globalen var tilgjengelige etter reload.
 - **Gjenværende fase 2-arbeid:** ingen kjent kodeendring mangler i denne grensen. Live Supabase-flyt er fortsatt ikke kjørt fordi den eksplisitte live-testen krever `PADELSTAR_LIVE_SUPABASE=1` og et tilgjengelig verifiseringsmiljø.
+- **Fase 3, 2026-09-04:** `escapeHtml`, `escapeAttribute`, `appendEmptyText`, `createInviteCode` og `slugify` er flyttet til `app/core/utilities.js` med eksplisitt dokument- og random-avhengighet. HTML, service worker og testharness er oppdatert.
+- **Fase 3-verifikasjon:** isolerte utility-tester og full testpakke passerte med 192 beståtte tester og 1 forventet live-Supabase-skip. Full syntakssjekk, `git diff --check`, lokal HTTP 200 for utility-scriptet og nettleser-reload med synlig landing er kontrollert. Den eneste console-feilen er fortsatt lokal 404 for `/_vercel/insights/script.js`.
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 
