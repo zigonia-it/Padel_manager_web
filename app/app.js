@@ -1,16 +1,18 @@
-const legacyStorageKey = "padel-manager-demo";
-const legacyRoleStorageKey = "padel-manager-role";
-const storageKey = "padelstar-demo";
-const roleStorageKey = "padelstar-role";
-const languageStorageKey = "padelstar-language";
-const profileStorageKey = "padelstar-profile";
-const profileHistoryStorageKey = "padelstar-profile-history";
-const tournamentHistoryStorageKey = "padelstar-tournament-history";
-const notificationPreferenceKey = "padelstar-notifications";
-const pushSubscriptionStorageKey = "padelstar-push-subscription";
-const syncStorageKey = `${storageKey}-sync`;
-const recoveryStorageKey = `${storageKey}-last-good`;
-const tournamentLibraryStorageKey = "padelstar-tournament-library";
+const {
+  legacyStorageKey,
+  legacyRoleStorageKey,
+  storageKey,
+  roleStorageKey,
+  languageStorageKey,
+  profileStorageKey,
+  profileHistoryStorageKey,
+  tournamentHistoryStorageKey,
+  notificationPreferenceKey,
+  pushSubscriptionStorageKey,
+  syncStorageKey,
+  recoveryStorageKey,
+  tournamentLibraryStorageKey,
+} = window.PadelstarStorageKeys;
 const linkUtils = window.PadelstarLinks;
 const publicAppUrl = linkUtils.publicAppUrl;
 const spectatorQueryKey = linkUtils.spectatorQueryKey;
@@ -309,11 +311,7 @@ const workspaceNavigation = window.PadelstarWorkspaceNavigation.create({
   t: (key, values) => t(key, values),
   workspaceModuleFromActiveModule: () => workspaceModuleFromActiveModule(),
 });
-const supabaseMeta = (name) => document.querySelector(`meta[name="${name}"]`)?.content?.trim() ?? "";
-const supabaseSettings = window.PADELSTAR_SUPABASE ?? window.PADEL_MANAGER_SUPABASE ?? {
-  url: supabaseMeta("padelstar-supabase-url"),
-  anonKey: supabaseMeta("padelstar-supabase-anon-key"),
-};
+const supabaseSettings = window.PadelstarSupabaseConfig.create({ document, window });
 let supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
   ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
     auth: {

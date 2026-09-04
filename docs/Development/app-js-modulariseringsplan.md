@@ -1,8 +1,8 @@
 # Plan for oppdeling av `app/app.js`
 
 **Sist kartlagt:** 2026-09-04  
-**Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`  
-**Status:** Analyse og planlegging. Ingen nye kodeflyttinger gjennomføres som del av dette dokumentet.
+**Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
+**Status:** Fase 2 (konfigurasjonsgrense) er gjennomført og verifisert. Fase A er fortsatt pågående fordi resterende entrypoint-orkestrering ikke er ferdig flyttet.
 
 ## 1. Konklusjon
 
@@ -128,6 +128,13 @@ Følgende skal ikke være første refaktorering:
 10. **Session/player:** flytt leave/join/availability og existing-player-flow. Verifiser lokal, spectator og remote rolleflyt.
 11. **Remote:** flytt remote-state og remote-sync kontroller. Verifiser revision/conflict, offline-kø, reconnect, tokenbinding og RPC-kontrakter.
 12. **Sluttkontroll:** fjern kun wrappers uten referanser, oppdater HTML service worker, tester og dokumentasjon, og mål at `app.js` kun er composition root.
+
+### Fersk gjennomføringsstatus
+
+- **Baseline, 2026-09-04:** `npm test` passerte med 187 tester og 1 forventet live-Supabase-skip; `npm run check:syntax` og `git diff --check` passerte. Lokal browser-smoke lastet landing og aktiv workspace. Den eneste console-feilen var lokal 404 for `/_vercel/insights/script.js`, som ikke er en app-modulfeil.
+- **Fase 2, 2026-09-04:** storage-nøkler er flyttet til `app/config/storage-keys.js`, og Supabase-config-lesing er flyttet til `app/config/supabase-config.js`. HTML- og service-worker-referanser er oppdatert, og `package.json` sin syntakssjekk dekker nå også underkataloger.
+- **Fase 2-verifikasjon:** isolerte config-tester, full testpakke (189 bestått, 1 forventet live-skip), full syntakssjekk og `git diff --check` passerte. Begge nye scriptressurser svarte HTTP 200 lokalt, og nettleseren bekreftet at storage-registry og Supabase-config-globalen var tilgjengelige etter reload.
+- **Gjenværende fase 2-arbeid:** ingen kjent kodeendring mangler i denne grensen. Live Supabase-flyt er fortsatt ikke kjørt fordi den eksplisitte live-testen krever `PADELSTAR_LIVE_SUPABASE=1` og et tilgjengelig verifiseringsmiljø.
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 
