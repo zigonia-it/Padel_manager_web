@@ -121,7 +121,6 @@ const appShell = [
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",
-  "./assets/icons/padelstar-512.png",
   "./assets/icons/padelstar-maskable-512.png",
   "./assets/icons/Games@0.5x.png",
   "./assets/icons/Match win@0.5x.png",

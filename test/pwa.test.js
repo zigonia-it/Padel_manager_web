@@ -292,7 +292,7 @@ test("all active app icon surfaces use the shared Padelstar icon", () => {
   assert.match(manifestSource, /"src": "assets\/icons\/padelstar-192\.png"/);
   assert.match(manifestSource, /"src": "assets\/icons\/padelstar-maskable-512\.png"/);
   assert.match(serviceWorkerSource, /assets\/icons\/padelstar-192\.png/);
-  assert.match(serviceWorkerSource, /assets\/icons\/padelstar-512\.png/);
+  assert.match(serviceWorkerSource, /assets\/icons\/padelstar-maskable-512\.png/);
   assert.match(serviceWorkerSource, /icon: "\.\/assets\/icons\/padelstar-icon\.png"/);
   assert.match(serviceWorkerSource, /badge: "\.\/assets\/icons\/padelstar-icon\.png"/);
   assert.match(matchCardSource, /src="assets\/icons\/padelstar-icon\.png"/);
