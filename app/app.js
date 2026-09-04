@@ -495,6 +495,15 @@ const courtSettings = window.PadelstarCourtSettings.create({
   escapeAttribute: (value) => escapeAttribute(value),
   escapeHtml: (value) => escapeHtml(value),
 });
+const setupForms = window.PadelstarSetupForms.create({
+  elements,
+  getDefaultTournament: () => defaultTournament,
+  getProfile: () => profile,
+  defaultAvatarId,
+  avatarUrl: (player) => avatarUrl(player),
+  accentStyle: (accent) => accentStyle(accent),
+  translate: (key, values) => t(key, values),
+});
 
 const workspaceOverview = window.PadelstarWorkspaceOverview.create({
   appendEmptyText: (container, text) => appendEmptyText(container, text),
@@ -1533,52 +1542,31 @@ function isValidTournamentState(candidate) {
 }
 
 function syncCreateFormDefaults() {
-  elements.createTournamentForm.elements.tournamentName.value = defaultTournament.name;
-  elements.createTournamentForm.elements.players.value = defaultTournament.players
-    .map((player) => player.name)
-    .join("\n");
-  elements.createTournamentForm.elements.courts.value = defaultTournament.courts.length;
-  elements.createTournamentForm.elements.adminParticipates.checked = false;
-  elements.createTournamentForm.elements.adminPlayerName.value = profile?.displayName?.trim() || "Admin";
-  syncAdminPlayerChoice();
+  return setupForms.syncCreateFormDefaults();
 }
 
 function syncAdminPlayerChoice() {
-  const adminParticipates = elements.createTournamentForm.elements.adminParticipates.checked;
-  elements.adminPlayerNameField.classList.toggle("hidden", !adminParticipates);
-  elements.createTournamentForm.elements.adminPlayerName.required = adminParticipates;
+  return setupForms.syncAdminPlayerChoice();
 }
 
 function syncAdminPlayerNameFromProfile() {
-  const name = profile?.displayName?.trim();
-  const field = elements.createTournamentForm?.elements.adminPlayerName;
-  if (name && field && (!field.value.trim() || field.value.trim() === "Admin")) field.value = name;
+  return setupForms.syncAdminPlayerNameFromProfile();
 }
 
 function syncJoinPreview() {
-  const inputName = elements.joinTournamentForm.elements.playerName.value.trim();
-  const name = inputName || profile?.displayName || t("setup.yourName");
-  const avatarId = profile?.avatarId || defaultAvatarId;
-  elements.joinNamePreview.textContent = name;
-  elements.joinAvatarPreview.src = avatarUrl({ name, avatarId });
-  elements.joinAvatarPreviewFrame?.setAttribute("style", accentStyle(profile?.accent ?? "gold"));
+  return setupForms.syncJoinPreview();
 }
 
 function syncJoinFormFromProfile() {
-  if (!profile || !elements.joinTournamentForm) return;
-  if (!elements.joinTournamentForm.elements.playerName.value) {
-    elements.joinTournamentForm.elements.playerName.value = profile.displayName;
-  }
+  return setupForms.syncJoinFormFromProfile();
 }
 
 function prefillInviteCodeFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const inviteCode = params.get("join") ?? params.get("code");
-  if (inviteCode) prefillJoinForm(inviteCode);
+  return setupForms.prefillInviteCodeFromUrl();
 }
 
 function prefillJoinForm(inviteCode) {
-  elements.joinTournamentForm.elements.inviteCode.value = inviteCode.trim().toUpperCase();
+  return setupForms.prefillJoinForm(inviteCode);
 }
 
 function showStart() {
