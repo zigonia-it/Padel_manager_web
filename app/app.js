@@ -1893,17 +1893,7 @@ function submitPlayerResult(matchId, teamOne, teamTwo) {
 }
 
 function notifyPlayerMatch(match, kind) {
-  if (!notificationsEnabled() || !match?.id || !navigator.serviceWorker?.controller) return;
-  const notificationKey = `${state.id}:${match.id}:${kind}`;
-  const lastKey = localStorage.getItem("padelstar-last-notification");
-  if (lastKey === notificationKey) return;
-  localStorage.setItem("padelstar-last-notification", notificationKey);
-  navigator.serviceWorker.controller.postMessage({
-    type: "padelstar-show-notification",
-    title: t("notifications.matchReadyTitle"),
-    body: kind === "playing" ? t("notifications.matchPlayingBody") : t("notifications.matchReadyBody"),
-    tag: `padelstar-match-${match.id}`,
-  });
+  return notificationSystem.notifyPlayerMatch(match, kind);
 }
 
 function renderPlayerStatus(matches) {

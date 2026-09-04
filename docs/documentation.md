@@ -44,6 +44,7 @@ Denne statusen beskriver arbeidskopien på branchen `codex/padelstar-ui-refresh`
 - De siste fire lokale Fase A-committene isolerer profilhistorikk, baneinnstillinger, oppstarts-/join-skjemaer og turneringsoppslag. Etter disse er `app/app.js` fortsatt entrypoint med gjenværende orkestrering; Fase A er derfor ikke ferdig.
 - Deling/kopiering er nå også isolert i `app/tournament-sharing.js`. Etter denne flytten er `npm test` kjørt på nytt: 187 tester, 186 bestått og 1 forventet live-Supabase-test hoppet over.
 - Resultatinnsendinger og admin-gjennomgang er nå isolert i `app/result-submissions.js`. Etter denne flytten er `npm test` kjørt på nytt: 188 tester, 187 bestått og 1 forventet live-Supabase-test hoppet over.
+- Lokal kampvarsling er nå samlet i `app/notification-system.js`. Runtime er lastet på nytt uten console-feil eller overflow; den eksisterende testpakken passerer fortsatt med 188 tester, 187 bestått og 1 forventet live-Supabase-test hoppet over.
 - `npm run check:syntax` og `git diff --check` passerer.
 - RLS/RPC, tokenbinding, revisjonskontroll, rate limiting, retensjon, modulgrenser og runtime-assets er statisk/testmessig dekket.
 - Lokal browserverifikasjon etter siste modul-flytting laster aktiv workspace uten console-feil og uten horisontal overflow ved 390, 768 og 1280 px. Den formelle `scripts/browser-smoke.sh`-kjøringen og live Auth, RPC, Realtime, push og produksjonsdeploy er fortsatt ikke verifisert.

@@ -457,6 +457,7 @@ test("push notifications have their own browser and subscription boundary", () =
   assert.match(notificationSystemSource, /sendPushNotification/);
   assert.match(notificationSystemSource, /subscribeToPush/);
   assert.match(notificationSystemSource, /global\.PadelstarNotificationSystem/);
+  assert.match(notificationSystemSource, /notifyPlayerMatch/);
   assert.match(indexSource, /app\/notification-system\.js\?v=padelstar-notification-system-1/);
   assert.match(serviceWorkerSource, /app\/notification-system\.js\?v=padelstar-notification-system-1/);
   assert.doesNotMatch(appSource, /return Uint8Array\.from\(atob/);

@@ -79,6 +79,8 @@ Nyeste Fase A-grense: kopiering og Web Share/fallback for turneringslenker er fl
 
 Nyeste Fase A-grense: spillerinnsendinger av resultater, admin-gjennomgang og lokal/remote resolusjon er flyttet til `app/result-submissions.js`, med eksplisitte state-, score-, RPC- og DOM-avhengigheter samt egen domenetest.
 
+Nyeste Fase A-grense: lokal varsling for spillerens kamp er samlet i `app/notification-system.js`, slik at service-worker-varsling og push-abonnement har samme varseldomene. Runtime og eksisterende varslingstester er kontrollert etter flytten.
+
 Fase A-kontroll 2026-09-04: de fire siste grensene er testet etter hver flytting. Branchen har fortsatt gjenværende entrypoint-orkestrering i `app/app.js`; fase A står derfor som pågående. Dette er en kontrollert del-leveranse, ikke en ferdigmelding.
 
 Leaderboard-/tabell-rendering er også flyttet til `app/standings.js`; `app.js` beholder kun orkestreringen.

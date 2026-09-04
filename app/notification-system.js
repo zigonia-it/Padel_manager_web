@@ -60,6 +60,21 @@
       }
     }
 
+    function notifyPlayerMatch(match, kind) {
+      const currentState = state();
+      if (!notificationsEnabled() || !match?.id || !global.navigator.serviceWorker?.controller) return;
+      const notificationKey = `${currentState.id}:${match.id}:${kind}`;
+      const lastKey = storage().getItem("padelstar-last-notification");
+      if (lastKey === notificationKey) return;
+      storage().setItem("padelstar-last-notification", notificationKey);
+      global.navigator.serviceWorker.controller.postMessage({
+        type: "padelstar-show-notification",
+        title: t("notifications.matchReadyTitle"),
+        body: kind === "playing" ? t("notifications.matchPlayingBody") : t("notifications.matchReadyBody"),
+        tag: `padelstar-match-${match.id}`,
+      });
+    }
+
     function notificationsSupported() {
       return "Notification" in global && "serviceWorker" in global.navigator;
     }
@@ -169,6 +184,7 @@
       base64ToUint8Array,
       notificationsEnabled,
       notificationsSupported,
+      notifyPlayerMatch,
       renderNotificationControl,
       sendPushNotification,
       subscribeToPush,
