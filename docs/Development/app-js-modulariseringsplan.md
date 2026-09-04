@@ -159,7 +159,7 @@ Følgende skal ikke være første refaktorering:
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 
-Fase B-notat 2026-09-04: verifiserte sikkerhetsrisikoer er rettet i commit `37cc230`, inkludert takeover ved ID-kollisjon, anonym token-replay, bred anonym lesing, stored XSS, push-endepunkt-/ressursgrenser, legacy localStorage og CI-rettigheter. `npm test` passerer 213/213 med 1 forventet live-test-skip, og syntax/diff-sjekker passerer. Standard security scan `dadc37d7-1264-4aba-83a0-9cd99faf7615` er startet mot aktuell commit og preflight er godkjent, men står fortsatt uten rapport i preflight. Fase B er derfor ikke ferdig før den autoritative scannen er fullført og 30-dagers profilslettingspolicy er eksplisitt avklart.
+Fase B-notat 2026-09-04: verifiserte sikkerhetsrisikoer er rettet i commit `37cc230`, med dokumentasjonsbaseline `08fe8b7`. Autoritativ Standard security scan `1cf7d2e5-6b90-47bb-8c2e-66363279ff01` er fullført og forseglet: 4 reportable funn (3 medium, 1 low), ingen high/critical. Funnene gjelder primært manuell schema-drift/deploymentavhengighet og et lav-konfidens push-egress-scenario. `npm test` passerer 213/213 med 1 forventet live-test-skip, og syntax/diff-sjekker passerer. Fase B er fortsatt åpen til funnene er lukket/akseptert med eierbeslutning og 30-dagers profilslettingspolicy er eksplisitt avklart.
 
 ## 8. Akseptansekriterier for selve refaktoreringen
 

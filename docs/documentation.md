@@ -74,15 +74,15 @@ Dette er den aktive, kronologiske oversikten over tidligere implementeringer, be
 ## Gjeldende leveransestatus
 
 - `main` er publisert til GitHub `origin/main`.
-- Siste felles baseline på `main`: `9c0a7b7`. Gjeldende arbeidsbranch: `codex/padelstar-ui-refresh`, med lokale UI-/CSS-konsolideringer og dokumentasjonsoppdateringer som ikke er publisert.
+- Siste felles baseline på `main`: `9c0a7b7`. Gjeldende publiserte arbeidsbranch: `codex/padelstar-ui-refresh`, med sikkerhetshardening og dokumentasjonsoppdateringer til `08fe8b7`.
 - Siste brukerrettede baseline: DiceBear Lorelei Neutral-avatarer, automatisk avatar ved spillerregistrering, blått scorecard-design og responsiv status-/spillerlayout.
 - Nyeste lokale strukturendring: avataransvar, accent-system, player-visuals, workspace-overview, UI-feedback, notification-system, profil-session, match-card, persistence, admin-identity, remote-feedback, realtime-connection, tournament-rounds, tournament-runtime, backup-format, lenke-/QR-generering, state-konstruksjon, state-bootstrap, modulruting og session-policy er isolert i egne app-moduler.
 - Den gamle duplikate kampkort-renderingen er fjernet fra `app/app.js`; entrypointen bruker nå den eksplisitte `app/match-card.js`-grensen.
 - GitHub-push er gjennomført; Vercel-produksjonsdeploy venter på separat deploy-godkjenning.
-- Lokalt: `npm test` passerer med 182 tester: 181 beståtte og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
+- Lokalt: `npm test` passerer med 214 tester: 213 beståtte og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
 - CI/deploy er satt opp med browser-smoke for desktop, medium og mobil. Tidligere smoke-kjøringer har verifisert opprettelse, start, hamburger, adminnavigasjon og kampvisning på 1440, 768 og 390 px uten horisontal overflow; ny kjøring etter denne branchens CSS-endringer gjenstår fordi Playwright ikke er tilgjengelig offline.
-- Fase A er fortsatt under gjennomføring lokalt; Fase B er kode-/sikkerhetsverifisert, og Fase C–D er kontrollert på kode- og kontraktsnivå. Browser-smoke må kjøres på nytt når Playwright er tilgjengelig. Modulgrensene, setup-/workspace-flaten, scorecard-layouten og CSS-konsolideringen er dokumentert i nåstatusen øverst.
-- Fase B-diffskanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført på arbeidskopien: 51 endrede filer og 4 sikkerhetsflater gjennomgått, ingen reportable funn. Live Supabase-flyt er ikke kjørt i denne offline-verifiseringen og forblir dekket av én forventet skip-test.
+- Fase A er ferdig verifisert. Fase B har fullført autoritativ Standard-scan, men står åpen for 4 dokumenterte funn og personvernpolicy. Fase C–D er kontrollert på kode-/kontraktsnivå; browser-smoke etter siste endringer må fortsatt kjøres når Playwright er tilgjengelig. Modulgrensene, setup-/workspace-flaten, scorecard-layouten og CSS-konsolideringen er dokumentert i nåstatusen øverst.
+- Fase B Standard security scan `1cf7d2e5-6b90-47bb-8c2e-66363279ff01` er fullført på commit `08fe8b7`: 297 filer inventert, 4 reportable funn (3 medium, 1 low), ingen high/critical. Rapporten er forseglet lokalt; live deployment-konfigurasjon ble ikke lest. Live Supabase-flyt er ikke kjørt og forblir dekket av én forventet skip-test.
 - Fase D UI-/språkgjennomgang er utført mot aktive HTML-, CSS- og JavaScript-filer. Eksisterende motor- og oversettelsesregresjoner passerer, initiale synlige fallback-tekster er bundet til oversettelsesnøkler, og browser-smoke bekrefter aktiv JavaScript-runtime og ingen overflow på desktop, medium eller mobil.
 - Fase 1-arbeidet startet etter masterplanen `docs/Development/Padelstar-komplett-utviklingsplan.md`: spillerregistrering bruker automatisk stabil avatar, PWA-installasjon har native prompt og plattformfallback, manifestet bruker riktige ikonstørrelser, og live-turneringer krever innlogget admin før opprettelse. Eierfeltet settes ved opprettelse når Supabase Auth er aktiv.
 
