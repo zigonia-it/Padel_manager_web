@@ -116,9 +116,9 @@ Turneringsstatus, rundeblokkering og fremdriftskontroll er flyttet til `app/tour
 Remote state persistence for debouncede admin-lagringer er flyttet til `app/remote-state-write.js`, mens den eksisterende felles skrivekøen beholdes i entrypointen for å sikre riktig rekkefølge mot match- og score-RPC-er.
 
 - Fase A: ferdig verifisert på commit `c4d7723` (kodegrensene i `da09fd4`, statusdokumentasjon i `c4d7723`). Struktur-, session/player- og remote state/sync-grensene er isolert, legacy-fallbacker er fjernet, og full lokal regresjon + browser desktop/mobil passerer.
-- Fase B: sikkerhetshardening og autoritativ Standard-scan er gjennomført på publisert baseline `08fe8b7`. Scan `1cf7d2e5-6b90-47bb-8c2e-66363279ff01` er fullført med 4 reportable funn (3 medium, 1 low), ingen high/critical; rapporten er forseglet lokalt. Fase B er fortsatt åpen for de gjenværende funnene: manuell schema-artifakt som kan avvike fra migreringene, mulig autentisert claim/replay i deploymenter som bruker schema-artifakten, og lav-konfidens server-side push-egress. 30-dagers profilslettingspolicy må også eksplisitt avklares før fasen kan lukkes.
-- Fase C: ikke startet på nytt etter Fase A. Historiske verifikasjoner beholdes som referanse, men skal ikke brukes som ferdigbevis.
-- Fase D: ikke startet på nytt etter Fase A. Historiske verifikasjoner beholdes som referanse, men skal ikke brukes som ferdigbevis.
+- Fase B: ferdig verifisert på publisert baseline `e10f5ae`. Autoritativ Standard-scan `132d1370-5afa-4a20-ba22-4f349af7e4d9` har komplett dekning og 0 reportable funn. Live Supabase-kontrakttest bestod, og 30-dagers profilsletting er dekket av eksisterende policy/test. Fase B er lukket med rapportens eneste begrensning dokumentert: ingen separat produksjonskonfigurasjon ble lest.
+- Fase C: gjennomført på nytt etter Fase A. Browser-smoke bestod på desktop (1440), medium (768) og mobil (390), inkludert opprettelse, start, adminnavigasjon, kampvisning og overflow-kontroll. Live Supabase-kontrakttest og samlet lokal regresjon bestod; en desktop-smokeassertion ble korrigert fordi den feilaktig krevde at to-kolonne setup-panel og skjema skulle ha samme bredde.
+- Fase D: gjennomført på nytt etter Fase C. Alle synlige landing-featuretekster har native oversettelser i de åtte støttede språkene; browser-gjennomgang bekreftet engelsk språkbytte, korrekt aria-label, mobilmeny, Escape-lukking og ingen overflow i smoke-testene. Static UI-/språktester og samlet regresjon passerer.
 
 ## Prioritert videre plan
 
@@ -187,13 +187,29 @@ Arbeidet er gjennomført lokalt mot gjeldende scope. Gjenstående produksjonsver
 
 Disse starter ikke før scope, personvern og akseptansekriterier er besluttet:
 
-- Ekstern driftsvarsling for `/api/health`.
+- Ekstern driftsvarsling for `/api/health`. # Hva er dette?
 - Full konto- og tokenmigrering for administratorer.
 - Mer avansert tiebreak/poengføring.
 - PDF-eksport av tabell og resultat.
 - Utvidet profilhistorikk og karrierestatistikk.
 - Mer avansert offline-konflikthåndtering.
-- Eventuell avataropplasting eller et større egendefinert avatarbibliotek; dagens avatarvelger og DiceBear Lorelei Neutral er gjeldende baseline.
+- Eventuell avataropplasting eller et større egendefinert avatarbibliotek; dagens avatarvelger og DiceBear Lorelei Neutral er gjeldende baseline. # Hvilke alternativer finnes det?
+
+### Fase E – beslutningsgjennomgang 2026-09-04
+
+Fase E er gjennomgått uten implementering. Punktene under er beslutningsklare scopeforslag, ikke godkjente utviklingsoppgaver.
+
+| Punkt | Allerede implementert | Gjenværende scope | Må besluttes før start | Foreslåtte akseptansekriterier |
+|---|---|---|---|---|
+| Ekstern driftsvarsling for `/api/health` | Health-endepunktet finnes og returnerer status, versjon og tidsstempel. | En ekstern monitor som kaller endepunktet og varsler ved feil, treghet eller feil versjon. | Monitorleverandør, intervall, mottakere, taushets-/eskaleringsregler og om betaen skal ha dette. | Varsling ved ikke-2xx, timeout og versjonsavvik; dokumentert testvarsel; ingen hemmeligheter i payload/logg. |
+| Full konto- og tokenmigrering for administratorer | Supabase Auth er valgfritt; admin-token beskytter fortsatt lokale/live-turneringer. | Knytte eksisterende lokale adminøkter til konto, migrere eierskap og etablere konto-basert gjenoppretting. | Skal konto bli obligatorisk, hvordan håndteres gjesteeierskap, og hva er fallback ved tapt konto? | Migrering er idempotent, kan ikke overta andres turneringer, og rollback/feil gir ingen tap av admin-tilgang. |
+| Mer avansert tiebreak/poengføring | Grunnleggende kamp-, sett-, game- og tabellpoengføring finnes. | Konfigurerbare tiebreak-regler, innbyrdes oppgjør, differanse og eventuelle turneringsspesifikke regler. | Regelverk, prioriteringsrekkefølge ved likhet og UI for valg/visning. | Samme input gir deterministisk rangering; regler vises før start og dekkes av positive/negative motor- og UI-tester. |
+| PDF-eksport av tabell og resultat | Tokenfri backup-eksport og web-/TV-visning finnes. | PDF-layout, metadata, språk, font/branding og eksport av ferdig/aktiv turnering. | Skal PDF lages lokalt eller via tjeneste, hvilke data skal inkluderes, og personvern ved deling? | Eksport fungerer offline, inneholder korrekt revisjon/resultat, har lesbar mobil/desktop-layout og eksponerer ingen tokens. |
+| Utvidet profilhistorikk og karrierestatistikk | Profil, historikk, aggregert statistikk og 30-dagers sletting finnes. | Sesonger, motstandere/partnere over tid, trender, filtrering og eksport. | Dataminimering, opt-in, sletting/portabilitet og hvilke beregninger som er produktkrav. | Aggregater kan spores til underliggende kamper, sletting fjerner avledede data innen avtalt frist, og visningen er tydelig på usikkerhet. |
+| Mer avansert offline-konflikthåndtering | Revisjonskontroll, konfliktstatus, server-refresh og lokal backup-valg finnes. | Felt-/kampnivå-merging, køvisning, retry-policy og konfliktløsning på tvers av enheter. | Autoritativ kilde per felttype, hvem som kan løse konflikt, og hvor lenge offline-data beholdes. | Ingen stille overskriving; hver konflikt er synlig, gjentakbar og kan gjenopprettes med lokal backup. |
+| Avataropplasting eller større bibliotek | Automatisk DiceBear Lorelei Neutral-avatar og stabil avatar-ID finnes; ingen opplasting. | Enten utvidet fast bibliotek, egen opplasting eller begge deler. | Moderering, lagring/kostnad, filformat/størrelse, personvern, rettigheter og om bilder skal deles offentlig. | Ugyldige filer avvises, bilder skaleres trygt, fallback fungerer offline, og sletting fjerner brukerens opplastede data. |
+
+Foreslått beslutningsrekkefølge etter A–D: (1) konto-/personvernmodell, (2) driftsansvar og monitorering, (3) tiebreak-regelverk, (4) offline-konfliktmodell, (5) profilhistorikk, (6) PDF-omfang, (7) avatarstrategi. Ingen av punktene startes før eier har valgt scope og akseptansekriterier.
 
 ## Dokumentasjons- og leveranseflyt
 
