@@ -945,6 +945,9 @@ test("critical confirmations use an accessible dialog surface", () => {
   assert.match(indexSource, /aria-labelledby="appConfirmTitle"/);
   assert.match(indexSource, /aria-describedby="appConfirmMessage"/);
   assert.match(appSource, /function requestConfirmation\(message\)/);
+  assert.match(appSource, /requestConfirmationWithTitle\(t\("messages\.endTournamentConfirm"\), t\("messages\.endTournamentTitle"\)\)/);
+  assert.match(appSource, /requestConfirmationWithTitle\(t\("messages\.resetTournamentConfirm"\), t\("messages\.resetTournamentTitle"\)\)/);
+  assert.match(uiFeedbackSource, /elements\.confirmTitle\.textContent = title/);
   assert.match(uiFeedbackSource, /previouslyFocused\.focus\(\)/);
   assert.match(stylesSource, /\.app-confirm-dialog::backdrop/);
 });

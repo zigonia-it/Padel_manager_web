@@ -878,14 +878,14 @@ function handleKeepLocalBackup() {
 }
 
 async function handleEndTournament() {
-  if (!await requestConfirmation(t("messages.endTournamentConfirm"))) return;
+  if (!await requestConfirmationWithTitle(t("messages.endTournamentConfirm"), t("messages.endTournamentTitle"))) return;
   endTournament();
   saveState();
   render();
 }
 
 async function handleResetTournament() {
-  if (!await requestConfirmation(t("messages.resetTournamentConfirm"))) return;
+  if (!await requestConfirmationWithTitle(t("messages.resetTournamentConfirm"), t("messages.resetTournamentTitle"))) return;
   await deleteRemoteTournament();
   tournamentLibrary.remove(state.id);
   state = structuredClone(defaultTournament);
@@ -1239,6 +1239,7 @@ function setRemoteNotice(message) {
 }
 
 function requestConfirmation(message) { return uiFeedback.requestConfirmation(message); }
+function requestConfirmationWithTitle(message, title) { return uiFeedback.requestConfirmation(message, title); }
 function showToast(message, statusClass = "status-message-success") { return uiFeedback.showToast(message, statusClass); }
 
 function showRecoveryNotice() {

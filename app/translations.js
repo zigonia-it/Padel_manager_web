@@ -209,6 +209,14 @@ Object.assign(padelstarTranslations.de, { "language.followDevice": "Gerätesprac
 Object.assign(padelstarTranslations.fr, { "language.followDevice": "Suivre la langue de l’appareil" });
 Object.assign(padelstarTranslations.sv, { "language.followDevice": "Följ enhetens språk" });
 Object.assign(padelstarTranslations.da, { "language.followDevice": "Følg enhedens sprog" });
+Object.assign(padelstarTranslations.nb, { "messages.endTournamentTitle": "Avslutt turnering", "messages.resetTournamentTitle": "Nullstill turnering" });
+Object.assign(padelstarTranslations.nn, { "messages.endTournamentTitle": "Avslutt turnering", "messages.resetTournamentTitle": "Nullstill turnering" });
+Object.assign(padelstarTranslations.en, { "messages.endTournamentTitle": "End tournament", "messages.resetTournamentTitle": "Reset tournament" });
+Object.assign(padelstarTranslations.es, { "messages.endTournamentTitle": "Finalizar torneo", "messages.resetTournamentTitle": "Restablecer torneo" });
+Object.assign(padelstarTranslations.de, { "messages.endTournamentTitle": "Turnier beenden", "messages.resetTournamentTitle": "Turnier zurücksetzen" });
+Object.assign(padelstarTranslations.fr, { "messages.endTournamentTitle": "Terminer le tournoi", "messages.resetTournamentTitle": "Réinitialiser le tournoi" });
+Object.assign(padelstarTranslations.sv, { "messages.endTournamentTitle": "Avsluta turnering", "messages.resetTournamentTitle": "Återställ turnering" });
+Object.assign(padelstarTranslations.da, { "messages.endTournamentTitle": "Afslut turnering", "messages.resetTournamentTitle": "Nulstil turnering" });
 Object.assign(padelstarTranslations.nb, { "account.signingIn": "Logger inn …" });
 Object.assign(padelstarTranslations.nn, { "account.signingIn": "Loggar inn …" });
 Object.assign(padelstarTranslations.en, { "account.signingIn": "Signing in …" });
