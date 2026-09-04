@@ -39,9 +39,10 @@ Denne statusen beskriver arbeidskopien på branchen `codex/padelstar-ui-refresh`
 ### Verifikasjonsstatus
 
 - `npm test`: 182 tester, 181 bestått og 1 forventet live-Supabase-test hoppet over.
+- Etter siste Fase A-flytting (`app/court-settings.js`) er `npm test` kjørt på nytt: 184 tester, 183 bestått og 1 forventet live-Supabase-test hoppet over.
 - `npm run check:syntax` og `git diff --check` passerer.
 - RLS/RPC, tokenbinding, revisjonskontroll, rate limiting, retensjon, modulgrenser og runtime-assets er statisk/testmessig dekket.
-- Browser-smoke er ikke kjørt i denne arbeidsøkten fordi Playwright-pakken ikke er tilgjengelig i offline-miljøet. Live Auth, RPC, Realtime, push og produksjonsdeploy er derfor ikke på nytt verifisert.
+- Lokal browserverifikasjon etter siste modul-flytting laster aktiv workspace uten console-feil og uten horisontal overflow ved tilgjengelig lokal viewport. Den formelle `scripts/browser-smoke.sh`-kjøringen og live Auth, RPC, Realtime, push og produksjonsdeploy er fortsatt ikke verifisert.
 - Branchens nye CSS-konsolidering fjerner historiske landing-/workspace-menyer, gamle tabs-regler og dupliserte setup-/scorecard-regler. Stylesheet-query-versjoner og service-worker-cache er oppdatert.
 
 ## 2026-09-03 – versjon 0.4 og funksjonskontroll
