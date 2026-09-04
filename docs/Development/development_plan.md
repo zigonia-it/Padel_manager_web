@@ -115,14 +115,16 @@ Turneringsstatus, rundeblokkering og fremdriftskontroll er flyttet til `app/tour
 
 Remote state persistence for debouncede admin-lagringer er flyttet til `app/remote-state-write.js`, mens den eksisterende felles skrivekøen beholdes i entrypointen for å sikre riktig rekkefølge mot match- og score-RPC-er.
 
-- Fase A: pågår. Avataransvar, lenke-/QR-generering, rene cup-runde-hjelpere, felles spiller-/lagmarkup, turnerings-runtime, workspace-overview-rendering, remote state persistence, admin-RPC-mutasjoner, spillerens poengkø, scoring-sideeffekter og global event-wiring er nå egne moduler. Videre oppdeling av den resterende `app/app.js` må gjøres trinnvis med regresjon etter hver grense.
-- Fase B: lokalt verifisert. Diff-skanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført for 51 endrede filer med komplett dekning, ingen reportable funn og ingen åpne kandidater. Live Supabase-flyten er fortsatt ikke kjørt i lokal offline-verifisering og dekkes av den forventede skip-testen.
-- Fase C: kode- og kontraktsverifisert. Testpakken (188 tester: 187 bestått, 1 forventet skip), syntakssjekken og diff-sjekken passerer. Lokal browserverifikasjon etter siste endring viser aktiv workspace, resultatpanel og ingen console-feil eller horisontal overflow; formell smoke/deploy og live Supabase-flyt må fortsatt bekreftes.
-- Fase D: lokalt gjennomgått. Visuelle kaskader, status-/avatar-styling, oversettelsesnøkler og turneringsmotorens eksisterende regresjonstester er kontrollert. Aktiv JavaScript-runtime er manuelt verifisert lokalt etter siste endring; dette erstatter ikke formell smoke på deploy.
+- Fase A: ferdig verifisert på commit `1434fc0`. Struktur-, session/player- og remote state/sync-grensene er isolert, legacy-fallbacker er fjernet, og full lokal regresjon + browser desktop/mobil passerer.
+- Fase B: pågår på Fase A-baselinen. Kildebaserte Supabase/RLS/token/privacy-tester passerer 28/28, med 1 forventet live-test-skip. Standard sikkerhetsskanning `dc9484dd-7a7f-4243-8956-47958f0d3fc9` er startet, men står i `preflight` med `incomplete` fordi denne økten ikke eksponerer delegert worker-runtime; den kan derfor ikke markeres ferdig.
+- Fase C: ikke startet på nytt etter Fase A. Historiske verifikasjoner beholdes som referanse, men skal ikke brukes som ferdigbevis.
+- Fase D: ikke startet på nytt etter Fase A. Historiske verifikasjoner beholdes som referanse, men skal ikke brukes som ferdigbevis.
 
 ## Prioritert videre plan
 
 ### Fase A – Fullfør strukturkonsolideringen
+
+Status: ferdig. Se Fase A-sluttkontrollen over.
 
 Mål: gjøre modulgrensene reelle og holde `app/app.js` som en liten entrypoint.
 
