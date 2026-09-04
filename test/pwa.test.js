@@ -67,6 +67,7 @@ const remotePlayerScoreSource = fs.readFileSync(path.join(root, "app", "remote-p
 const scoreActionsSource = fs.readFileSync(path.join(root, "app", "score-actions.js"), "utf8");
 const workspaceNavigationSource = fs.readFileSync(path.join(root, "app", "workspace-navigation.js"), "utf8");
 const appEventsSource = fs.readFileSync(path.join(root, "app", "app-events.js"), "utf8");
+const bootstrapEventsSource = fs.readFileSync(path.join(root, "app", "bootstrap", "app-events.js"), "utf8");
 const workspaceEventsSource = fs.readFileSync(path.join(root, "app", "workspace-events.js"), "utf8");
 const tournamentEntrySource = fs.readFileSync(path.join(root, "app", "tournament-entry.js"), "utf8");
 const adminFormEventsSource = fs.readFileSync(path.join(root, "app", "admin-form-events.js"), "utf8");
@@ -212,6 +213,15 @@ test("global app event wiring has its own boundary", () => {
   assert.match(appSource, /PadelstarAppEvents\?\.bind/);
 });
 
+test("bootstrap app controls have their own event boundary", () => {
+  assert.match(bootstrapEventsSource, /function bind\(/);
+  assert.match(bootstrapEventsSource, /global\.PadelstarBootstrapEvents/);
+  assert.match(indexSource, /app\/bootstrap\/app-events\.js\?v=padelstar-bootstrap-events-1/);
+  assert.match(serviceWorkerSource, /app\/bootstrap\/app-events\.js\?v=padelstar-bootstrap-events-1/);
+  assert.match(appSource, /PadelstarBootstrapEvents\?\.bind/);
+  assert.doesNotMatch(appSource, /elements\.profileForm\?\.addEventListener/);
+});
+
 test("workspace session controls have their own event boundary", () => {
   assert.match(workspaceEventsSource, /function bind\(/);
   assert.match(workspaceEventsSource, /global\.PadelstarWorkspaceEvents/);
@@ -307,7 +317,7 @@ test("home and menu expose account and TV Mode entry points", () => {
   assert.match(indexSource, /id="adminEmail"[^>]*name="adminEmail"/);
   assert.match(indexSource, /id="tvModeMenuButton"[^>]*data-action="tv-mode"/);
   assert.match(navigationSource, /focusTarget/);
-  assert.match(appSource, /tvModeMenuButton/);
+  assert.match(bootstrapEventsSource, /tvModeMenuButton/);
 });
 
 test("TV Mode is a full-viewport read-only layout across aspect ratios", () => {
@@ -877,7 +887,7 @@ test("sync conflicts expose server refresh and local backup choices", () => {
   assert.match(indexSource, /id="conflictActions" role="group"/);
   assert.match(indexSource, /id="keepLocalBackupButton"/);
   const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
-  assert.match(appSource, /keepLocalBackupButton\?\.addEventListener/);
+  assert.match(bootstrapEventsSource, /keepLocalBackupButton\?\.addEventListener/);
   assert.match(appSource, /localBackupKept/);
   assert.match(appSource, /function pendingRemoteWriteCount\(\)/);
   assert.match(appSource, /function markSyncAttempt\(\)/);

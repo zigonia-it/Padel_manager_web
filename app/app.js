@@ -835,106 +835,49 @@ accountAuth?.bind();
 void accountAuth?.refresh();
   showRecoveryNotice();
 
-elements.profileForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  saveLocalProfileFromForm();
-});
-const openAccountAuth = () => {
-  showModule("account");
-  window.requestAnimationFrame(() => elements.accountAuthEmail?.focus());
-};
-elements.createAccountAuthButton?.addEventListener("click", openAccountAuth);
-elements.adminAccountAuthButton?.addEventListener("click", openAccountAuth);
-elements.playerResultForm?.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const form = event.currentTarget;
-  submitPlayerResult(form.elements.matchId.value, Number(form.elements.teamOne.value), Number(form.elements.teamTwo.value));
-});
-elements.tvModeButton?.addEventListener("click", toggleTvMode);
-elements.tvModeMenuButton?.addEventListener("click", () => {
-  if (!hasActiveTournament()) return;
-  showModule("tournament");
-  toggleTvMode();
-  window.PadelstarNavigation?.closeMenu();
-});
-elements.deleteProfileButton?.addEventListener("click", () => void requestProfileDeletion());
-elements.cancelProfileDeletionButton?.addEventListener("click", cancelProfileDeletion);
-elements.profileHistoryFilter?.addEventListener("change", renderProfile);
-elements.adminMatchFilter?.addEventListener("change", (event) => {
-  matchFilters.admin = event.currentTarget.value;
-  render();
-});
-elements.playerMatchFilter?.addEventListener("change", (event) => {
-  matchFilters.player = event.currentTarget.value;
-  render();
-});
-elements.adminParticipatesInput.addEventListener("change", syncAdminPlayerChoice);
-elements.createAdminSignInLinkButton?.addEventListener("click", async () => {
-  const email = elements.createTournamentForm?.elements.adminEmail?.value.trim();
-  if (!email) {
-    showToast(t("admin.identityEmailRequired"), "status-message-error");
-    elements.createTournamentForm?.elements.adminEmail?.focus();
-    return;
-  }
-  const sent = await adminIdentity.sendSignInLink(email);
-  showToast(sent ? t("admin.identityLinkSent") : t("admin.identityFailed"), sent ? "status-message-success" : "status-message-error");
-});
-elements.languageSelect.addEventListener("change", () => {
-  if (elements.languageSelect.value === "device") {
-    state.settings.languageMode = "device";
-    localStorage.setItem(languageStorageKey, "device");
-    state.settings.language = loadUserLanguage(state.settings.language);
-  } else {
-    state.settings.languageMode = "manual";
-    state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
-    localStorage.setItem(languageStorageKey, state.settings.language);
-  }
-  if (profile) void accountAuth?.syncProfile(profile, state.settings.language);
-  applyLanguage();
-  syncJoinPreview();
-  render();
-  syncLanguageOptions();
-});
-
+  window.PadelstarBootstrapEvents?.bind({
+    elements,
+    callbacks: {
+      saveProfile: (event) => {
+        event.preventDefault();
+        saveLocalProfileFromForm();
+      },
+      openAccountAuth,
+      submitPlayerResult: (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        submitPlayerResult(form.elements.matchId.value, Number(form.elements.teamOne.value), Number(form.elements.teamTwo.value));
+      },
+      toggleTvMode,
+      toggleTvModeFromMenu: () => {
+        if (!hasActiveTournament()) return;
+        showModule("tournament");
+        toggleTvMode();
+        window.PadelstarNavigation?.closeMenu();
+      },
+      requestProfileDeletion: () => void requestProfileDeletion(),
+      cancelProfileDeletion,
+      renderProfile,
+      adminMatchFilterChanged: (event) => {
+        matchFilters.admin = event.currentTarget.value;
+        render();
+      },
+      playerMatchFilterChanged: (event) => {
+        matchFilters.player = event.currentTarget.value;
+        render();
+      },
+      syncAdminPlayerChoice,
+      createAdminSignInLink: handleCreateAdminSignInLink,
+      languageChanged: handleLanguageChange,
+      refreshRemote: handleRefreshRemote,
+      keepLocalBackup: handleKeepLocalBackup,
+      endTournament: handleEndTournament,
+      resetTournament: handleResetTournament,
+    },
+  });
 tournamentEntry?.bind(elements);
 
 adminFormEvents?.bind(elements);
-
-elements.refreshRemoteButton?.addEventListener("click", async () => {
-  elements.refreshRemoteButton.disabled = true;
-  await refreshRemoteState("manual");
-  elements.refreshRemoteButton.disabled = false;
-  render();
-});
-
-elements.keepLocalBackupButton?.addEventListener("click", () => {
-  exportBackup();
-  setRemoteNotice(t("messages.localBackupKept"));
-});
-
-elements.endTournamentButton.addEventListener("click", async () => {
-  if (!await requestConfirmation(t("messages.endTournamentConfirm"))) return;
-  endTournament();
-  saveState();
-  render();
-});
-
-elements.resetTournamentButton.addEventListener("click", async () => {
-  if (!await requestConfirmation(t("messages.resetTournamentConfirm"))) return;
-  await deleteRemoteTournament();
-  tournamentLibrary.remove(state.id);
-  state = structuredClone(defaultTournament);
-  localStorage.removeItem(storageKey);
-  localStorage.removeItem(recoveryStorageKey);
-  localStorage.removeItem(roleStorageKey);
-  localStorage.removeItem(syncStorageKey);
-  persistence.removeKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
-  syncCreateFormDefaults();
-  elements.joinTournamentForm.reset();
-  syncJoinPreview();
-  showStart();
-  render();
-});
 
 window.PadelstarWorkspaceEvents?.bind({
   elements,
@@ -985,6 +928,75 @@ window.PadelstarWorkspaceEvents?.bind({
     },
   });
 
+}
+
+function openAccountAuth() {
+  showModule("account");
+  window.requestAnimationFrame(() => elements.accountAuthEmail?.focus());
+}
+
+async function handleCreateAdminSignInLink() {
+  const email = elements.createTournamentForm?.elements.adminEmail?.value.trim();
+  if (!email) {
+    showToast(t("admin.identityEmailRequired"), "status-message-error");
+    elements.createTournamentForm?.elements.adminEmail?.focus();
+    return;
+  }
+  const sent = await adminIdentity.sendSignInLink(email);
+  showToast(sent ? t("admin.identityLinkSent") : t("admin.identityFailed"), sent ? "status-message-success" : "status-message-error");
+}
+
+function handleLanguageChange() {
+  if (elements.languageSelect.value === "device") {
+    state.settings.languageMode = "device";
+    localStorage.setItem(languageStorageKey, "device");
+    state.settings.language = loadUserLanguage(state.settings.language);
+  } else {
+    state.settings.languageMode = "manual";
+    state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
+    localStorage.setItem(languageStorageKey, state.settings.language);
+  }
+  if (profile) void accountAuth?.syncProfile(profile, state.settings.language);
+  applyLanguage();
+  syncJoinPreview();
+  render();
+  syncLanguageOptions();
+}
+
+async function handleRefreshRemote() {
+  elements.refreshRemoteButton.disabled = true;
+  await refreshRemoteState("manual");
+  elements.refreshRemoteButton.disabled = false;
+  render();
+}
+
+function handleKeepLocalBackup() {
+  exportBackup();
+  setRemoteNotice(t("messages.localBackupKept"));
+}
+
+async function handleEndTournament() {
+  if (!await requestConfirmation(t("messages.endTournamentConfirm"))) return;
+  endTournament();
+  saveState();
+  render();
+}
+
+async function handleResetTournament() {
+  if (!await requestConfirmation(t("messages.resetTournamentConfirm"))) return;
+  await deleteRemoteTournament();
+  tournamentLibrary.remove(state.id);
+  state = structuredClone(defaultTournament);
+  localStorage.removeItem(storageKey);
+  localStorage.removeItem(recoveryStorageKey);
+  localStorage.removeItem(roleStorageKey);
+  localStorage.removeItem(syncStorageKey);
+  persistence.removeKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
+  syncCreateFormDefaults();
+  elements.joinTournamentForm.reset();
+  syncJoinPreview();
+  showStart();
+  render();
 }
 
 async function showExistingPlayers() {

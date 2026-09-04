@@ -2,7 +2,7 @@
 
 **Sist kartlagt:** 2026-09-04  
 **Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
-**Status:** Fase 5 (meta/theme) er gjennomført og verifisert. Fase A er fortsatt pågående fordi resterende entrypoint-orkestrering ikke er ferdig flyttet.
+**Status:** Fase 6 (bootstrap-events) er gjennomført og verifisert. Fase A er fortsatt pågående fordi resterende entrypoint-orkestrering ikke er ferdig flyttet.
 
 ## 1. Konklusjon
 
@@ -141,6 +141,8 @@ Følgende skal ikke være første refaktorering:
 - **Fase 4-verifikasjon:** DOM-registry-testen bekrefter 145 unike oppslag og immutable resultat. Full testpakke passerte med 193 beståtte tester og 1 forventet live-Supabase-skip, i tillegg til full syntakssjekk og `git diff --check`. Nettleser-reload viste landing uten app-feil; eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
 - **Fase 5, 2026-09-04:** service-worker-registrering/copyright er flyttet til `app/bootstrap/app-meta.js`, og classic theme + `theme-color` er flyttet til `app/ui/theme.js`. HTML- og service-worker-referanser er oppdatert.
 - **Fase 5-verifikasjon:** isolerte meta/theme-tester og full testpakke passerte med 195 beståtte tester og 1 forventet live-Supabase-skip. Full syntakssjekk, `git diff --check` og browser-reload passerte; ekte nettleser viste `classic` theme, copyright `2026`, landing og 145 registry-elementer. Eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
+- **Fase 6, 2026-09-04:** de resterende direkte kontroll-listenerne fra `initializeApp()` er samlet i `app/bootstrap/app-events.js`. Callback-logikken er fortsatt injisert fra `app.js`, mens eksisterende domain-event-moduler og globale/realtime-listeners er beholdt.
+- **Fase 6-verifikasjon:** egen bootstrap-event-test bekrefter 18 bindinger til eksplisitte callbacks. Full testpakke passerte med 197 beståtte tester og 1 forventet live-Supabase-skip, samt full syntakssjekk og `git diff --check`. Browser-reload viste landing, `PadelstarBootstrapEvents` og classic theme uten app-feil; eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 
