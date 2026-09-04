@@ -346,6 +346,9 @@ if (pendingAdminSync) remoteMutationSequence = 1;
 mirrorOfflineStorage();
 
 const elements = window.PadelstarDomElements.create({ document });
+const appMeta = window.PadelstarAppMeta.create({ navigator, window, elements });
+const { registerServiceWorker, syncCopyrightYear } = appMeta;
+const { applyTheme } = window.PadelstarTheme.create({ document });
 
 const courtSettings = window.PadelstarCourtSettings.create({
   elements,
@@ -1413,22 +1416,6 @@ function importBackup(event) {
   backupUi.importBackup(event);
 }
 
-function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) return;
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-      console.warn("Service worker registration failed", error);
-    });
-  });
-}
-
-function syncCopyrightYear() {
-  if (!elements.copyrightYearRange) return;
-  const startYear = 2026;
-  const currentYear = new Date().getFullYear();
-  elements.copyrightYearRange.textContent = currentYear > startYear ? `${startYear}-${currentYear}` : `${startYear}`;
-}
-
 function isValidTournamentState(candidate) {
   return stateManager.isValidTournamentState(candidate);
 }
@@ -1579,12 +1566,6 @@ function render() {
 
 function syncConnectionStatus() {
   adminStatus.syncConnectionStatus();
-}
-
-function applyTheme() {
-  document.body.dataset.theme = "classic";
-  const themeColor = document.querySelector('meta[name="theme-color"]');
-  themeColor?.setAttribute("content", "#07101d");
 }
 
 function pendingRemoteWriteCount() {

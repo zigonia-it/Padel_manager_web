@@ -19,6 +19,9 @@ const tournamentLibrarySource = fs.readFileSync(path.join(root, "app", "tourname
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
 const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
 const utilitiesSource = fs.readFileSync(path.join(root, "app", "core", "utilities.js"), "utf8");
+const domElementsSource = fs.readFileSync(path.join(root, "app", "bootstrap", "dom-elements.js"), "utf8");
+const appMetaSource = fs.readFileSync(path.join(root, "app", "bootstrap", "app-meta.js"), "utf8");
+const themeSource = fs.readFileSync(path.join(root, "app", "ui", "theme.js"), "utf8");
 const translationsSource = fs.readFileSync(path.join(root, "app", "translations.js"), "utf8");
 const avatarSystemSource = fs.readFileSync(path.join(root, "app", "avatar-system.js"), "utf8");
 const accentSystemSource = fs.readFileSync(path.join(root, "app", "accent-system.js"), "utf8");
@@ -471,6 +474,12 @@ test("profile session lifecycle has its own storage and RPC boundary", () => {
   assert.match(profileSessionSource, /global\.PadelstarProfileSession/);
   assert.match(indexSource, /app\/profile-session\.js\?v=padelstar-profile-session-1/);
   assert.match(serviceWorkerSource, /app\/profile-session\.js\?v=padelstar-profile-session-1/);
+  assert.match(indexSource, /app\/bootstrap\/dom-elements\.js\?v=padelstar-dom-elements-1/);
+  assert.match(indexSource, /app\/bootstrap\/app-meta\.js\?v=padelstar-app-meta-1/);
+  assert.match(indexSource, /app\/ui\/theme\.js\?v=padelstar-theme-1/);
+  assert.match(serviceWorkerSource, /app\/bootstrap\/dom-elements\.js\?v=padelstar-dom-elements-1/);
+  assert.match(serviceWorkerSource, /app\/bootstrap\/app-meta\.js\?v=padelstar-app-meta-1/);
+  assert.match(serviceWorkerSource, /app\/ui\/theme\.js\?v=padelstar-theme-1/);
   assert.doesNotMatch(appSource, /p_profile_token:\s*profile\.accessToken/);
 });
 
@@ -792,11 +801,12 @@ test("create form uses a generic default tournament name", () => {
 });
 
 test("classic theme is the only available app theme", () => {
-  const appSource = fs.readFileSync(path.join(root, "app", "app.js"), "utf8");
   assert.equal((indexSource.match(/data-theme-toggle/g) || []).length, 0);
   assert.match(indexSource, /<body class="landing-active" data-theme="classic">/);
-  assert.match(appSource, /function applyTheme\(/);
-  assert.doesNotMatch(appSource, /coolSportsTheme|data-theme-toggle|data-cool-src/);
+  assert.match(themeSource, /function applyTheme\(/);
+  assert.match(appMetaSource, /function registerServiceWorker\(/);
+  assert.match(domElementsSource, /function create\(/);
+  assert.doesNotMatch(themeSource, /coolSportsTheme|data-theme-toggle|data-cool-src/);
   assert.doesNotMatch(indexSource, /data-cool-src|Cool tema|cool sports-tema/);
   assert.doesNotMatch(serviceWorkerSource, /assets\/themed\/cool-sports/);
 });

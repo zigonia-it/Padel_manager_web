@@ -9,6 +9,8 @@ const storageKeysPath = path.join(appRoot, "config", "storage-keys.js");
 const supabaseConfigPath = path.join(appRoot, "config", "supabase-config.js");
 const utilitiesPath = path.join(appRoot, "core", "utilities.js");
 const domElementsPath = path.join(appRoot, "bootstrap", "dom-elements.js");
+const appMetaPath = path.join(appRoot, "bootstrap", "app-meta.js");
+const themePath = path.join(appRoot, "ui", "theme.js");
 const translationsPath = path.join(appRoot, "translations.js");
 const i18nUiPath = path.join(appRoot, "i18n-ui.js");
 const storagePath = path.join(appRoot, "storage.js");
@@ -145,6 +147,8 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(supabaseConfigPath, "utf8"), context, { filename: supabaseConfigPath });
   vm.runInContext(fs.readFileSync(utilitiesPath, "utf8"), context, { filename: utilitiesPath });
   vm.runInContext(fs.readFileSync(domElementsPath, "utf8"), context, { filename: domElementsPath });
+  vm.runInContext(fs.readFileSync(appMetaPath, "utf8"), context, { filename: appMetaPath });
+  vm.runInContext(fs.readFileSync(themePath, "utf8"), context, { filename: themePath });
   vm.runInContext(fs.readFileSync(storagePath, "utf8"), context, { filename: storagePath });
   vm.runInContext(fs.readFileSync(renderingPath, "utf8"), context, { filename: renderingPath });
   vm.runInContext(fs.readFileSync(remoteTournamentPath, "utf8"), context, { filename: remoteTournamentPath });
@@ -209,6 +213,8 @@ function loadPadelstar(options = {}) {
     supabaseConfig: window.PadelstarSupabaseConfig,
     utilities: window.PadelstarUtilities,
     domElements: window.PadelstarDomElements,
+    appMeta: window.PadelstarAppMeta,
+    theme: window.PadelstarTheme,
     engine: window.PadelstarTournamentEngine,
     scoring: window.PadelstarScoring,
     stateManager: window.PadelstarState,
