@@ -27,6 +27,7 @@ const appShell = [
   "./app/admin-actions.js?v=padelstar-admin-actions-2",
   "./app/court-settings.js?v=padelstar-court-settings-1",
   "./app/setup-forms.js?v=padelstar-setup-forms-1",
+  "./app/tournament-queries.js?v=padelstar-tournament-queries-1",
   "./app/player-actions.js?v=padelstar-player-actions-1",
   "./app/privacy-i18n.js?v=padelstar-privacy-i18n-1",
   "./app/guide-i18n.js?v=padelstar-guide-i18n-1",

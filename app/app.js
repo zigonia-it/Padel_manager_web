@@ -504,6 +504,10 @@ const setupForms = window.PadelstarSetupForms.create({
   accentStyle: (accent) => accentStyle(accent),
   translate: (key, values) => t(key, values),
 });
+const tournamentQueries = window.PadelstarTournamentQueries.create({
+  getState: () => state,
+  leaderboardEntries: (matches) => leaderboardEntries(matches),
+});
 
 const workspaceOverview = window.PadelstarWorkspaceOverview.create({
   appendEmptyText: (container, text) => appendEmptyText(container, text),
@@ -2488,32 +2492,31 @@ function playerTournamentState(player, matches) {
 }
 
 function playerPlacement(player, matches) {
-  const index = leaderboardEntries(matches).findIndex((entry) => entry.player.id === player.id);
-  return index >= 0 ? index + 1 : null;
+  return tournamentQueries.playerPlacement(player, matches);
 }
 
 function getActiveRound() {
-  return state.rounds.find((round) => round.status === "active") ?? state.rounds.at(-1);
+  return tournamentQueries.getActiveRound();
 }
 
 function getRoundForMatch(match) {
-  return state.rounds.find((round) => round.matches.some((roundMatch) => roundMatch.id === match.id));
+  return tournamentQueries.getRoundForMatch(match);
 }
 
 function getAllMatches() {
-  return state.rounds.flatMap((round) => round.matches);
+  return tournamentQueries.getAllMatches();
 }
 
 function getMatchById(matchId) {
-  return getAllMatches().find((match) => match.id === matchId);
+  return tournamentQueries.getMatchById(matchId);
 }
 
 function getPlayerById(id) {
-  return state.players.find((player) => player.id === id);
+  return tournamentQueries.getPlayerById(id);
 }
 
 function findPlayerByName(name) {
-  return state.players.find((player) => player.name.localeCompare(name, "nb", { sensitivity: "accent" }) === 0);
+  return tournamentQueries.findPlayerByName(name);
 }
 
 function matchStateText(stateName) {

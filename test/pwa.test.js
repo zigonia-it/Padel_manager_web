@@ -72,6 +72,7 @@ const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"
 const profileHistorySource = fs.readFileSync(path.join(root, "app", "profile-history.js"), "utf8");
 const courtSettingsSource = fs.readFileSync(path.join(root, "app", "court-settings.js"), "utf8");
 const setupFormsSource = fs.readFileSync(path.join(root, "app", "setup-forms.js"), "utf8");
+const tournamentQueriesSource = fs.readFileSync(path.join(root, "app", "tournament-queries.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
   assert.match(serviceWorkerSource, /padelstar-v273/);
@@ -129,6 +130,14 @@ test("setup forms have their own boundary", () => {
   assert.match(setupFormsSource, /global\.PadelstarSetupForms/);
   assert.doesNotMatch(setupFormsSource, /localStorage|document\.querySelector/);
   assert.match(appSource, /setupForms\.syncJoinPreview\(\)/);
+});
+
+test("tournament queries have their own domain boundary", () => {
+  assert.match(indexSource, /app\/tournament-queries\.js\?v=padelstar-tournament-queries-1/);
+  assert.match(serviceWorkerSource, /app\/tournament-queries\.js\?v=padelstar-tournament-queries-1/);
+  assert.match(tournamentQueriesSource, /global\.PadelstarTournamentQueries/);
+  assert.doesNotMatch(tournamentQueriesSource, /localStorage|document\.querySelector/);
+  assert.match(appSource, /tournamentQueries\.getAllMatches\(\)/);
 });
 
 test("remote state writes have their own persistence boundary", () => {

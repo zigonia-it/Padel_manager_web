@@ -20,6 +20,7 @@ const profileSessionPath = path.join(appRoot, "profile-session.js");
 const profileHistoryPath = path.join(appRoot, "profile-history.js");
 const courtSettingsPath = path.join(appRoot, "court-settings.js");
 const setupFormsPath = path.join(appRoot, "setup-forms.js");
+const tournamentQueriesPath = path.join(appRoot, "tournament-queries.js");
 const matchCardPath = path.join(appRoot, "match-card.js");
 const backupFormatPath = path.join(appRoot, "backup-format.js");
 const linkUtilsPath = path.join(appRoot, "link-utils.js");
@@ -147,6 +148,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(profileHistoryPath, "utf8"), context, { filename: profileHistoryPath });
   vm.runInContext(fs.readFileSync(courtSettingsPath, "utf8"), context, { filename: courtSettingsPath });
   vm.runInContext(fs.readFileSync(setupFormsPath, "utf8"), context, { filename: setupFormsPath });
+  vm.runInContext(fs.readFileSync(tournamentQueriesPath, "utf8"), context, { filename: tournamentQueriesPath });
   vm.runInContext(fs.readFileSync(matchCardPath, "utf8"), context, { filename: matchCardPath });
   vm.runInContext(fs.readFileSync(backupFormatPath, "utf8"), context, { filename: backupFormatPath });
   vm.runInContext(fs.readFileSync(linkUtilsPath, "utf8"), context, { filename: linkUtilsPath });
