@@ -969,7 +969,7 @@ test("browser smoke is wired into the Pages deployment gate", () => {
   assert.match(smokeScript, /PADELSTAR_SMOKE_VIEWPORT/);
   assert.match(workflow, /viewport: \[desktop, medium, mobile\]/);
   assert.match(smokeScript, /horizontal overflow detected/);
-  assert.match(smokeScript, /setup page width is inconsistent/);
+  assert.match(smokeScript, /setup card exceeds its panel/);
   assert.match(smokeScript, /Browser smoke/);
 });
 

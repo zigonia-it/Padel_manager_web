@@ -792,6 +792,17 @@ test("all visible app translation keys have Bokmål fallback text", () => {
   assert.deepEqual(missingKeys, []);
 });
 
+test("landing feature cards have native translations in every supported language", () => {
+  const api = loadPadelstar();
+  for (const language of api.i18n.supportedLanguages().map((entry) => entry.code)) {
+    assert.notEqual(api.i18n.translate(language, "hero.featuresAria"), "hero.featuresAria");
+    assert.notEqual(api.i18n.translate(language, "hero.featureOneTitle"), "hero.featureOneTitle");
+    assert.notEqual(api.i18n.translate(language, "hero.featureOneText"), "hero.featureOneText");
+    assert.notEqual(api.i18n.translate(language, "hero.featureTwoTitle"), "hero.featureTwoTitle");
+    assert.notEqual(api.i18n.translate(language, "hero.featureThreeTitle"), "hero.featureThreeTitle");
+  }
+});
+
 test("initial view boundary routes join URLs and saved sessions", () => {
   const { initialView } = loadPadelstar();
   const calls = [];

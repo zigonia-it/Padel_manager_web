@@ -218,12 +218,77 @@ Object.assign(padelstarTranslations.fr, { "account.signingIn": "Connexion …" }
 Object.assign(padelstarTranslations.sv, { "account.signingIn": "Loggar in …" });
 Object.assign(padelstarTranslations.da, { "account.signingIn": "Logger ind …" });
 Object.assign(padelstarTranslations.nb, {
+  "hero.featuresAria": "Padelstar-funksjoner",
   "hero.featureOneTitle": "Enklere turneringer",
   "hero.featureOneText": "Opprett og organiser kamper uten unødvendig administrasjon.",
   "hero.featureTwoTitle": "Alle kan bli med",
   "hero.featureTwoText": "Del en kode og la spillerne koble seg på fra egne enheter.",
   "hero.featureThreeTitle": "Resultater i sanntid",
   "hero.featureThreeText": "Følg kamper, poeng og neste runde mens turneringen pågår.",
+});
+
+Object.assign(padelstarTranslations.nn, {
+  "hero.featuresAria": "Padelstar-funksjonar",
+  "hero.featureOneTitle": "Enklare turneringar",
+  "hero.featureOneText": "Opprett og organiser kampar utan unødvendig administrasjon.",
+  "hero.featureTwoTitle": "Alle kan bli med",
+  "hero.featureTwoText": "Del ein kode og la spelarane kople seg på frå eigne einingar.",
+  "hero.featureThreeTitle": "Resultat i sanntid",
+  "hero.featureThreeText": "Følg kampar, poeng og neste runde medan turneringa går føre seg.",
+});
+Object.assign(padelstarTranslations.en, {
+  "hero.featuresAria": "Padelstar features",
+  "hero.featureOneTitle": "Simpler tournaments",
+  "hero.featureOneText": "Create and organize matches without unnecessary administration.",
+  "hero.featureTwoTitle": "Everyone can join",
+  "hero.featureTwoText": "Share a code and let players connect from their own devices.",
+  "hero.featureThreeTitle": "Live results",
+  "hero.featureThreeText": "Follow matches, points and the next round as the tournament runs.",
+});
+Object.assign(padelstarTranslations.es, {
+  "hero.featuresAria": "Funciones de Padelstar",
+  "hero.featureOneTitle": "Torneos más sencillos",
+  "hero.featureOneText": "Crea y organiza partidos sin administración innecesaria.",
+  "hero.featureTwoTitle": "Todos pueden unirse",
+  "hero.featureTwoText": "Comparte un código y deja que los jugadores se conecten desde sus dispositivos.",
+  "hero.featureThreeTitle": "Resultados en directo",
+  "hero.featureThreeText": "Sigue los partidos, los puntos y la próxima ronda durante el torneo.",
+});
+Object.assign(padelstarTranslations.de, {
+  "hero.featuresAria": "Padelstar-Funktionen",
+  "hero.featureOneTitle": "Einfachere Turniere",
+  "hero.featureOneText": "Erstelle und organisiere Spiele ohne unnötige Verwaltung.",
+  "hero.featureTwoTitle": "Alle können teilnehmen",
+  "hero.featureTwoText": "Teile einen Code und lass Spieler ihre eigenen Geräte verbinden.",
+  "hero.featureThreeTitle": "Live-Ergebnisse",
+  "hero.featureThreeText": "Verfolge Spiele, Punkte und die nächste Runde während des Turniers.",
+});
+Object.assign(padelstarTranslations.fr, {
+  "hero.featuresAria": "Fonctionnalités de Padelstar",
+  "hero.featureOneTitle": "Des tournois plus simples",
+  "hero.featureOneText": "Créez et organisez des matchs sans administration superflue.",
+  "hero.featureTwoTitle": "Tout le monde peut participer",
+  "hero.featureTwoText": "Partagez un code et laissez les joueurs se connecter depuis leur appareil.",
+  "hero.featureThreeTitle": "Résultats en direct",
+  "hero.featureThreeText": "Suivez les matchs, les points et la prochaine manche pendant le tournoi.",
+});
+Object.assign(padelstarTranslations.sv, {
+  "hero.featuresAria": "Padelstar-funktioner",
+  "hero.featureOneTitle": "Enklare turneringar",
+  "hero.featureOneText": "Skapa och organisera matcher utan onödig administration.",
+  "hero.featureTwoTitle": "Alla kan delta",
+  "hero.featureTwoText": "Dela en kod och låt spelare ansluta från sina egna enheter.",
+  "hero.featureThreeTitle": "Resultat i realtid",
+  "hero.featureThreeText": "Följ matcher, poäng och nästa omgång under turneringen.",
+});
+Object.assign(padelstarTranslations.da, {
+  "hero.featuresAria": "Padelstar-funktioner",
+  "hero.featureOneTitle": "Enklere turneringer",
+  "hero.featureOneText": "Opret og organiser kampe uden unødvendig administration.",
+  "hero.featureTwoTitle": "Alle kan være med",
+  "hero.featureTwoText": "Del en kode, så spillerne kan oprette forbindelse fra deres egne enheder.",
+  "hero.featureThreeTitle": "Resultater i realtid",
+  "hero.featureThreeText": "Følg kampe, point og næste runde under turneringen.",
 });
 
 Object.assign(padelstarTranslations.nb, {

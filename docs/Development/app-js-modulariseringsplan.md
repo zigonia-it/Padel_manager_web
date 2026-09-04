@@ -159,7 +159,9 @@ Følgende skal ikke være første refaktorering:
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 
-Fase B-notat 2026-09-04: verifiserte sikkerhetsrisikoer er rettet i commit `37cc230`, med dokumentasjonsbaseline `08fe8b7`. Autoritativ Standard security scan `1cf7d2e5-6b90-47bb-8c2e-66363279ff01` er fullført og forseglet: 4 reportable funn (3 medium, 1 low), ingen high/critical. Funnene gjelder primært manuell schema-drift/deploymentavhengighet og et lav-konfidens push-egress-scenario. `npm test` passerer 213/213 med 1 forventet live-test-skip, og syntax/diff-sjekker passerer. Fase B er fortsatt åpen til funnene er lukket/akseptert med eierbeslutning og 30-dagers profilslettingspolicy er eksplisitt avklart.
+Fase B-notat 2026-09-04: sikkerhetshardening og synkronisering av manuell schema-artifakt er implementert på commit `e10f5ae`. Autoritativ Standard security scan `132d1370-5afa-4a20-ba22-4f349af7e4d9` er fullført med komplett dekning og 0 reportable funn. Live Supabase-kontrakttest bestod, og samlet testpakke passerer 215/215 når live-testen aktiveres. Fase B er lukket; eneste scanbegrensning er at separat produksjonskonfigurasjon ikke ble lest.
+
+Fase C-notat 2026-09-04: ny regresjonsverifisering etter Fase A/B bestod på desktop 1440, medium 768 og mobil 390 med opprettelse, start, adminnavigasjon, kampvisning og overflow-kontroll. En feilaktig desktop-assertion som krevde lik bredde på to-kolonne setup-panel og skjema er korrigert til å kontrollere at skjemaet holder seg innenfor panelet. Målrettet browser-gjennomgang bekreftet også engelsk språkbytte, oversatte feature-kort, mobilmeny og Escape-lukking.
 
 ## 8. Akseptansekriterier for selve refaktoreringen
 
