@@ -1522,72 +1522,7 @@ function activateAdminPanel(panel) {
   return workspaceNavigation.activateAdminPanel(panel);
 }
 
-function render() {
-  if (window.PADELSTAR_TEST_MODE) return;
-
-  const matches = getAllMatches();
-  applyLanguage();
-  accountAuth?.render();
-  renderProfile();
-  renderStartResume();
-  renderRoleVisibility();
-  elements.tournamentTitle.textContent = state.name;
-  elements.roundLabel.textContent = t("tournament.roundLabel", { round: Math.max(state.currentRound, 1) });
-  elements.adminInviteCode.textContent = state.inviteCode;
-  elements.joinLink.value = createJoinLink();
-  if (elements.spectatorLink) elements.spectatorLink.value = createSpectatorLink();
-  elements.joinQrCode.src = createQrCodeUrl(createJoinLink());
-  renderNotificationControl();
-  renderAdminIdentity();
-  elements.tournamentStatus.textContent = tournamentStatusText(state.status);
-  elements.playerCount.textContent = t("players.count", { count: state.players.length });
-  elements.matchCount.textContent = t("matches.count", { count: matches.length });
-  elements.courtSettingsForm.elements.courtList.value = courtsInputValue();
-  if (elements.courtNamesForm?.elements.courtCount) {
-    elements.courtNamesForm.elements.courtCount.value = state.courts.length;
-  }
-  renderCourtNames();
-  elements.tournamentSettingsForm.elements.format.value = state.settings.format;
-  elements.tournamentSettingsForm.elements.cupTeamSetupMode.value = state.settings.cupTeamSetupMode;
-  elements.tournamentSettingsForm.elements.includesThirdPlaceMatch.checked = state.settings.includesThirdPlaceMatch;
-  elements.tournamentSettingsForm.elements.pointMode.value = state.settings.pointMode;
-  elements.tournamentSettingsForm.elements.gamesToWinSet.value = state.settings.gamesToWinSet;
-  elements.tournamentSettingsForm.elements.setsToWinMatch.value = state.settings.setsToWinMatch;
-  elements.generateRoundButton.disabled = Boolean(generateRoundBlockReason());
-  elements.generateRoundButton.textContent = tournamentActionText();
-  elements.completeRoundButton.textContent = t("finishTournament");
-  elements.completeRoundButton.disabled = state.status === "Avsluttet" || getAllMatches().length === 0;
-  elements.endTournamentButton.closest(".button-row").classList.add("hidden");
-  elements.courtSettingsForm.elements.courtList.disabled = getActiveRound()?.status === "active" || state.status === "Avsluttet";
-  elements.courtSettingsForm.querySelector("button").disabled = getActiveRound()?.status === "active" || state.status === "Avsluttet";
-  elements.addPlayerForm.elements.playerName.disabled = state.rounds.length > 0;
-  elements.addPlayerForm.querySelector("button").disabled = state.rounds.length > 0;
-  elements.cupTeamSetupModeField.classList.toggle("hidden", state.settings.format !== "cup");
-  elements.cupTeamSetupModeField.querySelector("select").disabled = state.rounds.length > 0;
-  elements.cupThirdPlaceField.classList.toggle("hidden", state.settings.format !== "cup");
-  elements.cupThirdPlaceField.querySelector("input").disabled = state.rounds.length > 0;
-
-  renderLobbyStatus();
-  renderPlayers();
-  renderRoundSummary();
-  renderCupBracket();
-  renderMatches(matches);
-  renderResultSubmissions(matches);
-  renderStandings(matches);
-  renderPlayerIdentity();
-  renderLeaveTournamentControl();
-  renderAvailabilityControl();
-  renderPlayerNextMatch(matches);
-  renderPlayerResultForm(matches);
-  renderPlayerStatus(matches);
-  renderAdminLiveOverview(matches);
-  renderAssistant();
-  courtQueue.render(matches);
-  renderRules();
-  renderExistingPlayerList();
-  renderCupTeamBuilder();
-  renderSyncControls();
-}
+function render() { return appRenderer?.render(); }
 
 function syncConnectionStatus() {
   adminStatus.syncConnectionStatus();
@@ -2392,6 +2327,52 @@ function restoreInitialView() {
     },
   });
 }
+
+const appRenderer = window.PadelstarAppRenderer.create({
+  isTestMode: () => Boolean(window.PADELSTAR_TEST_MODE),
+  getElements: () => elements,
+  getState: () => state,
+  getAllMatches: () => getAllMatches(),
+  translate: (key, values) => t(key, values),
+  callbacks: {
+    applyLanguage,
+    renderAccountAuth: () => accountAuth?.render(),
+    renderProfile,
+    renderStartResume,
+    renderRoleVisibility,
+    createJoinLink,
+    createSpectatorLink,
+    createQrCodeUrl,
+    renderNotificationControl,
+    renderAdminIdentity,
+    tournamentStatusText,
+    courtsInputValue,
+    renderCourtNames,
+    generateRoundBlockReason,
+    tournamentActionText,
+    getActiveRound,
+    renderLobbyStatus,
+    renderPlayers,
+    renderRoundSummary,
+    renderCupBracket,
+    renderMatches,
+    renderResultSubmissions,
+    renderStandings,
+    renderPlayerIdentity,
+    renderLeaveTournamentControl,
+    renderAvailabilityControl,
+    renderPlayerNextMatch,
+    renderPlayerResultForm,
+    renderPlayerStatus,
+    renderAdminLiveOverview,
+    renderAssistant,
+    renderCourtQueue: (matches) => courtQueue.render(matches),
+    renderRules,
+    renderExistingPlayerList,
+    renderCupTeamBuilder,
+    renderSyncControls,
+  },
+});
 
 const appInit = window.PadelstarAppInit.create({
   callbacks: {

@@ -14,6 +14,7 @@ const appMetaPath = path.join(appRoot, "bootstrap", "app-meta.js");
 const bootstrapEventsPath = path.join(appRoot, "bootstrap", "app-events.js");
 const appInitPath = path.join(appRoot, "bootstrap", "app-init.js");
 const themePath = path.join(appRoot, "ui", "theme.js");
+const appRendererPath = path.join(appRoot, "ui", "app-renderer.js");
 const translationsPath = path.join(appRoot, "translations.js");
 const i18nUiPath = path.join(appRoot, "i18n-ui.js");
 const storagePath = path.join(appRoot, "storage.js");
@@ -155,6 +156,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(bootstrapEventsPath, "utf8"), context, { filename: bootstrapEventsPath });
   vm.runInContext(fs.readFileSync(appInitPath, "utf8"), context, { filename: appInitPath });
   vm.runInContext(fs.readFileSync(themePath, "utf8"), context, { filename: themePath });
+  vm.runInContext(fs.readFileSync(appRendererPath, "utf8"), context, { filename: appRendererPath });
   vm.runInContext(fs.readFileSync(storagePath, "utf8"), context, { filename: storagePath });
   vm.runInContext(fs.readFileSync(renderingPath, "utf8"), context, { filename: renderingPath });
   vm.runInContext(fs.readFileSync(remoteTournamentPath, "utf8"), context, { filename: remoteTournamentPath });
@@ -224,6 +226,7 @@ function loadPadelstar(options = {}) {
     bootstrapEvents: window.PadelstarBootstrapEvents,
     appInit: window.PadelstarAppInit,
     theme: window.PadelstarTheme,
+    appRenderer: window.PadelstarAppRenderer,
     engine: window.PadelstarTournamentEngine,
     scoring: window.PadelstarScoring,
     stateManager: window.PadelstarState,

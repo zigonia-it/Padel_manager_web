@@ -52,6 +52,7 @@ const backupFormatSource = fs.readFileSync(path.join(root, "app", "backup-format
 const privacyI18nSource = fs.readFileSync(path.join(root, "app", "privacy-i18n.js"), "utf8");
 const i18nUiSource = fs.readFileSync(path.join(root, "app", "i18n-ui.js"), "utf8");
 const languageControllerSource = fs.readFileSync(path.join(root, "app", "core", "language-controller.js"), "utf8");
+const appRendererSource = fs.readFileSync(path.join(root, "app", "ui", "app-renderer.js"), "utf8");
 const storageSource = fs.readFileSync(path.join(root, "app", "storage.js"), "utf8");
 const renderingSource = fs.readFileSync(path.join(root, "app", "rendering.js"), "utf8");
 const remoteTournamentSource = fs.readFileSync(path.join(root, "app", "remote-tournament.js"), "utf8");
@@ -733,6 +734,15 @@ test("language orchestration has its own module boundary", () => {
   assert.match(languageControllerSource, /window\.PadelstarLanguageController/);
   assert.match(indexSource, /app\/core\/language-controller\.js\?v=padelstar-language-controller-1/);
   assert.match(serviceWorkerSource, /app\/core\/language-controller\.js\?v=padelstar-language-controller-1/);
+});
+
+test("central render orchestration has its own module boundary", () => {
+  assert.match(appRendererSource, /function render/);
+  assert.match(appRendererSource, /renderMatches/);
+  assert.match(appRendererSource, /renderStandings/);
+  assert.match(appRendererSource, /window\.PadelstarAppRenderer/);
+  assert.match(indexSource, /app\/ui\/app-renderer\.js\?v=padelstar-app-renderer-1/);
+  assert.match(serviceWorkerSource, /app\/ui\/app-renderer\.js\?v=padelstar-app-renderer-1/);
 });
 
 test("JSON persistence has its own storage module boundary", () => {
