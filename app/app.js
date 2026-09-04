@@ -1258,17 +1258,6 @@ function showRecoveryNotice() {
   setRemoteNotice(t("messages.recoveredLocalTournament"));
 }
 
-function legacyMarkRemoteConflict() {
-  remoteConflict = true;
-  pendingAdminSync = false;
-  window.clearTimeout(remoteSaveTimer);
-  remoteSaveTimer = null;
-  lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, remoteMutationSequence);
-  persistSyncMetadata();
-  setRemoteNotice(t("messages.remoteConflict"));
-  render();
-}
-
 function handleRemoteError(error, fallback) {
   markSyncError(error);
   observability?.error("remote_error", error, { transient: isTransientRemoteError(error) });
@@ -1284,71 +1273,10 @@ function handleRemoteError(error, fallback) {
   syncConnectionStatus();
 }
 
-function legacyScheduleRemoteRetry() {
-  if (!isSupabaseReady() || !navigator.onLine || !hasPendingRemoteWrites() || remoteRetryTimer) return;
-  const delays = [2000, 5000, 15000, 30000];
-  const delay = delays[Math.min(remoteRetryAttempt, delays.length - 1)];
-  remoteRetryAttempt += 1;
-  remoteRetryTimer = window.setTimeout(() => {
-    remoteRetryTimer = null;
-    flushPendingRemoteWrites();
-  }, delay);
-}
-
-function legacyApplyRemoteState(remoteState, options = {}) {
-  if (!remoteState) return false;
-  const wasEnded = state.status === "Avsluttet";
-  const source = options.source ?? "remote";
-  const sameTournament = state.id === remoteState.id;
-  const remoteRevision = Number.isInteger(remoteState.revision) ? remoteState.revision : 0;
-  const currentRevision = Number.isInteger(state.revision) ? state.revision : 0;
-
-  if (sameTournament) {
-    if (remoteRevision < currentRevision) return false;
-    if (pendingPlayerScores.length > 0 && ["realtime", "refresh"].includes(source)) return false;
-    if (pendingAdminSync && source !== "rpc" && remoteRevision === currentRevision) return false;
-    if (pendingAdminSync && source !== "rpc" && remoteRevision > currentRevision) markRemoteConflict();
-    if (source === "realtime" && remoteRevision === currentRevision) return false;
-  } else {
-    pendingAdminSync = false;
-    pendingPlayerScores = [];
-    persistSyncMetadata();
-  }
-
-  const selectedPlayerId = state.selectedPlayerId ?? null;
-  const adminToken = state.id === remoteState.id ? state.adminToken ?? null : null;
-  const playerToken = state.id === remoteState.id ? state.playerToken ?? null : null;
-  const ownerUserId = state.id === remoteState.id ? state.ownerUserId ?? null : null;
-  const previousTournamentId = state.id;
-  isApplyingRemoteState = true;
-  const nextState = migrateState({
-    ...remoteState,
-    selectedPlayerId,
-  });
-  nextState.adminToken = adminToken;
-  nextState.playerToken = playerToken;
-  nextState.ownerUserId = remoteState.ownerUserId ?? ownerUserId;
-  state = nextState;
-  state.ownerProfileId = remoteState.ownerProfileId ?? state.ownerProfileId ?? null;
-  state.settings.language = loadUserLanguage(state.settings?.language ?? "nb");
-  saveState({ remote: false });
-  if (options.clearConflict) {
-    remoteConflict = false;
-    setRemoteNotice(t("messages.remoteStateUpdated"));
-  }
-  if (previousTournamentId !== state.id || !realtimeConnection.hasChannel()) connectRealtimeForCurrentState();
-  render();
-  if (!wasEnded && state.status === "Avsluttet") saveProfileHistory();
-  isApplyingRemoteState = false;
-  return true;
-}
-
-function markRemoteConflict() {
-  return remoteStateController?.markRemoteConflict() ?? legacyMarkRemoteConflict();
-}
+function markRemoteConflict() { return remoteStateController.markRemoteConflict(); }
 
 function applyRemoteState(remoteState, options = {}) {
-  return remoteStateController?.applyRemoteState(remoteState, options) ?? legacyApplyRemoteState(remoteState, options);
+  return remoteStateController.applyRemoteState(remoteState, options);
 }
 
 async function createRemoteTournament() {
@@ -1361,15 +1289,6 @@ async function loadRemoteTournamentByInvite(inviteCode) {
 
 async function joinRemoteTournament(playerName, avatarId) {
   return remoteTournament.join(playerName, avatarId);
-}
-
-function legacyQueueRemoteSave() {
-  if (!isSupabaseReady() || isApplyingRemoteState || !state.adminToken || !state.id) return;
-  window.clearTimeout(remoteSaveTimer);
-  remoteSaveTimer = window.setTimeout(() => {
-    remoteSaveTimer = null;
-    remoteWriteChain = remoteWriteChain.catch(() => {}).then(saveRemoteState);
-  }, 350);
 }
 
 async function saveRemoteState() {
@@ -1428,20 +1347,9 @@ function removeRealtimeChannel() { return realtimeConnection.removeChannel(); }
 function scheduleRealtimeReconnect() { return realtimeConnection.scheduleReconnect(); }
 function refreshRemoteState(reason = "reconnect") { return realtimeConnection.refresh(reason); }
 
-function legacyFlushPendingRemoteWrites() {
-  if (!isSupabaseReady() || !navigator.onLine) return;
-  if (pendingAdminSync && isCurrentUserAdmin()) {
-    if (remoteMutationSequence <= lastRemotePersistedSequence) {
-      remoteMutationSequence = lastRemotePersistedSequence + 1;
-    }
-    remoteWriteChain = remoteWriteChain.catch(() => {}).then(saveRemoteState);
-  }
-  processPlayerScoreQueue();
-}
-
-function scheduleRemoteRetry() { return remoteSyncController?.scheduleRemoteRetry() ?? legacyScheduleRemoteRetry(); }
-function queueRemoteSave() { return remoteSyncController?.queueRemoteSave() ?? legacyQueueRemoteSave(); }
-function flushPendingRemoteWrites() { return remoteSyncController?.flushPendingRemoteWrites() ?? legacyFlushPendingRemoteWrites(); }
+function scheduleRemoteRetry() { return remoteSyncController.scheduleRemoteRetry(); }
+function queueRemoteSave() { return remoteSyncController.queueRemoteSave(); }
+function flushPendingRemoteWrites() { return remoteSyncController.flushPendingRemoteWrites(); }
 
 function connectRealtimeForCurrentState() { return realtimeConnection.connect(); }
 
