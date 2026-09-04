@@ -51,6 +51,7 @@ const realtimeConnectionSource = fs.readFileSync(path.join(root, "app", "realtim
 const backupFormatSource = fs.readFileSync(path.join(root, "app", "backup-format.js"), "utf8");
 const privacyI18nSource = fs.readFileSync(path.join(root, "app", "privacy-i18n.js"), "utf8");
 const i18nUiSource = fs.readFileSync(path.join(root, "app", "i18n-ui.js"), "utf8");
+const languageControllerSource = fs.readFileSync(path.join(root, "app", "core", "language-controller.js"), "utf8");
 const storageSource = fs.readFileSync(path.join(root, "app", "storage.js"), "utf8");
 const renderingSource = fs.readFileSync(path.join(root, "app", "rendering.js"), "utf8");
 const remoteTournamentSource = fs.readFileSync(path.join(root, "app", "remote-tournament.js"), "utf8");
@@ -724,6 +725,14 @@ test("language DOM handling has its own module boundary", () => {
   assert.match(translationsSource, /flag: "🇬🇧"/);
   assert.match(translationsSource, /code: "sv".*flag: "🇸🇪"/s);
   assert.match(translationsSource, /code: "da".*flag: "🇩🇰"/s);
+});
+
+test("language orchestration has its own module boundary", () => {
+  assert.match(languageControllerSource, /loadUserLanguage/);
+  assert.match(languageControllerSource, /handleChange/);
+  assert.match(languageControllerSource, /window\.PadelstarLanguageController/);
+  assert.match(indexSource, /app\/core\/language-controller\.js\?v=padelstar-language-controller-1/);
+  assert.match(serviceWorkerSource, /app\/core\/language-controller\.js\?v=padelstar-language-controller-1/);
 });
 
 test("JSON persistence has its own storage module boundary", () => {

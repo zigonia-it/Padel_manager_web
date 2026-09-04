@@ -166,6 +166,7 @@ const stateBootstrap = window.PadelstarStateBootstrap.create({
   storageKey,
 });
 let state = stateBootstrap.loadState();
+let languageController;
 const tournamentLibrary = window.PadelstarTournamentLibrary?.create({
   storage,
   localStorage,
@@ -183,7 +184,14 @@ const backupFormat = window.PadelstarBackupFormat.create({
   migrateState: (candidate) => migrateState(candidate),
   sanitizeState: (candidate) => sanitizeSharedState(candidate),
 });
-state.settings.language = loadUserLanguage(state.settings?.language ?? "nb");
+state.settings.language = i18nUi.loadUserLanguage({
+  storage: localStorage,
+  storageKey: languageStorageKey,
+  fallbackLanguage: state.settings?.language ?? "nb",
+  i18n,
+  navigatorRef: navigator,
+  onMode: (mode) => { state.settings.languageMode = mode; },
+});
 let largeScoreMatchId = null;
 let activeModule = "landing";
 let spectatorMode = false;
@@ -357,6 +365,22 @@ const courtSettings = window.PadelstarCourtSettings.create({
   escapeAttribute: (value) => escapeAttribute(value),
   escapeHtml: (value) => escapeHtml(value),
 });
+languageController = window.PadelstarLanguageController.create({
+  getState: () => state,
+  getElements: () => elements,
+  storage: localStorage,
+  storageKey: languageStorageKey,
+  navigatorRef: navigator,
+  i18n,
+  i18nUi,
+  localizeGeneratedCourtNames: () => courtSettings.localizeGeneratedCourtNames(),
+  applyTheme,
+  getProfile: () => profile,
+  syncProfile: (currentProfile, language) => accountAuth?.syncProfile(currentProfile, language),
+  syncJoinPreview: () => syncJoinPreview(),
+  render: () => render(),
+});
+state.settings.language = languageController.loadUserLanguage(state.settings?.language ?? "nb");
 const setupForms = window.PadelstarSetupForms.create({
   elements,
   getDefaultTournament: () => defaultTournament,
@@ -835,22 +859,7 @@ async function handleCreateAdminSignInLink() {
   showToast(sent ? t("admin.identityLinkSent") : t("admin.identityFailed"), sent ? "status-message-success" : "status-message-error");
 }
 
-function handleLanguageChange() {
-  if (elements.languageSelect.value === "device") {
-    state.settings.languageMode = "device";
-    localStorage.setItem(languageStorageKey, "device");
-    state.settings.language = loadUserLanguage(state.settings.language);
-  } else {
-    state.settings.languageMode = "manual";
-    state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
-    localStorage.setItem(languageStorageKey, state.settings.language);
-  }
-  if (profile) void accountAuth?.syncProfile(profile, state.settings.language);
-  applyLanguage();
-  syncJoinPreview();
-  render();
-  syncLanguageOptions();
-}
+function handleLanguageChange() { return languageController.handleChange(); }
 
 async function handleRefreshRemote() {
   elements.refreshRemoteButton.disabled = true;
@@ -1091,16 +1100,7 @@ function renderProfile() {
   profileUi.renderProfile();
 }
 
-function loadUserLanguage(fallbackLanguage = "nb") {
-  return i18nUi.loadUserLanguage({
-    storage: localStorage,
-    storageKey: languageStorageKey,
-    fallbackLanguage,
-    i18n,
-    navigatorRef: navigator,
-    onMode: (mode) => { state.settings.languageMode = mode; },
-  });
-}
+function loadUserLanguage(fallbackLanguage = "nb") { return languageController.loadUserLanguage(fallbackLanguage); }
 
 function loadState() { return stateBootstrap.loadState(); }
 function loadSavedState(serializedState) { return stateBootstrap.loadSavedState(serializedState); }
@@ -1602,8 +1602,7 @@ function renderSyncControls() {
 }
 
 function applyLanguage() {
-  localizeGeneratedCourtNames();
-  i18nUi.applyLanguage({ state, elements, i18n, translate: t, applyTheme });
+  return languageController.applyLanguage();
 }
 
 function localizeGeneratedCourtNames() {
@@ -1611,18 +1610,10 @@ function localizeGeneratedCourtNames() {
 }
 
 function syncLanguageOptions() {
-  i18nUi.syncLanguageOptions({
-    select: elements.languageSelect,
-    i18n,
-    currentLanguage: state.settings?.language ?? "nb",
-    languageMode: state.settings?.languageMode ?? "device",
-  });
+  return languageController.syncLanguageOptions();
 }
 
-function t(key, values = {}) {
-  const language = state.settings?.language ?? "nb";
-  return i18n?.translate(language, key, values) ?? key;
-}
+function t(key, values = {}) { return languageController.translate(key, values); }
 
 function renderStartResume() {
   adminStatus.renderStartResume();

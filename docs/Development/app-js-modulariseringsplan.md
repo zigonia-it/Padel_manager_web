@@ -2,7 +2,7 @@
 
 **Sist kartlagt:** 2026-09-04  
 **Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
-**Status:** Fase 7 (app-init) er gjennomført og verifisert. Fase A er fortsatt pågående fordi resterende entrypoint-orkestrering ikke er ferdig flyttet.
+**Status:** Fase 8 (language-controller) er gjennomført og verifisert. Fase A er fortsatt pågående fordi resterende entrypoint-orkestrering og renderer-grensen ikke er ferdig flyttet.
 
 ## 1. Konklusjon
 
@@ -145,6 +145,8 @@ Følgende skal ikke være første refaktorering:
 - **Fase 6-verifikasjon:** egen bootstrap-event-test bekrefter 18 bindinger til eksplisitte callbacks. Full testpakke passerte med 197 beståtte tester og 1 forventet live-Supabase-skip, samt full syntakssjekk og `git diff --check`. Browser-reload viste landing, `PadelstarBootstrapEvents` og classic theme uten app-feil; eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
 - **Fase 7, 2026-09-04:** startup-orkestreringen er flyttet til `app/bootstrap/app-init.js`. `app.js` beholder eksplisitte callback-adaptere og mutable state, mens init-modulen kun styrer den dokumenterte rekkefølgen.
 - **Fase 7-verifikasjon:** sekvens-testen bekrefter alle 23 init-steg i riktig rekkefølge. Full testpakke passerte med 199 beståtte tester og 1 forventet live-Supabase-skip, samt full syntakssjekk og `git diff --check`. Browser-reload viste landing med `PadelstarAppInit`, `PadelstarBootstrapEvents` og classic theme tilgjengelig; eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
+- **Fase 8, 2026-09-04:** språkorkestreringen er flyttet til `app/core/language-controller.js`. `app.js` bruker nå controlleren for lasting, oversettelsesadapter, apply/sync og manuell/device-endring, mens `app/i18n-ui.js` beholder DOM-oppdateringene.
+- **Fase 8-verifikasjon:** controller-testene dekker fallback/mode, apply-rekkefølge og manuell endring med profil-sync. Full testpakke passerte med 203 beståtte tester og 1 forventet live-Supabase-skip (204 totalt), full syntakssjekk og `git diff --check`. Browser verifiserte reload, tilgjengelig controller, norsk initialvisning og faktisk bytte til engelsk med oppdatert heading; eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 

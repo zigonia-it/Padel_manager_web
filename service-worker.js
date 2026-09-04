@@ -88,6 +88,7 @@ const appShell = [
   "./app/config/storage-keys.js?v=padelstar-storage-keys-1",
   "./app/config/supabase-config.js?v=padelstar-supabase-config-1",
   "./app/core/utilities.js?v=padelstar-utilities-1",
+  "./app/core/language-controller.js?v=padelstar-language-controller-1",
   "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-1",
   "./app/bootstrap/app-meta.js?v=padelstar-app-meta-1",
   "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-1",
