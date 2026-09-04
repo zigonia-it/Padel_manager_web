@@ -1,5 +1,5 @@
 window.PadelstarPlayerStatus = (() => {
-  function create({ elements, getPlayerById, getState, matchIncludesPlayer, playerTournamentState, pointsByPlayer, statsForPlayer, t }) {
+  function create({ elements, escapeHtml, getPlayerById, getState, matchIncludesPlayer, playerTournamentState, pointsByPlayer, statsForPlayer, t }) {
     function renderPlayerStatus(matches) {
       const state = getState();
       const player = getPlayerById(state.selectedPlayerId);
@@ -27,7 +27,7 @@ window.PadelstarPlayerStatus = (() => {
     <div class="${nextState.kind === "playing" ? "ready" : "waiting"}">
       <span>${t("common.status")}</span>
       <strong>${state.status === "Avsluttet" ? t("common.finished") : statusText}</strong>
-      <small>${nextState.match?.courtName ?? (nextState.kind === "resting" ? t("tournament.thisRound") : t("tournament.noCourt"))}</small>
+      <small>${escapeHtml(nextState.match?.courtName ?? (nextState.kind === "resting" ? t("tournament.thisRound") : t("tournament.noCourt")))}</small>
     </div>
     <div class="ready">
       <span>${t("common.points")}</span>

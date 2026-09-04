@@ -30,3 +30,14 @@ coverage/
 output/
 docs/archive/qa-screenshots/
 **/.DS_Store
+
+# Unused active assets kept locally for possible future design work
+assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf
+assets/fonts/Nunito-VariableFont_wght.ttf
+assets/icons/Image Layer 1@0.5x.png
+assets/icons/Image Layer@0.5x.png
+assets/icons/Set @0.5x.png
+assets/icons/padelstar-512.png
+assets/logos/main_logo_without_icon@0.5x.png
+assets/logos/main_logo_without_icon@2x.png
+figma-review.png

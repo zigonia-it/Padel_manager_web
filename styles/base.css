@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: dark;
-  --font-ui: "Nunito", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: "Titillium Web", var(--font-ui);
   --soft: #070d17;
   --ink: #eef7ff;
@@ -35,6 +35,15 @@
   --ds-text-muted: #a9bfd5;
   --ds-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
   --ds-shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.24);
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
   --player-accent: var(--gold);
   --player-accent-light: var(--gold-light);
   --player-accent-dark: var(--gold-dark);
@@ -54,8 +63,8 @@
 }
 
 @font-face {
-  font-family: "Nunito";
-  src: url("../assets/fonts/Nunito-VariableFont_wght.ttf") format("truetype");
+  font-family: "Inter";
+  src: url("../assets/fonts/Inter-VariableFont_opsz,wght.ttf") format("truetype");
   font-weight: 200 1000;
   font-display: swap;
 }

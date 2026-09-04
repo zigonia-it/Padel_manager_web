@@ -16,6 +16,8 @@ const profileFixSql = readSql("supabase/migrations/20260828122000_profile_histor
 const pushSql = readSql("supabase/migrations/20260828130000_push_subscriptions.sql");
 const retentionCronSql = readSql("supabase/migrations/20260828103000_retention_cron.sql");
 const guestRetentionSql = readSql("supabase/migrations/20260902120000_guest_history_retention.sql");
+const profileOwnedRetentionSql = readSql("supabase/migrations/20260904090000_profile_owned_tournament_retention.sql");
+const securityHardeningSql = readSql("supabase/migrations/20260904210000_security_hardening.sql");
 
 function readSql(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -232,6 +234,16 @@ test("admin identity claim requires authenticated ownership and preserves token 
   assert.match(identitySql, /revoke all on function public\.claim_tournament\(uuid, text\) from public, anon/);
 });
 
+test("profile-owned retention keeps creator optional and stats profile-scoped", () => {
+  const sql = normalizeSql(profileOwnedRetentionSql);
+  assert.match(sql, /add column if not exists owner_profile_id text/);
+  assert.match(sql, /next_owner_profile_id text/);
+  assert.match(sql, /p_state->>'ownerprofileid'/);
+  assert.match(sql, /now\(\) \+ interval '7 days'/);
+  assert.match(sql, /where owner_profile_id is null/);
+  assert.match(sql, /coalesce\(retention_expires_at, created_at \+ make_interval\(days => p_retention_days\)\) <= now\(\)/);
+});
+
 test("push subscriptions are token-bound and private", () => {
   assert.match(pushSql, /create table if not exists public\.push_subscriptions/);
   assert.match(pushSql, /alter table public\.push_subscriptions enable row level security/);
@@ -240,6 +252,24 @@ test("push subscriptions are token-bound and private", () => {
   assert.match(pushSql, /on conflict \(endpoint\) do update/);
   assert.match(pushSql, /revoke all on function public\.upsert_push_subscription/);
   assert.match(pushSql, /grant execute on function public\.upsert_push_subscription.*to anon/);
+});
+
+test("latest security hardening closes takeover, guest token replay and broad reads", () => {
+  const sql = normalizeSql(securityHardeningSql);
+  assert.match(sql, /if exists \(select 1 from public\.tournaments where id = next_id\) then/);
+  assert.match(sql, /raise exception 'tournament already exists'/);
+  assert.match(sql, /player name already joined; sign in to rejoin/);
+  assert.match(sql, /drop policy if exists/);
+  assert.match(sql, /revoke select on public\.tournaments from public, anon, authenticated/);
+  assert.match(sql, /next_endpoint !~ '\^https:\/\/'/);
+  assert.match(sql, /count\(\*\).*push_subscriptions/);
+});
+
+test("manual schema mirrors the security boundary and push endpoint allowlist", () => {
+  assert.match(normalizeSql(schemaSql), /if exists \(select 1 from public\.tournaments where id = next_id\) then/);
+  assert.match(normalizeSql(schemaSql), /player name belongs to another session/);
+  assert.match(normalizeSql(schemaSql), /drop policy if exists "public can read tournament states for realtime"/);
+  assert.match(normalizeSql(schemaSql), /fcm.*googleapis.*com/);
 });
 
 test("profile migration protects profile ownership and delayed deletion", () => {

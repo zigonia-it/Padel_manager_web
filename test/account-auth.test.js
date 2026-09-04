@@ -29,7 +29,7 @@ test("account flow supports password auth and shared admin sessions", () => {
   assert.match(source, /getProfile/);
   assert.match(source, /from\("profiles"\)/);
   assert.match(source, /loadRemoteProfile/);
-  assert.match(fs.readFileSync(path.join(root, "app", "app.js"), "utf8"), /adminPlayerName\.value = profile\?\.displayName/);
+  assert.match(fs.readFileSync(path.join(root, "app", "setup-forms.js"), "utf8"), /getProfile\(\)\?\.displayName/);
   assert.match(fs.readFileSync(path.join(root, "app", "translations.js"), "utf8"), /en: "Log in with account"/);
   assert.match(fs.readFileSync(path.join(root, "app", "translations.js"), "utf8"), /en: \{ "queue.title": "Court queue"/);
   assert.match(adminSource, /adminIdentityForm\?\.classList\.add\("hidden"\)/);

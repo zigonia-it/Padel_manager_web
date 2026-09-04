@@ -5,6 +5,19 @@ const test = require("node:test");
 const vm = require("node:vm");
 
 const appRoot = path.join(__dirname, "..", "app");
+const storageKeysPath = path.join(appRoot, "config", "storage-keys.js");
+const supabaseConfigPath = path.join(appRoot, "config", "supabase-config.js");
+const utilitiesPath = path.join(appRoot, "core", "utilities.js");
+const languageControllerPath = path.join(appRoot, "core", "language-controller.js");
+const sessionControllerPath = path.join(appRoot, "core", "session-controller.js");
+const remoteStateControllerPath = path.join(appRoot, "core", "remote-state-controller.js");
+const remoteSyncControllerPath = path.join(appRoot, "core", "remote-sync-controller.js");
+const domElementsPath = path.join(appRoot, "bootstrap", "dom-elements.js");
+const appMetaPath = path.join(appRoot, "bootstrap", "app-meta.js");
+const bootstrapEventsPath = path.join(appRoot, "bootstrap", "app-events.js");
+const appInitPath = path.join(appRoot, "bootstrap", "app-init.js");
+const themePath = path.join(appRoot, "ui", "theme.js");
+const appRendererPath = path.join(appRoot, "ui", "app-renderer.js");
 const translationsPath = path.join(appRoot, "translations.js");
 const i18nUiPath = path.join(appRoot, "i18n-ui.js");
 const storagePath = path.join(appRoot, "storage.js");
@@ -17,6 +30,12 @@ const accentSystemPath = path.join(appRoot, "accent-system.js");
 const uiFeedbackPath = path.join(appRoot, "ui-feedback.js");
 const notificationSystemPath = path.join(appRoot, "notification-system.js");
 const profileSessionPath = path.join(appRoot, "profile-session.js");
+const profileHistoryPath = path.join(appRoot, "profile-history.js");
+const courtSettingsPath = path.join(appRoot, "court-settings.js");
+const setupFormsPath = path.join(appRoot, "setup-forms.js");
+const tournamentQueriesPath = path.join(appRoot, "tournament-queries.js");
+const tournamentSharingPath = path.join(appRoot, "tournament-sharing.js");
+const resultSubmissionsPath = path.join(appRoot, "result-submissions.js");
 const matchCardPath = path.join(appRoot, "match-card.js");
 const backupFormatPath = path.join(appRoot, "backup-format.js");
 const linkUtilsPath = path.join(appRoot, "link-utils.js");
@@ -131,6 +150,19 @@ function loadPadelstar(options = {}) {
 
   vm.runInContext(fs.readFileSync(translationsPath, "utf8"), context, { filename: translationsPath });
   vm.runInContext(fs.readFileSync(i18nUiPath, "utf8"), context, { filename: i18nUiPath });
+  vm.runInContext(fs.readFileSync(storageKeysPath, "utf8"), context, { filename: storageKeysPath });
+  vm.runInContext(fs.readFileSync(supabaseConfigPath, "utf8"), context, { filename: supabaseConfigPath });
+  vm.runInContext(fs.readFileSync(utilitiesPath, "utf8"), context, { filename: utilitiesPath });
+  vm.runInContext(fs.readFileSync(languageControllerPath, "utf8"), context, { filename: languageControllerPath });
+  vm.runInContext(fs.readFileSync(sessionControllerPath, "utf8"), context, { filename: sessionControllerPath });
+  vm.runInContext(fs.readFileSync(remoteStateControllerPath, "utf8"), context, { filename: remoteStateControllerPath });
+  vm.runInContext(fs.readFileSync(remoteSyncControllerPath, "utf8"), context, { filename: remoteSyncControllerPath });
+  vm.runInContext(fs.readFileSync(domElementsPath, "utf8"), context, { filename: domElementsPath });
+  vm.runInContext(fs.readFileSync(appMetaPath, "utf8"), context, { filename: appMetaPath });
+  vm.runInContext(fs.readFileSync(bootstrapEventsPath, "utf8"), context, { filename: bootstrapEventsPath });
+  vm.runInContext(fs.readFileSync(appInitPath, "utf8"), context, { filename: appInitPath });
+  vm.runInContext(fs.readFileSync(themePath, "utf8"), context, { filename: themePath });
+  vm.runInContext(fs.readFileSync(appRendererPath, "utf8"), context, { filename: appRendererPath });
   vm.runInContext(fs.readFileSync(storagePath, "utf8"), context, { filename: storagePath });
   vm.runInContext(fs.readFileSync(renderingPath, "utf8"), context, { filename: renderingPath });
   vm.runInContext(fs.readFileSync(remoteTournamentPath, "utf8"), context, { filename: remoteTournamentPath });
@@ -141,6 +173,12 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(uiFeedbackPath, "utf8"), context, { filename: uiFeedbackPath });
   vm.runInContext(fs.readFileSync(notificationSystemPath, "utf8"), context, { filename: notificationSystemPath });
   vm.runInContext(fs.readFileSync(profileSessionPath, "utf8"), context, { filename: profileSessionPath });
+  vm.runInContext(fs.readFileSync(profileHistoryPath, "utf8"), context, { filename: profileHistoryPath });
+  vm.runInContext(fs.readFileSync(courtSettingsPath, "utf8"), context, { filename: courtSettingsPath });
+  vm.runInContext(fs.readFileSync(setupFormsPath, "utf8"), context, { filename: setupFormsPath });
+  vm.runInContext(fs.readFileSync(tournamentQueriesPath, "utf8"), context, { filename: tournamentQueriesPath });
+  vm.runInContext(fs.readFileSync(tournamentSharingPath, "utf8"), context, { filename: tournamentSharingPath });
+  vm.runInContext(fs.readFileSync(resultSubmissionsPath, "utf8"), context, { filename: resultSubmissionsPath });
   vm.runInContext(fs.readFileSync(matchCardPath, "utf8"), context, { filename: matchCardPath });
   vm.runInContext(fs.readFileSync(backupFormatPath, "utf8"), context, { filename: backupFormatPath });
   vm.runInContext(fs.readFileSync(linkUtilsPath, "utf8"), context, { filename: linkUtilsPath });
@@ -185,6 +223,19 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(initialViewPath, "utf8"), context, { filename: initialViewPath });
   vm.runInContext(fs.readFileSync(appPath, "utf8"), context, { filename: appPath });
   return Object.assign(window.PadelstarTest, {
+    storageKeys: window.PadelstarStorageKeys,
+    supabaseConfig: window.PadelstarSupabaseConfig,
+    utilities: window.PadelstarUtilities,
+    languageController: window.PadelstarLanguageController,
+    sessionController: window.PadelstarSessionController,
+    remoteStateController: window.PadelstarRemoteStateController,
+    remoteSyncController: window.PadelstarRemoteSyncController,
+    domElements: window.PadelstarDomElements,
+    appMeta: window.PadelstarAppMeta,
+    bootstrapEvents: window.PadelstarBootstrapEvents,
+    appInit: window.PadelstarAppInit,
+    theme: window.PadelstarTheme,
+    appRenderer: window.PadelstarAppRenderer,
     engine: window.PadelstarTournamentEngine,
     scoring: window.PadelstarScoring,
     stateManager: window.PadelstarState,
@@ -739,6 +790,17 @@ test("all visible app translation keys have Bokmål fallback text", () => {
   const missingKeys = collectTranslationKeys().filter((key) => !api.i18n.has("nb", key));
 
   assert.deepEqual(missingKeys, []);
+});
+
+test("landing feature cards have native translations in every supported language", () => {
+  const api = loadPadelstar();
+  for (const language of api.i18n.supportedLanguages().map((entry) => entry.code)) {
+    assert.notEqual(api.i18n.translate(language, "hero.featuresAria"), "hero.featuresAria");
+    assert.notEqual(api.i18n.translate(language, "hero.featureOneTitle"), "hero.featureOneTitle");
+    assert.notEqual(api.i18n.translate(language, "hero.featureOneText"), "hero.featureOneText");
+    assert.notEqual(api.i18n.translate(language, "hero.featureTwoTitle"), "hero.featureTwoTitle");
+    assert.notEqual(api.i18n.translate(language, "hero.featureThreeTitle"), "hero.featureThreeTitle");
+  }
 });
 
 test("initial view boundary routes join URLs and saved sessions", () => {

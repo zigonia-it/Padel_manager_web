@@ -66,7 +66,7 @@ window.PadelstarMatchList = (() => {
       card.innerHTML = `
     <div class="spectator-score-top">
       <span>${escapeHtml(matchContextText(match))}</span>
-      <strong>${match.courtName ?? t("tournament.courtComing")}</strong>
+      <strong>${escapeHtml(match.courtName ?? t("tournament.courtComing"))}</strong>
     </div>
     <div class="spectator-score-teams">
       <div style="${teamAccentStyle(match.teamOne)}">

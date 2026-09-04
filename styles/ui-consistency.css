@@ -15,8 +15,8 @@
   --ui-line: rgba(99, 181, 255, 0.42);
   --ui-panel: rgba(3, 20, 49, 0.76);
   --ui-card: rgba(5, 27, 63, 0.88);
-  --ui-radius: 14px;
-  --ui-card-radius: 12px;
+  --ui-radius: var(--radius-lg);
+  --ui-card-radius: var(--radius-md);
   --ui-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 16px 36px rgba(0, 0, 0, 0.24);
 }
 
@@ -153,7 +153,7 @@ body:not(.landing-active) .panel-heading .eyebrow {
 body:not(.landing-active) .app-module:not(#startView) .panel,
 body:not(.landing-active) .app-module:not(#startView) .next-match,
 body:not(.landing-active) .setup-card {
-  gap: 16px;
+  gap: var(--space-4);
   padding: clamp(16px, 2vw, 22px);
 }
 
@@ -291,6 +291,58 @@ body:not(.landing-active) .button-secondary:hover:not(:disabled) {
   .language-options { right: auto; left: 0; }
 }
 
+@media (min-width: 901px) {
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 18px;
+  }
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .panel-heading,
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .live-overview,
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .tournament-assistant,
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .court-queue,
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .status-grid,
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > #tournamentSettingsForm,
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .button-row,
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .admin-identity-panel {
+    grid-column: 1 / -1;
+  }
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .inline-form,
+  body[data-theme="classic"] .admin-panel[data-admin-panel-section="control"] > .court-names-form {
+    min-width: 0;
+  }
+  body[data-theme="classic"] #adminMatches {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 16px;
+  }
+  body[data-theme="classic"] #adminMatches .match-group {
+    min-width: 0;
+  }
+  body[data-theme="classic"] [data-section="player"] > .panel.wide {
+    width: min(100%, 1080px);
+    justify-self: start;
+  }
+  body[data-theme="classic"] .match-card {
+    gap: 16px;
+    padding: 20px;
+    border-radius: 16px;
+  }
+  body[data-theme="classic"] .scorecard-matchup {
+    grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.15fr) minmax(180px, 1fr);
+    gap: 16px;
+  }
+  body[data-theme="classic"] .scorecard-team {
+    min-height: 230px;
+  }
+  body[data-theme="classic"] .scorecard-score-pair .scorecard-point-button,
+  body[data-theme="classic"] .scorecard-score-pair .scorecard-point-value {
+    min-height: 150px;
+  }
+}
+
 body:not(.landing-active) .app-module.module-entering {
   animation: ui-module-enter 180ms ease both;
 }
@@ -314,4 +366,625 @@ body:not(.landing-active) .app-module.module-entering {
   body:not(.landing-active) .setup-card h2 {
     font-size: clamp(1.8rem, 8vw, 2.55rem);
   }
+}
+
+/* Figma refresh: shared 1440px composition and component language. */
+body[data-theme="classic"] {
+  --figma-bg: #0b0f19;
+  --figma-surface: #121a2e;
+  --figma-border: #334155;
+  --figma-text: #f8fafc;
+  --figma-muted: #94a3b8;
+  --figma-accent: #0ea5e9;
+  --figma-accent-strong: #2563eb;
+}
+
+body[data-theme="classic"], body[data-theme="classic"] .app-shell { background: var(--figma-bg); }
+body[data-theme="classic"] .app-shell { width: 100%; max-width: none; padding: 0 0 42px; }
+body[data-theme="classic"] .topbar {
+  position: relative; top: auto; width: 100%; margin: 0; padding: 24px 80px;
+  border: 0; border-bottom: 1px solid var(--figma-border); border-radius: 0;
+  background: var(--figma-bg); box-shadow: none; backdrop-filter: none;
+}
+body[data-theme="classic"] .brand-lockup { flex: 0 0 auto; }
+body[data-theme="classic"] .brand-home-button { gap: 10px; }
+body[data-theme="classic"] .brand-logo { display: block; width: 32px; height: 32px; object-fit: contain; }
+body[data-theme="classic"] .brand-wordmark { display: block; width: 109px; height: auto; }
+body[data-theme="classic"] .app-menu { justify-content: center; width: auto; max-width: none; flex: 1 1 auto; gap: 8px; }
+body[data-theme="classic"] .app-menu .module-link {
+  min-height: 33px; padding: 7px 12px; border: 1px solid transparent; border-radius: var(--radius-sm);
+  background: transparent; color: var(--figma-muted); font-size: .875rem; font-weight: 600;
+}
+body[data-theme="classic"] .app-menu .module-link.active,
+body[data-theme="classic"] .app-menu .module-link:hover {
+  border-color: var(--figma-border); background: var(--figma-surface); color: var(--figma-text); box-shadow: none;
+}
+body[data-theme="classic"] .topbar-actions { flex: 1 1 auto; gap: 24px; }
+body[data-theme="classic"] .menu-drawer { display: contents; }
+body[data-theme="classic"] .language-picker { min-width: 85px; }
+body[data-theme="classic"] .language-picker > span { color: #64748b; font-size: .75rem; text-transform: none; }
+body[data-theme="classic"] .language-picker select {
+  min-height: 23px; padding: 2px 22px 2px 8px; border: 1px solid var(--figma-border); border-radius: 6px;
+  background: var(--figma-surface); color: var(--figma-text); font-family: var(--font-ui); font-size: .75rem;
+}
+body[data-theme="classic"] .status-pill { color: var(--figma-muted); font-size: .75rem; }
+body[data-theme="classic"] #app-main > .start-panel,
+body[data-theme="classic"] #app-main > .account-panel,
+body[data-theme="classic"] #app-main > .setup-panel,
+body[data-theme="classic"] #app-main > .workspace { width: min(1280px, calc(100% - 160px)); margin-inline: auto; }
+body[data-theme="classic"] .intro { min-height: 630px; margin: 0; padding: 0; background: transparent; }
+body[data-theme="classic"] .intro-copy { gap: 24px; transform: none; padding: 80px 20px 64px; }
+body[data-theme="classic"] .hero-logo-wordmark { display: none; }
+body[data-theme="classic"] .hero-title {
+  max-width: 800px; color: var(--figma-text); font-family: var(--font-ui); font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800; letter-spacing: -.04em; line-height: 1.05; text-transform: uppercase;
+}
+body[data-theme="classic"] .intro-copy p {
+  max-width: 720px; color: var(--figma-muted); font-family: var(--font-ui); font-size: 1.25rem;
+  font-weight: 400; line-height: 1.5; text-shadow: none;
+}
+body[data-theme="classic"] .version {
+  order: -1; padding: 5px 12px; border: 1px solid var(--figma-accent); border-radius: 999px;
+  color: var(--figma-accent); font-size: .75rem; font-weight: 600; text-transform: uppercase;
+}
+body[data-theme="classic"] .landing-actions { display: flex; justify-content: center; width: auto; gap: 18px; }
+body[data-theme="classic"] .landing-cta {
+  width: auto; min-height: 52px; padding: 14px 30px; border: 1px solid rgba(56, 189, 248, .72);
+  border-radius: 10px; background: linear-gradient(180deg, rgba(18, 26, 46, .96), rgba(9, 16, 31, .96));
+  color: #e0f2fe; font-family: var(--font-ui); font-size: .95rem; font-weight: 700;
+  letter-spacing: -.01em; box-shadow: 0 10px 26px rgba(14, 165, 233, .12), inset 0 1px 0 rgba(255,255,255,.06);
+}
+body[data-theme="classic"] .landing-cta:hover:not(:disabled) {
+  border-color: #7dd3fc;
+  background: linear-gradient(180deg, rgba(25, 40, 68, .98), rgba(12, 24, 44, .98));
+  color: var(--figma-text);
+  box-shadow: 0 12px 30px rgba(14, 165, 233, .2), inset 0 1px 0 rgba(255,255,255,.08);
+}
+body[data-theme="classic"] .landing-cta:not(.landing-cta-secondary) {
+  border-color: rgba(186, 230, 253, .92);
+  background: linear-gradient(135deg, #e6f6ff, #62b6ff);
+  color: #07111f;
+  box-shadow: 0 10px 26px rgba(56, 189, 248, .22), inset 0 1px 0 rgba(255,255,255,.55);
+}
+body[data-theme="classic"] .landing-cta:not(.landing-cta-secondary):hover:not(:disabled) {
+  border-color: #e0f2fe;
+  background: linear-gradient(135deg, #f0f9ff, #7dd3fc);
+}
+body[data-theme="classic"] .admin-subtabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: min(100%, 440px);
+  justify-self: start;
+  padding: 6px;
+  border: 1px solid var(--figma-border);
+  border-radius: 12px;
+  background: rgba(4, 14, 26, .70);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 12px 28px rgba(0,0,0,.18);
+}
+body[data-theme="classic"] .admin-subtabs .subtab {
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--figma-muted);
+  font-family: var(--font-ui);
+  font-size: .95rem;
+  font-weight: 700;
+}
+body[data-theme="classic"] .admin-subtabs .subtab:hover:not(:disabled) {
+  border-color: rgba(56, 189, 248, .55);
+  background: rgba(18, 26, 46, .72);
+  color: var(--figma-text);
+}
+body[data-theme="classic"] .admin-subtabs .subtab.active {
+  border-color: rgba(186, 230, 253, .92);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #e6f6ff, #62b6ff);
+  color: #07111f;
+  box-shadow: 0 10px 24px rgba(56, 189, 248, .20), inset 0 1px 0 rgba(255,255,255,.55);
+}
+/* Figma's secondary actions share the same dark surface as the install
+   action; the primary action remains the light-blue entry point. */
+body[data-theme="classic"] .landing-cta.landing-cta-secondary {
+  border-color: rgba(98, 182, 255, 0.54);
+  background: rgba(4, 14, 26, 0.70);
+  color: #eef7ff;
+}
+body[data-theme="classic"] .landing-cta.landing-cta-secondary:hover:not(:disabled) {
+  border-color: #7dd3fc;
+  background: linear-gradient(180deg, rgba(25, 40, 68, .98), rgba(12, 24, 44, .98));
+}
+body[data-theme="classic"] .landing-actions > :last-child:nth-child(odd) { width: auto; }
+.landing-features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 0 0 80px; }
+.landing-feature-card { display: grid; gap: 16px; min-height: 180px; padding: 32px; border: 1px solid var(--figma-border); border-radius: 16px; background: var(--figma-surface); }
+.landing-feature-card h3 { color: var(--figma-text); font-size: 1.25rem; }
+.landing-feature-card p { color: var(--figma-muted); font-size: .9375rem; line-height: 1.55; }
+.feature-icon {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: #0EA5E9;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body[data-theme="classic"] h1,
+body[data-theme="classic"] h2 {
+  text-transform: uppercase;
+}
+body[data-theme="classic"] .account-panel, body[data-theme="classic"] .setup-panel {
+  min-height: 584px; padding: 80px 0; border: 0; background: transparent; box-shadow: none;
+}
+body[data-theme="classic"] .account-panel { grid-template-columns: minmax(0, 1fr) 520px; align-items: start; gap: 64px; }
+body[data-theme="classic"] .account-intro { grid-column: 1; padding: 0; border: 0; background: transparent; box-shadow: none; }
+body[data-theme="classic"] .account-auth-panel, body[data-theme="classic"] .profile-light-panel, body[data-theme="classic"] .setup-card {
+  border: 1px solid var(--figma-border); border-radius: 16px; background: var(--figma-surface); box-shadow: none;
+}
+body[data-theme="classic"] .account-auth-panel, body[data-theme="classic"] .profile-light-panel { grid-column: 2; }
+body[data-theme="classic"] .account-intro h2, body[data-theme="classic"] .setup-card h2 {
+  color: var(--figma-text); font-family: var(--font-ui); font-size: 2.5rem; font-weight: 800; letter-spacing: -.03em;
+  line-height: 1.1; text-transform: uppercase;
+}
+body[data-theme="classic"] .account-intro .hint, body[data-theme="classic"] .setup-card .hint { color: var(--figma-muted); }
+body[data-theme="classic"] .setup-panel {
+  grid-template-columns: minmax(0, 1fr) 520px;
+  align-items: start;
+  gap: 64px;
+  justify-items: stretch;
+}
+body[data-theme="classic"] .setup-intro-panel { padding-top: 4px; }
+body[data-theme="classic"] .setup-intro-panel h2 { color: var(--figma-text); font-family: var(--font-ui); font-size: 2.5rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+body[data-theme="classic"] .setup-intro-panel .hint { max-width: 600px; margin-top: 16px; color: var(--figma-muted); }
+body[data-theme="classic"] .setup-card { width: 520px; max-width: 100%; justify-self: end; padding: 40px; }
+body[data-theme="classic"] .setup-account-option { width: 520px; max-width: 100%; justify-self: end; padding-top: 14px; }
+body[data-theme="classic"] .setup-card label > span, body[data-theme="classic"] .setup-card legend,
+body[data-theme="classic"] .account-auth-panel label > span, body[data-theme="classic"] .profile-light-panel label > span {
+  color: var(--figma-muted); font-family: var(--font-ui); font-size: .875rem; font-weight: 600;
+}
+body[data-theme="classic"] input, body[data-theme="classic"] textarea, body[data-theme="classic"] select {
+  border: 1px solid var(--figma-border); border-radius: var(--radius-sm); background: var(--figma-bg); color: var(--figma-text);
+  font-family: var(--font-ui); font-size: 1rem; font-weight: 400;
+}
+body[data-theme="classic"] .primary, body[data-theme="classic"] button.primary {
+  border: 0; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--figma-accent), var(--figma-accent-strong)); color: #fff; box-shadow: none;
+}
+body[data-theme="classic"] .site-footer { margin-top: 0; padding: 48px 80px; border-top: 1px solid var(--figma-border); background: #070a14; }
+@media (max-width: 900px) {
+  body[data-theme="classic"] .topbar { padding: 16px 20px; }
+  body[data-theme="classic"] .menu-drawer { display: none; }
+  body[data-theme="classic"].app-menu-open .menu-drawer { display: flex; }
+  body[data-theme="classic"] #app-main > .start-panel, body[data-theme="classic"] #app-main > .account-panel,
+  body[data-theme="classic"] #app-main > .setup-panel, body[data-theme="classic"] #app-main > .workspace { width: min(100% - 40px, 640px); }
+  body[data-theme="classic"] .account-panel { grid-template-columns: 1fr; gap: 24px; padding: 48px 0; }
+  body[data-theme="classic"] .account-intro, body[data-theme="classic"] .account-auth-panel, body[data-theme="classic"] .profile-light-panel { grid-column: 1; }
+  body[data-theme="classic"] .setup-panel {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 48px 0;
+  }
+  body[data-theme="classic"] .setup-intro-panel { padding-top: 0; }
+  body[data-theme="classic"] .setup-card { justify-self: stretch; width: 100%; padding: 24px; }
+  body[data-theme="classic"] .setup-account-option { justify-self: stretch; width: 100%; }
+  .landing-features { grid-template-columns: 1fr; padding-bottom: 48px; }
+  body[data-theme="classic"] .landing-actions { flex-wrap: wrap; }
+}
+@media (max-width: 560px) {
+  body[data-theme="classic"] .brand-wordmark { width: 92px; }
+  body[data-theme="classic"] .intro { min-height: 560px; }
+  body[data-theme="classic"] .intro-copy { padding: 56px 0 40px; }
+  body[data-theme="classic"] .hero-title { font-size: 2.4rem; }
+  body[data-theme="classic"] .landing-actions { display: grid; width: 100%; }
+  body[data-theme="classic"] .landing-cta, body[data-theme="classic"] .landing-actions > :last-child:nth-child(odd) { width: 100%; }
+  .landing-feature-card { padding: 24px; }
+  body[data-theme="classic"] .site-footer { padding: 40px 20px; }
+}
+
+/* Layout safety: grid items and form controls must never size the page wider
+   than their containing panel. */
+body[data-theme="classic"] .setup-panel,
+body[data-theme="classic"] .setup-intro-panel,
+body[data-theme="classic"] .setup-card,
+body[data-theme="classic"] .setup-card > label,
+body[data-theme="classic"] .setup-card > fieldset,
+body[data-theme="classic"] .setup-card input,
+body[data-theme="classic"] .setup-card textarea,
+body[data-theme="classic"] .setup-card select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+body[data-theme="classic"] .setup-card > label,
+body[data-theme="classic"] .setup-card > fieldset {
+  width: 100%;
+}
+
+body[data-theme="classic"] #createTournamentForm,
+body[data-theme="classic"] #joinTournamentForm,
+body[data-theme="classic"] .setup-card > *,
+body[data-theme="classic"] .setup-card label,
+body[data-theme="classic"] .setup-card fieldset,
+body[data-theme="classic"] .setup-card fieldset > *,
+body[data-theme="classic"] .setup-card .checkbox-card > *,
+body[data-theme="classic"] .setup-card .join-preview > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+body[data-theme="classic"] #createTournamentForm,
+body[data-theme="classic"] #joinTournamentForm {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 901px) {
+  body[data-theme="classic"] #adminMatches,
+  body[data-theme="classic"] #playerMatches,
+  body[data-theme="classic"] [data-section="admin"] > .panel,
+  body[data-theme="classic"] [data-section="player"] > .panel,
+  body[data-theme="classic"] [data-section="player"] > .next-match,
+  body[data-theme="classic"] [data-section="player"] > .player-result-panel,
+  body[data-theme="classic"] [data-section="player"] > .player-profile-panel,
+  body[data-theme="classic"] [data-section="admin"] .admin-panel,
+  body[data-theme="classic"] [data-section="player"] .matches,
+  body[data-theme="classic"] [data-section="player"] .match-group,
+  body[data-theme="classic"] [data-section="player"] .match-card,
+  body[data-theme="classic"] [data-section="admin"] .match-group,
+  body[data-theme="classic"] [data-section="admin"] .match-card {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  body[data-theme="classic"] [data-section="player"] > .next-match,
+  body[data-theme="classic"] [data-section="player"] > .player-profile-panel {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  body[data-theme="classic"] [data-section="player"] > .player-profile-panel {
+    grid-column: 2;
+  }
+
+  body[data-theme="classic"] [data-section="player"] > .player-result-panel {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  body[data-theme="classic"] [data-section="player"] > .panel.wide {
+    grid-column: 1 / -1;
+  }
+
+  body[data-theme="classic"] #adminMatches,
+  body[data-theme="classic"] #playerMatches {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  body[data-theme="classic"] .scorecard-team,
+  body[data-theme="classic"] .scorecard-center,
+  body[data-theme="classic"] .scorecard-players,
+  body[data-theme="classic"] .scorecard-stats {
+    min-width: 0;
+  }
+
+  body[data-theme="classic"] .scorecard-team {
+    padding-inline: 12px;
+  }
+
+  body[data-theme="classic"] .scorecard-team h3,
+  body[data-theme="classic"] .team-player-badge,
+  body[data-theme="classic"] .match-headline,
+  body[data-theme="classic"] .match-meta {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  body[data-theme="classic"] .match-card {
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  body[data-theme="classic"] #adminMatches,
+  body[data-theme="classic"] #playerMatches {
+    min-width: 0;
+  }
+}
+
+/* Final Figma polish: keep the brand lockup visually consistent across the
+   landing, setup and workspace headers. */
+body[data-theme="classic"] .brand-lockup { width: 268px; flex: 0 0 268px; }
+body[data-theme="classic"] .brand-home-button { width: 268px; gap: 12px; }
+body[data-theme="classic"] .brand-logo { width: 52px; height: 52px; flex: 0 0 52px; }
+body[data-theme="classic"] .brand-wordmark { width: 204px; height: auto; flex: 0 0 204px; }
+body[data-theme="classic"] .tv-mode-wordmark { width: 142px; }
+body[data-theme="classic"] .tv-mode-logo { width: 48px; height: 48px; }
+
+/* Match cards must size from their grid track, not from their contents. */
+.match-card {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.match-card > *,
+.match-card .match-top,
+.match-card .match-meta,
+.match-card .match-top-actions,
+.match-card .match-headline,
+.match-card .scorecard-matchup,
+.match-card .scorecard-team,
+.match-card .scorecard-center,
+.match-card .scorecard-stats,
+.match-card .match-controls {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.match-card .match-meta,
+.match-card .match-headline,
+.match-card .team-player-badge {
+  overflow-wrap: anywhere;
+}
+
+.match-card .court-edit-row {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+}
+
+.match-card .court-edit-row input,
+.match-card .court-edit-row button {
+  min-width: 0;
+  width: 100%;
+}
+
+.match-card .button-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.match-card .button-row > button {
+  min-width: 0;
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.match-card .walkover-row {
+  display: grid;
+  grid-template-columns: auto repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.match-card .walkover-row span {
+  min-width: 0;
+  margin-right: 0;
+}
+
+@media (min-width: 901px) and (max-width: 1199px) {
+  body[data-theme="classic"] #adminMatches,
+  body[data-theme="classic"] #playerMatches {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .match-card .button-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .match-card .button-row > button:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .match-card .walkover-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .match-card .walkover-row span {
+    grid-column: 1 / -1;
+  }
+}
+
+body[data-theme="classic"] .install-app-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 14px 24px;
+  border: 1px solid rgba(56, 189, 248, .72);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(18, 26, 46, .96), rgba(9, 16, 31, .96));
+  color: #e0f2fe;
+  font-family: var(--font-ui);
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  box-shadow: 0 10px 26px rgba(14, 165, 233, .12), inset 0 1px 0 rgba(255,255,255,.06);
+}
+body[data-theme="classic"] .install-app-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  fill: none;
+  stroke: #0EA5E9;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body[data-theme="classic"] .install-app-button:hover:not(:disabled) {
+  border-color: #7dd3fc;
+  background: linear-gradient(180deg, rgba(25, 40, 68, .98), rgba(12, 24, 44, .98));
+  box-shadow: 0 12px 30px rgba(14, 165, 233, .2), inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+body[data-theme="classic"] .language-picker { min-width: 124px; }
+body[data-theme="classic"] .language-picker > span {
+  display: block;
+  margin: 0 0 5px 2px;
+  color: var(--figma-muted);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+body[data-theme="classic"] .language-menu { min-width: 124px; }
+body[data-theme="classic"] .language-current {
+  width: 124px;
+  min-height: 46px;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--figma-border);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(18, 26, 46, .98), rgba(10, 17, 31, .98));
+  color: var(--figma-text);
+  font-family: var(--font-ui);
+  font-size: 1.1rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+}
+body[data-theme="classic"] .language-current-flag,
+body[data-theme="classic"] .language-option-flag {
+  display: block;
+  width: 24px;
+  height: 18px;
+  flex: 0 0 24px;
+  object-fit: fill;
+  border-radius: 1px;
+}
+body[data-theme="classic"] .language-option-globe {
+  width: 24px;
+  height: 18px;
+  font-size: 1rem;
+  line-height: 18px;
+  text-align: center;
+}
+body[data-theme="classic"] .language-current:hover,
+body[data-theme="classic"] .language-menu[open] .language-current {
+  border-color: rgba(56, 189, 248, .72);
+  background: var(--figma-surface);
+}
+body[data-theme="classic"] .language-current-name {
+  display: none;
+  margin-left: 2px;
+  font-size: .76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+body[data-theme="classic"] .language-options {
+  min-width: 210px;
+  padding: 8px;
+  border: 1px solid var(--figma-border);
+  border-radius: 12px;
+  background: rgba(11, 15, 25, .98);
+  box-shadow: 0 18px 40px rgba(0,0,0,.34);
+}
+body[data-theme="classic"] .language-option {
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: var(--figma-muted);
+  font-size: .84rem;
+  font-weight: 600;
+}
+body[data-theme="classic"] .language-option:hover,
+body[data-theme="classic"] .language-option[aria-selected="true"] {
+  background: rgba(14, 165, 233, .14);
+  color: var(--figma-text);
+}
+
+/* Use a compact switch for binary setup choices while keeping the native
+   checkbox in the accessibility tree and preserving label click behavior. */
+body[data-theme="classic"] .checkbox-card input[type="checkbox"] {
+  appearance: none;
+  position: relative;
+  width: 46px;
+  height: 26px;
+  margin: 0.05rem 0 0;
+  flex: 0 0 46px;
+  border: 1px solid rgba(159, 207, 255, 0.42);
+  border-radius: 999px;
+  background: rgba(18, 28, 46, 0.96);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.24);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+body[data-theme="classic"] .checkbox-card input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #dbeafe;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.32);
+  transition: transform 160ms ease;
+}
+
+body[data-theme="classic"] .checkbox-card input[type="checkbox"]:checked {
+  border-color: #38bdf8;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.14);
+}
+
+body[data-theme="classic"] .checkbox-card input[type="checkbox"]:checked::before {
+  transform: translateX(20px);
+  background: #ffffff;
+}
+
+body[data-theme="classic"] .checkbox-card input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--ui-blue);
+  outline-offset: 3px;
+}
+
+body[data-theme="classic"] .admin-identity-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 900px) {
+  body[data-theme="classic"] .brand-lockup,
+  body[data-theme="classic"] .brand-home-button { width: auto; flex: 0 0 auto; }
+  body[data-theme="classic"] .language-picker,
+  body[data-theme="classic"] .language-menu,
+  body[data-theme="classic"] .language-current { width: 100%; min-width: 0; }
+  body[data-theme="classic"] .language-current { justify-content: space-between; }
+  body[data-theme="classic"] .language-menu[open] .language-current-name { display: inline; }
+  body[data-theme="classic"] .admin-subtabs { width: 100%; }
+}
+
+@media (max-width: 560px) {
+  body[data-theme="classic"] .brand-wordmark { width: 92px; flex-basis: 92px; }
+}
+
+/* Match cards remain full-width in both workspaces. */
+@media (min-width: 901px) {
+  body[data-theme="classic"] #adminMatches,
+  body[data-theme="classic"] #playerMatches {
+    grid-template-columns: 1fr;
+  }
+}
+
+.match-card .walkover-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: 0;
+}
+
+.match-card .walkover-row span {
+  flex: 0 0 auto;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.match-card .walkover-row .walkover-button {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  white-space: nowrap;
 }

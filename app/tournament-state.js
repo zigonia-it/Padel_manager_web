@@ -53,6 +53,8 @@
         revision: 0,
         selectedPlayerId: null,
         playerToken: null,
+        ownerProfileId: null,
+        retentionExpiresAt: null,
       };
     }
 

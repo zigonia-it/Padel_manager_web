@@ -82,7 +82,7 @@ window.PadelstarPlayerNextMatch = (() => {
 
       elements.playerNextMatch.innerHTML = `
     <p class="eyebrow">${statusLabel}</p>
-    <h3>${match.courtName ?? t("tournament.courtComing")}</h3>
+    <h3>${escapeHtml(match.courtName ?? t("tournament.courtComing"))}</h3>
     <div class="player-now-grid">
       <div><span>${t("player.teammate")}</span><strong>${teammate ? escapeHtml(teammate.name) : t("common.single")}</strong></div>
       <div><span>${t("player.opponents")}</span><strong>${opponentNames}</strong></div>

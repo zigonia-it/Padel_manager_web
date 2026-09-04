@@ -47,7 +47,7 @@
         <span>${escapeHtml(matchContextText(match))}</span>
       </div>
       <div class="match-top-actions">
-        <span class="match-court">${match.courtName ?? translate("tournament.noCourtAssigned")}</span>
+        <span class="match-court">${escapeHtml(match.courtName ?? translate("tournament.noCourtAssigned"))}</span>
         <span class="match-status ${match.state}">${matchStateText(match.state)}</span>
       </div>
     </div>

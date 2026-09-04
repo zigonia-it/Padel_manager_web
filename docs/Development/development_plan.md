@@ -1,6 +1,6 @@
 # Padelstar – samlet utviklingsplan
 
-Sist oppdatert: 2026-09-02
+Sist oppdatert: 2026-09-04
 
 Status: aktivt operativt arbeidsdokument
 
@@ -8,7 +8,15 @@ Status: aktivt operativt arbeidsdokument
 
 Dette dokumentet er den eneste aktive planen for videre arbeid. Det beskriver dagens baseline, åpne beslutninger, prioriterte faser, akseptansekriterier og verifikasjon. Gjennomført arbeid føres i [documentation.md](documentation.md) i kronologisk rekkefølge.
 
+Den separate, kodebaserte analysen av gjenværende `app/app.js`-oppdeling ligger i [app-js-modulariseringsplan.md](app-js-modulariseringsplan.md). Den beskriver foreslåtte moduler og rekkefølge; den gjennomfører ikke refaktoreringen.
+
 Padelstar er en plattformuavhengig vanilla-JavaScript-PWA for å opprette, dele, administrere og følge padelturneringer på mobil, nettbrett og desktop. Supabase brukes for valgfri live-synk, mens lokal lagring og service worker gir offline-fallback.
+
+## Kontrollert baseline etter branch-gjennomgang
+
+Arbeidskopien på `codex/padelstar-ui-refresh` inneholder en 0.5 Beta-baseline med implementert kjerneflyt, fase 2–6-formatmoduler, TV Mode, profil/konto, historikk/statistikk, PWA/offline, varsler og konsolidert blå UI-retning. Siste lokale verifikasjon viser `npm test` med 212 tester: 211 bestått og 1 forventet live-Supabase-test hoppet over. `npm run check:syntax` og `git diff --check` passerer.
+
+Browser-smoke, live Supabase Auth/RPC/Realtime/push og ny produksjonsdeploy er ikke verifisert i denne arbeidsøkten fordi Playwright ikke er tilgjengelig i offline-miljøet. Dette er verifikasjonsoppgaver, ikke uimplementerte funksjoner.
 
 ## Gjeldende baseline
 
@@ -65,6 +73,18 @@ Oppdatert verifiseringsnotat: siste diff-skanning `60c77acd-3c28-4d7f-923a-50a47
 
 Siste Fase A-grense: appens globale event-wiring er flyttet til `app/app-events.js`, mens kampfiltrering, gruppering og tilskuerkort-rendering ligger i `app/match-list.js` med eksplisitte DOM-, oversettelses- og renderingsavhengigheter.
 
+Nyeste Fase A-grense: baneinnstillinger er flyttet til `app/court-settings.js`, inkludert generering av banefelt, lokalisering av automatisk genererte banenavn, parsing av banenummer og visning av låst/åpen baneredigering. Modulen er lastet i HTML/service worker og har egen domenetest.
+
+Nyeste Fase A-grense: rene oppslag for aktiv runde, kamp, spiller, spillerplassering og navnesøk er flyttet til `app/tournament-queries.js`. Modulen leser kun injisert state/leaderboard-data og har egen lastrekkefølge- og domenetest.
+
+Nyeste Fase A-grense: kopiering og Web Share/fallback for turneringslenker er flyttet til `app/tournament-sharing.js`, med injiserte DOM-, oversettelses- og observability-avhengigheter samt egen domenetest.
+
+Nyeste Fase A-grense: spillerinnsendinger av resultater, admin-gjennomgang og lokal/remote resolusjon er flyttet til `app/result-submissions.js`, med eksplisitte state-, score-, RPC- og DOM-avhengigheter samt egen domenetest.
+
+Nyeste Fase A-grense: lokal varsling for spillerens kamp er samlet i `app/notification-system.js`, slik at service-worker-varsling og push-abonnement har samme varseldomene. Runtime og eksisterende varslingstester er kontrollert etter flytten.
+
+Fase A-sluttkontroll 2026-09-04: storage-nøkler, Supabase-config-leser, rene hjelpefunksjoner, DOM-registry, app-meta, theme, bootstrap-events, app-init, language-controller, app-renderer, session-controller, remote-state-controller og remote-sync-controller er isolert og lastet fra HTML/service worker. Legacy-fallbacker er fjernet fra `app/app.js`. Full testpakke, syntax/diff og browser desktop/mobil passerer; fase A er lukket. Live Supabase/Auth/RPC/Realtime er fortsatt ikke verifisert uten eksplisitt live-miljø.
+
 Leaderboard-/tabell-rendering er også flyttet til `app/standings.js`; `app.js` beholder kun orkestreringen.
 
 Admin-spillerliste med redigering, avatarvalg og fjerning er flyttet til `app/player-list.js`.
@@ -95,14 +115,16 @@ Turneringsstatus, rundeblokkering og fremdriftskontroll er flyttet til `app/tour
 
 Remote state persistence for debouncede admin-lagringer er flyttet til `app/remote-state-write.js`, mens den eksisterende felles skrivekøen beholdes i entrypointen for å sikre riktig rekkefølge mot match- og score-RPC-er.
 
-- Fase A: pågår. Avataransvar, lenke-/QR-generering, rene cup-runde-hjelpere, felles spiller-/lagmarkup, turnerings-runtime, workspace-overview-rendering, remote state persistence, admin-RPC-mutasjoner, spillerens poengkø, scoring-sideeffekter og global event-wiring er nå egne moduler. Videre oppdeling av den resterende `app/app.js` må gjøres trinnvis med regresjon etter hver grense.
-- Fase B: lokalt verifisert. Diff-skanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført for 51 endrede filer med komplett dekning, ingen reportable funn og ingen åpne kandidater. Live Supabase-flyten er fortsatt ikke kjørt i lokal offline-verifisering og dekkes av den forventede skip-testen.
-- Fase C: lokalt verifisert på kode-, DOM- og runtime-nivå. Testpakken (125 tester: 124 bestått, 1 forventet skip), syntakssjekken og diff-sjekken passerer; browser-smoke fullfører opprettelse, start, hamburger på responsiv visning, adminnavigasjon og kampvisning på 1440, 768 og 390 px uten horisontal overflow. Desktop-smoke bekrefter også setup-bredden. CI/deploy må fortsatt bekrefte samme kontroll etter publisering.
-- Fase D: lokalt gjennomgått. Visuelle kaskader, status-/avatar-styling, oversettelsesnøkler og turneringsmotorens eksisterende regresjonstester er kontrollert. Initiale synlige fallback-tekster er bundet til oversettelsesnøkler, og aktiv JavaScript-runtime er nå bekreftet gjennom browser-smoke på alle tre viewportene.
+- Fase A: ferdig verifisert på commit `c4d7723` (kodegrensene i `da09fd4`, statusdokumentasjon i `c4d7723`). Struktur-, session/player- og remote state/sync-grensene er isolert, legacy-fallbacker er fjernet, og full lokal regresjon + browser desktop/mobil passerer.
+- Fase B: ferdig verifisert på publisert baseline `e10f5ae`. Autoritativ Standard-scan `132d1370-5afa-4a20-ba22-4f349af7e4d9` har komplett dekning og 0 reportable funn. Live Supabase-kontrakttest bestod, og 30-dagers profilsletting er dekket av eksisterende policy/test. Fase B er lukket med rapportens eneste begrensning dokumentert: ingen separat produksjonskonfigurasjon ble lest.
+- Fase C: gjennomført på nytt etter Fase A. Browser-smoke bestod på desktop (1440), medium (768) og mobil (390), inkludert opprettelse, start, adminnavigasjon, kampvisning og overflow-kontroll. Live Supabase-kontrakttest og samlet lokal regresjon bestod; en desktop-smokeassertion ble korrigert fordi den feilaktig krevde at to-kolonne setup-panel og skjema skulle ha samme bredde.
+- Fase D: gjennomført på nytt etter Fase C. Alle synlige landing-featuretekster har native oversettelser i de åtte støttede språkene; browser-gjennomgang bekreftet engelsk språkbytte, korrekt aria-label, mobilmeny, Escape-lukking og ingen overflow i smoke-testene. Static UI-/språktester og samlet regresjon passerer.
 
 ## Prioritert videre plan
 
 ### Fase A – Fullfør strukturkonsolideringen
+
+Status: ferdig. Se Fase A-sluttkontrollen over.
 
 Mål: gjøre modulgrensene reelle og holde `app/app.js` som en liten entrypoint.
 
@@ -165,13 +187,29 @@ Arbeidet er gjennomført lokalt mot gjeldende scope. Gjenstående produksjonsver
 
 Disse starter ikke før scope, personvern og akseptansekriterier er besluttet:
 
-- Ekstern driftsvarsling for `/api/health`.
+- Ekstern driftsvarsling for `/api/health`. # Hva er dette?
 - Full konto- og tokenmigrering for administratorer.
 - Mer avansert tiebreak/poengføring.
 - PDF-eksport av tabell og resultat.
 - Utvidet profilhistorikk og karrierestatistikk.
 - Mer avansert offline-konflikthåndtering.
-- Eventuell avataropplasting eller et større egendefinert avatarbibliotek; dagens avatarvelger og DiceBear Lorelei Neutral er gjeldende baseline.
+- Eventuell avataropplasting eller et større egendefinert avatarbibliotek; dagens avatarvelger og DiceBear Lorelei Neutral er gjeldende baseline. # Hvilke alternativer finnes det?
+
+### Fase E – beslutningsgjennomgang 2026-09-04
+
+Fase E er gjennomgått uten implementering. Punktene under er beslutningsklare scopeforslag, ikke godkjente utviklingsoppgaver.
+
+| Punkt | Allerede implementert | Gjenværende scope | Må besluttes før start | Foreslåtte akseptansekriterier |
+|---|---|---|---|---|
+| Ekstern driftsvarsling for `/api/health` | Health-endepunktet finnes og returnerer status, versjon og tidsstempel. | En ekstern monitor som kaller endepunktet og varsler ved feil, treghet eller feil versjon. | Monitorleverandør, intervall, mottakere, taushets-/eskaleringsregler og om betaen skal ha dette. | Varsling ved ikke-2xx, timeout og versjonsavvik; dokumentert testvarsel; ingen hemmeligheter i payload/logg. |
+| Full konto- og tokenmigrering for administratorer | Supabase Auth er valgfritt; admin-token beskytter fortsatt lokale/live-turneringer. | Knytte eksisterende lokale adminøkter til konto, migrere eierskap og etablere konto-basert gjenoppretting. | Skal konto bli obligatorisk, hvordan håndteres gjesteeierskap, og hva er fallback ved tapt konto? | Migrering er idempotent, kan ikke overta andres turneringer, og rollback/feil gir ingen tap av admin-tilgang. |
+| Mer avansert tiebreak/poengføring | Grunnleggende kamp-, sett-, game- og tabellpoengføring finnes. | Konfigurerbare tiebreak-regler, innbyrdes oppgjør, differanse og eventuelle turneringsspesifikke regler. | Regelverk, prioriteringsrekkefølge ved likhet og UI for valg/visning. | Samme input gir deterministisk rangering; regler vises før start og dekkes av positive/negative motor- og UI-tester. |
+| PDF-eksport av tabell og resultat | Tokenfri backup-eksport og web-/TV-visning finnes. | PDF-layout, metadata, språk, font/branding og eksport av ferdig/aktiv turnering. | Skal PDF lages lokalt eller via tjeneste, hvilke data skal inkluderes, og personvern ved deling? | Eksport fungerer offline, inneholder korrekt revisjon/resultat, har lesbar mobil/desktop-layout og eksponerer ingen tokens. |
+| Utvidet profilhistorikk og karrierestatistikk | Profil, historikk, aggregert statistikk og 30-dagers sletting finnes. | Sesonger, motstandere/partnere over tid, trender, filtrering og eksport. | Dataminimering, opt-in, sletting/portabilitet og hvilke beregninger som er produktkrav. | Aggregater kan spores til underliggende kamper, sletting fjerner avledede data innen avtalt frist, og visningen er tydelig på usikkerhet. |
+| Mer avansert offline-konflikthåndtering | Revisjonskontroll, konfliktstatus, server-refresh og lokal backup-valg finnes. | Felt-/kampnivå-merging, køvisning, retry-policy og konfliktløsning på tvers av enheter. | Autoritativ kilde per felttype, hvem som kan løse konflikt, og hvor lenge offline-data beholdes. | Ingen stille overskriving; hver konflikt er synlig, gjentakbar og kan gjenopprettes med lokal backup. |
+| Avataropplasting eller større bibliotek | Automatisk DiceBear Lorelei Neutral-avatar og stabil avatar-ID finnes; ingen opplasting. | Enten utvidet fast bibliotek, egen opplasting eller begge deler. | Moderering, lagring/kostnad, filformat/størrelse, personvern, rettigheter og om bilder skal deles offentlig. | Ugyldige filer avvises, bilder skaleres trygt, fallback fungerer offline, og sletting fjerner brukerens opplastede data. |
+
+Foreslått beslutningsrekkefølge etter A–D: (1) konto-/personvernmodell, (2) driftsansvar og monitorering, (3) tiebreak-regelverk, (4) offline-konfliktmodell, (5) profilhistorikk, (6) PDF-omfang, (7) avatarstrategi. Ingen av punktene startes før eier har valgt scope og akseptansekriterier.
 
 ## Dokumentasjons- og leveranseflyt
 

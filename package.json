@@ -1,6 +1,6 @@
 {
   "scripts": {
     "test": "node --test",
-    "check:syntax": "for file in app/*.js api/*.js; do node --check \"$file\"; done"
+    "check:syntax": "find app api -type f -name '*.js' -print0 | xargs -0 -n1 node --check"
   }
 }

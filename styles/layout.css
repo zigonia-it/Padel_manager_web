@@ -56,10 +56,6 @@ body:not(.workspace-active):not(.setup-active) .topbar {
   display: none;
 }
 
-.workspace-active .landing-nav {
-  display: none;
-}
-
 .workspace-active .topbar,
 .setup-active .topbar {
   position: sticky;

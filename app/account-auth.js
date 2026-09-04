@@ -73,7 +73,25 @@
       const password = form.elements.password.value;
       const client = getClient();
       if (!client) { notice(translate("account.authUnavailable"), true); return false; }
-      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      const submitButton = event.submitter ?? form.querySelector("[type=submit]");
+      const previousLabel = submitButton?.textContent ?? "";
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = translate("account.signingIn");
+      }
+      notice(translate("account.signingIn"));
+      let data;
+      let error;
+      try {
+        ({ data, error } = await client.auth.signInWithPassword({ email, password }));
+      } catch (authError) {
+        error = authError;
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = previousLabel;
+        }
+      }
       if (error) { notice(translate("account.authFailed"), true); return false; }
       user = data.user;
       await ensureRemoteProfile(user);

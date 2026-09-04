@@ -14,6 +14,7 @@ alter table public.tournaments
   add column if not exists revision integer not null default 0;
 alter table public.tournaments
   add column if not exists owner_user_id uuid references auth.users(id) on delete set null,
+  add column if not exists owner_profile_id text,
   add column if not exists claimed_at timestamptz,
   add column if not exists ended_at timestamptz,
   add column if not exists retention_expires_at timestamptz;
@@ -118,11 +119,6 @@ revoke all on function public.consume_api_rate_limit(text, integer, integer) fro
 alter table public.tournaments enable row level security;
 
 drop policy if exists "Public can read tournament states for realtime" on public.tournaments;
-create policy "Public can read tournament states for realtime"
-on public.tournaments
-for select
-to anon
-using (true);
 
 revoke all privileges on table public.tournaments from anon, authenticated;
 revoke select on public.tournaments from public, anon, authenticated;
@@ -159,23 +155,21 @@ declare
   next_id uuid := (p_state->>'id')::uuid;
   next_invite_code text := upper(p_state->>'inviteCode');
   saved_state jsonb;
+  trusted_owner_profile_id text := case when auth.uid() is null then null else auth.uid()::text end;
 begin
   if next_id is null or next_invite_code is null or p_admin_token is null or length(p_admin_token) < 16 then
     raise exception 'Invalid tournament payload';
   end if;
+  if exists (select 1 from public.tournaments where id = next_id) then
+    raise exception 'Tournament already exists';
+  end if;
 
-  saved_state := p_state - 'adminToken' - 'playerToken' - 'selectedPlayerId' - 'revision';
+  saved_state := p_state - 'adminToken' - 'playerToken' - 'selectedPlayerId' - 'revision' - 'ownerProfileId';
   saved_state := jsonb_set(saved_state, '{revision}', '0'::jsonb, true);
 
-  insert into public.tournaments (id, invite_code, admin_token, state, revision, owner_user_id, claimed_at)
-  values (next_id, next_invite_code, p_admin_token, saved_state, 0, auth.uid(), case when auth.uid() is null then null else now() end)
-  on conflict (id) do update
-  set invite_code = excluded.invite_code,
-      admin_token = excluded.admin_token,
-      state = excluded.state,
-      revision = 0,
-      owner_user_id = coalesce(public.tournaments.owner_user_id, excluded.owner_user_id),
-      claimed_at = coalesce(public.tournaments.claimed_at, excluded.claimed_at);
+  insert into public.tournaments (id, invite_code, admin_token, state, revision, owner_user_id, claimed_at, owner_profile_id, retention_expires_at)
+  values (next_id, next_invite_code, p_admin_token, saved_state, 0, auth.uid(), case when auth.uid() is null then null else now() end,
+    trusted_owner_profile_id, case when trusted_owner_profile_id is null then now() + interval '7 days' else null end);
 
   return saved_state;
 end;
@@ -1724,6 +1718,7 @@ declare
   result jsonb;
   tournament_id uuid;
   current_state jsonb;
+  existing_player jsonb;
   player_id uuid;
   authenticated_user uuid := auth.uid();
 begin
@@ -1735,6 +1730,16 @@ begin
   where invite_code = upper(trim(p_invite_code))
   for update;
   if current_state is null then raise exception 'Tournament not found'; end if;
+  select value into existing_player
+  from jsonb_array_elements(coalesce(current_state->'players', '[]'::jsonb)) value
+  where lower(value->>'name') = lower(trim(p_player->>'name'))
+  limit 1;
+  if existing_player is not null and (
+    existing_player->>'userId' is null
+    or existing_player->>'userId' <> authenticated_user::text
+  ) then
+    raise exception 'Player name belongs to another session';
+  end if;
   result := public.join_tournament_impl(p_invite_code, p_player);
   player_id := (result->>'playerId')::uuid;
   update public.tournaments t
@@ -2241,7 +2246,7 @@ create or replace function public.upsert_push_subscription(uuid, text, uuid, tex
 returns boolean language plpgsql security definer set search_path = public, pg_catalog as $$
 declare next_endpoint text := trim(coalesce($5->>'endpoint', ''));
 begin
-  if $1 is null or $3 is null or $4 is null or length(trim($4)) < 32 or $5 is null or jsonb_typeof($5) <> 'object' or next_endpoint = '' or length(next_endpoint) > 2048 or $5->'keys' is null then raise exception 'Invalid push subscription payload'; end if;
+  if $1 is null or $3 is null or $4 is null or length(trim($4)) < 32 or $5 is null or jsonb_typeof($5) <> 'object' or next_endpoint !~ '^https://([a-z0-9-]+\\.)*(fcm\\.googleapis\\.com|updates\\.push\\.services\\.mozilla\\.com|web\\.push\\.apple\\.com|notify\\.windows\\.com|wns\\.windows\\.com)(/|$)' or length(next_endpoint) > 2048 or $5->'keys' is null then raise exception 'Invalid push subscription payload'; end if;
   if not exists (select 1 from public.player_sessions where tournament_id = $1 and player_id = $3 and token_hash = encode(extensions.digest(trim($4), 'sha256'), 'hex')) or not exists (select 1 from public.tournaments where id = $1 and invite_code = upper(trim($2))) then raise exception 'Player session mismatch'; end if;
   insert into public.push_subscriptions (tournament_id, player_id, endpoint, subscription) values ($1, $3, next_endpoint, $5)
   on conflict (endpoint) do update set tournament_id = excluded.tournament_id, player_id = excluded.player_id, subscription = excluded.subscription, updated_at = now();

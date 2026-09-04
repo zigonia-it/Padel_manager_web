@@ -1,12 +1,12 @@
-/* Privacy page: neutral black/charcoal treatment, separate from the tournament palette. */
+/* Information pages share the Figma navy surface hierarchy with the app. */
 
 body:has(.privacy-page) {
   min-height: 100vh;
-  color: #f4f5f7;
+  color: var(--ui-ink, #f3f6ff);
   background:
-    radial-gradient(circle at 50% -10%, rgba(255, 255, 255, 0.08), transparent 32rem),
-    linear-gradient(180deg, #08090b 0%, #111316 55%, #08090b 100%) !important;
-  background-color: #08090b !important;
+    radial-gradient(circle at 50% -10%, rgba(18, 191, 255, 0.14), transparent 32rem),
+    linear-gradient(180deg, #020b1c 0%, #06152c 56%, #020812 100%) !important;
+  background-color: #020b1c !important;
 }
 
 body:has(.privacy-page)::before {
@@ -26,10 +26,10 @@ body:has(.privacy-page)::before {
   gap: 20px;
   margin-bottom: 24px;
   padding: 14px 18px;
-  border: 1px solid #30343a;
-  border-radius: 16px;
-  background: rgba(20, 22, 26, 0.94);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--ui-line, rgba(99, 181, 255, 0.42));
+  border-radius: var(--radius-lg, 14px);
+  background: rgba(3, 20, 49, 0.88);
+  box-shadow: var(--ui-shadow, 0 16px 36px rgba(0, 0, 0, 0.24));
 }
 
 .privacy-brand {
@@ -39,8 +39,8 @@ body:has(.privacy-page)::before {
 
 .privacy-back-link,
 .privacy-document a {
-  color: #f4f5f7;
-  text-decoration-color: #8e959f;
+  color: var(--ui-ink, #f3f6ff);
+  text-decoration-color: var(--ui-blue-soft, #63b5ff);
   text-underline-offset: 0.22em;
 }
 
@@ -51,7 +51,7 @@ body:has(.privacy-page)::before {
 .privacy-language {
   display: grid;
   gap: 5px;
-  color: #c4c9d0;
+  color: var(--ui-muted, #9fb4d2);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -61,29 +61,29 @@ body:has(.privacy-page)::before {
 .privacy-language select {
   min-width: 140px;
   padding: 8px 10px;
-  border: 1px solid #4a5058;
-  border-radius: 8px;
-  background: #101215;
-  color: #f4f5f7;
+  border: 1px solid var(--ui-line, rgba(99, 181, 255, 0.42));
+  border-radius: var(--radius-sm, 8px);
+  background: rgba(2, 13, 31, 0.78);
+  color: var(--ui-ink, #f3f6ff);
 }
 
 .privacy-document {
   display: grid;
   gap: 16px;
   padding: clamp(24px, 5vw, 48px);
-  border: 1px solid #30343a;
-  border-radius: 18px;
-  background: linear-gradient(145deg, rgba(36, 39, 44, 0.96), rgba(16, 18, 21, 0.98));
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ui-line, rgba(99, 181, 255, 0.42));
+  border-radius: var(--radius-lg, 14px);
+  background: linear-gradient(145deg, rgba(18, 109, 184, 0.12), transparent 42%), rgba(3, 20, 49, 0.88);
+  box-shadow: var(--ui-shadow, 0 16px 36px rgba(0, 0, 0, 0.24));
 }
 
 .privacy-document .eyebrow {
-  color: #c4c9d0;
+  color: var(--ui-blue-soft, #63b5ff);
 }
 
 .privacy-document h1,
 .privacy-document h2 {
-  color: #ffffff;
+  color: var(--ui-ink, #f3f6ff);
 }
 
 .privacy-document h1 {
@@ -96,7 +96,7 @@ body:has(.privacy-page)::before {
 }
 
 .privacy-document p {
-  color: #d0d4da;
+  color: var(--ui-muted, #9fb4d2);
 }
 
 @media (max-width: 560px) {
