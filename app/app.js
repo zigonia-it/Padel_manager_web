@@ -508,6 +508,13 @@ const tournamentQueries = window.PadelstarTournamentQueries.create({
   getState: () => state,
   leaderboardEntries: (matches) => leaderboardEntries(matches),
 });
+const tournamentSharing = window.PadelstarTournamentSharing.create({
+  elements,
+  getState: () => state,
+  translate: (key, values) => t(key, values),
+  createJoinLink: () => createJoinLink(),
+  observability,
+});
 
 const workspaceOverview = window.PadelstarWorkspaceOverview.create({
   appendEmptyText: (container, text) => appendEmptyText(container, text),
@@ -1996,34 +2003,11 @@ function createQrCodeUrl(text) {
 }
 
 async function copyText(text, successMessage) {
-  try {
-    await navigator.clipboard.writeText(text);
-    elements.copyStatus.textContent = successMessage;
-  } catch {
-    elements.copyStatus.textContent = t("messages.copyFallback");
-    if (text === createJoinLink()) elements.joinLink.select();
-  }
+  return tournamentSharing.copyText(text, successMessage);
 }
 
 async function shareCurrentTournament() {
-  const shareData = {
-    title: state.name,
-    text: t("share.shareText", { code: state.inviteCode }),
-    url: createJoinLink(),
-  };
-  try {
-    if (navigator.share) {
-      await navigator.share(shareData);
-      observability?.emit("share_completed", { method: "native" });
-      elements.copyStatus.textContent = t("share.shared");
-      return;
-    }
-  } catch (error) {
-    if (error?.name === "AbortError") return;
-    observability?.error("share_failed", error, { method: "native" });
-  }
-  await copyText(createJoinLink(), t("share.shareFallback"));
-  observability?.emit("share_completed", { method: "copy" });
+  return tournamentSharing.shareCurrentTournament();
 }
 
 async function sendPushNotification(kind, matchId = null) {

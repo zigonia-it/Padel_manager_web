@@ -73,6 +73,7 @@ const profileHistorySource = fs.readFileSync(path.join(root, "app", "profile-his
 const courtSettingsSource = fs.readFileSync(path.join(root, "app", "court-settings.js"), "utf8");
 const setupFormsSource = fs.readFileSync(path.join(root, "app", "setup-forms.js"), "utf8");
 const tournamentQueriesSource = fs.readFileSync(path.join(root, "app", "tournament-queries.js"), "utf8");
+const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tournament-sharing.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
   assert.match(serviceWorkerSource, /padelstar-v273/);
@@ -138,6 +139,14 @@ test("tournament queries have their own domain boundary", () => {
   assert.match(tournamentQueriesSource, /global\.PadelstarTournamentQueries/);
   assert.doesNotMatch(tournamentQueriesSource, /localStorage|document\.querySelector/);
   assert.match(appSource, /tournamentQueries\.getAllMatches\(\)/);
+});
+
+test("tournament sharing has its own browser API boundary", () => {
+  assert.match(indexSource, /app\/tournament-sharing\.js\?v=padelstar-tournament-sharing-1/);
+  assert.match(serviceWorkerSource, /app\/tournament-sharing\.js\?v=padelstar-tournament-sharing-1/);
+  assert.match(tournamentSharingSource, /global\.PadelstarTournamentSharing/);
+  assert.match(tournamentSharingSource, /navigator\.clipboard|navigator\.share/);
+  assert.match(appSource, /tournamentSharing\.shareCurrentTournament\(\)/);
 });
 
 test("remote state writes have their own persistence boundary", () => {
