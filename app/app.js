@@ -890,8 +890,10 @@ async function handleResetTournament() {
   tournamentLibrary.remove(state.id);
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
+  localStorage.removeItem(legacyStorageKey);
   localStorage.removeItem(recoveryStorageKey);
   localStorage.removeItem(roleStorageKey);
+  localStorage.removeItem(legacyRoleStorageKey);
   localStorage.removeItem(syncStorageKey);
   persistence.removeKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
   syncCreateFormDefaults();
@@ -2098,9 +2100,11 @@ function sittingOutSummary(match) {
 function migrateLegacyLocalStorage() {
   if (!localStorage.getItem(storageKey) && localStorage.getItem(legacyStorageKey)) {
     localStorage.setItem(storageKey, localStorage.getItem(legacyStorageKey));
+    localStorage.removeItem(legacyStorageKey);
   }
   if (!localStorage.getItem(roleStorageKey) && localStorage.getItem(legacyRoleStorageKey)) {
     localStorage.setItem(roleStorageKey, localStorage.getItem(legacyRoleStorageKey));
+    localStorage.removeItem(legacyRoleStorageKey);
   }
 }
 
