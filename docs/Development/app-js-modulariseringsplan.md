@@ -2,11 +2,11 @@
 
 **Sist kartlagt:** 2026-09-04  
 **Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
-**Status:** Fase 9 (app-renderer) er gjennomført og verifisert. Fase A er fortsatt pågående fordi resterende entrypoint-orkestrering og session/player-ansvar ikke er ferdig flyttet.
+**Status:** Fase 10 (session/player) er gjennomført og verifisert. Fase A er fortsatt pågående fordi remote-kontrollområdene og resterende composition-root-ansvar ikke er ferdig gjennomgått.
 
 ## 1. Konklusjon
 
-`app/app.js` er fortsatt composition root, men inneholder også flere resterende domener. Filen er 2622 linjer lang og har 257 toppnivådeklarasjoner/funksjoner. Prosjektet har allerede en etablert IIFE-/`window.Padelstar...`-arkitektur under `app/`, derfor bør videre oppdeling skje der og ikke ved å introdusere en parallell `js/`-struktur.
+`app/app.js` er fortsatt composition root, men inneholder også flere resterende domener. Filen er 2503 linjer lang etter de verifiserte flyttingene. Prosjektet har allerede en etablert IIFE-/`window.Padelstar...`-arkitektur under `app/`, derfor bør videre oppdeling skje der og ikke ved å introdusere en parallell `js/`-struktur.
 
 Målet for refaktoreringen bør være:
 
@@ -149,6 +149,8 @@ Følgende skal ikke være første refaktorering:
 - **Fase 8-verifikasjon:** controller-testene dekker fallback/mode, apply-rekkefølge og manuell endring med profil-sync. Full testpakke passerte med 203 beståtte tester og 1 forventet live-Supabase-skip (204 totalt), full syntakssjekk og `git diff --check`. Browser verifiserte reload, tilgjengelig controller, norsk initialvisning og faktisk bytte til engelsk med oppdatert heading; eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
 - **Fase 9, 2026-09-04:** sentral `render()`-orkestrering er flyttet til `app/ui/app-renderer.js`. `app.js` beholder kun composition-root-adapteren, mens renderer-modulen mottar state, DOM og eksplisitte render-callbacks.
 - **Fase 9-verifikasjon:** rendererens test-mode-isolasjon og callback-grense er testet. Fokuserte tester passerte med 129/129, full syntax- og diff-sjekk passerer, og browser reload viste aktiv `PadelstarAppRenderer`, `PadelstarAppInit` og fungerende oversatt UI. Språkvalg ble bekreftet persistert på tvers av reload; eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
+- **Fase 10, 2026-09-04:** join, leave, spectator-leave og existing-player-oppslag er flyttet til `app/core/session-controller.js`. Underliggende spillerstate og availability beholdes i de eksisterende player-modulene.
+- **Fase 10-verifikasjon:** fokuserte app-/PWA-/session-tester passerte med 130/130, full testpakke passerte med 207 beståtte tester og 1 forventet live-Supabase-skip (208 totalt), samt full syntakssjekk og `git diff --check`. Eksisterende local/admin/spectator-leave-regresjoner passerer i app-harnesset.
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 

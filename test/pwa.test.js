@@ -53,6 +53,7 @@ const privacyI18nSource = fs.readFileSync(path.join(root, "app", "privacy-i18n.j
 const i18nUiSource = fs.readFileSync(path.join(root, "app", "i18n-ui.js"), "utf8");
 const languageControllerSource = fs.readFileSync(path.join(root, "app", "core", "language-controller.js"), "utf8");
 const appRendererSource = fs.readFileSync(path.join(root, "app", "ui", "app-renderer.js"), "utf8");
+const sessionControllerSource = fs.readFileSync(path.join(root, "app", "core", "session-controller.js"), "utf8");
 const storageSource = fs.readFileSync(path.join(root, "app", "storage.js"), "utf8");
 const renderingSource = fs.readFileSync(path.join(root, "app", "rendering.js"), "utf8");
 const remoteTournamentSource = fs.readFileSync(path.join(root, "app", "remote-tournament.js"), "utf8");
@@ -743,6 +744,15 @@ test("central render orchestration has its own module boundary", () => {
   assert.match(appRendererSource, /window\.PadelstarAppRenderer/);
   assert.match(indexSource, /app\/ui\/app-renderer\.js\?v=padelstar-app-renderer-1/);
   assert.match(serviceWorkerSource, /app\/ui\/app-renderer\.js\?v=padelstar-app-renderer-1/);
+});
+
+test("session and player orchestration has its own module boundary", () => {
+  assert.match(sessionControllerSource, /joinTournament/);
+  assert.match(sessionControllerSource, /leaveCurrentTournament/);
+  assert.match(sessionControllerSource, /leaveSpectatorView/);
+  assert.match(sessionControllerSource, /window\.PadelstarSessionController/);
+  assert.match(indexSource, /app\/core\/session-controller\.js\?v=padelstar-session-controller-1/);
+  assert.match(serviceWorkerSource, /app\/core\/session-controller\.js\?v=padelstar-session-controller-1/);
 });
 
 test("JSON persistence has its own storage module boundary", () => {

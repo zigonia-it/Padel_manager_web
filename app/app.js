@@ -167,6 +167,7 @@ const stateBootstrap = window.PadelstarStateBootstrap.create({
 });
 let state = stateBootstrap.loadState();
 let languageController;
+let sessionController;
 const tournamentLibrary = window.PadelstarTournamentLibrary?.create({
   storage,
   localStorage,
@@ -1022,6 +1023,7 @@ function bindGlobalEvents() {
 }
 
 async function showExistingPlayers() {
+  if (sessionController) return sessionController.showExistingPlayers();
   const inviteCode = elements.joinTournamentForm.elements.inviteCode.value.trim().toUpperCase();
   if (!inviteCode) {
     showToast(t("messages.inviteCodeRequired"), "status-message-error");
@@ -1780,6 +1782,7 @@ async function unsubscribeFromPush() {
 }
 
 function joinTournament(name, avatarId) {
+  if (sessionController) return sessionController.joinTournament(name, avatarId);
   const existingPlayer = findPlayerByName(name);
   if (existingPlayer) return existingPlayer;
   const player = linkProfileToPlayer(addPlayer(name, "self", avatarId));
@@ -1812,7 +1815,7 @@ function removePlayer(playerId) {
   playerState.removePlayer(playerId);
 }
 
-function leaveCurrentTournament(options = {}) {
+function legacyLeaveCurrentTournament(options = {}) {
   const selectedPlayer = getPlayerById(state.selectedPlayerId);
   if (!selectedPlayer) return false;
 
@@ -1869,7 +1872,7 @@ function leaveCurrentTournament(options = {}) {
   return true;
 }
 
-function leaveSpectatorView() {
+function legacyLeaveSpectatorView() {
   const previousRole = spectatorPreviousRole;
   const shouldClearLocalView = previousRole === "spectator";
   spectatorMode = false;
@@ -1910,7 +1913,7 @@ function leaveSpectatorView() {
   }
 }
 
-async function leaveCurrentTournamentWithDialog() {
+async function legacyLeaveCurrentTournamentWithDialog() {
   const selectedPlayer = getPlayerById(state.selectedPlayerId);
   if (!selectedPlayer) return false;
   const pendingScoreText = pendingPlayerScores.length > 0
@@ -1921,6 +1924,12 @@ async function leaveCurrentTournamentWithDialog() {
     pendingScoreText,
   }));
   return accepted ? leaveCurrentTournament({ confirm: false }) : false;
+}
+
+function leaveCurrentTournament(options = {}) { return sessionController?.leaveCurrentTournament(options) ?? legacyLeaveCurrentTournament(options); }
+function leaveSpectatorView() { return sessionController?.leaveSpectatorView() ?? legacyLeaveSpectatorView(); }
+async function leaveCurrentTournamentWithDialog() {
+  return sessionController?.leaveCurrentTournamentWithDialog() ?? legacyLeaveCurrentTournamentWithDialog();
 }
 
 async function toggleSelectedPlayerAvailability() {
@@ -2372,6 +2381,49 @@ const appRenderer = window.PadelstarAppRenderer.create({
     renderCupTeamBuilder,
     renderSyncControls,
   },
+});
+sessionController = window.PadelstarSessionController.create({
+  getState: () => state,
+  setState: (nextState) => { state = nextState; },
+  getElements: () => elements,
+  getPendingPlayerScores: () => pendingPlayerScores,
+  setPendingPlayerScores: (scores) => { pendingPlayerScores = scores; },
+  setPendingAdminSync: (value) => { pendingAdminSync = value; },
+  setRemoteConflict: (value) => { remoteConflict = value; },
+  getSpectatorMode: () => spectatorMode,
+  setSpectatorMode: (enabled) => { spectatorMode = enabled; },
+  getSpectatorPreviousRole: () => spectatorPreviousRole,
+  setSpectatorPreviousRole: (role) => { spectatorPreviousRole = role; },
+  setLocalLeftPlayerId: (playerId) => { localLeftPlayerId = playerId; },
+  getPlayerById,
+  isCurrentUserAdmin,
+  findPlayerByName,
+  addPlayer,
+  linkProfileToPlayer,
+  loadRemoteTournamentByInvite,
+  hasTournamentForInvite,
+  getSupabaseClient: () => supabaseClient,
+  requestConfirmation,
+  showToast,
+  translate: (key, values) => t(key, values),
+  confirmRef: (message) => confirm(message),
+  storage: localStorage,
+  keys: { storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey, spectatorQueryKey },
+  persistence,
+  tournamentLibrary,
+  defaultTournament,
+  setLocalRole,
+  saveState,
+  persistSyncMetadata,
+  removeRealtimeChannel,
+  syncCreateFormDefaults,
+  syncJoinPreview,
+  showWorkspace,
+  showStart,
+  render,
+  renderExistingPlayerList,
+  windowRef: window,
+  testMode: () => Boolean(window.PADELSTAR_TEST_MODE),
 });
 
 const appInit = window.PadelstarAppInit.create({

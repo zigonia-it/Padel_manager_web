@@ -9,6 +9,7 @@ const storageKeysPath = path.join(appRoot, "config", "storage-keys.js");
 const supabaseConfigPath = path.join(appRoot, "config", "supabase-config.js");
 const utilitiesPath = path.join(appRoot, "core", "utilities.js");
 const languageControllerPath = path.join(appRoot, "core", "language-controller.js");
+const sessionControllerPath = path.join(appRoot, "core", "session-controller.js");
 const domElementsPath = path.join(appRoot, "bootstrap", "dom-elements.js");
 const appMetaPath = path.join(appRoot, "bootstrap", "app-meta.js");
 const bootstrapEventsPath = path.join(appRoot, "bootstrap", "app-events.js");
@@ -151,6 +152,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(supabaseConfigPath, "utf8"), context, { filename: supabaseConfigPath });
   vm.runInContext(fs.readFileSync(utilitiesPath, "utf8"), context, { filename: utilitiesPath });
   vm.runInContext(fs.readFileSync(languageControllerPath, "utf8"), context, { filename: languageControllerPath });
+  vm.runInContext(fs.readFileSync(sessionControllerPath, "utf8"), context, { filename: sessionControllerPath });
   vm.runInContext(fs.readFileSync(domElementsPath, "utf8"), context, { filename: domElementsPath });
   vm.runInContext(fs.readFileSync(appMetaPath, "utf8"), context, { filename: appMetaPath });
   vm.runInContext(fs.readFileSync(bootstrapEventsPath, "utf8"), context, { filename: bootstrapEventsPath });
@@ -221,6 +223,7 @@ function loadPadelstar(options = {}) {
     supabaseConfig: window.PadelstarSupabaseConfig,
     utilities: window.PadelstarUtilities,
     languageController: window.PadelstarLanguageController,
+    sessionController: window.PadelstarSessionController,
     domElements: window.PadelstarDomElements,
     appMeta: window.PadelstarAppMeta,
     bootstrapEvents: window.PadelstarBootstrapEvents,
