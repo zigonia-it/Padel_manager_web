@@ -1,6 +1,6 @@
 # Padelstar – samlet utviklingsplan
 
-Sist oppdatert: 2026-09-02
+Sist oppdatert: 2026-09-04
 
 Status: aktivt operativt arbeidsdokument
 
@@ -9,6 +9,12 @@ Status: aktivt operativt arbeidsdokument
 Dette dokumentet er den eneste aktive planen for videre arbeid. Det beskriver dagens baseline, åpne beslutninger, prioriterte faser, akseptansekriterier og verifikasjon. Gjennomført arbeid føres i [documentation.md](documentation.md) i kronologisk rekkefølge.
 
 Padelstar er en plattformuavhengig vanilla-JavaScript-PWA for å opprette, dele, administrere og følge padelturneringer på mobil, nettbrett og desktop. Supabase brukes for valgfri live-synk, mens lokal lagring og service worker gir offline-fallback.
+
+## Kontrollert baseline etter branch-gjennomgang
+
+Arbeidskopien på `codex/padelstar-ui-refresh` inneholder en 0.5 Beta-baseline med implementert kjerneflyt, fase 2–6-formatmoduler, TV Mode, profil/konto, historikk/statistikk, PWA/offline, varsler og konsolidert blå UI-retning. Lokal verifikasjon viser `npm test` med 182 tester: 181 bestått og 1 forventet live-Supabase-test hoppet over. `npm run check:syntax` og `git diff --check` passerer.
+
+Browser-smoke, live Supabase Auth/RPC/Realtime/push og ny produksjonsdeploy er ikke verifisert i denne arbeidsøkten fordi Playwright ikke er tilgjengelig i offline-miljøet. Dette er verifikasjonsoppgaver, ikke uimplementerte funksjoner.
 
 ## Gjeldende baseline
 
@@ -97,7 +103,7 @@ Remote state persistence for debouncede admin-lagringer er flyttet til `app/remo
 
 - Fase A: pågår. Avataransvar, lenke-/QR-generering, rene cup-runde-hjelpere, felles spiller-/lagmarkup, turnerings-runtime, workspace-overview-rendering, remote state persistence, admin-RPC-mutasjoner, spillerens poengkø, scoring-sideeffekter og global event-wiring er nå egne moduler. Videre oppdeling av den resterende `app/app.js` må gjøres trinnvis med regresjon etter hver grense.
 - Fase B: lokalt verifisert. Diff-skanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført for 51 endrede filer med komplett dekning, ingen reportable funn og ingen åpne kandidater. Live Supabase-flyten er fortsatt ikke kjørt i lokal offline-verifisering og dekkes av den forventede skip-testen.
-- Fase C: lokalt verifisert på kode-, DOM- og runtime-nivå. Testpakken (125 tester: 124 bestått, 1 forventet skip), syntakssjekken og diff-sjekken passerer; browser-smoke fullfører opprettelse, start, hamburger på responsiv visning, adminnavigasjon og kampvisning på 1440, 768 og 390 px uten horisontal overflow. Desktop-smoke bekrefter også setup-bredden. CI/deploy må fortsatt bekrefte samme kontroll etter publisering.
+- Fase C: kode- og kontraktsverifisert. Testpakken (182 tester: 181 bestått, 1 forventet skip), syntakssjekken og diff-sjekken passerer. Browser-smoke er ikke kjørt i denne arbeidsøkten fordi Playwright ikke er tilgjengelig offline; CI/deploy må bekrefte responsive viewporter og samlet produksjonsflyt.
 - Fase D: lokalt gjennomgått. Visuelle kaskader, status-/avatar-styling, oversettelsesnøkler og turneringsmotorens eksisterende regresjonstester er kontrollert. Initiale synlige fallback-tekster er bundet til oversettelsesnøkler, og aktiv JavaScript-runtime er nå bekreftet gjennom browser-smoke på alle tre viewportene.
 
 ## Prioritert videre plan

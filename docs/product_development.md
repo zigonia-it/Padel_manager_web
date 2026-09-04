@@ -1,8 +1,8 @@
 # Padelstar - Produktutviklingsdokument
 
-Sist oppdatert: 2026-09-03
+Sist oppdatert: 2026-09-04
 
-Status: aktivt arbeidsdokument for web/PWA-versjonen, produktversjon 0.4 (Beta)
+Status: aktivt arbeidsdokument for web/PWA-versjonen, produktversjon 0.5 (Beta)
 
 Metadata:
 - Navn: Padelstar
@@ -781,7 +781,7 @@ Oppgaver:
 - responsiv admin-, spiller- og tilskuerflyt
 - visuell Padelstar-profil og PWA-shell
 
-### Fase 2 - Publisert Beta (pågår)
+### Fase 2 - Publisert Beta (ferdig som baseline; ny produksjonskontroll ved behov)
 
 Mål: kunne bruke appen på nett med offentlig join-lenke og stabil statisk hosting.
 
@@ -791,12 +791,9 @@ Status:
 - PWA-manifest, service worker, app-shell og Padelstar-assets er på plass.
 - Join-lenker bruker offentlig URL; lokal origin brukes bare ved lokal utvikling.
 
-Gjenstår:
+Status etter branch-gjennomgang: statisk hosting, offentlig join-lenke, personvernside, guide og cache-busting er implementert. Ny deploy/DNS/cache-kontroll er en operativ verifikasjon og er ikke kjørt i denne arbeidsøkten.
 
-- verifisere produksjonsdeploy, DNS og cache på `https://padelstar.app`
-- oppdatere personverntekst og produksjonsfeilhåndtering
-
-### Fase 3 - Supabase og Multi-Device (delvis fullført)
+### Fase 3 - Supabase og Multi-Device (implementert; live produksjonskontroll gjenstår)
 
 Mål: administrator og spillere på hver sin enhet.
 
@@ -815,10 +812,10 @@ Status:
 
 - Supabase-tabell, RLS, RPC-er og Realtime er verifisert.
 - Spillerregistrering og spillerpoengføring bruker avgrensede RPC-er.
-- Adminens øvrige kampoperasjoner må fortsatt flyttes til atomiske serveroperasjoner.
-- Fler-enhetsscenario med admin, spiller og tilskuer må verifiseres som samlet produksjonsflyt.
+- Adminens kampoperasjoner bruker atomiske serveroperasjoner med revisjonskontroll der live-klienten er aktiv.
+- Fler-enhetsscenario med admin, spiller og tilskuer må fortsatt verifiseres som samlet produksjonsflyt mot live Supabase.
 
-### Fase 4 - PWA og Varslinger (grunnlag på plass)
+### Fase 4 - PWA og Varslinger (implementert lokalt og konfigurert for produksjon)
 
 Mål: føles mer som app.
 
@@ -832,7 +829,7 @@ Oppgaver:
 
 ### Fase 5 - Videreutvikling
 
-Mulige funksjoner:
+Senere eller valgstyrte funksjoner:
 
 - QR-invitasjon
 - display/TV-modus
@@ -953,14 +950,14 @@ Produktdokumentet er primært basert på:
 
 ## 22. Neste Konkrete Arbeid
 
-Fase 9 er ferdig. Fase 10 er pågående; mobil arbeidsflatenavigasjon er ferdig og neste synlige forbedring er kamp-/runde-filtre.
+Fase 0–15 og den aktive UI-/strukturkonsolideringen er implementert i beta-baselinen. Neste arbeid er verifikasjon og prioriterte produktvalg, ikke en ny parallell designretning.
 
 Anbefalt rekkefølge:
 
-1. Bygg kamp-/runde-filtre for aktive, neste, ferdige og egne kamper.
-2. Poler kampkort, spillerens nå-kort og tomtilstander på mobil.
-3. Forbedre leaderboard, cup-bracket og delingspanel.
-4. Rydd filstruktur i en egen ren fase med appkode i `app/`, styling i `styles/` og dokumentasjon i `docs/`, uten funksjonsendringer.
+1. Kjør browser-smoke på 1440, 768 og 390 px når Playwright er tilgjengelig.
+2. Verifiser live Supabase Auth, RPC, Realtime, push og flerklientflyt mot riktig miljø.
+3. Prioriter eventuelle kamp-/runde-filtre, avansert offline-konflikthåndtering, PDF-eksport eller ratingdatabase som egne godkjente produktvalg.
+4. Hold appkode i `app/`, styling i `styles/` og dokumentasjon i `docs/`, med test og dokumentasjonsoppdatering ved hver endring.
 
 ## 23. Arbeidsregel for Videre Utvikling
 

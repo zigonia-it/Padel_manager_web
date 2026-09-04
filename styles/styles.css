@@ -116,35 +116,11 @@
       48% center;
   }
 
-  .landing-nav {
-    align-items: center;
-  }
-
-  .landing-links {
-    gap: 14px;
-  }
-
-  .landing-links .module-link {
-    font-size:
-      clamp(0.72rem, 3.1vw, 1rem);
-  }
-
-  .landing-links .module-link.active::after {
-    bottom: -6px;
-
-    height: 2px;
-  }
-
   .intro-copy {
     gap: 16px;
 
     padding:
       56px 0 96px;
-  }
-
-  .hero-logo {
-    width:
-      min(74vw, 360px);
   }
 
   .landing-actions {
@@ -178,10 +154,6 @@
   .landing-badge {
     width:
       min(34vw, 146px);
-  }
-
-  .hero-logo {
-    display: block;
   }
 
   .view-grid {
@@ -220,12 +192,6 @@
 
   .versus {
     text-align: left;
-  }
-
-  .tabs {
-    grid-template-columns: 1fr;
-
-    gap: 6px;
   }
 
   .admin-subtabs {
@@ -276,100 +242,6 @@
     background-size: auto 100%;
   }
 
-  .landing-nav {
-    align-items: flex-start;
-  }
-
-  .landing-menu-toggle {
-    display: grid;
-  }
-
-  .landing-links {
-    position: absolute;
-
-    top: calc(100% + 12px);
-    right: 0;
-
-    display: grid;
-
-    width:
-      min(260px,
-        calc(100vw - 28px));
-
-    gap: 8px;
-
-    padding: 12px;
-
-    border-radius: 8px;
-
-    background:
-      linear-gradient(180deg,
-        rgba(var(--gold-rgb), 0.08),
-        rgba(3, 16, 34, 0.94));
-
-    border:
-      1px solid rgba(var(--gold-bright-rgb), 0.22);
-
-    opacity: 0;
-    pointer-events: none;
-
-    transform:
-      translateY(-8px);
-
-    transition:
-      opacity 180ms ease,
-      transform 180ms ease;
-  }
-
-  body.landing-menu-open .landing-links,
-  .landing-menu-toggle[aria-expanded="true"]+.landing-links {
-    opacity: 1;
-
-    pointer-events: auto;
-
-    transform:
-      translateY(0);
-  }
-
-  .landing-links .module-link {
-    display: grid;
-
-    min-height: 44px;
-
-    align-items: center;
-
-    padding:
-      0 12px;
-
-    border-radius: 8px;
-
-    background:
-      rgba(var(--gold-rgb), 0.06);
-
-    font-size: 1rem;
-  }
-
-  .landing-links .module-link:hover,
-  .landing-links .module-link.active {
-    background:
-      linear-gradient(90deg,
-        rgba(var(--gold-rgb), 0.18),
-        rgba(var(--gold-dark-rgb), 0.06));
-
-    color: var(--gold-light);
-  }
-
-  .landing-links .module-link.active::after {
-    left: 12px;
-    right: auto;
-
-    bottom: 4px;
-
-    width: 72px;
-
-    transform: none;
-  }
-
   .workspace-active .topbar {
     top: 8px;
   }
@@ -386,46 +258,6 @@
 
   .workspace-header {
     padding-right: 64px;
-  }
-
-  .workspace-menu-toggle {
-    display: none;
-  }
-
-  .workspace-active .tabs {
-    position: fixed;
-
-    top: auto;
-    right: 0;
-    bottom: 0;
-    left: 0;
-
-    z-index: 80;
-
-    display: flex;
-    width: 100%;
-    height: auto;
-    min-height: 0;
-    justify-content: space-around;
-    grid-template-columns: none;
-    justify-self: stretch;
-
-    gap: 8px;
-
-    padding: 8px max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
-    opacity: 1;
-    pointer-events: auto;
-    transform: none;
-  }
-
-  .tab {
-    flex: 1;
-    min-height: 44px;
-
-    justify-content: center;
-    padding-inline: 8px;
-
-    text-align: center;
   }
 
   .view-grid {
@@ -502,7 +334,6 @@ body[data-theme="classic"] {
 }
 
 body[data-theme="classic"] .topbar,
-body[data-theme="classic"] .landing-nav,
 body[data-theme="classic"] .workspace-header,
 body[data-theme="classic"] .panel,
 body[data-theme="classic"] .next-match,
@@ -524,8 +355,6 @@ body[data-theme="classic"] .intro {
 }
 
 body[data-theme="classic"] .app-menu,
-body[data-theme="classic"] .landing-links,
-body[data-theme="classic"] .tabs,
 body[data-theme="classic"] .admin-subtabs {
   border-color: rgba(159, 207, 255, 0.20);
   background: rgba(5, 14, 26, 0.72);
@@ -539,8 +368,6 @@ body[data-theme="classic"] .app-menu {
 }
 
 body[data-theme="classic"] .app-menu .module-link.active,
-body[data-theme="classic"] .landing-links .module-link.active,
-body[data-theme="classic"] .tab.active,
 body[data-theme="classic"] .subtab.active,
 body[data-theme="classic"] .landing-cta:first-child,
 body[data-theme="classic"] button.primary,
@@ -1087,15 +914,13 @@ body.workspace-active {
 #joinAvatarPreviewFrame { --player-accent: var(--gold); --player-accent-light: var(--gold-light); --player-accent-rgb: var(--gold-rgb); }
 #joinAvatarPreview { width: 100%; height: 100%; }
 
-.admin-subtabs,
-.tabs {
+.admin-subtabs {
   border-color: var(--card-line);
   border-radius: 18px;
   background: rgba(2, 11, 25, 0.74);
 }
 
-.admin-subtabs .subtab.active,
-.tabs .tab.active {
+.admin-subtabs .subtab.active {
   border-radius: 14px;
   background: linear-gradient(135deg, #dff3ff, #5caeff);
   color: #03101d;
@@ -1109,7 +934,6 @@ body.workspace-active {
   .scorecard-score-pair .scorecard-point-value { min-height: 104px; font-size: 4.2rem; }
   .scorecard-stats > div { padding: 12px; column-gap: 8px; }
   .scorecard-stat-icon { font-size: 1.25rem; }
-  .teams { grid-template-columns: 1fr; }
   .versus { justify-self: center; }
   .tennis-scoreboard > div { min-height: 72px; padding: 0.8rem; }
 }
@@ -1306,7 +1130,6 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 @media (max-width: 420px) {
-  .scorecard-matchup { grid-template-columns: 1fr; }
   .scorecard-team-one,
   .scorecard-team-two { grid-column: 1; }
   .scorecard-team-one { grid-row: 1; }
@@ -1772,5 +1595,40 @@ body[data-theme="classic"] .match-card.match-playing {
 @media (max-width: 760px) {
   .intro-copy {
     transform: translateY(clamp(16px, 4vh, 40px));
+  }
+}
+
+/* One desktop scorecard layout: reserve space for the score pair so the
+   points remain readable without shrinking the team cards into columns. */
+@media (min-width: 681px) {
+  .match-card .scorecard-matchup {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 1.1fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .match-card .scorecard-team,
+  .match-card .scorecard-players,
+  .match-card .scorecard-players .team-player {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .match-card .scorecard-players .team-player-badge {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .match-card .scorecard-score-pair {
+    grid-template-columns: minmax(40px, 1fr) minmax(80px, auto) minmax(40px, 1fr);
+    gap: clamp(6px, 1vw, 14px);
+  }
+
+  .match-card .scorecard-vs-icon {
+    width: clamp(80px, 34cqw, 140px);
   }
 }

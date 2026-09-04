@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v264";
+const cacheName = "padelstar-v273";
 
 const appShell = [
   "./",
@@ -7,16 +7,16 @@ const appShell = [
   "./privacy.html",
   "./guide.html",
   "./styles/base.css?v=padelstar-base-4",
-  "./styles/layout.css?v=padelstar-layout-6",
-  "./styles/components.css?v=padelstar-components-12",
+  "./styles/layout.css?v=padelstar-layout-7",
+  "./styles/components.css?v=padelstar-components-13",
   "./styles/tv.css?v=padelstar-tv-6",
   "./assets/logos/main_logo_without_icon.png",
   "./assets/icons/padelstar-icon.png",
   "./assets/logos/tv-brand.png",
-  "./styles/modules.css?v=padelstar-modules-8",
-  "./styles/styles.css?v=padelstar-ui-93",
+  "./styles/modules.css?v=padelstar-modules-9",
+  "./styles/styles.css?v=padelstar-ui-96",
   "./styles/responsive.css?v=padelstar-responsive-1",
-  "./styles/ui-consistency.css?v=padelstar-ui-consistency-34",
+  "./styles/ui-consistency.css?v=padelstar-ui-consistency-40",
   "./styles/privacy.css?v=padelstar-privacy-2",
   "./app/translations.js?v=padelstar-i18n-22",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-5",

@@ -1,12 +1,48 @@
 # Padelstar – implementeringsdokumentasjon
 
-Sist oppdatert: 2026-09-03
+Sist oppdatert: 2026-09-04
 
 ## Gjeldende produktbeslutninger
 
 De brukerrettede valgene som skal bevares gjennom nye faser er samlet i [produktbeslutninger og endringsvern](Development/produktbeslutninger.md). Dokumentet er styrende for menyrekkefølge og felles layout, roller, innlogget profilnavn, flerspråklig brukerflate, flerturneringsflyt, retensjon/GDPR og bruksanvisningen. Nye faser må få uttrykkelig godkjenning før de endrer et av disse valgene.
 
-Gjeldende produktversjon: **0.4 (Beta)**.
+Gjeldende produktversjon: **0.5 (Beta)**.
+
+## Nåtilstand etter branch-gjennomgang 2026-09-04
+
+Denne statusen beskriver arbeidskopien på branchen `codex/padelstar-ui-refresh`, inkludert lokale endringer som ennå ikke er publisert. Den er den mest presise oversikten over hva som faktisk finnes i appen.
+
+### Implementerte brukerfunksjoner
+
+- Landing med Opprett, Bli med, Konto/Profil, gjenoppta lagrede turneringer og lenke til bruksanvisningen.
+- Lokale/offline-turneringer og Supabase-turneringer når live-konfigurasjon er tilgjengelig.
+- Valgfri admin-deltakelse, invitasjonskode, offentlig join-lenke og QR-kode.
+- Admin-, spiller- og tilskuerroller, med lokal øktkontroll og mulighet til å forlate egen visning uten å endre delt state.
+- Round-robin med singles/doubles, partnerrotasjon, sit-out/bye, banekø og automatisk banetildeling.
+- Cup med automatisk/manuelt lagoppsett, seeding/shuffle, byes, bracket, bronsefinale, walkover og atomisk undo.
+- Kampstart, avbrytelse, hurtig settresultat, fullscore-dialog, tennispoeng med deuce/advantage, validerte sett og resultatinnsending fra spiller.
+- Adminpanel for styring, deling, spillere og kamper. Spillerflate med neste kamp, status, makker, motstandere, tilgjengelighet, resultat og tabell. Offentlig turneringsflate og separat TV Mode på `tv.html`.
+- Historikk, profilstatistikk, partner-/head-to-head-statistikk, sesongoppsummering og lokal Elo-/insight-beregning. Vedvarende ratingdatabase og liga er senere arbeid.
+- Lokal spillerprofil med automatisk DiceBear Lorelei Neutral-avatar og faste visningsnavn Sophie, Aiden, Luna og Milo. Konto med e-post/passord via Supabase Auth er valgfri for spiller og brukes for sterkere admin-eierskap.
+- Flerspråklig brukerflate/personvernside på Bokmål, Nynorsk, engelsk, spansk, tysk og fransk, med region- og nøkkelfallback.
+- PWA-installasjon, app-shell-cache, localStorage/recovery, IndexedDB-speiling, sync-kø, Web Share, opt-in-varsler og konfigurert serverdrevet push.
+
+### Gjeldende design
+
+- Én aktiv, konsolidert `classic`-stil med mørk marineblå bakgrunn, kjølige blå kanter, dempede skygger og samlet typografihierarki.
+- Landing, setup, konto og workspace deler app-shell, toppbar, logo-lockup og responsiv innholdsflate. Landing bruker ikke lenger en konkurrerende fotografisk hero-bakgrunn.
+- Desktop bruker fullbredde layout med kontrollert maksvidde; setup- og workspace-sider følger samme bredde- og spacinglogikk.
+- Mobil/nettbrett bruker kontekstuell hamburger/drawer, språkvelger i menyen og Escape-lukking. Layouten håndterer lange spillernavn uten horisontal overflow.
+- Kampkortene er scorecard-baserte med separate score-/sett-/game-felt, Anton kun for scoretall, blå aktive statuser og spilleraccentfarger. Rødt brukes til fare og avbrytelse.
+- TV Mode er en egen lesbar storskjermflate med livekamper, neste kamper, stilling, kø/progress, status og tilbakeknapp.
+
+### Verifikasjonsstatus
+
+- `npm test`: 182 tester, 181 bestått og 1 forventet live-Supabase-test hoppet over.
+- `npm run check:syntax` og `git diff --check` passerer.
+- RLS/RPC, tokenbinding, revisjonskontroll, rate limiting, retensjon, modulgrenser og runtime-assets er statisk/testmessig dekket.
+- Browser-smoke er ikke kjørt i denne arbeidsøkten fordi Playwright-pakken ikke er tilgjengelig i offline-miljøet. Live Auth, RPC, Realtime, push og produksjonsdeploy er derfor ikke på nytt verifisert.
+- Branchens nye CSS-konsolidering fjerner historiske landing-/workspace-menyer, gamle tabs-regler og dupliserte setup-/scorecard-regler. Stylesheet-query-versjoner og service-worker-cache er oppdatert.
 
 ## 2026-09-03 – versjon 0.4 og funksjonskontroll
 
@@ -32,14 +68,14 @@ Dette er den aktive, kronologiske oversikten over tidligere implementeringer, be
 ## Gjeldende leveransestatus
 
 - `main` er publisert til GitHub `origin/main`.
-- Siste GitHub-commit: `9c0a7b7` (fase A–D-modularisering, verifisering og dokumentasjon).
+- Siste felles baseline på `main`: `9c0a7b7`. Gjeldende arbeidsbranch: `codex/padelstar-ui-refresh`, med lokale UI-/CSS-konsolideringer og dokumentasjonsoppdateringer som ikke er publisert.
 - Siste brukerrettede baseline: DiceBear Lorelei Neutral-avatarer, automatisk avatar ved spillerregistrering, blått scorecard-design og responsiv status-/spillerlayout.
 - Nyeste lokale strukturendring: avataransvar, accent-system, player-visuals, workspace-overview, UI-feedback, notification-system, profil-session, match-card, persistence, admin-identity, remote-feedback, realtime-connection, tournament-rounds, tournament-runtime, backup-format, lenke-/QR-generering, state-konstruksjon, state-bootstrap, modulruting og session-policy er isolert i egne app-moduler.
 - Den gamle duplikate kampkort-renderingen er fjernet fra `app/app.js`; entrypointen bruker nå den eksplisitte `app/match-card.js`-grensen.
 - GitHub-push er gjennomført; Vercel-produksjonsdeploy venter på separat deploy-godkjenning.
-- Lokalt: `npm test` passerer med 125 tester: 124 beståtte og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
-- CI/deploy er satt opp med browser-smoke for desktop, medium og mobil; lokal browser-smoke fullfører opprettelse, start, hamburger på responsiv visning, adminnavigasjon og kampvisning på 1440, 768 og 390 px uten horisontal overflow. Eksterne CDN/Supabase-kall blokkeres bevisst i smoke-testen.
-- Fase A er fortsatt under gjennomføring lokalt; Fase B–D er lokalt verifisert. Avatar-, accent-, player-visuals-, workspace-overview-, UI-feedback-, notification-, profil-session-, match-card-, match-actions-, initial-view-, persistence-, admin-identity-, remote-feedback-, realtime-connection-, tournament-rounds-, tournament-runtime-, backup-, lenke-, state-konstruksjons-, recovery-bootstrap-, modulruting-, session-policy-, remote-state-write-, remote-admin-actions-, remote-player-score-, score-actions-, workspace-navigation-, app-events-, workspace-events-, tournament-entry- og admin-form-events-logikken er flyttet til egne moduler, setup-sidene bruker samme innholdsflate som workspace-sidene, runtime-kontroll passerer på 1440, 768 og 390 px, og full verifisering passerer med 125 tester (124 bestått, 1 forventet skip), syntaks- og diff-sjekk.
+- Lokalt: `npm test` passerer med 182 tester: 181 beståtte og én forventet live-Supabase-test hoppet over; syntax- og diff-sjekk passerer.
+- CI/deploy er satt opp med browser-smoke for desktop, medium og mobil. Tidligere smoke-kjøringer har verifisert opprettelse, start, hamburger, adminnavigasjon og kampvisning på 1440, 768 og 390 px uten horisontal overflow; ny kjøring etter denne branchens CSS-endringer gjenstår fordi Playwright ikke er tilgjengelig offline.
+- Fase A er fortsatt under gjennomføring lokalt; Fase B er kode-/sikkerhetsverifisert, og Fase C–D er kontrollert på kode- og kontraktsnivå. Browser-smoke må kjøres på nytt når Playwright er tilgjengelig. Modulgrensene, setup-/workspace-flaten, scorecard-layouten og CSS-konsolideringen er dokumentert i nåstatusen øverst.
 - Fase B-diffskanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført på arbeidskopien: 51 endrede filer og 4 sikkerhetsflater gjennomgått, ingen reportable funn. Live Supabase-flyt er ikke kjørt i denne offline-verifiseringen og forblir dekket av én forventet skip-test.
 - Fase D UI-/språkgjennomgang er utført mot aktive HTML-, CSS- og JavaScript-filer. Eksisterende motor- og oversettelsesregresjoner passerer, initiale synlige fallback-tekster er bundet til oversettelsesnøkler, og browser-smoke bekrefter aktiv JavaScript-runtime og ingen overflow på desktop, medium eller mobil.
 - Fase 1-arbeidet startet etter masterplanen `docs/Development/Padelstar-komplett-utviklingsplan.md`: spillerregistrering bruker automatisk stabil avatar, PWA-installasjon har native prompt og plattformfallback, manifestet bruker riktige ikonstørrelser, og live-turneringer krever innlogget admin før opprettelse. Eierfeltet settes ved opprettelse når Supabase Auth er aktiv.
@@ -228,6 +264,9 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - Verifisering: `npm test` passerer med 82 beståtte tester og én forventet live-Supabase-test hoppet over; `npm run check:syntax` og `git diff --check` passerer. Lokal statisk browser-kontroll viser desktop (1440 px), medium (768 px) og mobil (390 px) uten horisontal overflow; aktiv JavaScript-runtime kunne ikke bekreftes i testtilkoblingen.
 
 ### 2026-09-04
+
+- CSS-oppsettet ble gjennomgått mot aktiv HTML/JavaScript-logikk: historisk landingsnavigasjon, avatarvelger, workspace-hamburger og gamle tabs-regler uten runtime-referanser ble fjernet, og dupliserte setup-/scorecard-regler ble samlet.
+- Delte stylesheet-referanser ble synkronisert på app-, guide- og personvernsidene, service-worker-cachen ble bumpet til `padelstar-v272`, og CSS-query-versjonene ble oppdatert til gjeldende `layout-7`, `components-13`, `modules-9`, `ui-96` og `ui-consistency-40`. Statisk test og syntakssjekk passerer; browser-smoke kunne ikke kjøres fordi Playwright-pakken ikke var tilgjengelig uten nettverk.
 
 - App-flow er analysert og dokumentert i [app_flow.md](app_flow.md), med routing, opprett/join, roller, scoring, realtime/offline, konto/profil, statistikk og retensjon.
 - Dokumentasjonen presiserer skillet mellom Auth-konto, lokal profil, `ownerProfileId` og `ownerUserId`.

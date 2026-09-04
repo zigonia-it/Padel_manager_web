@@ -528,8 +528,12 @@ body[data-theme="classic"] .account-intro h2, body[data-theme="classic"] .setup-
   line-height: 1.1; text-transform: uppercase;
 }
 body[data-theme="classic"] .account-intro .hint, body[data-theme="classic"] .setup-card .hint { color: var(--figma-muted); }
-body[data-theme="classic"] .setup-panel { justify-items: stretch; }
-body[data-theme="classic"] .setup-panel { grid-template-columns: minmax(0, 1fr) 520px; align-items: start; gap: 64px; }
+body[data-theme="classic"] .setup-panel {
+  grid-template-columns: minmax(0, 1fr) 520px;
+  align-items: start;
+  gap: 64px;
+  justify-items: stretch;
+}
 body[data-theme="classic"] .setup-intro-panel { padding-top: 4px; }
 body[data-theme="classic"] .setup-intro-panel h2 { color: var(--figma-text); font-family: var(--font-ui); font-size: 2.5rem; font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
 body[data-theme="classic"] .setup-intro-panel .hint { max-width: 600px; margin-top: 16px; color: var(--figma-muted); }
@@ -555,8 +559,11 @@ body[data-theme="classic"] .site-footer { margin-top: 0; padding: 48px 80px; bor
   body[data-theme="classic"] #app-main > .setup-panel, body[data-theme="classic"] #app-main > .workspace { width: min(100% - 40px, 640px); }
   body[data-theme="classic"] .account-panel { grid-template-columns: 1fr; gap: 24px; padding: 48px 0; }
   body[data-theme="classic"] .account-intro, body[data-theme="classic"] .account-auth-panel, body[data-theme="classic"] .profile-light-panel { grid-column: 1; }
-  body[data-theme="classic"] .setup-panel { padding: 48px 0; }
-  body[data-theme="classic"] .setup-panel { grid-template-columns: 1fr; gap: 24px; }
+  body[data-theme="classic"] .setup-panel {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 48px 0;
+  }
   body[data-theme="classic"] .setup-intro-panel { padding-top: 0; }
   body[data-theme="classic"] .setup-card { justify-self: stretch; width: 100%; padding: 24px; }
   body[data-theme="classic"] .setup-account-option { justify-self: stretch; width: 100%; }
@@ -653,11 +660,6 @@ body[data-theme="classic"] #joinTournamentForm {
     align-items: start;
   }
 
-  body[data-theme="classic"] .scorecard-matchup {
-    grid-template-columns: minmax(0, 1fr) minmax(96px, .7fr) minmax(0, 1fr);
-    gap: 12px;
-  }
-
   body[data-theme="classic"] .scorecard-team,
   body[data-theme="classic"] .scorecard-center,
   body[data-theme="classic"] .scorecard-players,
@@ -679,11 +681,6 @@ body[data-theme="classic"] #joinTournamentForm {
 }
 
 @media (min-width: 901px) and (max-width: 1180px) {
-  body[data-theme="classic"] .scorecard-matchup {
-    grid-template-columns: minmax(0, 1fr) minmax(78px, .55fr) minmax(0, 1fr);
-    gap: 8px;
-  }
-
   body[data-theme="classic"] .match-card {
     padding-inline: 14px;
   }
@@ -704,6 +701,92 @@ body[data-theme="classic"] .brand-logo { width: 52px; height: 52px; flex: 0 0 52
 body[data-theme="classic"] .brand-wordmark { width: 204px; height: auto; flex: 0 0 204px; }
 body[data-theme="classic"] .tv-mode-wordmark { width: 142px; }
 body[data-theme="classic"] .tv-mode-logo { width: 48px; height: 48px; }
+
+/* Match cards must size from their grid track, not from their contents. */
+.match-card {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.match-card > *,
+.match-card .match-top,
+.match-card .match-meta,
+.match-card .match-top-actions,
+.match-card .match-headline,
+.match-card .scorecard-matchup,
+.match-card .scorecard-team,
+.match-card .scorecard-center,
+.match-card .scorecard-stats,
+.match-card .match-controls {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.match-card .match-meta,
+.match-card .match-headline,
+.match-card .team-player-badge {
+  overflow-wrap: anywhere;
+}
+
+.match-card .court-edit-row {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+}
+
+.match-card .court-edit-row input,
+.match-card .court-edit-row button {
+  min-width: 0;
+  width: 100%;
+}
+
+.match-card .button-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.match-card .button-row > button {
+  min-width: 0;
+  width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.match-card .walkover-row {
+  display: grid;
+  grid-template-columns: auto repeat(2, minmax(0, 1fr));
+  min-width: 0;
+}
+
+.match-card .walkover-row span {
+  min-width: 0;
+  margin-right: 0;
+}
+
+@media (min-width: 901px) and (max-width: 1199px) {
+  body[data-theme="classic"] #adminMatches,
+  body[data-theme="classic"] #playerMatches {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .match-card .button-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .match-card .button-row > button:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .match-card .walkover-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .match-card .walkover-row span {
+    grid-column: 1 / -1;
+  }
+}
 
 body[data-theme="classic"] .install-app-button {
   display: inline-flex;
@@ -876,4 +959,32 @@ body[data-theme="classic"] .admin-identity-panel {
 
 @media (max-width: 560px) {
   body[data-theme="classic"] .brand-wordmark { width: 92px; flex-basis: 92px; }
+}
+
+/* Match cards remain full-width in both workspaces. */
+@media (min-width: 901px) {
+  body[data-theme="classic"] #adminMatches,
+  body[data-theme="classic"] #playerMatches {
+    grid-template-columns: 1fr;
+  }
+}
+
+.match-card .walkover-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: 0;
+}
+
+.match-card .walkover-row span {
+  flex: 0 0 auto;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.match-card .walkover-row .walkover-button {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  white-space: nowrap;
 }
