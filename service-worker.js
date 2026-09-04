@@ -91,6 +91,7 @@ const appShell = [
   "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-1",
   "./app/bootstrap/app-meta.js?v=padelstar-app-meta-1",
   "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-1",
+  "./app/bootstrap/app-init.js?v=padelstar-app-init-1",
   "./app/ui/theme.js?v=padelstar-theme-1",
   "./app/match-card.js?v=padelstar-match-card-1",
   "./app/backup-format.js?v=padelstar-backup-format-1",

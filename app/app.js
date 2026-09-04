@@ -816,118 +816,7 @@ const adminFormEvents = window.PadelstarAdminFormEvents?.create({
 });
 
 function initializeApp() {
-observability?.installGlobalHandlers();
-window.PadelstarNavigation?.initialize({ showModule, translate: t });
-applyTheme();
-activateSupabaseClient();
-window.addEventListener("padelstar-supabase-ready", activateSupabaseClient, { once: true });
-syncLanguageOptions();
-syncCreateFormDefaults();
-syncJoinFormFromProfile();
-syncJoinPreview();
-renderProfile();
-prefillInviteCodeFromUrl();
-syncCopyrightYear();
-registerServiceWorker();
-window.PadelstarPwaInstall?.create({ documentRef: document, navigatorRef: navigator, windowRef: window, translate: (key, values) => t(key, values) }).initialize();
-syncConnectionStatus();
-accountAuth?.bind();
-void accountAuth?.refresh();
-  showRecoveryNotice();
-
-  window.PadelstarBootstrapEvents?.bind({
-    elements,
-    callbacks: {
-      saveProfile: (event) => {
-        event.preventDefault();
-        saveLocalProfileFromForm();
-      },
-      openAccountAuth,
-      submitPlayerResult: (event) => {
-        event.preventDefault();
-        const form = event.currentTarget;
-        submitPlayerResult(form.elements.matchId.value, Number(form.elements.teamOne.value), Number(form.elements.teamTwo.value));
-      },
-      toggleTvMode,
-      toggleTvModeFromMenu: () => {
-        if (!hasActiveTournament()) return;
-        showModule("tournament");
-        toggleTvMode();
-        window.PadelstarNavigation?.closeMenu();
-      },
-      requestProfileDeletion: () => void requestProfileDeletion(),
-      cancelProfileDeletion,
-      renderProfile,
-      adminMatchFilterChanged: (event) => {
-        matchFilters.admin = event.currentTarget.value;
-        render();
-      },
-      playerMatchFilterChanged: (event) => {
-        matchFilters.player = event.currentTarget.value;
-        render();
-      },
-      syncAdminPlayerChoice,
-      createAdminSignInLink: handleCreateAdminSignInLink,
-      languageChanged: handleLanguageChange,
-      refreshRemote: handleRefreshRemote,
-      keepLocalBackup: handleKeepLocalBackup,
-      endTournament: handleEndTournament,
-      resetTournament: handleResetTournament,
-    },
-  });
-tournamentEntry?.bind(elements);
-
-adminFormEvents?.bind(elements);
-
-window.PadelstarWorkspaceEvents?.bind({
-  elements,
-  callbacks: {
-    sendAdminSignInLink,
-    claimTournament: claimCurrentTournament,
-    leaveSession: async () => {
-      if (spectatorMode) leaveSpectatorView();
-      else await leaveCurrentTournamentWithDialog();
-    },
-    toggleAvailability: () => toggleSelectedPlayerAvailability(),
-    resumeTournament: () => {
-      showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
-      render();
-    },
-    openSavedTournament: (tournamentId) => openSavedTournament(tournamentId),
-    copyInviteCode: () => copyText(state.inviteCode, t("messages.inviteCopied")),
-    copyJoinLink: () => copyText(createJoinLink(), t("messages.joinLinkCopied")),
-    copySpectatorLink: () => copyText(createSpectatorLink(), t("messages.spectatorLinkCopied")),
-    shareTournament: shareCurrentTournament,
-    toggleNotifications,
-    showExistingPlayers: showExistingPlayers,
-  },
-});
-
-  window.PadelstarAppEvents?.bind({
-    elements,
-    documentRef: document,
-    windowRef: window,
-    callbacks: {
-      activateAdminPanel,
-      activatePlayerAction: (playerAction) => {
-        if (playerAction === "spectate") showWorkspace("tournament");
-        if (playerAction === "choose") showModule("setup-player");
-        if (playerAction === "rejoin") {
-          prefillJoinForm(state.inviteCode);
-          showModule("setup-player");
-        }
-      },
-      closeLargeScore,
-      closeSetScoreDialog,
-      handleOnline,
-      handleOffline,
-      render,
-      setPendingSetScoreMatchId: (matchId) => { pendingSetScoreMatchId = matchId; },
-      setLargeScoreMatchId: (matchId) => { largeScoreMatchId = matchId; },
-      syncJoinPreview,
-    },
-  });
-
+  return appInit.initialize();
 }
 
 function openAccountAuth() {
@@ -997,6 +886,130 @@ async function handleResetTournament() {
   syncJoinPreview();
   showStart();
   render();
+}
+
+function initializeNavigation() {
+  window.PadelstarNavigation?.initialize({ showModule, translate: t });
+}
+
+function bindSupabaseReady() {
+  window.addEventListener("padelstar-supabase-ready", activateSupabaseClient, { once: true });
+}
+
+function initializePwaInstall() {
+  window.PadelstarPwaInstall?.create({ documentRef: document, navigatorRef: navigator, windowRef: window, translate: (key, values) => t(key, values) }).initialize();
+}
+
+function bindAccountAuth() {
+  accountAuth?.bind();
+}
+
+function refreshAccountAuth() {
+  void accountAuth?.refresh();
+}
+
+function bindBootstrapEvents() {
+  window.PadelstarBootstrapEvents?.bind({
+    elements,
+    callbacks: {
+      saveProfile: (event) => {
+        event.preventDefault();
+        saveLocalProfileFromForm();
+      },
+      openAccountAuth,
+      submitPlayerResult: (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        submitPlayerResult(form.elements.matchId.value, Number(form.elements.teamOne.value), Number(form.elements.teamTwo.value));
+      },
+      toggleTvMode,
+      toggleTvModeFromMenu: () => {
+        if (!hasActiveTournament()) return;
+        showModule("tournament");
+        toggleTvMode();
+        window.PadelstarNavigation?.closeMenu();
+      },
+      requestProfileDeletion: () => void requestProfileDeletion(),
+      cancelProfileDeletion,
+      renderProfile,
+      adminMatchFilterChanged: (event) => {
+        matchFilters.admin = event.currentTarget.value;
+        render();
+      },
+      playerMatchFilterChanged: (event) => {
+        matchFilters.player = event.currentTarget.value;
+        render();
+      },
+      syncAdminPlayerChoice,
+      createAdminSignInLink: handleCreateAdminSignInLink,
+      languageChanged: handleLanguageChange,
+      refreshRemote: handleRefreshRemote,
+      keepLocalBackup: handleKeepLocalBackup,
+      endTournament: handleEndTournament,
+      resetTournament: handleResetTournament,
+    },
+  });
+}
+
+function bindTournamentEntry() {
+  tournamentEntry?.bind(elements);
+}
+
+function bindAdminFormEvents() {
+  adminFormEvents?.bind(elements);
+}
+
+function bindWorkspaceEvents() {
+  window.PadelstarWorkspaceEvents?.bind({
+    elements,
+    callbacks: {
+      sendAdminSignInLink,
+      claimTournament: claimCurrentTournament,
+      leaveSession: async () => {
+        if (spectatorMode) leaveSpectatorView();
+        else await leaveCurrentTournamentWithDialog();
+      },
+      toggleAvailability: () => toggleSelectedPlayerAvailability(),
+      resumeTournament: () => {
+        showWorkspace(isCurrentUserAdmin() ? "admin" : state.selectedPlayerId ? "player" : "spectator");
+        render();
+      },
+      openSavedTournament: (tournamentId) => openSavedTournament(tournamentId),
+      copyInviteCode: () => copyText(state.inviteCode, t("messages.inviteCopied")),
+      copyJoinLink: () => copyText(createJoinLink(), t("messages.joinLinkCopied")),
+      copySpectatorLink: () => copyText(createSpectatorLink(), t("messages.spectatorLinkCopied")),
+      shareTournament: shareCurrentTournament,
+      toggleNotifications,
+      showExistingPlayers,
+    },
+  });
+}
+
+function bindGlobalEvents() {
+  window.PadelstarAppEvents?.bind({
+    elements,
+    documentRef: document,
+    windowRef: window,
+    callbacks: {
+      activateAdminPanel,
+      activatePlayerAction: (playerAction) => {
+        if (playerAction === "spectate") showWorkspace("tournament");
+        if (playerAction === "choose") showModule("setup-player");
+        if (playerAction === "rejoin") {
+          prefillJoinForm(state.inviteCode);
+          showModule("setup-player");
+        }
+      },
+      closeLargeScore,
+      closeSetScoreDialog,
+      handleOnline,
+      handleOffline,
+      render,
+      setPendingSetScoreMatchId: (matchId) => { pendingSetScoreMatchId = matchId; },
+      setLargeScoreMatchId: (matchId) => { largeScoreMatchId = matchId; },
+      syncJoinPreview,
+    },
+  });
 }
 
 async function showExistingPlayers() {
@@ -2388,6 +2401,34 @@ function restoreInitialView() {
     },
   });
 }
+
+const appInit = window.PadelstarAppInit.create({
+  callbacks: {
+    installGlobalHandlers: () => observability?.installGlobalHandlers(),
+    initializeNavigation,
+    applyTheme,
+    activateSupabase: activateSupabaseClient,
+    bindSupabaseReady,
+    syncLanguageOptions,
+    syncCreateFormDefaults,
+    syncJoinFormFromProfile,
+    syncJoinPreview,
+    renderProfile,
+    prefillInviteCodeFromUrl,
+    syncCopyrightYear,
+    registerServiceWorker,
+    initializePwaInstall,
+    syncConnectionStatus,
+    bindAccountAuth,
+    refreshAccountAuth,
+    showRecoveryNotice,
+    bindBootstrapEvents,
+    bindTournamentEntry,
+    bindAdminFormEvents,
+    bindWorkspaceEvents,
+    bindGlobalEvents,
+  },
+});
 
 if (window.PADELSTAR_TEST_MODE) {
   window.PadelstarTest = {

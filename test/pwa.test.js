@@ -68,6 +68,7 @@ const scoreActionsSource = fs.readFileSync(path.join(root, "app", "score-actions
 const workspaceNavigationSource = fs.readFileSync(path.join(root, "app", "workspace-navigation.js"), "utf8");
 const appEventsSource = fs.readFileSync(path.join(root, "app", "app-events.js"), "utf8");
 const bootstrapEventsSource = fs.readFileSync(path.join(root, "app", "bootstrap", "app-events.js"), "utf8");
+const appInitSource = fs.readFileSync(path.join(root, "app", "bootstrap", "app-init.js"), "utf8");
 const workspaceEventsSource = fs.readFileSync(path.join(root, "app", "workspace-events.js"), "utf8");
 const tournamentEntrySource = fs.readFileSync(path.join(root, "app", "tournament-entry.js"), "utf8");
 const adminFormEventsSource = fs.readFileSync(path.join(root, "app", "admin-form-events.js"), "utf8");
@@ -220,6 +221,14 @@ test("bootstrap app controls have their own event boundary", () => {
   assert.match(serviceWorkerSource, /app\/bootstrap\/app-events\.js\?v=padelstar-bootstrap-events-1/);
   assert.match(appSource, /PadelstarBootstrapEvents\?\.bind/);
   assert.doesNotMatch(appSource, /elements\.profileForm\?\.addEventListener/);
+});
+
+test("app startup orchestration has its own bootstrap boundary", () => {
+  assert.match(appInitSource, /function initialize\(/);
+  assert.match(appInitSource, /global\.PadelstarAppInit/);
+  assert.match(indexSource, /app\/bootstrap\/app-init\.js\?v=padelstar-app-init-1/);
+  assert.match(serviceWorkerSource, /app\/bootstrap\/app-init\.js\?v=padelstar-app-init-1/);
+  assert.match(appSource, /return appInit\.initialize\(\)/);
 });
 
 test("workspace session controls have their own event boundary", () => {
