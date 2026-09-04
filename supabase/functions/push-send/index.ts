@@ -14,6 +14,22 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: corsHeaders });
 }
 
+function isAllowedPushEndpoint(endpoint: unknown): endpoint is string {
+  if (typeof endpoint !== "string" || !endpoint.startsWith("https://")) return false;
+  try {
+    const hostname = new URL(endpoint).hostname.toLowerCase();
+    return [
+      "fcm.googleapis.com",
+      "updates.push.services.mozilla.com",
+      "web.push.apple.com",
+      "notify.windows.com",
+      "wns.windows.com",
+    ].some((allowed) => hostname === allowed || hostname.endsWith(`.${allowed}`));
+  } catch {
+    return false;
+  }
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -51,6 +67,11 @@ Deno.serve(async (request) => {
   let sent = 0;
   let removed = 0;
   for (const row of subscriptions ?? []) {
+    if (!isAllowedPushEndpoint((row.subscription as { endpoint?: unknown })?.endpoint)) {
+      await supabase.from("push_subscriptions").delete().eq("id", row.id);
+      removed += 1;
+      continue;
+    }
     try {
       await Promise.race([
         webpush.sendNotification(row.subscription, JSON.stringify({ title: payload.title.slice(0, 80), body: payload.body.slice(0, 160), tag: payload.tag?.slice(0, 80) })),

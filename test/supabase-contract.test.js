@@ -265,6 +265,13 @@ test("latest security hardening closes takeover, guest token replay and broad re
   assert.match(sql, /count\(\*\).*push_subscriptions/);
 });
 
+test("manual schema mirrors the security boundary and push endpoint allowlist", () => {
+  assert.match(normalizeSql(schemaSql), /if exists \(select 1 from public\.tournaments where id = next_id\) then/);
+  assert.match(normalizeSql(schemaSql), /player name belongs to another session/);
+  assert.match(normalizeSql(schemaSql), /drop policy if exists "public can read tournament states for realtime"/);
+  assert.match(normalizeSql(schemaSql), /fcm.*googleapis.*com/);
+});
+
 test("profile migration protects profile ownership and delayed deletion", () => {
   assert.match(profileSql, /create table if not exists public\.player_profiles/);
   assert.match(profileSql, /create table if not exists public\.player_profile_history/);

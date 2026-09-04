@@ -58,9 +58,11 @@ begin
     from jsonb_array_elements(coalesce(current_state->'players', '[]'::jsonb)) value
     where lower(value->>'name') = lower(trim(p_player->>'name'))
     limit 1;
-    if existing_player is not null and existing_player->>'userId' is not null
-      and existing_player->>'userId' <> authenticated_user::text then
-      raise exception 'Player name belongs to another account';
+    if existing_player is not null and (
+      existing_player->>'userId' is null
+      or existing_player->>'userId' <> authenticated_user::text
+    ) then
+      raise exception 'Player name belongs to another session';
     end if;
   end if;
 
