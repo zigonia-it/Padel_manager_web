@@ -30,11 +30,11 @@ const notificationSystemSource = fs.readFileSync(path.join(root, "app", "notific
 const profileSessionSource = fs.readFileSync(path.join(root, "app", "profile-session.js"), "utf8");
 const matchCardSource = fs.readFileSync(path.join(root, "app", "match-card.js"), "utf8");
 const matchListSource = fs.readFileSync(path.join(root, "app", "match-list.js"), "utf8");
+const playerNextMatchSource = fs.readFileSync(path.join(root, "app", "player-next-match.js"), "utf8");
+const playerStatusSource = fs.readFileSync(path.join(root, "app", "player-status.js"), "utf8");
 const standingsSource = fs.readFileSync(path.join(root, "app", "standings.js"), "utf8");
 const playerListSource = fs.readFileSync(path.join(root, "app", "player-list.js"), "utf8");
 const cupBracketSource = fs.readFileSync(path.join(root, "app", "cup-bracket.js"), "utf8");
-const playerStatusSource = fs.readFileSync(path.join(root, "app", "player-status.js"), "utf8");
-const playerNextMatchSource = fs.readFileSync(path.join(root, "app", "player-next-match.js"), "utf8");
 const rulesSource = fs.readFileSync(path.join(root, "app", "rules.js"), "utf8");
 const playerControlsSource = fs.readFileSync(path.join(root, "app", "player-controls.js"), "utf8");
 const largeScoreSource = fs.readFileSync(path.join(root, "app", "large-score.js"), "utf8");
@@ -489,6 +489,14 @@ test("push notifications have their own browser and subscription boundary", () =
   assert.match(indexSource, /app\/notification-system\.js\?v=padelstar-notification-system-1/);
   assert.match(serviceWorkerSource, /app\/notification-system\.js\?v=padelstar-notification-system-1/);
   assert.doesNotMatch(appSource, /return Uint8Array\.from\(atob/);
+});
+
+test("remote court names are escaped at every HTML rendering sink", () => {
+  assert.match(matchCardSource, /escapeHtml\(match\.courtName/);
+  assert.match(matchListSource, /escapeHtml\(match\.courtName/);
+  assert.match(playerNextMatchSource, /escapeHtml\(match\.courtName/);
+  assert.match(playerStatusSource, /escapeHtml\(nextState\.match\?\.courtName/);
+  assert.match(appSource, /escapeHtml: \(value\) => escapeHtml\(value\),\s+getPlayerById/);
 });
 
 test("profile session lifecycle has its own storage and RPC boundary", () => {

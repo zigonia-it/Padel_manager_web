@@ -17,6 +17,7 @@ const pushSql = readSql("supabase/migrations/20260828130000_push_subscriptions.s
 const retentionCronSql = readSql("supabase/migrations/20260828103000_retention_cron.sql");
 const guestRetentionSql = readSql("supabase/migrations/20260902120000_guest_history_retention.sql");
 const profileOwnedRetentionSql = readSql("supabase/migrations/20260904090000_profile_owned_tournament_retention.sql");
+const securityHardeningSql = readSql("supabase/migrations/20260904210000_security_hardening.sql");
 
 function readSql(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -251,6 +252,17 @@ test("push subscriptions are token-bound and private", () => {
   assert.match(pushSql, /on conflict \(endpoint\) do update/);
   assert.match(pushSql, /revoke all on function public\.upsert_push_subscription/);
   assert.match(pushSql, /grant execute on function public\.upsert_push_subscription.*to anon/);
+});
+
+test("latest security hardening closes takeover, guest token replay and broad reads", () => {
+  const sql = normalizeSql(securityHardeningSql);
+  assert.match(sql, /if exists \(select 1 from public\.tournaments where id = next_id\) then/);
+  assert.match(sql, /raise exception 'tournament already exists'/);
+  assert.match(sql, /player name already joined; sign in to rejoin/);
+  assert.match(sql, /drop policy if exists/);
+  assert.match(sql, /revoke select on public\.tournaments from public, anon, authenticated/);
+  assert.match(sql, /next_endpoint !~ '\^https:\/\/'/);
+  assert.match(sql, /count\(\*\).*push_subscriptions/);
 });
 
 test("profile migration protects profile ownership and delayed deletion", () => {

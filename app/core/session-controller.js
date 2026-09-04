@@ -37,6 +37,7 @@
     removeRealtimeChannel,
     syncCreateFormDefaults,
     syncJoinPreview,
+    unsubscribeFromPush = () => Promise.resolve(),
     renderExistingPlayerList,
     showWorkspace,
     showStart,
@@ -64,6 +65,7 @@
       const pendingScoreText = getPendingPlayerScores().length > 0 ? translate("player.leavePendingScores") : "";
       if (shouldConfirm && !confirmRef(translate("player.leaveConfirm", { name: selectedPlayer.name, pendingScoreText }))) return false;
 
+      void unsubscribeFromPush();
       state.selectedPlayerId = null;
       setLocalLeftPlayerId(selectedPlayer.id);
       state.playerToken = null;

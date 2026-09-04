@@ -160,23 +160,26 @@
       const subscriptionKey = getPushSubscriptionStorageKey();
       const serialized = storage().getItem(subscriptionKey);
       const currentState = state();
+      let remoteDeleteSucceeded = !serialized || !getSupabaseClient() || !currentState.playerToken || !currentState.selectedPlayerId;
       try {
         const registration = await global.navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
         if (subscription) await subscription.unsubscribe();
         const supabaseClient = getSupabaseClient();
         if (serialized && supabaseClient && currentState.playerToken && currentState.selectedPlayerId) {
-          await remoteRpc(supabaseClient, "delete_push_subscription", {
+          const { error } = await remoteRpc(supabaseClient, "delete_push_subscription", {
             p_tournament_id: currentState.id,
             p_player_id: currentState.selectedPlayerId,
             p_player_token: currentState.playerToken,
             p_endpoint: JSON.parse(serialized).endpoint,
           });
+          if (error) throw error;
+          remoteDeleteSucceeded = true;
         }
       } catch (error) {
         getObservability()?.error("push_subscription_delete_failed", error);
       } finally {
-        storage().removeItem(subscriptionKey);
+        if (remoteDeleteSucceeded) storage().removeItem(subscriptionKey);
       }
     }
 

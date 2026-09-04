@@ -45,7 +45,7 @@ Deno.serve(async (request) => {
   if (!tournament) return json({ error: "Push authorization failed" }, 401);
 
   webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
-  const { data: subscriptions, error } = await supabase.from("push_subscriptions").select("id, subscription").eq("tournament_id", payload.tournamentId);
+  const { data: subscriptions, error } = await supabase.from("push_subscriptions").select("id, subscription").eq("tournament_id", payload.tournamentId).limit(100);
   if (error) return json({ error: "Subscription lookup failed" }, 502);
 
   let sent = 0;

@@ -506,6 +506,7 @@ const cupBracket = window.PadelstarCupBracket.create({
 });
 const playerStatus = window.PadelstarPlayerStatus.create({
   elements,
+  escapeHtml: (value) => escapeHtml(value),
   getPlayerById: (id) => getPlayerById(id),
   getState: () => state,
   matchIncludesPlayer: (match, playerId) => matchIncludesPlayer(match, playerId),
@@ -2206,6 +2207,7 @@ sessionController = window.PadelstarSessionController.create({
   removeRealtimeChannel,
   syncCreateFormDefaults,
   syncJoinPreview,
+  unsubscribeFromPush,
   showWorkspace,
   showStart,
   render,
