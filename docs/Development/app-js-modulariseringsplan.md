@@ -1,0 +1,142 @@
+# Plan for oppdeling av `app/app.js`
+
+**Sist kartlagt:** 2026-09-04  
+**Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`  
+**Status:** Analyse og planlegging. Ingen nye kodeflyttinger gjennomføres som del av dette dokumentet.
+
+## 1. Konklusjon
+
+`app/app.js` er fortsatt composition root, men inneholder også flere resterende domener. Filen er 2622 linjer lang og har 257 toppnivådeklarasjoner/funksjoner. Prosjektet har allerede en etablert IIFE-/`window.Padelstar...`-arkitektur under `app/`, derfor bør videre oppdeling skje der og ikke ved å introdusere en parallell `js/`-struktur.
+
+Målet for refaktoreringen bør være:
+
+- `app/app.js` beholder mutable runtime-state, modulkomposisjon og koordinering.
+- Rene funksjoner, DOM-registry, metadata, språk, event-binding og avgrensede kontrollere flyttes ut.
+- Eksisterende `window.Padelstar...`-API-er beholdes.
+- Hver flytting skjer i én separat commit med test, syntax-sjekk, `git diff --check` og lokal runtime-regresjon.
+
+## 2. Hva som allerede er flyttet
+
+Følgende områder har allerede egne moduler og skal ikke implementeres på nytt:
+
+| Område | Nåværende fil(er) |
+|---|---|
+| App-events, workspace-events og admin-form-events | `app/app-events.js`, `app/workspace-events.js`, `app/admin-form-events.js` |
+| Tournament engine/runtime/status/scheduler/state machine | `app/tournament-engine.js`, `app/tournament-runtime.js`, `app/tournament-status.js`, `app/tournament-scheduler.js`, `app/tournament-state-machine.js` |
+| Scoring og score-mutasjoner | `app/scoring-engine.js`, `app/score-actions.js`, `app/score-submissions.js`, `app/result-submissions.js` |
+| Remote state, admin-mutasjoner og spillerkø | `app/remote-state-write.js`, `app/remote-admin-actions.js`, `app/remote-player-score.js`, `app/remote-tournament.js` |
+| Rendering av kamp, tabell, spiller, cup og workspace | `app/match-card.js`, `app/match-list.js`, `app/standings.js`, `app/player-list.js`, `app/cup-bracket.js`, `app/workspace-overview.js` |
+| Profil, historikk og konto | `app/profile-session.js`, `app/profile-ui.js`, `app/profile-history.js`, `app/account-auth.js`, `app/admin-identity.js` |
+| Navigasjon, roller og øktpolicy | `app/workspace-navigation.js`, `app/module-routing.js`, `app/session-policy.js`, `app/initial-view.js` |
+| PWA, offline og realtime | `app/pwa-install.js`, `app/offline-storage.js`, `app/persistence.js`, `app/realtime-sync.js`, `app/realtime-connection.js` |
+| Visuelle og lavere UI-tjenester | `app/avatar-system.js`, `app/player-visuals.js`, `app/accent-system.js`, `app/ui-feedback.js`, `app/notification-system.js`, `app/rendering.js` |
+| Nye grenser fra siste kartlegging | `app/court-settings.js`, `app/setup-forms.js`, `app/tournament-queries.js`, `app/tournament-sharing.js` |
+
+## 3. Faktisk innhold som fortsatt ligger i `app/app.js`
+
+Linjenumrene er kontrollert mot kartlagt commit og skal brukes som startpunkt, ikke som permanente API-kontrakter.
+
+| Linjer | Ansvar | Vurdering |
+|---:|---|---|
+| 1–13 | Storage-nøkler | Trygt å flytte samlet. Ingen runtime-logikk. |
+| 14–336 | Globale tjenestereferanser, factory-wiring, Supabase-konfigurasjon og sync-state | Må deles i config/factory/state-lag; høy sirkulær avhengighetsrisiko. |
+| 343–489 | `elements`-registry med `document.querySelector(...)` | Svært lav risiko hvis modulen kun returnerer DOM-referanser. |
+| 491–955 | Modulkomposisjon og dependency injection | Skal i hovedsak bli i composition root; ikke flyttes mekanisk. |
+| 956–1125 | `initializeApp()` og direkte event-bindings | Kan deles i init og events, men event-rekkefølge må bevares. |
+| 1128–1164 | Existing-player-oppslag og Supabase-aktivering | Medium risiko; kobler join, remote state, auth og rendering. |
+| 1167–1203 | Tournament/profile wrappers og profile history orchestration | Mest wrappers; kan samles etter at avhengighetskartet er stabilt. |
+| 1207–1547 | State-migrering, lokal persistence, remote sync, konflikt og retry | Høy risiko; siste store gjenværende kontrollområde. |
+| 1549–1667 | PWA/meta, workspace-navigasjon, roller og `renderRoleVisibility` | Kan deles i meta, session/controller og navigation orchestration. |
+| 1654–1810 | Sentral `render()` og workspace-koordinering | Høy risiko; bør flyttes sent sist til en renderer med eksplisitte callbacks. |
+| 1813–1987 | Scorecard-hjelpere, lokal varsling og enkelte rendering wrappers | Delvis allerede flyttet; resterende wrappers bør ryddes etter renderer-flytting. |
+| 1991–2170 | Join/player-session, leave-flow, availability, regler og turneringsinnstillinger | Medium/høy risiko fordi state, persistence og rollepolicy endres samtidig. |
+| 2191–2420 | Turneringshandlinger, kamp-livssyklus og scoring wrappers | Mesteparten peker allerede til moduler; behold wrappers midlertidig for kompatibilitet. |
+| 2424–2554 | Tekstformattering, escaping, invite-code, slugify og legacy migration | Pure helpers er lav risiko; legacy migration må verifiseres separat. |
+| 2554–2622 | Initial view-kall og test-API | Composition-root ansvar; test-API skal beholdes stabilt. |
+
+## 4. Foreslåtte moduler og avhengigheter
+
+Strukturen tilpasses eksisterende repository:
+
+### Lav risiko – bør tas først
+
+| Foreslått fil | Ansvar | Avhengigheter | Skal ikke eie |
+|---|---|---|---|
+| `app/config/storage-keys.js` | Eksportere alle storage-nøkler, inkludert legacy-nøkler | Ingen | `localStorage`, state eller migrering |
+| `app/bootstrap/dom-elements.js` | Bygge og returnere `elements`-registry | `document` injiseres | Event handlers eller rendering |
+| `app/core/utilities.js` | `escapeHtml`, `escapeAttribute`, `appendEmptyText`, `createInviteCode`, `slugify` | Kun `crypto`/`Math` hvis nødvendig | App-state, DOM-oppslag og storage |
+| `app/config/supabase-config.js` | Lese meta/global Supabase-konfigurasjon | `document`/`window` injiseres | Klientopprettelse, auth og RPC |
+| `app/ui/theme.js` | `applyTheme` | `document` eller theme-element injiseres | Språk eller state |
+| `app/bootstrap/app-meta.js` | `registerServiceWorker`, copyright-år og statiske metadata | `navigator`, `window`, `document` injiseres | App-init og remote sync |
+
+### Medium risiko – etter lavrisikoflyttingene
+
+| Foreslått fil | Ansvar | Avhengigheter | Merknad |
+|---|---|---|---|
+| `app/bootstrap/app-events.js` | Samle de resterende direkte `addEventListener`-bindingene i init-blokken | `elements` og callback-objekt | Eksisterende event-moduler beholdes; ingen domenelogikk skal flyttes hit |
+| `app/bootstrap/app-init.js` | Orkestrere profil, preferences, services, auth, events, initial view og første render | Eksplisitte init-callbacks | Må ikke eie mutable state |
+| `app/core/language-controller.js` | `loadUserLanguage`, `applyLanguage`, `syncLanguageOptions`, `t` og språk-change-flow | `PadelstarI18n`, `PadelstarI18nUi`, storage, state access, elements | Språk skal ikke skrives inn i delt remote state |
+| `app/core/session-controller.js` | Leave-flow, current role, spectator mode og view/session transitions | `session-policy`, `module-routing`, persistence, rendering callbacks | Ikke flytt remote sync hit |
+| `app/ui/app-renderer.js` | Sentral `render()`-orkestrering og role visibility | State getter, elements, alle renderer-callbacks, language/theme | Skal ikke mutere tournament state bortsett fra eksisterende språk-/court-lokalisering |
+
+### Høy risiko – tas sist
+
+| Foreslått fil | Ansvar | Avhengigheter | Risiko |
+|---|---|---|---|
+| `app/remote/remote-state-controller.js` | `applyRemoteState`, conflict handling, sanitize og remote notices | state setter, migration, persistence, realtime, profile history | Revisjon, tokens, pending writes og realtime kan endres utilsiktet |
+| `app/remote/remote-sync-controller.js` | queue/retry/flush og sync metadata | timers, `remote-state-write`, remote RPC, navigator, persistence | Rekkefølge og idempotens må verifiseres |
+| `app/player/session-actions.js` | join/leave/replace/availability | player-state, session-policy, profile, remote/local persistence | Rolle- og retention-regler ligger i samme flyt |
+| `app/tournament/tournament-actions.js` | `activateRound`, end tournament og settings orchestration | tournament-runtime/status, retention, event log, persistence | Påvirker hele kamp- og retention-flyten |
+| `app/bootstrap/test-api.js` | Samle `window.PadelstarTest`-eksportene | Offentlige wrappers fra app.js | Må ikke endre test-API uten eksplisitt migrering |
+
+## 5. Mutable state som bør bli i `app.js` først
+
+Første refaktorering bør la følgende bli i composition root, fordi de deles på tvers av flere moduler eller må kunne byttes atomisk:
+
+- `state` og `profile`.
+- `defaultTournament` og `elements`-referansen, inntil registry-modulen er testet i isolasjon.
+- `supabaseClient` og `supabaseClientActivated`.
+- Remote-køens timers/sekvens: `remoteSaveTimer`, `remoteRetryTimer`, `remoteRetryAttempt`, `remoteWriteChain`, `remoteMutationSequence`, `lastRemotePersistedSequence`, `isApplyingRemoteState`, `remoteConflict`.
+- Pending sync: `pendingAdminSync`, `pendingPlayerScores`, `syncLastAttemptAt`, `syncLastError`, `recoveredFromLastGood`.
+- Aktiv UI/session: `activeModule`, `spectatorMode`, `tvMode`, `spectatorPreviousRole`, `localLeftPlayerId`, `largeScoreMatchId`, `pendingSetScoreMatchId`, `matchFilters`.
+- `wrappedScorecardPlayersFrame` og andre render-scheduler-flagg som må koordineres med én render-loop.
+
+Disse kan senere samles i et eksplisitt `appContext`, men det bør ikke gjøres samtidig med første modul-flytting. Moduler skal få getters/setters eller callbacks, ikke direkte tilgang til globale variabler.
+
+## 6. Områder som skal flyttes senere
+
+Følgende skal ikke være første refaktorering:
+
+- `applyRemoteState` og all konflikt-/retry-håndtering.
+- `render()` før alle under-renderere har eksplisitte, testede API-er.
+- Kampstart, scoring, undo, walkover og retention.
+- `activateSupabaseClient`, auth state-change og realtime-kobling.
+- `migrateState`, `migrateMatch` og legacy localStorage før backward-compatibility fixtures finnes.
+- Event-bindinger som endrer både state, URL, rolle og remote state i samme handler.
+
+## 7. Verifiserbar gjennomføringsrekkefølge
+
+1. **Baseline:** dokumenter commit, linjeinventar og kjør `npm test`, `npm run check:syntax`, `git diff --check` og lokal browser smoke.
+2. **Konfigurasjon:** flytt storage keys og Supabase config reader. Test at alle referanser og cache-busting-paths fortsatt løses.
+3. **Pure helpers:** flytt utilities. Legg til isolerte tester for escaping, invite-code-format og slugify.
+4. **DOM registry:** flytt `elements`. Verifiser at alle aktive HTML-id-er finnes og at appen laster uten console-feil.
+5. **Meta/theme:** flytt service-worker-registrering, copyright og theme. Verifiser PWA-/cache-testene.
+6. **Events:** samle resterende direkte listeners i én bootstrap-eventmodul. Verifiser keyboard, drawer, språk, dialoger, forms og navigation.
+7. **Init:** flytt init-orkestrering. Verifiser scriptrekkefølge, initial URL/session restore og første render.
+8. **Language:** flytt språk-controller. Verifiser device/manual språk, fallback, profile sync og at delt state ikke får språkfelt.
+9. **Renderer:** flytt sentral `render()` etter at callback-grensene er stabile. Verifiser alle roller, admin-tabs, TV Mode, scorecard og responsive viewports.
+10. **Session/player:** flytt leave/join/availability og existing-player-flow. Verifiser lokal, spectator og remote rolleflyt.
+11. **Remote:** flytt remote-state og remote-sync kontroller. Verifiser revision/conflict, offline-kø, reconnect, tokenbinding og RPC-kontrakter.
+12. **Sluttkontroll:** fjern kun wrappers uten referanser, oppdater HTML service worker, tester og dokumentasjon, og mål at `app.js` kun er composition root.
+
+Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
+
+## 8. Akseptansekriterier for selve refaktoreringen
+
+- Hver flyttet enhet har én tydelig `window.Padelstar...`-grense og eksplisitte avhengigheter.
+- Ingen ny modul leser `localStorage`, DOM eller global state uten at dette er en del av modulens dokumenterte ansvar.
+- Ingen aktiv HTML-/service-worker-referanse peker på en manglende eller arkivert fil.
+- Alle eksisterende tester består, og nye tester dekker selve grensen – ikke bare at filen eksisterer.
+- Lokal runtime er verifisert etter hver grense på desktop, tablet og mobil.
+- Live Supabase/Auth/RPC/Realtime/push verifiseres separat og omtales som uverifisert når miljøet ikke er tilgjengelig.
+- Ingen endring i observerbar funksjon, språkvalg, roller, tokenhåndtering, retention eller Supabase-kontrakt.

@@ -8,6 +8,8 @@ Status: aktivt operativt arbeidsdokument
 
 Dette dokumentet er den eneste aktive planen for videre arbeid. Det beskriver dagens baseline, åpne beslutninger, prioriterte faser, akseptansekriterier og verifikasjon. Gjennomført arbeid føres i [documentation.md](documentation.md) i kronologisk rekkefølge.
 
+Den separate, kodebaserte analysen av gjenværende `app/app.js`-oppdeling ligger i [app-js-modulariseringsplan.md](app-js-modulariseringsplan.md). Den beskriver foreslåtte moduler og rekkefølge; den gjennomfører ikke refaktoreringen.
+
 Padelstar er en plattformuavhengig vanilla-JavaScript-PWA for å opprette, dele, administrere og følge padelturneringer på mobil, nettbrett og desktop. Supabase brukes for valgfri live-synk, mens lokal lagring og service worker gir offline-fallback.
 
 ## Kontrollert baseline etter branch-gjennomgang
