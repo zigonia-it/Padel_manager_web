@@ -159,6 +159,8 @@ Følgende skal ikke være første refaktorering:
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 
+Fase B-notat 2026-09-04: lokal kilde- og kontraktsgjennomgang på Fase A-baselinen passerer 28/28 sikkerhets-/personverntester. Standard security scan `dc9484dd-7a7f-4243-8956-47958f0d3fc9` står fortsatt i `preflight/incomplete` på grunn av manglende delegert worker-runtime i økten; ingen reportable-funn kan konkluderes før den autoritative scannen er kjørbar.
+
 ## 8. Akseptansekriterier for selve refaktoreringen
 
 - Hver flyttet enhet har én tydelig `window.Padelstar...`-grense og eksplisitte avhengigheter.
