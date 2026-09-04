@@ -115,7 +115,7 @@ Turneringsstatus, rundeblokkering og fremdriftskontroll er flyttet til `app/tour
 
 Remote state persistence for debouncede admin-lagringer er flyttet til `app/remote-state-write.js`, mens den eksisterende felles skrivekøen beholdes i entrypointen for å sikre riktig rekkefølge mot match- og score-RPC-er.
 
-- Fase A: ferdig verifisert på commit `1434fc0`. Struktur-, session/player- og remote state/sync-grensene er isolert, legacy-fallbacker er fjernet, og full lokal regresjon + browser desktop/mobil passerer.
+- Fase A: ferdig verifisert på commit `c4d7723` (kodegrensene i `da09fd4`, statusdokumentasjon i `c4d7723`). Struktur-, session/player- og remote state/sync-grensene er isolert, legacy-fallbacker er fjernet, og full lokal regresjon + browser desktop/mobil passerer.
 - Fase B: pågår på Fase A-baselinen. Kildebaserte Supabase/RLS/token/privacy-tester passerer 28/28, med 1 forventet live-test-skip. Standard sikkerhetsskanning `dc9484dd-7a7f-4243-8956-47958f0d3fc9` er startet, men står i `preflight` med `incomplete` fordi denne økten ikke eksponerer delegert worker-runtime; den kan derfor ikke markeres ferdig.
 - Fase C: ikke startet på nytt etter Fase A. Historiske verifikasjoner beholdes som referanse, men skal ikke brukes som ferdigbevis.
 - Fase D: ikke startet på nytt etter Fase A. Historiske verifikasjoner beholdes som referanse, men skal ikke brukes som ferdigbevis.
