@@ -300,7 +300,11 @@ const workspaceNavigation = window.PadelstarWorkspaceNavigation.create({
   t: (key, values) => t(key, values),
   workspaceModuleFromActiveModule: () => workspaceModuleFromActiveModule(),
 });
-const supabaseSettings = window.PADELSTAR_SUPABASE ?? window.PADEL_MANAGER_SUPABASE ?? {};
+const supabaseMeta = (name) => document.querySelector(`meta[name="${name}"]`)?.content?.trim() ?? "";
+const supabaseSettings = window.PADELSTAR_SUPABASE ?? window.PADEL_MANAGER_SUPABASE ?? {
+  url: supabaseMeta("padelstar-supabase-url"),
+  anonKey: supabaseMeta("padelstar-supabase-anon-key"),
+};
 let supabaseClient = supabaseSettings.url && supabaseSettings.anonKey && window.supabase
   ? window.supabase.createClient(supabaseSettings.url, supabaseSettings.anonKey, {
     auth: {
@@ -755,6 +759,7 @@ const matchCard = window.PadelstarMatchCard.create({
 });
 const adminIdentity = window.PadelstarAdminIdentity.create({
   getClient: () => supabaseClient,
+  getProfile: () => profile,
   getElements: () => elements,
   getState: () => state,
   isAdmin: () => isCurrentUserAdmin(),
@@ -838,9 +843,9 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   getAdminAuthUser: async () => accountAuth?.currentUser() ?? await accountAuth?.refresh() ?? currentAuthUser(),
   getAdminEmail: () => elements.createTournamentForm?.elements.adminEmail?.value.trim(),
   randomAvatarId: () => avatarSystem.randomId(),
-  ensureProfileForJoin: (displayName, avatarId) => ensureProfileForJoin(displayName, avatarId),
   findPlayerByName: (name) => findPlayerByName(name),
   getClient: () => supabaseClient,
+  getProfile: () => profile,
   getState: () => state,
   hasTournamentForInvite: (inviteCode, loadedRemote) => hasTournamentForInvite(inviteCode, loadedRemote),
   joinRemoteTournament: (playerName, avatarId) => joinRemoteTournament(playerName, avatarId),
@@ -954,12 +959,20 @@ elements.createAdminSignInLinkButton?.addEventListener("click", async () => {
   showToast(sent ? t("admin.identityLinkSent") : t("admin.identityFailed"), sent ? "status-message-success" : "status-message-error");
 });
 elements.languageSelect.addEventListener("change", () => {
-  state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
-  localStorage.setItem(languageStorageKey, state.settings.language);
+  if (elements.languageSelect.value === "device") {
+    state.settings.languageMode = "device";
+    localStorage.setItem(languageStorageKey, "device");
+    state.settings.language = loadUserLanguage(state.settings.language);
+  } else {
+    state.settings.languageMode = "manual";
+    state.settings.language = i18n?.normalizeLanguage(elements.languageSelect.value) ?? elements.languageSelect.value;
+    localStorage.setItem(languageStorageKey, state.settings.language);
+  }
   if (profile) void accountAuth?.syncProfile(profile, state.settings.language);
   applyLanguage();
   syncJoinPreview();
   render();
+  syncLanguageOptions();
 });
 
 tournamentEntry?.bind(elements);
@@ -1171,7 +1184,14 @@ function renderProfile() {
 }
 
 function loadUserLanguage(fallbackLanguage = "nb") {
-  return i18nUi.loadUserLanguage({ storage: localStorage, storageKey: languageStorageKey, fallbackLanguage, i18n });
+  return i18nUi.loadUserLanguage({
+    storage: localStorage,
+    storageKey: languageStorageKey,
+    fallbackLanguage,
+    i18n,
+    navigatorRef: navigator,
+    onMode: (mode) => { state.settings.languageMode = mode; },
+  });
 }
 
 function loadState() { return stateBootstrap.loadState(); }
@@ -1243,6 +1263,13 @@ function saveState(options = {}) {
 }
 
 function persistLocalState() {
+  if (state.status === "Avsluttet" && !state.ownerProfileId) {
+    tournamentLibrary.remove(state.id);
+    localStorage.removeItem(storageKey);
+    localStorage.removeItem(recoveryStorageKey);
+    persistence.removeKeys([storageKey, recoveryStorageKey]);
+    return;
+  }
   tournamentLibrary.upsert(state);
   persistence.writeTournamentState({
     state,
@@ -1358,6 +1385,7 @@ function scheduleRemoteRetry() {
 
 function applyRemoteState(remoteState, options = {}) {
   if (!remoteState) return false;
+  const wasEnded = state.status === "Avsluttet";
   const source = options.source ?? "remote";
   const sameTournament = state.id === remoteState.id;
   const remoteRevision = Number.isInteger(remoteState.revision) ? remoteState.revision : 0;
@@ -1389,6 +1417,7 @@ function applyRemoteState(remoteState, options = {}) {
   nextState.playerToken = playerToken;
   nextState.ownerUserId = remoteState.ownerUserId ?? ownerUserId;
   state = nextState;
+  state.ownerProfileId = remoteState.ownerProfileId ?? state.ownerProfileId ?? null;
   state.settings.language = loadUserLanguage(state.settings?.language ?? "nb");
   saveState({ remote: false });
   if (options.clearConflict) {
@@ -1397,6 +1426,7 @@ function applyRemoteState(remoteState, options = {}) {
   }
   if (previousTournamentId !== state.id || !realtimeConnection.hasChannel()) connectRealtimeForCurrentState();
   render();
+  if (!wasEnded && state.status === "Avsluttet") saveProfileHistory();
   isApplyingRemoteState = false;
   return true;
 }
@@ -1642,6 +1672,9 @@ function render() {
   elements.playerCount.textContent = t("players.count", { count: state.players.length });
   elements.matchCount.textContent = t("matches.count", { count: matches.length });
   elements.courtSettingsForm.elements.courtList.value = courtsInputValue();
+  if (elements.courtNamesForm?.elements.courtCount) {
+    elements.courtNamesForm.elements.courtCount.value = state.courts.length;
+  }
   renderCourtNames();
   elements.tournamentSettingsForm.elements.format.value = state.settings.format;
   elements.tournamentSettingsForm.elements.cupTeamSetupMode.value = state.settings.cupTeamSetupMode;
@@ -1724,7 +1757,12 @@ function localizeGeneratedCourtNames() {
 }
 
 function syncLanguageOptions() {
-  i18nUi.syncLanguageOptions({ select: elements.languageSelect, i18n });
+  i18nUi.syncLanguageOptions({
+    select: elements.languageSelect,
+    i18n,
+    currentLanguage: state.settings?.language ?? "nb",
+    languageMode: state.settings?.languageMode ?? "device",
+  });
 }
 
 function t(key, values = {}) {
@@ -2064,8 +2102,8 @@ function joinTournament(name, avatarId) {
   const existingPlayer = findPlayerByName(name);
   if (existingPlayer) return existingPlayer;
   const player = linkProfileToPlayer(addPlayer(name, "self", avatarId));
-  player.guest = true;
-  player.participantType = "guest";
+  player.guest = !player.profileId;
+  player.participantType = player.profileId ? "player" : "guest";
   return player;
 }
 
@@ -2228,10 +2266,12 @@ function endTournament() {
     });
   }
   state.status = "Avsluttet";
-  if (window.PadelstarHistoricalRecords) {
+  if (state.ownerProfileId && window.PadelstarHistoricalRecords) {
     window.PadelstarHistoricalRecords.record(localStorage, tournamentHistoryStorageKey,
       window.PadelstarHistoricalRecords.create(state, window.PadelstarRetentionPolicy));
   }
+  // The creator's profile controls tournament retention; it does not gate
+  // history for other players who have their own profile on their device.
   saveProfileHistory();
   if (window.PadelstarRetentionPolicy) {
     state = window.PadelstarRetentionPolicy.sanitizeEndedTournamentState(state);
@@ -2256,6 +2296,8 @@ function renderCourtNames() {
     </label>`).join("");
   const submitButton = elements.courtNamesForm?.querySelector("button");
   if (submitButton) submitButton.disabled = locked;
+  const countInput = elements.courtNamesForm?.elements.courtCount;
+  if (countInput) countInput.disabled = locked;
 }
 
 function parseCourtNumbers(value) {

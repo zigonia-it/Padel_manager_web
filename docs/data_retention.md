@@ -24,7 +24,8 @@ Padelstar skal lagre minst mulig persondata og bare bruke opplysningene til å a
 
 Følgende retensjon er godkjent som foreløpig beta-policy:
 
-- Anonyme live-turneringer: kan slettes tidligst 30 dager etter at admin avslutter turneringen, og først når statistikk for registrerte spillere er overført til `player_profile_history`.
+- Midlertidige live-turneringer uten profilert oppretter: slettes automatisk senest etter 7 dager.
+- Turneringer med profilert oppretter: kan beholdes. Statistikk lagres individuelt bare for spillere som har profil; gjestespillere får ikke permanent historikk.
 - Spillerøkter/token-hasher: slettes sammen med turneringen.
 - Rate-limit-rader: slettes løpende eller holdes kortvarig nok til misbruksvern.
 - Lokale data: beholdes på brukerens enhet til turneringen nullstilles eller nettleserdata tømmes.
@@ -34,7 +35,7 @@ Følgende retensjon er godkjent som foreløpig beta-policy:
 Registrerte brukerprofiler og profilhistorikk slettes ikke på grunn av alder eller manglende aktivitet. De beholdes så lenge kontoen/profilen består og opplysningene er nødvendige for funksjonen. Først når brukeren eksplisitt ber om sletting, merkes profilen for sletting og fjernes 30 dager etter forespørselen. Profilens token lagres kun som en
 SHA-256-hash i den private profiltabellen og legges aldri i turneringsstate, historikk eller backup.
 
-Den implementerte interne cleanup-funksjonen sletter turneringer som admin eksplisitt har satt til `Avsluttet`, tidligst etter `retention_expires_at`, og bare når hver registrerte spiller med `profileId` har en tilhørende rad i `player_profile_history`. Den sletter også rate-limit-rader eldre enn 24 timer. Profil-cleanup sletter profil og profilhistorikk først når en eksplisitt slettingsforespørsel har passert 30 dager. Begge funksjonene kjøres av den betrodde `pg_cron`-jobben `padelstar-retention-cleanup`.
+Den implementerte interne cleanup-funksjonen sletter midlertidige turneringer uten `owner_profile_id` når `retention_expires_at` er passert, normalt innen 7 dager fra opprettelse. Ved avslutning fjernes gjestedeltakere fra lagret turneringsstate. Profil-cleanup sletter profil og profilhistorikk først når en eksplisitt slettingsforespørsel har passert 30 dager. Begge funksjonene kjøres av den betrodde `pg_cron`-jobben `padelstar-retention-cleanup`.
 
 ## Sletteprosedyre
 

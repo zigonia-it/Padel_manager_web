@@ -2,15 +2,8 @@
   "use strict";
 
   function isRetainedParticipant(player) {
-    if (player?.guest === true || player?.participantType === "guest") return false;
-    return Boolean(
-      player && (
-        player.profileId ||
-        player.userId ||
-        ["admin", "admin-player"].includes(player.participantType) ||
-        ["admin", "admin-self"].includes(player.joinedFrom)
-      ),
-    );
+    if (player?.profileId || player?.userId) return true;
+    return false;
   }
 
   function playerIdsInMatch(match) {

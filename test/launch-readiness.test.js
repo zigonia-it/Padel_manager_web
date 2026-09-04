@@ -31,15 +31,15 @@ test("privacy page reflects the current profile and retention behavior", () => {
   assert.match(privacySource, /lokal brukerprofil/i);
   assert.match(privacySource, /profilhistorikk/i);
   assert.match(privacySource, /språkvalg/i);
-  assert.match(privacySource, /innen 30 dager/i);
+  assert.match(privacySource, /innen 7 dager/i);
   assert.match(privacySource, /2026-09-03/);
   assert.match(privacySource, /styles\/privacy\.css/);
   assert.match(privacySource, /theme-color" content="#08090b"/);
 });
 
 test("retention note records the approved beta policy and profile follow-up", () => {
-  assert.match(retentionSource, /30 dager/);
-  assert.match(retentionSource, /Anonyme live-turneringer/);
+  assert.match(retentionSource, /7 dager/);
+  assert.match(retentionSource, /Midlertidige live-turneringer/);
   assert.match(retentionSource, /brukerprofiler/);
   assert.match(retentionSource, /profilen/);
   assert.match(retentionSource, /Vercel Analytics/);

@@ -383,7 +383,32 @@ h3 {
   font-weight: 700;
 }
 
+.court-count-control {
+  display: inline-grid;
+  grid-template-columns: auto 72px;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.court-count-control > span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.court-count-control input {
+  width: 72px;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
 @media (max-width: 640px) {
+  .court-count-control {
+    grid-template-columns: 1fr 72px;
+    margin-left: 0;
+  }
+
   .court-name-row {
     grid-template-columns: 1fr;
     gap: 6px;

@@ -60,7 +60,13 @@
           showToast(t("messages.courtsLocked"), "status-message-error");
           return;
         }
-        updateCourtNames(new FormData(event.currentTarget).getAll("courtName"));
+        const formData = new FormData(event.currentTarget);
+        const requestedCount = Number(formData.get("courtCount"));
+        const courtCount = Number.isInteger(requestedCount)
+          ? Math.max(1, Math.min(12, requestedCount))
+          : getState().courts.length;
+        updateCourtsFromInput(Array.from({ length: courtCount }, (_, index) => index + 1).join(","));
+        updateCourtNames(formData.getAll("courtName"));
         saveState();
         deps.render();
       });

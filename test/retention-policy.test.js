@@ -13,7 +13,7 @@ test("ended tournament state removes guest players and guest matches", () => {
   const state = {
     status: "Avsluttet",
     players: [
-      { id: "admin", participantType: "admin-player" },
+      { id: "admin", participantType: "admin-player", profileId: "profile-admin" },
       { id: "registered", profileId: "profile-1" },
       { id: "guest", participantType: "player" },
     ],
@@ -40,6 +40,12 @@ test("retention policy leaves active tournament state unchanged", () => {
   assert.deepEqual(policy.sanitizeEndedTournamentState(state), state);
 });
 
-test("a guest remains non-retained even when a temporary local profile exists", () => {
-  assert.equal(policy.isRetainedParticipant({ id: "guest", profileId: "temporary", guest: true }), false);
+test("a profiled player is retained even when they joined as a guest", () => {
+  assert.equal(policy.isRetainedParticipant({ id: "player", profileId: "profile-1", guest: true }), true);
+  assert.equal(policy.isRetainedParticipant({ id: "guest", guest: true }), false);
+});
+
+test("only a real participant profile retains tournament data", () => {
+  assert.equal(policy.isRetainedParticipant({ id: "creator", profileId: "creator-profile" }), true);
+  assert.equal(policy.isRetainedParticipant({ id: "guest", participantType: "admin-player" }), false);
 });

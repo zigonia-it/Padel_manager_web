@@ -1469,14 +1469,14 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 .match-headline {
-  font-family: "Nunito", sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: 600;
   text-align: center;
   text-transform: uppercase;
 }
 
 .match-court {
-  font-family: "Nunito", sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: 600;
 }
 

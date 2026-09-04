@@ -71,9 +71,9 @@ const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.j
 const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v240/);
-  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-11/);
-  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-11/);
+  assert.match(serviceWorkerSource, /padelstar-v264/);
+  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-34/);
+  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-34/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(serviceWorkerSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(indexSource, /app\/player-visuals\.js\?v=padelstar-player-visuals-1/);
@@ -175,8 +175,8 @@ test("tournament create and join flows have their own event boundary", () => {
 test("admin form mutations have their own event boundary", () => {
   assert.match(adminFormEventsSource, /generateRoundBlockReason/);
   assert.match(adminFormEventsSource, /global\.PadelstarAdminFormEvents/);
-  assert.match(indexSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-1/);
-  assert.match(serviceWorkerSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-1/);
+  assert.match(indexSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-2/);
+  assert.match(serviceWorkerSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-2/);
   assert.match(appSource, /PadelstarAdminFormEvents\?\.create/);
 });
 
@@ -229,17 +229,20 @@ test("PWA install flow supports native prompts, standalone detection and platfor
   assert.match(serviceWorkerSource, /app\/pwa-install\.js\?v=padelstar-pwa-install-2/);
 });
 
-test("phase 1 keeps player registration automatic and live admin creation authenticated", () => {
+test("tournament creation keeps profiles optional while tracking ownership", () => {
   assert.doesNotMatch(indexSource, /name="avatarId"/);
   assert.match(tournamentEntrySource, /getAdminAuthUser/);
   assert.match(appSource, /getAdminAuthUser: async \(\) => accountAuth\?\.currentUser\(\)/);
   assert.match(appSource, /showAccount: \(\) => showModule\("account"\)/);
-  assert.match(tournamentEntrySource, /identitySignInRequired/);
+  assert.match(tournamentEntrySource, /getProfile/);
   assert.match(tournamentEntrySource, /randomAvatarId/);
   assert.match(tournamentEntrySource, /ownerUserId/);
+  assert.match(tournamentEntrySource, /ownerProfileId/);
   assert.match(fs.readFileSync(path.join(root, "supabase_schema.sql"), "utf8"), /owner_user_id, claimed_at/);
   assert.match(appSource, /detectSessionInUrl: true/);
   assert.match(indexSource, /id="createAdminSignInLinkButton"/);
+  assert.match(indexSource, /class="setup-account-option"/);
+  assert.doesNotMatch(indexSource, /id="createAccountAuthButton"[^>]*data-module-link/);
 });
 
 test("home and menu expose account and TV Mode entry points", () => {
@@ -252,8 +255,8 @@ test("home and menu expose account and TV Mode entry points", () => {
 
 test("TV Mode is a full-viewport read-only layout across aspect ratios", () => {
   assert.match(indexSource, /class="tv-mode-logo"[^>]*src="assets\/icons\/padelstar-icon\.png"/);
-  assert.equal((indexSource.match(/id="tvModeButton"/g) ?? []).length, 1);
-  assert.match(indexSource, /workspace-header-actions[\s\S]*id="tvModeButton"/);
+  assert.doesNotMatch(indexSource, /id="tvModeButton"/);
+  assert.match(indexSource, /id="tvModeMenuButton"[^>]*data-action="tv-mode"/);
   assert.match(modulesStylesSource, /\.tv-mode \.app-shell[\s\S]*height: 100dvh/);
   assert.match(modulesStylesSource, /\.tv-mode \.site-footer/);
   assert.match(modulesStylesSource, /\.tv-mode \.workspace-header #roleIndicator/);
@@ -702,8 +705,8 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-92/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-37/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-93/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-39/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-1/);
@@ -713,8 +716,8 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/state-bootstrap\.js\?v=padelstar-state-bootstrap-1/);
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-1/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-92/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-37/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-93/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-39/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-1/);

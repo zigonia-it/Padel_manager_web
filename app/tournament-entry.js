@@ -9,9 +9,9 @@
       getAdminAuthUser,
       getAdminEmail,
       sendAdminSignInLink,
-      ensureProfileForJoin,
       findPlayerByName,
       getClient,
+      getProfile,
       getState,
       hasTournamentForInvite,
       joinRemoteTournament,
@@ -34,14 +34,7 @@
       event.preventDefault();
       const form = event.currentTarget;
       let adminUser = null;
-      if (getAdminAuthUser && getClient()) {
-        adminUser = await getAdminAuthUser();
-        if (!adminUser) {
-          showAccount?.();
-          showToast(t("admin.identitySignInRequired"), "status-message-error");
-          return;
-        }
-      }
+      if (getAdminAuthUser && getClient()) adminUser = await getAdminAuthUser();
       const formData = new FormData(form);
       const adminParticipates = formData.get("adminParticipates") === "on";
       const adminPlayerName = formData.get("adminPlayerName").trim();
@@ -63,11 +56,12 @@
         courtCount: Number(formData.get("courts")),
       });
       if (adminUser?.id) nextState.ownerUserId = adminUser.id;
+      if (getProfile?.()?.id) nextState.ownerProfileId = getProfile().id;
 
       if (adminParticipates) {
         nextState.players[0].joinedFrom = "admin-self";
         nextState.players[0].participantType = "admin-player";
-        linkProfileToPlayer(nextState.players[0]);
+        if (getProfile?.()) linkProfileToPlayer(nextState.players[0]);
         nextState.selectedPlayerId = nextState.players[0].id;
       }
 
@@ -94,8 +88,6 @@
         return;
       }
       if (!playerName) return;
-      ensureProfileForJoin(playerName, avatarId);
-
       let player;
       if (client) {
         const joined = await joinRemoteTournament(playerName, avatarId);

@@ -16,6 +16,7 @@ const profileFixSql = readSql("supabase/migrations/20260828122000_profile_histor
 const pushSql = readSql("supabase/migrations/20260828130000_push_subscriptions.sql");
 const retentionCronSql = readSql("supabase/migrations/20260828103000_retention_cron.sql");
 const guestRetentionSql = readSql("supabase/migrations/20260902120000_guest_history_retention.sql");
+const profileOwnedRetentionSql = readSql("supabase/migrations/20260904090000_profile_owned_tournament_retention.sql");
 
 function readSql(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
@@ -230,6 +231,16 @@ test("admin identity claim requires authenticated ownership and preserves token 
   assert.match(identitySql, /owner_user_id is null or owner_user_id = auth\.uid\(\)/);
   assert.match(identitySql, /grant execute on function public\.claim_tournament\(uuid, text\) to authenticated/);
   assert.match(identitySql, /revoke all on function public\.claim_tournament\(uuid, text\) from public, anon/);
+});
+
+test("profile-owned retention keeps creator optional and stats profile-scoped", () => {
+  const sql = normalizeSql(profileOwnedRetentionSql);
+  assert.match(sql, /add column if not exists owner_profile_id text/);
+  assert.match(sql, /next_owner_profile_id text/);
+  assert.match(sql, /p_state->>'ownerprofileid'/);
+  assert.match(sql, /now\(\) \+ interval '7 days'/);
+  assert.match(sql, /where owner_profile_id is null/);
+  assert.match(sql, /coalesce\(retention_expires_at, created_at \+ make_interval\(days => p_retention_days\)\) <= now\(\)/);
 });
 
 test("push subscriptions are token-bound and private", () => {

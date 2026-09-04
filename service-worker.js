@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v240";
+const cacheName = "padelstar-v264";
 
 const appShell = [
   "./",
@@ -6,20 +6,20 @@ const appShell = [
   "./tv.html",
   "./privacy.html",
   "./guide.html",
-  "./styles/base.css?v=padelstar-base-3",
+  "./styles/base.css?v=padelstar-base-4",
   "./styles/layout.css?v=padelstar-layout-6",
   "./styles/components.css?v=padelstar-components-12",
-  "./styles/tv.css?v=padelstar-tv-4",
+  "./styles/tv.css?v=padelstar-tv-6",
   "./assets/logos/main_logo_without_icon.png",
   "./assets/icons/padelstar-icon.png",
   "./assets/logos/tv-brand.png",
   "./styles/modules.css?v=padelstar-modules-8",
-  "./styles/styles.css?v=padelstar-ui-92",
+  "./styles/styles.css?v=padelstar-ui-93",
   "./styles/responsive.css?v=padelstar-responsive-1",
-  "./styles/ui-consistency.css?v=padelstar-ui-consistency-11",
-  "./styles/privacy.css?v=padelstar-privacy-1",
-  "./app/translations.js?v=padelstar-i18n-21",
-  "./app/i18n-ui.js?v=padelstar-i18n-ui-2",
+  "./styles/ui-consistency.css?v=padelstar-ui-consistency-34",
+  "./styles/privacy.css?v=padelstar-privacy-2",
+  "./app/translations.js?v=padelstar-i18n-22",
+  "./app/i18n-ui.js?v=padelstar-i18n-ui-5",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
   "./app/rendering.js?v=padelstar-rendering-2",
@@ -95,10 +95,10 @@ const appShell = [
   "./app/app-events.js?v=padelstar-app-events-1",
   "./app/workspace-events.js?v=padelstar-workspace-events-1",
   "./app/tournament-entry.js?v=padelstar-tournament-entry-1",
-  "./app/admin-form-events.js?v=padelstar-admin-form-events-1",
+  "./app/admin-form-events.js?v=padelstar-admin-form-events-2",
   "./app/match-actions.js?v=padelstar-match-actions-1",
   "./app/initial-view.js?v=padelstar-initial-view-1",
-  "./app/app.js?v=padelstar-session-37",
+  "./app/app.js?v=padelstar-session-39",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",
@@ -113,7 +113,7 @@ const appShell = [
   "./assets/ui/menu_highlight.png",
   "./assets/fonts/TitilliumWeb-Bold.ttf",
   "./assets/fonts/Anton-Regular.ttf",
-  "./assets/fonts/Nunito-VariableFont_wght.ttf",
+  "./assets/fonts/Inter-VariableFont_opsz,wght.ttf",
 ];
 
 self.addEventListener("install", (event) => {

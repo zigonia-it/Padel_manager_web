@@ -227,6 +227,13 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 - Browser-smoke-scriptet starter på `about:blank` og bruker lokale 204-test-svar for CDN, Supabase og Insights før appnavigering; smoke-kjøringen er dermed fri for forventet nettverksstøy.
 - Verifisering: `npm test` passerer med 82 beståtte tester og én forventet live-Supabase-test hoppet over; `npm run check:syntax` og `git diff --check` passerer. Lokal statisk browser-kontroll viser desktop (1440 px), medium (768 px) og mobil (390 px) uten horisontal overflow; aktiv JavaScript-runtime kunne ikke bekreftes i testtilkoblingen.
 
+### 2026-09-04
+
+- App-flow er analysert og dokumentert i [app_flow.md](app_flow.md), med routing, opprett/join, roller, scoring, realtime/offline, konto/profil, statistikk og retensjon.
+- Dokumentasjonen presiserer skillet mellom Auth-konto, lokal profil, `ownerProfileId` og `ownerUserId`.
+- Dokumentasjonen beskriver at profilerte spillere kan beholde egen statistikk, mens permanent turneringslagring krever profilert oppretter.
+- Dokumentasjonen inkluderer kjente verifikasjonsgrenser: lokal browser-smoke dekker ikke live Supabase Auth/RPC/realtime.
+
 ## Verifikasjonsprinsipp
 
 Hver ny oppføring skal inneholde hva som ble endret, hvilken brukerflyt som berøres, testresultater, commit-id og deploystatus. Nye funn eller åpne beslutninger føres i [Padelstar-komplett-utviklingsplan.md](Development/Padelstar-komplett-utviklingsplan.md), ikke som skjulte TODO-er i historikken.
