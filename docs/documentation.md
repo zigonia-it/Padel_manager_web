@@ -40,9 +40,11 @@ Denne statusen beskriver arbeidskopien på branchen `codex/padelstar-ui-refresh`
 
 - `npm test`: 182 tester, 181 bestått og 1 forventet live-Supabase-test hoppet over.
 - Etter siste Fase A-flytting (`app/court-settings.js`) er `npm test` kjørt på nytt: 184 tester, 183 bestått og 1 forventet live-Supabase-test hoppet over.
+- Etter ytterligere Fase A-flytting (`app/setup-forms.js` og `app/tournament-queries.js`) er `npm test` kjørt på nytt: 186 tester, 185 bestått og 1 forventet live-Supabase-test hoppet over.
+- De siste fire lokale Fase A-committene isolerer profilhistorikk, baneinnstillinger, oppstarts-/join-skjemaer og turneringsoppslag. Etter disse er `app/app.js` fortsatt entrypoint med gjenværende orkestrering; Fase A er derfor ikke ferdig.
 - `npm run check:syntax` og `git diff --check` passerer.
 - RLS/RPC, tokenbinding, revisjonskontroll, rate limiting, retensjon, modulgrenser og runtime-assets er statisk/testmessig dekket.
-- Lokal browserverifikasjon etter siste modul-flytting laster aktiv workspace uten console-feil og uten horisontal overflow ved tilgjengelig lokal viewport. Den formelle `scripts/browser-smoke.sh`-kjøringen og live Auth, RPC, Realtime, push og produksjonsdeploy er fortsatt ikke verifisert.
+- Lokal browserverifikasjon etter siste modul-flytting laster aktiv workspace uten console-feil og uten horisontal overflow ved 390, 768 og 1280 px. Den formelle `scripts/browser-smoke.sh`-kjøringen og live Auth, RPC, Realtime, push og produksjonsdeploy er fortsatt ikke verifisert.
 - Branchens nye CSS-konsolidering fjerner historiske landing-/workspace-menyer, gamle tabs-regler og dupliserte setup-/scorecard-regler. Stylesheet-query-versjoner og service-worker-cache er oppdatert.
 
 ## 2026-09-03 – versjon 0.4 og funksjonskontroll
