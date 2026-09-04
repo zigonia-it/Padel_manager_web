@@ -40,7 +40,7 @@ Arbeidskopien på `codex/padelstar-ui-refresh` er en 0.5 Beta-baseline:
 | Konto og profil | Implementert lokalt | Supabase Auth med passord, profiler, eierkobling og forsinket sletting er testet. Live Auth-flyt må verifiseres mot miljøet. |
 | Live og sikkerhet | Implementert med produksjonsavhengig verifikasjon | RLS/RPC, tokenbinding, revisjon, rate limiting, realtime/reconnect og push-kontrakter er statisk/testmessig dekket; live-testen er forventet hoppet over lokalt. |
 | PWA og offline | Implementert lokalt | Manifest, service worker, installasjonsfallback, recovery, IndexedDB-speiling og sync-kø er koblet inn og testet. |
-| UI og responsivitet | Implementert lokalt | Felles blå scorecard-design, fullbredde setup/workspace, TV Mode, hamburger/drawer, språkvelger og CSS-konsolidering er kontrollert i kode/tester. Browser-smoke gjenstår når Playwright er tilgjengelig. |
+| UI og responsivitet | Implementert lokalt | Felles blå scorecard-design, fullbredde setup/workspace, TV Mode, hamburger/drawer, språkvelger og CSS-konsolidering er kontrollert i kode/tester. Lokal runtime er verifisert ved 390, 768 og 1280 px uten console-feil eller overflow; formell deploy-smoke gjenstår. |
 | Produksjon | Delvis verifisert | Statisk hosting- og deploykonfigurasjon finnes, men ny deploy, live flerklientflyt og produksjonscache er ikke verifisert i denne arbeidsøkten. |
 
 Funksjonsdetaljer og brukerflyt ligger i [app_flow.md](../app_flow.md). Kronologiske endringer og verifikasjonsgrenser ligger i [documentation.md](../documentation.md).
