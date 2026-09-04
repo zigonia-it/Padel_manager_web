@@ -14,7 +14,7 @@ Padelstar er en plattformuavhengig vanilla-JavaScript-PWA for å opprette, dele,
 
 ## Kontrollert baseline etter branch-gjennomgang
 
-Arbeidskopien på `codex/padelstar-ui-refresh` inneholder en 0.5 Beta-baseline med implementert kjerneflyt, fase 2–6-formatmoduler, TV Mode, profil/konto, historikk/statistikk, PWA/offline, varsler og konsolidert blå UI-retning. Siste lokale verifikasjon viser `npm test` med 208 tester: 207 bestått og 1 forventet live-Supabase-test hoppet over. `npm run check:syntax` og `git diff --check` passerer.
+Arbeidskopien på `codex/padelstar-ui-refresh` inneholder en 0.5 Beta-baseline med implementert kjerneflyt, fase 2–6-formatmoduler, TV Mode, profil/konto, historikk/statistikk, PWA/offline, varsler og konsolidert blå UI-retning. Siste lokale verifikasjon viser `npm test` med 210 tester: 209 bestått og 1 forventet live-Supabase-test hoppet over. `npm run check:syntax` og `git diff --check` passerer.
 
 Browser-smoke, live Supabase Auth/RPC/Realtime/push og ny produksjonsdeploy er ikke verifisert i denne arbeidsøkten fordi Playwright ikke er tilgjengelig i offline-miljøet. Dette er verifikasjonsoppgaver, ikke uimplementerte funksjoner.
 
@@ -83,7 +83,7 @@ Nyeste Fase A-grense: spillerinnsendinger av resultater, admin-gjennomgang og lo
 
 Nyeste Fase A-grense: lokal varsling for spillerens kamp er samlet i `app/notification-system.js`, slik at service-worker-varsling og push-abonnement har samme varseldomene. Runtime og eksisterende varslingstester er kontrollert etter flytten.
 
-Fase A-kontroll 2026-09-04: storage-nøkler, Supabase-config-leser, rene hjelpefunksjoner, DOM-registry, app-meta, theme, bootstrap-events, app-init, language-controller, app-renderer og session-controller er isolert og lastet fra HTML/service worker, med ferske domenetester og lokal browser-verifisering. Branchen har fortsatt remote-kontrollområder og composition-root-ansvar i `app/app.js`; fase A står derfor som pågående. Dette er en kontrollert del-leveranse, ikke en ferdigmelding.
+Fase A-kontroll 2026-09-04: storage-nøkler, Supabase-config-leser, rene hjelpefunksjoner, DOM-registry, app-meta, theme, bootstrap-events, app-init, language-controller, app-renderer, session-controller og remote-state-controller er isolert og lastet fra HTML/service worker, med ferske domenetester og lokal browser-verifisering. Branchen har fortsatt remote sync/retry- og composition-root-ansvar i `app/app.js`; fase A står derfor som pågående. Dette er en kontrollert del-leveranse, ikke en ferdigmelding.
 
 Leaderboard-/tabell-rendering er også flyttet til `app/standings.js`; `app.js` beholder kun orkestreringen.
 

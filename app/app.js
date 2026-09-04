@@ -168,6 +168,7 @@ const stateBootstrap = window.PadelstarStateBootstrap.create({
 let state = stateBootstrap.loadState();
 let languageController;
 let sessionController;
+let remoteStateController;
 const tournamentLibrary = window.PadelstarTournamentLibrary?.create({
   storage,
   localStorage,
@@ -1256,7 +1257,7 @@ function showRecoveryNotice() {
   setRemoteNotice(t("messages.recoveredLocalTournament"));
 }
 
-function markRemoteConflict() {
+function legacyMarkRemoteConflict() {
   remoteConflict = true;
   pendingAdminSync = false;
   window.clearTimeout(remoteSaveTimer);
@@ -1293,7 +1294,7 @@ function scheduleRemoteRetry() {
   }, delay);
 }
 
-function applyRemoteState(remoteState, options = {}) {
+function legacyApplyRemoteState(remoteState, options = {}) {
   if (!remoteState) return false;
   const wasEnded = state.status === "Avsluttet";
   const source = options.source ?? "remote";
@@ -1339,6 +1340,14 @@ function applyRemoteState(remoteState, options = {}) {
   if (!wasEnded && state.status === "Avsluttet") saveProfileHistory();
   isApplyingRemoteState = false;
   return true;
+}
+
+function markRemoteConflict() {
+  return remoteStateController?.markRemoteConflict() ?? legacyMarkRemoteConflict();
+}
+
+function applyRemoteState(remoteState, options = {}) {
+  return remoteStateController?.applyRemoteState(remoteState, options) ?? legacyApplyRemoteState(remoteState, options);
 }
 
 async function createRemoteTournament() {
@@ -2424,6 +2433,30 @@ sessionController = window.PadelstarSessionController.create({
   renderExistingPlayerList,
   windowRef: window,
   testMode: () => Boolean(window.PADELSTAR_TEST_MODE),
+});
+remoteStateController = window.PadelstarRemoteStateController.create({
+  getState: () => state,
+  setState: (nextState) => { state = nextState; },
+  getPendingPlayerScores: () => pendingPlayerScores,
+  setPendingPlayerScores: (scores) => { pendingPlayerScores = scores; },
+  getPendingAdminSync: () => pendingAdminSync,
+  setPendingAdminSync: (value) => { pendingAdminSync = value; },
+  setRemoteConflict: (value) => { remoteConflict = value; },
+  getRemoteMutationSequence: () => remoteMutationSequence,
+  getLastRemotePersistedSequence: () => lastRemotePersistedSequence,
+  setLastRemotePersistedSequence: (value) => { lastRemotePersistedSequence = value; },
+  setIsApplyingRemoteState: (value) => { isApplyingRemoteState = value; },
+  clearRemoteSaveTimer: () => { window.clearTimeout(remoteSaveTimer); remoteSaveTimer = null; },
+  migrateState,
+  loadUserLanguage,
+  saveState,
+  persistSyncMetadata,
+  setRemoteNotice,
+  connectRealtimeForCurrentState,
+  hasRealtimeChannel: () => realtimeConnection.hasChannel(),
+  render,
+  saveProfileHistory,
+  translate: (key, values) => t(key, values),
 });
 
 const appInit = window.PadelstarAppInit.create({

@@ -54,6 +54,7 @@ const i18nUiSource = fs.readFileSync(path.join(root, "app", "i18n-ui.js"), "utf8
 const languageControllerSource = fs.readFileSync(path.join(root, "app", "core", "language-controller.js"), "utf8");
 const appRendererSource = fs.readFileSync(path.join(root, "app", "ui", "app-renderer.js"), "utf8");
 const sessionControllerSource = fs.readFileSync(path.join(root, "app", "core", "session-controller.js"), "utf8");
+const remoteStateControllerSource = fs.readFileSync(path.join(root, "app", "core", "remote-state-controller.js"), "utf8");
 const storageSource = fs.readFileSync(path.join(root, "app", "storage.js"), "utf8");
 const renderingSource = fs.readFileSync(path.join(root, "app", "rendering.js"), "utf8");
 const remoteTournamentSource = fs.readFileSync(path.join(root, "app", "remote-tournament.js"), "utf8");
@@ -753,6 +754,15 @@ test("session and player orchestration has its own module boundary", () => {
   assert.match(sessionControllerSource, /window\.PadelstarSessionController/);
   assert.match(indexSource, /app\/core\/session-controller\.js\?v=padelstar-session-controller-1/);
   assert.match(serviceWorkerSource, /app\/core\/session-controller\.js\?v=padelstar-session-controller-1/);
+});
+
+test("remote state orchestration has its own module boundary", () => {
+  assert.match(remoteStateControllerSource, /applyRemoteState/);
+  assert.match(remoteStateControllerSource, /markRemoteConflict/);
+  assert.match(remoteStateControllerSource, /ownerUserId/);
+  assert.match(remoteStateControllerSource, /window\.PadelstarRemoteStateController/);
+  assert.match(indexSource, /app\/core\/remote-state-controller\.js\?v=padelstar-remote-state-controller-1/);
+  assert.match(serviceWorkerSource, /app\/core\/remote-state-controller\.js\?v=padelstar-remote-state-controller-1/);
 });
 
 test("JSON persistence has its own storage module boundary", () => {

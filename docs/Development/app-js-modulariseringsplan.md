@@ -2,7 +2,7 @@
 
 **Sist kartlagt:** 2026-09-04  
 **Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
-**Status:** Fase 10 (session/player) er gjennomført og verifisert. Fase A er fortsatt pågående fordi remote-kontrollområdene og resterende composition-root-ansvar ikke er ferdig gjennomgått.
+**Status:** Remote state-delgrensen er gjennomført og verifisert. Fase A er fortsatt pågående fordi remote sync/retry og resterende composition-root-ansvar ikke er ferdig gjennomgått.
 
 ## 1. Konklusjon
 
@@ -151,6 +151,8 @@ Følgende skal ikke være første refaktorering:
 - **Fase 9-verifikasjon:** rendererens test-mode-isolasjon og callback-grense er testet. Fokuserte tester passerte med 129/129, full syntax- og diff-sjekk passerer, og browser reload viste aktiv `PadelstarAppRenderer`, `PadelstarAppInit` og fungerende oversatt UI. Språkvalg ble bekreftet persistert på tvers av reload; eneste console-feil er lokal 404 for `/_vercel/insights/script.js`.
 - **Fase 10, 2026-09-04:** join, leave, spectator-leave og existing-player-oppslag er flyttet til `app/core/session-controller.js`. Underliggende spillerstate og availability beholdes i de eksisterende player-modulene.
 - **Fase 10-verifikasjon:** fokuserte app-/PWA-/session-tester passerte med 130/130, full testpakke passerte med 207 beståtte tester og 1 forventet live-Supabase-skip (208 totalt), samt full syntakssjekk og `git diff --check`. Eksisterende local/admin/spectator-leave-regresjoner passerer i app-harnesset.
+- **Remote state-delgrense, 2026-09-04:** `applyRemoteState` og konfliktmarkering er flyttet til `app/core/remote-state-controller.js`. Appens eksisterende remote-tournament/RPC-moduler bruker fortsatt samme callback-kontrakt.
+- **Remote state-verifikasjon:** isolert test bekrefter stale-revisjon, RPC-oppdatering og bevaring av selected player, admin-token, player-token og owner-identitet. Fokuserte tester passerte med 131/131, full testpakke med 209 beståtte tester og 1 forventet live-Supabase-skip (210 totalt), syntax/diff passerte, og browser reload viste aktiv remote-state-controller. Live Supabase er fortsatt ikke verifisert uten eksplisitt live-miljø.
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 
