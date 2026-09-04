@@ -265,6 +265,7 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 
 ### 2026-09-04
 
+- Fase A-slice: profilhistorikkberegningen ble flyttet fra `app/app.js` til `app/profile-history.js` med eksplisitte state-, profil-, leaderboard- og retention-avhengigheter. Modulen er lagt i HTML-loader, service-worker-cache og testharness. `npm test` passerer med 183 tester: 182 bestått og 1 forventet live-Supabase-test hoppet over; syntaks, diff og lokal browser-reload uten console-feil passerer.
 - CSS-oppsettet ble gjennomgått mot aktiv HTML/JavaScript-logikk: historisk landingsnavigasjon, avatarvelger, workspace-hamburger og gamle tabs-regler uten runtime-referanser ble fjernet, og dupliserte setup-/scorecard-regler ble samlet.
 - Delte stylesheet-referanser ble synkronisert på app-, guide- og personvernsidene, service-worker-cachen ble bumpet til `padelstar-v272`, og CSS-query-versjonene ble oppdatert til gjeldende `layout-7`, `components-13`, `modules-9`, `ui-96` og `ui-consistency-40`. Statisk test og syntakssjekk passerer; browser-smoke kunne ikke kjøres fordi Playwright-pakken ikke var tilgjengelig uten nettverk.
 

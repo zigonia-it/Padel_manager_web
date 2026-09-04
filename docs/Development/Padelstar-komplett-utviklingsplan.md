@@ -36,7 +36,7 @@ Arbeidskopien på `codex/padelstar-ui-refresh` er en 0.5 Beta-baseline:
 |---|---|---|
 | Kjerneflyt | Implementert | Opprett, join/QR, admin, spiller, tilskuer, scoring og avslutning er koblet i `index.html` og app-modulene. |
 | Turneringsformater | Implementert lokalt | Round-robin, cup, Americano, lag-Americano, Mexicano, lag-Mexicano, Kongen av banen og gruppespill/sluttspill har motor- og kontrakttester. |
-| Historikk og analyse | Implementert lokalt | Historikk, spillerstatistikk, partner/head-to-head, sesongoppsummering og lokal rating/insight-beregning er testet. Vedvarende ratingdatabase og liga er ikke implementert. |
+| Historikk og analyse | Implementert lokalt | Historikkberegning har egen modulgrense i `app/profile-history.js`. Spillerstatistikk, partner/head-to-head, sesongoppsummering og lokal rating/insight-beregning er testet. Vedvarende ratingdatabase og liga er ikke implementert. |
 | Konto og profil | Implementert lokalt | Supabase Auth med passord, profiler, eierkobling og forsinket sletting er testet. Live Auth-flyt må verifiseres mot miljøet. |
 | Live og sikkerhet | Implementert med produksjonsavhengig verifikasjon | RLS/RPC, tokenbinding, revisjon, rate limiting, realtime/reconnect og push-kontrakter er statisk/testmessig dekket; live-testen er forventet hoppet over lokalt. |
 | PWA og offline | Implementert lokalt | Manifest, service worker, installasjonsfallback, recovery, IndexedDB-speiling og sync-kø er koblet inn og testet. |

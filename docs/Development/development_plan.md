@@ -12,7 +12,7 @@ Padelstar er en plattformuavhengig vanilla-JavaScript-PWA for å opprette, dele,
 
 ## Kontrollert baseline etter branch-gjennomgang
 
-Arbeidskopien på `codex/padelstar-ui-refresh` inneholder en 0.5 Beta-baseline med implementert kjerneflyt, fase 2–6-formatmoduler, TV Mode, profil/konto, historikk/statistikk, PWA/offline, varsler og konsolidert blå UI-retning. Lokal verifikasjon viser `npm test` med 182 tester: 181 bestått og 1 forventet live-Supabase-test hoppet over. `npm run check:syntax` og `git diff --check` passerer.
+Arbeidskopien på `codex/padelstar-ui-refresh` inneholder en 0.5 Beta-baseline med implementert kjerneflyt, fase 2–6-formatmoduler, TV Mode, profil/konto, historikk/statistikk, PWA/offline, varsler og konsolidert blå UI-retning. Lokal verifikasjon viser `npm test` med 183 tester: 182 bestått og 1 forventet live-Supabase-test hoppet over. `npm run check:syntax` og `git diff --check` passerer.
 
 Browser-smoke, live Supabase Auth/RPC/Realtime/push og ny produksjonsdeploy er ikke verifisert i denne arbeidsøkten fordi Playwright ikke er tilgjengelig i offline-miljøet. Dette er verifikasjonsoppgaver, ikke uimplementerte funksjoner.
 

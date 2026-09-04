@@ -68,6 +68,7 @@ const appShell = [
   "./app/realtime-connection.js?v=padelstar-realtime-connection-1",
   "./app/observability.js?v=padelstar-observability-1",
   "./app/profile-manager.js?v=padelstar-profile-1",
+  "./app/profile-history.js?v=padelstar-profile-history-1",
   "./app/remote-rpc.js?v=padelstar-remote-rpc-1",
   "./app/ui-effects.js?v=padelstar-ui-effects-1",
   "./app/navigation.js?v=padelstar-navigation-2",

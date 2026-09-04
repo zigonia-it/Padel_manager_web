@@ -69,6 +69,7 @@ const adminFormEventsSource = fs.readFileSync(path.join(root, "app", "admin-form
 const matchActionsSource = fs.readFileSync(path.join(root, "app", "match-actions.js"), "utf8");
 const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.js"), "utf8");
 const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
+const profileHistorySource = fs.readFileSync(path.join(root, "app", "profile-history.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
   assert.match(serviceWorkerSource, /padelstar-v273/);
@@ -103,6 +104,13 @@ test("service worker claims updates and keeps a navigation fallback", () => {
   assert.match(serviceWorkerSource, /"\.\/privacy\.html"/);
   assert.match(indexSource, /app\/remote-state-write\.js\?v=padelstar-remote-state-write-1/);
   assert.match(serviceWorkerSource, /app\/remote-state-write\.js\?v=padelstar-remote-state-write-1/);
+});
+
+test("profile history has its own domain boundary", () => {
+  assert.match(indexSource, /app\/profile-history\.js\?v=padelstar-profile-history-1/);
+  assert.match(serviceWorkerSource, /app\/profile-history\.js\?v=padelstar-profile-history-1/);
+  assert.match(profileHistorySource, /global\.PadelstarProfileHistory/);
+  assert.doesNotMatch(profileHistorySource, /localStorage|document\.querySelector/);
 });
 
 test("remote state writes have their own persistence boundary", () => {
