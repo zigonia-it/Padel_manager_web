@@ -1025,22 +1025,7 @@ function bindGlobalEvents() {
 }
 
 async function showExistingPlayers() {
-  if (sessionController) return sessionController.showExistingPlayers();
-  const inviteCode = elements.joinTournamentForm.elements.inviteCode.value.trim().toUpperCase();
-  if (!inviteCode) {
-    showToast(t("messages.inviteCodeRequired"), "status-message-error");
-    elements.joinTournamentForm.elements.inviteCode.focus();
-    return;
-  }
-
-  const loadedRemote = supabaseClient ? await loadRemoteTournamentByInvite(inviteCode) : false;
-  if (!hasTournamentForInvite(inviteCode, loadedRemote)) {
-    showToast(t("messages.tournamentNotFound", { code: inviteCode }), "status-message-error");
-    return;
-  }
-
-  elements.existingPlayerList.classList.toggle("hidden");
-  renderExistingPlayerList();
+  return sessionController.showExistingPlayers();
 }
 
 function activateSupabaseClient() {
@@ -1704,13 +1689,7 @@ async function unsubscribeFromPush() {
 }
 
 function joinTournament(name, avatarId) {
-  if (sessionController) return sessionController.joinTournament(name, avatarId);
-  const existingPlayer = findPlayerByName(name);
-  if (existingPlayer) return existingPlayer;
-  const player = linkProfileToPlayer(addPlayer(name, "self", avatarId));
-  player.guest = !player.profileId;
-  player.participantType = player.profileId ? "player" : "guest";
-  return player;
+  return sessionController.joinTournament(name, avatarId);
 }
 
 function parsePlayerNames(value) {
@@ -1737,122 +1716,9 @@ function removePlayer(playerId) {
   playerState.removePlayer(playerId);
 }
 
-function legacyLeaveCurrentTournament(options = {}) {
-  const selectedPlayer = getPlayerById(state.selectedPlayerId);
-  if (!selectedPlayer) return false;
-
-  const wasAdmin = isCurrentUserAdmin();
-
-  const shouldConfirm = options.confirm !== false;
-  const pendingScoreText = pendingPlayerScores.length > 0
-    ? t("player.leavePendingScores")
-    : "";
-  if (shouldConfirm && !confirm(t("player.leaveConfirm", {
-    name: selectedPlayer.name,
-    pendingScoreText,
-  }))) {
-    return false;
-  }
-
-  state.selectedPlayerId = null;
-  localLeftPlayerId = selectedPlayer.id;
-  state.playerToken = null;
-  pendingPlayerScores = [];
-
-  if (wasAdmin) {
-    persistSyncMetadata();
-    setLocalRole("admin");
-    saveState({ remote: false });
-  } else {
-    removeRealtimeChannel();
-    tournamentLibrary.remove(state.id);
-    const language = state.settings?.language ?? "nb";
-    state = structuredClone(defaultTournament);
-    state.settings.language = language;
-    state.adminToken = null;
-    state.playerToken = null;
-    pendingAdminSync = false;
-    remoteConflict = false;
-    localStorage.removeItem(storageKey);
-    localStorage.removeItem(recoveryStorageKey);
-    localStorage.removeItem(roleStorageKey);
-    localStorage.removeItem(syncStorageKey);
-  persistence.removeKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
-    if (!window.PADELSTAR_TEST_MODE) {
-      elements.joinTournamentForm.reset();
-      syncCreateFormDefaults();
-      syncJoinPreview();
-    }
-    spectatorMode = false;
-  }
-
-  if (!window.PADELSTAR_TEST_MODE) {
-    if (wasAdmin) showWorkspace("admin");
-    else showStart();
-    render();
-  }
-  return true;
-}
-
-function legacyLeaveSpectatorView() {
-  const previousRole = spectatorPreviousRole;
-  const shouldClearLocalView = previousRole === "spectator";
-  spectatorMode = false;
-
-  const url = new URL(window.location.href ?? window.location.origin);
-  url.searchParams.delete(spectatorQueryKey);
-  window.history?.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
-
-  if (shouldClearLocalView) {
-    removeRealtimeChannel();
-    tournamentLibrary.remove(state.id);
-    const language = state.settings?.language ?? "nb";
-    state = structuredClone(defaultTournament);
-    state.settings.language = language;
-    state.adminToken = null;
-    state.playerToken = null;
-    pendingAdminSync = false;
-    pendingPlayerScores = [];
-    remoteConflict = false;
-    localStorage.removeItem(storageKey);
-    localStorage.removeItem(recoveryStorageKey);
-    localStorage.removeItem(roleStorageKey);
-    localStorage.removeItem(syncStorageKey);
-    persistence.removeKeys([storageKey, recoveryStorageKey, roleStorageKey, syncStorageKey]);
-    if (!window.PADELSTAR_TEST_MODE) {
-      elements.joinTournamentForm.reset();
-      syncCreateFormDefaults();
-      syncJoinPreview();
-    }
-  } else {
-    setLocalRole(previousRole);
-  }
-
-  spectatorPreviousRole = "spectator";
-  if (!window.PADELSTAR_TEST_MODE) {
-    showStart();
-    render();
-  }
-}
-
-async function legacyLeaveCurrentTournamentWithDialog() {
-  const selectedPlayer = getPlayerById(state.selectedPlayerId);
-  if (!selectedPlayer) return false;
-  const pendingScoreText = pendingPlayerScores.length > 0
-    ? t("player.leavePendingScores")
-    : "";
-  const accepted = await requestConfirmation(t("player.leaveConfirm", {
-    name: selectedPlayer.name,
-    pendingScoreText,
-  }));
-  return accepted ? leaveCurrentTournament({ confirm: false }) : false;
-}
-
-function leaveCurrentTournament(options = {}) { return sessionController?.leaveCurrentTournament(options) ?? legacyLeaveCurrentTournament(options); }
-function leaveSpectatorView() { return sessionController?.leaveSpectatorView() ?? legacyLeaveSpectatorView(); }
-async function leaveCurrentTournamentWithDialog() {
-  return sessionController?.leaveCurrentTournamentWithDialog() ?? legacyLeaveCurrentTournamentWithDialog();
-}
+function leaveCurrentTournament(options = {}) { return sessionController.leaveCurrentTournament(options); }
+function leaveSpectatorView() { return sessionController.leaveSpectatorView(); }
+async function leaveCurrentTournamentWithDialog() { return sessionController.leaveCurrentTournamentWithDialog(); }
 
 async function toggleSelectedPlayerAvailability() {
   return playerActions.toggleSelectedPlayerAvailability();

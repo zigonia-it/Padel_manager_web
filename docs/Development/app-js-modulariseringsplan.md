@@ -2,7 +2,7 @@
 
 **Sist kartlagt:** 2026-09-04  
 **Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
-**Status:** Remote state- og sync-delgrensene er gjennomført og verifisert. Fase A er fortsatt pågående fordi legacy-fallbacker og resterende composition-root-ansvar må ryddes og revalideres samlet.
+**Status:** Fase A er gjennomført og verifisert. Neste arbeid er ny gjennomgang av Fase B på denne baselinen.
 
 ## 1. Konklusjon
 
@@ -155,6 +155,7 @@ Følgende skal ikke være første refaktorering:
 - **Remote state-verifikasjon:** isolert test bekrefter stale-revisjon, RPC-oppdatering og bevaring av selected player, admin-token, player-token og owner-identitet. Fokuserte tester passerte med 131/131, full testpakke med 209 beståtte tester og 1 forventet live-Supabase-skip (210 totalt), syntax/diff passerte, og browser reload viste aktiv remote-state-controller. Live Supabase er fortsatt ikke verifisert uten eksplisitt live-miljø.
 - **Remote sync-delgrense, 2026-09-04:** debounce, skrivekø, retry/backoff og pending-write flush er flyttet til `app/core/remote-sync-controller.js`. RPC- og scorekø-modulene beholder sine eksisterende API-er.
 - **Remote sync-verifikasjon:** isolert sync-test bekrefter 350 ms debounce og sekvensjustering ved flush. Full testpakke passerte med 211 beståtte tester og 1 forventet live-Supabase-skip (212 totalt), syntax/diff passerte, og browser viste aktiv state- og sync-controller i desktop/tablet/mobil-størrelser. Live Supabase/Auth/RPC/Realtime er fortsatt ikke verifisert uten eksplisitt live-miljø.
+- **Fase A-sluttkontroll, 2026-09-04:** legacy remote/session-fallbacker er fjernet fra `app.js`; branchens nye grenser er lastet fra HTML/service worker. Full testpakke passerte 212/212 uten feil (211 bestått, 1 forventet live-skip), browser verifiserte desktop og mobil uten horisontal overflow, og `git diff --check`/syntax passerer. Fase A er dermed lukket med live Supabase som eksplisitt miljøbegrensning.
 
 Hver fase skal stoppe ved første regresjon. Det er ikke tillatt å gå videre basert på statiske mønstre alene dersom den berørte brukerflyten ikke også er kjørt.
 

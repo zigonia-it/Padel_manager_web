@@ -83,7 +83,7 @@ Nyeste Fase A-grense: spillerinnsendinger av resultater, admin-gjennomgang og lo
 
 Nyeste Fase A-grense: lokal varsling for spillerens kamp er samlet i `app/notification-system.js`, slik at service-worker-varsling og push-abonnement har samme varseldomene. Runtime og eksisterende varslingstester er kontrollert etter flytten.
 
-Fase A-kontroll 2026-09-04: storage-nøkler, Supabase-config-leser, rene hjelpefunksjoner, DOM-registry, app-meta, theme, bootstrap-events, app-init, language-controller, app-renderer, session-controller, remote-state-controller og remote-sync-controller er isolert og lastet fra HTML/service worker, med ferske domenetester og lokal browser-verifisering. Branchen har fortsatt legacy-fallbacker og composition-root-ansvar i `app/app.js`; fase A står derfor som pågående. Dette er en kontrollert del-leveranse, ikke en ferdigmelding.
+Fase A-sluttkontroll 2026-09-04: storage-nøkler, Supabase-config-leser, rene hjelpefunksjoner, DOM-registry, app-meta, theme, bootstrap-events, app-init, language-controller, app-renderer, session-controller, remote-state-controller og remote-sync-controller er isolert og lastet fra HTML/service worker. Legacy-fallbacker er fjernet fra `app/app.js`. Full testpakke, syntax/diff og browser desktop/mobil passerer; fase A er lukket. Live Supabase/Auth/RPC/Realtime er fortsatt ikke verifisert uten eksplisitt live-miljø.
 
 Leaderboard-/tabell-rendering er også flyttet til `app/standings.js`; `app.js` beholder kun orkestreringen.
 
