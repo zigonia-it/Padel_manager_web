@@ -77,6 +77,8 @@ Nyeste Fase A-grense: rene oppslag for aktiv runde, kamp, spiller, spillerplasse
 
 Nyeste Fase A-grense: kopiering og Web Share/fallback for turneringslenker er flyttet til `app/tournament-sharing.js`, med injiserte DOM-, oversettelses- og observability-avhengigheter samt egen domenetest.
 
+Nyeste Fase A-grense: spillerinnsendinger av resultater, admin-gjennomgang og lokal/remote resolusjon er flyttet til `app/result-submissions.js`, med eksplisitte state-, score-, RPC- og DOM-avhengigheter samt egen domenetest.
+
 Fase A-kontroll 2026-09-04: de fire siste grensene er testet etter hver flytting. Branchen har fortsatt gjenværende entrypoint-orkestrering i `app/app.js`; fase A står derfor som pågående. Dette er en kontrollert del-leveranse, ikke en ferdigmelding.
 
 Leaderboard-/tabell-rendering er også flyttet til `app/standings.js`; `app.js` beholder kun orkestreringen.
@@ -111,7 +113,7 @@ Remote state persistence for debouncede admin-lagringer er flyttet til `app/remo
 
 - Fase A: pågår. Avataransvar, lenke-/QR-generering, rene cup-runde-hjelpere, felles spiller-/lagmarkup, turnerings-runtime, workspace-overview-rendering, remote state persistence, admin-RPC-mutasjoner, spillerens poengkø, scoring-sideeffekter og global event-wiring er nå egne moduler. Videre oppdeling av den resterende `app/app.js` må gjøres trinnvis med regresjon etter hver grense.
 - Fase B: lokalt verifisert. Diff-skanningen `60c77acd-3c28-4d7f-923a-50a476efef68` er fullført for 51 endrede filer med komplett dekning, ingen reportable funn og ingen åpne kandidater. Live Supabase-flyten er fortsatt ikke kjørt i lokal offline-verifisering og dekkes av den forventede skip-testen.
-- Fase C: kode- og kontraktsverifisert. Testpakken (187 tester: 186 bestått, 1 forventet skip), syntakssjekken og diff-sjekken passerer. Lokal browserverifikasjon etter siste endring viser aktiv workspace, delingskontroll og ingen console-feil eller horisontal overflow; formell smoke/deploy og live Supabase-flyt må fortsatt bekreftes.
+- Fase C: kode- og kontraktsverifisert. Testpakken (188 tester: 187 bestått, 1 forventet skip), syntakssjekken og diff-sjekken passerer. Lokal browserverifikasjon etter siste endring viser aktiv workspace, resultatpanel og ingen console-feil eller horisontal overflow; formell smoke/deploy og live Supabase-flyt må fortsatt bekreftes.
 - Fase D: lokalt gjennomgått. Visuelle kaskader, status-/avatar-styling, oversettelsesnøkler og turneringsmotorens eksisterende regresjonstester er kontrollert. Aktiv JavaScript-runtime er manuelt verifisert lokalt etter siste endring; dette erstatter ikke formell smoke på deploy.
 
 ## Prioritert videre plan

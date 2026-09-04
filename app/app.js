@@ -515,6 +515,28 @@ const tournamentSharing = window.PadelstarTournamentSharing.create({
   createJoinLink: () => createJoinLink(),
   observability,
 });
+const resultSubmissions = window.PadelstarResultSubmissions.create({
+  elements,
+  getState: () => state,
+  getPlayerById: (id) => getPlayerById(id),
+  getMatchById: (id) => getMatchById(id),
+  matchIncludesPlayer: (match, playerId) => matchIncludesPlayer(match, playerId),
+  matchContextText: (match) => matchContextText(match),
+  validateSetScore: (teamOne, teamTwo, settings) => scoring.validateSetScore(teamOne, teamTwo, settings),
+  scoreSubmissions: window.PadelstarScoreSubmissions,
+  eventLog,
+  saveMatchResult: (match, teamOne, teamTwo) => saveMatchResult(match, teamOne, teamTwo),
+  saveState: () => saveState(),
+  queueRemoteSetResult: (match, teamOne, teamTwo) => queueRemoteSetResult(match, teamOne, teamTwo),
+  render: () => render(),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  isCurrentUserAdmin: () => isCurrentUserAdmin(),
+  isSupabaseReady: () => isSupabaseReady(),
+  remotePlayerResult,
+  translate: (key, values) => t(key, values),
+  escapeHtml: (value) => escapeHtml(value),
+  escapeAttribute: (value) => escapeAttribute(value),
+});
 
 const workspaceOverview = window.PadelstarWorkspaceOverview.create({
   appendEmptyText: (container, text) => appendEmptyText(container, text),
@@ -1855,85 +1877,19 @@ function renderPlayerNextMatch(matches) {
 }
 
 function renderPlayerResultForm(matches) {
-  if (!elements.playerResultForm || !elements.playerResultPanel) return;
-  const player = getPlayerById(state.selectedPlayerId);
-  const ownMatches = player ? matches.filter((match) => matchIncludesPlayer(match, player.id) && !["cancelled"].includes(match.state)) : [];
-  elements.playerResultPanel.classList.toggle("hidden", !player || ownMatches.length === 0 || state.status === "Avsluttet");
-  if (!player || ownMatches.length === 0) return;
-  const previousMatchId = elements.playerResultMatch.value;
-  elements.playerResultMatch.replaceChildren(...ownMatches.map((match) => {
-    const option = document.createElement("option");
-    option.value = match.id;
-    option.textContent = `${matchContextText(match)} · ${match.teamOne.displayName} vs ${match.teamTwo.displayName}`;
-    return option;
-  }));
-  if (ownMatches.some((match) => match.id === previousMatchId)) elements.playerResultMatch.value = previousMatchId;
-  const selectedMatch = getMatchById(elements.playerResultMatch.value) ?? ownMatches[0];
-  elements.playerResultMatch.value = selectedMatch.id;
-  elements.playerResultForm.elements.teamOne.value = selectedMatch.currentSet?.teamOne ?? "";
-  elements.playerResultForm.elements.teamTwo.value = selectedMatch.currentSet?.teamTwo ?? "";
-  const resultState = window.PadelstarScoreSubmissions?.forMatch(state, selectedMatch.id);
-  elements.playerResultStatus.textContent = resultState?.status === "conflict" ? t("score.conflict") : resultState?.status === "confirmed" ? t("score.confirmed") : "";
-  elements.playerResultStatus.className = `status-chip ${resultState?.status === "conflict" ? "error" : ""}`;
+  return resultSubmissions.renderPlayerResultForm(matches);
 }
 
 function renderResultSubmissions(matches) {
-  const container = elements.adminResultSubmissions;
-  if (!container) return;
-  const submissions = (state.scoreSubmissions ?? []).filter((submission) => submission.status !== "rejected");
-  if (submissions.length === 0) {
-    container.innerHTML = "";
-    return;
-  }
-  container.innerHTML = `<div class="panel-heading"><h3>${t("score.submissionsTitle")}</h3><span>${submissions.length}</span></div>${submissions.map((submission) => {
-    const match = matches.find((item) => item.id === submission.matchId);
-    if (!match) return "";
-    const player = getPlayerById(submission.submittedBy);
-    return `<article class="result-submission ${submission.status === "conflict" ? "is-conflict" : ""}">
-      <div><strong>${escapeHtml(matchContextText(match))}</strong><span>${escapeHtml(player?.name ?? t("common.player"))} · ${escapeHtml(new Date(submission.submittedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))}</span></div>
-      <strong>${submission.teamOne}-${submission.teamTwo}</strong>
-      <button class="secondary review-result-button" type="button" data-submission-id="${escapeAttribute(submission.id)}">${t("score.useSubmission")}</button>
-    </article>`;
-  }).join("")}`;
-  container.querySelectorAll(".review-result-button").forEach((button) => {
-    button.addEventListener("click", () => reviewPlayerSubmission(button.dataset.submissionId));
-  });
+  return resultSubmissions.renderResultSubmissions(matches);
 }
 
 function reviewPlayerSubmission(submissionId) {
-  if (!isCurrentUserAdmin()) return;
-  const submission = (state.scoreSubmissions ?? []).find((item) => item.id === submissionId);
-  const match = getMatchById(submission?.matchId);
-  if (!submission || !match) return;
-  if (isSupabaseReady()) {
-    window.PadelstarScoreSubmissions?.resolve(state, match.id, submission.teamOne, submission.teamTwo, "admin");
-    eventLog.record("result_resolved", "match", match.id, { teamOne: submission.teamOne, teamTwo: submission.teamTwo, sourceSubmissionId: submission.id });
-    saveState();
-    queueRemoteSetResult(match, submission.teamOne, submission.teamTwo);
-    render();
-    return;
-  }
-  saveMatchResult(match, submission.teamOne, submission.teamTwo);
-  render();
+  return resultSubmissions.reviewPlayerSubmission(submissionId);
 }
 
 function submitPlayerResult(matchId, teamOne, teamTwo) {
-  const player = getPlayerById(state.selectedPlayerId);
-  const match = getMatchById(matchId);
-  if (!player || !match || !matchIncludesPlayer(match, player.id) || !window.PadelstarScoreSubmissions) return;
-  const validationError = scoring.validateSetScore(teamOne, teamTwo, state.settings);
-  if (validationError) {
-    showToast(validationError, "status-message-error");
-    return;
-  }
-  const result = window.PadelstarScoreSubmissions.add(state, window.PadelstarScoreSubmissions.createSubmission({
-    matchId, teamOne, teamTwo, submittedBy: player.id,
-  }));
-  eventLog.record("score_submitted", "match", matchId, { teamOne, teamTwo, status: result.status });
-  saveState();
-  render();
-  showToast(result.status === "conflict" ? t("score.conflictHint") : t("score.submitted"), result.status === "conflict" ? "status-message-error" : "status-message-success");
-  if (remotePlayerResult) void remotePlayerResult.submit(matchId, teamOne, teamTwo);
+  return resultSubmissions.submitPlayerResult(matchId, teamOne, teamTwo);
 }
 
 function notifyPlayerMatch(match, kind) {
