@@ -1,6 +1,22 @@
 # Padelstar – implementeringsdokumentasjon
 
-Sist oppdatert: 2026-09-04
+Sist oppdatert: 2026-09-12
+
+## 2026-09-12 – statusrydding og fersk verifikasjon
+
+- Baseline: `main` på `621c4eb`. Endringene i denne økten er lokale, ikke committet eller publisert.
+- Samordnet README, masterplan, implementasjonsstatus og modulariseringsplan. Rettet beskrivelsen av faktisk valgfri admininnlogging uten å endre produktatferd; kontomodellen ble senere presisert av eieren: database for multiplayer også uten konto; konto for permanent eierskap og personlig historikk.
+- Fjernet seks byte-identiske testkopier. Lokal suite: 215 bestått, 1 forventet live-skip, 0 feil. Syntaks og diff-sjekk bestod.
+- Separat live-Supabase-kontrakttest bestod 1/1, inkludert bekreftet opprydding. Lokal desktop-/mobil-smoke bestod. Produksjonen svarte HTTP 200 og health `ok: true`; HTML og tournament-entry samsvarte med baseline.
+- Full innlogget flerklient-/reconnect-flyt er fortsatt uverifisert; ingen kjent testkonto er tilgjengelig. Se [verifikasjonsmatrisen](Development/implementasjonsstatus.md) for presis dekning og neste kontroll.
+
+## 2026-09-12 – presisering fra produkteier
+
+- Konto er ikke nødvendig for å opprette eller delta i en turnering, heller ikke på flere enheter. Databasen brukes for delt aktiv turneringsdata også for gjester. Konto gir permanent eierskap og turneringshistorikk for oppretteren, og permanent personlig statistikk for innloggede spillere. En gjesteeid turnering slettes etter avslutning eller avbrytelse, først når statistikken til registrerte spillere er lagret uavhengig av turneringen.
+- Generelt obligatorisk admininnlogging er forkastet. Produktbeslutninger, masterplan, README og status er rettet.
+- Tidligere funn om anonym databaseopprettelse som avvik trekkes tilbake. Midlertidig databasebruk uten konto er tilsiktet. Full retensjons-/statistikkflyt er ikke verifisert på nytt.
+- Eierens fullstendige kravtekst er lagret i [konto-, database- og turneringsflyt](Development/konto-database-turneringsflyt.md), inkludert valg om innlogging/registrering/fortsett uten konto for både admin og spiller.
+- Kun dokumentasjon endret; `git diff --check` kontrollert. Ingen ny commit eller publisering.
 
 ## Gjeldende produktbeslutninger
 
@@ -10,7 +26,7 @@ Gjeldende produktversjon: **0.5 (Beta)**.
 
 ## Nåtilstand etter branch-gjennomgang 2026-09-04
 
-Denne statusen beskriver arbeidskopien på branchen `codex/padelstar-ui-refresh`, inkludert lokale endringer som ennå ikke er publisert. Den er den mest presise oversikten over hva som faktisk finnes i appen.
+Denne statusen beskriver arbeidskopien på branchen `codex/padelstar-ui-refresh`, inkludert lokale endringer som ennå ikke er publisert. Dette er historisk status; fersk kontroll av `main` står i [implementasjonsstatus](Development/implementasjonsstatus.md).
 
 ### Implementerte brukerfunksjoner
 

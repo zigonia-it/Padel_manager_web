@@ -2,11 +2,33 @@
 
 Dette er en kort sporbar status for arbeidet som er kontrollert mot [Padelstar-komplett-utviklingsplan.md](Padelstar-komplett-utviklingsplan.md). Masterplanen gjelder ved motstrid.
 
-Gjeldende produktversjon: **0.5 (Beta)**. Sist kontrollert: **2026-09-04** på branchen `codex/padelstar-ui-refresh`.
+Gjeldende produktversjon: **0.5 (Beta)**. Sist kontrollert: **2026-09-12** på `main`, baseline `621c4eb`.
+
+## Fersk verifikasjon 2026-09-12
+
+Kontrollert mot `main`, commit `621c4eb`, med lokale dokumentasjonsendringer og fjerning av seks byte-identiske `test/* 2.js`-kopier. Ingen produksjonskode er endret eller publisert.
+
+| Kontroll | Resultat | Hva den faktisk dekker |
+|---|---|---|
+| `npm test` | 216 totalt: 215 bestått, 0 feil, 1 live-skip | Lokal regresjon etter fjerning av testkopier. Tidligere 224 inkluderte åtte dupliserte testtilfeller. |
+| `PADELSTAR_LIVE_SUPABASE=1 node --test test/live-supabase.test.js` | 1/1 bestått | Ekte RPC-opprettelse, join, poengføring, stale-revisjon, token-/tilgangskontroller og bekreftet sletting av egen testturnering. |
+| `scripts/browser-smoke.sh`, desktop og mobil | Begge bestått | Lokal opprettelse, start, admin/kampvisning og initial overflow-kontroll ved 1440 og 390 px. Ekstern backend er blokkert i dette testoppsettet. |
+| `npm run check:syntax` og `git diff --check` | Bestått | JavaScript-syntaks og patchformat. |
+| Produksjon HTTP | HTTP 200; health `ok: true`, versjon `0.5-beta` | Tilgjengelighet. Publisert `index.html` og `app/tournament-entry.js` er byte-identiske med lokal baseline. Dette bekrefter ikke hele deployen. |
+
+**Samlet vurdering: delvis verifisert.** Innlogging med testkonto, påmelding fra separat nettleser/enhet, observerte realtime-oppdateringer og offline/reconnect i produksjon er ikke kjørt. Ingen kjent testkonto er tilgjengelig; bruker opplyser at det er usikkert om en finnes. Den anonyme RPC-testen erstatter ikke denne brukerflyten. Push og produksjonens PWA-oppdateringsflyt er heller ikke verifisert på nytt.
+
+Neste avgrensede kontroll: bruk en dedikert testkonto til innlogging og opprettelse, meld inn en spiller fra en separat klient, før et resultat, og bekreft at begge klienter konvergerer etter frakobling/tilkobling. Bruk kun en merket testturnering og rydd den etterpå.
+
+## Avklart kontomodell og verifikasjonsgrense
+
+Konto er ikke nødvendig for å opprette eller delta i en turnering, heller ikke på flere enheter. Databasen brukes for delt aktiv turneringsdata også for gjester. Konto gir permanent eierskap og turneringshistorikk for oppretteren, og permanent personlig statistikk for innloggede spillere. En gjesteeid turnering slettes etter avslutning eller avbrytelse, først når statistikken til registrerte spillere er lagret uavhengig av turneringen.
+
+Anonym databaseopprettelse er i tråd med den presiserte modellen og er ikke i seg selv et implementasjonsgap. Tidligere konklusjon om innloggingssperre trekkes tilbake. Detaljert kravgrunnlag er [konto-, database- og turneringsflyt](konto-database-turneringsflyt.md). Full etterlevelse av permanent kontokoblet statistikk, slettingsrekkefølge og uavhengighet fra turneringsobjektet er ikke verifisert i denne dokumentasjonsrettingen.
 
 ## Kontrollert og implementert
 
-- Admin-oppretting krever passordbasert Supabase-innlogging når Supabase er aktiv.
+- Avklart kontomodell: Konto er ikke nødvendig for å opprette eller delta i en turnering, heller ikke på flere enheter. Databasen brukes for delt aktiv turneringsdata også for gjester. Konto gir permanent eierskap og turneringshistorikk for oppretteren, og permanent personlig statistikk for innloggede spillere. En gjesteeid turnering slettes etter avslutning eller avbrytelse, først når statistikken til registrerte spillere er lagret uavhengig av turneringen. Dagens kode knytter `ownerUserId` når admin er innlogget.
 - Konto kan opprettes, logges inn og logges ut med e-post og passord. Den gamle magiske lenke-flaten er skjult.
 - Registrerte kontoer har en 1:1 `public.profiles`-rad med RLS. Gjestespillere kan fortsatt bli med uten konto.
 - En innlogget spiller knyttes til `user_id` ved påmelding; konto er fortsatt ikke obligatorisk for spillere.

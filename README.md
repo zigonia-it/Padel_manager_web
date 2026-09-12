@@ -2,7 +2,7 @@
 
 Live app: https://padelstar.app
 
-Sist oppdatert: 2026-09-04
+Sist oppdatert: 2026-09-12
 
 Status: 0.5 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
@@ -14,6 +14,8 @@ Metadata:
 - Utvikler: Sigurd Steen Grødem
 
 Padelstar er en responsiv PWA for å opprette, administrere og følge padelturneringer på mobil, nettbrett og desktop. Appen kan hostes som statiske filer, men bruker Supabase for delt turneringsdata, live sync og sanntidsoppdateringer mellom enheter.
+
+Avklart kontomodell: Konto er ikke nødvendig for å opprette eller delta i en turnering, heller ikke på flere enheter. Databasen brukes for delt aktiv turneringsdata også for gjester. Konto gir permanent eierskap og turneringshistorikk for oppretteren, og permanent personlig statistikk for innloggede spillere. En gjesteeid turnering slettes etter avslutning eller avbrytelse, først når statistikken til registrerte spillere er lagret uavhengig av turneringen. Detaljert kravgrunnlag: [konto-, database- og turneringsflyt](docs/Development/konto-database-turneringsflyt.md).
 
 ## Hva appen gjør
 
@@ -30,6 +32,8 @@ Padelstar er en responsiv PWA for å opprette, administrere og følge padelturne
 - Fungerer lokalt i nettleseren med localStorage fallback, siste-kjente-gode recovery-kopi og IndexedDB-speiling der nettleseren støtter det.
 - Har Web Share med kopieringsfallback, opt-in lokale PWA-varsler og admin-eierskap via Supabase Auth for live-turneringer.
 - Har en kort, flerspråklig bruksanvisning på `guide.html`, lenket fra hjemmesiden og tilgjengelig offline.
+
+Fersk kontroll av `main` og verifikasjonsgrenser ligger i [implementasjonsstatus](docs/Development/implementasjonsstatus.md). Fase A–D er dokumentert gjennomført; fase E er beslutningsklar, men ikke startet.
 
 ## Aktiv utviklingsretning
 

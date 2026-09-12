@@ -1,10 +1,14 @@
 # Produktbeslutninger og endringsvern
 
-Sist oppdatert: 2026-09-03
+Sist oppdatert: 2026-09-12
 
 Dette dokumentet beskriver valg som er godkjent for Padelstar. Nye faser, redesign og refaktorering skal behandle valgene som produktkrav. De skal ikke endres, fjernes eller omtolkes uten uttrykkelig godkjenning fra Sigurd Steen Grødem.
 
+Detaljert, styrende presisering: [konto-, database- og turneringsflyt](konto-database-turneringsflyt.md). Denne presiseringen overstyrer eldre formuleringer om konto som krav for database/multiplayer.
+
 ## Godkjente valg
+
+- Konto er ikke nødvendig for å opprette eller delta i en turnering, heller ikke på flere enheter. Databasen brukes for delt aktiv turneringsdata også for gjester. Konto gir permanent eierskap og turneringshistorikk for oppretteren, og permanent personlig statistikk for innloggede spillere. En gjesteeid turnering slettes etter avslutning eller avbrytelse, først når statistikken til registrerte spillere er lagret uavhengig av turneringen.
 
 - Hovedmenyen skal ha denne rekkefølgen: Hjem, Bli med, Opprett, Admin, Spiller, Konto/Profil, TV Mode og Språk. Menyen skal oppføre seg likt på alle visninger, med samme størrelse, spacing, logo-posisjon og responsiv oppførsel.
 - Appen skal bruke den mørkeblå Padelstar-bakgrunnen og et felles visuelt uttrykk på tvers av hjemme-, oppsett-, admin-, spiller- og konto-visninger. Unødvendige ekstra bakgrunnspaneler og overskriftsflater skal ikke introduseres.

@@ -1,12 +1,12 @@
 # Plan for oppdeling av `app/app.js`
 
-**Sist kartlagt:** 2026-09-04  
-**Kartlagt commit:** `f734e72` på `codex/padelstar-ui-refresh`
-**Status:** Fase A er gjennomført og verifisert. Neste arbeid er ny gjennomgang av Fase B på denne baselinen.
+**Sist kartlagt:** 2026-09-12
+**Kartlagt commit:** `621c4eb` på `main`
+**Status:** Fase A–D er dokumentert gjennomført. Fase E er avgrenset, men ikke startet. Se fersk verifikasjon i `implementasjonsstatus.md`.
 
 ## 1. Konklusjon
 
-`app/app.js` er fortsatt composition root, men inneholder også flere resterende domener. Filen er 2503 linjer lang etter de verifiserte flyttingene. Prosjektet har allerede en etablert IIFE-/`window.Padelstar...`-arkitektur under `app/`, derfor bør videre oppdeling skje der og ikke ved å introdusere en parallell `js/`-struktur.
+`app/app.js` er fortsatt composition root, men inneholder også flere resterende domener. Filen er 2345 linjer lang på denne baselinen. Prosjektet har allerede en etablert IIFE-/`window.Padelstar...`-arkitektur under `app/`, derfor bør videre oppdeling skje der og ikke ved å introdusere en parallell `js/`-struktur.
 
 Målet for refaktoreringen bør være:
 
@@ -34,7 +34,7 @@ Følgende områder har allerede egne moduler og skal ikke implementeres på nytt
 
 ## 3. Faktisk innhold som fortsatt ligger i `app/app.js`
 
-Linjenumrene er kontrollert mot kartlagt commit og skal brukes som startpunkt, ikke som permanente API-kontrakter.
+Tabellen under er et historisk inventar fra før modulflyttingene (2026-09-04); linjenumrene beskriver ikke dagens fil. Gjennomføringsloggen nedenfor viser hva som siden er flyttet.
 
 | Linjer | Ansvar | Vurdering |
 |---:|---|---|

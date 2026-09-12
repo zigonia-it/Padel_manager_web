@@ -1,6 +1,6 @@
 # Padelstar – komplett utviklingsplan
 
-**Sist oppdatert:** 2026-09-04
+**Sist oppdatert:** 2026-09-12
 **Status:** Masterplan
 **Formål:** Samle eksisterende forbedringsarbeid og planlagte funksjoner i én prioritert utviklingsplan for Padelstar. Nåstatusen nedenfor overstyrer eldre formuleringer om hva som fortsatt bare er planlagt.
 
@@ -16,7 +16,7 @@ Padelstar skal utvikles til en moderne, mobilvennlig og installérbar turnerings
 - robust turneringslogikk
 - fleksibel støtte for flere turneringsformer
 - sanntidsoppdatering mellom enheter
-- valgfri spillerkonto og påkrevd admininnlogging
+- turneringer og deltakelse uten kontokrav, database for multiplayer og konto for permanent eierskap/historikk
 - historikk og statistikk
 - TV-/storskjermvisning
 - en databasearkitektur som er klar for kommende funksjoner
@@ -30,18 +30,18 @@ Hovedmålet skal være:
 
 # 2. Nåstatus etter branch-gjennomgang
 
-Arbeidskopien på `codex/padelstar-ui-refresh` er en 0.5 Beta-baseline:
+Arbeidskopien på `main`, baseline `621c4eb`, er 0.5 Beta. Fersk verifikasjon og gjenværende begrensninger står i [implementasjonsstatus](implementasjonsstatus.md). Fase A–D er dokumentert gjennomført; fase E er ikke startet.
 
 | Område | Status | Grunnlag |
 |---|---|---|
 | Kjerneflyt | Implementert | Opprett, join/QR, admin, spiller, tilskuer, scoring og avslutning er koblet i `index.html` og app-modulene. |
 | Turneringsformater | Implementert lokalt | Round-robin, cup, Americano, lag-Americano, Mexicano, lag-Mexicano, Kongen av banen og gruppespill/sluttspill har motor- og kontrakttester. |
 | Historikk og analyse | Implementert lokalt | Historikkberegning har egen modulgrense i `app/profile-history.js`. Spillerstatistikk, partner/head-to-head, sesongoppsummering og lokal rating/insight-beregning er testet. Vedvarende ratingdatabase og liga er ikke implementert. |
-| Konto og profil | Implementert lokalt | Supabase Auth med passord, profiler, eierkobling og forsinket sletting er testet. Live Auth-flyt må verifiseres mot miljøet. |
-| Live og sikkerhet | Implementert med produksjonsavhengig verifikasjon | RLS/RPC, tokenbinding, revisjon, rate limiting, realtime/reconnect og push-kontrakter er statisk/testmessig dekket; live-testen er forventet hoppet over lokalt. |
+| Konto og profil | Implementert lokalt | Supabase Auth med passord, profiler, eierkobling og forsinket sletting er testet. Admin kan opprette uten innlogging; innlogget eier kobles til kontoen. Live Auth-flyt er ikke verifisert på nytt. |
+| Live og sikkerhet | Implementert med produksjonsavhengig verifikasjon | RLS/RPC, tokenbinding, revisjon, rate limiting, realtime/reconnect og push-kontrakter er statisk/testmessig dekket; live-RPC-testen bestod 2026-09-12, inkludert opprett, join, scoring, revisjonskonflikt og opprydding. Dette dekker ikke Auth, nettleser-realtime eller push. |
 | PWA og offline | Implementert lokalt | Manifest, service worker, installasjonsfallback, recovery, IndexedDB-speiling og sync-kø er koblet inn og testet. |
 | UI og responsivitet | Implementert lokalt | Felles blå scorecard-design, fullbredde setup/workspace, TV Mode, hamburger/drawer, språkvelger og CSS-konsolidering er kontrollert i kode/tester. Lokal runtime er verifisert ved 390, 768 og 1280 px uten console-feil eller overflow; formell deploy-smoke gjenstår. |
-| Produksjon | Delvis verifisert | Statisk hosting- og deploykonfigurasjon finnes, men ny deploy, live flerklientflyt og produksjonscache er ikke verifisert i denne arbeidsøkten. |
+| Produksjon | Delvis verifisert | HTTP/health og to publiserte filer er kontrollert 2026-09-12. Live-RPC bestod. Innlogget flerklientflyt, reconnect og produksjonscache er fortsatt uverifisert; ingen ny deploy er utført. |
 
 Funksjonsdetaljer og brukerflyt ligger i [app_flow.md](../app_flow.md). Kronologiske endringer og verifikasjonsgrenser ligger i [documentation.md](../documentation.md).
 
@@ -306,7 +306,9 @@ Beslutning: Gjestedeltakere skal kun eksistere i turneringens aktive/live state.
 
 ### Admin
 
-Innlogging er påkrevd.
+**Avklart produktvalg, 2026-09-12:** Konto er ikke nødvendig for å opprette eller delta i en turnering, heller ikke på flere enheter. Databasen brukes for delt aktiv turneringsdata også for gjester. Konto gir permanent eierskap og turneringshistorikk for oppretteren, og permanent personlig statistikk for innloggede spillere. En gjesteeid turnering slettes etter avslutning eller avbrytelse, først når statistikken til registrerte spillere er lagret uavhengig av turneringen.
+
+Generelt krav om obligatorisk admininnlogging er forkastet. Konto kreves for permanent eierskap og personlig historikk, ikke for midlertidig databaselagring, opprettelse eller deltakelse.
 
 Dette gjør det mulig å:
 

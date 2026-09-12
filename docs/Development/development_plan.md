@@ -202,7 +202,7 @@ Fase E er gjennomgått uten implementering. Punktene under er beslutningsklare s
 | Punkt | Allerede implementert | Gjenværende scope | Må besluttes før start | Foreslåtte akseptansekriterier |
 |---|---|---|---|---|
 | Ekstern driftsvarsling for `/api/health` | Health-endepunktet finnes og returnerer status, versjon og tidsstempel. | En ekstern monitor som kaller endepunktet og varsler ved feil, treghet eller feil versjon. | Monitorleverandør, intervall, mottakere, taushets-/eskaleringsregler og om betaen skal ha dette. | Varsling ved ikke-2xx, timeout og versjonsavvik; dokumentert testvarsel; ingen hemmeligheter i payload/logg. |
-| Full konto- og tokenmigrering for administratorer | Supabase Auth er valgfritt; admin-token beskytter fortsatt lokale/live-turneringer. | Knytte eksisterende lokale adminøkter til konto, migrere eierskap og etablere konto-basert gjenoppretting. | Skal konto bli obligatorisk, hvordan håndteres gjesteeierskap, og hva er fallback ved tapt konto? | Migrering er idempotent, kan ikke overta andres turneringer, og rollback/feil gir ingen tap av admin-tilgang. |
+| Full konto- og tokenmigrering for administratorer | Supabase Auth er valgfritt; admin-token beskytter fortsatt lokale/live-turneringer. | Knytte eksisterende lokale adminøkter til konto, migrere eierskap og etablere konto-basert gjenoppretting. | Konto kreves for permanent eierskap; gjester kan bruke midlertidig databaselagring og multiplayer. Avklar migrering og fallback ved tapt konto. | Migrering er idempotent, kan ikke overta andres turneringer, og rollback/feil gir ingen tap av admin-tilgang. |
 | Mer avansert tiebreak/poengføring | Grunnleggende kamp-, sett-, game- og tabellpoengføring finnes. | Konfigurerbare tiebreak-regler, innbyrdes oppgjør, differanse og eventuelle turneringsspesifikke regler. | Regelverk, prioriteringsrekkefølge ved likhet og UI for valg/visning. | Samme input gir deterministisk rangering; regler vises før start og dekkes av positive/negative motor- og UI-tester. |
 | PDF-eksport av tabell og resultat | Tokenfri backup-eksport og web-/TV-visning finnes. | PDF-layout, metadata, språk, font/branding og eksport av ferdig/aktiv turnering. | Skal PDF lages lokalt eller via tjeneste, hvilke data skal inkluderes, og personvern ved deling? | Eksport fungerer offline, inneholder korrekt revisjon/resultat, har lesbar mobil/desktop-layout og eksponerer ingen tokens. |
 | Utvidet profilhistorikk og karrierestatistikk | Profil, historikk, aggregert statistikk og 30-dagers sletting finnes. | Sesonger, motstandere/partnere over tid, trender, filtrering og eksport. | Dataminimering, opt-in, sletting/portabilitet og hvilke beregninger som er produktkrav. | Aggregater kan spores til underliggende kamper, sletting fjerner avledede data innen avtalt frist, og visningen er tydelig på usikkerhet. |
@@ -220,9 +220,13 @@ Foreslått beslutningsrekkefølge etter A–D: (1) konto-/personvernmodell, (2) 
 5. Kjør full verifikasjon før push.
 6. Push til `origin/main` når brukerens arbeidsflyt uttrykkelig inkluderer publisering.
 
+## Fersk kontroll 2026-09-12
+
+Se [implementasjonsstatus](implementasjonsstatus.md) for fersk lokal regresjon, live-RPC og produksjonskontroll. Fase A–D-status nedenfor/over er historisk evidens; full innlogget flerklient- og reconnect-flyt er ikke verifisert på nytt. Dagens opprettelsesflyt tillater admin uten konto.
+
 ## Eierbeslutninger som fortsatt er åpne
 
 - Skal ekstern monitor for health-endepunktet innføres, og hvem mottar varsler?
-- Skal admin-konto bli obligatorisk, eller skal lokal/tokenbasert tilgang beholdes?
+- Hvordan håndteres eksisterende gjesteeide turneringer ved overgang til den avklarte livssyklusen for midlertidige data?
 - Hvilke produktforbedringer skal prioriteres etter beta?
 - Skal Vercel Analytics beholdes etter beta-evalueringen?
