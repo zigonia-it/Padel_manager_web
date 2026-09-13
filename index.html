@@ -43,7 +43,8 @@
       </div>
     </form>
   </dialog>
-  <dialog class="app-confirm-dialog" id="entryAccountDialog" aria-labelledby="entryAccountTitle" aria-describedby="entryAccountHint">
+  <dialog class="app-confirm-dialog" id="entryAccountDialog" aria-labelledby="entryAccountTitle"
+    aria-describedby="entryAccountHint">
     <form method="dialog" class="app-confirm-card">
       <h2 id="entryAccountTitle" data-i18n="entry.accountTitle">Velg hvordan du vil fortsette</h2>
       <p id="entryAccountHint"></p>
@@ -63,7 +64,8 @@
         <button class="brand-home-button" type="button" data-module-link="landing" aria-label="Gå til hjem"
           data-i18n-aria-label="nav.homeAria">
           <img class="brand-logo" src="assets/icons/padelstar-icon.png" alt="" width="3000" height="3000">
-          <img class="brand-wordmark" src="assets/logos/main_logo_without_icon.png" alt="Padelstar" width="1500" height="352">
+          <img class="brand-wordmark" src="assets/logos/main_logo_without_icon.png" alt="Padelstar" width="1500"
+            height="352">
         </button>
       </div>
       <div class="topbar-actions">
@@ -180,7 +182,8 @@
             <h3 data-i18n="resume.title">Dine turneringer</h3>
             <span id="resumeTitle" data-i18n="resume.continueTournament" hidden>Fortsett turnering</span>
             <span id="resumeSummary" data-i18n="resume.defaultSummary" hidden></span>
-            <p class="hint" data-i18n="resume.defaultSummary">Lagrede turneringer du kan åpne igjen på denne enheten.</p>
+            <p class="hint" data-i18n="resume.defaultSummary">Lagrede turneringer du kan åpne igjen på denne enheten.
+            </p>
           </div>
           <div class="saved-tournaments-list" id="savedTournamentsList"></div>
         </div>
@@ -232,15 +235,18 @@
               <label>
                 <span data-i18n="account.newPassword">Nytt passord</span>
                 <input id="accountAuthNewPassword" name="newPassword" type="password" autocomplete="new-password"
-                  minlength="6" data-i18n-placeholder="account.newPasswordPlaceholder" placeholder="La stå tomt for å beholde passordet">
+                  minlength="6" data-i18n-placeholder="account.newPasswordPlaceholder"
+                  placeholder="La stå tomt for å beholde passordet">
               </label>
               <label>
                 <span data-i18n="account.confirmPassword">Bekreft passord</span>
-                <input id="accountAuthPasswordConfirm" name="passwordConfirm" type="password" autocomplete="new-password"
-                  minlength="6" data-i18n-placeholder="account.confirmPasswordPlaceholder" placeholder="Skriv passordet på nytt">
+                <input id="accountAuthPasswordConfirm" name="passwordConfirm" type="password"
+                  autocomplete="new-password" minlength="6" data-i18n-placeholder="account.confirmPasswordPlaceholder"
+                  placeholder="Skriv passordet på nytt">
               </label>
               <div class="button-row">
-                <button class="secondary" id="accountAuthSave" type="submit" data-i18n="account.saveChanges">Lagre endringer</button>
+                <button class="secondary" id="accountAuthSave" type="submit" data-i18n="account.saveChanges">Lagre
+                  endringer</button>
                 <span class="hint" id="accountAuthCreated"></span>
               </div>
             </form>
@@ -290,7 +296,8 @@
         <div class="setup-intro-panel">
           <p class="eyebrow" data-i18n="setup.createEyebrow">Opprett</p>
           <h2 id="setupAdminTitle" data-i18n="setup.newTournament">Ny turnering</h2>
-          <p class="hint" data-i18n="setup.createDescription">Konfigurer din turnering raskt. Sett opp baner, opprett spillerlister manuelt, eller la spillere bli med selv med en invitasjonskode.</p>
+          <p class="hint" data-i18n="setup.createDescription">Konfigurer din turnering raskt. Sett opp baner, opprett
+            spillerlister manuelt, eller la spillere bli med selv med en invitasjonskode.</p>
         </div>
         <form class="panel setup-card" id="createTournamentForm">
           <label>
@@ -324,7 +331,8 @@
               data-i18n-placeholder="admin.identityEmailPlaceholder">
           </label>
           <div class="setup-account-option">
-            <span class="hint" data-i18n="setup.accountOptionalHint">Vil du lagre turneringen permanent? Opprett profil først.</span>
+            <span class="hint" data-i18n="setup.accountOptionalHint">Vil du lagre turneringen permanent? Opprett profil
+              først.</span>
           </div>
           <button class="ghost hidden" id="createAdminSignInLinkButton" type="button"
             data-i18n="actions.sendAdminLink">Send
@@ -342,7 +350,8 @@
         <div class="setup-intro-panel">
           <p class="eyebrow" data-i18n="setup.joinEyebrow">Bli med</p>
           <h2 id="setupPlayerTitle" data-i18n="setup.joinTitle">Bli med i turnering</h2>
-          <p class="hint" data-i18n="setup.joinDescription">Skriv inn invitasjonskoden du har fått fra arrangøren. Profilen din blir automatisk lagt til i spiller treet.</p>
+          <p class="hint" data-i18n="setup.joinDescription">Skriv inn invitasjonskoden du har fått fra arrangøren.
+            Profilen din blir automatisk lagt til i spiller treet.</p>
         </div>
         <form class="panel setup-card" id="joinTournamentForm">
           <label>
@@ -754,17 +763,18 @@
     </dialog>
 
     <footer class="site-footer">
-      <p class="version" data-i18n="app.version">v. 0.6 (Beta)</p>
       <p>
         <img class="footer-brand-logo" src="assets/logos/main_logo.png" alt="Padelstar" width="640" height="426"
           loading="lazy">
       </p>
+      <p class="version" data-i18n="app.version" width="640">v. 0.6 (Beta)</p>
       <p data-i18n="footer.developedBy">Utviklet av Sigurd Steen Grødem</p>
       <p>
         <span data-i18n="footer.copyrightPrefix">Copyright</span> &copy; <span id="copyrightYearRange">2026</span>.
         <span data-i18n="footer.rights">All rights reserved.</span>
       </p>
-      <p><a href="guide.html" data-i18n="guide.link">Bruksanvisning</a> · <a href="privacy.html" data-i18n="footer.privacy">Personvern</a></p>
+      <p><a href="guide.html" data-i18n="guide.link">Bruksanvisning</a> · <a href="privacy.html"
+          data-i18n="footer.privacy">Personvern</a></p>
     </footer>
 
 
