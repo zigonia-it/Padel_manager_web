@@ -323,7 +323,7 @@ Object.assign(padelstarTranslations.nb, {
   "queue.later": "Deretter",
   "queue.empty": "Ingen kamper i kø akkurat nå.",
   "meta.description": "Padelstar - Padel Manager av Sigurd Steen Grødem / Zigonia IT. Administrer padelturneringer, kamper, baner og resultater.",
-  "app.version": "v. 0.5 (Beta)",
+  "app.version": "v. 0.6 (Beta)",
   "hero.title": "Spill mer. Organiser mindre.",
   "hero.subtitle": "Opprett turneringen, inviter spillerne og la Padelstar ordne med resten.",
   "avatar.smash": "Smash",
@@ -1144,6 +1144,23 @@ function interpolate(template, values = {}) {
 }
 
 window.PadelstarLanguages = padelstarLanguageMeta;
+const finalizationErrors = {
+  nb: "Kunne ikke avslutte. Resultatene er beholdt. Koble til og prøv igjen.",
+  nn: "Kunne ikkje avslutte. Resultata er tekne vare på. Kople til og prøv igjen.",
+  en: "Could not finish. Results are kept. Reconnect and try again.",
+  sv: "Kunde inte avsluta. Resultaten är sparade. Anslut och försök igen.",
+  da: "Kunne ikke afslutte. Resultaterne er bevaret. Opret forbindelse og prøv igen.",
+  es: "No se pudo finalizar. Los resultados se conservan. Vuelve a conectarte e inténtalo de nuevo.",
+  de: "Abschluss fehlgeschlagen. Die Ergebnisse bleiben erhalten. Verbinde dich erneut und versuche es noch einmal.",
+  fr: "Impossible de terminer. Les résultats sont conservés. Reconnectez-vous et réessayez.",
+};
+for (const [language, message] of Object.entries(finalizationErrors)) {
+  Object.assign(padelstarTranslations[language], { "lifecycle.finalizeFailed": message });
+}
+const entryAccountMessages = {"nb": ["Velg hvordan du vil fortsette", "Fortsett uten konto", "Med konto beholder du turneringen etter avslutning. Uten konto kan alle spille og synkronisere mens turneringen pågår.", "Med konto beholder du egen statistikk. Uten konto kan du delta normalt, men får ikke permanent personlig historikk."], "nn": ["Vel korleis du vil halde fram", "Hald fram utan konto", "Med konto tek du vare på turneringa etter avslutning. Utan konto kan alle spele og synkronisere medan turneringa går føre seg.", "Med konto tek du vare på eigen statistikk. Utan konto kan du delta som vanleg, men får ikkje varig personleg historikk."], "en": ["Choose how to continue", "Continue without an account", "An account keeps your tournament after it ends. Without an account, everyone can still play and sync during the tournament.", "An account keeps your personal statistics. Without an account, you can play normally but have no permanent personal history."], "es": ["Elige cómo continuar", "Continuar sin cuenta", "Con una cuenta conservas el torneo al finalizar. Sin cuenta, todos pueden jugar y sincronizar durante el torneo.", "Con una cuenta conservas tus estadísticas. Sin cuenta puedes jugar normalmente, pero no tendrás un historial personal permanente."], "de": ["Wähle, wie du fortfahren möchtest", "Ohne Konto fortfahren", "Mit einem Konto bleibt dein Turnier nach dem Ende gespeichert. Ohne Konto können alle während des Turniers spielen und synchronisieren.", "Mit einem Konto bleiben deine persönlichen Statistiken gespeichert. Ohne Konto kannst du normal mitspielen, erhältst aber keinen dauerhaften persönlichen Verlauf."], "fr": ["Choisissez comment continuer", "Continuer sans compte", "Avec un compte, votre tournoi est conservé après sa fin. Sans compte, tous peuvent jouer et synchroniser pendant le tournoi.", "Avec un compte, vos statistiques personnelles sont conservées. Sans compte, vous pouvez jouer normalement, mais sans historique personnel permanent."], "sv": ["Välj hur du vill fortsätta", "Fortsätt utan konto", "Med konto behåller du turneringen efter avslut. Utan konto kan alla spela och synkronisera medan turneringen pågår.", "Med konto behåller du din statistik. Utan konto kan du delta som vanligt, men får ingen permanent personlig historik."], "da": ["Vælg, hvordan du vil fortsætte", "Fortsæt uden konto", "Med en konto beholder du turneringen efter afslutning. Uden konto kan alle spille og synkronisere, mens turneringen er i gang.", "Med en konto beholder du din statistik. Uden konto kan du deltage normalt, men får ingen permanent personlig historik."]};
+for (const [language, values] of Object.entries(entryAccountMessages)) {
+  Object.assign(padelstarTranslations[language], { "entry.accountTitle": values[0], "entry.continueGuest": values[1], "entry.accountAdminHint": values[2], "entry.accountPlayerHint": values[3] });
+}
 window.PadelstarTranslations = padelstarTranslations;
 window.PadelstarI18n = {
   fallbackLanguage,

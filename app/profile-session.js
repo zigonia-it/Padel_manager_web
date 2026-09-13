@@ -10,6 +10,7 @@
       getProfile,
       getState,
       getSupabaseClient,
+      getAccountUser = () => null,
       mirrorStorageKeys,
       profileHistoryStorageKey,
       profileManager,
@@ -68,7 +69,7 @@
     async function syncProfileRemote() {
       const currentProfile = profile();
       const supabaseClient = getSupabaseClient();
-      if (!supabaseClient || !currentProfile?.accessToken) return false;
+      if (!supabaseClient || !currentProfile?.accessToken || !getAccountUser()) return false;
       const { data, error } = await remoteRpc(supabaseClient, "upsert_player_profile", {
         p_profile_id: currentProfile.id,
         p_profile_token: currentProfile.accessToken,
@@ -86,45 +87,33 @@
       return true;
     }
 
-    async function syncProfileHistoryRemote(entry) {
-      const currentProfile = profile();
-      const supabaseClient = getSupabaseClient();
-      if (!supabaseClient || !currentProfile?.accessToken) return false;
-      if (!entry) return syncProfileHistoryRemoteRead();
-      const { error } = await remoteRpc(supabaseClient, "save_player_profile_history", {
-        p_profile_id: currentProfile.id,
-        p_profile_token: currentProfile.accessToken,
-        p_history: entry,
-      });
-      if (error) {
-        console.warn("Profile history sync failed", error);
-        return false;
-      }
-      return true;
+    async function syncProfileHistoryRemote() {
+      // Statistics are written by finalize_tournament, never by a participant's
+      // browser. Refresh this account's rows through its authenticated RLS scope.
+      return syncProfileHistoryRemoteRead();
     }
 
     async function syncProfileHistoryRemoteRead() {
+      const account = getAccountUser();
       const currentProfile = profile();
-      const supabaseClient = getSupabaseClient();
-      if (!supabaseClient || !currentProfile?.accessToken) return false;
-      const { data, error } = await remoteRpc(supabaseClient, "get_player_profile_history", {
-        p_profile_id: currentProfile.id,
-        p_profile_token: currentProfile.accessToken,
-      });
+      const client = getSupabaseClient();
+      if (!account?.id || !currentProfile || !client?.from) return false;
+      const { data, error } = await client.from("account_tournament_statistics")
+        .select("tournament_id, ended_at, outcome, matches, wins, sets, games")
+        .eq("user_id", account.id).order("ended_at", { ascending: false });
       if (error) {
-        getObservability()?.error("profile_history_read_failed", error);
+        getObservability()?.error("account_statistics_read_failed", error);
         return false;
       }
-      let entries = Array.isArray(data) ? data : [];
-      if (typeof data === "string") {
-        try {
-          entries = JSON.parse(data);
-        } catch {
-          entries = [];
-        }
+      if (getAccountUser()?.id !== account.id || profile()?.id !== currentProfile.id) return false;
+      for (const row of data ?? []) {
+        profileManager.recordHistory(storage(), profileHistoryStorageKey, {
+          id: row.tournament_id, profileId: currentProfile.id, accountUserId: account.id,
+          endedAt: row.ended_at, outcome: row.outcome, matches: row.matches,
+          wins: row.wins, sets: row.sets, games: row.games,
+          tournamentName: t("tournament.finished"),
+        });
       }
-      if (!Array.isArray(entries)) entries = [];
-      entries.forEach((entry) => profileManager.recordHistory(storage(), profileHistoryStorageKey, entry));
       mirrorStorageKeys([profileHistoryStorageKey]);
       renderProfile();
       return true;

@@ -165,6 +165,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(appRendererPath, "utf8"), context, { filename: appRendererPath });
   vm.runInContext(fs.readFileSync(storagePath, "utf8"), context, { filename: storagePath });
   vm.runInContext(fs.readFileSync(renderingPath, "utf8"), context, { filename: renderingPath });
+  vm.runInContext(fs.readFileSync(path.join(appRoot, "tournament-finalization.js"), "utf8"), context);
   vm.runInContext(fs.readFileSync(remoteTournamentPath, "utf8"), context, { filename: remoteTournamentPath });
   vm.runInContext(fs.readFileSync(adminActionsPath, "utf8"), context, { filename: adminActionsPath });
   vm.runInContext(fs.readFileSync(playerActionsPath, "utf8"), context, { filename: playerActionsPath });

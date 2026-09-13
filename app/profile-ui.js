@@ -1,5 +1,5 @@
 window.PadelstarProfileUi = (() => {
-  function create({ defaultAvatarId, elements, escapeHtml, getLocalStorage, getProfile, getProfileManager, profileHistoryStorageKey, t }) {
+  function create({ defaultAvatarId, elements, escapeHtml, getLocalStorage, getProfile, getAccountUser = () => null, getProfileManager, profileHistoryStorageKey, t }) {
     function renderProfile() {
       const profileManager = getProfileManager();
       const profile = getProfile();
@@ -14,7 +14,9 @@ window.PadelstarProfileUi = (() => {
       elements.profileDeletionStatus.classList.toggle("hidden", !pendingDeletion);
       elements.deleteProfileButton.classList.toggle("hidden", !profile || pendingDeletion);
       elements.cancelProfileDeletionButton.classList.toggle("hidden", !pendingDeletion);
-      const history = profileManager.historyForProfile(profileManager.loadHistory(getLocalStorage(), profileHistoryStorageKey), profile?.id);
+      const accountId = getAccountUser()?.id;
+      const history = accountId ? profileManager.historyForProfile(profileManager.loadHistory(getLocalStorage(), profileHistoryStorageKey), profile?.id)
+        .filter((entry) => entry.accountUserId === accountId) : [];
       const summary = profileManager.summarizeHistory(history);
       elements.profileStats.innerHTML = profile ? [
         [t("profile.tournaments"), summary.tournaments], [t("profile.matches"), summary.matches],

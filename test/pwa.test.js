@@ -88,7 +88,7 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v273/);
+  assert.match(serviceWorkerSource, /padelstar-v274/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-40/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-40/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -248,16 +248,16 @@ test("tournament create and join flows have their own event boundary", () => {
   assert.match(tournamentEntrySource, /handleCreate/);
   assert.match(tournamentEntrySource, /handleJoin/);
   assert.match(tournamentEntrySource, /global\.PadelstarTournamentEntry/);
-  assert.match(indexSource, /app\/tournament-entry\.js\?v=padelstar-tournament-entry-1/);
-  assert.match(serviceWorkerSource, /app\/tournament-entry\.js\?v=padelstar-tournament-entry-1/);
+  assert.match(indexSource, /app\/tournament-entry\.js\?v=padelstar-tournament-entry-2/);
+  assert.match(serviceWorkerSource, /app\/tournament-entry\.js\?v=padelstar-tournament-entry-2/);
   assert.match(appSource, /PadelstarTournamentEntry\?\.create/);
 });
 
 test("admin form mutations have their own event boundary", () => {
   assert.match(adminFormEventsSource, /generateRoundBlockReason/);
   assert.match(adminFormEventsSource, /global\.PadelstarAdminFormEvents/);
-  assert.match(indexSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-2/);
-  assert.match(serviceWorkerSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-2/);
+  assert.match(indexSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-3/);
+  assert.match(serviceWorkerSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-3/);
   assert.match(appSource, /PadelstarAdminFormEvents\?\.create/);
 });
 
@@ -770,8 +770,8 @@ test("remote state orchestration has its own module boundary", () => {
   assert.match(remoteStateControllerSource, /markRemoteConflict/);
   assert.match(remoteStateControllerSource, /ownerUserId/);
   assert.match(remoteStateControllerSource, /window\.PadelstarRemoteStateController/);
-  assert.match(indexSource, /app\/core\/remote-state-controller\.js\?v=padelstar-remote-state-controller-1/);
-  assert.match(serviceWorkerSource, /app\/core\/remote-state-controller\.js\?v=padelstar-remote-state-controller-1/);
+  assert.match(indexSource, /app\/core\/remote-state-controller\.js\?v=padelstar-remote-state-controller-2/);
+  assert.match(serviceWorkerSource, /app\/core\/remote-state-controller\.js\?v=padelstar-remote-state-controller-2/);
 });
 
 test("remote sync orchestration has its own module boundary", () => {
@@ -846,7 +846,7 @@ test("active app files do not reference archived assets", () => {
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
   assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-97/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-40/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-41/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
@@ -857,7 +857,7 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-1/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-97/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-40/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-41/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);

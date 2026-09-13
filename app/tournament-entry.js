@@ -30,11 +30,39 @@
       t,
     } = deps;
 
+    let pendingEntry = null;
+    let choosing = false;
+
+    async function chooseAccount(kind, event, authenticatedUser) {
+      if (authenticatedUser || !deps.requestAccountChoice || event.accountChoice === "guest") return true;
+      if (choosing) return false;
+      choosing = true;
+      let choice;
+      try { choice = await deps.requestAccountChoice(kind); }
+      finally { choosing = false; }
+      if (choice === "guest") return true;
+      if (choice === "signin" || choice === "signup") {
+        pendingEntry = { kind, form: event.currentTarget };
+        showAccount(choice);
+      }
+      return false;
+    }
+
+    async function resumePendingEntry() {
+      if (!pendingEntry) return false;
+      const pending = pendingEntry;
+      pendingEntry = null;
+      const event = { preventDefault() {}, currentTarget: pending.form };
+      if (!pending.form.reportValidity()) return false;
+      return pending.kind === "create" ? handleCreate(event) : handleJoin(event);
+    }
+
     async function handleCreate(event) {
       event.preventDefault();
       const form = event.currentTarget;
       let adminUser = null;
       if (getAdminAuthUser && getClient()) adminUser = await getAdminAuthUser();
+      if (!await chooseAccount("create", event, adminUser)) return false;
       const formData = new FormData(form);
       const adminParticipates = formData.get("adminParticipates") === "on";
       const adminPlayerName = formData.get("adminPlayerName").trim();
@@ -55,6 +83,7 @@
         players: tournamentPlayers,
         courtCount: Number(formData.get("courts")),
       });
+      nextState.remoteMode = getClient() ? "shared" : "local";
       if (adminUser?.id) nextState.ownerUserId = adminUser.id;
       if (getProfile?.()?.id) nextState.ownerProfileId = getProfile().id;
 
@@ -76,6 +105,8 @@
     async function handleJoin(event) {
       event.preventDefault();
       const form = event.currentTarget;
+      const user = getAdminAuthUser && getClient() ? await getAdminAuthUser() : null;
+      if (!await chooseAccount("join", event, user)) return false;
       const formData = new FormData(form);
       const inviteCode = formData.get("inviteCode").trim().toUpperCase();
       const playerName = formData.get("playerName").trim();
@@ -120,7 +151,7 @@
       elements.joinTournamentForm?.addEventListener("submit", handleJoin);
     }
 
-    return { bind, handleCreate, handleJoin };
+    return { bind, handleCreate, handleJoin, resumePendingEntry };
   }
 
   global.PadelstarTournamentEntry = { create };

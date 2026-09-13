@@ -43,6 +43,19 @@
       </div>
     </form>
   </dialog>
+  <dialog class="app-confirm-dialog" id="entryAccountDialog" aria-labelledby="entryAccountTitle" aria-describedby="entryAccountHint">
+    <form method="dialog" class="app-confirm-card">
+      <h2 id="entryAccountTitle" data-i18n="entry.accountTitle">Velg hvordan du vil fortsette</h2>
+      <p id="entryAccountHint"></p>
+      <div class="dialog-actions">
+        <button class="button secondary" value="signin" data-i18n="account.signIn">Logg inn</button>
+        <button class="button secondary" value="signup" data-i18n="account.signUp">Opprett konto</button>
+        <button class="button primary" value="guest" data-i18n="entry.continueGuest">Fortsett uten konto</button>
+        <button class="button ghost" value="cancel" data-i18n="actions.close">Lukk</button>
+      </div>
+    </form>
+  </dialog>
+
   <a class="skip-link" href="#app-main" data-i18n="nav.skipToContent">Hopp til innhold</a>
   <div class="app-shell">
     <header class="topbar">
@@ -114,7 +127,6 @@
               Opprett turneringen, inviter spillerne og la Padelstar ordne med resten.
             </p>
             <h2 id="startTitle">PADELSTAR</h2>
-            <h4 class="version" data-i18n="app.version">v. 0.5 (Beta)</h4>
             <div class="landing-actions" aria-label="Startvalg" data-i18n-aria-label="nav.startChoicesAria">
               <button class="landing-cta" type="button" data-module-link="setup-player" data-i18n="nav.join">Bli
                 med</button>
@@ -742,6 +754,7 @@
     </dialog>
 
     <footer class="site-footer">
+      <p class="version" data-i18n="app.version">v. 0.6 (Beta)</p>
       <p>
         <img class="footer-brand-logo" src="assets/logos/main_logo.png" alt="Padelstar" width="640" height="426"
           loading="lazy">
@@ -760,7 +773,7 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-23"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-24"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-5"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
@@ -802,6 +815,7 @@
   <script defer src="app/backup-ui.js?v=padelstar-backup-ui-1"></script>
   <script defer src="app/player-state.js?v=padelstar-player-state-1"></script>
   <script defer src="app/tournament-status.js?v=padelstar-tournament-status-1"></script>
+  <script defer src="app/tournament-finalization.js?v=padelstar-finalization-1"></script>
   <script defer src="app/scoring-engine.js?v=padelstar-scoring-2"></script>
   <script defer src="app/state-manager.js?v=padelstar-state-1"></script>
   <script defer src="app/realtime-sync.js?v=padelstar-realtime-sync-1"></script>
@@ -829,7 +843,7 @@
   <script defer src="app/core/utilities.js?v=padelstar-utilities-1"></script>
   <script defer src="app/core/language-controller.js?v=padelstar-language-controller-1"></script>
   <script defer src="app/core/session-controller.js?v=padelstar-session-controller-1"></script>
-  <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-1"></script>
+  <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-2"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
   <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-1"></script>
   <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-1"></script>
@@ -852,11 +866,11 @@
   <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-3"></script>
   <script defer src="app/app-events.js?v=padelstar-app-events-1"></script>
   <script defer src="app/workspace-events.js?v=padelstar-workspace-events-1"></script>
-  <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-1"></script>
-  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-2"></script>
+  <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-2"></script>
+  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-3"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-1"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-1"></script>
-  <script defer src="app/app.js?v=padelstar-session-40"></script>
+  <script defer src="app/app.js?v=padelstar-session-41"></script>
 </body>
 
 </html>

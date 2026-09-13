@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v273";
+const cacheName = "padelstar-v274";
 
 const appShell = [
   "./",
@@ -18,7 +18,7 @@ const appShell = [
   "./styles/responsive.css?v=padelstar-responsive-1",
   "./styles/ui-consistency.css?v=padelstar-ui-consistency-40",
   "./styles/privacy.css?v=padelstar-privacy-2",
-  "./app/translations.js?v=padelstar-i18n-23",
+  "./app/translations.js?v=padelstar-i18n-24",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-5",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -63,6 +63,7 @@ const appShell = [
   "./app/backup-ui.js?v=padelstar-backup-ui-1",
   "./app/player-state.js?v=padelstar-player-state-1",
   "./app/tournament-status.js?v=padelstar-tournament-status-1",
+  "./app/tournament-finalization.js?v=padelstar-finalization-1",
   "./app/scoring-engine.js?v=padelstar-scoring-2",
   "./app/state-manager.js?v=padelstar-state-1",
   "./app/realtime-sync.js?v=padelstar-realtime-sync-1",
@@ -90,7 +91,7 @@ const appShell = [
   "./app/core/utilities.js?v=padelstar-utilities-1",
   "./app/core/language-controller.js?v=padelstar-language-controller-1",
   "./app/core/session-controller.js?v=padelstar-session-controller-1",
-  "./app/core/remote-state-controller.js?v=padelstar-remote-state-controller-1",
+  "./app/core/remote-state-controller.js?v=padelstar-remote-state-controller-2",
   "./app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1",
   "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-1",
   "./app/bootstrap/app-meta.js?v=padelstar-app-meta-1",
@@ -113,11 +114,11 @@ const appShell = [
   "./app/workspace-navigation.js?v=padelstar-workspace-navigation-3",
   "./app/app-events.js?v=padelstar-app-events-1",
   "./app/workspace-events.js?v=padelstar-workspace-events-1",
-  "./app/tournament-entry.js?v=padelstar-tournament-entry-1",
-  "./app/admin-form-events.js?v=padelstar-admin-form-events-2",
+  "./app/tournament-entry.js?v=padelstar-tournament-entry-2",
+  "./app/admin-form-events.js?v=padelstar-admin-form-events-3",
   "./app/match-actions.js?v=padelstar-match-actions-1",
   "./app/initial-view.js?v=padelstar-initial-view-1",
-  "./app/app.js?v=padelstar-session-40",
+  "./app/app.js?v=padelstar-session-41",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",

@@ -596,6 +596,7 @@ const profileUi = window.PadelstarProfileUi.create({
   elements,
   escapeHtml: (value) => escapeHtml(value),
   getLocalStorage: () => localStorage,
+  getAccountUser: () => accountAuth?.currentUser(),
   getProfile: () => profile,
   getProfileManager: () => profileManager,
   profileHistoryStorageKey,
@@ -664,6 +665,7 @@ const profileSession = window.PadelstarProfileSession.create({
   getPlayerById: (id) => getPlayerById(id),
   getProfile: () => profile,
   getState: () => state,
+  getAccountUser: () => accountAuth?.currentUser(),
   getSupabaseClient: () => supabaseClient,
   mirrorStorageKeys: (keys) => persistence.mirrorKeys(keys),
   profileHistoryStorageKey,
@@ -722,7 +724,7 @@ const accountAuth = window.PadelstarAccountAuth?.create({
   getClient: () => supabaseClient,
   getElements: () => elements,
   getProfile: () => profile,
-  onAuthChange: () => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); },
+  onAuthChange: (user) => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void tournamentEntry?.resumePendingEntry(); } },
   onProfileLoaded: (remoteProfile) => {
     profile = profile
       ? profileManager.normalizeProfile({ ...profile, ...remoteProfile })
@@ -785,6 +787,18 @@ const matchActions = window.PadelstarMatchActions.create({
   t: (key, values) => t(key, values),
 });
 const initialView = window.PadelstarInitialView;
+function requestEntryAccountChoice(kind) {
+  const dialog = document.querySelector("#entryAccountDialog");
+  if (!dialog?.showModal) return Promise.resolve("cancel");
+  const previousFocus = document.activeElement;
+  dialog.querySelector("#entryAccountHint").textContent = t(kind === "create" ? "entry.accountAdminHint" : "entry.accountPlayerHint");
+  dialog.returnValue = "cancel";
+  dialog.showModal();
+  return new Promise((resolve) => dialog.addEventListener("close", () => {
+    previousFocus?.focus?.();
+    resolve(dialog.returnValue);
+  }, { once: true }));
+}
 const tournamentEntry = window.PadelstarTournamentEntry?.create({
   createInviteCode: () => createInviteCode(),
   createRemoteTournament: () => createRemoteTournament(),
@@ -804,7 +818,12 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   parsePlayerNames: (value) => parsePlayerNames(value),
   render: () => render(),
   saveState: (options) => saveState(options),
-  showAccount: () => showModule("account"),
+  requestAccountChoice: requestEntryAccountChoice,
+  showAccount: (choice) => {
+    showModule("account");
+    elements.accountAuthPassword.autocomplete = choice === "signup" ? "new-password" : "current-password";
+    window.requestAnimationFrame(() => elements.accountAuthEmail?.focus());
+  },
   sendAdminSignInLink: async (email) => {
     const sent = await adminIdentity.sendSignInLink(email);
     showToast(sent ? t("admin.identityLinkSent") : t("admin.identityFailed"), sent ? "status-message-success" : "status-message-error");
@@ -816,6 +835,53 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   showWorkspace: (view) => showWorkspace(view),
   syncJoinPreview: () => syncJoinPreview(),
   t: (key, values) => t(key, values),
+});
+const tournamentFinalization = window.PadelstarTournamentFinalization.create({
+  getState: () => state,
+  isShared: (current) => current.remoteMode === "shared" || (current.remoteMode !== "local" && isSupabaseReady()),
+  isOnline: () => navigator.onLine !== false && isSupabaseReady(),
+  getIntent: (id) => storage.readJson(localStorage, `${storageKey}:finalize:${id}`),
+  saveIntent: (intent) => localStorage.setItem(`${storageKey}:finalize:${intent.id}`, JSON.stringify(intent)),
+  clearIntent: (id) => localStorage.removeItem(`${storageKey}:finalize:${id}`),
+  flushWrites: async (id) => {
+    if (remoteSaveTimer) { window.clearTimeout(remoteSaveTimer); remoteSaveTimer = null; }
+    if (remoteRetryTimer) { window.clearTimeout(remoteRetryTimer); remoteRetryTimer = null; }
+    await remoteWriteChain;
+    if (state.id !== id || remoteConflict) return false;
+    if (pendingAdminSync && !await saveRemoteState()) return false;
+    return state.id === id && !pendingAdminSync && pendingPlayerScores.length === 0;
+  },
+  call: (name, payload) => remoteRpc(supabaseClient, name, payload),
+  commit: async (result) => {
+    removeRealtimeChannel();
+    pendingAdminSync = false;
+    pendingPlayerScores = [];
+    remoteConflict = false;
+    if (result.deleted) {
+      const id = state.id;
+      state = { ...structuredClone(defaultTournament), id, status: "Avsluttet",
+        lifecycleStatus: result.outcome, players: [], rounds: [], adminToken: null,
+        ownerUserId: null, ownerProfileId: null, finalizationConfirmed: true };
+      tournamentLibrary.remove(id);
+      localStorage.removeItem(storageKey);
+      localStorage.removeItem(recoveryStorageKey);
+      persistence.removeKeys([storageKey, recoveryStorageKey]);
+    } else {
+      const adminToken = state.adminToken;
+      state = migrateState({ ...result.state, adminToken, finalizationConfirmed: true });
+      if (state.ownerUserId && window.PadelstarHistoricalRecords) {
+        window.PadelstarHistoricalRecords.record(localStorage, tournamentHistoryStorageKey,
+          window.PadelstarHistoricalRecords.create(state, window.PadelstarRetentionPolicy));
+      }
+      persistLocalState();
+    }
+    persistSyncMetadata();
+    render();
+  },
+  reportError: (error) => {
+    observability?.error("tournament_finalization_failed", error);
+    showToast(t("lifecycle.finalizeFailed"), "status-message-error");
+  },
 });
 const adminFormEvents = window.PadelstarAdminFormEvents?.create({
   addPlayers: (names, joinedFrom) => addPlayers(names, joinedFrom),
@@ -879,14 +945,12 @@ function handleKeepLocalBackup() {
 
 async function handleEndTournament() {
   if (!await requestConfirmationWithTitle(t("messages.endTournamentConfirm"), t("messages.endTournamentTitle"))) return;
-  endTournament();
-  saveState();
-  render();
+  await endTournament();
 }
 
 async function handleResetTournament() {
   if (!await requestConfirmationWithTitle(t("messages.resetTournamentConfirm"), t("messages.resetTournamentTitle"))) return;
-  await deleteRemoteTournament();
+  if (!await tournamentFinalization.finalize("cancelled")) return;
   tournamentLibrary.remove(state.id);
   state = structuredClone(defaultTournament);
   localStorage.removeItem(storageKey);
@@ -1078,11 +1142,9 @@ function profileHistoryEntry() {
 }
 
 function saveProfileHistory() {
-  const entry = profileHistoryEntry();
-  if (!entry) return;
-  profileManager.recordHistory(localStorage, profileHistoryStorageKey, entry);
-  persistence.mirrorKeys([profileHistoryStorageKey]);
-  void syncProfileHistoryRemote(entry);
+  // Durable results are server-derived. Reading them must not create a second,
+  // browser-authored history for a local profile or guest.
+  void syncProfileHistoryRemoteRead();
 }
 
 function requestRemoteProfileDeletion() { return profileSession.requestRemoteProfileDeletion(); }
@@ -1154,7 +1216,7 @@ function markSyncError(error) {
 function saveState(options = {}) {
   persistLocalState();
   recoveredFromLastGood = false;
-  if (options.remote !== false && isCurrentUserAdmin()) {
+  if (options.remote !== false && isCurrentUserAdmin() && !state.finalizationConfirmed) {
     pendingAdminSync = true;
     persistSyncMetadata();
     remoteMutationSequence += 1;
@@ -1163,7 +1225,7 @@ function saveState(options = {}) {
 }
 
 function persistLocalState() {
-  if (state.status === "Avsluttet" && !state.ownerProfileId) {
+  if (state.status === "Avsluttet" && !state.ownerUserId) {
     tournamentLibrary.remove(state.id);
     localStorage.removeItem(storageKey);
     localStorage.removeItem(recoveryStorageKey);
@@ -1737,27 +1799,7 @@ function saveManualCupTeams(value) {
 }
 
 function endTournament() {
-  const activeRound = getActiveRound();
-  if (activeRound && !["finished", "completed"].includes(activeRound.status)) {
-    activeRound.status = "completed";
-    activeRound.matches.forEach((match) => {
-      if (match.state !== "finished") {
-        match.state = "cancelled";
-        match.status = "cancelled";
-      }
-    });
-  }
-  state.status = "Avsluttet";
-  if (state.ownerProfileId && window.PadelstarHistoricalRecords) {
-    window.PadelstarHistoricalRecords.record(localStorage, tournamentHistoryStorageKey,
-      window.PadelstarHistoricalRecords.create(state, window.PadelstarRetentionPolicy));
-  }
-  // The creator's profile controls tournament retention; it does not gate
-  // history for other players who have their own profile on their device.
-  saveProfileHistory();
-  if (window.PadelstarRetentionPolicy) {
-    state = window.PadelstarRetentionPolicy.sanitizeEndedTournamentState(state);
-  }
+  return tournamentFinalization.finalize("completed");
 }
 
 function updateCourtsFromInput(value) {

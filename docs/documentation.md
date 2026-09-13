@@ -300,3 +300,8 @@ Oppføringene under er hentet fra den tidligere dokumentasjonsloggen og sortert 
 ## Verifikasjonsprinsipp
 
 Hver ny oppføring skal inneholde hva som ble endret, hvilken brukerflyt som berøres, testresultater, commit-id og deploystatus. Nye funn eller åpne beslutninger føres i [Padelstar-komplett-utviklingsplan.md](Development/Padelstar-komplett-utviklingsplan.md), ikke som skjulte TODO-er i historikken.
+
+
+## 2026-09-13 – transaksjonell kontostatistikk under implementering
+
+Lokal migrasjon for sluttføring og permanente kontostatistikkrader er lagt til, sammen med isolert PostgreSQL-test. Testen bekrefter statistikk før gjestesletting, idempotens, tilgang med admintoken og rollback ved lagringsfeil. Klientmodulens fire fokuserte tester passerer. Full klientintegrasjon, Auth/flerklienttest og produksjonsklarhet gjenstår; se [gjennomføringsstatus](Development/kontoflyt-gjennomforing.md). Baseline `e666717`; endringene er ikke committet eller deployet.

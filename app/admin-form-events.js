@@ -121,8 +121,7 @@
 
       elements.completeRoundButton?.addEventListener("click", async () => {
         if (!await requestConfirmation(t("messages.finishTournamentConfirm"))) return;
-        endTournament();
-        saveState();
+        await endTournament();
         deps.render();
       });
 

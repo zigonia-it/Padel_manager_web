@@ -63,6 +63,7 @@
       const previousTournamentId = state.id;
       setIsApplyingRemoteState(true);
       const nextState = migrateState({ ...remoteState, selectedPlayerId });
+      nextState.remoteMode = "shared";
       nextState.adminToken = adminToken;
       nextState.playerToken = playerToken;
       nextState.ownerUserId = remoteState.ownerUserId ?? ownerUserId;

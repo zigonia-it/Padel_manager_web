@@ -112,7 +112,7 @@
       if (!client) { notice(translate("account.authUnavailable"), true); return false; }
       const { data, error } = await client.auth.signUp({ email, password });
       if (error) { notice(translate("account.authFailed"), true); return false; }
-      user = data.user ?? null;
+      user = data.session?.user ?? null;
       await ensureRemoteProfile(user);
       if (user) await loadRemoteProfile(user);
       elements.accountAuthPassword.value = "";
