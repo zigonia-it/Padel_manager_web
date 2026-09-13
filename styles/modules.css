@@ -1042,7 +1042,7 @@
   border-top: 1px solid rgba(155, 190, 222, .18);
 }
 
-.court-queue > .panel-heading {
+.court-queue>.panel-heading {
   margin: 0;
 }
 
@@ -1119,7 +1119,7 @@
   background: rgba(255, 255, 255, .03);
 }
 
-.result-submission > div {
+.result-submission>div {
   display: grid;
   gap: 3px;
 }
@@ -1265,7 +1265,7 @@
   opacity: 0.7;
 }
 
-.tv-mode .workspace-header > div:first-child {
+.tv-mode .workspace-header>div:first-child {
   padding-left: clamp(88px, 8vw, 132px);
 }
 
@@ -1286,7 +1286,7 @@
   gap: clamp(8px, 1.2vw, 18px);
 }
 
-.tv-mode [data-section="tournament"] > .panel:first-child {
+.tv-mode [data-section="tournament"]>.panel:first-child {
   grid-area: overview;
   display: flex;
   flex-direction: column;
@@ -1295,13 +1295,13 @@
   overflow: hidden;
 }
 
-.tv-mode [data-section="tournament"] > .panel:nth-child(2) {
+.tv-mode [data-section="tournament"]>.panel:nth-child(2) {
   grid-area: queue;
   min-height: 0;
   overflow: hidden;
 }
 
-.tv-mode [data-section="tournament"] > .panel:nth-child(3) {
+.tv-mode [data-section="tournament"]>.panel:nth-child(3) {
   grid-area: standings;
   display: flex;
   flex-direction: column;
@@ -1310,7 +1310,7 @@
   overflow: hidden;
 }
 
-.tv-mode [data-section="tournament"] > .panel:nth-child(2) {
+.tv-mode [data-section="tournament"]>.panel:nth-child(2) {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1322,17 +1322,17 @@
   border-top: 0;
 }
 
-.tv-mode [data-section="tournament"] > .panel > h3,
-.tv-mode [data-section="tournament"] > .panel > .panel-heading,
-.tv-mode .court-queue > .panel-heading,
-.tv-mode .spectator-live-group > h4 {
+.tv-mode [data-section="tournament"]>.panel>h3,
+.tv-mode [data-section="tournament"]>.panel>.panel-heading,
+.tv-mode .court-queue>.panel-heading,
+.tv-mode .spectator-live-group>h4 {
   flex: 0 0 auto;
   text-transform: uppercase;
 }
 
-.tv-mode [data-section="tournament"] > .panel > h3,
+.tv-mode [data-section="tournament"]>.panel>h3,
 .tv-mode .panel-heading h3,
-.tv-mode .spectator-live-group > h4 {
+.tv-mode .spectator-live-group>h4 {
   font-family: var(--font-display);
   font-size: clamp(1rem, 1.25vw, 1.35rem);
   font-weight: 700;
@@ -1569,10 +1569,10 @@
   color:
     rgba(var(--gold-light-rgb), 0.62);
 
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.76rem;
+  font-weight: 400;
   letter-spacing: 0.01em;
-  line-height: 1.5;
+  line-height: 1.6;
 
   text-align: center;
 }
@@ -1592,9 +1592,23 @@
   color: var(--ink);
 }
 
-.install-modal::backdrop { background: rgba(0, 0, 0, 0.66); backdrop-filter: blur(8px); }
-.install-modal-card { padding: 24px; border: 1px solid rgba(var(--gold-bright-rgb), 0.24); border-radius: 8px; background: var(--panel); }
-.install-modal-card ol { display: grid; gap: 10px; padding-left: 24px; }
+.install-modal::backdrop {
+  background: rgba(0, 0, 0, 0.66);
+  backdrop-filter: blur(8px);
+}
+
+.install-modal-card {
+  padding: 24px;
+  border: 1px solid rgba(var(--gold-bright-rgb), 0.24);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.install-modal-card ol {
+  display: grid;
+  gap: 10px;
+  padding-left: 24px;
+}
 
 .site-footer p {
   margin: 0;
