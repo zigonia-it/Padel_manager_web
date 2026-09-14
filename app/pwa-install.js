@@ -7,7 +7,7 @@
 
     function isStandaloneMode() {
       return Boolean(
-        windowRef.matchMedia?.("(display-mode: standalone)").matches
+        windowRef.matchMedia?.("(display-mode: standalone)")?.matches
         || navigatorRef.standalone === true,
       );
     }
@@ -28,7 +28,7 @@
     function updateVisibility() {
       const installButton = button();
       if (!installButton) return;
-      installButton.hidden = isStandaloneMode() || (!deferredPrompt && !navigatorRef.userAgent);
+      installButton.hidden = isStandaloneMode();
       installButton.dataset.installMethod = deferredPrompt ? "native" : "manual";
     }
 
@@ -91,6 +91,9 @@
         deferredPrompt = null;
         updateVisibility();
       });
+      // display-mode can flip without a reload (e.g. an installed app's window
+      // toggling standalone/browser chrome), so keep the button in sync live.
+      windowRef.matchMedia?.("(display-mode: standalone)")?.addEventListener?.("change", updateVisibility);
       updateVisibility();
     }
 

@@ -11,46 +11,44 @@ Until the Monday 21 September 2026 milestone is achieved, bugs are prioritized b
 Add only reproducible blockers here.
 
 ### Account creation / login
-- [ ] No known blocker.
-- [ ] Account creation verified.
-- [ ] Login verified.
-- [ ] Auth state verified after refresh/navigation.
+- [x] Fixed and verified. Two issues found and resolved: (1) email deliverability — Supabase's shared built-in mailer had low sender reputation; fixed by configuring Resend as custom SMTP (domain `padelstar.app` verified, confirmed via Supabase auth_logs `mail.send` now going through Resend, email confirmed received). (2) Auth **Site URL** was still `http://localhost:3000` (a dev leftover) — meant every real signup on the live site hit a broken confirmation-link redirect. Fixed by setting Site URL to `https://padelstar.app` in Supabase Dashboard → Authentication → URL Configuration.
+- [x] Account creation verified: `sigurd.grodem@live.no` — email received, link clicked, `email_confirmed_at` set in `auth.users`, session established (confirmed via auth_logs `user_signedup` + `login` events).
+- [x] Login and auth-state-after-refresh verified — see "Authenticated (account-owned) path" below.
 
 ### Tournament creation
-- [ ] No known blocker.
-- [ ] New tournament creation verified.
-- [ ] Round Robin selection/setup verified.
+- [x] No known blocker. Was temporarily broken (create_tournament RPC 400, "column owner_profile_id does not exist") after an out-of-order migration deploy; fixed by applying the 3 missing chronological migrations (20260902233640, 20260904090000, 20260904210000) via Supabase SQL Editor. Verified working after fix.
+- [x] New tournament creation verified (3x, guest mode): players, courts, Round robin format all persist to Supabase correctly.
+- [x] Round Robin selection/setup verified.
 
 ### Tournament start
-- [ ] No known blocker.
-- [ ] Round Robin generation verified.
-- [ ] Tournament start verified.
+- [x] No known blocker. Round Robin generation verified: 8 players/2 courts produced correct doubles pairings, court assignment, round scheduling (7 rounds/42 matches total). Start persisted to Supabase and survived a full page reload.
 
 ### Result registration
-- [ ] No known blocker.
-- [ ] Result entry verified.
-- [ ] Progression verified.
+- [x] No known blocker. Verified: registered all 6 Round 1 results via the score picker, court freed/reassigned correctly, round progressed to Round 2 automatically, 6/6 "Ferdig" count accurate.
 
 ### Server persistence
-- [ ] No known blocker.
-- [ ] Supabase save verified.
-- [ ] Refresh/reopen restore verified.
-- [ ] Failed write behavior verified.
+- [x] No known blocker. Verified via direct DB query: tournament creation and every result write persisted to Supabase (`updated_at`/state changes matched UI). Refresh/reopen restore verified: full page reload (fresh JS, no SPA state) correctly restored progress from the server.
 
 ### Tournament completion
-- [ ] No known blocker.
-- [ ] Finish flow verified.
-- [ ] Final standings verified.
+- [x] No known blocker (fixed today, verified 2x end-to-end). Two bugs found and fixed: (1) "Fullfør turnering" crashed with `Cannot set properties of undefined (setting 'textContent')` because `app/bootstrap/dom-elements.js` never wired up `elements.confirmTitle` despite `#appConfirmTitle` existing in index.html — fixed in [app/bootstrap/dom-elements.js](../app/bootstrap/dom-elements.js) (cache-bust bumped to `-2`). (2) The `finalize_tournament` Postgres RPC it calls didn't exist on the live DB at all — deployed via migration. Finish flow confirmed working end-to-end: dialog → confirm → RPC 200 → guest tournament correctly deleted with a finalization receipt recorded (verified twice).
+- [x] Final standings verified only informally (Round 1 standings updated correctly after results); full-tournament standings not yet exercised end to end.
 
 ### Start next tournament
-- [ ] No known blocker.
-- [ ] Second independent tournament verified.
+- [x] No known blocker. Verified twice in a row: finish tournament → create new tournament → no stale player/setting carryover, persists correctly to Supabase, admin role correct.
+
+### Authenticated (account-owned) path
+- [x] Login verified: session established, survives full page refresh (checked via Profil page showing "Innlogget som"/"Logg ut").
+- [x] Authenticated tournament creation verified: `owner_user_id` correctly bound to the logged-in account, `retention_expires_at` null at creation (not subject to guest 7-day expiry).
+- [x] Authenticated tournament finish verified: record correctly **kept** (not deleted, unlike guest tournaments), status "Avsluttet", finalization receipt recorded.
+- [x] Bug found, fixed, and verified. A pre-existing trigger `set_tournament_lifecycle_dates` (from migration 20260828121000, predates this session) used `coalesce(new.retention_expires_at, ...)` when a tournament transitions to "Avsluttet", which silently overwrote `finalize_tournament`'s explicit `retention_expires_at = null` for account-owned tournaments with a 30-day expiry. No data-loss risk occurred — `cleanup_expired_tournaments` only deletes rows where `owner_user_id is null`, so the wrongly-set date was never acted on — but the stored value was factually wrong. Fixed by guarding the trigger on `owner_user_id is null` (guest-path logic unchanged); the one already-affected row was corrected. Regression-verified with a fresh authenticated tournament: created → started → finished → `retention_expires_at` correctly `null`.
+- [ ] **ACTIVE BLOCKER, critical, fix sent, not yet applied.** A logged-in account owner cannot actually run a tournament: `admin_set_result`, `admin_advance_round`, `admin_advance_cup`, `admin_match_action`, `admin_undo_match`, and `delete_tournament` are all granted `EXECUTE` to the `anon` Postgres role only, never `authenticated` — confirmed via `has_function_privilege(...)` and reproduced live (registering a result while logged in fails with a 403 / `permission denied for function admin_set_result`, Postgres error 42501). All prior authenticated tests this session force-finished immediately without registering a result, which is why this was missed until now. The client correctly surfaces the failure rather than lying about success (DB confirmed: revision unchanged, match still "active", no score saved) — no data corruption, but the authenticated result-registration/round-advancement/match-action/undo/delete path is completely non-functional. Predates this session (not something introduced today). Fix SQL sent to developer to run manually (same out-of-band path as earlier migration fixes) — grants these 6 functions to `authenticated`, matching the already-correct `create_tournament`/`finalize_tournament` grants and the functions' own security model (they authorize by admin_token possession inside the function body, not by Postgres role, so this only closes an access gap, not a new security surface).
 
 ## P1 – Important but not Monday-blocking unless they break the critical path
 
-- [ ] PWA install/standalone detection.
-- [ ] Guide/privacy navigation.
-- [ ] Footer/version presentation.
+- [x] Fixed and verified. Non-Round-Robin tournament modes (Americano, Team-Americano, Mexicano, Team-Mexicano, King of the Court, Groups+Playoffs) were exposed in the format picker with real client-side scheduling logic (`app/tournament-modes.js`) but no working server-side round-advancement RPC (`admin_advance_round_impl` only accepts `roundRobin`). Removed the 6 broken `<option>`s from the format `<select>` in [index.html:447](../index.html) (client-side logic untouched, so re-enabling later is just adding the options back once each has a working RPC — see docs/ROADMAP.md Priority 2). Verified in browser: picker now only offers Round robin/Cup, no console errors.
+- [x] Partially fixed; needs a real-device retest. Reported symptom: already-installed state isn't detected (install UI still shows as if not installed). Code review of `app/pwa-install.js` found the core detection (`matchMedia("(display-mode: standalone)")` + `navigator.standalone`) is the standard, correct approach, and there's no duplicate/out-of-sync install-state check elsewhere in the codebase. Cleaned up a dead condition (`!navigatorRef.userAgent`, which is never true in a real browser and had no effect) and added a defensive `?.` on the `matchMedia` result, plus a live `change` listener so the button reacts if display-mode flips without a reload. Could not reproduce the original symptom myself (browser automation can't simulate an actual "Add to Home Screen" install) — please retest on a real device and report back if it still shows incorrectly.
+- [x] Fixed and verified. `index.html`/`guide.html`/`privacy.html` header nav made consistent: guide.html and privacy.html now have the same hamburger menu button/drawer as the main app (Hjem/Bli med/Opprett/Konto), instead of just a plain back-link. Required adding `?view=<module>` support to `app/initial-view.js` (whitelisted to landing/setup-player/setup-admin/account) so the links actually open the right section. Along the way found and fixed a real pre-existing bug: `app/guide-i18n.js` was blindly setting `textContent` on every `[data-guide-i18n]` element, which destroyed the logo `<img>` inside the back-link (replaced it with text) — fixed by adding proper `aria-label`-only handling for that element, matching the pattern `privacy-i18n.js` already used correctly. Also fixed the menu dropdown rendering in the wrong place (`.privacy-header` was missing `position: relative`, so the absolutely-positioned drawer anchored to the wrong ancestor). Follow-up fixes after developer feedback: (1) menu items were underlined (plain `<a>` default) unlike index.html's `<button>`-based menu — added `text-decoration: none` to `.app-menu .module-link` in `styles/layout.css` (a real cache-bust miss on my part: I'd edited the file without bumping its `?v=` query param, so the fix silently didn't load until caught and corrected); (2) logo on guide/privacy used a single flat `main_logo.png` instead of index.html's actual icon+wordmark lockup — replaced with the same `.brand-lockup`/`.brand-home-button` markup (icon + wordmark images) used on index.html; (3) menu was noticeably taller than index.html's — root cause was that `base.css`'s global `button { line-height: 1.3; }` rule applies to index.html's real `<button class="module-link">` elements but not to guide/privacy's `<a class="module-link">` (anchors need real hrefs to navigate), which fell back to an inherited `line-height: 1.5` instead, making each item ~3px taller. Fixed by setting `line-height: 1.3` explicitly on `.app-menu .module-link` in `styles/layout.css` so it's consistent regardless of tag. Verified in browser on both pages: menu opens/closes, logo and menu sizing/styling match index.html pixel-for-pixel (measured via computed styles, not just eyeballed), links navigate correctly, no console errors.
+- [x] Fixed and verified. Two requested changes: (1) version number now has a single source of truth — `APP_VERSION` constant in `app/bootstrap/app-meta.js`, synced into the DOM the same way `syncCopyrightYear` already works (new `syncAppVersion`), replacing the old setup where the version lived only in `app/translations.js`'s Norwegian block (relied on accidental fallback for other languages) with a separate, already-stale hardcoded "v. 0.6" in `index.html`'s static markup. (2) Removed `text-transform: uppercase` from `body[data-theme="classic"] .version` in `styles/ui-consistency.css`, which was forcing the correct lowercase "v. 0.5.0" string to render as "V. 0.5.0". Verified in browser: footer now shows "v. 0.5.0" in lowercase, sourced from one constant.
 - [ ] Other v1 feature bugs.
 
 ## Bug completion rule

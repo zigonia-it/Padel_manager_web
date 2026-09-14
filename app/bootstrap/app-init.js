@@ -13,6 +13,7 @@
       callbacks.renderProfile();
       callbacks.prefillInviteCodeFromUrl();
       callbacks.syncCopyrightYear();
+      callbacks.syncAppVersion();
       callbacks.registerServiceWorker();
       callbacks.initializePwaInstall();
       callbacks.syncConnectionStatus();

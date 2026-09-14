@@ -30,6 +30,11 @@
       showModule("setup-player");
       return;
     }
+    const requestedView = params.get("view");
+    if (requestedView && ["landing", "setup-player", "setup-admin", "account"].includes(requestedView)) {
+      showModule(requestedView);
+      return;
+    }
     if (!hasSavedTournament) return;
     if (isCurrentUserAdmin()) {
       showWorkspace("admin");

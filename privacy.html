@@ -12,22 +12,39 @@
   <link rel="apple-touch-icon" href="assets/icons/padelstar-icon.png">
   <link rel="icon" href="assets/icons/padelstar-icon.png" type="image/png">
   <link rel="stylesheet" href="styles/base.css?v=padelstar-base-4">
-  <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-7">
+  <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-9">
   <link rel="stylesheet" href="styles/components.css?v=padelstar-components-13">
   <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-9">
   <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-97">
-  <link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-2">
-  <script defer src="app/translations.js?v=padelstar-i18n-23"></script>
+  <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
+  <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-41">
+  <link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-3">
+  <script defer src="app/translations.js?v=padelstar-i18n-25"></script>
   <script defer src="app/privacy-i18n.js?v=padelstar-privacy-i18n-1"></script>
 </head>
 
-<body>
+<body data-theme="classic">
   <main class="privacy-page">
     <header class="privacy-header">
-      <a href="./" data-privacy-aria-label="back" aria-label="Tilbake til Padelstar">
-        <img class="privacy-brand" src="assets/logos/main_logo.png" alt="Padelstar" width="640" height="426">
-      </a>
-      <a class="privacy-back-link" href="./" data-privacy-i18n="back">Tilbake til Padelstar</a>
+      <div class="brand-lockup">
+        <a class="brand-home-button" href="./" data-privacy-aria-label="back">
+          <img class="brand-logo" src="assets/icons/padelstar-icon.png" alt="" width="3000" height="3000">
+          <img class="brand-wordmark" src="assets/logos/main_logo_without_icon.png" alt="Padelstar" width="1500" height="352">
+        </a>
+      </div>
+      <div class="topbar-actions">
+        <button class="app-menu-toggle" id="appMenuToggle" type="button" aria-expanded="false" aria-controls="appMenu" aria-label="Meny">
+          <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+        </button>
+        <div class="menu-drawer">
+          <nav class="app-menu" id="appMenu" aria-label="Meny">
+            <a class="module-link" href="index.html">Hjem</a>
+            <a class="module-link" href="index.html?view=setup-player">Bli med</a>
+            <a class="module-link" href="index.html?view=setup-admin">Opprett</a>
+            <a class="module-link" href="index.html?view=account">Konto</a>
+          </nav>
+        </div>
+      </div>
       <label class="privacy-language">
         <span data-privacy-i18n="language">Språk</span>
         <select id="privacyLanguage" aria-label="Språk">
@@ -36,6 +53,22 @@
         </select>
       </label>
     </header>
+    <script>
+      (function () {
+        var toggle = document.getElementById("appMenuToggle");
+        if (!toggle) return;
+        toggle.addEventListener("click", function () {
+          var isOpen = document.body.classList.toggle("app-menu-open");
+          toggle.setAttribute("aria-expanded", String(isOpen));
+        });
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") {
+            document.body.classList.remove("app-menu-open");
+            toggle.setAttribute("aria-expanded", "false");
+          }
+        });
+      })();
+    </script>
     <article class="privacy-document" aria-labelledby="privacyTitle">
       <p class="eyebrow" data-privacy-i18n="beta">Beta</p>
       <h1 id="privacyTitle" data-privacy-i18n="title">Personvern</h1>

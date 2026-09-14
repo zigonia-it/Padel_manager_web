@@ -12,6 +12,7 @@
   const copy = languages[lang] || languages.nb;
   document.documentElement.lang = lang;
   document.querySelectorAll("[data-guide-i18n]").forEach((node) => { const key = node.dataset.guideI18n; if (copy[key]) node.textContent = copy[key]; });
+  document.querySelectorAll("[data-guide-aria-label]").forEach((node) => { const key = node.dataset.guideAriaLabel; if (copy[key]) node.setAttribute("aria-label", copy[key]); });
   const selector = document.getElementById("guideLanguage");
   if (selector) { selector.value = languages[lang] ? lang : "nb"; selector.addEventListener("change", () => { localStorage.setItem("padelstar-language", selector.value); location.reload(); }); }
 })();

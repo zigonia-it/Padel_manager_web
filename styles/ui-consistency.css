@@ -425,7 +425,7 @@ body[data-theme="classic"] .intro-copy p {
 }
 body[data-theme="classic"] .version {
   order: -1; padding: 5px 12px; border: 1px solid var(--figma-accent); border-radius: 999px;
-  color: var(--figma-accent); font-size: .75rem; font-weight: 600; text-transform: uppercase;
+  color: var(--figma-accent); font-size: .75rem; font-weight: 600; text-transform: none;
 }
 body[data-theme="classic"] .landing-actions { display: flex; justify-content: center; width: auto; gap: 18px; }
 body[data-theme="classic"] .landing-cta {

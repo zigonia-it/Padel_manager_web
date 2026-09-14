@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath // empty' | { read -r f; [ -z \"$f\" ] && exit 0; case \"$f\" in */styles/*.css|styles/*.css) ;; */app/*.js|app/*.js) ;; *) exit 0 ;; esac; root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0; cd \"$root\" || exit 0; base=$(basename \"$f\"); base_esc=$(printf '%s' \"$base\" | sed 's/\\./\\\\./g'); missing=\"\"; for html in index.html guide.html privacy.html; do [ -f \"$html\" ] || continue; ref=$(grep -oE \"${base_esc}\\?v=[A-Za-z0-9_-]+\" \"$html\" | head -1); [ -z \"$ref\" ] && continue; git diff -U0 -- \"$html\" 2>/dev/null | grep '^+' | grep -qF \"$ref\" || missing=\"$missing $html\"; done; if [ -n \"$missing\" ]; then jq -n --arg m \"Cache-bust reminder: $base changed but its ?v= version wasn't bumped in:$missing (no bundler in this project - browsers cache these files by exact URL, so an unbumped ?v= means the change may silently not load).\" '{hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:$m},systemMessage:$m}'; fi; } 2>/dev/null || true",
+            "statusMessage": "Checking cache-bust version..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -358,7 +358,7 @@ mirrorOfflineStorage();
 
 const elements = window.PadelstarDomElements.create({ document });
 const appMeta = window.PadelstarAppMeta.create({ navigator, window, elements });
-const { registerServiceWorker, syncCopyrightYear } = appMeta;
+const { registerServiceWorker, syncCopyrightYear, syncAppVersion } = appMeta;
 const { applyTheme } = window.PadelstarTheme.create({ document });
 
 const courtSettings = window.PadelstarCourtSettings.create({
@@ -2324,6 +2324,7 @@ const appInit = window.PadelstarAppInit.create({
     renderProfile,
     prefillInviteCodeFromUrl,
     syncCopyrightYear,
+    syncAppVersion,
     registerServiceWorker,
     initializePwaInstall,
     syncConnectionStatus,

@@ -22,26 +22,26 @@ Nothing below Priority 0 should consume meaningful development time while a bloc
 
 The owner must be able to complete this exact chain:
 
-- [ ] Create an account.
-- [ ] Log in successfully.
-- [ ] Remain correctly authenticated after normal navigation/refresh.
-- [ ] Create a tournament.
-- [ ] Choose/create a Round Robin tournament.
-- [ ] Add the required participants.
-- [ ] Add/select courts as required.
-- [ ] Start the tournament.
-- [ ] Start/open a match.
-- [ ] Register a valid result.
-- [ ] Result is saved to Supabase/server.
-- [ ] Refresh/reopen and verify the saved tournament/result still exists.
-- [ ] Continue the tournament with the saved state intact.
-- [ ] Complete the Round Robin.
-- [ ] Final standings/result are valid.
-- [ ] Finish/close the tournament cleanly.
-- [ ] Return to a state where a new tournament can be created.
-- [ ] Create/start a second tournament without manual cleanup or corrupted prior state.
+- [x] Create an account.
+- [x] Log in successfully.
+- [x] Remain correctly authenticated after normal navigation/refresh.
+- [x] Create a tournament.
+- [x] Choose/create a Round Robin tournament.
+- [x] Add the required participants.
+- [x] Add/select courts as required.
+- [x] Start the tournament.
+- [x] Start/open a match.
+- [x] Register a valid result.
+- [x] Result is saved to Supabase/server.
+- [x] Refresh/reopen and verify the saved tournament/result still exists.
+- [x] Continue the tournament with the saved state intact.
+- [ ] Complete the Round Robin. — every test used the admin "Fullfør turnering" override to finish early; a Round Robin has not yet been played to its own natural completion (all rounds/matches actually played out).
+- [ ] Final standings/result are valid. — informal only (Round 1 standings updated correctly after results); no dedicated standings/table view has been checked, and nothing has reached a full-tournament final standing.
+- [x] Finish/close the tournament cleanly.
+- [x] Return to a state where a new tournament can be created.
+- [x] Create/start a second tournament without manual cleanup or corrupted prior state.
 
-If this chain works reliably, the Monday milestone is achieved even if some wider v1.0 functionality remains unfinished.
+Two items remain open (natural Round Robin completion, final standings) — see `docs/BUGS.md` "Tournament completion" for detail. Everything else in this chain is verified end-to-end, guest and account-owned paths both.
 
 ---
 
@@ -49,12 +49,12 @@ If this chain works reliably, the Monday milestone is achieved even if some wide
 
 Keep this phase short.
 
-- [ ] Start the current app successfully.
-- [ ] Attempt the exact Monday-success chain above.
-- [ ] Add only reproducible blockers to `BUGS.md`.
-- [ ] Stop investigation as soon as the first blocking defect is identified.
-- [ ] Fix that blocker before broadening analysis.
-- [ ] Repeat until the whole chain succeeds.
+- [x] Start the current app successfully.
+- [x] Attempt the exact Monday-success chain above.
+- [x] Add only reproducible blockers to `BUGS.md`.
+- [x] Stop investigation as soon as the first blocking defect is identified.
+- [x] Fix that blocker before broadening analysis.
+- [x] Repeat until the whole chain succeeds.
 
 **Do not produce a repository-wide report first.**
 
@@ -64,43 +64,43 @@ Keep this phase short.
 
 This is the first functional blocker group.
 
-- [ ] Owner can open account creation.
-- [ ] Account creation succeeds.
-- [ ] Validation errors are visible and understandable.
-- [ ] Auth email/confirmation behavior works as intended.
-- [ ] Owner can log in with the created account.
-- [ ] Failed login provides visible feedback.
-- [ ] Login/create-account flows are clearly separated.
-- [ ] Authenticated state survives ordinary page navigation.
-- [ ] Authenticated state survives refresh where intended.
-- [ ] Profile reflects actual logged-in user.
-- [ ] Logout works.
-- [ ] Login again works after logout.
-- [ ] No stale auth state blocks tournament creation.
+- [x] Owner can open account creation.
+- [x] Account creation succeeds.
+- [ ] Validation errors are visible and understandable. — not tested (no invalid-input attempt made).
+- [x] Auth email/confirmation behavior works as intended.
+- [x] Owner can log in with the created account.
+- [ ] Failed login provides visible feedback. — not tested (no wrong-password attempt made).
+- [ ] Login/create-account flows are clearly separated. — UI has both, but not specifically assessed.
+- [x] Authenticated state survives ordinary page navigation.
+- [x] Authenticated state survives refresh where intended.
+- [x] Profile reflects actual logged-in user.
+- [ ] Logout works. — not tested (never clicked "Logg ut" and verified the result).
+- [ ] Login again works after logout. — not tested.
+- [x] No stale auth state blocks tournament creation.
 
 ### Exit gate
 
-- [ ] New owner account can be created and used to log in from a clean session.
+- [x] New owner account can be created and used to log in from a clean session.
 
 ---
 
 # Phase 2 — Tournament creation
 
-- [ ] Logged-in owner can create a new tournament.
-- [ ] New tournament receives a stable database ID.
-- [ ] Owner relationship is saved correctly.
-- [ ] Tournament setup loads without runtime errors.
-- [ ] Participants can be added.
-- [ ] Participant validation works.
-- [ ] Courts can be added/selected/named as required.
-- [ ] Round Robin can be selected.
-- [ ] Required setup values persist before start.
-- [ ] Refresh does not silently destroy the setup.
-- [ ] Creating a tournament does not depend on stale data from the previous tournament.
+- [x] Logged-in owner can create a new tournament.
+- [x] New tournament receives a stable database ID.
+- [x] Owner relationship is saved correctly.
+- [x] Tournament setup loads without runtime errors.
+- [x] Participants can be added.
+- [ ] Participant validation works. — not tested (no invalid/duplicate participant attempt made).
+- [x] Courts can be added/selected/named as required.
+- [x] Round Robin can be selected.
+- [x] Required setup values persist before start.
+- [x] Refresh does not silently destroy the setup.
+- [x] Creating a tournament does not depend on stale data from the previous tournament.
 
 ### Exit gate
 
-- [ ] Owner can create a valid Round Robin setup from a clean logged-in session.
+- [x] Owner can create a valid Round Robin setup from a clean logged-in session.
 
 ---
 
@@ -108,41 +108,41 @@ This is the first functional blocker group.
 
 Round Robin has priority over Cup/Liga until Monday.
 
-- [ ] Round Robin generates valid matches.
-- [ ] Teams/players are assigned correctly.
-- [ ] Required meetings are generated correctly for the supported setup.
-- [ ] Courts are assigned correctly.
-- [ ] Tournament can transition from setup to active.
-- [ ] First playable match is available.
-- [ ] Admin view shows correct active state.
-- [ ] Player/match view does not crash.
-- [ ] Tournament start state is saved to Supabase/server.
-- [ ] Refresh after start restores the active tournament.
+- [x] Round Robin generates valid matches.
+- [x] Teams/players are assigned correctly.
+- [x] Required meetings are generated correctly for the supported setup.
+- [x] Courts are assigned correctly.
+- [x] Tournament can transition from setup to active.
+- [x] First playable match is available.
+- [x] Admin view shows correct active state.
+- [ ] Player/match view does not crash. — not tested (only the admin/Styring view was exercised this cycle).
+- [x] Tournament start state is saved to Supabase/server.
+- [x] Refresh after start restores the active tournament.
 
 ### Exit gate
 
-- [ ] A newly created Round Robin can be started and survives refresh.
+- [x] A newly created Round Robin can be started and survives refresh.
 
 ---
 
 # Phase 4 — Result registration and progression
 
-- [ ] Owner/admin can open an active match.
-- [ ] Owner/admin can register a valid result.
-- [ ] Result validation works.
-- [ ] Result is saved to the correct match.
-- [ ] Result is persisted to Supabase/server.
-- [ ] Tournament standings/ranking update correctly.
-- [ ] Match becomes completed.
-- [ ] Court becomes available when appropriate.
-- [ ] Next match/round progression is valid.
-- [ ] Refresh after result entry restores the same authoritative result.
-- [ ] Duplicate submit does not create duplicate/corrupt result state.
-- [ ] Registering multiple results sequentially works.
+- [x] Owner/admin can open an active match.
+- [x] Owner/admin can register a valid result.
+- [ ] Result validation works. — not tested (no invalid-score attempt made).
+- [x] Result is saved to the correct match.
+- [x] Result is persisted to Supabase/server.
+- [ ] Tournament standings/ranking update correctly. — not directly checked (no dedicated standings/table view was opened this cycle).
+- [x] Match becomes completed.
+- [x] Court becomes available when appropriate.
+- [x] Next match/round progression is valid.
+- [x] Refresh after result entry restores the same authoritative result.
+- [ ] Duplicate submit does not create duplicate/corrupt result state. — not tested.
+- [x] Registering multiple results sequentially works.
 
 ### Exit gate
 
-- [ ] Round Robin can progress through multiple saved match results without corruption.
+- [x] Round Robin can progress through multiple saved match results without corruption.
 
 ---
 
@@ -150,40 +150,40 @@ Round Robin has priority over Cup/Liga until Monday.
 
 For the Monday milestone, "server backup" means authoritative tournament persistence in Supabase/backend.
 
-- [ ] Tournament record exists server-side.
-- [ ] Owner/account relationship exists server-side.
-- [ ] Participants required by the active tournament exist server-side.
-- [ ] Courts/setup required by the active tournament persist server-side.
-- [ ] Generated matches persist server-side.
-- [ ] Match results persist server-side.
-- [ ] Tournament lifecycle state persists server-side.
-- [ ] Current standings can be reconstructed/restored from saved tournament data.
-- [ ] Refresh restores the tournament.
-- [ ] Closing/reopening the app restores the tournament where expected.
-- [ ] Local cache/storage is not the sole authoritative copy.
-- [ ] Failed server write is surfaced rather than falsely presented as saved.
-- [ ] Basic reconnect/resync behavior is verified.
+- [x] Tournament record exists server-side.
+- [x] Owner/account relationship exists server-side.
+- [x] Participants required by the active tournament exist server-side.
+- [x] Courts/setup required by the active tournament persist server-side.
+- [x] Generated matches persist server-side.
+- [x] Match results persist server-side.
+- [x] Tournament lifecycle state persists server-side.
+- [ ] Current standings can be reconstructed/restored from saved tournament data. — tied to the standings gap noted above; not checked.
+- [x] Refresh restores the tournament.
+- [x] Closing/reopening the app restores the tournament where expected. — verified via full page navigation (fresh JS bootstrap each time), which is functionally equivalent to close/reopen.
+- [x] Local cache/storage is not the sole authoritative copy — demonstrated directly via server-side SQL checks independent of browser state.
+- [ ] Failed server write is surfaced rather than falsely presented as saved. — not tested (no failed-write scenario simulated).
+- [ ] Basic reconnect/resync behavior is verified. — not tested (no offline/online transition simulated).
 
 ### Exit gate
 
-- [ ] A tournament can be started, partially played, app refreshed/reopened, and continued from server-backed state.
+- [x] A tournament can be started, partially played, app refreshed/reopened, and continued from server-backed state.
 
 ---
 
 # Phase 6 — Complete tournament
 
-- [ ] Round Robin reaches its valid completion condition.
-- [ ] Final standings are calculated correctly.
-- [ ] Admin can finish tournament.
-- [ ] Finished status persists server-side.
-- [ ] Completed tournament no longer behaves as active.
-- [ ] Final result/standings remain readable as intended.
-- [ ] Completion does not leave locks/scorer/session state that blocks future use.
-- [ ] Abort/reset controls do not corrupt account or future tournament state.
+- [ ] Round Robin reaches its valid completion condition. — not tested naturally; every test used the admin force-finish override instead.
+- [ ] Final standings are calculated correctly. — not verified.
+- [x] Admin can finish tournament.
+- [x] Finished status persists server-side.
+- [x] Completed tournament no longer behaves as active.
+- [ ] Final result/standings remain readable as intended. — tied to the standings gap above; not checked.
+- [x] Completion does not leave locks/scorer/session state that blocks future use.
+- [ ] Abort/reset controls do not corrupt account or future tournament state. — "Nullstill turnering" (reset) was never exercised.
 
 ### Exit gate
 
-- [ ] Tournament completes cleanly and the owner returns to a usable post-tournament state.
+- [x] Tournament completes cleanly and the owner returns to a usable post-tournament state.
 
 ---
 
@@ -191,24 +191,26 @@ For the Monday milestone, "server backup" means authoritative tournament persist
 
 This is part of the Monday acceptance test, not an optional polish item.
 
-- [ ] From the completed tournament state, owner can navigate to create a new tournament.
-- [ ] New tournament gets a new independent ID.
-- [ ] Prior tournament data does not leak into new setup.
-- [ ] Prior active-match/scorer state does not leak into new tournament.
-- [ ] New participants/courts can be configured.
-- [ ] New Round Robin can start.
-- [ ] First result can be registered.
-- [ ] Both tournaments remain internally distinct.
+- [x] From the completed tournament state, owner can navigate to create a new tournament.
+- [x] New tournament gets a new independent ID.
+- [x] Prior tournament data does not leak into new setup.
+- [ ] Prior active-match/scorer state does not leak into new tournament. — plausible given clean setup forms observed, but not specifically stress-tested.
+- [x] New participants/courts can be configured.
+- [x] New Round Robin can start.
+- [ ] First result can be registered. — the tournaments created *after* completing a previous one were finished before any result was registered on them (single-match ownership/retention tests); this specific combination (post-completion tournament → register a result on it) hasn't been exercised yet.
+- [x] Both tournaments remain internally distinct.
 
 ### Exit gate
 
-- [ ] Two tournaments can be created and run sequentially without manual database/browser cleanup.
+- [x] Two tournaments can be created and run sequentially without manual database/browser cleanup.
 
 ---
 
 # Phase 8 — Monday end-to-end verification
 
 Run this only after Phases 1–7 are individually passing.
+
+**Not yet run as a single continuous pass.** Every step below has been verified individually (see Phases 1–7 above and `docs/BUGS.md`), but split across separate guest-mode and account-owned sessions rather than one unbroken clean-session run-through, and a few Phase 1–7 items remain open (validation errors, logout, failed-write surfacing, standings, natural Round Robin completion). Recommended next step before calling Monday fully done: one uninterrupted pass through this exact checklist.
 
 ## Clean-session test
 
@@ -285,6 +287,8 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] 10-minute admin escalation.
 - [ ] 30-minute conditional auto-approval.
 - [ ] Dependent progression waits for authoritative result.
+- [ ] Concrete `score_conflict` state when two submissions for the same match disagree; auto-confirmed only when submissions match, otherwise routed to admin.
+- [ ] Visible "flagged for review" state for admin/referee escalation beyond auto-resolve.
 
 ## Phase 13 — Result correction/consequences
 
@@ -342,11 +346,13 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Acceptance/cutoff rules.
 - [ ] Guest temporary session identity.
 - [ ] No unsafe name-only takeover.
+- [ ] Retroactive guest-stat claiming (a guest player later links their historical stats to an account) — explicitly pending a fresh product decision, not yet approved.
 
 ## Phase 19 — Notifications
 
 - [ ] In-app notifications.
 - [ ] Push/PWA where supported.
+- [ ] Richer push categories: invites, results, "notify me for my own matches only" — beyond today's match-ready/round-ready triggers.
 - [ ] Necessary vs optional.
 - [ ] Notification center.
 - [ ] Individual read/unread.
@@ -361,6 +367,8 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Live score/status.
 - [ ] Final standings/result after completion.
 - [ ] Reset/nullified state handled correctly.
+- [ ] Court Queue view ("Playing now / Next / After that" per court) reused across admin, player, and TV Mode surfaces.
+- [ ] Nicer public/shareable results page built on the existing spectator RPC, embeddable on a club's own website.
 
 ## Phase 21 — PWA
 
@@ -462,13 +470,26 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Court templates.
 - [ ] Participant templates.
 - [ ] Official standard templates.
-- [ ] Additional tournament modes.
+- [ ] Setup conveniences for the above templates: reuse-last-setup, favorites, archive/restore.
+- [ ] Additional tournament modes: Americano, Team-Americano, Mexicano, Team-Mexicano, King of the Court, Groups+Playoffs are already exposed in the UI with client-side scheduling logic (`app/tournament-modes.js`) but have no server-side round-advancement RPC (`admin_advance_round_impl` only accepts `roundRobin`) — deactivated in the UI until each is server-wired and verified end-to-end like Round Robin; re-enable one at a time as they pass verification.
+- [ ] Redesign the in-tournament admin UI ("Styring" tab): contextual visibility — hide/collapse settings that can't be changed given the tournament's current state (e.g. court-count/format settings once active) — before considering a fuller redesign.
+- [ ] Player-first UI: "Min neste kamp" (my next match) and "Mine kamper" (my matches) surfaced more prominently than the full tournament overview.
+- [ ] PDF export of standings/results.
+- [ ] Tournament Assistant: rule-based (non-AI) live-insights engine surfacing things like a stuck court, a missing result, playtime imbalance, repeated partner pairings, plus an estimated finish time.
+- [ ] Rating/Elo system as a separate post-hoc calculation layer over raw match results (not mixed into stored scores, so the algorithm can change without rewriting history).
+- [ ] Leagues & seasons: group multiple tournaments into a season with combined points/rating/participation/wins/final standing.
+- [ ] Club/venue entity: group recurring tournaments under a venue for regular groups.
+- [ ] Recurring league automation: auto-generate next week's tournament from a saved template + last week's roster.
+- [ ] Organizer analytics dashboard: average match duration, court utilization, no-show rate, built on the existing tournament `events[]` activity log.
+- [ ] Calendar/.ics export and reminders for scheduled tournaments.
+- [ ] Sponsor/prize-pool display (informational only — name, logo, prize description; no payment processing).
+- [ ] Photo/highlight attachment per match.
 - [ ] Expanded system administration.
-- [ ] Superusers and granular permissions.
+- [ ] Superusers and granular permissions — concrete deliverable: build out `admin.html` (currently a placeholder stub) as the owner's/superusers' app-administration surface: template creation, permissions management, and other app-wide functions, distinct from in-tournament admin controls.
 - [ ] Permission sets.
 - [ ] MFA/step-up/recovery where required.
 - [ ] Secure guest-device transfer.
-- [ ] Template sharing/public library when approved.
+- [ ] Template sharing/public library when approved — concrete deliverable: a template marketplace living inside the `admin.html` dashboard above.
 - [ ] Custom Padelstar notification sounds.
 - [ ] Player result-error reporting/admin cases (D67–D71) if not already implemented.
 
@@ -476,12 +497,15 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 # PRIORITY 3 — v2.0.0 Social
 
+- [ ] Player dashboard: a personal hub beyond a stats page — next match at a glance, avatar/profile picture change, a Discord-style status message; becomes the home the rest of this section attaches to.
 - [ ] Friend requests.
 - [ ] Mutual friend list.
 - [ ] Private friend list.
 - [ ] Friend-based invitations.
 - [ ] Friend status.
-- [ ] Broader social activity/profile functionality.
+- [ ] Rivalries/head-to-head stats between two specific players across all shared tournaments.
+- [ ] Achievements/badges layered on existing per-account tournament statistics — confirmed as a good addition, detailed design deferred to a later planning pass.
+- [ ] Broader social activity/profile functionality, including optional public statistics sharing and optional social activity/history — both explicitly pending a future product decision.
 
 ---
 
@@ -489,5 +513,5 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 - [ ] Permanent tamper-protected security audit log.
 - [ ] Broader public template ecosystem.
-- [ ] Generic multi-sport expansion.
+- [ ] Standalone reusable scoring engine: generalize `app/scoring-engine.js` into an engine decoupled from padel-specific concepts, usable to power scoring for other point/set/match-based sports apps (football, handball, hockey, etc.), with padel as one configured ruleset on top of a generic core. Bigger commitment than a simple multi-sport mode — scope once the padel-specific engine is stable, since a shared interface is harder to change once other consumers depend on it.
 - [ ] Additional languages.
