@@ -1,11 +1,7 @@
 # Archive
 
-Historical/superseded documentation belongs here.
+Historical/superseded documentation only.
 
-Suggested folders:
+Files here are **not authoritative** and Codex must not read them unless a task explicitly requires historical information.
 
-- `plans/`
-- `development-history/`
-- `qa/`
-
-Files in this directory are **not authoritative** and must not be read by Codex unless the current task explicitly requires historical information.
+The former detailed `Padelstar_v1_0_0_plan.md` is superseded by `docs/ROADMAP.md`.

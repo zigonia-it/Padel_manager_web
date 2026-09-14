@@ -2,34 +2,22 @@
 
 # Padelstar Changelog
 
-Use this file for verified, completed release-relevant changes.
-
-Do not use it as a planning document.
+Only verified completed changes belong here.
 
 ## Unreleased
 
 ### Added
-
-- _Add verified new functionality here._
+- _Verified additions._
 
 ### Changed
-
-- _Add verified behavior changes here._
+- _Verified behavior changes._
 
 ### Fixed
-
-- _Move completed verified bugs here from `BUGS.md`._
+- _Verified bug fixes._
 
 ### Security
+- _Verified security changes._
 
-- _Add verified security-relevant changes here._
+## Version rule
 
----
-
-## Versioning rules
-
-- `MAJOR.MINOR.PATCH`
-- Major version changes require explicit developer decision.
-- Feature/minor changes are recorded only after implementation and verification.
-- Patch changes are recorded only after the relevant bugfix batch is verified.
-- Do not change the application version while work is unfinished.
+Do not change the application version merely to meet a date. A stable pre-1.0 build is preferable to an unverified `1.0.0`.

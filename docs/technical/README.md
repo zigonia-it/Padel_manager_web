@@ -1,8 +1,8 @@
 # Technical documentation
 
-Keep technical contracts here and update them from verified implementation.
+Technical contracts belong here.
 
-Expected files:
+Expected active files may include:
 
 - `app-flow.md`
 - `architecture.md`
@@ -11,6 +11,4 @@ Expected files:
 - `privacy-retention.md`
 - `operations.md`
 
-Do not copy obsolete technical assumptions from archived documents without verifying them against the current code and `PROJECT.md`.
-
-Codex should open only the technical document relevant to the current task.
+Codex should read only the technical document relevant to the current blocker/task.

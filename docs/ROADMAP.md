@@ -1,373 +1,493 @@
 # ROADMAP.md
 
-# Padelstar Release Roadmap
+# Padelstar – Active Release Roadmap
 
-> This is the active work queue. Work **one phase at a time**. Do not inspect the entire roadmap before starting implementation.
-
-## Status
-
-- [ ] Not started
-- [x] Done and verified
-- `🟡` Needs adjustment
-- `🧪` Needs verification
-- `❌` Missing
-- `🔒` Implemented but release-gated
-- `⏭️` Later version
+> **Primary objective:** Restore a reliably usable Padelstar as fast as possible.
+>
+> **Hard milestone:** functioning build by **Monday 21 September 2026**.
+>
+> **Version baseline:** The real current development version is `0.5.0`. The `0.6`/`0.6.0` text currently visible in the UI was set prematurely and is not evidence that 0.6.0 is complete. Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically.
+>
+> **Token reset:** **Saturday 19 September 2026 at 11:31**. Before the reset, spend tokens only on the shortest path to a functioning app and verified blockers.
+>
+> This is the **only active development plan**. The previous detailed `Padelstar_v1_0_0_plan.md` is superseded and may be archived.
 
 ---
 
-# v1.0.0
+# PRIORITY 0 — Monday critical path
 
-## Phase 0 – Focused baseline
+Nothing below Priority 0 should consume meaningful development time while a blocker exists here.
 
-- [ ] Confirm current application version.
-- [ ] Confirm build/run/test commands.
-- [ ] Identify active entry points relevant to v1 scope.
-- [ ] Confirm authoritative docs structure.
-- [ ] Do **not** perform a full repo rewrite or archive review.
+## Definition of Monday success
 
-## Phase 1 – Release gating
+The owner must be able to complete this exact chain:
 
-- [ ] Inventory tournament modes only.
-- [ ] Round Robin visible.
-- [ ] Cup visible.
-- [ ] Liga visible.
-- [ ] Other existing modes retained.
-- [ ] Other existing modes cleanly hidden/release-gated.
-- [ ] Verify gating does not break hidden modes.
+- [ ] Create an account.
+- [ ] Log in successfully.
+- [ ] Remain correctly authenticated after normal navigation/refresh.
+- [ ] Create a tournament.
+- [ ] Choose/create a Round Robin tournament.
+- [ ] Add the required participants.
+- [ ] Add/select courts as required.
+- [ ] Start the tournament.
+- [ ] Start/open a match.
+- [ ] Register a valid result.
+- [ ] Result is saved to Supabase/server.
+- [ ] Refresh/reopen and verify the saved tournament/result still exists.
+- [ ] Continue the tournament with the saved state intact.
+- [ ] Complete the Round Robin.
+- [ ] Final standings/result are valid.
+- [ ] Finish/close the tournament cleanly.
+- [ ] Return to a state where a new tournament can be created.
+- [ ] Create/start a second tournament without manual cleanup or corrupted prior state.
 
-## Phase 2 – Tournament core
+If this chain works reliably, the Monday milestone is achieved even if some wider v1.0 functionality remains unfinished.
 
-- [ ] Create guest tournament.
-- [ ] Create account-owned tournament.
-- [ ] Participants add/edit/remove correctly.
-- [ ] Unique display name within tournament.
-- [ ] Courts add/edit/name correctly.
-- [ ] Matches/runds generate correctly.
-- [ ] Tournament progression works.
-- [ ] Finish/abort/reset flows work.
+---
 
-## Phase 3 – Round Robin
+# Phase 0 — Reproduce the critical path
 
-- [ ] Teams of two.
-- [ ] Required round-robin meetings.
-- [ ] Reshuffle logic.
-- [ ] Avoid repeated teammate where possible.
-- [ ] Slot partner/opponent history.
-- [ ] Table/ranking.
-- [ ] Replacement-compatible structure.
-- [ ] Regression tests.
+Keep this phase short.
 
-## Phase 4 – Cup
+- [ ] Start the current app successfully.
+- [ ] Attempt the exact Monday-success chain above.
+- [ ] Add only reproducible blockers to `BUGS.md`.
+- [ ] Stop investigation as soon as the first blocking defect is identified.
+- [ ] Fix that blocker before broadening analysis.
+- [ ] Repeat until the whole chain succeeds.
+
+**Do not produce a repository-wide report first.**
+
+---
+
+# Phase 1 — Account creation and login
+
+This is the first functional blocker group.
+
+- [ ] Owner can open account creation.
+- [ ] Account creation succeeds.
+- [ ] Validation errors are visible and understandable.
+- [ ] Auth email/confirmation behavior works as intended.
+- [ ] Owner can log in with the created account.
+- [ ] Failed login provides visible feedback.
+- [ ] Login/create-account flows are clearly separated.
+- [ ] Authenticated state survives ordinary page navigation.
+- [ ] Authenticated state survives refresh where intended.
+- [ ] Profile reflects actual logged-in user.
+- [ ] Logout works.
+- [ ] Login again works after logout.
+- [ ] No stale auth state blocks tournament creation.
+
+### Exit gate
+
+- [ ] New owner account can be created and used to log in from a clean session.
+
+---
+
+# Phase 2 — Tournament creation
+
+- [ ] Logged-in owner can create a new tournament.
+- [ ] New tournament receives a stable database ID.
+- [ ] Owner relationship is saved correctly.
+- [ ] Tournament setup loads without runtime errors.
+- [ ] Participants can be added.
+- [ ] Participant validation works.
+- [ ] Courts can be added/selected/named as required.
+- [ ] Round Robin can be selected.
+- [ ] Required setup values persist before start.
+- [ ] Refresh does not silently destroy the setup.
+- [ ] Creating a tournament does not depend on stale data from the previous tournament.
+
+### Exit gate
+
+- [ ] Owner can create a valid Round Robin setup from a clean logged-in session.
+
+---
+
+# Phase 3 — Round Robin generation and start
+
+Round Robin has priority over Cup/Liga until Monday.
+
+- [ ] Round Robin generates valid matches.
+- [ ] Teams/players are assigned correctly.
+- [ ] Required meetings are generated correctly for the supported setup.
+- [ ] Courts are assigned correctly.
+- [ ] Tournament can transition from setup to active.
+- [ ] First playable match is available.
+- [ ] Admin view shows correct active state.
+- [ ] Player/match view does not crash.
+- [ ] Tournament start state is saved to Supabase/server.
+- [ ] Refresh after start restores the active tournament.
+
+### Exit gate
+
+- [ ] A newly created Round Robin can be started and survives refresh.
+
+---
+
+# Phase 4 — Result registration and progression
+
+- [ ] Owner/admin can open an active match.
+- [ ] Owner/admin can register a valid result.
+- [ ] Result validation works.
+- [ ] Result is saved to the correct match.
+- [ ] Result is persisted to Supabase/server.
+- [ ] Tournament standings/ranking update correctly.
+- [ ] Match becomes completed.
+- [ ] Court becomes available when appropriate.
+- [ ] Next match/round progression is valid.
+- [ ] Refresh after result entry restores the same authoritative result.
+- [ ] Duplicate submit does not create duplicate/corrupt result state.
+- [ ] Registering multiple results sequentially works.
+
+### Exit gate
+
+- [ ] Round Robin can progress through multiple saved match results without corruption.
+
+---
+
+# Phase 5 — Server backup / persistence
+
+For the Monday milestone, "server backup" means authoritative tournament persistence in Supabase/backend.
+
+- [ ] Tournament record exists server-side.
+- [ ] Owner/account relationship exists server-side.
+- [ ] Participants required by the active tournament exist server-side.
+- [ ] Courts/setup required by the active tournament persist server-side.
+- [ ] Generated matches persist server-side.
+- [ ] Match results persist server-side.
+- [ ] Tournament lifecycle state persists server-side.
+- [ ] Current standings can be reconstructed/restored from saved tournament data.
+- [ ] Refresh restores the tournament.
+- [ ] Closing/reopening the app restores the tournament where expected.
+- [ ] Local cache/storage is not the sole authoritative copy.
+- [ ] Failed server write is surfaced rather than falsely presented as saved.
+- [ ] Basic reconnect/resync behavior is verified.
+
+### Exit gate
+
+- [ ] A tournament can be started, partially played, app refreshed/reopened, and continued from server-backed state.
+
+---
+
+# Phase 6 — Complete tournament
+
+- [ ] Round Robin reaches its valid completion condition.
+- [ ] Final standings are calculated correctly.
+- [ ] Admin can finish tournament.
+- [ ] Finished status persists server-side.
+- [ ] Completed tournament no longer behaves as active.
+- [ ] Final result/standings remain readable as intended.
+- [ ] Completion does not leave locks/scorer/session state that blocks future use.
+- [ ] Abort/reset controls do not corrupt account or future tournament state.
+
+### Exit gate
+
+- [ ] Tournament completes cleanly and the owner returns to a usable post-tournament state.
+
+---
+
+# Phase 7 — Start another tournament
+
+This is part of the Monday acceptance test, not an optional polish item.
+
+- [ ] From the completed tournament state, owner can navigate to create a new tournament.
+- [ ] New tournament gets a new independent ID.
+- [ ] Prior tournament data does not leak into new setup.
+- [ ] Prior active-match/scorer state does not leak into new tournament.
+- [ ] New participants/courts can be configured.
+- [ ] New Round Robin can start.
+- [ ] First result can be registered.
+- [ ] Both tournaments remain internally distinct.
+
+### Exit gate
+
+- [ ] Two tournaments can be created and run sequentially without manual database/browser cleanup.
+
+---
+
+# Phase 8 — Monday end-to-end verification
+
+Run this only after Phases 1–7 are individually passing.
+
+## Clean-session test
+
+- [ ] Start from logged-out/clean app state.
+- [ ] Create owner account.
+- [ ] Log in.
+- [ ] Create Round Robin.
+- [ ] Add participants/courts.
+- [ ] Start tournament.
+- [ ] Register first result.
+- [ ] Refresh.
+- [ ] Verify result/tournament restored from server.
+- [ ] Continue remaining matches.
+- [ ] Finish tournament.
+- [ ] Verify final standings.
+- [ ] Create a second tournament.
+- [ ] Start second tournament.
+- [ ] Register at least one result.
+- [ ] No critical console/runtime errors occurred.
+- [ ] No manual database fix/local-storage deletion was required.
+
+## Browser/device sanity
+
+- [ ] Primary desktop browser works.
+- [ ] Primary mobile/PWA path is usable if currently supported.
+- [ ] Layout does not block core controls.
+- [ ] Supabase/network failure gives safe visible behavior.
+
+## Monday release decision
+
+- [ ] If the full v1.0 Definition of Done is also satisfied, release `1.0.0`.
+- [ ] Otherwise deploy/keep the functioning pre-1.0 build.
+- [ ] Never call an unverified build `1.0.0` solely because of the date.
+
+---
+
+# PRIORITY 1 — v1.0.0 completion
+
+Only start these after the Monday critical path is working end-to-end, unless a Priority 1 feature is required to fix a Priority 0 blocker.
+
+## Phase 9 — Cup
 
 - [ ] Bracket generation.
 - [ ] Advancement/elimination.
 - [ ] Final.
 - [ ] Result-dependent future path.
-- [ ] Correction consequence handling.
-- [ ] No automatic rewrite of already-played matches.
-- [ ] Admin choices for affected future path.
-- [ ] Regression tests.
+- [ ] Final standings/result.
+- [ ] End-to-end regression test.
 
-## Phase 5 – Liga
+## Phase 10 — Liga
 
 - [ ] League setup.
 - [ ] Match generation.
-- [ ] Table calculation.
-- [ ] Ranking.
-- [ ] Correction recalculation.
+- [ ] Table/ranking.
 - [ ] Final standings.
-- [ ] Guest and account-owned flows.
-- [ ] Regression tests.
+- [ ] End-to-end regression test.
 
-## Phase 6 – Scoring and rules
-
-- [ ] Generic minimum-points/margin engine.
-- [ ] 0/15/30/40 display.
-- [ ] Deuce/Advantage.
-- [ ] Golden Point/No-ad.
-- [ ] Tiebreak.
-- [ ] Rule snapshots per match.
-- [ ] Rules lock at first match start.
-- [ ] Read-only rule overview.
-- [ ] Relevant UI only.
-
-## Phase 7 – Player live scoring
+## Phase 11 — Player live scoring
 
 - [ ] Player can score own active match.
 - [ ] One active scorer.
 - [ ] Others live-view.
-- [ ] Scorer transfer.
-- [ ] Scorer request.
+- [ ] Scorer transfer/request.
 - [ ] Admin override.
-- [ ] Offline takeover after 2 minutes.
-- [ ] Server arbitration.
-- [ ] Undo.
-- [ ] Redo.
-- [ ] Event history.
+- [ ] Offline takeover.
+- [ ] Undo/Redo.
 - [ ] Multi-device verification.
 
-## Phase 8 – Result approval
+## Phase 12 — Result approval
 
-- [ ] Explicit `Send resultat til godkjenning`.
-- [ ] At least one approval per team.
-- [ ] Submitter approval for own team.
-- [ ] Device-less admin-added player handling.
-- [ ] Wrong/dispute flow.
-- [ ] Correction proposal resets approvals.
-- [ ] Maximum two player correction attempts.
-- [ ] 10-minute admin alert.
+- [ ] Explicit submission for approval.
+- [ ] Required approvals.
+- [ ] Dispute/correction proposal.
+- [ ] 10-minute admin escalation.
 - [ ] 30-minute conditional auto-approval.
-- [ ] Court freed independently from result approval.
 - [ ] Dependent progression waits for authoritative result.
 
-## Phase 9 – Admin correction/consequence engine
+## Phase 13 — Result correction/consequences
 
-- [ ] Admin correct live score.
-- [ ] Admin set final result/end match.
-- [ ] Finalized correction admin-only.
-- [ ] Preserve prior correction history.
-- [ ] Mandatory correction reason.
-- [ ] `Annet` requires comment.
-- [ ] Simulate consequences before mutation.
-- [ ] Concrete consequence preview.
-- [ ] Future unstarted-match handling.
-- [ ] Already-played matches never auto-rewritten.
+- [ ] Admin-only finalized correction.
+- [ ] Correction history.
+- [ ] Mandatory reason.
+- [ ] Consequence simulation.
+- [ ] Future-match handling.
+- [ ] Already-played matches protected.
 - [ ] Atomic commit/rollback.
-- [ ] Notifications only after success.
-- [ ] Restore old result as new correction.
+- [ ] Successful-change notifications.
 - [ ] Regression tests.
 
-## Phase 10 – Replacement/withdrawal
+## Phase 14 — Replacement/withdrawal
 
-- [ ] Replace player.
-- [ ] Personal stats follow person.
-- [ ] Structural history follows slot.
-- [ ] Historical actual participants preserved.
-- [ ] Original player can return.
-- [ ] One active slot per physical person.
-- [ ] Future schedule follows slot.
-- [ ] Active-match replacement restart/reset.
-- [ ] Awaiting-confirmation/dispute block replacement.
+- [ ] Structural slot vs actual-person behavior.
+- [ ] Personal stats follow actual player.
+- [ ] Historical participant preserved.
+- [ ] Active-match restart rules.
+- [ ] Disputed/unconfirmed match restrictions.
 - [ ] Regression tests.
 
-## Phase 11 – Timed matches/clock
+## Phase 15 — Timed matches/scoring rules
 
-- [ ] Normal untimed match.
-- [ ] X-minute match.
-- [ ] Authoritative start timestamp.
-- [ ] 1-minute visual warning.
-- [ ] 00:00 behavior.
-- [ ] Finish current game.
-- [ ] No negative timer.
-- [ ] Tie options.
-- [ ] Cup per-round time override.
-- [ ] Rule/time lock.
-- [ ] Refresh/offline/resync.
-- [ ] Clock foundation does not expose irrelevant future controls.
+- [ ] Generic point/margin engine.
+- [ ] Classic scoring.
+- [ ] No-ad/Golden Point.
+- [ ] Tiebreak.
+- [ ] Timed matches.
+- [ ] 00:00 finish-current-game behavior.
+- [ ] Rule lock/snapshots.
+- [ ] Cup time overrides.
 
-## Phase 12 – Auth/account
+## Phase 16 — Permanent history/statistics
 
-- [ ] Create account.
-- [ ] Login.
-- [ ] Logout.
-- [ ] Separate login/create flows.
-- [ ] Clear auth errors.
-- [ ] Profile auth state.
-- [ ] Profile login button.
-- [ ] Account not required for guest create/join.
-- [ ] Permanent user ID.
+- [ ] Account-owned history.
+- [ ] Personal statistics.
+- [ ] Corrections recalculate authoritative stats.
+- [ ] Owner history deletion does not delete other players' stats.
+- [ ] Guest has no permanent account history.
+
+## Phase 17 — Retention/cleanup
+
+- [ ] Guest completed/aborted retention.
+- [ ] Stats saved before guest deletion.
+- [ ] 30-day inactivity → expired.
+- [ ] 7-day recovery.
 - [ ] Account deletion lifecycle.
-- [ ] Auth/RLS tests.
+- [ ] Privacy documentation matches implementation.
 
-## Phase 13 – History/statistics
+## Phase 18 — Claiming/invitations
 
-- [ ] Account-owned tournament history.
-- [ ] Owner history deletion.
-- [ ] Other players' permanent stats unaffected by owner deletion.
-- [ ] Personal W/L.
-- [ ] Games/sets/stat recalculation after correction.
-- [ ] Actual-person stats.
-- [ ] Guest has no permanent personal history.
-- [ ] No retroactive guest-stat claiming.
-
-## Phase 14 – Retention/cleanup
-
-- [ ] Guest completed/aborted retention = 24 hours.
-- [ ] Read-only during retention.
-- [ ] Permanent eligible stats saved before deletion.
-- [ ] Failed stats persistence postpones cleanup.
-- [ ] 30-day inactive guest expiry.
-- [ ] Real-activity definition correct.
-- [ ] 7-day expired recovery.
-- [ ] Reactivation.
-- [ ] Permanent deletion.
-- [ ] Account deletion = 30-day period.
-- [ ] Privacy text matches behavior.
-
-## Phase 15 – Claiming/invitations
-
-- [ ] Claim existing unlinked player slot.
-- [ ] Secure account-to-slot link.
-- [ ] Invitation without friend list.
-- [ ] Invitation does not occupy slot before acceptance.
-- [ ] Accept/reject.
-- [ ] Pending invitation cutoff at first-round start.
-- [ ] Admin consequence review if accepted participant changes setup.
-- [ ] After cutoff use replacement flow.
+- [ ] Claim unlinked slot.
+- [ ] Invitations without friend list.
+- [ ] Acceptance/cutoff rules.
 - [ ] Guest temporary session identity.
-- [ ] No insecure name-only device takeover.
+- [ ] No unsafe name-only takeover.
 
-## Phase 16 – Notifications
+## Phase 19 — Notifications
 
 - [ ] In-app notifications.
-- [ ] Push/PWA where allowed.
+- [ ] Push/PWA where supported.
 - [ ] Necessary vs optional.
-- [ ] Only optional can be disabled in app.
 - [ ] Notification center.
 - [ ] Individual read/unread.
-- [ ] Opening center does not mark all read.
-- [ ] Tournament notification cleanup at tournament finish.
-- [ ] Optional final-result notification retention.
-- [ ] First version uses system sounds.
+- [ ] Lifecycle cleanup.
+- [ ] System sounds for first version.
 
-## Phase 17 – TV Mode
+## Phase 20 — TV Mode
 
-- [ ] Read-only.
-- [ ] No account required.
-- [ ] Dedicated link/QR.
+- [ ] Read-only public viewing.
+- [ ] Link/QR.
 - [ ] No admin/player rights.
 - [ ] Live score/status.
-- [ ] No private account data.
-- [ ] Final standings/results after normal completion.
-- [ ] Ended/reset state after nullification.
-- [ ] Timer visual warning without TV sound/vibration.
-- [ ] 16:9 verification.
+- [ ] Final standings/result after completion.
+- [ ] Reset/nullified state handled correctly.
 
-## Phase 18 – PWA
+## Phase 21 — PWA
 
 - [ ] Manifest.
 - [ ] Service worker.
 - [ ] Installability.
 - [ ] Standalone detection.
-- [ ] Install CTA only when relevant.
-- [ ] Desktop install guide.
-- [ ] Mobile install guide.
+- [ ] Correct install CTA.
 - [ ] Cache/update behavior.
-- [ ] Installed-app regression test.
+- [ ] Desktop/mobile install guide.
 
-## Phase 19 – Language/i18n
+## Phase 22 — Language/i18n
 
 - [ ] Norwegian.
 - [ ] English.
-- [ ] Device language default.
+- [ ] Device default.
 - [ ] Persistent manual override.
 - [ ] `Følg enhetens språk`.
-- [ ] Remove inappropriate hard-coded visible strings.
-- [ ] Admin/player/TV/notifications/help coverage.
-- [ ] Future-language extensibility.
+- [ ] Key surfaces translated.
 
-## Phase 20 – Help/privacy/information
+## Phase 23 — Help/privacy/info
 
-- [ ] User guide matches current product.
-- [ ] Privacy page matches actual data flow.
-- [ ] Guest/account retention described correctly.
-- [ ] Account deletion described correctly.
-- [ ] Notifications described where required.
+- [ ] Guide matches current product.
+- [ ] Privacy matches actual data flow.
 - [ ] Navigation matches current UI.
-- [ ] Old contradictory privacy text removed.
+- [ ] Contradictory old text removed.
 
-## Phase 21 – Initial system owner
+## Phase 24 — Initial system owner
 
-- [ ] Exactly one protected `Systemeier`.
-- [ ] Separate from ordinary user.
-- [ ] All system-level access.
-- [ ] Cannot be removed/restricted by ordinary superuser.
+- [ ] Exactly one protected Systemeier.
 - [ ] Backend/database enforcement.
-- [ ] Unauthorized system-admin access blocked before data load.
-- [ ] Minimal owner administration verified.
-- [ ] Advanced permissions remain later unless required for secure owner foundation.
+- [ ] Cannot be removed/restricted by ordinary superuser.
+- [ ] Unauthorized system-admin access blocked.
+- [ ] Minimum owner administration verified.
 
-## Phase 22 – v1 security/data integrity
+## Phase 25 — v1 security/data integrity
 
-- [ ] Supabase RLS review for v1 flows.
-- [ ] Stable IDs used for authorization/relations.
-- [ ] Guest rights.
-- [ ] Player own-match rights.
-- [ ] Admin rights.
-- [ ] Owner rights.
-- [ ] TV read-only rights.
-- [ ] Scoring race conditions.
-- [ ] Scorer takeover race conditions.
-- [ ] Final-result duplicate/race handling.
+- [ ] Supabase RLS for v1 flows.
+- [ ] Stable IDs for auth/relations.
+- [ ] Guest/player/admin/owner/TV access.
+- [ ] Duplicate/race handling.
 - [ ] Correction atomicity.
-- [ ] Cleanup cannot delete required permanent data.
+- [ ] Cleanup cannot destroy required permanent data.
 
-## Phase 23 – v1 regression/release
+## Phase 26 — v1 resilience and UI verification
 
-- [ ] Round Robin full regression.
-- [ ] Cup full regression.
-- [ ] Liga full regression.
-- [ ] Other modes remain gated, not deleted.
-- [ ] Guest flow.
-- [ ] Account flow.
-- [ ] Multi-device scoring.
-- [ ] Result approval.
-- [ ] Correction.
-- [ ] Replacement.
-- [ ] Timed match.
-- [ ] Retention.
-- [ ] Notifications.
-- [ ] TV Mode.
-- [ ] PWA.
-- [ ] i18n.
-- [ ] Privacy/help.
-- [ ] Systemeier.
-- [ ] Critical security/RLS.
-- [ ] Production build.
-- [ ] Production smoke test.
-- [ ] Active docs updated.
-- [ ] Developer approves version change.
-- [ ] Set/tag/release `1.0.0`.
+- [ ] Network loss during active match.
+- [ ] Refresh during active match.
+- [ ] Stale client state.
+- [ ] Duplicate result submit.
+- [ ] Concurrent scoring/takeover attempt.
+- [ ] Failed database write.
+- [ ] Failed permanent-stat transfer.
+- [ ] Desktop responsive verification.
+- [ ] Mobile responsive verification.
+- [ ] Tablet verification where relevant.
+- [ ] TV 16:9 verification.
+- [ ] Touch targets usable.
+- [ ] Status does not rely only on color.
+
+## Phase 27 — Documentation consolidation
+
+- [ ] `PROJECT.md` matches current approved product behavior.
+- [ ] `ROADMAP.md` is the only active development plan.
+- [ ] `BUGS.md` contains only active defects.
+- [ ] `CHANGELOG.md` contains completed verified release changes.
+- [ ] Relevant `docs/technical/*` reflects verified implementation.
+- [ ] Superseded plans moved to `docs/archive/plans/`.
+- [ ] Old contradictory design/development docs archived.
+- [ ] Archive clearly marked non-authoritative.
+
+## Phase 28 — v1.0 Definition of Done
+
+- [ ] Priority 0 critical path passes end-to-end.
+- [ ] Round Robin verified.
+- [ ] Cup verified.
+- [ ] Liga verified.
+- [ ] Required player/result flows verified.
+- [ ] Auth/account verified.
+- [ ] Server persistence verified.
+- [ ] History/retention required for v1 verified.
+- [ ] Notifications/TV/PWA/i18n/help/privacy required for v1 verified.
+- [ ] Minimum Systemeier verified.
+- [ ] No known critical data-integrity defect.
+- [ ] No known critical auth/authorization defect.
+- [ ] Production build succeeds.
+- [ ] Production smoke test succeeds.
+- [ ] Docs match shipped behavior.
+- [ ] Release-gated later features remain gated.
+- [ ] Developer explicitly approves version change to `1.0.0`.
 
 ---
 
-# 1.1.x / later 1.x
+# PRIORITY 2 — Later 1.x
 
-- [ ] Regelmaler.
-- [ ] Tidsmaler.
-- [ ] Turneringsmaler.
-- [ ] Banemaler.
-- [ ] Deltakermaler.
+- [ ] Rule templates.
+- [ ] Time templates.
+- [ ] Tournament templates.
+- [ ] Court templates.
+- [ ] Participant templates.
 - [ ] Official standard templates.
-- [ ] Template version history.
-- [ ] Favorites/archive/restore.
-- [ ] `Bruk sist oppsett`.
-- [ ] Additional tournament modes activated incrementally.
+- [ ] Additional tournament modes.
 - [ ] Expanded system administration.
-- [ ] Superusers.
-- [ ] Granular permissions.
+- [ ] Superusers and granular permissions.
 - [ ] Permission sets.
-- [ ] MFA/step-up where required.
+- [ ] MFA/step-up/recovery where required.
+- [ ] Secure guest-device transfer.
 - [ ] Template sharing/public library when approved.
-- [ ] Custom Padelstar notification sounds when approved.
-- [ ] Secure guest-device transfer when implemented safely.
+- [ ] Custom Padelstar notification sounds.
+- [ ] Player result-error reporting/admin cases (D67–D71) if not already implemented.
 
-# 2.0.0 – Social Padelstar
+---
+
+# PRIORITY 3 — v2.0.0 Social
 
 - [ ] Friend requests.
 - [ ] Mutual friend list.
 - [ ] Private friend list.
-- [ ] Friend-based tournament invitations.
-- [ ] Friend status visible to involved users.
-- [ ] Broader social activity.
-- [ ] Expanded social profile only after explicit product decisions.
-- [ ] Avatar/public stats/history only if later approved.
+- [ ] Friend-based invitations.
+- [ ] Friend status.
+- [ ] Broader social activity/profile functionality.
 
-# Post-1.0 / architecture backlog
+---
+
+# Post-1.0 architecture backlog
 
 - [ ] Permanent tamper-protected security audit log.
-- [ ] Public/unlisted user template ecosystem.
+- [ ] Broader public template ecosystem.
 - [ ] Generic multi-sport expansion.
 - [ ] Additional languages.
-- [ ] Other tournament modes.
