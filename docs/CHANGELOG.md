@@ -28,6 +28,7 @@ Monday critical-path chain (create account → log in → create Round Robin →
 - `app/guide-i18n.js` was destroying the logo image on `guide.html`'s back-link by overwriting it with translated text.
 - Menu dropdown on `guide.html`/`privacy.html` rendered in the wrong place (missing a CSS positioning anchor) and was noticeably larger than on `index.html` (a `<button>`-only global line-height rule wasn't reaching the `<a>`-based menu links there).
 - A logged-in account owner could not register results, advance rounds, perform match actions, undo a match, or delete a tournament — `admin_set_result`, `admin_advance_round`, `admin_advance_cup`, `admin_match_action`, `admin_undo_match`, and `delete_tournament` were granted to the `anon` Postgres role only, never `authenticated`. Fixed by granting all 6 to `authenticated`; verified end-to-end with a full authenticated-owner Round Robin playthrough.
+- `admin_set_result_impl` updated a scored match's `state` field but never its separate `status` field, leaving a finished match's `status` stuck at `"active"`. Fixed by adding the matching `status` writes; verified directly against the database.
 
 ## Version rule
 
