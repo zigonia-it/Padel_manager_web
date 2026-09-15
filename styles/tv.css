@@ -47,3 +47,17 @@ button { font: inherit; color: inherit; }
 .tv-footer > p { justify-content: center; margin: 0; color: #f2f6ff; font-family: "Titillium Web", sans-serif; font-size: clamp(.8rem, 1.05vw, 1.22rem); letter-spacing: .02em; text-align: center; }.footer-icon { color: var(--blue); font-size: 1.8em; }.tv-footer-status strong { color: var(--green); }.tv-footer-status .live-dot { background: var(--green); }.tv-footer-status.offline strong { color: var(--red); }.tv-footer-status.offline .live-dot { background: var(--red); }.tv-footer button { border: 0; border-left: 0; background: transparent; color: var(--muted); cursor: pointer; font-weight: 800; } @keyframes tv-live-pulse { 0%, 100% { opacity: .78; text-shadow: 0 0 5px rgba(18,191,255,.28); } 50% { opacity: 1; text-shadow: 0 0 12px rgba(18,191,255,.7); } }
 @media (max-width: 1050px) { .tv-header { grid-template-columns: 1fr auto auto; }.tv-header-lines { display: none; }.tv-title-wrap { position: static; transform: none; text-align: left; }.tv-title-wrap span { text-align: left; }.tv-title-wrap h1 { text-align: left; }.tv-columns { grid-template-columns: 1fr 1fr; grid-template-rows: minmax(0, 1fr) minmax(0, .8fr); }.tv-standing-panel { grid-column: 1 / -1; }.tv-footer { grid-template-columns: auto auto minmax(0,1fr) auto; }.tv-footer-status { display: flex !important; } }
 @media (max-width: 700px) { body { overflow: auto; }.tv-app { min-height: 100dvh; height: auto; padding: 14px; }.tv-header { grid-template-columns: 1fr auto; }.tv-title-wrap { grid-column: 1 / -1; grid-row: 2; }.tv-title-wrap h1 { font-size: 2rem; }.tv-columns { grid-template-columns: 1fr; grid-template-rows: 360px 360px minmax(300px, 1fr); }.tv-standing-panel { grid-column: auto; }.tv-footer { grid-template-columns: 1fr 1fr; }.tv-footer > p { grid-column: 1 / -1; grid-row: 2; min-height: 42px; }.tv-footer button { grid-column: 2; grid-row: 1; justify-content: center; } }
+.hidden { display: none !important; }
+.tv-cup-bracket { min-height: 0; flex: 1; display: grid; gap: 10px; overflow: auto; scrollbar-width: none; align-content: start; }
+.tv-cup-bracket::-webkit-scrollbar { display: none; }
+.tv-cup-champion { display: grid; gap: 4px; padding: clamp(10px, 1vw, 16px); border: 1px solid rgba(255,210,50,.65); border-radius: 12px; background: rgba(255,210,50,.1); text-align: center; }
+.tv-cup-champion span { color: #ffd232; font-size: clamp(.68rem, .78vw, .88rem); font-weight: 800; letter-spacing: .08em; }
+.tv-cup-champion strong { font-family: "Titillium Web", sans-serif; font-size: clamp(1.1rem, 1.4vw, 1.7rem); }
+.tv-bracket-round-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; font-family: "Titillium Web", sans-serif; font-size: clamp(.72rem, .82vw, .95rem); letter-spacing: .05em; color: #dfeaff; }
+.tv-bracket-round-heading span { color: var(--muted); font-size: .85em; font-weight: 600; letter-spacing: 0; }
+.tv-bracket-slots { display: grid; gap: 8px; }
+.tv-bracket-slot { display: grid; gap: 3px; padding: clamp(8px, .7vw, 12px); border: 1px solid rgba(89,174,255,.5); border-radius: 10px; background: var(--card); font-size: clamp(.74rem, .88vw, 1rem); font-weight: 700; }
+.tv-bracket-slot.finished { border-color: rgba(139,220,92,.55); }
+.tv-bracket-slot.pending { color: var(--muted); font-weight: 600; text-align: center; }
+.tv-bracket-winner { color: var(--green); }
+

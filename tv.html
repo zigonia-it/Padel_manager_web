@@ -8,7 +8,7 @@
   <title>Padelstar TV</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icons/padelstar-icon.png" type="image/png">
-  <link rel="stylesheet" href="styles/tv.css?v=padelstar-tv-6">
+  <link rel="stylesheet" href="styles/tv.css?v=padelstar-tv-7">
 </head>
 
 <body class="tv-page">
@@ -34,10 +34,11 @@
       </section>
       <section class="tv-panel tv-standing-panel" aria-labelledby="standingTitle">
         <h2 id="standingTitle"><img class="heading-icon" src="assets/icons/Match win@0.5x.png" alt="">STILLING</h2>
-        <div class="tv-table-head">
+        <div class="tv-table-head" id="tvStandingsHead">
           <span>#</span><span>SPILLER</span><span>KAMPER</span><span>SEIER</span><span>POENG</span><span>DIFF</span>
         </div>
         <ol id="tvStandings" class="tv-standings"></ol>
+        <div id="tvCupBracket" class="tv-cup-bracket hidden"></div>
       </section>
     </section>
 
@@ -52,7 +53,7 @@
   </main>
   <script src="supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app/tv-mode.js?v=padelstar-tv-mode-1"></script>
+  <script src="app/tv-mode.js?v=padelstar-tv-mode-2"></script>
 </body>
 
 </html>

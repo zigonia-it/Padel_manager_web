@@ -9,8 +9,11 @@ Only verified completed changes belong here.
 ### Fixed
 - `admin_advance_round_impl` and `admin_advance_cup_impl` had the same `state`/`status` desync bug fixed in `admin_set_result_impl` for 0.6.0: newly-activated matches never got their `status` field updated (Cup's newly-built bracket matches didn't get a `status` key at all). Fixed; harmless today since nothing currently reads `status` for these matches, but closes the same class of bug for consistency.
 
+### Added
+- TV Mode (`tv.html`) now renders a Cup bracket — round-by-round matches with winners highlighted, plus a champion banner — instead of the generic points table when the tournament format is Cup.
+
 ### Verified
-- Cup tournament format (docs/ROADMAP.md Phase 9) verified end-to-end as the authenticated account owner: bracket generation with auto team pairing, advancement from a finished round to the next (built from real winners/losers, not placeholders), the final and third-place match, automatic "Cup ferdig" completion with the correct winner recorded, and the admin's round-by-round bracket view. Known gap (not fixed): the spectator/TV/player views don't render the bracket, only a generic points table — see docs/BUGS.md.
+- Cup tournament format (docs/ROADMAP.md Phase 9) verified end-to-end as the authenticated account owner: bracket generation with auto team pairing, advancement from a finished round to the next (built from real winners/losers, not placeholders), the final and third-place match, automatic "Cup ferdig" completion with the correct winner recorded, and both the admin's and TV Mode's round-by-round bracket views.
 
 ## 0.6.0
 

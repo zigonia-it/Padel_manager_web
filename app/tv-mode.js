@@ -41,6 +41,57 @@
 
   function matchContext(match) { return `Runde ${match.rotationNumber ?? 1} · Kamp`; }
 
+  const isCup = () => state?.settings?.format === "cup";
+  const cupBracket = () => state?.cup?.bracket;
+  const matchById = (id) => allMatches().find((match) => match.id === id);
+
+  function cupRoundTitle(round, index, totalRounds) {
+    if (totalRounds === 1) return "FINALE";
+    if (index === totalRounds - 1) return "FINALE";
+    if (index === totalRounds - 2) return "SEMIFINALE";
+    if (index === 0) return "FØRSTE RUNDE";
+    return `RUNDE ${round.roundNumber ?? index + 1}`;
+  }
+
+  function cupBracketSlot(slot, isThirdPlace = false) {
+    if (!slot || slot.type === "pending") {
+      return `<div class="tv-bracket-slot pending"><span>${isThirdPlace ? "BRONSEFINALE" : "VENTER PÅ VINNERE"}</span></div>`;
+    }
+    const match = matchById(slot.matchId);
+    if (!match) return `<div class="tv-bracket-slot pending"><span>VENTER PÅ KAMP</span></div>`;
+    const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
+    return `<div class="tv-bracket-slot ${escapeHtml(match.state)}">
+      <span class="tv-bracket-slot-label">${isThirdPlace ? "BRONSEFINALE" : matchStatusLabel(match.state)}</span>
+      <strong class="${winner === match.teamOne ? "tv-bracket-winner" : ""}">${escapeHtml(match.teamOne.displayName)}</strong>
+      <strong class="${winner === match.teamTwo ? "tv-bracket-winner" : ""}">${escapeHtml(match.teamTwo.displayName)}</strong>
+    </div>`;
+  }
+
+  function matchStatusLabel(matchState) {
+    if (matchState === "finished") return "FERDIG";
+    if (matchState === "playing") return "PÅGÅR";
+    return "VENTER";
+  }
+
+  function renderCupBracketPanel() {
+    const bracket = cupBracket();
+    const winnerTeam = state?.cup?.winnerTeam;
+    const champion = winnerTeam ? `<div class="tv-cup-champion"><span>🏆 CUPMESTER</span><strong>${escapeHtml(winnerTeam.displayName)}</strong></div>` : "";
+    if (!bracket?.rounds?.length) return champion || `<p>Bracket genereres...</p>`;
+    const rounds = bracket.rounds.map((round, index) => `
+      <section class="tv-bracket-round">
+        <div class="tv-bracket-round-heading">
+          <strong>${cupRoundTitle(round, index, bracket.rounds.length)}</strong>
+          ${round.byeTeams?.length ? `<span>${round.byeTeams.length} bye</span>` : ""}
+        </div>
+        <div class="tv-bracket-slots">
+          ${round.slots.map((slot) => cupBracketSlot(slot)).join("")}
+          ${round.thirdPlaceSlot ? cupBracketSlot(round.thirdPlaceSlot, true) : ""}
+        </div>
+      </section>`).join("");
+    return champion + rounds;
+  }
+
   function render() {
     if (!state) return;
     const matches = allMatches();
@@ -50,7 +101,18 @@
     document.querySelector("#tvRoundLabel").textContent = `RUNDE ${state.currentRound || 1}`;
     document.querySelector("#tvLiveMatches").innerHTML = (live.length ? live : next.slice(0, 3)).map((match) => matchCard(match, !live.includes(match))).join("") || `<p>Ingen aktive kamper akkurat nå.</p>`;
     document.querySelector("#tvNextMatches").innerHTML = next.slice(0, 5).map((match) => matchCard(match, true)).join("") || `<p>Ingen kamper i kø.</p>`;
-    document.querySelector("#tvStandings").innerHTML = playerStats().map((entry) => `<li class="tv-standing-row">${standingPlayer(entry.player)}<span>${entry.matches}</span><span>${entry.wins}</span><span class="tv-standing-points">${entry.points}</span><span>${entry.diff > 0 ? "+" : ""}${entry.diff}</span></li>`).join("");
+    const cup = isCup();
+    document.querySelector("#standingTitle").innerHTML = cup
+      ? `<img class="heading-icon" src="assets/icons/Match win@0.5x.png" alt="">CUP-BRACKET`
+      : `<img class="heading-icon" src="assets/icons/Match win@0.5x.png" alt="">STILLING`;
+    document.querySelector("#tvStandingsHead").classList.toggle("hidden", cup);
+    document.querySelector("#tvStandings").classList.toggle("hidden", cup);
+    document.querySelector("#tvCupBracket").classList.toggle("hidden", !cup);
+    if (cup) {
+      document.querySelector("#tvCupBracket").innerHTML = renderCupBracketPanel();
+    } else {
+      document.querySelector("#tvStandings").innerHTML = playerStats().map((entry) => `<li class="tv-standing-row">${standingPlayer(entry.player)}<span>${entry.matches}</span><span>${entry.wins}</span><span class="tv-standing-points">${entry.points}</span><span>${entry.diff > 0 ? "+" : ""}${entry.diff}</span></li>`).join("");
+    }
     const finished = matches.filter((match) => match.state === "finished").length;
     document.querySelector("#tvProgress").textContent = `RUNDE ${state.currentRound || 1} / ${Math.max((state.rounds ?? []).length, 1)}`;
     document.querySelector("#tvPlayerProgress").textContent = `${finished} / ${matches.length}`;
