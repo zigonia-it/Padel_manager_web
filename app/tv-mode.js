@@ -45,51 +45,98 @@
   const cupBracket = () => state?.cup?.bracket;
   const matchById = (id) => allMatches().find((match) => match.id === id);
 
-  function cupRoundTitle(round, index, totalRounds) {
-    if (totalRounds === 1) return "FINALE";
-    if (index === totalRounds - 1) return "FINALE";
+  function cupRoundLabel(round, index, totalRounds) {
+    if (totalRounds === 1 || index === totalRounds - 1) return "FINALE";
     if (index === totalRounds - 2) return "SEMIFINALE";
     if (index === 0) return "FØRSTE RUNDE";
     return `RUNDE ${round.roundNumber ?? index + 1}`;
   }
 
-  function cupBracketSlot(slot, isThirdPlace = false) {
-    if (!slot || slot.type === "pending") {
-      return `<div class="tv-bracket-slot pending"><span>${isThirdPlace ? "BRONSEFINALE" : "VENTER PÅ VINNERE"}</span></div>`;
+  function bracketCardHtml(slot, roundIndex, slotIndex) {
+    const position = `data-round="${roundIndex}" data-slot="${slotIndex}"`;
+    const match = slot && slot.type !== "pending" ? matchById(slot.matchId) : null;
+    if (!match) {
+      return `<div class="tv-bracket-card pending" ${position}><div class="tv-bracket-team placeholder">Venter</div><div class="tv-bracket-team placeholder">Venter</div></div>`;
     }
-    const match = matchById(slot.matchId);
-    if (!match) return `<div class="tv-bracket-slot pending"><span>VENTER PÅ KAMP</span></div>`;
     const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
-    return `<div class="tv-bracket-slot ${escapeHtml(match.state)}">
-      <span class="tv-bracket-slot-label">${isThirdPlace ? "BRONSEFINALE" : matchStatusLabel(match.state)}</span>
-      <strong class="${winner === match.teamOne ? "tv-bracket-winner" : ""}">${escapeHtml(match.teamOne.displayName)}</strong>
-      <strong class="${winner === match.teamTwo ? "tv-bracket-winner" : ""}">${escapeHtml(match.teamTwo.displayName)}</strong>
+    const stateClass = match.state === "finished" ? "finished" : match.state === "playing" ? "playing" : "pending";
+    return `<div class="tv-bracket-card ${stateClass}" ${position}>
+      <div class="tv-bracket-team${winner === match.teamOne ? " winner" : ""}">${escapeHtml(match.teamOne.displayName)}</div>
+      <div class="tv-bracket-team${winner === match.teamTwo ? " winner" : ""}">${escapeHtml(match.teamTwo.displayName)}</div>
     </div>`;
   }
 
-  function matchStatusLabel(matchState) {
-    if (matchState === "finished") return "FERDIG";
-    if (matchState === "playing") return "PÅGÅR";
-    return "VENTER";
+  function renderBracketTreeHtml(bracket) {
+    return bracket.rounds.map((round, index) => `
+      <div class="tv-bracket-col" data-round-index="${index}">
+        <div class="tv-bracket-col-label">${cupRoundLabel(round, index, bracket.rounds.length)}</div>
+        ${round.slots.map((slot, slotIndex) => bracketCardHtml(slot, index, slotIndex)).join("")}
+        ${round.byeTeams?.length ? `<div class="tv-bracket-bye">Bye: ${round.byeTeams.map((team) => escapeHtml(team.displayName)).join(", ")}</div>` : ""}
+      </div>`).join("");
   }
 
-  function renderCupBracketPanel() {
+  function renderBracketExtraHtml(bracket) {
+    const thirdRound = bracket.rounds.find((round) => round.thirdPlaceSlot);
+    if (!thirdRound?.thirdPlaceSlot) return "";
+    return `<div class="tv-bracket-extra-label">BRONSEFINALE</div>${bracketCardHtml(thirdRound.thirdPlaceSlot, -1, 0)}`;
+  }
+
+  function svgLine(svg, x1, y1, x2, y2) {
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", x1); line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+    svg.appendChild(line);
+  }
+
+  function drawBracketLines() {
+    const svg = document.querySelector("#tvBracketSvg");
+    const wrap = document.querySelector(".tv-bracket-tree-wrap");
+    if (!svg || !wrap) return;
+    const wrapRect = wrap.getBoundingClientRect();
+    svg.setAttribute("width", wrapRect.width);
+    svg.setAttribute("height", wrapRect.height);
+    svg.innerHTML = "";
+    const columns = [...document.querySelectorAll(".tv-bracket-col")];
+    for (let roundIndex = 0; roundIndex < columns.length - 1; roundIndex += 1) {
+      const cards = [...columns[roundIndex].querySelectorAll(".tv-bracket-card")];
+      const parentCards = [...columns[roundIndex + 1].querySelectorAll(".tv-bracket-card")];
+      for (let slotIndex = 0; slotIndex < cards.length; slotIndex += 2) {
+        const cardA = cards[slotIndex];
+        const cardB = cards[slotIndex + 1];
+        const parent = parentCards[Math.floor(slotIndex / 2)];
+        if (!cardA || !cardB || !parent) continue;
+        const rectA = cardA.getBoundingClientRect();
+        const rectB = cardB.getBoundingClientRect();
+        const rectP = parent.getBoundingClientRect();
+        const ax = rectA.right - wrapRect.left, ay = rectA.top + rectA.height / 2 - wrapRect.top;
+        const bx = rectB.right - wrapRect.left, by = rectB.top + rectB.height / 2 - wrapRect.top;
+        const px = rectP.left - wrapRect.left, py = rectP.top + rectP.height / 2 - wrapRect.top;
+        const midX = Math.max(ax, bx) + (px - Math.max(ax, bx)) / 2;
+        const mergeY = (ay + by) / 2;
+        svgLine(svg, ax, ay, midX, ay);
+        svgLine(svg, bx, by, midX, by);
+        svgLine(svg, midX, ay, midX, by);
+        svgLine(svg, midX, mergeY, px, py);
+      }
+    }
+  }
+
+  function renderCupPanel() {
     const bracket = cupBracket();
     const winnerTeam = state?.cup?.winnerTeam;
-    const champion = winnerTeam ? `<div class="tv-cup-champion"><span>🏆 CUPMESTER</span><strong>${escapeHtml(winnerTeam.displayName)}</strong></div>` : "";
-    if (!bracket?.rounds?.length) return champion || `<p>Bracket genereres...</p>`;
-    const rounds = bracket.rounds.map((round, index) => `
-      <section class="tv-bracket-round">
-        <div class="tv-bracket-round-heading">
-          <strong>${cupRoundTitle(round, index, bracket.rounds.length)}</strong>
-          ${round.byeTeams?.length ? `<span>${round.byeTeams.length} bye</span>` : ""}
-        </div>
-        <div class="tv-bracket-slots">
-          ${round.slots.map((slot) => cupBracketSlot(slot)).join("")}
-          ${round.thirdPlaceSlot ? cupBracketSlot(round.thirdPlaceSlot, true) : ""}
-        </div>
-      </section>`).join("");
-    return champion + rounds;
+    document.querySelector("#tvCupChampion").classList.toggle("hidden", !winnerTeam);
+    if (winnerTeam) document.querySelector("#tvCupChampion").innerHTML = `<span>🏆 CUPMESTER</span><strong>${escapeHtml(winnerTeam.displayName)}</strong>`;
+    const tree = document.querySelector("#tvBracketTree");
+    const extra = document.querySelector("#tvBracketExtra");
+    if (!bracket?.rounds?.length) {
+      tree.innerHTML = `<p>Bracket genereres...</p>`;
+      extra.innerHTML = "";
+      document.querySelector("#tvBracketSvg").innerHTML = "";
+      return;
+    }
+    tree.innerHTML = renderBracketTreeHtml(bracket);
+    extra.innerHTML = renderBracketExtraHtml(bracket);
+    drawBracketLines();
   }
 
   function render() {
@@ -99,8 +146,11 @@
     const next = matches.filter((match) => match.state === "waiting");
     document.querySelector("#tvTournamentTitle").textContent = String(state.name || "PADELSTAR").toLocaleUpperCase("nb-NO");
     document.querySelector("#tvRoundLabel").textContent = `RUNDE ${state.currentRound || 1}`;
+    const idle = live.length === 0 && next.length === 0;
     document.querySelector("#tvLiveMatches").innerHTML = (live.length ? live : next.slice(0, 3)).map((match) => matchCard(match, !live.includes(match))).join("") || `<p>Ingen aktive kamper akkurat nå.</p>`;
     document.querySelector("#tvNextMatches").innerHTML = next.slice(0, 5).map((match) => matchCard(match, true)).join("") || `<p>Ingen kamper i kø.</p>`;
+    document.querySelector(".tv-live-panel").classList.toggle("hidden", idle);
+    document.querySelector(".tv-next-panel").classList.toggle("hidden", idle);
     const cup = isCup();
     document.querySelector("#standingTitle").innerHTML = cup
       ? `<img class="heading-icon" src="assets/icons/Match win@0.5x.png" alt="">CUP-BRACKET`
@@ -108,8 +158,9 @@
     document.querySelector("#tvStandingsHead").classList.toggle("hidden", cup);
     document.querySelector("#tvStandings").classList.toggle("hidden", cup);
     document.querySelector("#tvCupBracket").classList.toggle("hidden", !cup);
+    document.querySelector("#tvStandingPanel").classList.toggle("tv-panel-full", idle);
     if (cup) {
-      document.querySelector("#tvCupBracket").innerHTML = renderCupBracketPanel();
+      renderCupPanel();
     } else {
       document.querySelector("#tvStandings").innerHTML = playerStats().map((entry) => `<li class="tv-standing-row">${standingPlayer(entry.player)}<span>${entry.matches}</span><span>${entry.wins}</span><span class="tv-standing-points">${entry.points}</span><span>${entry.diff > 0 ? "+" : ""}${entry.diff}</span></li>`).join("");
     }
@@ -138,6 +189,7 @@
     setInterval(() => { const now = new Date(); const clock = document.querySelector("#tvClock"); clock.textContent = now.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" }); clock.dateTime = now.toISOString(); }, 1000);
     setInterval(() => { messageIndex = (messageIndex + 1) % footerMessages.length; document.querySelector("#tvMessage").textContent = footerMessages[messageIndex]; }, 60000);
     document.querySelector("#tvExitButton").addEventListener("click", () => { if (global.history.length > 1) global.history.back(); else global.location.href = "index.html"; });
+    global.addEventListener("resize", () => { if (isCup()) drawBracketLines(); });
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./service-worker.js").catch(() => { });
   }
   global.PadelstarTvMode = { start };
