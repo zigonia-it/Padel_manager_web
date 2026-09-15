@@ -35,13 +35,13 @@ The owner must be able to complete this exact chain:
 - [x] Result is saved to Supabase/server.
 - [x] Refresh/reopen and verify the saved tournament/result still exists.
 - [x] Continue the tournament with the saved state intact.
-- [ ] Complete the Round Robin. — every test used the admin "Fullfør turnering" override to finish early; a Round Robin has not yet been played to its own natural completion (all rounds/matches actually played out).
-- [ ] Final standings/result are valid. — informal only (Round 1 standings updated correctly after results); no dedicated standings/table view has been checked, and nothing has reached a full-tournament final standing.
+- [x] Complete the Round Robin. — verified: a 4-player/3-round Round Robin was played to its own natural completion (every round advanced via "Start neste runde" once its matches were actually finished, not via the admin force-finish override).
+- [x] Final standings/result are valid. — verified: final standings (points, wins, sets, games) checked against all 3 registered results and confirmed mathematically correct via the spectator table view.
 - [x] Finish/close the tournament cleanly.
 - [x] Return to a state where a new tournament can be created.
 - [x] Create/start a second tournament without manual cleanup or corrupted prior state.
 
-Two items remain open (natural Round Robin completion, final standings) — see `docs/BUGS.md` "Tournament completion" for detail. Everything else in this chain is verified end-to-end, guest and account-owned paths both.
+Every item in this chain is now verified end-to-end, guest and account-owned paths both. See `docs/BUGS.md` "Tournament completion" and "Authenticated (account-owned) path" for detail.
 
 ---
 
@@ -132,7 +132,7 @@ Round Robin has priority over Cup/Liga until Monday.
 - [ ] Result validation works. — not tested (no invalid-score attempt made).
 - [x] Result is saved to the correct match.
 - [x] Result is persisted to Supabase/server.
-- [ ] Tournament standings/ranking update correctly. — not directly checked (no dedicated standings/table view was opened this cycle).
+- [x] Tournament standings/ranking update correctly. — verified via the spectator table view after a full 3-round Round Robin: points, wins, sets, and games all correct against the registered results.
 - [x] Match becomes completed.
 - [x] Court becomes available when appropriate.
 - [x] Next match/round progression is valid.
@@ -157,7 +157,7 @@ For the Monday milestone, "server backup" means authoritative tournament persist
 - [x] Generated matches persist server-side.
 - [x] Match results persist server-side.
 - [x] Tournament lifecycle state persists server-side.
-- [ ] Current standings can be reconstructed/restored from saved tournament data. — tied to the standings gap noted above; not checked.
+- [x] Current standings can be reconstructed/restored from saved tournament data. — standings are computed live from server-persisted match state (no separate standings table to desync); confirmed correct on a full 3-round tournament reloaded via the spectator view.
 - [x] Refresh restores the tournament.
 - [x] Closing/reopening the app restores the tournament where expected. — verified via full page navigation (fresh JS bootstrap each time), which is functionally equivalent to close/reopen.
 - [x] Local cache/storage is not the sole authoritative copy — demonstrated directly via server-side SQL checks independent of browser state.
@@ -172,12 +172,12 @@ For the Monday milestone, "server backup" means authoritative tournament persist
 
 # Phase 6 — Complete tournament
 
-- [ ] Round Robin reaches its valid completion condition. — not tested naturally; every test used the admin force-finish override instead.
-- [ ] Final standings are calculated correctly. — not verified.
+- [x] Round Robin reaches its valid completion condition. — verified: all 3 rounds of a 4-player Round Robin played and advanced naturally (not via the admin force-finish override) before finalizing.
+- [x] Final standings are calculated correctly. — verified mathematically correct against all 3 registered results.
 - [x] Admin can finish tournament.
 - [x] Finished status persists server-side.
 - [x] Completed tournament no longer behaves as active.
-- [ ] Final result/standings remain readable as intended. — tied to the standings gap above; not checked.
+- [x] Final result/standings remain readable as intended. — verified via the spectator table view after finalization.
 - [x] Completion does not leave locks/scorer/session state that blocks future use.
 - [ ] Abort/reset controls do not corrupt account or future tournament state. — "Nullstill turnering" (reset) was never exercised.
 
@@ -210,7 +210,7 @@ This is part of the Monday acceptance test, not an optional polish item.
 
 Run this only after Phases 1–7 are individually passing.
 
-**Not yet run as a single continuous pass.** Every step below has been verified individually (see Phases 1–7 above and `docs/BUGS.md`), but split across separate guest-mode and account-owned sessions rather than one unbroken clean-session run-through, and a few Phase 1–7 items remain open (validation errors, logout, failed-write surfacing, standings, natural Round Robin completion). Recommended next step before calling Monday fully done: one uninterrupted pass through this exact checklist.
+**Not yet run as a single continuous pass.** Every step below has been verified individually (see Phases 1–7 above and `docs/BUGS.md`), but split across separate guest-mode and account-owned sessions rather than one unbroken clean-session run-through, and a few Phase 1–7 items remain open (validation errors, logout, failed-write surfacing). Natural Round Robin completion and final standings are now verified (see Phase 4/6 above). Recommended next step before calling Monday fully done: one uninterrupted pass through this exact checklist, starting from a logged-out state.
 
 ## Clean-session test
 
