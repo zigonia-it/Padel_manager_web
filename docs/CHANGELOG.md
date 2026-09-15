@@ -4,7 +4,7 @@
 
 Only verified completed changes belong here.
 
-## Unreleased
+## 0.6.0
 
 Monday critical-path chain (create account → log in → create Round Robin → start → register results → persist to Supabase → complete → create new tournament) verified end-to-end this cycle, guest and account-owned paths both, including natural Round Robin completion (all rounds played to their own end, not force-finished) and full final standings. See `docs/BUGS.md` for full verification detail per critical-path step.
 
