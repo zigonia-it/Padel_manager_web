@@ -253,12 +253,12 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 9 — Cup
 
-- [ ] Bracket generation.
-- [ ] Advancement/elimination.
-- [ ] Final.
-- [ ] Result-dependent future path.
-- [ ] Final standings/result.
-- [ ] End-to-end regression test.
+- [x] Bracket generation. — verified: 8 players auto-paired into 4 teams, bracket correctly pre-created with 2 rounds (semifinal slots filled, final round + third-place slot pending).
+- [x] Advancement/elimination. — verified: `admin_advance_cup` correctly detects a finished semifinal round and generates the final + third-place matches from the actual winners/losers.
+- [x] Final. — verified: final match built from the two semifinal winners, correctly flagged as the bracket's final round (`finalMatchId` set).
+- [x] Result-dependent future path. — verified: round 2's bracket slots started as "pending" (winners not yet known) and were filled in with the real teams only once semifinal results existed.
+- [x] Final standings/result. — winner detection works correctly (`cup.winnerTeam`, `status: "Cup ferdig"` set automatically once the last match of the final round is scored — no extra click needed), and the admin's Kamper tab renders a full round-by-round bracket view with per-round winners. **Known gap**: the spectator/TV view (`?spectate=<code>`) shows only the generic points table (`TABELL`), not the bracket or the winner — a spectator watching a finished Cup has no way to see who won. See BUGS.md.
+- [x] End-to-end regression test. — manual pass: created an 8-player/4-court Cup tournament as the authenticated owner (with third-place match enabled), played both semifinals, the final, and the third-place match to completion, verified the bracket and winner at every step via direct DB checks, then finalized the tournament (kept, not deleted, per the account-owned path). No automated test suite exists in this project — this is the same manual-verification standard used for Round Robin.
 
 ## Phase 10 — Liga
 
@@ -442,9 +442,9 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 28 — v1.0 Definition of Done
 
-- [ ] Priority 0 critical path passes end-to-end.
-- [ ] Round Robin verified.
-- [ ] Cup verified.
+- [x] Priority 0 critical path passes end-to-end.
+- [x] Round Robin verified.
+- [x] Cup verified.
 - [ ] Liga verified.
 - [ ] Required player/result flows verified.
 - [ ] Auth/account verified.
