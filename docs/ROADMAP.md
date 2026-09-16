@@ -440,7 +440,17 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Old contradictory design/development docs archived.
 - [ ] Archive clearly marked non-authoritative.
 
-## Phase 28 — v1.0 Definition of Done
+## Phase 28 — Claude Design UI completion
+
+The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent workspace nav shell) shipped across 6 phases — see `docs/CHANGELOG.md`. These are the pieces of that same Claude Design mockup that were deliberately deferred because building them is new functionality/interaction, not a restyle of something already there, and the redesign's own working assumption was to never risk the Monday critical path for a visual-only change. Design reference: the handoff bundle behind that redesign (screens covering create/join/Kamper), and the roadmap phases these final gems fold into: 4-step create wizard folds into Phase 2's tournament-creation flow; the match-card visual pass touches Phase 11 (player live scoring)/Phase 4's result registration; the podium screen is new ground with no existing phase, tracked here directly.
+
+- [ ] Multi-step create wizard (Turneringsnavn+format → Regler → Spillere → Bekreft, with a progress bar) replacing today's single-page create form — own step/validation/back-next state, built and verified without regressing today's single-submit create flow until the wizard fully replaces it.
+- [ ] 8-cell invite-code input (auto-advance between cells, paste-fills-all) replacing the plain text field on the join screen.
+- [ ] Manual gem/accent-color picker on join + profile screens — today's app auto-assigns a player's accent; this needs a real "chosen color" value plumbed from UI through `joinTournament`/`joinRemoteTournament` into stored player data, not just a swatch grid.
+- [ ] Podium / post-tournament celebration screen (final standings as a 1st/2nd/3rd podium layout with a trophy header, "Ny turnering" CTA) — this app has no post-finish screen today; finishing a tournament just leaves the admin on the standings view.
+- [ ] Deeper Kamper/Styring visual pass matching the mockup's flatter list-row match-card and settings-row layout — deferred in the 0.6.1 redesign specifically because `match-card.js`'s scoring buttons are wired by CSS class name, making a markup rewrite there real risk to live scoring; do this once Phase 11 (player live scoring) or Phase 26 (resilience) verification gives a safe window to touch that code without conflating a markup change with a scoring-logic change.
+
+## Phase 29 — v1.0 Definition of Done
 
 - [x] Priority 0 critical path passes end-to-end.
 - [x] Round Robin verified.
@@ -452,6 +462,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] History/retention required for v1 verified.
 - [ ] Notifications/TV/PWA/i18n/help/privacy required for v1 verified.
 - [ ] Minimum Systemeier verified.
+- [ ] Claude Design UI completion (Phase 28) verified.
 - [ ] No known critical data-integrity defect.
 - [ ] No known critical auth/authorization defect.
 - [ ] Production build succeeds.
