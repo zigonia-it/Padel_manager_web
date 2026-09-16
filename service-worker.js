@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v274";
+const cacheName = "padelstar-v275";
 
 const appShell = [
   "./",
@@ -123,8 +123,8 @@ const appShell = [
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",
   "./assets/icons/padelstar-maskable-512.png",
-  "./assets/icons/Games@0.5x.png",
-  "./assets/icons/Match win@0.5x.png",
+  "./assets/icons/games-96.png",
+  "./assets/icons/trophy-96.png",
   "./assets/logos/main_logo.png",
   "./assets/icons/vs_icon",
   "./assets/icons/padelstar-icon.png",

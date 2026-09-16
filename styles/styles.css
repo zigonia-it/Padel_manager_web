@@ -1150,13 +1150,6 @@ body[data-theme="classic"] .match-card.match-playing {
 
 /* Final match-card polish: keep the brand mark anchored to the card edge
    while giving the VS artwork enough presence on every card width. */
-@font-face {
-  font-family: "Titillium Web";
-  src: url("../assets/fonts/TitilliumWeb-SemiBold.ttf") format("truetype");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
 
 .match-card {
   position: relative;
@@ -1173,7 +1166,7 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 .scorecard-team h3 {
-  font-family: "Titillium Web", sans-serif;
+  font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: 0.08em;
 }
@@ -1299,14 +1292,14 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 .match-headline {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-ui);
   font-weight: 600;
   text-align: center;
   text-transform: uppercase;
 }
 
 .match-court {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-ui);
   font-weight: 600;
 }
 
@@ -1452,7 +1445,7 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 .hero-title {
-  font-family: "Titillium Web", sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
 }
 

@@ -155,8 +155,8 @@
     document.querySelector(".tv-columns").classList.toggle("tv-idle", idle);
     const cup = isCup();
     document.querySelector("#standingTitle").innerHTML = cup
-      ? `<img class="heading-icon" src="assets/icons/Match win@0.5x.png" alt="">CUP-BRACKET`
-      : `<img class="heading-icon" src="assets/icons/Match win@0.5x.png" alt="">STILLING`;
+      ? `<img class="heading-icon" src="assets/icons/trophy-96.png" alt="">CUP-BRACKET`
+      : `<img class="heading-icon" src="assets/icons/trophy-96.png" alt="">STILLING`;
     document.querySelector("#tvStandingsHead").classList.toggle("hidden", cup);
     document.querySelector("#tvStandings").classList.toggle("hidden", cup);
     document.querySelector("#tvCupBracket").classList.toggle("hidden", !cup);
