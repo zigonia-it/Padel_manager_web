@@ -11,6 +11,11 @@ const padelstarLanguageMeta = [
   { code: "da", label: "Dansk", flag: "🇩🇰", fallback: "nb", htmlLang: "da" },
 ];
 
+// v1.0 Release Candidate ships only fully verified languages. The rest keep
+// their full translation data (still reachable via supportedLanguages()) and
+// get re-added to this list once each is independently verified.
+const padelstarProductionLanguageCodes = ["nb", "en"];
+
 const padelstarTranslations = {
   nb: {
     brandEyebrow: "Padel Manager",
@@ -1165,6 +1170,11 @@ window.PadelstarI18n = {
   fallbackLanguage,
   supportedLanguages() {
     return padelstarLanguageMeta.map((entry) => ({ ...entry }));
+  },
+  productionLanguages() {
+    return padelstarLanguageMeta
+      .filter((entry) => padelstarProductionLanguageCodes.includes(entry.code))
+      .map((entry) => ({ ...entry }));
   },
   normalizeLanguage(language) {
     return languageFor(language).code;

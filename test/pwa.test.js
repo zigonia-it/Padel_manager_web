@@ -89,8 +89,8 @@ const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-s
 
 test("service worker claims updates and keeps a navigation fallback", () => {
   assert.match(serviceWorkerSource, /padelstar-v281/);
-  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-43/);
-  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-43/);
+  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-44/);
+  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-44/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(serviceWorkerSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(indexSource, /app\/player-visuals\.js\?v=padelstar-player-visuals-3/);
