@@ -3,6 +3,7 @@ window.PadelstarStandings = (() => {
     function renderStandings(matches) {
       renderStandingsList(elements.standingsList, matches);
       renderStandingsList(elements.playerStandingsList, matches);
+      if (elements.ownerStandingsList) renderStandingsList(elements.ownerStandingsList, matches);
     }
 
     function renderStandingsList(container, matches) {

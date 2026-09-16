@@ -19,12 +19,12 @@
   <link rel="preload" href="assets/backgrounds/bg_img-1600.jpg" as="image" fetchpriority="high">
   <link rel="stylesheet" href="styles/base.css?v=padelstar-base-7">
   <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-9">
-  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-13">
-  <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-9">
+  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-14">
+  <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-10">
   <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-98">
   <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
   <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-41">
-  <link rel="stylesheet" href="styles/components-v2.css?v=padelstar-components-v2-1">
+  <link rel="stylesheet" href="styles/components-v2.css?v=padelstar-components-v2-2">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -406,6 +406,8 @@
               data-i18n="admin.control">Styring</button>
             <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="matches"
               data-i18n="admin.matches">Kamper</button>
+            <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="standings"
+              data-i18n="common.standings">Stilling</button>
           </div>
 
           <div class="panel command-panel">
@@ -631,6 +633,15 @@
               <div class="matches" id="adminMatches"></div>
             </div>
           </div>
+
+          <div class="panel wide">
+            <div class="admin-panel hidden" data-admin-panel-section="standings">
+              <div class="panel-heading">
+                <h3 data-i18n="common.standings">Tabell</h3>
+              </div>
+              <ol class="standings" id="ownerStandingsList"></ol>
+            </div>
+          </div>
         </section>
 
         <section class="view-grid hidden" data-section="player">
@@ -816,7 +827,7 @@
   <script defer src="app/retention-policy.js?v=padelstar-retention-1"></script>
   <script defer src="app/remote-player-result.js?v=padelstar-player-result-1"></script>
   <script defer src="app/match-list.js?v=padelstar-match-list-1"></script>
-  <script defer src="app/standings.js?v=padelstar-standings-1"></script>
+  <script defer src="app/standings.js?v=padelstar-standings-2"></script>
   <script defer src="app/player-list.js?v=padelstar-player-list-1"></script>
   <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-2"></script>
   <script defer src="app/player-status.js?v=padelstar-player-status-1"></script>
@@ -848,7 +859,7 @@
   <script defer src="app/avatar-system.js?v=padelstar-avatar-system-1"></script>
   <script defer src="app/pwa-install.js?v=padelstar-pwa-install-3"></script>
   <script defer src="app/accent-system.js?v=padelstar-accent-system-1"></script>
-  <script defer src="app/player-visuals.js?v=padelstar-player-visuals-1"></script>
+  <script defer src="app/player-visuals.js?v=padelstar-player-visuals-2"></script>
   <script defer src="app/ui-feedback.js?v=padelstar-ui-feedback-2"></script>
   <script defer src="app/notification-system.js?v=padelstar-notification-system-1"></script>
   <script defer src="app/profile-session.js?v=padelstar-profile-session-1"></script>
@@ -860,7 +871,7 @@
   <script defer src="app/core/session-controller.js?v=padelstar-session-controller-1"></script>
   <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-2"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
-  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-3"></script>
+  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-4"></script>
   <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-3"></script>
   <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-1"></script>
   <script defer src="app/bootstrap/app-init.js?v=padelstar-app-init-2"></script>

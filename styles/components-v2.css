@@ -133,6 +133,16 @@
 .ds-avatar-gem-xl { width: 96px; height: 96px; }
 .ds-avatar-gem-xl .ds-avatar-gem-inner { inset: 4px; font-size: 30px; }
 
+/* Neutralize the legacy .avatar box (border/background/box-shadow) when
+   it's combined with the gem class, so avatarMarkup() call sites that
+   still pass the old "avatar" className get a clean gem instead of a
+   circle drawn behind the hexagon. */
+.avatar.ds-avatar-gem {
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
 /* ---- Status pill ---- */
 
 .ds-pill {

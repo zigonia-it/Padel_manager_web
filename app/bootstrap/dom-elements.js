@@ -98,6 +98,7 @@
       standingsList: document.querySelector("#standingsList"),
       rulesList: document.querySelector("#rulesList"),
       playerStandingsList: document.querySelector("#playerStandingsList"),
+      ownerStandingsList: document.querySelector("#ownerStandingsList"),
       playerIdentityCard: document.querySelector("#playerIdentityCard"),
       leaveSessionButton: document.querySelector("#leaveSessionButton"),
       toggleNotificationsButton: document.querySelector("#toggleNotificationsButton"),

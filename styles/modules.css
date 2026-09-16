@@ -779,23 +779,19 @@
 .match-status.finished,
 .status-chip.finished {
   border-color:
-    rgba(63, 157, 99, 0.28);
+    rgba(142, 224, 173, 0.28);
 
   background:
-    rgba(63, 157, 99, 0.18);
+    rgba(142, 224, 173, 0.13);
 
-  color: #a8e5bc;
+  color: var(--finished);
 }
 
 .match-status.cancelled,
 .status-chip.cancelled {
-  border-color:
-    rgba(168, 59, 54, 0.28);
-
-  background:
-    rgba(168, 59, 54, 0.18);
-
-  color: #f0b1ad;
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 .match-status.waiting,
@@ -815,7 +811,7 @@
 }
 
 .winner-note {
-  color: #a8e5bc;
+  color: var(--finished);
 
   font-size: 0.84rem;
   font-weight: 700;
