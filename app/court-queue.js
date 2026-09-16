@@ -21,7 +21,6 @@ window.PadelstarCourtQueue = (() => {
 
     function render(matches) {
       renderContainer(elements.courtQueue, matches);
-      renderContainer(elements.tournamentCourtQueue, matches);
     }
 
     return { render };

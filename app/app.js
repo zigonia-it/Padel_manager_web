@@ -452,13 +452,7 @@ const courtQueue = window.PadelstarCourtQueue?.create({
 const matchList = window.PadelstarMatchList.create({
   appendEmptyText: (container, text) => appendEmptyText(container, text),
   document,
-  elements,
-  escapeHtml: (value) => escapeHtml(value),
-  matchContextText: (match) => matchContextText(match),
-  setScoreText: (match) => setScoreText(match),
   t: (key, values) => t(key, values),
-  teamAccentStyle: (team) => teamAccentStyle(team),
-  teamDisplay: (team, variant) => teamDisplay(team, variant),
 });
 const standings = window.PadelstarStandings.create({
   accentStyle: (accent) => accentStyle(accent),
@@ -1003,7 +997,6 @@ function bindBootstrapEvents() {
       toggleTvMode,
       toggleTvModeFromMenu: () => {
         if (!hasActiveTournament()) return;
-        showModule("tournament");
         toggleTvMode();
         window.PadelstarNavigation?.closeMenu();
       },
@@ -1071,7 +1064,10 @@ function bindGlobalEvents() {
     callbacks: {
       activateAdminPanel,
       activatePlayerAction: (playerAction) => {
-        if (playerAction === "spectate") showWorkspace("tournament");
+        if (playerAction === "spectate") {
+          const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
+          window.location.href = `tv.html${inviteCode}`;
+        }
         if (playerAction === "choose") showModule("setup-player");
         if (playerAction === "rejoin") {
           prefillJoinForm(state.inviteCode);
@@ -1487,7 +1483,6 @@ function toggleTvMode() {
     return;
   }
   tvMode = !tvMode;
-  if (tvMode) showModule("tournament");
   document.body.classList.toggle("tv-mode", tvMode);
   elements.tvModeButton?.setAttribute("aria-pressed", String(tvMode));
   elements.tvModeButton?.setAttribute("data-i18n", tvMode ? "actions.exitTvMode" : "actions.tvMode");
@@ -1575,7 +1570,6 @@ function renderMatches(matches) {
     selectedPlayer ? t("tournament.noPlayerMatches") : t("tournament.choosePlayerForMatches"),
     (match) => createMatchCard(match, isEditablePlayerMatch(match, selectedPlayer), selectedPlayer?.id, true),
   );
-  matchList.renderSpectatorMatches(matches);
   scheduleWrappedScorecardPlayers();
 }
 
@@ -2160,16 +2154,8 @@ function restoreInitialView() {
     storage: localStorage,
     keys: { storageKey, spectatorQueryKey },
     callbacks: {
-      currentLocalRole: () => currentLocalRole(),
       hasSelectedPlayer: () => Boolean(state.selectedPlayerId),
-      hasSupabaseClient: () => Boolean(supabaseClient),
-      hasTournamentForInvite: (inviteCode) => hasTournamentForInvite(inviteCode),
       isCurrentUserAdmin: () => isCurrentUserAdmin(),
-      loadRemoteTournamentByInvite: (inviteCode) => loadRemoteTournamentByInvite(inviteCode),
-      render: () => render(),
-      setLocalRole: (role) => setLocalRole(role),
-      setSpectatorMode: (enabled) => { spectatorMode = enabled; },
-      setSpectatorPreviousRole: (role) => { spectatorPreviousRole = role; },
       showModule: (moduleName) => showModule(moduleName),
       showWorkspace: (view) => showWorkspace(view),
     },

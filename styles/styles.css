@@ -383,7 +383,6 @@ body[data-theme="classic"] .status-grid > div,
 body[data-theme="classic"] .round-summary > div,
 body[data-theme="classic"] .profile-stat-grid > div,
 body[data-theme="classic"] .share-details > div,
-body[data-theme="classic"] .spectator-score-card,
 body[data-theme="classic"] .cup-team-builder,
 body[data-theme="classic"] .admin-identity-panel,
 body[data-theme="classic"] .player-now-grid > div,
@@ -394,8 +393,7 @@ body[data-theme="classic"] .rules-list > div {
 }
 
 body[data-theme="classic"] .match-card.match-playing,
-body[data-theme="classic"] .highlight-match,
-body[data-theme="classic"] .spectator-score-card {
+body[data-theme="classic"] .highlight-match {
   border-color: rgba(20, 124, 255, 0.72);
   background: linear-gradient(135deg, rgba(20, 124, 255, 0.16), transparent 54%), rgba(13, 28, 49, 0.88);
   box-shadow: 0 16px 36px rgba(20, 124, 255, 0.12);
@@ -569,7 +567,6 @@ body.workspace-active {
 
 .panel,
 .match-card,
-.spectator-score-card,
 .next-match,
 .player-identity-card,
 .round-summary,
@@ -1288,8 +1285,7 @@ body[data-theme="classic"] .match-card.match-playing {
   color: var(--cream);
 }
 
-.next-match .team-player-badge,
-.spectator-score-card .team-player-badge {
+.next-match .team-player-badge {
   min-height: auto;
   padding: 0;
   border: 0;
@@ -1320,29 +1316,6 @@ body[data-theme="classic"] .match-card.match-playing {
   font-size: 1rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-}
-
-.spectator-score-card {
-  border-color: rgba(96, 166, 255, 0.58);
-  background:
-    linear-gradient(145deg, rgba(20, 124, 255, 0.18), transparent 56%),
-    rgba(3, 16, 34, 0.96);
-  box-shadow: 0 16px 36px rgba(20, 124, 255, 0.14);
-}
-
-.spectator-score-teams > div > strong {
-  font-family: "Anton", sans-serif;
-  font-weight: 400;
-}
-
-.spectator-score-teams > div {
-  border-color: rgba(96, 166, 255, 0.28);
-  background: linear-gradient(145deg, rgba(20, 124, 255, 0.16), rgba(3, 16, 34, 0.9));
-  padding-right: 26px;
-}
-
-.spectator-score-teams .team-player {
-  gap: 12px;
 }
 
 .scorecard-score-pair {

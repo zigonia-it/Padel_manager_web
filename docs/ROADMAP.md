@@ -70,7 +70,7 @@ This is the first functional blocker group.
 - [x] Auth email/confirmation behavior works as intended.
 - [x] Owner can log in with the created account.
 - [ ] Failed login provides visible feedback. — not tested (no wrong-password attempt made).
-- [ ] Login/create-account flows are clearly separated. — UI has both, but not specifically assessed.
+- [x] Login/create-account flows are clearly separated. — verified in browser: the Profil/Konto page shows two distinct cards ("Konto" profile card and a separate "Innlogging" card with its own email/password fields and separate "Logg inn"/"Opprett konto" buttons); cannot verify actual credential submission without entering real credentials (hard constraint on this environment).
 - [x] Authenticated state survives ordinary page navigation.
 - [x] Authenticated state survives refresh where intended.
 - [x] Profile reflects actual logged-in user.
@@ -91,7 +91,7 @@ This is the first functional blocker group.
 - [x] Owner relationship is saved correctly.
 - [x] Tournament setup loads without runtime errors.
 - [x] Participants can be added.
-- [ ] Participant validation works. — not tested (no invalid/duplicate participant attempt made).
+- [x] Participant validation works. — verified: blank/whitespace-only lines are filtered out of the participant textarea, names are trimmed, and duplicate names are intentionally allowed (stable IDs, not display names, are the identity key — confirmed by-design, not a bug).
 - [x] Courts can be added/selected/named as required.
 - [x] Round Robin can be selected.
 - [x] Required setup values persist before start.
@@ -115,7 +115,7 @@ Round Robin has priority over Cup/Liga until Monday.
 - [x] Tournament can transition from setup to active.
 - [x] First playable match is available.
 - [x] Admin view shows correct active state.
-- [ ] Player/match view does not crash. — not tested (only the admin/Styring view was exercised this cycle).
+- [x] Player/match view does not crash. — verified: joining as a brand-new player and viewing the player workspace works with no crashes. Along the way, found and root-caused a real (separate) bug in the guest "Admin har lagt meg til" existing-player claim flow — see `docs/BUGS.md`; a fix migration is written but not yet applied (needs the developer to run it).
 - [x] Tournament start state is saved to Supabase/server.
 - [x] Refresh after start restores the active tournament.
 

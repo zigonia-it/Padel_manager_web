@@ -82,8 +82,6 @@
 
       elements.adminTab.classList.toggle("hidden", !canShowAdmin);
       elements.playerTab.classList.toggle("hidden", !canShowPlayer);
-      // TV Mode is the public tournament view; keep the old tournament link out of the menu.
-      elements.tournamentTab.classList.add("hidden");
       elements.tvModeMenuButton?.classList.toggle("hidden", !tournamentIsActive);
       const canLeaveSession = deps.getSpectatorMode() || canShowPlayer;
       elements.leaveSessionButton?.classList.toggle("hidden", !canLeaveSession);

@@ -581,7 +581,6 @@ test("admin role can open admin module and falls back there without a player ide
   assert.equal(api.isCurrentUserAdmin(), true);
   assert.equal(api.normalizeModule("admin"), "admin");
   assert.equal(api.normalizeModule("player"), "admin");
-  assert.equal(api.normalizeModule("tournament"), "tournament");
 });
 
 test("player role cannot open admin module and falls back to player workspace", () => {
@@ -596,7 +595,6 @@ test("player role cannot open admin module and falls back to player workspace", 
   assert.equal(api.isCurrentUserAdmin(), false);
   assert.equal(api.normalizeModule("admin"), "player");
   assert.equal(api.normalizeModule("player"), "player");
-  assert.equal(api.normalizeModule("tournament"), "tournament");
 });
 
 test("player can leave local tournament session without mutating tournament data", () => {
@@ -635,7 +633,7 @@ test("admin player can leave player role without losing the tournament", () => {
   assert.equal(api.normalizeModule("admin"), "admin");
 });
 
-test("spectator role can see tournament view but not admin or player modules", () => {
+test("spectator role cannot open admin or player modules", () => {
   const api = loadPadelstar();
   makeTournament(api, ["Ada", "Bo"]);
 
@@ -644,9 +642,8 @@ test("spectator role can see tournament view but not admin or player modules", (
 
   assert.equal(api.currentLocalRole(), "spectator");
   assert.equal(api.isCurrentUserAdmin(), false);
-  assert.equal(api.normalizeModule("admin"), "tournament");
-  assert.equal(api.normalizeModule("player"), "tournament");
-  assert.equal(api.normalizeModule("tournament"), "tournament");
+  assert.equal(api.normalizeModule("admin"), "landing");
+  assert.equal(api.normalizeModule("player"), "landing");
 });
 
 test("spectator can leave the viewing session without keeping a local tournament", () => {
@@ -782,7 +779,7 @@ test("link utility keeps local join and spectator URLs isolated", () => {
   const location = { hostname: "localhost", origin: "http://localhost:8080" };
 
   assert.equal(api.links.createJoinLink({ location, inviteCode: "TEST1" }), "http://localhost:8080/?join=TEST1");
-  assert.equal(api.links.createSpectatorLink({ location, inviteCode: "TEST1" }), "http://localhost:8080/?spectate=TEST1");
+  assert.equal(api.links.createSpectatorLink({ location, inviteCode: "TEST1" }), "http://localhost:8080/tv.html?spectate=TEST1");
   assert.match(api.links.createQrCodeUrl("http://localhost:8080/?join=TEST1"), /quickchart\.io\/qr\?/);
 });
 
@@ -828,6 +825,25 @@ test("initial view boundary routes join URLs and saved sessions", () => {
     callbacks,
   });
   assert.deepEqual(calls, ["module:setup-player"]);
+});
+
+test("initial view boundary redirects spectator links to TV Mode instead of the app", () => {
+  const { initialView } = loadPadelstar();
+  const calls = [];
+  const location = { search: "?spectate=ABCD" };
+  initialView.restore({
+    windowRef: { location },
+    storage: { getItem: () => null },
+    keys: { storageKey: "state", spectatorQueryKey: "spectate" },
+    callbacks: {
+      isCurrentUserAdmin: () => false,
+      hasSelectedPlayer: () => false,
+      showModule: (moduleName) => calls.push(`module:${moduleName}`),
+      showWorkspace: (view) => calls.push(`workspace:${view}`),
+    },
+  });
+  assert.equal(location.href, "tv.html?spectate=ABCD");
+  assert.deepEqual(calls, []);
 });
 
 test("initial visible fallback labels are translation-bound", () => {

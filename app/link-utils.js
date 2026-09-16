@@ -6,8 +6,8 @@
     return ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
   }
 
-  function createTournamentLink({ location, inviteCode, queryKey }) {
-    const url = new URL(isLocalDevelopment(location) ? location.origin : publicAppUrl);
+  function createTournamentLink({ location, inviteCode, queryKey, path = "" }) {
+    const url = new URL(path, isLocalDevelopment(location) ? location.origin : publicAppUrl);
     url.searchParams.set(queryKey, inviteCode);
     url.hash = "";
     return url.toString();
@@ -33,7 +33,7 @@
       return createTournamentLink({ location, inviteCode, queryKey: "join" });
     },
     createSpectatorLink({ location, inviteCode }) {
-      return createTournamentLink({ location, inviteCode, queryKey: spectatorQueryKey });
+      return createTournamentLink({ location, inviteCode, queryKey: spectatorQueryKey, path: "tv.html" });
     },
     createQrCodeUrl,
   });
