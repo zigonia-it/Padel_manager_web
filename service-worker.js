@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v279";
+const cacheName = "padelstar-v281";
 
 const appShell = [
   "./",
@@ -62,7 +62,7 @@ const appShell = [
   "./app/set-score-dialog.js?v=padelstar-set-score-dialog-1",
   "./app/admin-status.js?v=padelstar-admin-status-2",
   "./app/profile-ui.js?v=padelstar-profile-ui-1",
-  "./app/backup-ui.js?v=padelstar-backup-ui-1",
+  "./app/backup-ui.js?v=padelstar-backup-ui-2",
   "./app/player-state.js?v=padelstar-player-state-1",
   "./app/tournament-status.js?v=padelstar-tournament-status-1",
   "./app/tournament-finalization.js?v=padelstar-finalization-1",
@@ -103,7 +103,7 @@ const appShell = [
   "./app/ui/theme.js?v=padelstar-theme-1",
   "./app/ui/app-renderer.js?v=padelstar-app-renderer-1",
   "./app/match-card.js?v=padelstar-match-card-1",
-  "./app/backup-format.js?v=padelstar-backup-format-1",
+  "./app/backup-format.js?v=padelstar-backup-format-2",
   "./app/link-utils.js?v=padelstar-link-utils-1",
   "./app/tournament-state.js?v=padelstar-tournament-state-1",
   "./app/state-bootstrap.js?v=padelstar-state-bootstrap-1",
@@ -121,7 +121,7 @@ const appShell = [
   "./app/admin-form-events.js?v=padelstar-admin-form-events-3",
   "./app/match-actions.js?v=padelstar-match-actions-1",
   "./app/initial-view.js?v=padelstar-initial-view-2",
-  "./app/app.js?v=padelstar-session-45",
+  "./app/app.js?v=padelstar-session-46",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",

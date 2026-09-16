@@ -11,7 +11,8 @@ window.PadelstarBackupUi = (() => {
     }
 
     function importBackup(event) {
-      const [file] = event.currentTarget.files;
+      const input = event.target;
+      const [file] = input.files;
       if (!file) return;
       const reader = new FileReader();
       reader.addEventListener("load", () => {
@@ -25,7 +26,13 @@ window.PadelstarBackupUi = (() => {
         } catch {
           showToast(t("messages.importBackupFailed"), "status-message-error");
         } finally {
-          event.currentTarget.value = "";
+          // event.currentTarget is only valid during synchronous dispatch —
+          // by the time this async FileReader callback runs it's already
+          // null, which crashed this line on every import (success or
+          // failure). event.target survives and is the same element here
+          // since this listener is bound directly to the input, not
+          // delegated from an ancestor.
+          input.value = "";
         }
       });
       reader.readAsText(file);

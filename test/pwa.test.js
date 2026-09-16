@@ -88,7 +88,7 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v279/);
+  assert.match(serviceWorkerSource, /padelstar-v281/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-43/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-43/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -106,7 +106,7 @@ test("service worker claims updates and keeps a navigation fallback", () => {
   assert.match(serviceWorkerSource, /padelstar-ui-feedback-2/);
   assert.match(serviceWorkerSource, /padelstar-notification-system-1/);
   assert.match(serviceWorkerSource, /padelstar-profile-session-1/);
-  assert.match(serviceWorkerSource, /padelstar-backup-format-1/);
+  assert.match(serviceWorkerSource, /padelstar-backup-format-2/);
   assert.match(serviceWorkerSource, /padelstar-link-utils-1/);
   assert.match(serviceWorkerSource, /padelstar-tournament-state-1/);
   assert.match(serviceWorkerSource, /padelstar-state-bootstrap-1/);
@@ -472,13 +472,12 @@ test("confirmation and toast feedback has its own module boundary", () => {
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
 });
 
-test("backup format has its own token-free serialization boundary", () => {
+test("backup format has its own serialization boundary", () => {
   assert.match(backupFormatSource, /serialize/);
   assert.match(backupFormatSource, /parse/);
   assert.match(backupFormatSource, /global\.PadelstarBackupFormat/);
-  assert.match(indexSource, /app\/backup-format\.js\?v=padelstar-backup-format-1/);
-  assert.match(serviceWorkerSource, /app\/backup-format\.js\?v=padelstar-backup-format-1/);
-  assert.match(backupFormatSource, /sanitizeState/);
+  assert.match(indexSource, /app\/backup-format\.js\?v=padelstar-backup-format-2/);
+  assert.match(serviceWorkerSource, /app\/backup-format\.js\?v=padelstar-backup-format-2/);
 });
 
 test("push notifications have their own browser and subscription boundary", () => {
@@ -631,8 +630,8 @@ test("backup UI has its own import and export boundary", () => {
   assert.match(backupUiSource, /exportBackup/);
   assert.match(backupUiSource, /importBackup/);
   assert.match(backupUiSource, /window\.PadelstarBackupUi/);
-  assert.match(indexSource, /app\/backup-ui\.js\?v=padelstar-backup-ui-1/);
-  assert.match(serviceWorkerSource, /app\/backup-ui\.js\?v=padelstar-backup-ui-1/);
+  assert.match(indexSource, /app\/backup-ui\.js\?v=padelstar-backup-ui-2/);
+  assert.match(serviceWorkerSource, /app\/backup-ui\.js\?v=padelstar-backup-ui-2/);
   assert.match(appSource, /backupUi\.importBackup\(event\)/);
 });
 
@@ -846,7 +845,7 @@ test("active app files do not reference archived assets", () => {
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
   assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-100/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-45/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-46/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
@@ -857,7 +856,7 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-1/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-100/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-45/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-46/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
@@ -983,8 +982,14 @@ test("new invite codes use the stronger eight-character format", () => {
   assert.match(indexSource, /maxlength="8"/);
 });
 
-test("backup export uses the token-free state projection", () => {
-  assert.match(backupFormatSource, /sanitizeState\(state\)/);
+test("backup export preserves admin/player identity so restore can resume as the same user", () => {
+  // docs/BUGS.md: exportBackup() used to run state through the same
+  // sanitizer as the remote/shared-state payload, stripping adminToken
+  // (and selectedPlayerId/ownerUserId) — restoring that backup could
+  // never re-establish admin identity, so it silently fell back to the
+  // read-only legacy spectator view instead of the admin workspace.
+  assert.doesNotMatch(backupFormatSource, /sanitizeState/);
+  assert.match(backupFormatSource, /tournament:\s*state/);
 });
 
 test("app shell uses optimized startup images", () => {

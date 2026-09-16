@@ -185,7 +185,6 @@ const eventLog = window.PadelstarTournamentEvents?.create({
 const backupFormat = window.PadelstarBackupFormat.create({
   isValidState: (candidate) => isValidTournamentState(candidate),
   migrateState: (candidate) => migrateState(candidate),
-  sanitizeState: (candidate) => sanitizeSharedState(candidate),
 });
 state.settings.language = i18nUi.loadUserLanguage({
   storage: localStorage,
