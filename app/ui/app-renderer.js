@@ -67,6 +67,7 @@
       callbacks.renderExistingPlayerList();
       callbacks.renderCupTeamBuilder();
       callbacks.renderSyncControls();
+      callbacks.renderPodium();
     }
 
     return { render };

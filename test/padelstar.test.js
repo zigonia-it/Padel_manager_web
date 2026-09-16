@@ -50,6 +50,7 @@ const tournamentRuntimePath = path.join(appRoot, "tournament-runtime.js");
 const workspaceOverviewPath = path.join(appRoot, "workspace-overview.js");
 const matchListPath = path.join(appRoot, "match-list.js");
 const standingsPath = path.join(appRoot, "standings.js");
+const podiumPath = path.join(appRoot, "podium.js");
 const playerListPath = path.join(appRoot, "player-list.js");
 const cupBracketPath = path.join(appRoot, "cup-bracket.js");
 const playerStatusPath = path.join(appRoot, "player-status.js");
@@ -194,6 +195,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(workspaceOverviewPath, "utf8"), context, { filename: workspaceOverviewPath });
   vm.runInContext(fs.readFileSync(matchListPath, "utf8"), context, { filename: matchListPath });
   vm.runInContext(fs.readFileSync(standingsPath, "utf8"), context, { filename: standingsPath });
+  vm.runInContext(fs.readFileSync(podiumPath, "utf8"), context, { filename: podiumPath });
   vm.runInContext(fs.readFileSync(playerListPath, "utf8"), context, { filename: playerListPath });
   vm.runInContext(fs.readFileSync(cupBracketPath, "utf8"), context, { filename: cupBracketPath });
   vm.runInContext(fs.readFileSync(playerStatusPath, "utf8"), context, { filename: playerStatusPath });

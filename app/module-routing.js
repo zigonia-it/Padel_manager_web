@@ -12,6 +12,9 @@
 
     function normalizeModule(moduleName) {
       const requestedModule = normalizeWorkspaceModule(moduleName);
+      // Podium renders from a captured snapshot, not live tournament state, so
+      // it must stay reachable even after finishing wipes a guest tournament.
+      if (requestedModule === "podium") return "podium";
       if (!hasActiveTournament()) {
         return ["setup-admin", "setup-player", "account"].includes(requestedModule) ? requestedModule : "landing";
       }

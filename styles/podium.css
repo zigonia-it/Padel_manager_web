@@ -1,0 +1,122 @@
+/* =========================================================
+   PODIUM / POST-TOURNAMENT CELEBRATION
+   ========================================================= */
+
+.podium-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(20px, 3vw, 32px);
+
+  max-width: 640px;
+  margin: 0 auto;
+  padding: clamp(24px, 4vw, 48px) 16px;
+  text-align: center;
+}
+
+.podium-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.podium-header .eyebrow {
+  color: var(--gold-bright, #62b6ff);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.podium-trophy {
+  margin: 6px 0;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.4));
+}
+
+.podium-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 800;
+}
+
+.podium-header p#podiumStats {
+  color: var(--ui-muted, #9fb4cc);
+  font-size: 0.92rem;
+}
+
+.podium-places {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: clamp(8px, 2vw, 20px);
+  width: 100%;
+}
+
+.podium-place {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: podium-place-pop 0.5s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .podium-place { animation: none; }
+}
+
+@keyframes podium-place-pop {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+
+.podium-avatar {
+  display: flex;
+  justify-content: center;
+}
+
+.podium-name {
+  font-weight: 700;
+  font-size: 0.94rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.podium-points {
+  color: var(--gold-bright, #62b6ff);
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.podium-plinth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border: 1px solid var(--ds-border-strong);
+  background: linear-gradient(180deg, rgba(91, 173, 255, 0.28), rgba(91, 173, 255, 0.08));
+
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.podium-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+#podiumFullStandings {
+  width: 100%;
+  max-width: 420px;
+}
+
+#podiumFullStandings.hidden {
+  display: none;
+}

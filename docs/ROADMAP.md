@@ -355,6 +355,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 - [ ] Read-only public viewing.
 - [ ] Link/QR.
+- [ ] Opens in new window/tab.
 - [ ] No admin/player rights.
 - [ ] Live score/status.
 - [ ] Final standings/result after completion.
@@ -458,7 +459,7 @@ The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent works
 - [ ] Multi-step create wizard (Turneringsnavn+format → Regler → Spillere → Bekreft, with a progress bar) replacing today's single-page create form — own step/validation/back-next state, built and verified without regressing today's single-submit create flow until the wizard fully replaces it.
 - [ ] 8-cell invite-code input (auto-advance between cells, paste-fills-all) replacing the plain text field on the join screen.
 - [ ] Manual gem/accent-color picker on join + profile screens — today's app auto-assigns a player's accent; this needs a real "chosen color" value plumbed from UI through `joinTournament`/`joinRemoteTournament` into stored player data, not just a swatch grid.
-- [ ] Podium / post-tournament celebration screen (final standings as a 1st/2nd/3rd podium layout with a trophy header, "Ny turnering" CTA) — this app has no post-finish screen today; finishing a tournament just leaves the admin on the standings view.
+- [x] Podium / post-tournament celebration screen (final standings as a 1st/2nd/3rd podium layout with a trophy header, "Ny turnering" CTA) — built on the `ui-makeover` branch. Finishing a guest tournament wipes `state` as part of the same action (see `docs/BUGS.md`-style note: a guest tournament is deleted server-side on finish), so the podium can't read live state after the fact — `app/app.js`'s `endTournament()` now captures a `leaderboardEntries()` snapshot immediately before calling finalize, and `app/podium.js` renders from that snapshot alone. "Se full tabell" expands an inline full-ranked list from the same snapshot rather than navigating to the live standings tab, so it works identically whether the tournament was deleted (guest) or retained (owner). Verified in-browser at desktop and mobile widths, both a played-out and a force-finished tournament, and that "Ny turnering" reaches a genuinely clean create form (found and fixed a related bug: the create form's player textarea kept the previous tournament's names since navigating there doesn't reset form fields — `syncCreateFormDefaults()` is now called first).
 - [ ] Deeper Kamper/Styring visual pass matching the mockup's flatter list-row match-card and settings-row layout — deferred in the 0.6.1 redesign specifically because `match-card.js`'s scoring buttons are wired by CSS class name, making a markup rewrite there real risk to live scoring; do this once Phase 10 (player live scoring) or Phase 25 (resilience) verification gives a safe window to touch that code without conflating a markup change with a scoring-logic change.
 
 ## Phase 29 — v1.0 Definition of Done

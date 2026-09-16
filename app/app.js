@@ -464,6 +464,16 @@ const standings = window.PadelstarStandings.create({
   leaderboardEntries: (matches) => leaderboardEntries(matches),
   t: (key, values) => t(key, values),
 });
+const podium = window.PadelstarPodium.create({
+  accentStyle: (accent) => accentStyle(accent),
+  avatarMarkup: (player, className, size) => avatarMarkup(player, className, size),
+  document,
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  showModule: (moduleName) => showModule(moduleName),
+  syncCreateFormDefaults: () => syncCreateFormDefaults(),
+  t: (key, values) => t(key, values),
+});
 const playerList = window.PadelstarPlayerList.create({
   accentStyle: (accent) => accentStyle(accent),
   appendEmptyText: (container, text) => appendEmptyText(container, text),
@@ -1076,12 +1086,14 @@ function bindGlobalEvents() {
       },
       closeLargeScore,
       closeSetScoreDialog,
+      goToNewTournamentFromPodium,
       handleOnline,
       handleOffline,
       render,
       setPendingSetScoreMatchId: (matchId) => { pendingSetScoreMatchId = matchId; },
       setLargeScoreMatchId: (matchId) => { largeScoreMatchId = matchId; },
       syncJoinPreview,
+      togglePodiumFullStandings,
     },
   });
 }
@@ -1797,8 +1809,43 @@ function saveManualCupTeams(value) {
   return adminActions.saveManualCupTeams(value);
 }
 
-function endTournament() {
-  return tournamentFinalization.finalize("completed");
+let podiumSnapshot = null;
+
+// Captured before finalize() runs: a guest tournament's state gets wiped
+// (players/rounds cleared, storage removed) as part of finishing, so the
+// podium can never read live state after the fact -- it always renders from
+// this snapshot instead.
+function buildPodiumSnapshot() {
+  const matches = getAllMatches();
+  return {
+    tournamentName: state.name,
+    roundsCount: state.rounds.length,
+    matchesCount: matches.length,
+    playersCount: state.players.length,
+    entries: leaderboardEntries(matches),
+  };
+}
+
+async function endTournament() {
+  const snapshot = buildPodiumSnapshot();
+  const success = await tournamentFinalization.finalize("completed");
+  if (success) {
+    podiumSnapshot = snapshot;
+    showModule("podium");
+  }
+  return success;
+}
+
+function renderPodium() {
+  return podium.renderPodium(podiumSnapshot);
+}
+
+function togglePodiumFullStandings() {
+  return podium.toggleFullStandings();
+}
+
+function goToNewTournamentFromPodium() {
+  return podium.goToNewTournament();
 }
 
 function updateCourtsFromInput(value) {
@@ -2207,6 +2254,7 @@ const appRenderer = window.PadelstarAppRenderer.create({
     renderExistingPlayerList,
     renderCupTeamBuilder,
     renderSyncControls,
+    renderPodium,
   },
 });
 sessionController = window.PadelstarSessionController.create({

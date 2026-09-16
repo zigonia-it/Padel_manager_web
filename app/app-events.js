@@ -7,12 +7,14 @@
       activatePlayerAction,
       closeLargeScore,
       closeSetScoreDialog,
+      goToNewTournamentFromPodium,
       handleOnline,
       handleOffline,
       render,
       setPendingSetScoreMatchId,
       setLargeScoreMatchId,
       syncJoinPreview,
+      togglePodiumFullStandings,
     } = callbacks;
 
     elements.confirmDialog?.addEventListener("click", (event) => {
@@ -32,6 +34,8 @@
       if (event.target === elements.setScoreDialog) closeSetScoreDialog();
     });
     elements.setScoreDialog.addEventListener("close", () => setPendingSetScoreMatchId(null));
+    elements.podiumViewStandingsButton?.addEventListener("click", togglePodiumFullStandings);
+    elements.podiumNewTournamentButton?.addEventListener("click", goToNewTournamentFromPodium);
     documentRef.querySelectorAll(".subtab").forEach((tab) => {
       tab.addEventListener("click", () => activateAdminPanel(tab.dataset.adminPanel));
     });
