@@ -91,10 +91,11 @@
   function drawBracketLines() {
     const svg = document.querySelector("#tvBracketSvg");
     const wrap = document.querySelector(".tv-bracket-tree-wrap");
-    if (!svg || !wrap) return;
+    const tree = document.querySelector("#tvBracketTree");
+    if (!svg || !wrap || !tree) return;
     const wrapRect = wrap.getBoundingClientRect();
-    svg.setAttribute("width", wrapRect.width);
-    svg.setAttribute("height", wrapRect.height);
+    svg.setAttribute("width", Math.max(tree.scrollWidth, wrapRect.width));
+    svg.setAttribute("height", Math.max(tree.scrollHeight, wrapRect.height));
     svg.innerHTML = "";
     const columns = [...document.querySelectorAll(".tv-bracket-col")];
     for (let roundIndex = 0; roundIndex < columns.length - 1; roundIndex += 1) {
@@ -151,6 +152,7 @@
     document.querySelector("#tvNextMatches").innerHTML = next.slice(0, 5).map((match) => matchCard(match, true)).join("") || `<p>Ingen kamper i kø.</p>`;
     document.querySelector(".tv-live-panel").classList.toggle("hidden", idle);
     document.querySelector(".tv-next-panel").classList.toggle("hidden", idle);
+    document.querySelector(".tv-columns").classList.toggle("tv-idle", idle);
     const cup = isCup();
     document.querySelector("#standingTitle").innerHTML = cup
       ? `<img class="heading-icon" src="assets/icons/Match win@0.5x.png" alt="">CUP-BRACKET`
