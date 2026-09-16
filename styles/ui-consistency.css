@@ -193,11 +193,14 @@ body:not(.landing-active) select:focus-visible {
   outline-offset: 2px;
 }
 
-/* Route changes focus the module heading for screen readers. Keep that
-   programmatic focus quiet visually, while retaining the outline when a
-   browser accessibility mode exposes keyboard focus. */
-body:not(.landing-active) h1[tabindex="-1"]:focus:not(:focus-visible),
-body:not(.landing-active) h2[tabindex="-1"]:focus:not(:focus-visible) {
+/* Route changes focus the module heading for screen readers (including the
+   landing page's own hero heading — this isn't one of the "surface" rules
+   excluded from landing above, it's the same accessibility mechanism on
+   every module). Keep that programmatic focus quiet visually, while
+   retaining the outline when a browser accessibility mode exposes keyboard
+   focus. */
+h1[tabindex="-1"]:focus:not(:focus-visible),
+h2[tabindex="-1"]:focus:not(:focus-visible) {
   outline: none;
   box-shadow: none;
 }
