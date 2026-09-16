@@ -1473,7 +1473,9 @@ function setLocalRole(role) { return sessionPolicy.setLocalRole(role); }
 function currentLocalRole() { return sessionPolicy.currentLocalRole(); }
 
 function renderRoleVisibility() {
-  return workspaceNavigation.renderRoleVisibility();
+  const result = workspaceNavigation.renderRoleVisibility();
+  window.PadelstarWorkspaceRail?.syncActiveState();
+  return result;
 }
 
 function toggleTvMode() {

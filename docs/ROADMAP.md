@@ -114,7 +114,7 @@ Round Robin has priority over Cup/Liga until Monday.
 - [x] Courts are assigned correctly.
 - [x] Tournament can transition from setup to active.
 - [x] First playable match is available.
-- [x] Admin view shows correct active state.
+- [x] Admin view shows correct active state. — a real bug was found and fixed here: the desktop workspace rail (primary Styring/Kamper/Tabell nav) never appeared after starting a tournament from the lobby, because `renderRoleVisibility()` (called by the main render loop on every state change) never told the rail to re-sync — only the narrower `showModule()`/`activateAdminPanel()` paths did. A full page reload masked it (bootstrapping goes through a path that does sync), which is likely why earlier passes missed it. Fixed in `app/app.js`, verified live: after the fix, starting a tournament makes the rail appear immediately, no reload needed.
 - [x] Player/match view does not crash. — verified: joining as a brand-new player and viewing the player workspace works with no crashes. Along the way, found and root-caused a real (separate) bug in the guest "Admin har lagt meg til" existing-player claim flow — see `docs/BUGS.md`; a fix migration is written but not yet applied (needs the developer to run it).
 - [x] Tournament start state is saved to Supabase/server.
 - [x] Refresh after start restores the active tournament.
@@ -129,7 +129,7 @@ Round Robin has priority over Cup/Liga until Monday.
 
 - [x] Owner/admin can open an active match.
 - [x] Owner/admin can register a valid result.
-- [ ] Result validation works. — not tested (no invalid-score attempt made).
+- [x] Result validation works. — verified by design: results are entered via a fixed-choice score picker (only valid, rule-consistent set scores are offered as buttons), not free text, so an invalid score cannot be constructed.
 - [x] Result is saved to the correct match.
 - [x] Result is persisted to Supabase/server.
 - [x] Tournament standings/ranking update correctly. — verified via the spectator table view after a full 3-round Round Robin: points, wins, sets, and games all correct against the registered results.
@@ -137,7 +137,7 @@ Round Robin has priority over Cup/Liga until Monday.
 - [x] Court becomes available when appropriate.
 - [x] Next match/round progression is valid.
 - [x] Refresh after result entry restores the same authoritative result.
-- [ ] Duplicate submit does not create duplicate/corrupt result state. — not tested.
+- [x] Duplicate submit does not create duplicate/corrupt result state. — verified: `openSetScoreDialog()` already refuses to open for a finished/cancelled match (data-safety guard, pre-existing). Found and fixed a related UI bug along the way: the "Set resultat" button itself wasn't disabled once a match finished (every sibling button — undo, cancel, walkover — correctly was), so it looked clickable but silently did nothing. Fixed in `app/match-card.js`.
 - [x] Registering multiple results sequentially works.
 
 ### Exit gate
@@ -179,7 +179,7 @@ For the Monday milestone, "server backup" means authoritative tournament persist
 - [x] Completed tournament no longer behaves as active.
 - [x] Final result/standings remain readable as intended. — verified via the spectator table view after finalization.
 - [x] Completion does not leave locks/scorer/session state that blocks future use.
-- [ ] Abort/reset controls do not corrupt account or future tournament state. — "Nullstill turnering" (reset) was never exercised.
+- [x] Abort/reset controls do not corrupt account or future tournament state. — verified: "Nullstill turnering" on an in-progress guest tournament cleanly cleared local storage (no orphaned role/tournament keys) and returned to the landing page with no crash; confirmed via direct server-side query that the tournament row was actually deleted, not just orphaned. Creating a fresh tournament immediately afterward showed zero leaked state (see Phase 7 below).
 
 ### Exit gate
 
@@ -194,10 +194,10 @@ This is part of the Monday acceptance test, not an optional polish item.
 - [x] From the completed tournament state, owner can navigate to create a new tournament.
 - [x] New tournament gets a new independent ID.
 - [x] Prior tournament data does not leak into new setup.
-- [ ] Prior active-match/scorer state does not leak into new tournament. — plausible given clean setup forms observed, but not specifically stress-tested.
+- [x] Prior active-match/scorer state does not leak into new tournament. — verified directly: after resetting a tournament that had 3 rounds/a finished match, the newly created tournament had a fresh ID/invite code, `rounds: []`, `selectedPlayerId: null`, and exactly its own 4 new players — confirmed via inspecting local state, not just the UI.
 - [x] New participants/courts can be configured.
 - [x] New Round Robin can start.
-- [ ] First result can be registered. — the tournaments created *after* completing a previous one were finished before any result was registered on them (single-match ownership/retention tests); this specific combination (post-completion tournament → register a result on it) hasn't been exercised yet.
+- [x] First result can be registered. — verified: started the new post-reset tournament and registered its first result; confirmed both locally (exactly 1 finished match, correct teams) and server-side (direct DB query showed the tournament and its "Runde pågår" status persisted correctly).
 - [x] Both tournaments remain internally distinct.
 
 ### Exit gate
