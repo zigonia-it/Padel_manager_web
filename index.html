@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
   <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-41">
   <link rel="stylesheet" href="styles/components-v2.css?v=padelstar-components-v2-2">
+  <link rel="stylesheet" href="styles/workspace-nav.css?v=padelstar-workspace-nav-3">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -399,6 +400,24 @@
           </div>
         </div>
 
+        <div class="workspace-body">
+          <nav class="workspace-rail hidden" id="workspaceRail" aria-label="Turneringsnavigasjon">
+            <button type="button" class="workspace-rail-item" data-rail-target="control">
+              <span class="workspace-rail-label" data-i18n="admin.control">Styring</span>
+            </button>
+            <button type="button" class="workspace-rail-item" data-rail-target="matches">
+              <span class="workspace-rail-label" data-i18n="admin.matches">Kamper</span>
+            </button>
+            <button type="button" class="workspace-rail-item" data-rail-target="standings">
+              <span class="workspace-rail-label" data-i18n="common.standings">Tabell</span>
+            </button>
+            <button type="button" class="workspace-rail-item hidden" data-rail-target="player">
+              <span class="workspace-rail-label" data-i18n="nav.player">Spiller</span>
+            </button>
+          </nav>
+
+          <div class="workspace-content">
+
         <section class="view-grid" data-section="admin">
           <div class="admin-subtabs wide" role="tablist" aria-label="Adminseksjoner"
             data-i18n-aria-label="admin.sectionsAria">
@@ -407,7 +426,7 @@
             <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="matches"
               data-i18n="admin.matches">Kamper</button>
             <button class="subtab" type="button" role="tab" aria-selected="false" data-admin-panel="standings"
-              data-i18n="common.standings">Stilling</button>
+              data-i18n="common.standings">Tabell</button>
           </div>
 
           <div class="panel command-panel">
@@ -731,6 +750,24 @@
             <ol class="standings" id="standingsList"></ol>
           </div>
         </section>
+
+          </div>
+
+          <nav class="workspace-bottom-tabs hidden" id="workspaceBottomTabs" aria-label="Turneringsnavigasjon">
+            <button type="button" class="workspace-rail-item" data-rail-target="control">
+              <span class="workspace-rail-label" data-i18n="admin.control">Styring</span>
+            </button>
+            <button type="button" class="workspace-rail-item" data-rail-target="matches">
+              <span class="workspace-rail-label" data-i18n="admin.matches">Kamper</span>
+            </button>
+            <button type="button" class="workspace-rail-item" data-rail-target="standings">
+              <span class="workspace-rail-label" data-i18n="common.standings">Tabell</span>
+            </button>
+            <button type="button" class="workspace-rail-item hidden" data-rail-target="player">
+              <span class="workspace-rail-label" data-i18n="nav.player">Spiller</span>
+            </button>
+          </nav>
+        </div>
       </section>
     </main>
 
@@ -856,6 +893,7 @@
   <script defer src="app/remote-rpc.js?v=padelstar-remote-rpc-1"></script>
   <script defer src="app/ui-effects.js?v=padelstar-ui-effects-1"></script>
   <script defer src="app/navigation.js?v=padelstar-navigation-2"></script>
+  <script defer src="app/workspace-rail.js?v=padelstar-workspace-rail-1"></script>
   <script defer src="app/avatar-system.js?v=padelstar-avatar-system-1"></script>
   <script defer src="app/pwa-install.js?v=padelstar-pwa-install-3"></script>
   <script defer src="app/accent-system.js?v=padelstar-accent-system-1"></script>
@@ -896,7 +934,7 @@
   <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-3"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-1"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-2"></script>
-  <script defer src="app/app.js?v=padelstar-session-42"></script>
+  <script defer src="app/app.js?v=padelstar-session-43"></script>
 </body>
 
 </html>

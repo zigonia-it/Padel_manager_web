@@ -1,0 +1,144 @@
+/* =========================================================
+   WORKSPACE NAV SHELL — side rail (desktop) / bottom tabs (mobile)
+   See .claude/plans/we-can-plan-new-playful-volcano.md (Phase 3).
+   Purely presentational: app/workspace-rail.js dispatches into the
+   existing showModule()/activateAdminPanel() calls and reads active
+   state back from the DOM — this is not a second state machine.
+   ========================================================= */
+
+.workspace-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.workspace-content {
+  min-width: 0;
+}
+
+/* Now that the rail/bottom-tabs own navigation between Styring/Kamper/
+   Tabell, the inline subtab row inside the admin panel would be a
+   redundant second control for the same three destinations. */
+.admin-subtabs,
+body[data-theme] .admin-subtabs {
+  display: none;
+}
+
+/* The rail/bottom-tabs are the sole nav path to these destinations now;
+   keep the hamburger entries out of the menu to avoid a second path to
+   the same content (module routing still works if something reaches
+   showModule("admin"/"player") programmatically). */
+#adminModuleLink,
+#playerModuleLink {
+  display: none;
+}
+
+.workspace-rail,
+.workspace-bottom-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.workspace-rail.hidden,
+.workspace-bottom-tabs.hidden {
+  display: none;
+}
+
+.workspace-rail-item {
+  display: flex;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-dim);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 46px;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.workspace-rail-item:hover {
+  color: var(--text-secondary);
+  transform: none;
+}
+
+.workspace-rail-item.is-active {
+  background: var(--ds-glass);
+  color: var(--gold-bright);
+  border-color: var(--ds-border-hairline);
+}
+
+.workspace-rail-item.hidden {
+  display: none;
+}
+
+/* ---- Desktop: side rail ---- */
+
+@media not all and (min-width: 860px) {
+  .workspace-rail {
+    display: none;
+  }
+}
+
+@media (min-width: 860px) {
+  .workspace-bottom-tabs {
+    display: none;
+  }
+
+  .workspace-body:not(:has(.workspace-rail.hidden)) {
+    grid-template-columns: 186px 1fr;
+  }
+
+  .workspace-rail {
+    flex-direction: column;
+    position: sticky;
+    top: 110px;
+    padding: 10px;
+    background: #0a1322;
+    border: 1px solid var(--ds-border-hairline);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--ds-shadow-soft);
+  }
+
+  .workspace-rail-item {
+    justify-content: flex-start;
+    padding: 0 14px;
+    border-left: 3px solid transparent;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  .workspace-rail-item.is-active {
+    border-left-color: var(--gold-bright);
+  }
+}
+
+/* ---- Mobile/tablet: sticky bottom tab bar ---- */
+
+@media not all and (min-width: 860px) {
+  .workspace-bottom-tabs {
+    position: sticky;
+    bottom: 0;
+    z-index: 15;
+    margin: 18px -8px 0;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(180deg, rgba(10, 19, 34, 0.7), rgba(10, 19, 34, 0.97));
+    border-top: 1px solid var(--ds-border-hairline);
+    backdrop-filter: blur(18px);
+  }
+
+  .workspace-bottom-tabs .workspace-rail-item {
+    flex: 1 1 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 56px;
+    text-align: center;
+  }
+
+  .workspace-bottom-tabs .workspace-rail-item.is-active {
+    background: var(--ds-glass);
+  }
+}

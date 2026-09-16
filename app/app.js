@@ -969,6 +969,7 @@ async function handleResetTournament() {
 
 function initializeNavigation() {
   window.PadelstarNavigation?.initialize({ showModule, translate: t });
+  window.PadelstarWorkspaceRail?.initialize({ showModule, activateAdminPanel });
 }
 
 function bindSupabaseReady() {
@@ -1457,7 +1458,9 @@ function showWorkspace(view = "admin") {
 }
 
 function showModule(moduleName) {
-  return workspaceNavigation.showModule(moduleName);
+  const result = workspaceNavigation.showModule(moduleName);
+  window.PadelstarWorkspaceRail?.syncActiveState();
+  return result;
 }
 
 function activateTab(view) {
@@ -1494,7 +1497,9 @@ function toggleTvMode() {
 }
 
 function activateAdminPanel(panel) {
-  return workspaceNavigation.activateAdminPanel(panel);
+  const result = workspaceNavigation.activateAdminPanel(panel);
+  window.PadelstarWorkspaceRail?.syncActiveState();
+  return result;
 }
 
 function render() { return appRenderer?.render(); }
