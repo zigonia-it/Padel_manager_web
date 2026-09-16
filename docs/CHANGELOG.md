@@ -6,16 +6,30 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
-### Fixed
-- `admin_advance_round_impl` and `admin_advance_cup_impl` had the same `state`/`status` desync bug fixed in `admin_set_result_impl` for 0.6.0: newly-activated matches never got their `status` field updated (Cup's newly-built bracket matches didn't get a `status` key at all). Fixed; harmless today since nothing currently reads `status` for these matches, but closes the same class of bug for consistency.
+## 0.6.1
+
+UI redesign imported from a Claude Design mockup, shipped across six reviewable commits (fonts/tokens → components → workspace content → nav shell → landing/login/join/create → lobby/podium/profil/install → cleanup), plus the TV Mode Cup bracket work and a database desync fix carried over from before the redesign started. No change to the Monday critical-path flow itself — same create/start/score/persist/finish behavior, restyled.
 
 ### Added
+- Archivo (headings) + Instrument Sans (body) replacing Titillium Web + Inter, hosted locally as before (no Google Fonts CDN dependency).
+- A reconciled design-token and component system (`styles/components-v2.css`): buttons, cards, status pills, a segmented control, and a two-layer clip-path "gem" avatar reusing the existing 16-color player-accent palette.
+- Gem avatars replacing Dicebear-generated images everywhere across the main app (standings, match cards, player lists, the join-form preview) — TV Mode keeps its own independent avatar rendering by design, untouched.
+- An owner-facing "Stilling" (standings) tab next to Styring/Kamper, wired into the existing dynamic subtab detection with no new routing code.
+- A persistent workspace navigation shell: a sticky side rail on desktop (≥860px), a sticky bottom tab bar on mobile, replacing the old in-content subtab row. Implemented as a thin dispatcher onto the existing `showModule()`/`activateAdminPanel()` calls, re-deriving its active state from the DOM rather than tracking its own — it can't drift out of sync with real navigation.
 - TV Mode (`tv.html`) now renders a real visual bracket-tree for Cup tournaments — rounds as columns connected by lines (measured from actual rendered positions via SVG, so it stays correct at any bracket size), winners highlighted, plus a "🏆 CUPMESTER" champion banner — instead of the generic points table.
 - TV Mode is now adaptive: whenever there are no live or queued matches (between rounds, or the tournament finished), the empty LIVE/NEXT panels collapse and the bracket (Cup) or standings table (Round Robin) expands to use the full width and height instead of leaving most of the screen blank.
 - `.claude/launch.json` for a local static-file preview server, so UI changes can be checked before they reach the live site.
 
+### Fixed
+- The install-instructions modal had no visible background at all: `background: var(--panel)` referenced a custom property that only exists inside TV Mode's own isolated token set, undefined everywhere else. Its heading also had no scoped font size and visually overlapped the close button.
+- The Spillerprofil (career stats + tournament history) panel, reachable once signed in, had zero base layout CSS for its stat grid and history list — only color/border overrides for a grid that was never actually defined — so both rendered as unstyled stacked text instead of cards.
+- `service-worker.js`'s offline precache list had drifted out of sync with the app's actual asset versions since before this redesign started, and was missing three files added during it entirely. Most notably, the 9 new Archivo/Instrument Sans font files were never precached — installed/offline PWA users would never get them, only the system fallback font.
+- A Phase 2 redesign regression, caught during Phase 4: the general-purpose `.ghost` button class had been recolored to the new danger/error token, which made non-destructive buttons ("Opprett konto", "Lukk") read as error states. Reverted to a neutral color; genuinely destructive buttons keep their own separate styling.
+- `admin_advance_round_impl` and `admin_advance_cup_impl` had the same `state`/`status` desync bug fixed in `admin_set_result_impl` for 0.6.0: newly-activated matches never got their `status` field updated (Cup's newly-built bracket matches didn't get a `status` key at all). Fixed; harmless today since nothing currently reads `status` for these matches, but closes the same class of bug for consistency.
+
 ### Verified
 - Cup tournament format (docs/ROADMAP.md Phase 9) verified end-to-end as the authenticated account owner: bracket generation with auto team pairing, advancement from a finished round to the next (built from real winners/losers, not placeholders), the final and third-place match, automatic "Cup ferdig" completion with the correct winner recorded, and both the admin's and TV Mode's round-by-round bracket views.
+- Monday critical path re-walked repeatedly across the redesign's six phases (create/join → start → register results → persist and sync to Supabase → refresh mid-tournament → finish → create another), guest and account-owned paths both, with no regression from any visual change.
 
 ## 0.6.0
 

@@ -6,7 +6,7 @@
 >
 > **Hard milestone:** functioning build by **Monday 21 September 2026**.
 >
-> **Version baseline:** The real current development version is `0.5.0`. The `0.6`/`0.6.0` text currently visible in the UI was set prematurely and is not evidence that 0.6.0 is complete. Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically.
+> **Version baseline:** `0.6.1` — the Monday critical path was verified end-to-end for `0.6.0` (see `docs/CHANGELOG.md`), and `0.6.1` is a verified UI-redesign/polish batch on top of it that changed no critical-path behavior. Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
 >
 > **Token reset:** **Saturday 19 September 2026 at 11:31**. Before the reset, spend tokens only on the shortest path to a functioning app and verified blockers.
 >

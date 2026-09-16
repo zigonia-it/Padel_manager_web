@@ -99,9 +99,9 @@ Permanent tamper-protected security audit logging is post-1.0.
 
 ## Version baseline
 
-The actual current development baseline is `0.5.0`.
+The actual current development baseline is `0.6.1`.
 
-The UI may display `0.6`/`0.6.0`, but that version was set before the intended milestone was completed and must not be treated as the authoritative release state.
+`0.6.0` was set once the Monday critical path was verified end-to-end (see `docs/CHANGELOG.md`); `0.6.1` is a verified UI-redesign/polish batch on top of it (fonts, design tokens, gem avatars, workspace nav shell, a handful of real bug fixes) that changed no critical-path behavior.
 
 Version changes are milestone-based:
 
