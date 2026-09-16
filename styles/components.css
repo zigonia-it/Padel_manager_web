@@ -1078,8 +1078,69 @@ h3 {
   gap: 10px;
 }
 
+.profile-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.profile-history-list {
+  list-style: none;
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.profile-history-list>li {
+  display: grid;
+  gap: 6px;
+
+  border:
+    1px solid rgba(var(--gold-light-rgb), 0.22);
+
+  border-radius: 8px;
+
+  padding: 0.72rem 0.78rem;
+
+  background:
+    linear-gradient(180deg,
+      rgba(var(--gold-rgb), 0.07),
+      rgba(0, 0, 0, 0.10)),
+    rgba(5, 21, 43, 0.54);
+}
+
+.profile-history-list>li>div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.profile-history-list small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.profile-history-list>li>span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.profile-history-list details {
+  margin-top: 4px;
+}
+
+.profile-history-list summary {
+  cursor: pointer;
+  color: var(--gold-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
 .status-grid>div,
-.round-summary>div {
+.round-summary>div,
+.profile-stat-grid>div {
   display: grid;
   gap: 0.2rem;
 
@@ -1100,7 +1161,9 @@ h3 {
 .status-grid span,
 .status-grid small,
 .round-summary span,
-.round-summary small {
+.round-summary small,
+.profile-stat-grid span,
+.profile-stat-grid small {
   color: var(--muted);
 
   font-size: 0.72rem;
@@ -1112,7 +1175,8 @@ h3 {
 }
 
 .status-grid strong,
-.round-summary strong {
+.round-summary strong,
+.profile-stat-grid strong {
   font-size: 1.18rem;
   line-height: 1.2;
 }
