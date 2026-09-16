@@ -388,6 +388,11 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Persistent manual override.
 - [ ] `Følg enhetens språk`.
 - [ ] Key surfaces translated.
+- [ ] Selector redesign: closed state shows only the current language's flag (no permanent language name/code next to it — `index.html`'s `.language-current` currently renders both `.language-current-flag` and a `.language-current-name` span; drop the visible name, keep it available to assistive tech via the existing `aria-label`). Opening the selector clearly lists the available languages.
+- [ ] Production language list trimmed to only fully translated and verified languages — for the v1.0.0 Release Candidate that's Norwegian Bokmål (`nb`) and English (`en`) only; `nn`/`es`/`de`/`fr`/`sv`/`da` (currently all offered in `index.html`'s `#languageSelect` and the custom `.language-options` dropdown) are hidden from the production selector until each is independently completed and verified, then can be re-added one at a time — same "flag it off until verified" pattern already used for the tournament-format picker (docs/BUGS.md P1, Americano/Mexicano/etc.).
+- [ ] No untranslated keys or fallback strings visible in either shipped language.
+- [ ] Switching language updates the interface immediately, no reload required (already true today via `app/core/language-controller.js` — verify it still holds once the selector is redesigned).
+- [ ] Selector and switching work consistently on desktop and mobile.
 
 ## Phase 23 — Help/privacy/info
 
@@ -428,6 +433,8 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] TV 16:9 verification.
 - [ ] Touch targets usable.
 - [ ] Status does not rely only on color.
+- [ ] No unintended overlap: text/buttons/icons/cards never collide, fixed/sticky elements never cover interactive content, at mobile/tablet/standard-desktop/wide-desktop widths. Intentional overlap (modals, dropdowns, menus, tooltips) is exempt.
+- [ ] Long translated strings (English is often longer than Norwegian) don't cause overlap or broken layout at any of the above widths — check this against whichever languages Phase 22 ships for the v1.0 RC.
 
 ## Phase 27 — Documentation consolidation
 
@@ -440,7 +447,19 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Old contradictory design/development docs archived.
 - [ ] Archive clearly marked non-authoritative.
 
-## Phase 28 — Claude Design UI completion
+## Phase 28 — Theme system (light/dark mode)
+
+An extensible theme system rather than isolated page-specific styling — dark mode remains PADELSTAR's primary visual identity, light mode is the second v1.0-required mode, and the architecture must not need rewriting to add future seasonal themes (see the Priority 2 "Owner Admin global theme management" entry below, which builds on this).
+
+- [ ] Dark mode (current default) and light mode both implemented, same layout/spacing/hierarchy/component structure in both — only token values change, not markup.
+- [ ] `prefers-color-scheme` respected on first use; a manual selection overrides it and persists between sessions (same persistence pattern as the existing language preference in `app/core/language-controller.js`).
+- [ ] Switching theme applies immediately, no reload.
+- [ ] Contrast verified in both modes: text, buttons, cards, dialogs, forms, and interactive/focus states all stay readable.
+- [ ] Architecture is token/CSS-custom-property/theme-class based (extending Phase 1's `styles/base.css` token system and `styles/components-v2.css`, not a parallel styling system), so a future theme only needs to define its own token values (background/surface/accent/text colors, gradients, shadows, decorative assets, logo variant) without touching component markup or logic.
+- [ ] Theme resolution priority defined and implemented: (1) user's manual light/dark choice, (2) `prefers-color-scheme`, (3) dark fallback.
+- [ ] Out of v1.0 scope, do not let these delay the RC: seasonal/event themes (Christmas, Winter, Pride, Summer, etc.), Owner Admin theme management, and scheduled automatic theme activation — tracked separately under Priority 2.
+
+## Phase 29 — Claude Design UI completion
 
 The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent workspace nav shell) shipped across 6 phases — see `docs/CHANGELOG.md`. These are the pieces of that same Claude Design mockup that were deliberately deferred because building them is new functionality/interaction, not a restyle of something already there, and the redesign's own working assumption was to never risk the Monday critical path for a visual-only change. Design reference: the handoff bundle behind that redesign (screens covering create/join/Kamper), and the roadmap phases these final gems fold into: 4-step create wizard folds into Phase 2's tournament-creation flow; the match-card visual pass touches Phase 11 (player live scoring)/Phase 4's result registration; the podium screen is new ground with no existing phase, tracked here directly.
 
@@ -450,7 +469,7 @@ The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent works
 - [ ] Podium / post-tournament celebration screen (final standings as a 1st/2nd/3rd podium layout with a trophy header, "Ny turnering" CTA) — this app has no post-finish screen today; finishing a tournament just leaves the admin on the standings view.
 - [ ] Deeper Kamper/Styring visual pass matching the mockup's flatter list-row match-card and settings-row layout — deferred in the 0.6.1 redesign specifically because `match-card.js`'s scoring buttons are wired by CSS class name, making a markup rewrite there real risk to live scoring; do this once Phase 11 (player live scoring) or Phase 26 (resilience) verification gives a safe window to touch that code without conflating a markup change with a scoring-logic change.
 
-## Phase 29 — v1.0 Definition of Done
+## Phase 30 — v1.0 Definition of Done
 
 - [x] Priority 0 critical path passes end-to-end.
 - [x] Round Robin verified.
@@ -462,7 +481,8 @@ The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent works
 - [ ] History/retention required for v1 verified.
 - [ ] Notifications/TV/PWA/i18n/help/privacy required for v1 verified.
 - [ ] Minimum Systemeier verified.
-- [ ] Claude Design UI completion (Phase 28) verified.
+- [ ] Theme system (Phase 28: dark + light mode) verified.
+- [ ] Claude Design UI completion (Phase 29) verified.
 - [ ] No known critical data-integrity defect.
 - [ ] No known critical auth/authorization defect.
 - [ ] Production build succeeds.
@@ -503,6 +523,8 @@ The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent works
 - [ ] Template sharing/public library when approved — concrete deliverable: a template marketplace living inside the `admin.html` dashboard above.
 - [ ] Custom Padelstar notification sounds.
 - [ ] Player result-error reporting/admin cases (D67–D71) if not already implemented.
+- [ ] Owner Admin global theme management, built on Phase 28's theme architecture and living inside the `admin.html` dashboard above: Systemeier selects which installed theme (standard PADELSTAR, plus future seasonal ones — Christmas, Winter, Pride, Summer, etc.) is the app-wide default, stored centrally (not just in the admin's own browser) so it applies to all users without a redeploy. Visual theme (standard/Christmas/Pride/...) and display mode (light/dark) stay separate concepts, combinable freely (e.g. "Christmas + Dark"). Each installed theme carries an explicit status (`active`/`available`/`disabled`/`development`); only `active` ones are selectable as the production default, and a theme that fails to load falls back to the standard PADELSTAR theme safely. Changing the global theme must never touch tournament or user data.
+- [ ] Scheduled theme activation (e.g. auto-switch to Christmas Dec 1–26) — build the manual Owner Admin theme switch above first; automatic scheduling is a later enhancement on top of it, not required alongside it.
 
 ---
 
