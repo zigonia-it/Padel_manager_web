@@ -48,6 +48,18 @@
   --player-accent-light: var(--gold-light);
   --player-accent-dark: var(--gold-dark);
   --player-accent-rgb: var(--gold-rgb);
+
+  /* Added for the Claude Design UI redesign (docs/ROADMAP.md, see .claude/plans/we-can-plan-new-playful-volcano.md) */
+  --ds-card-bg: #0e1a2c;
+  --ds-border-hairline: rgba(159, 207, 255, 0.13);
+  --danger: #ff8fa3;
+  --danger-bg: rgba(224, 90, 120, 0.13);
+  --danger-bg-strong: rgba(224, 90, 120, 0.3);
+  --danger-border: rgba(224, 90, 120, 0.36);
+  --warning: #e6c05a;
+  --warning-bg: rgba(184, 140, 0, 0.16);
+  --text-secondary: #c2d4e5;
+  --text-dim: #7e93a9;
 }
 
 /* =========================================================
