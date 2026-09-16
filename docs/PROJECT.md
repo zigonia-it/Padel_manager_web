@@ -26,8 +26,8 @@ This flow must be reliable before lower-priority features consume development ti
 - Shared active tournament state uses backend/database state when multiple devices participate.
 - Current implemented UI is the design authority.
 - Product rules must not be silently changed to match old documentation.
-- Round Robin, Cup and Liga are intended visible v1.0 tournament modes.
-- For the Monday usable-build milestone, Round Robin is mandatory; Cup/Liga may follow if time remains.
+- Round Robin and Cup are the v1.0 tournament modes. Liga is pushed out to a later release (see `ROADMAP.md` Priority 2) per explicit developer decision.
+- For the Monday usable-build milestone, Round Robin is mandatory; Cup may follow if time remains.
 
 ## Ownership/account
 
@@ -69,7 +69,6 @@ Beyond the Monday critical path, v1.0 includes the approved core functionality f
 
 - Round Robin;
 - Cup;
-- Liga;
 - scoring/rules;
 - shared live state;
 - player scoring;

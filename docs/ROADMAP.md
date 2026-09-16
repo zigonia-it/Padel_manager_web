@@ -260,15 +260,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [x] Final standings/result. — winner detection works correctly (`cup.winnerTeam`, `status: "Cup ferdig"` set automatically once the last match of the final round is scored — no extra click needed), and both the admin's Kamper tab and TV Mode (`tv.html`) render a full round-by-round bracket view with per-round winners and a champion banner. See BUGS.md.
 - [x] End-to-end regression test. — manual pass: created an 8-player/4-court Cup tournament as the authenticated owner (with third-place match enabled), played both semifinals, the final, and the third-place match to completion, verified the bracket and winner at every step via direct DB checks, then finalized the tournament (kept, not deleted, per the account-owned path). No automated test suite exists in this project — this is the same manual-verification standard used for Round Robin.
 
-## Phase 10 — Liga
-
-- [ ] League setup.
-- [ ] Match generation.
-- [ ] Table/ranking.
-- [ ] Final standings.
-- [ ] End-to-end regression test.
-
-## Phase 11 — Player live scoring
+## Phase 10 — Player live scoring
 
 - [ ] Player can score own active match.
 - [ ] One active scorer.
@@ -279,7 +271,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Undo/Redo.
 - [ ] Multi-device verification.
 
-## Phase 12 — Result approval
+## Phase 11 — Result approval
 
 - [ ] Explicit submission for approval.
 - [ ] Required approvals.
@@ -290,7 +282,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Concrete `score_conflict` state when two submissions for the same match disagree; auto-confirmed only when submissions match, otherwise routed to admin.
 - [ ] Visible "flagged for review" state for admin/referee escalation beyond auto-resolve.
 
-## Phase 13 — Result correction/consequences
+## Phase 12 — Result correction/consequences
 
 - [ ] Admin-only finalized correction.
 - [ ] Correction history.
@@ -302,7 +294,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Successful-change notifications.
 - [ ] Regression tests.
 
-## Phase 14 — Replacement/withdrawal
+## Phase 13 — Replacement/withdrawal
 
 - [ ] Structural slot vs actual-person behavior.
 - [ ] Personal stats follow actual player.
@@ -311,7 +303,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Disputed/unconfirmed match restrictions.
 - [ ] Regression tests.
 
-## Phase 15 — Timed matches/scoring rules
+## Phase 14 — Timed matches/scoring rules
 
 - [ ] Generic point/margin engine.
 - [ ] Classic scoring.
@@ -322,7 +314,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Rule lock/snapshots.
 - [ ] Cup time overrides.
 
-## Phase 16 — Permanent history/statistics
+## Phase 15 — Permanent history/statistics
 
 - [ ] Account-owned history.
 - [ ] Personal statistics.
@@ -330,7 +322,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Owner history deletion does not delete other players' stats.
 - [ ] Guest has no permanent account history.
 
-## Phase 17 — Retention/cleanup
+## Phase 16 — Retention/cleanup
 
 - [ ] Guest completed/aborted retention.
 - [ ] Stats saved before guest deletion.
@@ -339,7 +331,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Account deletion lifecycle.
 - [ ] Privacy documentation matches implementation.
 
-## Phase 18 — Claiming/invitations
+## Phase 17 — Claiming/invitations
 
 - [ ] Claim unlinked slot.
 - [ ] Invitations without friend list.
@@ -348,7 +340,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] No unsafe name-only takeover.
 - [ ] Retroactive guest-stat claiming (a guest player later links their historical stats to an account) — explicitly pending a fresh product decision, not yet approved.
 
-## Phase 19 — Notifications
+## Phase 18 — Notifications
 
 - [ ] In-app notifications.
 - [ ] Push/PWA where supported.
@@ -359,7 +351,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Lifecycle cleanup.
 - [ ] System sounds for first version.
 
-## Phase 20 — TV Mode
+## Phase 19 — TV Mode
 
 - [ ] Read-only public viewing.
 - [ ] Link/QR.
@@ -370,7 +362,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Court Queue view ("Playing now / Next / After that" per court) reused across admin, player, and TV Mode surfaces.
 - [ ] Nicer public/shareable results page built on the existing spectator RPC, embeddable on a club's own website.
 
-## Phase 21 — PWA
+## Phase 20 — PWA
 
 - [ ] Manifest.
 - [ ] Service worker.
@@ -380,7 +372,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Cache/update behavior.
 - [ ] Desktop/mobile install guide.
 
-## Phase 22 — Language/i18n
+## Phase 21 — Language/i18n
 
 - [ ] Norwegian.
 - [ ] English.
@@ -394,14 +386,14 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Switching language updates the interface immediately, no reload required (already true today via `app/core/language-controller.js` — verify it still holds once the selector is redesigned).
 - [ ] Selector and switching work consistently on desktop and mobile.
 
-## Phase 23 — Help/privacy/info
+## Phase 22 — Help/privacy/info
 
 - [ ] Guide matches current product.
 - [ ] Privacy matches actual data flow.
 - [ ] Navigation matches current UI.
 - [ ] Contradictory old text removed.
 
-## Phase 24 — Initial system owner
+## Phase 23 — Initial system owner
 
 - [ ] Exactly one protected Systemeier.
 - [ ] Backend/database enforcement.
@@ -409,7 +401,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Unauthorized system-admin access blocked.
 - [ ] Minimum owner administration verified.
 
-## Phase 25 — v1 security/data integrity
+## Phase 24 — v1 security/data integrity
 
 - [ ] Supabase RLS for v1 flows.
 - [ ] Stable IDs for auth/relations.
@@ -418,7 +410,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Correction atomicity.
 - [ ] Cleanup cannot destroy required permanent data.
 
-## Phase 26 — v1 resilience and UI verification
+## Phase 25 — v1 resilience and UI verification
 
 - [ ] Network loss during active match.
 - [ ] Refresh during active match.
@@ -434,9 +426,9 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Touch targets usable.
 - [ ] Status does not rely only on color.
 - [ ] No unintended overlap: text/buttons/icons/cards never collide, fixed/sticky elements never cover interactive content, at mobile/tablet/standard-desktop/wide-desktop widths. Intentional overlap (modals, dropdowns, menus, tooltips) is exempt.
-- [ ] Long translated strings (English is often longer than Norwegian) don't cause overlap or broken layout at any of the above widths — check this against whichever languages Phase 22 ships for the v1.0 RC.
+- [ ] Long translated strings (English is often longer than Norwegian) don't cause overlap or broken layout at any of the above widths — check this against whichever languages Phase 21 ships for the v1.0 RC.
 
-## Phase 27 — Documentation consolidation
+## Phase 26 — Documentation consolidation
 
 - [ ] `PROJECT.md` matches current approved product behavior.
 - [ ] `ROADMAP.md` is the only active development plan.
@@ -447,7 +439,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Old contradictory design/development docs archived.
 - [ ] Archive clearly marked non-authoritative.
 
-## Phase 28 — Theme system (light/dark mode)
+## Phase 27 — Theme system (light/dark mode)
 
 An extensible theme system rather than isolated page-specific styling — dark mode remains PADELSTAR's primary visual identity, light mode is the second v1.0-required mode, and the architecture must not need rewriting to add future seasonal themes (see the Priority 2 "Owner Admin global theme management" entry below, which builds on this).
 
@@ -459,30 +451,29 @@ An extensible theme system rather than isolated page-specific styling — dark m
 - [ ] Theme resolution priority defined and implemented: (1) user's manual light/dark choice, (2) `prefers-color-scheme`, (3) dark fallback.
 - [ ] Out of v1.0 scope, do not let these delay the RC: seasonal/event themes (Christmas, Winter, Pride, Summer, etc.), Owner Admin theme management, and scheduled automatic theme activation — tracked separately under Priority 2.
 
-## Phase 29 — Claude Design UI completion
+## Phase 28 — Claude Design UI completion
 
-The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent workspace nav shell) shipped across 6 phases — see `docs/CHANGELOG.md`. These are the pieces of that same Claude Design mockup that were deliberately deferred because building them is new functionality/interaction, not a restyle of something already there, and the redesign's own working assumption was to never risk the Monday critical path for a visual-only change. Design reference: the handoff bundle behind that redesign (screens covering create/join/Kamper), and the roadmap phases these final gems fold into: 4-step create wizard folds into Phase 2's tournament-creation flow; the match-card visual pass touches Phase 11 (player live scoring)/Phase 4's result registration; the podium screen is new ground with no existing phase, tracked here directly.
+The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent workspace nav shell) shipped across 6 phases — see `docs/CHANGELOG.md`. These are the pieces of that same Claude Design mockup that were deliberately deferred because building them is new functionality/interaction, not a restyle of something already there, and the redesign's own working assumption was to never risk the Monday critical path for a visual-only change. Design reference: the handoff bundle behind that redesign (screens covering create/join/Kamper), and the roadmap phases these final gems fold into: 4-step create wizard folds into Phase 2's tournament-creation flow; the match-card visual pass touches Phase 10 (player live scoring)/Phase 4's result registration; the podium screen is new ground with no existing phase, tracked here directly.
 
 - [ ] Multi-step create wizard (Turneringsnavn+format → Regler → Spillere → Bekreft, with a progress bar) replacing today's single-page create form — own step/validation/back-next state, built and verified without regressing today's single-submit create flow until the wizard fully replaces it.
 - [ ] 8-cell invite-code input (auto-advance between cells, paste-fills-all) replacing the plain text field on the join screen.
 - [ ] Manual gem/accent-color picker on join + profile screens — today's app auto-assigns a player's accent; this needs a real "chosen color" value plumbed from UI through `joinTournament`/`joinRemoteTournament` into stored player data, not just a swatch grid.
 - [ ] Podium / post-tournament celebration screen (final standings as a 1st/2nd/3rd podium layout with a trophy header, "Ny turnering" CTA) — this app has no post-finish screen today; finishing a tournament just leaves the admin on the standings view.
-- [ ] Deeper Kamper/Styring visual pass matching the mockup's flatter list-row match-card and settings-row layout — deferred in the 0.6.1 redesign specifically because `match-card.js`'s scoring buttons are wired by CSS class name, making a markup rewrite there real risk to live scoring; do this once Phase 11 (player live scoring) or Phase 26 (resilience) verification gives a safe window to touch that code without conflating a markup change with a scoring-logic change.
+- [ ] Deeper Kamper/Styring visual pass matching the mockup's flatter list-row match-card and settings-row layout — deferred in the 0.6.1 redesign specifically because `match-card.js`'s scoring buttons are wired by CSS class name, making a markup rewrite there real risk to live scoring; do this once Phase 10 (player live scoring) or Phase 25 (resilience) verification gives a safe window to touch that code without conflating a markup change with a scoring-logic change.
 
-## Phase 30 — v1.0 Definition of Done
+## Phase 29 — v1.0 Definition of Done
 
 - [x] Priority 0 critical path passes end-to-end.
 - [x] Round Robin verified.
 - [x] Cup verified.
-- [ ] Liga verified.
 - [ ] Required player/result flows verified.
 - [ ] Auth/account verified.
 - [ ] Server persistence verified.
 - [ ] History/retention required for v1 verified.
 - [ ] Notifications/TV/PWA/i18n/help/privacy required for v1 verified.
 - [ ] Minimum Systemeier verified.
-- [ ] Theme system (Phase 28: dark + light mode) verified.
-- [ ] Claude Design UI completion (Phase 29) verified.
+- [ ] Theme system (Phase 27: dark + light mode) verified.
+- [ ] Claude Design UI completion (Phase 28) verified.
 - [ ] No known critical data-integrity defect.
 - [ ] No known critical auth/authorization defect.
 - [ ] Production build succeeds.
@@ -503,6 +494,7 @@ The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent works
 - [ ] Official standard templates.
 - [ ] Setup conveniences for the above templates: reuse-last-setup, favorites, archive/restore.
 - [ ] Additional tournament modes: Americano, Team-Americano, Mexicano, Team-Mexicano, King of the Court, Groups+Playoffs are already exposed in the UI with client-side scheduling logic (`app/tournament-modes.js`) but have no server-side round-advancement RPC (`admin_advance_round_impl` only accepts `roundRobin`) — deactivated in the UI until each is server-wired and verified end-to-end like Round Robin; re-enable one at a time as they pass verification.
+- [ ] Liga tournament format (league setup, match generation, table/ranking, final standings) — pushed out of the v1.0 Monday/RC critical scope per explicit developer decision; Round Robin and Cup remain the v1.0 formats. Revisit once both are fully stable and the Priority 1 phases above are done.
 - [ ] Redesign the in-tournament admin UI ("Styring" tab): contextual visibility — hide/collapse settings that can't be changed given the tournament's current state (e.g. court-count/format settings once active) — before considering a fuller redesign.
 - [ ] Player-first UI: "Min neste kamp" (my next match) and "Mine kamper" (my matches) surfaced more prominently than the full tournament overview.
 - [ ] PDF export of standings/results.
@@ -523,7 +515,7 @@ The `0.6.1` UI redesign (fonts, design tokens, gem avatars, the persistent works
 - [ ] Template sharing/public library when approved — concrete deliverable: a template marketplace living inside the `admin.html` dashboard above.
 - [ ] Custom Padelstar notification sounds.
 - [ ] Player result-error reporting/admin cases (D67–D71) if not already implemented.
-- [ ] Owner Admin global theme management, built on Phase 28's theme architecture and living inside the `admin.html` dashboard above: Systemeier selects which installed theme (standard PADELSTAR, plus future seasonal ones — Christmas, Winter, Pride, Summer, etc.) is the app-wide default, stored centrally (not just in the admin's own browser) so it applies to all users without a redeploy. Visual theme (standard/Christmas/Pride/...) and display mode (light/dark) stay separate concepts, combinable freely (e.g. "Christmas + Dark"). Each installed theme carries an explicit status (`active`/`available`/`disabled`/`development`); only `active` ones are selectable as the production default, and a theme that fails to load falls back to the standard PADELSTAR theme safely. Changing the global theme must never touch tournament or user data.
+- [ ] Owner Admin global theme management, built on Phase 27's theme architecture and living inside the `admin.html` dashboard above: Systemeier selects which installed theme (standard PADELSTAR, plus future seasonal ones — Christmas, Winter, Pride, Summer, etc.) is the app-wide default, stored centrally (not just in the admin's own browser) so it applies to all users without a redeploy. Visual theme (standard/Christmas/Pride/...) and display mode (light/dark) stay separate concepts, combinable freely (e.g. "Christmas + Dark"). Each installed theme carries an explicit status (`active`/`available`/`disabled`/`development`); only `active` ones are selectable as the production default, and a theme that fails to load falls back to the standard PADELSTAR theme safely. Changing the global theme must never touch tournament or user data.
 - [ ] Scheduled theme activation (e.g. auto-switch to Christmas Dec 1–26) — build the manual Owner Admin theme switch above first; automatic scheduling is a later enhancement on top of it, not required alongside it.
 
 ---

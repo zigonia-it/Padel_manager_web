@@ -56,7 +56,7 @@ The current implemented UI is the design authority. Match existing typography, s
 
 ## Release scope
 
-For the immediate usable build and v1 path, Round Robin is the first required tournament mode. Cup and Liga remain intended v1.0 functionality but must not delay the Monday usable-build milestone.
+For the immediate usable build and v1 path, Round Robin is the first required tournament mode. Cup remains intended v1.0 functionality but must not delay the Monday usable-build milestone. Liga is pushed out to a later release (see `docs/ROADMAP.md` Priority 2) per explicit developer decision — do not build it as part of v1.0 work.
 
 Other existing modes must not be deleted merely because they are not currently exposed.
 
