@@ -880,44 +880,6 @@ body.workspace-active {
 
 .match-note .hint { color: var(--card-blue-soft); text-align: center; }
 
-.avatar-frame {
-  position: relative;
-  display: inline-grid;
-  place-items: center;
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
-  overflow: hidden;
-  border: 2px solid var(--player-accent-light);
-  border-radius: 50%;
-  background: var(--player-accent);
-  box-shadow:
-    0 0 0 2px rgba(var(--player-accent-rgb), 0.18),
-    0 0 20px rgba(var(--player-accent-rgb), 0.32);
-}
-
-.avatar-frame::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: var(--player-accent);
-  mix-blend-mode: color;
-  opacity: 0.58;
-}
-
-.avatar-frame img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: saturate(0.78) contrast(1.08);
-}
-
-.avatar-frame.small-avatar { width: 28px; height: 28px; }
-.avatar-frame.large-avatar { width: 48px; height: 48px; }
-
 #joinAvatarPreviewFrame { --player-accent: var(--gold); --player-accent-light: var(--gold-light); --player-accent-rgb: var(--gold-rgb); }
 
 .admin-subtabs {

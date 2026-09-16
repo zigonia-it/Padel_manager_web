@@ -485,7 +485,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Sponsor/prize-pool display (informational only — name, logo, prize description; no payment processing).
 - [ ] Photo/highlight attachment per match.
 - [ ] Expanded system administration.
-- [ ] Superusers and granular permissions — concrete deliverable: build out `admin.html` (currently a placeholder stub) as the owner's/superusers' app-administration surface: template creation, permissions management, and other app-wide functions, distinct from in-tournament admin controls.
+- [ ] Superusers and granular permissions — concrete deliverable: build out `admin.html` (currently a placeholder stub) as the owner's/superusers' app-administration surface: template creation, permissions management, and other app-wide functions, distinct from in-tournament admin controls. A visual reference for this exists (screen 14 of the Claude Design UI redesign handoff, see `.claude/plans/we-can-plan-new-playful-volcano.md`): a Systemeier-only `admin.html` shell with Oversikt/Brukere/Turneringer/Retention/Logger tabs — metric cards, a searchable user table (block/delete actions), a system-wide tournament list, and retention/log views. Deliberately not built as part of that UI redesign — it's new functionality needing backend endpoints (user listing, block/delete, retention job status, log access) that don't exist yet, not a restyle of something already there.
 - [ ] Permission sets.
 - [ ] MFA/step-up/recovery where required.
 - [ ] Secure guest-device transfer.
