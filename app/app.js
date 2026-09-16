@@ -388,8 +388,7 @@ const setupForms = window.PadelstarSetupForms.create({
   elements,
   getDefaultTournament: () => defaultTournament,
   getProfile: () => profile,
-  defaultAvatarId,
-  avatarUrl: (player) => avatarUrl(player),
+  initials: (name) => playerVisuals.initials(name),
   accentStyle: (accent) => accentStyle(accent),
   translate: (key, values) => t(key, values),
 });

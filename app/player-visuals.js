@@ -32,7 +32,7 @@ window.PadelstarPlayerVisuals = (() => {
       return accentStyle(team.accent ?? team.players[0]?.accent);
     }
 
-    return { avatarMarkup, avatarUrl, teamAccentStyle, teamDisplay };
+    return { avatarMarkup, avatarUrl, initials, teamAccentStyle, teamDisplay };
   }
 
   return { create };

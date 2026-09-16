@@ -919,7 +919,6 @@ body.workspace-active {
 .avatar-frame.large-avatar { width: 48px; height: 48px; }
 
 #joinAvatarPreviewFrame { --player-accent: var(--gold); --player-accent-light: var(--gold-light); --player-accent-rgb: var(--gold-rgb); }
-#joinAvatarPreview { width: 100%; height: 100%; }
 
 .admin-subtabs {
   border-color: var(--card-line);

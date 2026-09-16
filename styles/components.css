@@ -1335,7 +1335,7 @@ h3 {
   background:
     rgba(5, 21, 43, 0.44);
 
-  color: var(--danger);
+  color: var(--text-secondary);
 }
 
 .button-row button,

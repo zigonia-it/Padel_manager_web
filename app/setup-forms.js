@@ -1,7 +1,7 @@
 (function attachPadelstarSetupForms(global) {
   "use strict";
 
-  function create({ elements, getDefaultTournament, getProfile, defaultAvatarId, avatarUrl, accentStyle, translate }) {
+  function create({ elements, getDefaultTournament, getProfile, initials, accentStyle, translate }) {
     function syncCreateFormDefaults() {
       const defaultTournament = getDefaultTournament();
       elements.createTournamentForm.elements.tournamentName.value = defaultTournament.name;
@@ -30,9 +30,8 @@
       const inputName = elements.joinTournamentForm.elements.playerName.value.trim();
       const profile = getProfile();
       const name = inputName || profile?.displayName || translate("setup.yourName");
-      const avatarId = profile?.avatarId || defaultAvatarId;
       elements.joinNamePreview.textContent = name;
-      elements.joinAvatarPreview.src = avatarUrl({ name, avatarId });
+      elements.joinAvatarPreview.textContent = initials(name);
       elements.joinAvatarPreviewFrame?.setAttribute("style", accentStyle(profile?.accent ?? "gold"));
     }
 
