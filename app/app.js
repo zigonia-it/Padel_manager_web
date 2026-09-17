@@ -471,7 +471,6 @@ const podium = window.PadelstarPodium.create({
   elements,
   escapeHtml: (value) => escapeHtml(value),
   showModule: (moduleName) => showModule(moduleName),
-  syncCreateFormDefaults: () => syncCreateFormDefaults(),
   t: (key, values) => t(key, values),
 });
 const playerList = window.PadelstarPlayerList.create({
@@ -838,6 +837,12 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   syncJoinPreview: () => syncJoinPreview(),
   t: (key, values) => t(key, values),
 });
+const createWizard = window.PadelstarCreateWizard.create({
+  document,
+  elements,
+  handleCreate: (event) => tournamentEntry.handleCreate(event),
+  t: (key, values) => t(key, values),
+});
 const tournamentFinalization = window.PadelstarTournamentFinalization.create({
   getState: () => state,
   isShared: (current) => current.remoteMode === "shared" || (current.remoteMode !== "local" && isSupabaseReady()),
@@ -1034,6 +1039,7 @@ function bindBootstrapEvents() {
 
 function bindTournamentEntry() {
   tournamentEntry?.bind(elements);
+  createWizard?.initialize();
 }
 
 function bindAdminFormEvents() {
@@ -1123,8 +1129,8 @@ function activateSupabaseClient() {
   connectRealtimeForCurrentState();
 }
 
-function createTournament({ name, inviteCode, players, courtCount }) {
-  return tournamentState.createTournament({ name, inviteCode, players, courtCount });
+function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
+  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
 }
 
 function createPlayer(name, index, avatarId = null) {
@@ -1428,7 +1434,9 @@ function isValidTournamentState(candidate) {
 }
 
 function syncCreateFormDefaults() {
-  return setupForms.syncCreateFormDefaults();
+  const result = setupForms.syncCreateFormDefaults();
+  createWizard?.resetToFirstStep();
+  return result;
 }
 
 function syncAdminPlayerChoice() {
@@ -1466,6 +1474,7 @@ function showWorkspace(view = "admin") {
 function showModule(moduleName) {
   const result = workspaceNavigation.showModule(moduleName);
   window.PadelstarWorkspaceRail?.syncActiveState();
+  if (moduleName === "setup-admin") syncCreateFormDefaults();
   return result;
 }
 

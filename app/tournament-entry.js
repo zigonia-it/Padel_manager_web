@@ -82,6 +82,12 @@
         inviteCode: createInviteCode(),
         players: tournamentPlayers,
         courtCount: Number(formData.get("courts")),
+        format: formData.get("format") || "roundRobin",
+        gamesToWinSet: Number(formData.get("gamesToWinSet")) || 6,
+        setsToWinMatch: Number(formData.get("setsToWinMatch")) || 1,
+        pointMode: formData.get("pointMode") || "matches",
+        cupTeamSetupMode: formData.get("cupTeamSetupMode") || "auto",
+        includesThirdPlaceMatch: formData.get("includesThirdPlaceMatch") === "on",
       });
       nextState.remoteMode = getClient() ? "shared" : "local";
       if (adminUser?.id) nextState.ownerUserId = adminUser.id;

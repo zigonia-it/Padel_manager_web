@@ -1,5 +1,5 @@
 window.PadelstarPodium = (() => {
-  function create({ accentStyle, avatarMarkup, document, elements, escapeHtml, showModule, syncCreateFormDefaults, t }) {
+  function create({ accentStyle, avatarMarkup, document, elements, escapeHtml, showModule, t }) {
     const placeOrder = [1, 0, 2]; // visual left-to-right: 2nd, 1st, 3rd
     const plinthHeight = { 0: 84, 1: 60, 2: 44 };
     const gemSize = { 0: 84, 1: 64, 2: 64 };
@@ -53,7 +53,6 @@ window.PadelstarPodium = (() => {
     }
 
     function goToNewTournament() {
-      syncCreateFormDefaults();
       showModule("setup-admin");
     }
 
