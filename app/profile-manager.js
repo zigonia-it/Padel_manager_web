@@ -11,11 +11,14 @@ window.PadelstarProfiles = (() => {
     return date.toISOString();
   }
 
-  function createProfile(displayName = "", avatarId = "smash", now = new Date(), id = crypto.randomUUID(), accessToken = crypto.randomUUID()) {
+  const accentPalette = ["blue", "orange", "mint", "pink", "indigo", "teal", "red", "yellow", "gold", "silver", "bronze", "sapphire", "emerald", "garnet", "amethyst", "onyx"];
+
+  function createProfile(displayName = "", avatarId = "smash", now = new Date(), id = crypto.randomUUID(), accessToken = crypto.randomUUID(), accent = null) {
     return normalizeProfile({
       id,
       displayName: String(displayName).trim(),
       avatarId,
+      accent,
       createdAt: nowIso(now),
       updatedAt: nowIso(now),
       deletionRequestedAt: null,
@@ -30,6 +33,7 @@ window.PadelstarProfiles = (() => {
       id: profile.id,
       displayName: String(profile.displayName ?? "").trim().slice(0, 64),
       avatarId: ["smash", "serve", "wall", "lob"].includes(profile.avatarId) ? profile.avatarId : "smash",
+      accent: accentPalette.includes(profile.accent) ? profile.accent : null,
       createdAt: profile.createdAt ?? nowIso(),
       updatedAt: profile.updatedAt ?? profile.createdAt ?? nowIso(),
       deletionRequestedAt: profile.deletionRequestedAt ?? null,

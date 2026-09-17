@@ -3,9 +3,9 @@ window.PadelstarPlayerState = (() => {
     function parsePlayerNames(value) {
       return String(value).split(/[\n,;]+/).map((name) => name.trim()).filter(Boolean);
     }
-    function addPlayer(name, joinedFrom, avatarId) {
+    function addPlayer(name, joinedFrom, avatarId, accent) {
       const state = getState();
-      const player = { ...createPlayer(name, state.players.length, avatarId), joinedFrom };
+      const player = { ...createPlayer(name, state.players.length, avatarId, accent), joinedFrom };
       state.players.push(player);
       state.schedule = buildSchedule(state.players, state.settings.format);
       return player;

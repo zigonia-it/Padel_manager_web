@@ -117,6 +117,7 @@
       const inviteCode = formData.get("inviteCode").trim().toUpperCase();
       const playerName = formData.get("playerName").trim();
       const avatarId = randomAvatarId();
+      const accent = formData.get("accent");
       const client = getClient();
       const loadedRemote = client ? await loadRemoteTournamentByInvite(inviteCode) : false;
 
@@ -127,7 +128,7 @@
       if (!playerName) return;
       let player;
       if (client) {
-        const joined = await joinRemoteTournament(playerName, avatarId);
+        const joined = await joinRemoteTournament(playerName, avatarId, accent);
         if (!joined) return;
         player = findPlayerByName(playerName);
       } else {
@@ -137,7 +138,7 @@
           showToast(t("messages.tournamentStartedAskAdmin"), "status-message-error");
           return;
         }
-        player = existingPlayer ?? joinTournament(playerName, avatarId);
+        player = existingPlayer ?? joinTournament(playerName, avatarId, accent);
       }
 
       if (!player) return;

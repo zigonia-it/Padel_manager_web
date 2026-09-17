@@ -1,5 +1,5 @@
 window.PadelstarProfileUi = (() => {
-  function create({ defaultAvatarId, elements, escapeHtml, getLocalStorage, getProfile, getAccountUser = () => null, getProfileManager, profileHistoryStorageKey, t }) {
+  function create({ defaultAvatarId, elements, escapeHtml, getLocalStorage, getProfile, getAccountUser = () => null, getProfileManager, profileHistoryStorageKey, t, accentPicker, defaultAccent }) {
     function renderProfile() {
       const profileManager = getProfileManager();
       const profile = getProfile();
@@ -8,6 +8,7 @@ window.PadelstarProfileUi = (() => {
       elements.profileAvatarPicker?.querySelectorAll("input[name=profileAvatarId]").forEach((input) => {
         input.checked = input.value === (profile?.avatarId ?? defaultAvatarId);
       });
+      accentPicker?.setSelected(elements.profileAccentPicker, profile?.accent ?? defaultAccent);
       const pendingDeletion = Boolean(profile?.deletionScheduledFor);
       elements.profileDeletionStatus.textContent = pendingDeletion
         ? t("profile.deletePending", { date: new Date(profile.deletionScheduledFor).toLocaleDateString(document.documentElement.lang || "nb-NO") }) : "";

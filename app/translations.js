@@ -1191,6 +1191,18 @@ const entryAccountMessages = { "nb": ["Velg hvordan du vil fortsette", "Fortsett
 for (const [language, values] of Object.entries(entryAccountMessages)) {
   Object.assign(padelstarTranslations[language], { "entry.accountTitle": values[0], "entry.continueGuest": values[1], "entry.accountAdminHint": values[2], "entry.accountPlayerHint": values[3] });
 }
+for (const [language, values] of Object.entries({
+  nb: { "setup.chooseColor": "Velg farge" },
+  nn: { "setup.chooseColor": "Vel farge" },
+  en: { "setup.chooseColor": "Choose color" },
+  es: { "setup.chooseColor": "Elige color" },
+  de: { "setup.chooseColor": "Farbe wählen" },
+  fr: { "setup.chooseColor": "Choisir une couleur" },
+  sv: { "setup.chooseColor": "Välj färg" },
+  da: { "setup.chooseColor": "Vælg farve" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 window.PadelstarTranslations = padelstarTranslations;
 window.PadelstarI18n = {
   fallbackLanguage,

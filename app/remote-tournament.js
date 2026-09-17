@@ -40,10 +40,10 @@
       return true;
     }
 
-    async function join(playerName, avatarId) {
+    async function join(playerName, avatarId, accent) {
       if (!isReady()) return false;
       const state = getState();
-      const player = linkProfileToPlayer(createPlayer(playerName, state.players.length, avatarId));
+      const player = linkProfileToPlayer(createPlayer(playerName, state.players.length, avatarId, accent));
       player.joinedFrom = "self";
       player.guest = !player.profileId;
       player.participantType = player.profileId ? "player" : "guest";

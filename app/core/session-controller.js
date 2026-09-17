@@ -47,10 +47,10 @@
   }) {
     const isTestMode = () => Boolean(testMode?.());
 
-    function joinTournament(name, avatarId) {
+    function joinTournament(name, avatarId, accent) {
       const existingPlayer = findPlayerByName(name);
       if (existingPlayer) return existingPlayer;
-      const player = linkProfileToPlayer(addPlayer(name, "self", avatarId));
+      const player = linkProfileToPlayer(addPlayer(name, "self", avatarId, accent));
       player.guest = !player.profileId;
       player.participantType = player.profileId ? "player" : "guest";
       return player;

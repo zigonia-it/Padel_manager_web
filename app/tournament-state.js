@@ -2,12 +2,12 @@
   function create(deps) {
     const { accents, buildSchedule, defaultAvatarId, randomAvatarId = () => defaultAvatarId, randomUUID, now = () => new Date().toISOString() } = deps;
 
-    function createPlayer(name, index, avatarId = null) {
+    function createPlayer(name, index, avatarId = null, accent = null) {
       return {
         id: randomUUID(),
         name,
         avatarId: avatarId ?? randomAvatarId(),
-        accent: accents[index % accents.length],
+        accent: accent && accents.includes(accent) ? accent : accents[index % accents.length],
         active: true,
         availability: "active",
         participantType: "player",

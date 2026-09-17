@@ -27,6 +27,7 @@ const accentSystem = window.PadelstarAccentSystem;
 const playerAccentPalette = accentSystem.palette;
 const legacyAccentMap = accentSystem.legacyAccentMap;
 const accents = accentSystem.accents;
+const accentPicker = window.PadelstarAccentPicker.create({ palette: playerAccentPalette });
 const avatarSystem = window.PadelstarAvatarSystem;
 const playerVisuals = window.PadelstarPlayerVisuals.create({
   avatarUrl: (player) => avatarSystem.url(player),
@@ -60,7 +61,7 @@ const remoteTournament = window.PadelstarRemoteTournament.create({
   getTournamentByInvite: (inviteCode) => getTournamentByInviteRpc(inviteCode),
   sanitizeSharedState: (nextState) => sanitizeSharedState(nextState),
   applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
-  createPlayer: (name, index, avatarId) => createPlayer(name, index, avatarId),
+  createPlayer: (name, index, avatarId, accent) => createPlayer(name, index, avatarId, accent),
   linkProfileToPlayer: (player) => linkProfileToPlayer(player),
   saveState: (options) => saveState(options),
   showToast: (message, statusClass) => showToast(message, statusClass),
@@ -391,6 +392,7 @@ const setupForms = window.PadelstarSetupForms.create({
   accentStyle: (accent) => accentStyle(accent),
   translate: (key, values) => t(key, values),
   syncInviteCodeCells: () => inviteCodeInput?.syncCellsFromHidden(),
+  accentPicker,
 });
 const tournamentQueries = window.PadelstarTournamentQueries.create({
   getState: () => state,
@@ -595,6 +597,7 @@ const adminStatus = window.PadelstarAdminStatus.create({
 });
 const profileUi = window.PadelstarProfileUi.create({
   defaultAvatarId,
+  defaultAccent: accents[0],
   elements,
   escapeHtml: (value) => escapeHtml(value),
   getLocalStorage: () => localStorage,
@@ -603,6 +606,7 @@ const profileUi = window.PadelstarProfileUi.create({
   getProfileManager: () => profileManager,
   profileHistoryStorageKey,
   t: (key, values) => t(key, values),
+  accentPicker,
 });
 const backupUi = window.PadelstarBackupUi.create({
   backupFormat,
@@ -620,7 +624,7 @@ const backupUi = window.PadelstarBackupUi.create({
 });
 const playerState = window.PadelstarPlayerState.create({
   buildSchedule: (players, format) => buildSchedule(players, format),
-  createPlayer: (name, index, avatarId) => createPlayer(name, index, avatarId),
+  createPlayer: (name, index, avatarId, accent) => createPlayer(name, index, avatarId, accent),
   createTeam: (players) => createTeam(players),
   defaultAvatarId,
   findPlayerByName: (name) => findPlayerByName(name),
@@ -813,8 +817,8 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   getProfile: () => profile,
   getState: () => state,
   hasTournamentForInvite: (inviteCode, loadedRemote) => hasTournamentForInvite(inviteCode, loadedRemote),
-  joinRemoteTournament: (playerName, avatarId) => joinRemoteTournament(playerName, avatarId),
-  joinTournament: (playerName, avatarId) => joinTournament(playerName, avatarId),
+  joinRemoteTournament: (playerName, avatarId, accent) => joinRemoteTournament(playerName, avatarId, accent),
+  joinTournament: (playerName, avatarId, accent) => joinTournament(playerName, avatarId, accent),
   linkProfileToPlayer: (player) => linkProfileToPlayer(player),
   loadRemoteTournamentByInvite: (inviteCode) => loadRemoteTournamentByInvite(inviteCode),
   parsePlayerNames: (value) => parsePlayerNames(value),
@@ -1043,6 +1047,8 @@ function bindTournamentEntry() {
   tournamentEntry?.bind(elements);
   createWizard?.initialize();
   inviteCodeInput?.initialize();
+  accentPicker.renderSwatches(elements.joinAccentPicker, "accent", profile?.accent ?? accents[0]);
+  accentPicker.renderSwatches(elements.profileAccentPicker, "profileAccent", profile?.accent ?? accents[0]);
 }
 
 function bindAdminFormEvents() {
@@ -1136,8 +1142,8 @@ function createTournament({ name, inviteCode, players, courtCount, format, games
   return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
 }
 
-function createPlayer(name, index, avatarId = null) {
-  return tournamentState.createPlayer(name, index, avatarId);
+function createPlayer(name, index, avatarId = null, accent = null) {
+  return tournamentState.createPlayer(name, index, avatarId, accent);
 }
 
 function loadLocalProfile() { return profileSession.loadLocalProfile(); }
@@ -1354,8 +1360,8 @@ async function loadRemoteTournamentByInvite(inviteCode) {
   return remoteTournament.loadByInvite(inviteCode);
 }
 
-async function joinRemoteTournament(playerName, avatarId) {
-  return remoteTournament.join(playerName, avatarId);
+async function joinRemoteTournament(playerName, avatarId, accent) {
+  return remoteTournament.join(playerName, avatarId, accent);
 }
 
 async function saveRemoteState() {
@@ -1777,8 +1783,8 @@ async function unsubscribeFromPush() {
   return notificationSystem.unsubscribeFromPush();
 }
 
-function joinTournament(name, avatarId) {
-  return sessionController.joinTournament(name, avatarId);
+function joinTournament(name, avatarId, accent) {
+  return sessionController.joinTournament(name, avatarId, accent);
 }
 
 function parsePlayerNames(value) {
@@ -1789,8 +1795,8 @@ function addPlayers(names, joinedFrom) {
   playerState.addPlayers(names, joinedFrom);
 }
 
-function addPlayer(name, joinedFrom, avatarId) {
-  return playerState.addPlayer(name, joinedFrom, avatarId);
+function addPlayer(name, joinedFrom, avatarId, accent) {
+  return playerState.addPlayer(name, joinedFrom, avatarId, accent);
 }
 
 function replacePlayer(playerId, name) {
