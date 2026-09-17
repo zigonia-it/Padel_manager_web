@@ -25,6 +25,7 @@
       setState,
       showToast,
       showAccount,
+      showModule,
       showWorkspace,
       syncJoinPreview,
       t,
@@ -104,7 +105,7 @@
       setLocalRole("admin");
       saveState({ remote: false });
       await deps.createRemoteTournament();
-      showWorkspace();
+      showModule("lobby");
       render();
     }
 

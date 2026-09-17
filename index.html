@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="styles/create-wizard.css?v=padelstar-create-wizard-1">
   <link rel="stylesheet" href="styles/invite-code-input.css?v=padelstar-invite-code-input-1">
   <link rel="stylesheet" href="styles/accent-picker.css?v=padelstar-accent-picker-1">
+  <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-1">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -856,6 +857,43 @@
         </div>
         <ol class="standings hidden" id="podiumFullStandings"></ol>
       </section>
+
+      <section class="lobby-panel app-module hidden" id="lobbyView" data-module="lobby" aria-labelledby="lobbyHeading">
+        <div class="lobby-header">
+          <span class="eyebrow" data-i18n="common.lobby">Lobby</span>
+          <h2 id="lobbyHeading"></h2>
+          <p data-i18n="tournament.lobbyHeadline">Del koden og fyll spillerlisten.</p>
+          <p id="lobbyReadiness"></p>
+        </div>
+        <div class="lobby-grid">
+          <div class="share-details">
+            <div>
+              <span data-i18n="share.inviteCode">Invitasjonskode</span>
+              <strong id="lobbyInviteCode">-----</strong>
+            </div>
+            <div class="qr-card">
+              <span data-i18n="share.qrCode">QR-kode</span>
+              <img id="lobbyQrCode" src="" alt="QR-kode for påmelding" width="150" height="150"
+                data-i18n-alt="share.qrCodeAlt">
+            </div>
+            <div>
+              <span data-i18n="share.joinLink">Join-lenke</span>
+              <input id="lobbyJoinLink" type="text" readonly value="">
+            </div>
+          </div>
+          <div class="lobby-players-card">
+            <div class="panel-heading">
+              <h3 data-i18n="admin.lobbyPlayers">Lobby / spillere</h3>
+            </div>
+            <ul class="compact-list" id="lobbyPlayersList"></ul>
+          </div>
+        </div>
+        <div class="lobby-actions">
+          <button class="primary" id="lobbyStartButton" type="button" data-i18n="actions.startTournament">Start
+            turnering</button>
+          <button class="ghost" id="lobbySkipButton" type="button" data-i18n="admin.control">Styring</button>
+        </div>
+      </section>
     </main>
 
     <dialog class="large-score-dialog" id="largeScoreDialog" aria-labelledby="largeScoreTitle">
@@ -953,6 +991,7 @@
   <script defer src="app/match-list.js?v=padelstar-match-list-2"></script>
   <script defer src="app/standings.js?v=padelstar-standings-3"></script>
   <script defer src="app/podium.js?v=padelstar-podium-3"></script>
+  <script defer src="app/lobby.js?v=padelstar-lobby-1"></script>
   <script defer src="app/player-list.js?v=padelstar-player-list-1"></script>
   <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-2"></script>
   <script defer src="app/player-status.js?v=padelstar-player-status-1"></script>
@@ -997,35 +1036,35 @@
   <script defer src="app/core/session-controller.js?v=padelstar-session-controller-2"></script>
   <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-2"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
-  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-8"></script>
+  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-9"></script>
   <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-4"></script>
   <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-1"></script>
   <script defer src="app/bootstrap/app-init.js?v=padelstar-app-init-2"></script>
   <script defer src="app/ui/theme.js?v=padelstar-theme-1"></script>
-  <script defer src="app/ui/app-renderer.js?v=padelstar-app-renderer-2"></script>
+  <script defer src="app/ui/app-renderer.js?v=padelstar-app-renderer-3"></script>
   <script defer src="app/match-card.js?v=padelstar-match-card-2"></script>
   <script defer src="app/backup-format.js?v=padelstar-backup-format-2"></script>
   <script defer src="app/link-utils.js?v=padelstar-link-utils-2"></script>
   <script defer src="app/tournament-state.js?v=padelstar-tournament-state-3"></script>
   <script defer src="app/tournament-library.js?v=padelstar-tournament-library-3"></script>
   <script defer src="app/state-bootstrap.js?v=padelstar-state-bootstrap-1"></script>
-  <script defer src="app/module-routing.js?v=padelstar-module-routing-3"></script>
+  <script defer src="app/module-routing.js?v=padelstar-module-routing-4"></script>
   <script defer src="app/session-policy.js?v=padelstar-session-policy-1"></script>
   <script defer src="app/remote-state-write.js?v=padelstar-remote-state-write-1"></script>
   <script defer src="app/remote-admin-actions.js?v=padelstar-remote-admin-actions-1"></script>
   <script defer src="app/remote-player-score.js?v=padelstar-remote-player-score-1"></script>
   <script defer src="app/score-actions.js?v=padelstar-score-actions-2"></script>
   <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-4"></script>
-  <script defer src="app/app-events.js?v=padelstar-app-events-3"></script>
+  <script defer src="app/app-events.js?v=padelstar-app-events-4"></script>
   <script defer src="app/workspace-events.js?v=padelstar-workspace-events-1"></script>
-  <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-4"></script>
+  <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-5"></script>
   <script defer src="app/create-wizard.js?v=padelstar-create-wizard-1"></script>
   <script defer src="app/invite-code-input.js?v=padelstar-invite-code-input-1"></script>
   <script defer src="app/accent-picker.js?v=padelstar-accent-picker-1"></script>
   <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-3"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-1"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
-  <script defer src="app/app.js?v=padelstar-session-56"></script>
+  <script defer src="app/app.js?v=padelstar-session-57"></script>
 </body>
 
 </html>

@@ -15,6 +15,8 @@
       setLargeScoreMatchId,
       syncJoinPreview,
       togglePodiumFullStandings,
+      startFromLobby,
+      skipLobby,
     } = callbacks;
 
     elements.confirmDialog?.addEventListener("click", (event) => {
@@ -37,6 +39,8 @@
     elements.setScoreDialog.addEventListener("close", () => setPendingSetScoreMatchId(null));
     elements.podiumViewStandingsButton?.addEventListener("click", togglePodiumFullStandings);
     elements.podiumNewTournamentButton?.addEventListener("click", goToNewTournamentFromPodium);
+    elements.lobbyStartButton?.addEventListener("click", startFromLobby);
+    elements.lobbySkipButton?.addEventListener("click", skipLobby);
     documentRef.querySelectorAll(".subtab").forEach((tab) => {
       tab.addEventListener("click", () => activateAdminPanel(tab.dataset.adminPanel));
     });

@@ -51,6 +51,7 @@ const workspaceOverviewPath = path.join(appRoot, "workspace-overview.js");
 const matchListPath = path.join(appRoot, "match-list.js");
 const standingsPath = path.join(appRoot, "standings.js");
 const podiumPath = path.join(appRoot, "podium.js");
+const lobbyPath = path.join(appRoot, "lobby.js");
 const createWizardPath = path.join(appRoot, "create-wizard.js");
 const inviteCodeInputPath = path.join(appRoot, "invite-code-input.js");
 const accentPickerPath = path.join(appRoot, "accent-picker.js");
@@ -199,6 +200,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(matchListPath, "utf8"), context, { filename: matchListPath });
   vm.runInContext(fs.readFileSync(standingsPath, "utf8"), context, { filename: standingsPath });
   vm.runInContext(fs.readFileSync(podiumPath, "utf8"), context, { filename: podiumPath });
+  vm.runInContext(fs.readFileSync(lobbyPath, "utf8"), context, { filename: lobbyPath });
   vm.runInContext(fs.readFileSync(createWizardPath, "utf8"), context, { filename: createWizardPath });
   vm.runInContext(fs.readFileSync(inviteCodeInputPath, "utf8"), context, { filename: inviteCodeInputPath });
   vm.runInContext(fs.readFileSync(accentPickerPath, "utf8"), context, { filename: accentPickerPath });

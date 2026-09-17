@@ -476,6 +476,20 @@ const podium = window.PadelstarPodium.create({
   showModule: (moduleName) => showModule(moduleName),
   t: (key, values) => t(key, values),
 });
+const lobby = window.PadelstarLobby.create({
+  createJoinLink: () => createJoinLink(),
+  createQrCodeUrl: (text) => createQrCodeUrl(text),
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  generateFullTournamentSchedule: () => generateFullTournamentSchedule(),
+  generateRoundBlockReason: () => generateRoundBlockReason(),
+  getState: () => state,
+  render: () => render(),
+  saveState: () => saveState(),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  showWorkspace: (view) => showWorkspace(view),
+  t: (key, values) => t(key, values),
+});
 const playerList = window.PadelstarPlayerList.create({
   accentStyle: (accent) => accentStyle(accent),
   appendEmptyText: (container, text) => appendEmptyText(container, text),
@@ -838,6 +852,7 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   setLocalRole: (role) => setLocalRole(role),
   setState: (nextState) => { state = nextState; },
   showToast: (message, statusClass) => showToast(message, statusClass),
+  showModule: (moduleName) => showModule(moduleName),
   showWorkspace: (view) => showWorkspace(view),
   syncJoinPreview: () => syncJoinPreview(),
   t: (key, values) => t(key, values),
@@ -1109,6 +1124,8 @@ function bindGlobalEvents() {
       setLargeScoreMatchId: (matchId) => { largeScoreMatchId = matchId; },
       syncJoinPreview,
       togglePodiumFullStandings,
+      startFromLobby,
+      skipLobby,
     },
   });
 }
@@ -1854,6 +1871,10 @@ async function endTournament() {
   return success;
 }
 
+function renderLobby() {
+  return lobby.renderLobby();
+}
+
 function renderPodium() {
   return podium.renderPodium(podiumSnapshot);
 }
@@ -1864,6 +1885,14 @@ function togglePodiumFullStandings() {
 
 function goToNewTournamentFromPodium() {
   return podium.goToNewTournament();
+}
+
+function startFromLobby() {
+  return lobby.startFromLobby();
+}
+
+function skipLobby() {
+  return lobby.skipToWorkspace();
 }
 
 function updateCourtsFromInput(value) {
@@ -2273,6 +2302,7 @@ const appRenderer = window.PadelstarAppRenderer.create({
     renderCupTeamBuilder,
     renderSyncControls,
     renderPodium,
+    renderLobby,
   },
 });
 sessionController = window.PadelstarSessionController.create({

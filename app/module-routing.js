@@ -18,6 +18,7 @@
       if (!hasActiveTournament()) {
         return ["setup-admin", "setup-player", "account"].includes(requestedModule) ? requestedModule : "landing";
       }
+      if (requestedModule === "lobby") return isCurrentUserAdmin() ? "lobby" : fallbackTournamentModule();
       if (requestedModule === "admin") return isCurrentUserAdmin() ? "admin" : fallbackTournamentModule();
       if (requestedModule === "player") return hasSelectedPlayer() ? "player" : fallbackTournamentModule();
       if (["landing", "setup-admin", "setup-player", "account"].includes(requestedModule)) return requestedModule;
