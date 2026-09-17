@@ -28,8 +28,32 @@
       setProfile,
     } = dependencies;
 
+    let activeTournaments = [];
+
     function storage() {
       return getLocalStorage();
+    }
+
+    function getActiveTournaments() {
+      return activeTournaments;
+    }
+
+    async function loadActiveTournaments() {
+      const account = getAccountUser();
+      const client = getSupabaseClient();
+      if (!account?.id || !client) {
+        activeTournaments = [];
+        return false;
+      }
+      const { data, error } = await remoteRpc(client, "list_my_active_tournaments", {});
+      if (error) {
+        getObservability()?.error("active_tournaments_read_failed", error);
+        return false;
+      }
+      if (getAccountUser()?.id !== account.id) return false;
+      activeTournaments = Array.isArray(data) ? data : [];
+      renderProfile();
+      return true;
     }
 
     function profile() {
@@ -221,7 +245,9 @@
     return {
       cancelProfileDeletion,
       ensureProfileForJoin,
+      getActiveTournaments,
       linkProfileToPlayer,
+      loadActiveTournaments,
       loadLocalProfile,
       persistLocalProfile,
       profileAvatarIdFromForm,

@@ -1203,6 +1203,18 @@ for (const [language, values] of Object.entries({
 })) {
   Object.assign(padelstarTranslations[language], values);
 }
+for (const [language, values] of Object.entries({
+  nb: { "profile.activeTournaments": "Mine aktive turneringer", "profile.noActiveTournaments": "Ingen aktive turneringer akkurat nå.", "profile.accountSettings": "Kontoinnstillinger" },
+  nn: { "profile.activeTournaments": "Mine aktive turneringar", "profile.noActiveTournaments": "Ingen aktive turneringar akkurat no.", "profile.accountSettings": "Kontoinnstillingar" },
+  en: { "profile.activeTournaments": "My active tournaments", "profile.noActiveTournaments": "No active tournaments right now.", "profile.accountSettings": "Account settings" },
+  es: { "profile.activeTournaments": "Mis torneos activos", "profile.noActiveTournaments": "No hay torneos activos ahora mismo.", "profile.accountSettings": "Configuración de la cuenta" },
+  de: { "profile.activeTournaments": "Meine aktiven Turniere", "profile.noActiveTournaments": "Gerade keine aktiven Turniere.", "profile.accountSettings": "Kontoeinstellungen" },
+  fr: { "profile.activeTournaments": "Mes tournois actifs", "profile.noActiveTournaments": "Aucun tournoi actif pour le moment.", "profile.accountSettings": "Paramètres du compte" },
+  sv: { "profile.activeTournaments": "Mina aktiva turneringar", "profile.noActiveTournaments": "Inga aktiva turneringar just nu.", "profile.accountSettings": "Kontoinställningar" },
+  da: { "profile.activeTournaments": "Mine aktive turneringer", "profile.noActiveTournaments": "Ingen aktive turneringer lige nu.", "profile.accountSettings": "Kontoindstillinger" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 window.PadelstarTranslations = padelstarTranslations;
 window.PadelstarI18n = {
   fallbackLanguage,

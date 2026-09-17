@@ -616,11 +616,13 @@ const profileUi = window.PadelstarProfileUi.create({
   escapeHtml: (value) => escapeHtml(value),
   getLocalStorage: () => localStorage,
   getAccountUser: () => accountAuth?.currentUser(),
+  getActiveTournaments: () => getActiveTournaments(),
   getProfile: () => profile,
   getProfileManager: () => profileManager,
   profileHistoryStorageKey,
   t: (key, values) => t(key, values),
   accentPicker,
+  tournamentStatusText: (status) => tournamentStatusText(status),
 });
 const backupUi = window.PadelstarBackupUi.create({
   backupFormat,
@@ -744,7 +746,7 @@ const accountAuth = window.PadelstarAccountAuth?.create({
   getClient: () => supabaseClient,
   getElements: () => elements,
   getProfile: () => profile,
-  onAuthChange: (user) => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void tournamentEntry?.resumePendingEntry(); } },
+  onAuthChange: (user) => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
   onProfileLoaded: (remoteProfile) => {
     profile = profile
       ? profileManager.normalizeProfile({ ...profile, ...remoteProfile })
@@ -1168,6 +1170,8 @@ function persistLocalProfile() { return profileSession.persistLocalProfile(); }
 function syncProfileRemote() { return profileSession.syncProfileRemote(); }
 function syncProfileHistoryRemote(entry) { return profileSession.syncProfileHistoryRemote(entry); }
 function syncProfileHistoryRemoteRead() { return profileSession.syncProfileHistoryRemoteRead(); }
+function loadActiveTournaments() { return profileSession.loadActiveTournaments(); }
+function getActiveTournaments() { return profileSession.getActiveTournaments(); }
 function purgeLocalProfile() { return profileSession.purgeLocalProfile(); }
 function profileAvatarIdFromForm() { return profileSession.profileAvatarIdFromForm(); }
 function saveLocalProfileFromForm() { return profileSession.saveLocalProfileFromForm(); }
@@ -1184,6 +1188,7 @@ function saveProfileHistory() {
   // Durable results are server-derived. Reading them must not create a second,
   // browser-authored history for a local profile or guest.
   void syncProfileHistoryRemoteRead();
+  void loadActiveTournaments();
 }
 
 function requestRemoteProfileDeletion() { return profileSession.requestRemoteProfileDeletion(); }

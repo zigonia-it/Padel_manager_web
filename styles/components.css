@@ -1084,6 +1084,21 @@ h3 {
   gap: 10px;
 }
 
+.account-settings-rows {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.account-settings-rows>div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(var(--gold-light-rgb), 0.14);
+}
+
 .profile-history-list {
   list-style: none;
   display: grid;
