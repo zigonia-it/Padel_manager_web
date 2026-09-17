@@ -390,6 +390,7 @@ const setupForms = window.PadelstarSetupForms.create({
   initials: (name) => playerVisuals.initials(name),
   accentStyle: (accent) => accentStyle(accent),
   translate: (key, values) => t(key, values),
+  syncInviteCodeCells: () => inviteCodeInput?.syncCellsFromHidden(),
 });
 const tournamentQueries = window.PadelstarTournamentQueries.create({
   getState: () => state,
@@ -843,6 +844,7 @@ const createWizard = window.PadelstarCreateWizard.create({
   handleCreate: (event) => tournamentEntry.handleCreate(event),
   t: (key, values) => t(key, values),
 });
+const inviteCodeInput = window.PadelstarInviteCodeInput.create({ elements });
 const tournamentFinalization = window.PadelstarTournamentFinalization.create({
   getState: () => state,
   isShared: (current) => current.remoteMode === "shared" || (current.remoteMode !== "local" && isSupabaseReady()),
@@ -1040,6 +1042,7 @@ function bindBootstrapEvents() {
 function bindTournamentEntry() {
   tournamentEntry?.bind(elements);
   createWizard?.initialize();
+  inviteCodeInput?.initialize();
 }
 
 function bindAdminFormEvents() {

@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="styles/workspace-nav.css?v=padelstar-workspace-nav-3">
   <link rel="stylesheet" href="styles/podium.css?v=padelstar-podium-3">
   <link rel="stylesheet" href="styles/create-wizard.css?v=padelstar-create-wizard-1">
+  <link rel="stylesheet" href="styles/invite-code-input.css?v=padelstar-invite-code-input-1">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -421,10 +422,21 @@
             Profilen din blir automatisk lagt til i spiller treet.</p>
         </div>
         <form class="panel setup-card" id="joinTournamentForm">
-          <label>
+          <div class="invite-code-field">
             <span data-i18n="share.inviteCode">Invitasjonskode</span>
-            <input name="inviteCode" type="text" placeholder="P4K7D2M8" maxlength="8" autocomplete="off" required>
-          </label>
+            <div class="invite-code-cells" role="group" aria-label="Invitasjonskode" data-i18n-aria-label="share.inviteCode">
+              <input type="text" class="invite-code-cell" inputmode="text" maxlength="1" autocomplete="off" placeholder=" " data-code-cell-index="0">
+              <input type="text" class="invite-code-cell" inputmode="text" maxlength="1" autocomplete="off" placeholder=" " data-code-cell-index="1">
+              <input type="text" class="invite-code-cell" inputmode="text" maxlength="1" autocomplete="off" placeholder=" " data-code-cell-index="2">
+              <input type="text" class="invite-code-cell" inputmode="text" maxlength="1" autocomplete="off" placeholder=" " data-code-cell-index="3">
+              <input type="text" class="invite-code-cell" inputmode="text" maxlength="1" autocomplete="off" placeholder=" " data-code-cell-index="4">
+              <input type="text" class="invite-code-cell" inputmode="text" maxlength="1" autocomplete="off" placeholder=" " data-code-cell-index="5">
+              <input type="text" class="invite-code-cell" inputmode="text" maxlength="1" autocomplete="off" placeholder=" " data-code-cell-index="6">
+              <input type="text" class="invite-code-cell" inputmode="text" maxlength="1" autocomplete="off" placeholder=" " data-code-cell-index="7">
+            </div>
+            <input name="inviteCode" type="text" class="invite-code-hidden-field" required minlength="8" maxlength="8"
+              autocomplete="off" tabindex="-1" aria-hidden="true">
+          </div>
           <label>
             <span data-i18n="common.name">Navn</span>
             <input name="playerName" type="text" placeholder="Skriv navnet ditt" maxlength="64" autocomplete="name"
@@ -909,7 +921,7 @@
   <script defer src="app/remote-tournament.js?v=padelstar-remote-tournament-1"></script>
   <script defer src="app/admin-actions.js?v=padelstar-admin-actions-2"></script>
   <script defer src="app/court-settings.js?v=padelstar-court-settings-1"></script>
-  <script defer src="app/setup-forms.js?v=padelstar-setup-forms-2"></script>
+  <script defer src="app/setup-forms.js?v=padelstar-setup-forms-3"></script>
   <script defer src="app/tournament-queries.js?v=padelstar-tournament-queries-1"></script>
   <script defer src="app/tournament-sharing.js?v=padelstar-tournament-sharing-1"></script>
   <script defer src="app/result-submissions.js?v=padelstar-result-submissions-1"></script>
@@ -999,10 +1011,11 @@
   <script defer src="app/workspace-events.js?v=padelstar-workspace-events-1"></script>
   <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-3"></script>
   <script defer src="app/create-wizard.js?v=padelstar-create-wizard-1"></script>
+  <script defer src="app/invite-code-input.js?v=padelstar-invite-code-input-1"></script>
   <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-3"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-1"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
-  <script defer src="app/app.js?v=padelstar-session-53"></script>
+  <script defer src="app/app.js?v=padelstar-session-55"></script>
 </body>
 
 </html>

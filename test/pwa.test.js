@@ -78,6 +78,7 @@ const appInitSource = fs.readFileSync(path.join(root, "app", "bootstrap", "app-i
 const workspaceEventsSource = fs.readFileSync(path.join(root, "app", "workspace-events.js"), "utf8");
 const tournamentEntrySource = fs.readFileSync(path.join(root, "app", "tournament-entry.js"), "utf8");
 const createWizardSource = fs.readFileSync(path.join(root, "app", "create-wizard.js"), "utf8");
+const inviteCodeInputSource = fs.readFileSync(path.join(root, "app", "invite-code-input.js"), "utf8");
 const adminFormEventsSource = fs.readFileSync(path.join(root, "app", "admin-form-events.js"), "utf8");
 const matchActionsSource = fs.readFileSync(path.join(root, "app", "match-actions.js"), "utf8");
 const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.js"), "utf8");
@@ -140,8 +141,8 @@ test("court settings have their own domain boundary", () => {
 });
 
 test("setup forms have their own boundary", () => {
-  assert.match(indexSource, /app\/setup-forms\.js\?v=padelstar-setup-forms-2/);
-  assert.match(serviceWorkerSource, /app\/setup-forms\.js\?v=padelstar-setup-forms-2/);
+  assert.match(indexSource, /app\/setup-forms\.js\?v=padelstar-setup-forms-3/);
+  assert.match(serviceWorkerSource, /app\/setup-forms\.js\?v=padelstar-setup-forms-3/);
   assert.match(setupFormsSource, /global\.PadelstarSetupForms/);
   assert.doesNotMatch(setupFormsSource, /localStorage|document\.querySelector/);
   assert.match(appSource, /setupForms\.syncJoinPreview\(\)/);
@@ -270,6 +271,22 @@ test("create tournament wizard has real format/rules choices and its own step bo
   assert.match(tournamentStateSource, /format = "roundRobin"/);
   assert.match(tournamentStateSource, /buildSchedule\(tournamentPlayers, validatedFormat\)/);
   assert.match(tournamentEntrySource, /formData\.get\("format"\)/);
+});
+
+test("invite code input is a real 8-cell control kept in sync with the form field", () => {
+  assert.match(indexSource, /data-code-cell-index="0"/);
+  assert.match(indexSource, /data-code-cell-index="7"/);
+  assert.match(indexSource, /name="inviteCode" type="text" class="invite-code-hidden-field" required minlength="8" maxlength="8"/);
+  assert.match(indexSource, /app\/invite-code-input\.js\?v=padelstar-invite-code-input-1/);
+  assert.match(serviceWorkerSource, /app\/invite-code-input\.js\?v=padelstar-invite-code-input-1/);
+  assert.match(inviteCodeInputSource, /window\.PadelstarInviteCodeInput/);
+  assert.match(inviteCodeInputSource, /syncCellsFromHidden/);
+  // prefillJoinForm is the one function every real caller (URL prefill,
+  // rejoin, workspace-navigation auto-prefill) funnels through -- it must
+  // sync the visible cells, not just the hidden field, or those 3 paths
+  // silently show empty cells despite a correctly-set form value.
+  assert.match(setupFormsSource, /syncInviteCodeCells/);
+  assert.match(appSource, /syncInviteCodeCells: \(\) => inviteCodeInput\?\.syncCellsFromHidden\(\)/);
 });
 
 test("admin form mutations have their own event boundary", () => {
@@ -869,7 +886,7 @@ test("active app files do not reference archived assets", () => {
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
   assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-101/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-53/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-55/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
@@ -880,7 +897,7 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-3/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-101/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-53/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-55/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);

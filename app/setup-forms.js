@@ -1,7 +1,7 @@
 (function attachPadelstarSetupForms(global) {
   "use strict";
 
-  function create({ elements, getDefaultTournament, getProfile, initials, accentStyle, translate }) {
+  function create({ elements, getDefaultTournament, getProfile, initials, accentStyle, translate, syncInviteCodeCells }) {
     function syncCreateFormDefaults() {
       const defaultTournament = getDefaultTournament();
       elements.createTournamentForm.elements.tournamentName.value = defaultTournament.name;
@@ -51,6 +51,7 @@
 
     function prefillJoinForm(inviteCode) {
       elements.joinTournamentForm.elements.inviteCode.value = inviteCode.trim().toUpperCase();
+      syncInviteCodeCells?.();
     }
 
     return {
