@@ -210,34 +210,34 @@ This is part of the Monday acceptance test, not an optional polish item.
 
 Run this only after Phases 1–7 are individually passing.
 
-**Not yet run as a single continuous pass.** Every step below has been verified individually (see Phases 1–7 above and `docs/BUGS.md`), but split across separate guest-mode and account-owned sessions rather than one unbroken clean-session run-through, and a few Phase 1–7 items remain open (validation errors, logout, failed-write surfacing). Natural Round Robin completion and final standings are now verified (see Phase 4/6 above). Recommended next step before calling Monday fully done: one uninterrupted pass through this exact checklist, starting from a logged-out state.
+**Guest path run as one continuous pass (2026-09-18); account steps still open.** A clean session (localStorage, service worker and caches wiped) ran the whole chain in one go against the live Supabase project: create a 4-player/2-court Round Robin through the wizard → lobby → start → register a result → refresh (state restored) → play the remaining rounds through the round-end confirmation → finish → podium/standings → "Ny turnering" (clean form, no carry-over) → create, start and score a second tournament, with direct database checks after each step. The account steps (create owner account, log in) were **not** run: this environment cannot enter real credentials, so they remain the developer's to confirm on the deployed site. One real defect was found and is fixed in a migration awaiting application: from round 2 on, the server's round advance starts matches without assigning them a court (see `docs/BUGS.md`).
 
 ## Clean-session test
 
-- [ ] Start from logged-out/clean app state.
-- [ ] Create owner account.
-- [ ] Log in.
-- [ ] Create Round Robin.
-- [ ] Add participants/courts.
-- [ ] Start tournament.
-- [ ] Register first result.
-- [ ] Refresh.
-- [ ] Verify result/tournament restored from server.
-- [ ] Continue remaining matches.
-- [ ] Finish tournament.
-- [ ] Verify final standings.
-- [ ] Create a second tournament.
-- [ ] Start second tournament.
-- [ ] Register at least one result.
-- [ ] No critical console/runtime errors occurred.
-- [ ] No manual database fix/local-storage deletion was required.
+- [x] Start from logged-out/clean app state. — guest session, storage/service worker/caches wiped.
+- [ ] Create owner account. — not run (needs real credentials; developer to confirm).
+- [ ] Log in. — not run (needs real credentials; developer to confirm).
+- [x] Create Round Robin. — via the 4-step wizard; server row confirmed (format roundRobin, 4 players, 2 courts).
+- [x] Add participants/courts.
+- [x] Start tournament. — from the lobby; 3 rounds generated, round 1 playing on Bane 1.
+- [x] Register first result. — 6-4 via "Set resultat"; database revision 2 matched.
+- [x] Refresh.
+- [x] Verify result/tournament restored from server. — workspace, result and revision intact after reload.
+- [x] Continue remaining matches. — rounds 2 and 3 via "Start neste runde" (with the round-end recap dialog) and registered results. Round 2+ matches started with no court assigned; fix migration written, see BUGS.md.
+- [x] Finish tournament. — guest tournament deleted server-side as designed.
+- [x] Verify final standings. — points/wins/sets/games all correct against the entered results (Alice 9 p, 3 wins, 19 games). Ties after sets fall back to alphabetical order, not games — see Phase 14 "Tiebreak".
+- [x] Create a second tournament. — form opened clean, no players/name carried over.
+- [x] Start second tournament.
+- [x] Register at least one result. — 6-3, persisted (revision 2).
+- [x] No critical console/runtime errors occurred. — no uncaught JS errors; the only console errors are local-dev artifacts (Vercel Insights script 404s off Vercel; push-send CORS only allows the `padelstar.app` origin).
+- [x] No manual database fix/local-storage deletion was required. — the only storage wipe was the deliberate clean-session start.
 
 ## Browser/device sanity
 
-- [ ] Primary desktop browser works.
-- [ ] Primary mobile/PWA path is usable if currently supported.
-- [ ] Layout does not block core controls.
-- [ ] Supabase/network failure gives safe visible behavior.
+- [x] Primary desktop browser works. — Chromium.
+- [x] Primary mobile/PWA path is usable if currently supported. — workspace, bottom nav and header checked at 375px.
+- [x] Layout does not block core controls.
+- [x] Supabase/network failure gives safe visible behavior. — offline admin action shows "Du er offline. Koble til igjen før admin-endringen sendes.", pill turns grey "Offline", revision and match state unchanged.
 
 ## Monday release decision
 
@@ -308,7 +308,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Generic point/margin engine.
 - [ ] Classic scoring.
 - [ ] No-ad/Golden Point.
-- [ ] Tiebreak.
+- [ ] Tiebreak. — no rule is defined yet: `leaderboardEntries()` sorts by points, wins, sets, then alphabetically by name (games are shown in the table but not used to rank). Needs a product decision (e.g. game difference) before implementing.
 - [ ] Timed matches.
 - [ ] 00:00 finish-current-game behavior.
 - [ ] Rule lock/snapshots.
