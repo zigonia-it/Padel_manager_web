@@ -95,9 +95,9 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v290/);
-  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-45/);
-  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-45/);
+  assert.match(serviceWorkerSource, /padelstar-v291/);
+  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-50/);
+  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-50/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(serviceWorkerSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(indexSource, /app\/player-visuals\.js\?v=padelstar-player-visuals-3/);
@@ -975,7 +975,7 @@ test("active app files do not reference archived assets", () => {
 });
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
-  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-102/);
+  assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-103/);
   assert.match(indexSource, /app\/app\.js\?v=padelstar-session-62/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
@@ -986,7 +986,7 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/state-bootstrap\.js\?v=padelstar-state-bootstrap-1/);
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-4/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
-  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-102/);
+  assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-103/);
   assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-62/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
@@ -1124,7 +1124,7 @@ test("backup export preserves admin/player identity so restore can resume as the
 });
 
 test("app shell uses optimized startup images", () => {
-  assert.match(indexSource, /assets\/logos\/main_logo\.png/);
+  assert.match(indexSource, /assets\/logos\/main_logo_without_icon\.png/);
   assert.match(indexSource, /assets\/backgrounds\/bg_img-1600\.jpg/);
   assert.match(stylesSource, /assets\/backgrounds\/bg_img-1600\.jpg/);
   assert.match(serviceWorkerSource, /assets\/logos\/main_logo\.png/);

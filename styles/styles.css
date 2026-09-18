@@ -427,36 +427,46 @@ body[data-theme="classic"] .status-pill {
   background: rgba(5, 15, 28, 0.58);
 }
 
+/* Neutral by default (offline / not yet synced); green only when the
+   realtime connection is actually up, so "Offline" never reads as healthy. */
 body[data-theme="classic"] .status-pill {
   padding: 5px 11px 5px 9px;
-  border: 1px solid rgba(85, 230, 154, 0.32);
+  border: 1px solid rgba(154, 167, 184, 0.32);
   border-radius: 999px;
-  background: rgba(85, 230, 154, 0.09);
+  background: rgba(154, 167, 184, 0.08);
   box-shadow: none;
+  color: #9aa7b8;
   font-size: 0.72rem;
   letter-spacing: 0.02em;
 }
 
-body[data-theme="classic"] .status-pill[data-status="connected"]::before {
-  animation: statusPillPulse 2.4s ease-in-out infinite;
+body[data-theme="classic"] .status-pill::before {
+  box-shadow: none;
 }
 
-body[data-theme="classic"] .status-pill.offline,
-body[data-theme="classic"] .status-pill[data-status="offline"] {
-  border-color: rgba(154, 167, 184, 0.32);
-  background: rgba(154, 167, 184, 0.08);
+body[data-theme="classic"] .status-pill[data-status="connected"] {
+  border-color: rgba(85, 230, 154, 0.32);
+  background: rgba(85, 230, 154, 0.09);
+  color: #55e69a;
+}
+
+body[data-theme="classic"] .status-pill[data-status="connected"]::before {
+  box-shadow: 0 0 8px currentColor;
+  animation: statusPillPulse 2.4s ease-in-out infinite;
 }
 
 body[data-theme="classic"] .status-pill[data-status="connecting"],
 body[data-theme="classic"] .status-pill[data-status="reconnecting"] {
   border-color: rgba(var(--gold-bright-rgb), 0.4);
   background: rgba(var(--gold-bright-rgb), 0.08);
+  color: var(--gold-bright);
 }
 
 body[data-theme="classic"] .status-pill[data-status="error"],
 body[data-theme="classic"] .status-pill[data-status="disconnected"] {
   border-color: rgba(255, 47, 63, 0.4);
   background: rgba(255, 47, 63, 0.08);
+  color: #ff2f3f;
 }
 
 @keyframes statusPillPulse {

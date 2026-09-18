@@ -750,7 +750,7 @@ test("translations are loaded from the shared dictionary with Bokmål fallback",
   assert.equal(api.i18n.normalizeLanguage("international-en"), "nb");
   assert.equal(
     JSON.stringify(api.i18n.supportedLanguages().map((language) => language.code)),
-    JSON.stringify(["nb", "nn", "en", "es", "de", "fr", "sv", "da"]),
+    JSON.stringify(["nb", "nn", "sa", "en", "es", "de", "fr", "sv", "da"]),
   );
   assert.equal(
     api.i18n.supportedLanguages().filter((language) => language.code === "en").length,
@@ -858,6 +858,8 @@ test("initial view boundary redirects spectator links to TV Mode instead of the 
 
 test("initial visible fallback labels are translation-bound", () => {
   const htmlSource = fs.readFileSync(indexPath, "utf8");
-  assert.match(htmlSource, /id="connectionStatus"[^>]*data-i18n="localPwa"/);
+  // #connectionStatus text is owned by syncConnectionStatus(); a data-i18n attribute would
+  // let the generic translation pass overwrite the live Online/Offline text.
+  assert.doesNotMatch(htmlSource, /id="connectionStatus"[^>]*data-i18n=/);
   assert.match(htmlSource, /id="resumeTitle"[^>]*data-i18n="resume\.continueTournament"/);
 });

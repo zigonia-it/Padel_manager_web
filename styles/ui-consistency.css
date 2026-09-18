@@ -1041,3 +1041,154 @@ body[data-theme="classic"] .admin-identity-panel {
   min-width: 0;
   white-space: nowrap;
 }
+
+/* =========================================================
+   DESIGN-FILE ALIGNMENT: header, language picker, hero, footer
+   Appended last so it wins the classic-theme cascade above.
+   ========================================================= */
+
+/* Header: compact sticky bar with blurred navy glass, brand + version on the left. */
+body[data-theme="classic"] .topbar {
+  background: rgba(7, 13, 23, 0.88);
+  border-bottom: 1px solid rgba(159, 207, 255, 0.13);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+body[data-theme="classic"] .brand-lockup .version {
+  order: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #93a8bd;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.09em;
+  white-space: nowrap;
+}
+
+@media (min-width: 901px) {
+  body[data-theme="classic"] .topbar { padding: 10px clamp(16px, 3vw, 40px); }
+  body[data-theme="classic"] .brand-lockup { display: flex; align-items: center; gap: 14px; width: auto; flex: 0 0 auto; }
+  body[data-theme="classic"] .brand-home-button { width: auto; gap: 10px; }
+  body[data-theme="classic"] .brand-logo { width: 60px; height: 60px; flex: 0 0 60px; }
+  body[data-theme="classic"] .brand-wordmark { width: 200px; height: 50px; flex: 0 0 200px; object-fit: contain; }
+
+  /* Language picker: the flag alone identifies the language, so no label or name. */
+  body[data-theme="classic"] .language-picker,
+  body[data-theme="classic"] .language-menu { min-width: 0; }
+  body[data-theme="classic"] .language-current {
+    width: auto;
+    min-width: 0;
+    min-height: 40px;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 12px 6px 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  body[data-theme="classic"] .brand-lockup { display: flex; align-items: center; gap: 10px; }
+}
+
+@media (max-width: 700px) {
+  body[data-theme="classic"] .brand-lockup .version { display: none; }
+}
+
+/* Hero: let the card size to its content instead of clipping it. */
+body[data-theme="classic"] .intro {
+  display: block;
+  overflow: visible;
+  height: auto;
+}
+
+body[data-theme="classic"] .intro-copy {
+  transform: none;
+}
+
+body[data-theme="classic"] .intro-copy > :not(#startTitle) {
+  position: relative;
+}
+
+/* Footer: install + links row, then one centred credit line (as in the design). */
+body[data-theme="classic"] .site-footer {
+  display: grid;
+  gap: 24px;
+  width: min(1080px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 26px 0 40px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+body[data-theme="classic"] .footer-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+body[data-theme="classic"] .footer-links {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+  font-size: 0.78rem;
+}
+
+body[data-theme="classic"] .footer-links a {
+  color: #5cb8ff;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(92, 184, 255, 0.42);
+  padding-bottom: 1px;
+}
+
+body[data-theme="classic"] .footer-links a:hover {
+  color: #eef7ff;
+  border-bottom-color: #eef7ff;
+}
+
+body[data-theme="classic"] .site-footer .install-app-button {
+  min-height: 44px;
+  margin: 0;
+  padding: 13px 16px;
+  gap: 9px;
+  border: 1px solid rgba(159, 207, 255, 0.18);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(91, 173, 255, 0), rgba(91, 173, 255, 0.32));
+  box-shadow: none;
+  color: #c2d4e5;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+body[data-theme="classic"] .site-footer .install-app-button[hidden] { display: none; }
+
+body[data-theme="classic"] .site-footer .install-app-icon {
+  width: 15px;
+  height: 15px;
+  flex-basis: 15px;
+  stroke: #4fa8ff;
+}
+
+body[data-theme="classic"] .footer-credit {
+  margin: 0;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Landing column: hero, feature cards and saved tournaments share one 1080px column. */
+body[data-theme="classic"] .landing-features { padding-bottom: 0; gap: 12px; }
+
+@media (min-width: 901px) {
+  body[data-theme="classic"] #app-main > .start-panel { width: min(1080px, calc(100% - 40px)); }
+}
+
+body[data-theme="classic"] .intro { padding-inline: 0; }
+
+/* The "saved locally" hint only makes sense when something is saved. */
+.resume-panel:has(#resumeEmptyState:not(.hidden)) .hint { display: none; }
