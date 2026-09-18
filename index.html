@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-1">
   <link rel="stylesheet" href="styles/scoreboard-table.css?v=padelstar-scoreboard-table-1">
   <link rel="stylesheet" href="styles/match-list-collapse.css?v=padelstar-match-list-collapse-1">
+  <link rel="stylesheet" href="styles/settings-rows.css?v=padelstar-settings-rows-1">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -567,45 +568,48 @@
                 <div class="court-names-list" id="courtNamesList"></div>
                 <button class="secondary" type="submit" data-i18n="actions.saveRules">Lagre regler</button>
               </form>
-              <form class="inline-form" id="tournamentSettingsForm">
-                <label>
-                  <span data-i18n="admin.tournamentFormat">Turneringsformat</span>
-                  <!-- Americano/Team-Americano/Mexicano/Team-Mexicano/King of Court/Groups+Playoffs have
-                       client-side scheduling logic (app/tournament-modes.js) but no server-side round-advancement
-                       RPC yet (admin_advance_round_impl only accepts roundRobin) — hidden until each is wired
-                       and verified like Round Robin; see docs/ROADMAP.md Priority 2 and docs/BUGS.md. -->
-                  <select name="format">
-                    <option value="roundRobin" data-i18n="admin.roundRobinFormat">Round robin</option>
-                    <option value="cup" data-i18n="admin.cupFormat">Cup</option>
-                  </select>
-                </label>
-                <label id="cupTeamSetupModeField">
-                  <span data-i18n="admin.cupTeamSetup">Cup-lagoppsett</span>
-                  <select name="cupTeamSetupMode">
-                    <option value="auto" data-i18n="common.automatic">Automatisk</option>
-                    <option value="manual" data-i18n="common.manual">Manuelt</option>
-                  </select>
-                </label>
-                <label class="checkbox-field" id="cupThirdPlaceField">
-                  <input name="includesThirdPlaceMatch" type="checkbox">
-                  <span data-i18n="cup.thirdPlaceMatch">Bronsefinale</span>
-                </label>
-                <label>
-                  <span data-i18n="admin.tablePoints">Tabellpoeng</span>
-                  <select name="pointMode">
-                    <option value="matches" data-i18n="common.matches">Kamper</option>
-                    <option value="sets" data-i18n="common.sets">Sett</option>
-                    <option value="games" data-i18n="common.games">Games</option>
-                  </select>
-                </label>
-                <label>
-                  <span data-i18n="admin.gamesPerSet">Games per sett</span>
-                  <input name="gamesToWinSet" type="number" min="1" max="12" value="6" required>
-                </label>
-                <label>
-                  <span data-i18n="admin.setsPerMatch">Sett per match</span>
-                  <input name="setsToWinMatch" type="number" min="1" max="5" value="1" required>
-                </label>
+              <form class="inline-form settings-form" id="tournamentSettingsForm">
+                <div class="settings-group">
+                  <div class="settings-group-title" data-i18n="admin.rulesGroupTitle">Regler</div>
+                  <label class="settings-row">
+                    <span data-i18n="admin.tournamentFormat">Turneringsformat</span>
+                    <!-- Americano/Team-Americano/Mexicano/Team-Mexicano/King of Court/Groups+Playoffs have
+                         client-side scheduling logic (app/tournament-modes.js) but no server-side round-advancement
+                         RPC yet (admin_advance_round_impl only accepts roundRobin) — hidden until each is wired
+                         and verified like Round Robin; see docs/ROADMAP.md Priority 2 and docs/BUGS.md. -->
+                    <select name="format">
+                      <option value="roundRobin" data-i18n="admin.roundRobinFormat">Round robin</option>
+                      <option value="cup" data-i18n="admin.cupFormat">Cup</option>
+                    </select>
+                  </label>
+                  <label class="settings-row" id="cupTeamSetupModeField">
+                    <span data-i18n="admin.cupTeamSetup">Cup-lagoppsett</span>
+                    <select name="cupTeamSetupMode">
+                      <option value="auto" data-i18n="common.automatic">Automatisk</option>
+                      <option value="manual" data-i18n="common.manual">Manuelt</option>
+                    </select>
+                  </label>
+                  <label class="settings-row checkbox-field" id="cupThirdPlaceField">
+                    <span data-i18n="cup.thirdPlaceMatch">Bronsefinale</span>
+                    <input name="includesThirdPlaceMatch" type="checkbox">
+                  </label>
+                  <label class="settings-row">
+                    <span data-i18n="admin.tablePoints">Tabellpoeng</span>
+                    <select name="pointMode">
+                      <option value="matches" data-i18n="common.matches">Kamper</option>
+                      <option value="sets" data-i18n="common.sets">Sett</option>
+                      <option value="games" data-i18n="common.games">Games</option>
+                    </select>
+                  </label>
+                  <label class="settings-row">
+                    <span data-i18n="admin.gamesPerSet">Games per sett</span>
+                    <input name="gamesToWinSet" type="number" min="1" max="12" value="6" required>
+                  </label>
+                  <label class="settings-row">
+                    <span data-i18n="admin.setsPerMatch">Sett per match</span>
+                    <input name="setsToWinMatch" type="number" min="1" max="5" value="1" required>
+                  </label>
+                </div>
                 <button class="secondary" type="submit" data-i18n="actions.saveRules">Lagre regler</button>
               </form>
               <div class="button-row">
@@ -977,7 +981,7 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-32"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-33"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-6"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>

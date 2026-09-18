@@ -95,7 +95,7 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v288/);
+  assert.match(serviceWorkerSource, /padelstar-v289/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-44/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-44/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -593,6 +593,18 @@ test("Kamper match cards are collapsible list rows (flatter mockup layout), summ
   assert.match(matchCardSource, /match-summary-score/);
   assert.match(matchCardSource, /aria-expanded/);
   assert.match(matchCardSource, /scoreSummary/);
+});
+
+test("Styring rules form uses the flatter grouped settings-row layout, editable controls preserved", () => {
+  assert.match(indexSource, /styles\/settings-rows\.css\?v=padelstar-settings-rows-1/);
+  assert.match(serviceWorkerSource, /styles\/settings-rows\.css\?v=padelstar-settings-rows-1/);
+  assert.match(indexSource, /class="settings-group"/);
+  assert.match(indexSource, /class="settings-group-title" data-i18n="admin\.rulesGroupTitle"/);
+  assert.match(indexSource, /<form class="inline-form settings-form" id="tournamentSettingsForm">/);
+  assert.match(indexSource, /id="cupTeamSetupModeField"/);
+  assert.match(indexSource, /id="cupThirdPlaceField"/);
+  assert.match(indexSource, /name="format"/);
+  assert.match(indexSource, /name="gamesToWinSet"/);
 });
 
 test("match list rendering has its own grouping boundary", () => {
