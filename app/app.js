@@ -451,6 +451,7 @@ const courtQueue = window.PadelstarCourtQueue?.create({
   getState: () => state,
   matchContextText: (match) => matchContextText(match),
   t: (key, values) => t(key, values),
+  teamAccentStyle: (team) => teamAccentStyle(team),
 }) ?? { render() {} };
 const matchList = window.PadelstarMatchList.create({
   appendEmptyText: (container, text) => appendEmptyText(container, text),
@@ -562,6 +563,7 @@ const playerControls = window.PadelstarPlayerControls.create({
   getPlayerById: (id) => getPlayerById(id),
   getState: () => state,
   getSpectatorMode: () => spectatorMode,
+  pendingRemoteWriteCount: () => pendingRemoteWriteCount(),
   t: (key, values) => t(key, values),
 });
 const largeScore = window.PadelstarLargeScore.create({
@@ -928,7 +930,8 @@ const adminFormEvents = window.PadelstarAdminFormEvents?.create({
   queueRemoteCupAdvance: () => queueRemoteCupAdvance(),
   queueRemoteRoundAdvance: () => queueRemoteRoundAdvance(),
   render: () => render(),
-  requestConfirmation: (message) => requestConfirmation(message),
+  requestConfirmation: (message, title) => requestConfirmationWithTitle(message, title),
+  roundProgress: (round) => roundProgress(round),
   saveManualCupTeams: (value) => saveManualCupTeams(value),
   saveState: (options) => saveState(options),
   showToast: (message, statusClass) => showToast(message, statusClass),

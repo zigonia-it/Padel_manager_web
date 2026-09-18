@@ -88,13 +88,14 @@ const initialViewSource = fs.readFileSync(path.join(root, "app", "initial-view.j
 const pwaInstallSource = fs.readFileSync(path.join(root, "app", "pwa-install.js"), "utf8");
 const profileHistorySource = fs.readFileSync(path.join(root, "app", "profile-history.js"), "utf8");
 const courtSettingsSource = fs.readFileSync(path.join(root, "app", "court-settings.js"), "utf8");
+const courtQueueSource = fs.readFileSync(path.join(root, "app", "court-queue.js"), "utf8");
 const setupFormsSource = fs.readFileSync(path.join(root, "app", "setup-forms.js"), "utf8");
 const tournamentQueriesSource = fs.readFileSync(path.join(root, "app", "tournament-queries.js"), "utf8");
 const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tournament-sharing.js"), "utf8");
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v284/);
+  assert.match(serviceWorkerSource, /padelstar-v285/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-44/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-44/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -309,8 +310,8 @@ test("accent picker lets a player choose their own gem color on join and profile
 test("admin form mutations have their own event boundary", () => {
   assert.match(adminFormEventsSource, /generateRoundBlockReason/);
   assert.match(adminFormEventsSource, /global\.PadelstarAdminFormEvents/);
-  assert.match(indexSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-3/);
-  assert.match(serviceWorkerSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-3/);
+  assert.match(indexSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-4/);
+  assert.match(serviceWorkerSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-4/);
   assert.match(appSource, /PadelstarAdminFormEvents\?\.create/);
 });
 
@@ -638,8 +639,8 @@ test("player status rendering has its own dashboard boundary", () => {
 test("player next-match rendering has its own workspace boundary", () => {
   assert.match(playerNextMatchSource, /renderPlayerNextMatch/);
   assert.match(playerNextMatchSource, /window\.PadelstarPlayerNextMatch/);
-  assert.match(indexSource, /app\/player-next-match\.js\?v=padelstar-player-next-match-1/);
-  assert.match(serviceWorkerSource, /app\/player-next-match\.js\?v=padelstar-player-next-match-1/);
+  assert.match(indexSource, /app\/player-next-match\.js\?v=padelstar-player-next-match-2/);
+  assert.match(serviceWorkerSource, /app\/player-next-match\.js\?v=padelstar-player-next-match-2/);
   assert.match(appSource, /playerNextMatch\.renderPlayerNextMatch\(matches\)/);
 });
 
@@ -655,9 +656,19 @@ test("player controls have their own identity and session boundary", () => {
   assert.match(playerControlsSource, /renderPlayerIdentity/);
   assert.match(playerControlsSource, /renderLeaveTournamentControl/);
   assert.match(playerControlsSource, /window\.PadelstarPlayerControls/);
-  assert.match(indexSource, /app\/player-controls\.js\?v=padelstar-player-controls-1/);
-  assert.match(serviceWorkerSource, /app\/player-controls\.js\?v=padelstar-player-controls-1/);
+  assert.match(indexSource, /app\/player-controls\.js\?v=padelstar-player-controls-2/);
+  assert.match(serviceWorkerSource, /app\/player-controls\.js\?v=padelstar-player-controls-2/);
   assert.match(appSource, /playerControls\.renderPlayerIdentity\(\)/);
+});
+
+test("design-chat suggestions: gem-color court strips, offline indicator, waiting-state detail, round-end summary", () => {
+  assert.match(courtQueueSource, /teamAccentStyle/);
+  assert.match(playerControlsSource, /pendingRemoteWriteCount/);
+  assert.match(playerControlsSource, /syncPending/);
+  assert.match(playerNextMatchSource, /matchesAhead/);
+  assert.match(playerNextMatchSource, /player\.matchesAhead/);
+  assert.match(adminFormEventsSource, /round\.endSummaryConfirm/);
+  assert.match(adminFormEventsSource, /await requestConfirmation/);
 });
 
 test("large score rendering has its own dialog boundary", () => {
@@ -928,7 +939,7 @@ test("active app files do not reference archived assets", () => {
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
   assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-101/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-58/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-59/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
@@ -939,7 +950,7 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-4/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-101/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-58/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-59/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);

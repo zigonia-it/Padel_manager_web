@@ -14,6 +14,7 @@
       queueRemoteCupAdvance,
       queueRemoteRoundAdvance,
       requestConfirmation,
+      roundProgress,
       saveManualCupTeams,
       saveState,
       showToast,
@@ -91,7 +92,7 @@
         saveManualCupTeams(new FormData(event.currentTarget).get("teamLines"));
       });
 
-      elements.generateRoundButton?.addEventListener("click", () => {
+      elements.generateRoundButton?.addEventListener("click", async () => {
         const activeRound = getActiveRound();
         const completingActiveRound = activeRound?.status === "active" && canCompleteRound(activeRound);
         if (!completingActiveRound) {
@@ -100,6 +101,11 @@
             showToast(blockReason, "status-message-error");
             return;
           }
+        }
+        if (completingActiveRound) {
+          const progress = roundProgress(activeRound);
+          const summary = t("round.endSummaryConfirm", { round: activeRound.roundNumber, finished: progress.finished, total: progress.total });
+          if (!await requestConfirmation(summary, t("round.endSummaryTitle", { round: activeRound.roundNumber }))) return;
         }
         const state = getState();
         if (state.rounds.length === 0) {

@@ -1204,6 +1204,30 @@ for (const [language, values] of Object.entries({
   Object.assign(padelstarTranslations[language], values);
 }
 for (const [language, values] of Object.entries({
+  nb: { "round.endSummaryTitle": "Runde {round} ferdig", "round.endSummaryConfirm": "{finished}/{total} kamper spilt i runde {round}. Klar for neste runde?" },
+  nn: { "round.endSummaryTitle": "Runde {round} ferdig", "round.endSummaryConfirm": "{finished}/{total} kampar spelte i runde {round}. Klar for neste runde?" },
+  en: { "round.endSummaryTitle": "Round {round} complete", "round.endSummaryConfirm": "{finished}/{total} matches played in round {round}. Ready for the next round?" },
+  es: { "round.endSummaryTitle": "Ronda {round} completa", "round.endSummaryConfirm": "{finished}/{total} partidos jugados en la ronda {round}. ¿Listo para la siguiente ronda?" },
+  de: { "round.endSummaryTitle": "Runde {round} abgeschlossen", "round.endSummaryConfirm": "{finished}/{total} Spiele in Runde {round} gespielt. Bereit für die nächste Runde?" },
+  fr: { "round.endSummaryTitle": "Manche {round} terminée", "round.endSummaryConfirm": "{finished}/{total} matchs joués lors de la manche {round}. Prêt pour la manche suivante ?" },
+  sv: { "round.endSummaryTitle": "Omgång {round} klar", "round.endSummaryConfirm": "{finished}/{total} matcher spelade i omgång {round}. Redo för nästa omgång?" },
+  da: { "round.endSummaryTitle": "Runde {round} færdig", "round.endSummaryConfirm": "{finished}/{total} kampe spillet i runde {round}. Klar til næste runde?" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+for (const [language, values] of Object.entries({
+  nb: { "player.matchesAhead": "Du spiller om {count} kamper" },
+  nn: { "player.matchesAhead": "Du speler om {count} kampar" },
+  en: { "player.matchesAhead": "You play in {count} matches" },
+  es: { "player.matchesAhead": "Juegas en {count} partidos" },
+  de: { "player.matchesAhead": "Du spielst in {count} Spielen" },
+  fr: { "player.matchesAhead": "Vous jouez dans {count} matchs" },
+  sv: { "player.matchesAhead": "Du spelar om {count} matcher" },
+  da: { "player.matchesAhead": "Du spiller om {count} kampe" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+for (const [language, values] of Object.entries({
   nb: { "profile.activeTournaments": "Mine aktive turneringer", "profile.noActiveTournaments": "Ingen aktive turneringer akkurat nå.", "profile.accountSettings": "Kontoinnstillinger" },
   nn: { "profile.activeTournaments": "Mine aktive turneringar", "profile.noActiveTournaments": "Ingen aktive turneringar akkurat no.", "profile.accountSettings": "Kontoinnstillingar" },
   en: { "profile.activeTournaments": "My active tournaments", "profile.noActiveTournaments": "No active tournaments right now.", "profile.accountSettings": "Account settings" },
