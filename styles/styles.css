@@ -428,9 +428,40 @@ body[data-theme="classic"] .status-pill {
 }
 
 body[data-theme="classic"] .status-pill {
-  border: 0;
-  background: transparent;
+  padding: 5px 11px 5px 9px;
+  border: 1px solid rgba(85, 230, 154, 0.32);
+  border-radius: 999px;
+  background: rgba(85, 230, 154, 0.09);
   box-shadow: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+body[data-theme="classic"] .status-pill[data-status="connected"]::before {
+  animation: statusPillPulse 2.4s ease-in-out infinite;
+}
+
+body[data-theme="classic"] .status-pill.offline,
+body[data-theme="classic"] .status-pill[data-status="offline"] {
+  border-color: rgba(154, 167, 184, 0.32);
+  background: rgba(154, 167, 184, 0.08);
+}
+
+body[data-theme="classic"] .status-pill[data-status="connecting"],
+body[data-theme="classic"] .status-pill[data-status="reconnecting"] {
+  border-color: rgba(var(--gold-bright-rgb), 0.4);
+  background: rgba(var(--gold-bright-rgb), 0.08);
+}
+
+body[data-theme="classic"] .status-pill[data-status="error"],
+body[data-theme="classic"] .status-pill[data-status="disconnected"] {
+  border-color: rgba(255, 47, 63, 0.4);
+  background: rgba(255, 47, 63, 0.08);
+}
+
+@keyframes statusPillPulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
 }
 
 body.setup-active .account-panel {

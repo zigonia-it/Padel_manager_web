@@ -426,6 +426,33 @@ h3 {
   gap: 18px;
 }
 
+.resume-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 30px 18px 34px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.resume-empty-state svg {
+  opacity: 0.42;
+}
+
+.resume-empty-state h4 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.resume-empty-state p {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .saved-tournaments-list {
   display: grid;
   gap: 10px;

@@ -24,6 +24,7 @@
       accountAuthNotice: document.querySelector("#accountAuthNotice"),
       resumePanel: document.querySelector("#resumePanel"),
       savedTournamentsList: document.querySelector("#savedTournamentsList"),
+      resumeEmptyState: document.querySelector("#resumeEmptyState"),
       resumeTitle: document.querySelector("#resumeTitle"),
       resumeSummary: document.querySelector("#resumeSummary"),
       resumeTournamentButton: document.querySelector("#resumeTournamentButton"),

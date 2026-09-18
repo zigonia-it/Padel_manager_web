@@ -232,6 +232,7 @@ Object.assign(padelstarTranslations.sv, { "account.signingIn": "Loggar in …" }
 Object.assign(padelstarTranslations.da, { "account.signingIn": "Logger ind …" });
 Object.assign(padelstarTranslations.nb, {
   "hero.featuresAria": "Padelstar-funksjoner",
+  "hero.accountOptionalHint": "Konto er valgfritt for å spille, men gir historikk og statistikk.",
   "hero.featureOneTitle": "Enklere turneringer",
   "hero.featureOneText": "Opprett og organiser kamper uten unødvendig administrasjon.",
   "hero.featureTwoTitle": "Alle kan bli med",
@@ -242,6 +243,7 @@ Object.assign(padelstarTranslations.nb, {
 
 Object.assign(padelstarTranslations.nn, {
   "hero.featuresAria": "Padelstar-funksjonar",
+  "hero.accountOptionalHint": "Konto er valfritt for å spela, men gir historikk og statistikk.",
   "hero.featureOneTitle": "Enklare turneringar",
   "hero.featureOneText": "Opprett og organiser kampar utan unødvendig administrasjon.",
   "hero.featureTwoTitle": "Alle kan bli med",
@@ -251,6 +253,7 @@ Object.assign(padelstarTranslations.nn, {
 });
 Object.assign(padelstarTranslations.en, {
   "hero.featuresAria": "Padelstar features",
+  "hero.accountOptionalHint": "An account is optional to play, but gives you history and stats.",
   "hero.featureOneTitle": "Simpler tournaments",
   "hero.featureOneText": "Create and organize matches without unnecessary administration.",
   "hero.featureTwoTitle": "Everyone can join",
@@ -260,6 +263,7 @@ Object.assign(padelstarTranslations.en, {
 });
 Object.assign(padelstarTranslations.es, {
   "hero.featuresAria": "Funciones de Padelstar",
+  "hero.accountOptionalHint": "La cuenta es opcional para jugar, pero te da historial y estadísticas.",
   "hero.featureOneTitle": "Torneos más sencillos",
   "hero.featureOneText": "Crea y organiza partidos sin administración innecesaria.",
   "hero.featureTwoTitle": "Todos pueden unirse",
@@ -269,6 +273,7 @@ Object.assign(padelstarTranslations.es, {
 });
 Object.assign(padelstarTranslations.de, {
   "hero.featuresAria": "Padelstar-Funktionen",
+  "hero.accountOptionalHint": "Ein Konto ist zum Spielen optional, bietet aber Verlauf und Statistiken.",
   "hero.featureOneTitle": "Einfachere Turniere",
   "hero.featureOneText": "Erstelle und organisiere Spiele ohne unnötige Verwaltung.",
   "hero.featureTwoTitle": "Alle können teilnehmen",
@@ -278,6 +283,7 @@ Object.assign(padelstarTranslations.de, {
 });
 Object.assign(padelstarTranslations.fr, {
   "hero.featuresAria": "Fonctionnalités de Padelstar",
+  "hero.accountOptionalHint": "Le compte est facultatif pour jouer, mais donne accès à l'historique et aux statistiques.",
   "hero.featureOneTitle": "Des tournois plus simples",
   "hero.featureOneText": "Créez et organisez des matchs sans administration superflue.",
   "hero.featureTwoTitle": "Tout le monde peut participer",
@@ -287,6 +293,7 @@ Object.assign(padelstarTranslations.fr, {
 });
 Object.assign(padelstarTranslations.sv, {
   "hero.featuresAria": "Padelstar-funktioner",
+  "hero.accountOptionalHint": "Konto är valfritt för att spela, men ger historik och statistik.",
   "hero.featureOneTitle": "Enklare turneringar",
   "hero.featureOneText": "Skapa och organisera matcher utan onödig administration.",
   "hero.featureTwoTitle": "Alla kan delta",
@@ -296,6 +303,7 @@ Object.assign(padelstarTranslations.sv, {
 });
 Object.assign(padelstarTranslations.da, {
   "hero.featuresAria": "Padelstar-funktioner",
+  "hero.accountOptionalHint": "Konto er valgfrit for at spille, men giver historik og statistik.",
   "hero.featureOneTitle": "Enklere turneringer",
   "hero.featureOneText": "Opret og organiser kampe uden unødvendig administration.",
   "hero.featureTwoTitle": "Alle kan være med",
@@ -388,6 +396,8 @@ Object.assign(padelstarTranslations.nb, {
   "role.player": "Spiller",
   "role.spectator": "Tilskuer",
   "resume.localSaved": "Lagret lokalt",
+  "resume.emptyTitle": "Ingen turneringer ennå",
+  "resume.emptyText": "Opprett din første turnering, eller bli med i en med invitasjonskode.",
   "resume.defaultSummary": "Det finnes en turnering lagret i denne nettleseren.",
   "resume.title": "Dine turneringer",
   "resume.adminSummary": "{players} spillere · {courts} baner · kode {code}",
@@ -707,6 +717,8 @@ Object.assign(padelstarTranslations.nn, {
   "nav.viewAria": "Vising",
   "nav.leaveSpectator": "Forlat tilskodarvising",
   "resume.localSaved": "Lagra lokalt",
+  "resume.emptyTitle": "Ingen turneringar enno",
+  "resume.emptyText": "Opprett din første turnering, eller bli med i ei med invitasjonskode.",
   "resume.defaultSummary": "Det finst ei turnering lagra i denne nettlesaren.",
   "resume.title": "Turneringane dine",
   "resume.adminSummary": "{players} spelarar · {courts} baner · kode {code}",
@@ -761,7 +773,7 @@ Object.assign(padelstarTranslations.en, {
   "hero.subtitle": "Create the tournament, invite the players and let Padelstar take care of the rest.",
   "nav.homeAria": "Go home", "nav.modulesAria": "Modules", "nav.home": "Home", "nav.create": "Create", "nav.login": "Sign in", "nav.join": "Join", "nav.admin": "Admin", "nav.player": "Player", "nav.tournament": "Tournament", "nav.frontPageAria": "Front page", "nav.openMenu": "Open menu", "nav.closeMenu": "Close menu", "nav.startChoicesAria": "Start choices", "nav.openViewMenu": "Open view menu", "nav.closeViewMenu": "Close view menu", "nav.viewAria": "View", "nav.leaveSpectator": "Leave spectator view",
   "role.admin": "Admin", "role.player": "Player", "role.spectator": "Spectator",
-  "resume.localSaved": "Saved locally", "resume.defaultSummary": "Saved tournaments you can open again on this device.", "resume.title": "Your tournaments", "resume.adminSummary": "{players} players · {courts} courts · code {code}", "resume.summary": "{players} players · {courts} courts", "resume.continueAdmin": "Continue as admin", "resume.continueTournament": "Continue tournament", "resume.openTournament": "Open tournament", "resume.players": "players", "resume.courts": "courts",
+  "resume.localSaved": "Saved locally", "resume.emptyTitle": "No tournaments yet", "resume.emptyText": "Create your first tournament, or join one with an invite code.", "resume.defaultSummary": "Saved tournaments you can open again on this device.", "resume.title": "Your tournaments", "resume.adminSummary": "{players} players · {courts} courts · code {code}", "resume.summary": "{players} players · {courts} courts", "resume.continueAdmin": "Continue as admin", "resume.continueTournament": "Continue tournament", "resume.openTournament": "Open tournament", "resume.players": "players", "resume.courts": "courts",
   "setup.createEyebrow": "Create", "setup.joinEyebrow": "Join", "setup.newTournament": "New tournament", "setup.tournamentName": "Tournament name", "setup.playersOptional": "Players, optional", "setup.playersOptionalPlaceholder": "Add players manually if someone does not have their own device.", "setup.adminParticipation": "Admin participation", "setup.adminPlays": "Admin plays", "setup.adminPlaysHint": "Choose this if the tournament creator will also have a player profile.", "setup.adminPlayerName": "Admin player name", "setup.courtCount": "Number of courts", "setup.playerNamePlaceholder": "Enter your name", "setup.yourAvatar": "Your avatar", "setup.yourName": "Your name", "setup.chooseAvatar": "Choose avatar", "setup.localJoinHint": "In this local version, the code works for the tournament created on this device.", "setup.creatorProfileHint": "A profile is optional for joining. Create one if you want to keep the tournament and save your own statistics.", "setup.accountOptionalHint": "Want to keep the tournament permanently? Create a profile first.",
   "share.title": "Share tournament", "share.inviteCode": "Invite code", "share.qrCode": "QR code", "share.qrCodeAlt": "QR code for joining", "share.joinLink": "Join link", "share.spectatorLink": "Spectator link", "share.joinHint": "Scan the QR code or use the link to join the tournament.",
   "admin.sectionsAria": "Admin sections", "admin.control": "Control", "admin.share": "Share", "admin.players": "Players", "admin.matches": "Matches", "admin.courtsInUse": "Courts in use", "admin.courtListPlaceholder": "1, 2 or 3, 4, 16", "admin.rulesGroupTitle": "Rules", "admin.tournamentFormat": "Tournament format", "admin.roundRobinFormat": "Round robin", "admin.cupFormat": "Cup", "admin.cupTeamSetup": "Cup team setup", "admin.tablePoints": "Table points", "admin.gamesPerSet": "Games per set", "admin.setsPerMatch": "Sets per match", "admin.lobbyPlayers": "Lobby / players", "admin.addPlayersPlaceholder": "Add one or more players", "admin.matchesHistory": "Matches and history",
@@ -777,7 +789,7 @@ Object.assign(padelstarTranslations.es, {
   "hero.title": "Juega más. Organiza menos.",
   "hero.subtitle": "Crea el torneo, invita a los jugadores y deja que Padelstar se encargue del resto.",
   "nav.homeAria": "Ir al inicio", "nav.modulesAria": "Módulos", "nav.home": "Inicio", "nav.create": "Crear", "nav.join": "Unirse", "nav.admin": "Admin", "nav.player": "Jugador", "nav.tournament": "Torneo", "nav.frontPageAria": "Página principal", "nav.openMenu": "Abrir menú", "nav.closeMenu": "Cerrar menú", "nav.startChoicesAria": "Opciones de inicio", "nav.openViewMenu": "Abrir menú de vista", "nav.closeViewMenu": "Cerrar menú de vista", "nav.viewAria": "Vista", "nav.leaveSpectator": "Salir de la vista de espectador", "role.admin": "Admin", "role.player": "Jugador", "role.spectator": "Espectador",
-  "resume.localSaved": "Guardado localmente", "resume.defaultSummary": "Torneos guardados que puedes volver a abrir en este dispositivo.", "resume.title": "Tus torneos", "resume.adminSummary": "{players} jugadores · {courts} pistas · código {code}", "resume.summary": "{players} jugadores · {courts} pistas", "resume.continueAdmin": "Continuar como admin", "resume.continueTournament": "Continuar torneo", "resume.openTournament": "Abrir torneo", "resume.players": "jugadores", "resume.courts": "pistas",
+  "resume.localSaved": "Guardado localmente", "resume.emptyTitle": "Aún no hay torneos", "resume.emptyText": "Crea tu primer torneo, o únete a uno con un código de invitación.", "resume.defaultSummary": "Torneos guardados que puedes volver a abrir en este dispositivo.", "resume.title": "Tus torneos", "resume.adminSummary": "{players} jugadores · {courts} pistas · código {code}", "resume.summary": "{players} jugadores · {courts} pistas", "resume.continueAdmin": "Continuar como admin", "resume.continueTournament": "Continuar torneo", "resume.openTournament": "Abrir torneo", "resume.players": "jugadores", "resume.courts": "pistas",
   "setup.createEyebrow": "Crear", "setup.joinEyebrow": "Unirse", "setup.newTournament": "Nuevo torneo", "setup.tournamentName": "Nombre del torneo", "setup.playersOptional": "Jugadores, opcional", "setup.playersOptionalPlaceholder": "Añade jugadores manualmente si alguien no tiene su propio dispositivo.", "setup.adminParticipation": "Participación del admin", "setup.adminPlays": "El admin juega", "setup.adminPlaysHint": "Elige esto si quien crea el torneo también tendrá un perfil de jugador.", "setup.adminPlayerName": "Nombre del jugador admin", "setup.courtCount": "Número de pistas", "setup.playerNamePlaceholder": "Escribe tu nombre", "setup.yourAvatar": "Tu avatar", "setup.yourName": "Tu nombre", "setup.chooseAvatar": "Elige avatar", "setup.localJoinHint": "En esta versión local, el código funciona para el torneo creado en este dispositivo.",
   "share.title": "Compartir torneo", "share.inviteCode": "Código de invitación", "share.qrCode": "Código QR", "share.qrCodeAlt": "Código QR para inscribirse", "share.joinLink": "Enlace para unirse", "share.spectatorLink": "Enlace de espectador", "share.joinHint": "Escanea el código QR o usa el enlace para unirte al torneo.",
   "admin.sectionsAria": "Secciones de admin", "admin.control": "Control", "admin.share": "Compartir", "admin.players": "Jugadores", "admin.matches": "Partidos", "admin.courtsInUse": "Pistas en uso", "admin.courtListPlaceholder": "1, 2 o 3, 4, 16", "admin.rulesGroupTitle": "Reglas", "admin.tournamentFormat": "Formato del torneo", "admin.roundRobinFormat": "Todos contra todos", "admin.cupFormat": "Copa", "admin.cupTeamSetup": "Configuración de equipos de copa", "admin.tablePoints": "Puntos de tabla", "admin.gamesPerSet": "Juegos por set", "admin.setsPerMatch": "Sets por partido", "admin.lobbyPlayers": "Lobby / jugadores", "admin.addPlayersPlaceholder": "Añadir uno o más jugadores", "admin.matchesHistory": "Partidos e historial",
