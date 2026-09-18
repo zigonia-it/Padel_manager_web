@@ -1,8 +1,9 @@
 const fallbackLanguage = "nb";
 
 const padelstarLanguageMeta = [
-  { code: "nb", label: "Bokmål", flag: "🇳🇴", fallback: "nb", htmlLang: "nb" },
-  { code: "nn", label: "Nynorsk", flag: "🇳🇴", fallback: "nb", htmlLang: "nn" },
+  { code: "nb", label: "Norsk - Bokmål", flag: "🇳🇴", fallback: "nb", htmlLang: "nb" },
+  { code: "nn", label: "Norsk - Nynorsk", flag: "🇳🇴", fallback: "nb", htmlLang: "nn" },
+  { code: "sa", label: "Samisk", flag: "🇳🇴", fallback: "nb", htmlLang: "sa" },
   { code: "en", label: "English", flag: "🇬🇧", fallback: "en", htmlLang: "en" },
   { code: "es", label: "Español", flag: "🇪🇸", fallback: "en", htmlLang: "es" },
   { code: "de", label: "Deutsch", flag: "🇩🇪", fallback: "en", htmlLang: "de" },
