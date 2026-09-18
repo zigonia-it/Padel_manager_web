@@ -726,6 +726,7 @@ const matchCard = window.PadelstarMatchCard.create({
   reopenMatch: (match) => reopenMatch(match),
   setWalkover: (match, teamIndex) => setWalkover(match, teamIndex),
   setsWonByTeam: (match, teamIndex) => setsWonByTeam(match, teamIndex),
+  scoreSummary: (match) => scoreSummary(match),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),

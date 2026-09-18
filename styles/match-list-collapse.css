@@ -1,0 +1,72 @@
+/* =========================================================
+   COLLAPSIBLE MATCH LIST ROW
+   ========================================================= */
+
+.match-summary {
+  display: grid;
+  gap: 16px;
+  padding-right: 22px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.match-summary:focus-visible {
+  outline: 2px solid rgba(var(--player-accent-rgb), 0.7);
+  outline-offset: 3px;
+}
+
+.match-summary .match-headline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.match-summary-score {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.match-summary-chevron {
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform 0.18s ease;
+}
+
+.match-card-expanded .match-summary-chevron {
+  transform: rotate(-135deg);
+}
+
+.match-card-body {
+  display: grid;
+  gap: 16px;
+}
+
+.match-card-body.hidden {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .match-summary {
+    padding-right: 20px;
+  }
+
+  .match-summary .match-headline {
+    flex-wrap: wrap;
+  }
+
+  .match-summary-score {
+    font-size: 0.95rem;
+  }
+}

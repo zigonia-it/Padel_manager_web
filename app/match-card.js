@@ -17,6 +17,7 @@
       setWalkover,
       setsWonByTeam,
       scoreConflict,
+      scoreSummary,
       sittingOutSummary,
       startMatch,
       teamAccentStyle,
@@ -26,6 +27,12 @@
       undoMatch,
       updateMatchCourt,
     } = dependencies;
+
+    const expandState = new Map();
+
+    function isExpanded(match) {
+      return expandState.has(match.id) ? expandState.get(match.id) : match.state === "playing";
+    }
 
     function scoreboardRow(match, teamIndex, teamName, pointControlsEnabled) {
       const team = teamIndex === 0 ? match.teamOne : match.teamTwo;
@@ -77,7 +84,8 @@
 
     function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly = false) {
       const card = global.document.createElement("article");
-      card.className = `match-card match-${match.state} ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
+      const expanded = isExpanded(match);
+      card.className = `match-card match-${match.state} ${expanded ? "match-card-expanded" : "match-card-collapsed"} ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
       card.dataset.matchId = match.id;
       card.setAttribute("style", teamAccentStyle(match.teamOne));
       const teamOneName = escapeHtml(match.teamOne.displayName);
@@ -88,33 +96,56 @@
         .filter(Boolean)
         .join("");
       card.innerHTML = `
-    <div class="match-top">
-      <div class="match-meta">
-        <span>${escapeHtml(matchContextText(match))}</span>
+    <div class="match-summary" role="button" tabindex="0" aria-expanded="${expanded}">
+      <div class="match-top">
+        <div class="match-meta">
+          <span>${escapeHtml(matchContextText(match))}</span>
+        </div>
+        <div class="match-top-actions">
+          <span class="match-court">${escapeHtml(match.courtName ?? translate("tournament.noCourtAssigned"))}</span>
+          <span class="match-status ${match.state}">${matchStateText(match.state)}</span>
+        </div>
       </div>
-      <div class="match-top-actions">
-        <span class="match-court">${escapeHtml(match.courtName ?? translate("tournament.noCourtAssigned"))}</span>
-        <span class="match-status ${match.state}">${matchStateText(match.state)}</span>
+      <div class="match-headline">
+        <span>${escapeHtml(primaryMatchHeadline(match))}</span>
+        <span class="match-summary-score">${escapeHtml(scoreSummary(match))}</span>
       </div>
+      <span class="match-summary-chevron" aria-hidden="true"></span>
     </div>
-    <div class="match-headline">
-      <span>${escapeHtml(primaryMatchHeadline(match))}</span>
+    <div class="match-card-body ${expanded ? "" : "hidden"}">
+      <div class="scorecard-matchup">
+        <section class="scorecard-team scorecard-team-one" style="${teamAccentStyle(match.teamOne)}">
+          <h3>${translate("common.teamOne")}</h3>
+          <div class="scorecard-players">${teamDisplay(match.teamOne, "scorecard")}</div>
+        </section>
+        <section class="scorecard-team scorecard-team-two" style="${teamAccentStyle(match.teamTwo)}">
+          <h3>${translate("common.teamTwo")}</h3>
+          <div class="scorecard-players">${teamDisplay(match.teamTwo, "scorecard")}</div>
+        </section>
+      </div>
+      ${scoreboardTableMarkup(match, editable)}
+      ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
     </div>
-    <div class="scorecard-matchup">
-      <section class="scorecard-team scorecard-team-one" style="${teamAccentStyle(match.teamOne)}">
-        <h3>${translate("common.teamOne")}</h3>
-        <div class="scorecard-players">${teamDisplay(match.teamOne, "scorecard")}</div>
-      </section>
-      <section class="scorecard-team scorecard-team-two" style="${teamAccentStyle(match.teamTwo)}">
-        <h3>${translate("common.teamTwo")}</h3>
-        <div class="scorecard-players">${teamDisplay(match.teamTwo, "scorecard")}</div>
-      </section>
-    </div>
-    ${scoreboardTableMarkup(match, editable)}
-    ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
   `;
 
       bindScoreboardTable(card, match, editable && match.state !== "cancelled");
+
+      const summaryToggle = card.querySelector(".match-summary");
+      const body = card.querySelector(".match-card-body");
+      function toggleExpanded() {
+        const next = !isExpanded(match);
+        expandState.set(match.id, next);
+        body.classList.toggle("hidden", !next);
+        summaryToggle.setAttribute("aria-expanded", String(next));
+        card.classList.toggle("match-card-expanded", next);
+        card.classList.toggle("match-card-collapsed", !next);
+      }
+      summaryToggle.addEventListener("click", toggleExpanded);
+      summaryToggle.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        toggleExpanded();
+      });
 
       if (editable && match.state !== "cancelled") {
         const controls = global.document.createElement("div");
@@ -150,7 +181,7 @@
             button.addEventListener("click", () => void setWalkover(match, Number(button.dataset.walkoverTeam)));
           });
         }
-        card.append(controls);
+        body.append(controls);
       }
       return card;
     }
