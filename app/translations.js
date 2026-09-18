@@ -1204,6 +1204,18 @@ for (const [language, values] of Object.entries({
   Object.assign(padelstarTranslations[language], values);
 }
 for (const [language, values] of Object.entries({
+  nb: { "score.undoLastAria": "Angre siste poeng" },
+  nn: { "score.undoLastAria": "Angre siste poeng" },
+  en: { "score.undoLastAria": "Undo last point" },
+  es: { "score.undoLastAria": "Deshacer último punto" },
+  de: { "score.undoLastAria": "Letzten Punkt rückgängig machen" },
+  fr: { "score.undoLastAria": "Annuler le dernier point" },
+  sv: { "score.undoLastAria": "Ångra senaste poängen" },
+  da: { "score.undoLastAria": "Fortryd sidste point" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+for (const [language, values] of Object.entries({
   nb: { "round.endSummaryTitle": "Runde {round} ferdig", "round.endSummaryConfirm": "{finished}/{total} kamper spilt i runde {round}. Klar for neste runde?" },
   nn: { "round.endSummaryTitle": "Runde {round} ferdig", "round.endSummaryConfirm": "{finished}/{total} kampar spelte i runde {round}. Klar for neste runde?" },
   en: { "round.endSummaryTitle": "Round {round} complete", "round.endSummaryConfirm": "{finished}/{total} matches played in round {round}. Ready for the next round?" },

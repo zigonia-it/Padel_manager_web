@@ -113,7 +113,7 @@ function makeTournamentState(inviteCode) {
         winnerTeamIndex: null,
         isWalkover: false,
         isThirdPlaceMatch: false,
-        lastScoredMatchState: null,
+        undoStack: [],
       }],
     }],
     cup: null,

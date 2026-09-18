@@ -3,9 +3,10 @@
     const {
       awardTennisPoint,
       cancelMatch,
+      currentLocalRole,
       escapeAttribute,
       escapeHtml,
-      gameScoreText,
+      getState,
       matchContextText,
       matchIncludesPlayer,
       matchStateText,
@@ -13,8 +14,8 @@
       openSetScoreDialog,
       primaryMatchHeadline,
       reopenMatch,
-      setScoreText,
       setWalkover,
+      setsWonByTeam,
       scoreConflict,
       sittingOutSummary,
       startMatch,
@@ -22,8 +23,57 @@
       teamDisplay,
       tennisPointLabel,
       translate,
+      undoMatch,
       updateMatchCourt,
     } = dependencies;
+
+    function scoreboardRow(match, teamIndex, teamName, pointControlsEnabled) {
+      const team = teamIndex === 0 ? match.teamOne : match.teamTwo;
+      const key = teamIndex === 0 ? "teamOne" : "teamTwo";
+      const canUndo = pointControlsEnabled && match.state !== "finished" && Boolean(match.undoStack?.length);
+      const canAward = pointControlsEnabled && match.state !== "finished";
+      return `
+    <tr class="scoreboard-row" style="${teamAccentStyle(team)}">
+      <td class="scoreboard-team-name">${teamName}</td>
+      <td class="scoreboard-cell scoreboard-sets">${setsWonByTeam(match, teamIndex)}</td>
+      <td class="scoreboard-cell scoreboard-games">${match.currentSet?.[key] ?? 0}</td>
+      <td class="scoreboard-cell scoreboard-points">
+        <button class="scoreboard-point-minus" type="button" data-undo-team="${teamIndex}" aria-label="${translate("score.undoLastAria")}" ${canUndo ? "" : "disabled"}>−</button>
+        <strong class="scoreboard-point-value">${tennisPointLabel(match.currentGame?.[key] ?? 0)}</strong>
+        <button class="scoreboard-point-plus" type="button" data-point-team="${teamIndex}" aria-label="${translate("score.pointsLabel", { team: teamName })}" ${canAward ? "" : "disabled"}>+</button>
+      </td>
+    </tr>`;
+    }
+
+    function scoreboardTableMarkup(match, editable) {
+      const pointControlsEnabled = editable && match.state !== "cancelled";
+      return `
+    <table class="scoreboard-table" aria-label="${translate("score.scoreboardAria")}">
+      <thead>
+        <tr><th scope="col"></th><th scope="col">${translate("common.sets")}</th><th scope="col">${translate("common.games")}</th><th scope="col">${translate("common.points")}</th></tr>
+      </thead>
+      <tbody>
+        ${scoreboardRow(match, 0, escapeHtml(match.teamOne.displayName), pointControlsEnabled)}
+        ${scoreboardRow(match, 1, escapeHtml(match.teamTwo.displayName), pointControlsEnabled)}
+      </tbody>
+    </table>`;
+    }
+
+    function bindScoreboardTable(root, match, pointControlsEnabled) {
+      if (!pointControlsEnabled) return;
+      root.querySelectorAll("[data-point-team]").forEach((button) => {
+        button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.pointTeam)));
+      });
+      root.querySelectorAll("[data-undo-team]").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (currentLocalRole() === "player" && matchIncludesPlayer(match, getState().selectedPlayerId)) {
+            if (match.undoStack?.length) undoMatch(match);
+            return;
+          }
+          reopenMatch(match);
+        });
+      });
+    }
 
     function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly = false) {
       const card = global.document.createElement("article");
@@ -33,14 +83,10 @@
       const teamOneName = escapeHtml(match.teamOne.displayName);
       const teamTwoName = escapeHtml(match.teamTwo.displayName);
       const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
-      const pointControlsEnabled = editable && match.state !== "cancelled";
       const sittingOut = sittingOutSummary(match);
       const matchNote = [sittingOut, winner ? `<p class="winner-note">${translate("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : "", scoreConflict?.(match) ? `<p class="match-conflict">${translate("score.conflictAdminHint")}</p>` : ""]
         .filter(Boolean)
         .join("");
-      const pointControl = (teamIndex, teamName) => pointControlsEnabled
-        ? `<button class="scorecard-point-button" type="button" data-point-team="${teamIndex}" aria-label="${translate("score.pointsLabel", { team: teamName })}" ${match.state === "finished" ? "disabled" : ""}>${tennisPointLabel(match.currentGame?.[teamIndex === 0 ? "teamOne" : "teamTwo"] ?? 0)}</button>`
-        : `<strong class="scorecard-point-value">${tennisPointLabel(match.currentGame?.[teamIndex === 0 ? "teamOne" : "teamTwo"] ?? 0)}</strong>`;
       card.innerHTML = `
     <div class="match-top">
       <div class="match-meta">
@@ -59,26 +105,16 @@
         <h3>${translate("common.teamOne")}</h3>
         <div class="scorecard-players">${teamDisplay(match.teamOne, "scorecard")}</div>
       </section>
-      <section class="scorecard-center" aria-label="${translate("score.scoreboardAria")}">
-        <div class="scorecard-emblem" aria-hidden="true"><img src="assets/icons/padelstar-icon.png" alt="" width="54" height="54"></div>
-        <div class="scorecard-score-pair">
-          ${pointControl(0, teamOneName)}
-          <img class="scorecard-vs-icon" src="assets/icons/vs_icon" alt="VS" width="88" height="58">
-          ${pointControl(1, teamTwoName)}
-        </div>
-      </section>
       <section class="scorecard-team scorecard-team-two" style="${teamAccentStyle(match.teamTwo)}">
         <h3>${translate("common.teamTwo")}</h3>
         <div class="scorecard-players">${teamDisplay(match.teamTwo, "scorecard")}</div>
       </section>
     </div>
-    <div class="scorecard-stats" aria-label="${translate("score.scoreboardAria")}">
-      <div><span class="scorecard-stat-icon" aria-hidden="true">◆</span><span>${translate("common.games")}</span><strong>${setScoreText(match)}</strong></div>
-      <div><span class="scorecard-stat-icon" aria-hidden="true">✦</span><span>${translate("common.points")}</span><strong>${gameScoreText(match)}</strong></div>
-      <div><span class="scorecard-stat-icon" aria-hidden="true">◎</span><span>${translate("common.sets")}</span><strong>${setScoreText(match)}</strong></div>
-    </div>
+    ${scoreboardTableMarkup(match, editable)}
     ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
   `;
+
+      bindScoreboardTable(card, match, editable && match.state !== "cancelled");
 
       if (editable && match.state !== "cancelled") {
         const controls = global.document.createElement("div");
@@ -92,7 +128,7 @@
         <button class="secondary set-score-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${translate("actions.setResult")}</button>
         <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>${translate("actions.startMatch")}</button>
         <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>${translate("actions.largeScore")}</button>
-        <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.lastScoredMatchState ? "disabled" : ""}>${match.state === "finished" ? translate("actions.undoResult") : translate("actions.undoLast")}</button>
+        <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.undoStack?.length ? "disabled" : ""}>${match.state === "finished" ? translate("actions.undoResult") : translate("actions.undoLast")}</button>
         <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${translate("actions.cancelMatch")}</button>
         <div class="walkover-row">
           <span>${translate("score.walkover")}</span>
@@ -105,11 +141,6 @@
         if (!scoreOnly) {
           const courtInput = controls.querySelector(".court-name-input");
           controls.querySelector(".save-court-button").addEventListener("click", () => updateMatchCourt(match, courtInput.value));
-        }
-        card.querySelectorAll("[data-point-team]").forEach((button) => {
-          button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.pointTeam)));
-        });
-        if (!scoreOnly) {
           controls.querySelector(".set-score-button").addEventListener("click", () => openSetScoreDialog(match.id));
           controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
           controls.querySelector(".large-score-button").addEventListener("click", () => openLargeScore(match.id));
@@ -124,7 +155,7 @@
       return card;
     }
 
-    return { createMatchCard };
+    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable };
   }
 
   global.PadelstarMatchCard = { create };

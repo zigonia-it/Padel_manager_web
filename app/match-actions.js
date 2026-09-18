@@ -23,7 +23,7 @@
       const state = getState();
       const activeRound = getRoundForMatch(match);
       const matchSnapshot = structuredClone(match);
-      delete matchSnapshot.lastScoredMatchState;
+      delete matchSnapshot.undoStack;
       const nextWaitingMatch = activeRound?.matches.find((item) => item.id !== match.id && item.state === "waiting");
       return {
         match: matchSnapshot,
@@ -38,15 +38,17 @@
 
     function undoMatch(match) {
       const state = getState();
-      const undoState = match.lastScoredMatchState;
+      const undoStack = match.undoStack ?? [];
+      const undoState = undoStack.at(-1);
       if (!undoState?.match) {
         showToast(t("messages.noUndo"), "status-message-error");
         return;
       }
       const restoredMatch = structuredClone(undoState.match);
       deps.recordEvent?.("match_undone", "match", match.id, { restoredState: restoredMatch.state });
-      delete match.lastScoredMatchState;
+      undoStack.pop();
       Object.assign(match, restoredMatch);
+      match.undoStack = undoStack;
       if (undoState.nextWaitingMatch) {
         const nextMatch = getMatchById(undoState.nextWaitingMatch.id);
         if (nextMatch) Object.assign(nextMatch, structuredClone(undoState.nextWaitingMatch));
@@ -80,7 +82,7 @@
         queueRemoteMatchAction(match, "undo");
         return;
       }
-      if (match.lastScoredMatchState) {
+      if (match.undoStack?.length) {
         undoMatch(match);
         return;
       }
@@ -91,7 +93,7 @@
       match.currentGame = { teamOne: 0, teamTwo: 0 };
       match.winnerTeamIndex = null;
       match.isWalkover = false;
-      match.lastScoredMatchState = null;
+      match.undoStack = [];
       match.completedAt = null;
       saveState();
       render();
@@ -125,7 +127,8 @@
         queueRemoteMatchAction(match, "walkover", teamIndex);
         return;
       }
-      match.lastScoredMatchState = captureMatchUndoState(match);
+      match.undoStack = match.undoStack ?? [];
+      match.undoStack.push(captureMatchUndoState(match));
       match.state = "finished";
       match.status = "completed";
       deps.recordEvent?.("match_walkover", "match", match.id, { winnerTeamIndex: teamIndex });

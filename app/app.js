@@ -536,9 +536,9 @@ const playerStatus = window.PadelstarPlayerStatus.create({
 });
 const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   accentStyle: (accent) => accentStyle(accent),
+  bindScoreboardTable: (root, match, editable) => matchCard.bindScoreboardTable(root, match, editable),
   elements,
   escapeHtml: (value) => escapeHtml(value),
-  gameScoreText: (match) => gameScoreText(match),
   getActiveRound: () => getActiveRound(),
   getPlayerById: (id) => getPlayerById(id),
   getState: () => state,
@@ -547,6 +547,7 @@ const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   playerPlacement: (player, matches) => playerPlacement(player, matches),
   playerTournamentState: (player, matches) => playerTournamentState(player, matches),
   scoreSummary: (match) => scoreSummary(match),
+  scoreboardTableMarkup: (match, editable) => matchCard.scoreboardTableMarkup(match, editable),
   t: (key, values) => t(key, values),
 });
 const rules = window.PadelstarRules.create({
@@ -712,9 +713,10 @@ profile = profileSession.loadLocalProfile();
 const matchCard = window.PadelstarMatchCard.create({
   awardTennisPoint: (match, teamIndex) => awardTennisPoint(match, teamIndex),
   cancelMatch: (match) => cancelMatch(match),
+  currentLocalRole: () => currentLocalRole(),
   escapeAttribute: (value) => escapeAttribute(value),
   escapeHtml: (value) => escapeHtml(value),
-  gameScoreText: (match) => gameScoreText(match),
+  getState: () => state,
   matchContextText: (match) => matchContextText(match),
   matchIncludesPlayer: (match, playerId) => matchIncludesPlayer(match, playerId),
   matchStateText: (stateName) => matchStateText(stateName),
@@ -722,14 +724,15 @@ const matchCard = window.PadelstarMatchCard.create({
   openSetScoreDialog: (matchId) => openSetScoreDialog(matchId),
   primaryMatchHeadline: (match) => primaryMatchHeadline(match),
   reopenMatch: (match) => reopenMatch(match),
-  setScoreText: (match) => setScoreText(match),
   setWalkover: (match, teamIndex) => setWalkover(match, teamIndex),
+  setsWonByTeam: (match, teamIndex) => setsWonByTeam(match, teamIndex),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),
   teamDisplay: (team, variant) => teamDisplay(team, variant),
   tennisPointLabel: (value) => tennisPointLabel(value),
   translate: (key, values) => t(key, values),
+  undoMatch: (match) => undoMatch(match),
   updateMatchCourt: (match, courtName) => updateMatchCourt(match, courtName),
 });
 const adminIdentity = window.PadelstarAdminIdentity.create({

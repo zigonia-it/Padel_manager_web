@@ -82,7 +82,7 @@ window.PadelstarTournamentEngine = (() => {
         winnerTeamIndex: null,
         isWalkover: false,
         isThirdPlaceMatch: false,
-        lastScoredMatchState: null,
+        undoStack: [],
         courtId: null,
         courtName: null,
         completedAt: null,

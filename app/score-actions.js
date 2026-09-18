@@ -16,7 +16,8 @@
         deps.queueRemoteSetResult(match, teamOne, teamTwo);
         return;
       }
-      match.lastScoredMatchState = deps.captureMatchUndoState(match);
+      match.undoStack = match.undoStack ?? [];
+      match.undoStack.push(deps.captureMatchUndoState(match));
       match.currentSet = { teamOne, teamTwo };
       match.currentGame = { teamOne: 0, teamTwo: 0 };
       match.completedSets.push({ teamOne, teamTwo });
@@ -58,7 +59,8 @@
 
     function awardTennisPoint(match, teamIndex) {
       if (["finished", "cancelled"].includes(match.state)) return;
-      match.lastScoredMatchState = deps.captureMatchUndoState(match);
+      match.undoStack = match.undoStack ?? [];
+      match.undoStack.push(deps.captureMatchUndoState(match));
       if (match.state === "waiting") {
         match.state = "playing";
         match.status = "active";
