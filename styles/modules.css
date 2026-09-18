@@ -563,126 +563,6 @@
 
 
 /* =========================================================
-   SPECTATOR SCORE
-   ========================================================= */
-
-.spectator-live-group {
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fit,
-      minmax(240px, 1fr));
-
-  gap: 12px;
-}
-
-.spectator-live-group h4 {
-  grid-column: 1 / -1;
-}
-
-.spectator-score-card {
-  display: grid;
-
-  gap: 10px;
-
-  border:
-    1px solid rgba(var(--player-accent-rgb), 0.42);
-
-  border-radius: 8px;
-
-  padding: 12px;
-
-  background:
-    radial-gradient(circle at 0% 0%,
-      rgba(var(--player-accent-rgb), 0.26),
-      transparent 36%),
-    linear-gradient(160deg,
-      rgba(var(--gold-light-rgb), 0.08),
-      rgba(5, 21, 43, 0.30)),
-    var(--cell);
-
-  box-shadow:
-    inset 0 1px 0 rgba(var(--gold-light-rgb), 0.08),
-    0 12px 26px rgba(var(--player-accent-rgb), 0.12);
-}
-
-.spectator-score-top,
-.spectator-score-bottom {
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 8px;
-
-  color: var(--muted);
-
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.035em;
-  line-height: 1.35;
-
-  text-transform: uppercase;
-}
-
-.spectator-score-top strong {
-  color: var(--gold-light);
-
-  white-space: nowrap;
-}
-
-.spectator-score-teams {
-  display: grid;
-  gap: 8px;
-}
-
-.spectator-score-teams>div {
-  display: grid;
-
-  grid-template-columns:
-    minmax(0, 1fr) auto;
-
-  align-items: center;
-
-  gap: 10px;
-
-  border:
-    1px solid rgba(var(--player-accent-rgb), 0.20);
-
-  border-radius: 8px;
-
-  padding: 8px 10px;
-
-  background:
-    rgba(5, 21, 43, 0.46);
-}
-
-.spectator-score-teams .team-player {
-  margin: 2px 4px 2px 0;
-}
-
-.spectator-score-teams .team-player-badge {
-  min-height: 24px;
-
-  padding: 0.2rem 0.5rem;
-
-  font-size: 0.76rem;
-}
-
-.spectator-score-teams .avatar {
-  width: 24px;
-  height: 24px;
-}
-
-.spectator-score-teams strong {
-  color: var(--cream);
-
-  font-size: 2rem;
-  line-height: 1;
-}
-
-
-/* =========================================================
    MATCH META
    ========================================================= */
 
@@ -792,6 +672,12 @@
   border-color: var(--danger-border);
   background: var(--danger-bg);
   color: var(--danger);
+}
+
+.offline-pending-chip {
+  border-color: rgba(240, 181, 46, 0.4);
+  background: rgba(240, 181, 46, 0.14);
+  color: var(--gold-bright, #f0b52e);
 }
 
 .match-status.waiting,
@@ -1063,6 +949,12 @@
   gap: 2px;
 }
 
+.court-queue-team {
+  padding-left: 8px;
+  border-left: 3px solid rgba(var(--player-accent-rgb), 0.7);
+  color: var(--player-accent-light, inherit);
+}
+
 .court-queue-match span,
 .court-queue-next small {
   color: var(--text-muted);
@@ -1202,9 +1094,7 @@
 }
 
 .tv-mode .workspace-header h2,
-.tv-mode .workspace-header .eyebrow,
-.tv-mode [data-section="tournament"] h3,
-.tv-mode [data-section="tournament"] h4 {
+.tv-mode .workspace-header .eyebrow {
   text-transform: uppercase;
 }
 
@@ -1265,130 +1155,16 @@
   padding-left: clamp(88px, 8vw, 132px);
 }
 
-.tv-mode [data-section="tournament"] {
-  flex: 1 1 auto;
-  min-height: 0;
-  width: 100%;
-  max-width: none;
-  overflow: hidden;
-}
-
-.tv-mode [data-section="tournament"] {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-areas: "overview queue standings";
-  grid-template-rows: minmax(0, 1fr);
-  align-items: stretch;
-  gap: clamp(8px, 1.2vw, 18px);
-}
-
-.tv-mode [data-section="tournament"]>.panel:first-child {
-  grid-area: overview;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-.tv-mode [data-section="tournament"]>.panel:nth-child(2) {
-  grid-area: queue;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.tv-mode [data-section="tournament"]>.panel:nth-child(3) {
-  grid-area: standings;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-.tv-mode [data-section="tournament"]>.panel:nth-child(2) {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.tv-mode .tv-queue-panel .court-queue {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
-}
-
-.tv-mode [data-section="tournament"]>.panel>h3,
-.tv-mode [data-section="tournament"]>.panel>.panel-heading,
-.tv-mode .court-queue>.panel-heading,
-.tv-mode .spectator-live-group>h4 {
+.tv-mode .court-queue>.panel-heading {
   flex: 0 0 auto;
   text-transform: uppercase;
 }
 
-.tv-mode [data-section="tournament"]>.panel>h3,
-.tv-mode .panel-heading h3,
-.tv-mode .spectator-live-group>h4 {
+.tv-mode .panel-heading h3 {
   font-family: var(--font-display);
   font-size: clamp(1rem, 1.25vw, 1.35rem);
   font-weight: 700;
   letter-spacing: 0.04em;
-  line-height: 1.2;
-}
-
-.tv-mode #spectatorMatches {
-  display: block;
-  min-height: 0;
-  flex: 1 1 auto;
-  order: 1;
-  overflow: auto;
-  padding-right: 3px;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-}
-
-.tv-mode #spectatorMatches::-webkit-scrollbar,
-.tv-mode .tv-queue-panel #tournamentCourtQueue::-webkit-scrollbar,
-.tv-mode #standingsList::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-
-.tv-mode .tv-queue-panel #tournamentCourtQueue {
-  height: 100%;
-  max-height: none;
-  overflow: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-}
-
-.tv-mode #standingsList {
-  flex: 1 1 auto;
-  min-height: 0;
-  max-height: 100%;
-  gap: clamp(4px, 0.65vh, 10px);
-  overflow: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-}
-
-.tv-mode #standingsList li {
-  min-height: 0;
-  padding: clamp(5px, 0.7vh, 10px) clamp(6px, 0.7vw, 12px);
-  font-size: clamp(0.68rem, 0.82vw, 0.96rem);
-  line-height: 1.25;
-}
-
-.tv-mode #standingsList .player-name-badge {
-  font-size: clamp(0.68rem, 0.82vw, 0.96rem);
-}
-
-.tv-mode #standingsList .standing-stats strong {
-  font-size: clamp(0.72rem, 0.86vw, 1rem);
-}
-
-.tv-mode #standingsList .standing-stats small {
-  font-size: clamp(0.56rem, 0.62vw, 0.76rem);
   line-height: 1.2;
 }
 
@@ -1404,40 +1180,7 @@
   font-size: clamp(1rem, 1.25vw, 1.35rem);
 }
 
-.tv-mode .spectator-live-group {
-  gap: clamp(8px, 0.8vw, 14px);
-}
-
-.tv-mode .spectator-score-card {
-  min-height: 0;
-  padding: clamp(8px, 0.8vw, 14px);
-  gap: clamp(6px, 0.7vh, 10px);
-}
-
-.tv-mode .spectator-score-card {
-  font-size: clamp(0.78rem, 1vw, 1.15rem);
-}
-
-@media (max-width: 1000px) {
-  .tv-mode [data-section="tournament"] {
-    grid-template-columns: minmax(0, 1.45fr) minmax(220px, 0.9fr);
-    grid-template-areas:
-      "overview standings"
-      "queue queue";
-    grid-template-rows: minmax(0, 1fr) minmax(120px, 0.42fr);
-  }
-}
-
 @media (max-width: 700px) {
-  .tv-mode [data-section="tournament"] {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "overview"
-      "queue"
-      "standings";
-    grid-template-rows: minmax(0, 1.4fr) minmax(0, 0.7fr) minmax(0, 0.8fr);
-  }
-
   .tv-mode .workspace-header h2 {
     max-width: 68vw;
   }

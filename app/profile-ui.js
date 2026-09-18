@@ -1,5 +1,5 @@
 window.PadelstarProfileUi = (() => {
-  function create({ defaultAvatarId, elements, escapeHtml, getLocalStorage, getProfile, getAccountUser = () => null, getProfileManager, profileHistoryStorageKey, t }) {
+  function create({ defaultAvatarId, elements, escapeHtml, getLocalStorage, getProfile, getAccountUser = () => null, getActiveTournaments = () => [], getProfileManager, profileHistoryStorageKey, t, accentPicker, defaultAccent, tournamentStatusText }) {
     function renderProfile() {
       const profileManager = getProfileManager();
       const profile = getProfile();
@@ -8,6 +8,7 @@ window.PadelstarProfileUi = (() => {
       elements.profileAvatarPicker?.querySelectorAll("input[name=profileAvatarId]").forEach((input) => {
         input.checked = input.value === (profile?.avatarId ?? defaultAvatarId);
       });
+      accentPicker?.setSelected(elements.profileAccentPicker, profile?.accent ?? defaultAccent);
       const pendingDeletion = Boolean(profile?.deletionScheduledFor);
       elements.profileDeletionStatus.textContent = pendingDeletion
         ? t("profile.deletePending", { date: new Date(profile.deletionScheduledFor).toLocaleDateString(document.documentElement.lang || "nb-NO") }) : "";
@@ -34,6 +35,31 @@ window.PadelstarProfileUi = (() => {
       elements.profileHistoryList.innerHTML = filteredHistory.length === 0
         ? `<p class="hint">${t("profile.noHistory")}</p>`
         : `<h4>${t("profile.historyTitle")}</h4><ul class="profile-history-list">${filteredHistory.map((entry) => `<li><div><strong>${escapeHtml(entry.tournamentName)}</strong><small>${entry.endedAt ? new Date(entry.endedAt).toLocaleDateString(document.documentElement.lang || "nb-NO") : ""}</small></div><span>${t("profile.historyDetail", { placement: entry.placement ?? "-", points: entry.points, wins: entry.wins, matches: entry.matches })}</span>${matchSummary(entry) ? `<details><summary>${t("common.matches")}</summary><ul>${matchSummary(entry)}</ul></details>` : ""}</li>`).join("")}</ul>`;
+
+      const account = getAccountUser();
+      if (elements.activeTournamentsList) {
+        const activeTournaments = account ? getActiveTournaments() : [];
+        elements.activeTournamentsList.innerHTML = activeTournaments.length === 0
+          ? `<p class="hint">${t("profile.noActiveTournaments")}</p>`
+          : activeTournaments.map((tournament) => `
+            <article class="saved-tournament-item">
+              <span class="status-chip">${escapeHtml(tournamentStatusText?.(tournament.status) ?? tournament.status ?? "")}</span>
+              <strong>${escapeHtml(tournament.name ?? "")}</strong>
+              <span>${tournament.playerCount} · ${tournament.inviteCode}</span>
+            </article>`).join("");
+      }
+      if (elements.profileAccountEmail) elements.profileAccountEmail.textContent = account?.email ?? "";
+      if (elements.profileAccountCreated) {
+        elements.profileAccountCreated.textContent = account?.created_at
+          ? t("account.memberSince", { date: new Date(account.created_at).toLocaleDateString(document.documentElement.lang || "nb-NO") })
+          : "";
+      }
+      if (elements.profileAccountEmailStatus) {
+        elements.profileAccountEmailStatus.textContent = account
+          ? account.email_confirmed_at ? t("account.emailConfirmed") : t("account.emailNotConfirmed")
+          : "";
+      }
+      elements.accountSettingsPanel?.classList.toggle("hidden", !account);
     }
     return { renderProfile };
   }

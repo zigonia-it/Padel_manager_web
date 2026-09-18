@@ -1,7 +1,7 @@
 (function attachPadelstarSetupForms(global) {
   "use strict";
 
-  function create({ elements, getDefaultTournament, getProfile, initials, accentStyle, translate }) {
+  function create({ elements, getDefaultTournament, getProfile, initials, accentStyle, translate, syncInviteCodeCells, accentPicker }) {
     function syncCreateFormDefaults() {
       const defaultTournament = getDefaultTournament();
       elements.createTournamentForm.elements.tournamentName.value = defaultTournament.name;
@@ -30,9 +30,10 @@
       const inputName = elements.joinTournamentForm.elements.playerName.value.trim();
       const profile = getProfile();
       const name = inputName || profile?.displayName || translate("setup.yourName");
+      const selectedAccent = elements.joinAccentPicker?.querySelector("input:checked")?.value;
       elements.joinNamePreview.textContent = name;
       elements.joinAvatarPreview.textContent = initials(name);
-      elements.joinAvatarPreviewFrame?.setAttribute("style", accentStyle(profile?.accent ?? "gold"));
+      elements.joinAvatarPreviewFrame?.setAttribute("style", accentStyle(selectedAccent ?? profile?.accent ?? "gold"));
     }
 
     function syncJoinFormFromProfile() {
@@ -41,6 +42,7 @@
       if (!elements.joinTournamentForm.elements.playerName.value) {
         elements.joinTournamentForm.elements.playerName.value = profile.displayName;
       }
+      if (profile.accent) accentPicker?.setSelected(elements.joinAccentPicker, profile.accent);
     }
 
     function prefillInviteCodeFromUrl() {
@@ -51,6 +53,7 @@
 
     function prefillJoinForm(inviteCode) {
       elements.joinTournamentForm.elements.inviteCode.value = inviteCode.trim().toUpperCase();
+      syncInviteCodeCells?.();
     }
 
     return {

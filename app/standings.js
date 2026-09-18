@@ -1,7 +1,6 @@
 window.PadelstarStandings = (() => {
   function create({ accentStyle, appendEmptyText, avatarMarkup, document, elements, escapeHtml, leaderboardEntries, t }) {
     function renderStandings(matches) {
-      renderStandingsList(elements.standingsList, matches);
       renderStandingsList(elements.playerStandingsList, matches);
       if (elements.ownerStandingsList) renderStandingsList(elements.ownerStandingsList, matches);
     }

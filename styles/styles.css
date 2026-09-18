@@ -383,7 +383,6 @@ body[data-theme="classic"] .status-grid > div,
 body[data-theme="classic"] .round-summary > div,
 body[data-theme="classic"] .profile-stat-grid > div,
 body[data-theme="classic"] .share-details > div,
-body[data-theme="classic"] .spectator-score-card,
 body[data-theme="classic"] .cup-team-builder,
 body[data-theme="classic"] .admin-identity-panel,
 body[data-theme="classic"] .player-now-grid > div,
@@ -394,8 +393,7 @@ body[data-theme="classic"] .rules-list > div {
 }
 
 body[data-theme="classic"] .match-card.match-playing,
-body[data-theme="classic"] .highlight-match,
-body[data-theme="classic"] .spectator-score-card {
+body[data-theme="classic"] .highlight-match {
   border-color: rgba(20, 124, 255, 0.72);
   background: linear-gradient(135deg, rgba(20, 124, 255, 0.16), transparent 54%), rgba(13, 28, 49, 0.88);
   box-shadow: 0 16px 36px rgba(20, 124, 255, 0.12);
@@ -430,9 +428,40 @@ body[data-theme="classic"] .status-pill {
 }
 
 body[data-theme="classic"] .status-pill {
-  border: 0;
-  background: transparent;
+  padding: 5px 11px 5px 9px;
+  border: 1px solid rgba(85, 230, 154, 0.32);
+  border-radius: 999px;
+  background: rgba(85, 230, 154, 0.09);
   box-shadow: none;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+
+body[data-theme="classic"] .status-pill[data-status="connected"]::before {
+  animation: statusPillPulse 2.4s ease-in-out infinite;
+}
+
+body[data-theme="classic"] .status-pill.offline,
+body[data-theme="classic"] .status-pill[data-status="offline"] {
+  border-color: rgba(154, 167, 184, 0.32);
+  background: rgba(154, 167, 184, 0.08);
+}
+
+body[data-theme="classic"] .status-pill[data-status="connecting"],
+body[data-theme="classic"] .status-pill[data-status="reconnecting"] {
+  border-color: rgba(var(--gold-bright-rgb), 0.4);
+  background: rgba(var(--gold-bright-rgb), 0.08);
+}
+
+body[data-theme="classic"] .status-pill[data-status="error"],
+body[data-theme="classic"] .status-pill[data-status="disconnected"] {
+  border-color: rgba(255, 47, 63, 0.4);
+  background: rgba(255, 47, 63, 0.08);
+}
+
+@keyframes statusPillPulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
 }
 
 body.setup-active .account-panel {
@@ -569,7 +598,6 @@ body.workspace-active {
 
 .panel,
 .match-card,
-.spectator-score-card,
 .next-match,
 .player-identity-card,
 .round-summary,
@@ -1288,8 +1316,7 @@ body[data-theme="classic"] .match-card.match-playing {
   color: var(--cream);
 }
 
-.next-match .team-player-badge,
-.spectator-score-card .team-player-badge {
+.next-match .team-player-badge {
   min-height: auto;
   padding: 0;
   border: 0;
@@ -1320,29 +1347,6 @@ body[data-theme="classic"] .match-card.match-playing {
   font-size: 1rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-}
-
-.spectator-score-card {
-  border-color: rgba(96, 166, 255, 0.58);
-  background:
-    linear-gradient(145deg, rgba(20, 124, 255, 0.18), transparent 56%),
-    rgba(3, 16, 34, 0.96);
-  box-shadow: 0 16px 36px rgba(20, 124, 255, 0.14);
-}
-
-.spectator-score-teams > div > strong {
-  font-family: "Anton", sans-serif;
-  font-weight: 400;
-}
-
-.spectator-score-teams > div {
-  border-color: rgba(96, 166, 255, 0.28);
-  background: linear-gradient(145deg, rgba(20, 124, 255, 0.16), rgba(3, 16, 34, 0.9));
-  padding-right: 26px;
-}
-
-.spectator-score-teams .team-player {
-  gap: 12px;
 }
 
 .scorecard-score-pair {

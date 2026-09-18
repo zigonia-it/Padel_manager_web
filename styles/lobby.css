@@ -1,0 +1,53 @@
+/* =========================================================
+   LOBBY / PRE-START WAITING ROOM
+   ========================================================= */
+
+.lobby-panel {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 3vw, 28px);
+
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 40px) 16px;
+}
+
+.lobby-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lobby-header .eyebrow {
+  color: var(--gold-bright, #62b6ff);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.lobby-header h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3.4vw, 2rem);
+  font-weight: 800;
+}
+
+.lobby-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.lobby-players-card {
+  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.2));
+  border-radius: var(--radius-md, 10px);
+  background: var(--ds-surface-1, rgba(16, 31, 52, 0.94));
+  padding: 16px;
+}
+
+.lobby-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

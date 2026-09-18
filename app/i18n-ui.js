@@ -11,9 +11,10 @@
 
   function resolveDeviceLanguage({ navigatorRef, fallbackLanguage, i18n }) {
     const candidates = [navigatorRef?.language, ...(navigatorRef?.languages ?? [])].filter(Boolean);
+    const availableLanguages = i18n?.productionLanguages?.() ?? i18n?.supportedLanguages?.();
     for (const candidate of candidates) {
       const normalized = i18n?.normalizeLanguage(candidate);
-      if (normalized && i18n?.supportedLanguages?.().some((item) => item.code === normalized)) return normalized;
+      if (normalized && availableLanguages?.some((item) => item.code === normalized)) return normalized;
     }
     return i18n?.normalizeLanguage(fallbackLanguage) ?? fallbackLanguage;
   }
@@ -35,7 +36,7 @@
     deviceOption.value = "device";
     deviceOption.textContent = i18n.translate(currentLanguage, "language.followDevice");
     select.append(deviceOption);
-    const languages = i18n.supportedLanguages();
+    const languages = i18n.productionLanguages?.() ?? i18n.supportedLanguages();
     languages.forEach((language) => {
       const option = document.createElement("option");
       option.value = language.code;

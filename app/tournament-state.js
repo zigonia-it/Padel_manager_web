@@ -2,12 +2,12 @@
   function create(deps) {
     const { accents, buildSchedule, defaultAvatarId, randomAvatarId = () => defaultAvatarId, randomUUID, now = () => new Date().toISOString() } = deps;
 
-    function createPlayer(name, index, avatarId = null) {
+    function createPlayer(name, index, avatarId = null, accent = null) {
       return {
         id: randomUUID(),
         name,
         avatarId: avatarId ?? randomAvatarId(),
-        accent: accents[index % accents.length],
+        accent: accent && accents.includes(accent) ? accent : accents[index % accents.length],
         active: true,
         availability: "active",
         participantType: "player",
@@ -17,8 +17,20 @@
       };
     }
 
-    function createTournament({ name, inviteCode, players, courtCount }) {
+    function createTournament({
+      name,
+      inviteCode,
+      players,
+      courtCount,
+      format = "roundRobin",
+      gamesToWinSet = 6,
+      setsToWinMatch = 1,
+      pointMode = "matches",
+      cupTeamSetupMode = "auto",
+      includesThirdPlaceMatch = false,
+    }) {
       const tournamentPlayers = players.map((playerName, index) => createPlayer(playerName, index));
+      const validatedFormat = ["roundRobin", "cup"].includes(format) ? format : "roundRobin";
       return {
         id: randomUUID(),
         adminToken: randomUUID(),
@@ -27,13 +39,13 @@
         status: "Klar",
         currentRound: 0,
         settings: {
-          gamesToWinSet: 6,
-          setsToWinMatch: 1,
-          pointMode: "matches",
-          format: "roundRobin",
+          gamesToWinSet: Math.max(1, Math.min(12, gamesToWinSet || 6)),
+          setsToWinMatch: Math.max(1, Math.min(5, setsToWinMatch || 1)),
+          pointMode: ["matches", "sets", "games"].includes(pointMode) ? pointMode : "matches",
+          format: validatedFormat,
           seasonId: null,
-          cupTeamSetupMode: "auto",
-          includesThirdPlaceMatch: false,
+          cupTeamSetupMode: ["auto", "manual"].includes(cupTeamSetupMode) ? cupTeamSetupMode : "auto",
+          includesThirdPlaceMatch: Boolean(includesThirdPlaceMatch),
           language: "nb",
         },
         courts: Array.from({ length: courtCount }, (_, index) => ({
@@ -43,7 +55,7 @@
           active: true,
         })),
         players: tournamentPlayers,
-        schedule: buildSchedule(tournamentPlayers, "roundRobin"),
+        schedule: buildSchedule(tournamentPlayers, validatedFormat),
         schedulerHistory: { partners: {}, opponents: {}, matches: [], byes: [] },
         events: [],
         scoreSubmissions: [],

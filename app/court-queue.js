@@ -1,5 +1,5 @@
 window.PadelstarCourtQueue = (() => {
-  function create({ document, elements, escapeHtml, getState, matchContextText, t }) {
+  function create({ document, elements, escapeHtml, getState, matchContextText, t, teamAccentStyle }) {
     function renderContainer(container, matches) {
       if (!container) return;
       const state = getState();
@@ -13,7 +13,8 @@ window.PadelstarCourtQueue = (() => {
         const next = queuedMatches
           .filter((match) => match.courtId === court.id || (!match.courtId && match.plannedCourtIndex === state.courts.indexOf(court)))
           .slice(0, 2);
-        const matchup = (match) => `<div class="court-queue-match"><strong>${escapeHtml(match.teamOne.players.map((player) => player.name).join(" & "))}</strong><span>${escapeHtml(matchContextText(match))}</span><strong>${escapeHtml(match.teamTwo.players.map((player) => player.name).join(" & "))}</strong></div>`;
+        const teamName = (team) => `<strong class="court-queue-team" style="${teamAccentStyle(team)}">${escapeHtml(team.players.map((player) => player.name).join(" & "))}</strong>`;
+        const matchup = (match) => `<div class="court-queue-match">${teamName(match.teamOne)}<span>${escapeHtml(matchContextText(match))}</span>${teamName(match.teamTwo)}</div>`;
         return `<article class="court-queue-court"><h4>${escapeHtml(court.name)}</h4>${current ? `<span class="status-chip playing">${t("queue.inProgress")}</span>${matchup(current)}` : `<span class="status-chip waiting">${t("queue.free")}</span>`}${next.map((match, index) => `<div class="court-queue-next"><small>${index === 0 ? t("queue.next") : t("queue.later")}</small>${matchup(match)}</div>`).join("")}</article>`;
       }).join("");
       container.insertAdjacentHTML("beforeend", courtCards || `<p class="hint">${t("queue.empty")}</p>`);
@@ -21,7 +22,6 @@ window.PadelstarCourtQueue = (() => {
 
     function render(matches) {
       renderContainer(elements.courtQueue, matches);
-      renderContainer(elements.tournamentCourtQueue, matches);
     }
 
     return { render };

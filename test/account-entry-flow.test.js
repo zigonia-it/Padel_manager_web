@@ -16,7 +16,7 @@ function setup(choice = 'guest') {
     createTournament: () => ({ id: 't1', players: [] }), getProfile: () => null,
     setState: value => { state = value; }, getState: () => state, setLocalRole: () => {},
     saveState: () => {}, createRemoteTournament: async () => calls.push('remote:create'),
-    showWorkspace: () => {}, render: () => {}, randomAvatarId: () => 'smash',
+    showWorkspace: () => {}, showModule: mode => calls.push(`module:${mode}`), render: () => {}, randomAvatarId: () => 'smash',
     loadRemoteTournamentByInvite: async () => true, hasTournamentForInvite: () => true,
     joinRemoteTournament: async () => { calls.push('remote:join'); state.players.push({ id: 'p1', name: 'Ada' }); return true; },
     findPlayerByName: () => state.players[0], syncJoinPreview: () => {},
@@ -26,7 +26,7 @@ function setup(choice = 'guest') {
 
 test('guest creation and joining still use the shared database', async () => {
   const create = setup(); await create.entry.handleCreate(create.event);
-  assert.deepEqual(create.calls, ['choice:create', 'remote:create']);
+  assert.deepEqual(create.calls, ['choice:create', 'remote:create', 'module:lobby']);
   const join = setup(); await join.entry.handleJoin(join.event);
   assert.deepEqual(join.calls, ['choice:join', 'remote:join']);
 });
@@ -34,7 +34,7 @@ test('login preserves the pending form and resumes it only once after authentica
   const h = setup('signin'); await h.entry.handleCreate(h.event);
   assert.deepEqual(h.calls, ['choice:create', 'signin']);
   h.setUser({ id: 'account' }); await h.entry.resumePendingEntry(); await h.entry.resumePendingEntry();
-  assert.deepEqual(h.calls, ['choice:create', 'signin', 'remote:create']);
+  assert.deepEqual(h.calls, ['choice:create', 'signin', 'remote:create', 'module:lobby']);
 });
 test('cancel never creates or joins, authenticated players skip the choice', async () => {
   const cancelled = setup('cancel'); await cancelled.entry.handleCreate(cancelled.event);

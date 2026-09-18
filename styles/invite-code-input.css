@@ -1,0 +1,45 @@
+/* =========================================================
+   INVITE CODE CELLS
+   ========================================================= */
+
+.invite-code-cells {
+  display: flex;
+  gap: 8px;
+}
+
+.invite-code-cell {
+  flex: 1 1 0;
+  aspect-ratio: 3 / 4;
+  min-width: 0;
+  padding: 0;
+
+  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.2));
+  border-radius: var(--radius-sm, 8px);
+  background: var(--ds-surface-1, rgba(16, 31, 52, 0.94));
+
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.invite-code-cell:focus {
+  border-color: var(--ds-border-strong, rgba(91, 173, 255, 0.58));
+  outline: none;
+}
+
+.invite-code-cell:not(:placeholder-shown) {
+  border-color: var(--ds-border-strong, rgba(91, 173, 255, 0.58));
+  color: var(--gold-bright, #62b6ff);
+}
+
+.invite-code-hidden-field {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}

@@ -1,0 +1,94 @@
+/* =========================================================
+   STYRING SETTINGS ROWS (grouped card + label/value row)
+   ========================================================= */
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.settings-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid rgba(var(--gold-light-rgb), 0.22);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(5, 21, 43, 0.5);
+}
+
+.settings-group-title {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(var(--gold-light-rgb), 0.16);
+
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(var(--gold-light-rgb), 0.08);
+  background: transparent;
+}
+
+.settings-group .settings-row:last-child {
+  border-bottom: 0;
+}
+
+.settings-row > span:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.92rem;
+}
+
+.settings-row select,
+.settings-row input[type="number"] {
+  flex: none;
+  width: auto;
+  min-width: 108px;
+
+  border-radius: 999px;
+  padding: 0.5rem 1.4rem 0.5rem 0.9rem;
+
+  text-align: center;
+  font-weight: 700;
+}
+
+.settings-row select {
+  min-height: auto;
+  padding-right: 2rem;
+}
+
+.settings-row.checkbox-field {
+  cursor: pointer;
+}
+
+.settings-row.checkbox-field input[type="checkbox"] {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 560px) {
+  .settings-row {
+    flex-wrap: wrap;
+  }
+
+  .settings-row select,
+  .settings-row input[type="number"] {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}

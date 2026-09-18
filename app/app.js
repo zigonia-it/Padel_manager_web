@@ -27,6 +27,7 @@ const accentSystem = window.PadelstarAccentSystem;
 const playerAccentPalette = accentSystem.palette;
 const legacyAccentMap = accentSystem.legacyAccentMap;
 const accents = accentSystem.accents;
+const accentPicker = window.PadelstarAccentPicker.create({ palette: playerAccentPalette });
 const avatarSystem = window.PadelstarAvatarSystem;
 const playerVisuals = window.PadelstarPlayerVisuals.create({
   avatarUrl: (player) => avatarSystem.url(player),
@@ -60,7 +61,7 @@ const remoteTournament = window.PadelstarRemoteTournament.create({
   getTournamentByInvite: (inviteCode) => getTournamentByInviteRpc(inviteCode),
   sanitizeSharedState: (nextState) => sanitizeSharedState(nextState),
   applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
-  createPlayer: (name, index, avatarId) => createPlayer(name, index, avatarId),
+  createPlayer: (name, index, avatarId, accent) => createPlayer(name, index, avatarId, accent),
   linkProfileToPlayer: (player) => linkProfileToPlayer(player),
   saveState: (options) => saveState(options),
   showToast: (message, statusClass) => showToast(message, statusClass),
@@ -390,6 +391,8 @@ const setupForms = window.PadelstarSetupForms.create({
   initials: (name) => playerVisuals.initials(name),
   accentStyle: (accent) => accentStyle(accent),
   translate: (key, values) => t(key, values),
+  syncInviteCodeCells: () => inviteCodeInput?.syncCellsFromHidden(),
+  accentPicker,
 });
 const tournamentQueries = window.PadelstarTournamentQueries.create({
   getState: () => state,
@@ -448,17 +451,12 @@ const courtQueue = window.PadelstarCourtQueue?.create({
   getState: () => state,
   matchContextText: (match) => matchContextText(match),
   t: (key, values) => t(key, values),
+  teamAccentStyle: (team) => teamAccentStyle(team),
 }) ?? { render() {} };
 const matchList = window.PadelstarMatchList.create({
   appendEmptyText: (container, text) => appendEmptyText(container, text),
   document,
-  elements,
-  escapeHtml: (value) => escapeHtml(value),
-  matchContextText: (match) => matchContextText(match),
-  setScoreText: (match) => setScoreText(match),
   t: (key, values) => t(key, values),
-  teamAccentStyle: (team) => teamAccentStyle(team),
-  teamDisplay: (team, variant) => teamDisplay(team, variant),
 });
 const standings = window.PadelstarStandings.create({
   accentStyle: (accent) => accentStyle(accent),
@@ -468,6 +466,29 @@ const standings = window.PadelstarStandings.create({
   elements,
   escapeHtml: (value) => escapeHtml(value),
   leaderboardEntries: (matches) => leaderboardEntries(matches),
+  t: (key, values) => t(key, values),
+});
+const podium = window.PadelstarPodium.create({
+  accentStyle: (accent) => accentStyle(accent),
+  avatarMarkup: (player, className, size) => avatarMarkup(player, className, size),
+  document,
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  showModule: (moduleName) => showModule(moduleName),
+  t: (key, values) => t(key, values),
+});
+const lobby = window.PadelstarLobby.create({
+  createJoinLink: () => createJoinLink(),
+  createQrCodeUrl: (text) => createQrCodeUrl(text),
+  elements,
+  escapeHtml: (value) => escapeHtml(value),
+  generateFullTournamentSchedule: () => generateFullTournamentSchedule(),
+  generateRoundBlockReason: () => generateRoundBlockReason(),
+  getState: () => state,
+  render: () => render(),
+  saveState: () => saveState(),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  showWorkspace: (view) => showWorkspace(view),
   t: (key, values) => t(key, values),
 });
 const playerList = window.PadelstarPlayerList.create({
@@ -515,9 +536,9 @@ const playerStatus = window.PadelstarPlayerStatus.create({
 });
 const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   accentStyle: (accent) => accentStyle(accent),
+  bindScoreboardTable: (root, match, editable) => matchCard.bindScoreboardTable(root, match, editable),
   elements,
   escapeHtml: (value) => escapeHtml(value),
-  gameScoreText: (match) => gameScoreText(match),
   getActiveRound: () => getActiveRound(),
   getPlayerById: (id) => getPlayerById(id),
   getState: () => state,
@@ -526,6 +547,7 @@ const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   playerPlacement: (player, matches) => playerPlacement(player, matches),
   playerTournamentState: (player, matches) => playerTournamentState(player, matches),
   scoreSummary: (match) => scoreSummary(match),
+  scoreboardTableMarkup: (match, editable) => matchCard.scoreboardTableMarkup(match, editable),
   t: (key, values) => t(key, values),
 });
 const rules = window.PadelstarRules.create({
@@ -542,6 +564,7 @@ const playerControls = window.PadelstarPlayerControls.create({
   getPlayerById: (id) => getPlayerById(id),
   getState: () => state,
   getSpectatorMode: () => spectatorMode,
+  pendingRemoteWriteCount: () => pendingRemoteWriteCount(),
   t: (key, values) => t(key, values),
 });
 const largeScore = window.PadelstarLargeScore.create({
@@ -591,14 +614,18 @@ const adminStatus = window.PadelstarAdminStatus.create({
 });
 const profileUi = window.PadelstarProfileUi.create({
   defaultAvatarId,
+  defaultAccent: accents[0],
   elements,
   escapeHtml: (value) => escapeHtml(value),
   getLocalStorage: () => localStorage,
   getAccountUser: () => accountAuth?.currentUser(),
+  getActiveTournaments: () => getActiveTournaments(),
   getProfile: () => profile,
   getProfileManager: () => profileManager,
   profileHistoryStorageKey,
   t: (key, values) => t(key, values),
+  accentPicker,
+  tournamentStatusText: (status) => tournamentStatusText(status),
 });
 const backupUi = window.PadelstarBackupUi.create({
   backupFormat,
@@ -616,7 +643,7 @@ const backupUi = window.PadelstarBackupUi.create({
 });
 const playerState = window.PadelstarPlayerState.create({
   buildSchedule: (players, format) => buildSchedule(players, format),
-  createPlayer: (name, index, avatarId) => createPlayer(name, index, avatarId),
+  createPlayer: (name, index, avatarId, accent) => createPlayer(name, index, avatarId, accent),
   createTeam: (players) => createTeam(players),
   defaultAvatarId,
   findPlayerByName: (name) => findPlayerByName(name),
@@ -686,9 +713,10 @@ profile = profileSession.loadLocalProfile();
 const matchCard = window.PadelstarMatchCard.create({
   awardTennisPoint: (match, teamIndex) => awardTennisPoint(match, teamIndex),
   cancelMatch: (match) => cancelMatch(match),
+  currentLocalRole: () => currentLocalRole(),
   escapeAttribute: (value) => escapeAttribute(value),
   escapeHtml: (value) => escapeHtml(value),
-  gameScoreText: (match) => gameScoreText(match),
+  getState: () => state,
   matchContextText: (match) => matchContextText(match),
   matchIncludesPlayer: (match, playerId) => matchIncludesPlayer(match, playerId),
   matchStateText: (stateName) => matchStateText(stateName),
@@ -696,14 +724,16 @@ const matchCard = window.PadelstarMatchCard.create({
   openSetScoreDialog: (matchId) => openSetScoreDialog(matchId),
   primaryMatchHeadline: (match) => primaryMatchHeadline(match),
   reopenMatch: (match) => reopenMatch(match),
-  setScoreText: (match) => setScoreText(match),
   setWalkover: (match, teamIndex) => setWalkover(match, teamIndex),
+  setsWonByTeam: (match, teamIndex) => setsWonByTeam(match, teamIndex),
+  scoreSummary: (match) => scoreSummary(match),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),
   teamDisplay: (team, variant) => teamDisplay(team, variant),
   tennisPointLabel: (value) => tennisPointLabel(value),
   translate: (key, values) => t(key, values),
+  undoMatch: (match) => undoMatch(match),
   updateMatchCourt: (match, courtName) => updateMatchCourt(match, courtName),
 });
 const adminIdentity = window.PadelstarAdminIdentity.create({
@@ -722,7 +752,7 @@ const accountAuth = window.PadelstarAccountAuth?.create({
   getClient: () => supabaseClient,
   getElements: () => elements,
   getProfile: () => profile,
-  onAuthChange: (user) => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void tournamentEntry?.resumePendingEntry(); } },
+  onAuthChange: (user) => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
   onProfileLoaded: (remoteProfile) => {
     profile = profile
       ? profileManager.normalizeProfile({ ...profile, ...remoteProfile })
@@ -809,8 +839,8 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   getProfile: () => profile,
   getState: () => state,
   hasTournamentForInvite: (inviteCode, loadedRemote) => hasTournamentForInvite(inviteCode, loadedRemote),
-  joinRemoteTournament: (playerName, avatarId) => joinRemoteTournament(playerName, avatarId),
-  joinTournament: (playerName, avatarId) => joinTournament(playerName, avatarId),
+  joinRemoteTournament: (playerName, avatarId, accent) => joinRemoteTournament(playerName, avatarId, accent),
+  joinTournament: (playerName, avatarId, accent) => joinTournament(playerName, avatarId, accent),
   linkProfileToPlayer: (player) => linkProfileToPlayer(player),
   loadRemoteTournamentByInvite: (inviteCode) => loadRemoteTournamentByInvite(inviteCode),
   parsePlayerNames: (value) => parsePlayerNames(value),
@@ -830,10 +860,18 @@ const tournamentEntry = window.PadelstarTournamentEntry?.create({
   setLocalRole: (role) => setLocalRole(role),
   setState: (nextState) => { state = nextState; },
   showToast: (message, statusClass) => showToast(message, statusClass),
+  showModule: (moduleName) => showModule(moduleName),
   showWorkspace: (view) => showWorkspace(view),
   syncJoinPreview: () => syncJoinPreview(),
   t: (key, values) => t(key, values),
 });
+const createWizard = window.PadelstarCreateWizard.create({
+  document,
+  elements,
+  handleCreate: (event) => tournamentEntry.handleCreate(event),
+  t: (key, values) => t(key, values),
+});
+const inviteCodeInput = window.PadelstarInviteCodeInput.create({ elements });
 const tournamentFinalization = window.PadelstarTournamentFinalization.create({
   getState: () => state,
   isShared: (current) => current.remoteMode === "shared" || (current.remoteMode !== "local" && isSupabaseReady()),
@@ -896,7 +934,8 @@ const adminFormEvents = window.PadelstarAdminFormEvents?.create({
   queueRemoteCupAdvance: () => queueRemoteCupAdvance(),
   queueRemoteRoundAdvance: () => queueRemoteRoundAdvance(),
   render: () => render(),
-  requestConfirmation: (message) => requestConfirmation(message),
+  requestConfirmation: (message, title) => requestConfirmationWithTitle(message, title),
+  roundProgress: (round) => roundProgress(round),
   saveManualCupTeams: (value) => saveManualCupTeams(value),
   saveState: (options) => saveState(options),
   showToast: (message, statusClass) => showToast(message, statusClass),
@@ -1003,7 +1042,6 @@ function bindBootstrapEvents() {
       toggleTvMode,
       toggleTvModeFromMenu: () => {
         if (!hasActiveTournament()) return;
-        showModule("tournament");
         toggleTvMode();
         window.PadelstarNavigation?.closeMenu();
       },
@@ -1031,6 +1069,10 @@ function bindBootstrapEvents() {
 
 function bindTournamentEntry() {
   tournamentEntry?.bind(elements);
+  createWizard?.initialize();
+  inviteCodeInput?.initialize();
+  accentPicker.renderSwatches(elements.joinAccentPicker, "accent", profile?.accent ?? accents[0]);
+  accentPicker.renderSwatches(elements.profileAccentPicker, "profileAccent", profile?.accent ?? accents[0]);
 }
 
 function bindAdminFormEvents() {
@@ -1071,7 +1113,10 @@ function bindGlobalEvents() {
     callbacks: {
       activateAdminPanel,
       activatePlayerAction: (playerAction) => {
-        if (playerAction === "spectate") showWorkspace("tournament");
+        if (playerAction === "spectate") {
+          const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
+          window.location.href = `tv.html${inviteCode}`;
+        }
         if (playerAction === "choose") showModule("setup-player");
         if (playerAction === "rejoin") {
           prefillJoinForm(state.inviteCode);
@@ -1080,12 +1125,16 @@ function bindGlobalEvents() {
       },
       closeLargeScore,
       closeSetScoreDialog,
+      goToNewTournamentFromPodium,
       handleOnline,
       handleOffline,
       render,
       setPendingSetScoreMatchId: (matchId) => { pendingSetScoreMatchId = matchId; },
       setLargeScoreMatchId: (matchId) => { largeScoreMatchId = matchId; },
       syncJoinPreview,
+      togglePodiumFullStandings,
+      startFromLobby,
+      skipLobby,
     },
   });
 }
@@ -1115,12 +1164,12 @@ function activateSupabaseClient() {
   connectRealtimeForCurrentState();
 }
 
-function createTournament({ name, inviteCode, players, courtCount }) {
-  return tournamentState.createTournament({ name, inviteCode, players, courtCount });
+function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
+  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
 }
 
-function createPlayer(name, index, avatarId = null) {
-  return tournamentState.createPlayer(name, index, avatarId);
+function createPlayer(name, index, avatarId = null, accent = null) {
+  return tournamentState.createPlayer(name, index, avatarId, accent);
 }
 
 function loadLocalProfile() { return profileSession.loadLocalProfile(); }
@@ -1128,6 +1177,8 @@ function persistLocalProfile() { return profileSession.persistLocalProfile(); }
 function syncProfileRemote() { return profileSession.syncProfileRemote(); }
 function syncProfileHistoryRemote(entry) { return profileSession.syncProfileHistoryRemote(entry); }
 function syncProfileHistoryRemoteRead() { return profileSession.syncProfileHistoryRemoteRead(); }
+function loadActiveTournaments() { return profileSession.loadActiveTournaments(); }
+function getActiveTournaments() { return profileSession.getActiveTournaments(); }
 function purgeLocalProfile() { return profileSession.purgeLocalProfile(); }
 function profileAvatarIdFromForm() { return profileSession.profileAvatarIdFromForm(); }
 function saveLocalProfileFromForm() { return profileSession.saveLocalProfileFromForm(); }
@@ -1144,6 +1195,7 @@ function saveProfileHistory() {
   // Durable results are server-derived. Reading them must not create a second,
   // browser-authored history for a local profile or guest.
   void syncProfileHistoryRemoteRead();
+  void loadActiveTournaments();
 }
 
 function requestRemoteProfileDeletion() { return profileSession.requestRemoteProfileDeletion(); }
@@ -1337,8 +1389,8 @@ async function loadRemoteTournamentByInvite(inviteCode) {
   return remoteTournament.loadByInvite(inviteCode);
 }
 
-async function joinRemoteTournament(playerName, avatarId) {
-  return remoteTournament.join(playerName, avatarId);
+async function joinRemoteTournament(playerName, avatarId, accent) {
+  return remoteTournament.join(playerName, avatarId, accent);
 }
 
 async function saveRemoteState() {
@@ -1420,7 +1472,9 @@ function isValidTournamentState(candidate) {
 }
 
 function syncCreateFormDefaults() {
-  return setupForms.syncCreateFormDefaults();
+  const result = setupForms.syncCreateFormDefaults();
+  createWizard?.resetToFirstStep();
+  return result;
 }
 
 function syncAdminPlayerChoice() {
@@ -1458,6 +1512,7 @@ function showWorkspace(view = "admin") {
 function showModule(moduleName) {
   const result = workspaceNavigation.showModule(moduleName);
   window.PadelstarWorkspaceRail?.syncActiveState();
+  if (moduleName === "setup-admin") syncCreateFormDefaults();
   return result;
 }
 
@@ -1477,7 +1532,9 @@ function setLocalRole(role) { return sessionPolicy.setLocalRole(role); }
 function currentLocalRole() { return sessionPolicy.currentLocalRole(); }
 
 function renderRoleVisibility() {
-  return workspaceNavigation.renderRoleVisibility();
+  const result = workspaceNavigation.renderRoleVisibility();
+  window.PadelstarWorkspaceRail?.syncActiveState();
+  return result;
 }
 
 function toggleTvMode() {
@@ -1487,7 +1544,6 @@ function toggleTvMode() {
     return;
   }
   tvMode = !tvMode;
-  if (tvMode) showModule("tournament");
   document.body.classList.toggle("tv-mode", tvMode);
   elements.tvModeButton?.setAttribute("aria-pressed", String(tvMode));
   elements.tvModeButton?.setAttribute("data-i18n", tvMode ? "actions.exitTvMode" : "actions.tvMode");
@@ -1575,7 +1631,6 @@ function renderMatches(matches) {
     selectedPlayer ? t("tournament.noPlayerMatches") : t("tournament.choosePlayerForMatches"),
     (match) => createMatchCard(match, isEditablePlayerMatch(match, selectedPlayer), selectedPlayer?.id, true),
   );
-  matchList.renderSpectatorMatches(matches);
   scheduleWrappedScorecardPlayers();
 }
 
@@ -1757,8 +1812,8 @@ async function unsubscribeFromPush() {
   return notificationSystem.unsubscribeFromPush();
 }
 
-function joinTournament(name, avatarId) {
-  return sessionController.joinTournament(name, avatarId);
+function joinTournament(name, avatarId, accent) {
+  return sessionController.joinTournament(name, avatarId, accent);
 }
 
 function parsePlayerNames(value) {
@@ -1769,8 +1824,8 @@ function addPlayers(names, joinedFrom) {
   playerState.addPlayers(names, joinedFrom);
 }
 
-function addPlayer(name, joinedFrom, avatarId) {
-  return playerState.addPlayer(name, joinedFrom, avatarId);
+function addPlayer(name, joinedFrom, avatarId, accent) {
+  return playerState.addPlayer(name, joinedFrom, avatarId, accent);
 }
 
 function replacePlayer(playerId, name) {
@@ -1801,8 +1856,55 @@ function saveManualCupTeams(value) {
   return adminActions.saveManualCupTeams(value);
 }
 
-function endTournament() {
-  return tournamentFinalization.finalize("completed");
+let podiumSnapshot = null;
+
+// Captured before finalize() runs: a guest tournament's state gets wiped
+// (players/rounds cleared, storage removed) as part of finishing, so the
+// podium can never read live state after the fact -- it always renders from
+// this snapshot instead.
+function buildPodiumSnapshot() {
+  const matches = getAllMatches();
+  return {
+    tournamentName: state.name,
+    roundsCount: state.rounds.length,
+    matchesCount: matches.length,
+    playersCount: state.players.length,
+    entries: leaderboardEntries(matches),
+  };
+}
+
+async function endTournament() {
+  const snapshot = buildPodiumSnapshot();
+  const success = await tournamentFinalization.finalize("completed");
+  if (success) {
+    podiumSnapshot = snapshot;
+    showModule("podium");
+  }
+  return success;
+}
+
+function renderLobby() {
+  return lobby.renderLobby();
+}
+
+function renderPodium() {
+  return podium.renderPodium(podiumSnapshot);
+}
+
+function togglePodiumFullStandings() {
+  return podium.toggleFullStandings();
+}
+
+function goToNewTournamentFromPodium() {
+  return podium.goToNewTournament();
+}
+
+function startFromLobby() {
+  return lobby.startFromLobby();
+}
+
+function skipLobby() {
+  return lobby.skipToWorkspace();
 }
 
 function updateCourtsFromInput(value) {
@@ -2160,16 +2262,8 @@ function restoreInitialView() {
     storage: localStorage,
     keys: { storageKey, spectatorQueryKey },
     callbacks: {
-      currentLocalRole: () => currentLocalRole(),
       hasSelectedPlayer: () => Boolean(state.selectedPlayerId),
-      hasSupabaseClient: () => Boolean(supabaseClient),
-      hasTournamentForInvite: (inviteCode) => hasTournamentForInvite(inviteCode),
       isCurrentUserAdmin: () => isCurrentUserAdmin(),
-      loadRemoteTournamentByInvite: (inviteCode) => loadRemoteTournamentByInvite(inviteCode),
-      render: () => render(),
-      setLocalRole: (role) => setLocalRole(role),
-      setSpectatorMode: (enabled) => { spectatorMode = enabled; },
-      setSpectatorPreviousRole: (role) => { spectatorPreviousRole = role; },
       showModule: (moduleName) => showModule(moduleName),
       showWorkspace: (view) => showWorkspace(view),
     },
@@ -2219,6 +2313,8 @@ const appRenderer = window.PadelstarAppRenderer.create({
     renderExistingPlayerList,
     renderCupTeamBuilder,
     renderSyncControls,
+    renderPodium,
+    renderLobby,
   },
 });
 sessionController = window.PadelstarSessionController.create({

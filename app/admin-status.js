@@ -40,7 +40,8 @@ window.PadelstarAdminStatus = (() => {
       const state = getState();
       const tournaments = getSavedTournaments?.() ?? [];
       const hasSavedTournament = Boolean(getLocalStorage().getItem(storageKey)) || tournaments.length > 0;
-      elements.resumePanel.classList.toggle("hidden", !hasSavedTournament);
+      elements.savedTournamentsList?.classList.toggle("hidden", !hasSavedTournament);
+      elements.resumeEmptyState?.classList.toggle("hidden", hasSavedTournament);
       if (!hasSavedTournament || !elements.savedTournamentsList) return;
       elements.savedTournamentsList.replaceChildren();
       tournaments.forEach((entry) => {

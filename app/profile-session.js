@@ -28,8 +28,32 @@
       setProfile,
     } = dependencies;
 
+    let activeTournaments = [];
+
     function storage() {
       return getLocalStorage();
+    }
+
+    function getActiveTournaments() {
+      return activeTournaments;
+    }
+
+    async function loadActiveTournaments() {
+      const account = getAccountUser();
+      const client = getSupabaseClient();
+      if (!account?.id || !client) {
+        activeTournaments = [];
+        return false;
+      }
+      const { data, error } = await remoteRpc(client, "list_my_active_tournaments", {});
+      if (error) {
+        getObservability()?.error("active_tournaments_read_failed", error);
+        return false;
+      }
+      if (getAccountUser()?.id !== account.id) return false;
+      activeTournaments = Array.isArray(data) ? data : [];
+      renderProfile();
+      return true;
     }
 
     function profile() {
@@ -75,6 +99,7 @@
         p_profile_token: currentProfile.accessToken,
         p_display_name: currentProfile.displayName,
         p_avatar_id: currentProfile.avatarId,
+        p_accent: currentProfile.accent,
       });
       if (error) {
         console.warn("Profile sync failed", error);
@@ -130,6 +155,10 @@
       return new global.FormData(elements().profileForm).get("profileAvatarId") || defaultAvatarId;
     }
 
+    function profileAccentFromForm() {
+      return new global.FormData(elements().profileForm).get("profileAccent") || null;
+    }
+
     function saveLocalProfileFromForm() {
       const currentElements = elements();
       const displayName = currentElements.profileNameInput.value.trim();
@@ -138,10 +167,11 @@
         return;
       }
       const avatarId = profileAvatarIdFromForm();
+      const accent = profileAccentFromForm();
       const currentProfile = profile();
       setProfile(currentProfile
-        ? profileManager.normalizeProfile({ ...currentProfile, displayName, avatarId, deletionRequestedAt: null, deletionScheduledFor: null })
-        : profileManager.createProfile(displayName, avatarId));
+        ? profileManager.normalizeProfile({ ...currentProfile, displayName, avatarId, accent, deletionRequestedAt: null, deletionScheduledFor: null })
+        : profileManager.createProfile(displayName, avatarId, undefined, undefined, undefined, accent));
       persistLocalProfile();
       void syncAuthenticatedProfile(profile());
       void syncProfileRemote();
@@ -151,6 +181,7 @@
         if (state().rounds.length === 0) {
           selectedPlayer.name = profile().displayName;
           selectedPlayer.avatarId = profile().avatarId;
+          if (profile().accent) selectedPlayer.accent = profile().accent;
         }
         saveState({ remote: getIsCurrentUserAdmin() });
       }
@@ -214,7 +245,9 @@
     return {
       cancelProfileDeletion,
       ensureProfileForJoin,
+      getActiveTournaments,
       linkProfileToPlayer,
+      loadActiveTournaments,
       loadLocalProfile,
       persistLocalProfile,
       profileAvatarIdFromForm,

@@ -25,6 +25,7 @@
       setState,
       showToast,
       showAccount,
+      showModule,
       showWorkspace,
       syncJoinPreview,
       t,
@@ -82,6 +83,12 @@
         inviteCode: createInviteCode(),
         players: tournamentPlayers,
         courtCount: Number(formData.get("courts")),
+        format: formData.get("format") || "roundRobin",
+        gamesToWinSet: Number(formData.get("gamesToWinSet")) || 6,
+        setsToWinMatch: Number(formData.get("setsToWinMatch")) || 1,
+        pointMode: formData.get("pointMode") || "matches",
+        cupTeamSetupMode: formData.get("cupTeamSetupMode") || "auto",
+        includesThirdPlaceMatch: formData.get("includesThirdPlaceMatch") === "on",
       });
       nextState.remoteMode = getClient() ? "shared" : "local";
       if (adminUser?.id) nextState.ownerUserId = adminUser.id;
@@ -98,7 +105,7 @@
       setLocalRole("admin");
       saveState({ remote: false });
       await deps.createRemoteTournament();
-      showWorkspace();
+      showModule("lobby");
       render();
     }
 
@@ -111,6 +118,7 @@
       const inviteCode = formData.get("inviteCode").trim().toUpperCase();
       const playerName = formData.get("playerName").trim();
       const avatarId = randomAvatarId();
+      const accent = formData.get("accent");
       const client = getClient();
       const loadedRemote = client ? await loadRemoteTournamentByInvite(inviteCode) : false;
 
@@ -121,7 +129,7 @@
       if (!playerName) return;
       let player;
       if (client) {
-        const joined = await joinRemoteTournament(playerName, avatarId);
+        const joined = await joinRemoteTournament(playerName, avatarId, accent);
         if (!joined) return;
         player = findPlayerByName(playerName);
       } else {
@@ -131,7 +139,7 @@
           showToast(t("messages.tournamentStartedAskAdmin"), "status-message-error");
           return;
         }
-        player = existingPlayer ?? joinTournament(playerName, avatarId);
+        player = existingPlayer ?? joinTournament(playerName, avatarId, accent);
       }
 
       if (!player) return;

@@ -1,0 +1,123 @@
+/* =========================================================
+   SCOREBOARD TABLE (SETT / GAME / POENG)
+   ========================================================= */
+
+.scoreboard-table {
+  width: 100%;
+  margin: 12px 0;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.scoreboard-table thead th {
+  padding: 0 10px 4px;
+  color: var(--ui-muted, #9fb4cc);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.scoreboard-table thead th:first-child {
+  text-align: left;
+}
+
+.scoreboard-row {
+  background: linear-gradient(150deg, rgba(var(--player-accent-rgb), 0.16), rgba(2, 11, 25, 0.7) 70%);
+  box-shadow: inset 0 0 0 1px rgba(var(--player-accent-rgb), 0.42);
+}
+
+.scoreboard-row > td {
+  padding: 10px;
+}
+
+.scoreboard-row > td:first-child {
+  border-radius: 10px 0 0 10px;
+  padding-left: 14px;
+}
+
+.scoreboard-row > td:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.scoreboard-team-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--player-accent-light, inherit);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 0;
+}
+
+.scoreboard-cell {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.scoreboard-points {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.scoreboard-point-value {
+  min-width: 2.4ch;
+  text-align: center;
+}
+
+.scoreboard-point-minus,
+.scoreboard-point-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(var(--player-accent-rgb), 0.5);
+  border-radius: 8px;
+  background: rgba(var(--player-accent-rgb), 0.14);
+  color: var(--player-accent-light, inherit);
+
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.scoreboard-point-minus:not(:disabled):hover,
+.scoreboard-point-plus:not(:disabled):hover {
+  background: rgba(var(--player-accent-rgb), 0.28);
+}
+
+.scoreboard-point-minus:disabled,
+.scoreboard-point-plus:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .scoreboard-table thead th {
+    font-size: 0.64rem;
+    padding: 0 6px 4px;
+  }
+
+  .scoreboard-row > td {
+    padding: 8px 6px;
+  }
+
+  .scoreboard-cell {
+    font-size: 1.05rem;
+  }
+
+  .scoreboard-point-minus,
+  .scoreboard-point-plus {
+    width: 26px;
+    height: 26px;
+  }
+}

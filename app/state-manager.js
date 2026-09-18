@@ -50,14 +50,15 @@ window.PadelstarState = (() => {
 
   function migrateMatch(match, tournamentId, helpers) {
     if (match.teamOne && match.teamTwo) {
-      return {
+      const migrated = {
         currentGame: { teamOne: 0, teamTwo: 0 },
         completedSets: [],
         sittingOut: [],
         isThirdPlaceMatch: false,
-        lastScoredMatchState: null,
+        undoStack: [],
         ...match,
       };
+      return migrateUndoState(migrated);
     }
     return {
       id: match.id,
@@ -80,9 +81,24 @@ window.PadelstarState = (() => {
       winnerTeamIndex: match.scoreTeam1 > match.scoreTeam2 ? 0 : match.scoreTeam2 > match.scoreTeam1 ? 1 : null,
       isWalkover: false,
       isThirdPlaceMatch: false,
-      lastScoredMatchState: null,
+      undoStack: [],
       completedAt: match.completedAt,
     };
+  }
+
+  // Pre-multi-step-undo saved state (local or synced from a server not yet
+  // migrated) carries a single lastScoredMatchState snapshot instead of an
+  // undoStack array. Preserve that one step of undo rather than discarding it.
+  function migrateUndoState(match) {
+    if (!Array.isArray(match.undoStack) || match.undoStack.length === 0) {
+      if (match.lastScoredMatchState && typeof match.lastScoredMatchState === "object") {
+        match.undoStack = [match.lastScoredMatchState];
+      } else if (!Array.isArray(match.undoStack)) {
+        match.undoStack = [];
+      }
+    }
+    delete match.lastScoredMatchState;
+    return match;
   }
 
   function readSyncMetadata(storage, syncStorageKey) {

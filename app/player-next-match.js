@@ -1,9 +1,9 @@
 window.PadelstarPlayerNextMatch = (() => {
   function create({
     accentStyle,
+    bindScoreboardTable,
     elements,
     escapeHtml,
-    gameScoreText,
     getActiveRound,
     getPlayerById,
     getState,
@@ -12,6 +12,7 @@ window.PadelstarPlayerNextMatch = (() => {
     playerPlacement,
     playerTournamentState,
     scoreSummary,
+    scoreboardTableMarkup,
     t,
   }) {
     function renderPlayerNextMatch(matches) {
@@ -77,22 +78,26 @@ window.PadelstarPlayerNextMatch = (() => {
       const teammate = ownTeam.players.find((item) => item.id !== player.id);
       const opponentNames = opponents.players.map((opponent) => escapeHtml(opponent.name)).join(" & ");
       const statusLabel = playerState.kind === "playing" ? t("player.playingNow") : t("player.nextMatch");
-      const ownScore = isTeamOne ? match.currentSet.teamOne : match.currentSet.teamTwo;
-      const opponentScore = isTeamOne ? match.currentSet.teamTwo : match.currentSet.teamOne;
+      const matchesAhead = playerState.kind === "waiting" && !match.courtName
+        ? matches.filter((otherMatch) => otherMatch.state === "waiting" && (otherMatch.queuePosition ?? 0) < (match.queuePosition ?? 0)).length
+        : 0;
+      const isPlaying = playerState.kind === "playing";
 
       elements.playerNextMatch.innerHTML = `
     <p class="eyebrow">${statusLabel}</p>
     <h3>${escapeHtml(match.courtName ?? t("tournament.courtComing"))}</h3>
+    ${matchesAhead > 0 ? `<p class="hint">${t("player.matchesAhead", { count: matchesAhead })}</p>` : ""}
     <div class="player-now-grid">
       <div><span>${t("player.teammate")}</span><strong>${teammate ? escapeHtml(teammate.name) : t("common.single")}</strong></div>
       <div><span>${t("player.opponents")}</span><strong>${opponentNames}</strong></div>
-      <div><span>${t("common.games")}</span><strong>${ownScore}-${opponentScore}</strong></div>
-      <div><span>${t("common.points")}</span><strong>${gameScoreText(match)}</strong></div>
     </div>
+    ${isPlaying ? scoreboardTableMarkup(match, true) : ""}
     <div class="next-match-summary">
       <span>${escapeHtml(matchContextText(match))}</span>
       <span>${scoreSummary(match)}</span>
     </div>`;
+
+      if (isPlaying) bindScoreboardTable(elements.playerNextMatch, match, true);
     }
 
     return { renderPlayerNextMatch };

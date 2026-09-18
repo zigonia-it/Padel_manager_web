@@ -11,6 +11,11 @@ const padelstarLanguageMeta = [
   { code: "da", label: "Dansk", flag: "🇩🇰", fallback: "nb", htmlLang: "da" },
 ];
 
+// v1.0 Release Candidate ships only fully verified languages. The rest keep
+// their full translation data (still reachable via supportedLanguages()) and
+// get re-added to this list once each is independently verified.
+const padelstarProductionLanguageCodes = ["nb", "en"];
+
 const padelstarTranslations = {
   nb: {
     brandEyebrow: "Padel Manager",
@@ -227,6 +232,7 @@ Object.assign(padelstarTranslations.sv, { "account.signingIn": "Loggar in …" }
 Object.assign(padelstarTranslations.da, { "account.signingIn": "Logger ind …" });
 Object.assign(padelstarTranslations.nb, {
   "hero.featuresAria": "Padelstar-funksjoner",
+  "hero.accountOptionalHint": "Konto er valgfritt for å spille, men gir historikk og statistikk.",
   "hero.featureOneTitle": "Enklere turneringer",
   "hero.featureOneText": "Opprett og organiser kamper uten unødvendig administrasjon.",
   "hero.featureTwoTitle": "Alle kan bli med",
@@ -237,6 +243,7 @@ Object.assign(padelstarTranslations.nb, {
 
 Object.assign(padelstarTranslations.nn, {
   "hero.featuresAria": "Padelstar-funksjonar",
+  "hero.accountOptionalHint": "Konto er valfritt for å spela, men gir historikk og statistikk.",
   "hero.featureOneTitle": "Enklare turneringar",
   "hero.featureOneText": "Opprett og organiser kampar utan unødvendig administrasjon.",
   "hero.featureTwoTitle": "Alle kan bli med",
@@ -246,6 +253,7 @@ Object.assign(padelstarTranslations.nn, {
 });
 Object.assign(padelstarTranslations.en, {
   "hero.featuresAria": "Padelstar features",
+  "hero.accountOptionalHint": "An account is optional to play, but gives you history and stats.",
   "hero.featureOneTitle": "Simpler tournaments",
   "hero.featureOneText": "Create and organize matches without unnecessary administration.",
   "hero.featureTwoTitle": "Everyone can join",
@@ -255,6 +263,7 @@ Object.assign(padelstarTranslations.en, {
 });
 Object.assign(padelstarTranslations.es, {
   "hero.featuresAria": "Funciones de Padelstar",
+  "hero.accountOptionalHint": "La cuenta es opcional para jugar, pero te da historial y estadísticas.",
   "hero.featureOneTitle": "Torneos más sencillos",
   "hero.featureOneText": "Crea y organiza partidos sin administración innecesaria.",
   "hero.featureTwoTitle": "Todos pueden unirse",
@@ -264,6 +273,7 @@ Object.assign(padelstarTranslations.es, {
 });
 Object.assign(padelstarTranslations.de, {
   "hero.featuresAria": "Padelstar-Funktionen",
+  "hero.accountOptionalHint": "Ein Konto ist zum Spielen optional, bietet aber Verlauf und Statistiken.",
   "hero.featureOneTitle": "Einfachere Turniere",
   "hero.featureOneText": "Erstelle und organisiere Spiele ohne unnötige Verwaltung.",
   "hero.featureTwoTitle": "Alle können teilnehmen",
@@ -273,6 +283,7 @@ Object.assign(padelstarTranslations.de, {
 });
 Object.assign(padelstarTranslations.fr, {
   "hero.featuresAria": "Fonctionnalités de Padelstar",
+  "hero.accountOptionalHint": "Le compte est facultatif pour jouer, mais donne accès à l'historique et aux statistiques.",
   "hero.featureOneTitle": "Des tournois plus simples",
   "hero.featureOneText": "Créez et organisez des matchs sans administration superflue.",
   "hero.featureTwoTitle": "Tout le monde peut participer",
@@ -282,6 +293,7 @@ Object.assign(padelstarTranslations.fr, {
 });
 Object.assign(padelstarTranslations.sv, {
   "hero.featuresAria": "Padelstar-funktioner",
+  "hero.accountOptionalHint": "Konto är valfritt för att spela, men ger historik och statistik.",
   "hero.featureOneTitle": "Enklare turneringar",
   "hero.featureOneText": "Skapa och organisera matcher utan onödig administration.",
   "hero.featureTwoTitle": "Alla kan delta",
@@ -291,6 +303,7 @@ Object.assign(padelstarTranslations.sv, {
 });
 Object.assign(padelstarTranslations.da, {
   "hero.featuresAria": "Padelstar-funktioner",
+  "hero.accountOptionalHint": "Konto er valgfrit for at spille, men giver historik og statistik.",
   "hero.featureOneTitle": "Enklere turneringer",
   "hero.featureOneText": "Opret og organiser kampe uden unødvendig administration.",
   "hero.featureTwoTitle": "Alle kan være med",
@@ -383,6 +396,8 @@ Object.assign(padelstarTranslations.nb, {
   "role.player": "Spiller",
   "role.spectator": "Tilskuer",
   "resume.localSaved": "Lagret lokalt",
+  "resume.emptyTitle": "Ingen turneringer ennå",
+  "resume.emptyText": "Opprett din første turnering, eller bli med i en med invitasjonskode.",
   "resume.defaultSummary": "Det finnes en turnering lagret i denne nettleseren.",
   "resume.title": "Dine turneringer",
   "resume.adminSummary": "{players} spillere · {courts} baner · kode {code}",
@@ -427,6 +442,7 @@ Object.assign(padelstarTranslations.nb, {
   "admin.matches": "Kamper",
   "admin.courtsInUse": "Baner i bruk",
   "admin.courtListPlaceholder": "1, 2 eller 3, 4, 16",
+  "admin.rulesGroupTitle": "Regler",
   "admin.tournamentFormat": "Turneringsformat",
   "admin.roundRobinFormat": "Round robin",
   "admin.cupFormat": "Cup",
@@ -701,6 +717,8 @@ Object.assign(padelstarTranslations.nn, {
   "nav.viewAria": "Vising",
   "nav.leaveSpectator": "Forlat tilskodarvising",
   "resume.localSaved": "Lagra lokalt",
+  "resume.emptyTitle": "Ingen turneringar enno",
+  "resume.emptyText": "Opprett din første turnering, eller bli med i ei med invitasjonskode.",
   "resume.defaultSummary": "Det finst ei turnering lagra i denne nettlesaren.",
   "resume.title": "Turneringane dine",
   "resume.adminSummary": "{players} spelarar · {courts} baner · kode {code}",
@@ -738,6 +756,7 @@ Object.assign(padelstarTranslations.nn, {
   "admin.matches": "Kampar",
   "admin.courtsInUse": "Baner i bruk",
   "admin.courtListPlaceholder": "1, 2 eller 3, 4, 16",
+  "admin.rulesGroupTitle": "Reglar",
   "admin.tournamentFormat": "Turneringsformat",
   "admin.cupTeamSetup": "Cup-lagoppsett",
   "admin.tablePoints": "Tabellpoeng",
@@ -754,10 +773,10 @@ Object.assign(padelstarTranslations.en, {
   "hero.subtitle": "Create the tournament, invite the players and let Padelstar take care of the rest.",
   "nav.homeAria": "Go home", "nav.modulesAria": "Modules", "nav.home": "Home", "nav.create": "Create", "nav.login": "Sign in", "nav.join": "Join", "nav.admin": "Admin", "nav.player": "Player", "nav.tournament": "Tournament", "nav.frontPageAria": "Front page", "nav.openMenu": "Open menu", "nav.closeMenu": "Close menu", "nav.startChoicesAria": "Start choices", "nav.openViewMenu": "Open view menu", "nav.closeViewMenu": "Close view menu", "nav.viewAria": "View", "nav.leaveSpectator": "Leave spectator view",
   "role.admin": "Admin", "role.player": "Player", "role.spectator": "Spectator",
-  "resume.localSaved": "Saved locally", "resume.defaultSummary": "Saved tournaments you can open again on this device.", "resume.title": "Your tournaments", "resume.adminSummary": "{players} players · {courts} courts · code {code}", "resume.summary": "{players} players · {courts} courts", "resume.continueAdmin": "Continue as admin", "resume.continueTournament": "Continue tournament", "resume.openTournament": "Open tournament", "resume.players": "players", "resume.courts": "courts",
+  "resume.localSaved": "Saved locally", "resume.emptyTitle": "No tournaments yet", "resume.emptyText": "Create your first tournament, or join one with an invite code.", "resume.defaultSummary": "Saved tournaments you can open again on this device.", "resume.title": "Your tournaments", "resume.adminSummary": "{players} players · {courts} courts · code {code}", "resume.summary": "{players} players · {courts} courts", "resume.continueAdmin": "Continue as admin", "resume.continueTournament": "Continue tournament", "resume.openTournament": "Open tournament", "resume.players": "players", "resume.courts": "courts",
   "setup.createEyebrow": "Create", "setup.joinEyebrow": "Join", "setup.newTournament": "New tournament", "setup.tournamentName": "Tournament name", "setup.playersOptional": "Players, optional", "setup.playersOptionalPlaceholder": "Add players manually if someone does not have their own device.", "setup.adminParticipation": "Admin participation", "setup.adminPlays": "Admin plays", "setup.adminPlaysHint": "Choose this if the tournament creator will also have a player profile.", "setup.adminPlayerName": "Admin player name", "setup.courtCount": "Number of courts", "setup.playerNamePlaceholder": "Enter your name", "setup.yourAvatar": "Your avatar", "setup.yourName": "Your name", "setup.chooseAvatar": "Choose avatar", "setup.localJoinHint": "In this local version, the code works for the tournament created on this device.", "setup.creatorProfileHint": "A profile is optional for joining. Create one if you want to keep the tournament and save your own statistics.", "setup.accountOptionalHint": "Want to keep the tournament permanently? Create a profile first.",
   "share.title": "Share tournament", "share.inviteCode": "Invite code", "share.qrCode": "QR code", "share.qrCodeAlt": "QR code for joining", "share.joinLink": "Join link", "share.spectatorLink": "Spectator link", "share.joinHint": "Scan the QR code or use the link to join the tournament.",
-  "admin.sectionsAria": "Admin sections", "admin.control": "Control", "admin.share": "Share", "admin.players": "Players", "admin.matches": "Matches", "admin.courtsInUse": "Courts in use", "admin.courtListPlaceholder": "1, 2 or 3, 4, 16", "admin.tournamentFormat": "Tournament format", "admin.roundRobinFormat": "Round robin", "admin.cupFormat": "Cup", "admin.cupTeamSetup": "Cup team setup", "admin.tablePoints": "Table points", "admin.gamesPerSet": "Games per set", "admin.setsPerMatch": "Sets per match", "admin.lobbyPlayers": "Lobby / players", "admin.addPlayersPlaceholder": "Add one or more players", "admin.matchesHistory": "Matches and history",
+  "admin.sectionsAria": "Admin sections", "admin.control": "Control", "admin.share": "Share", "admin.players": "Players", "admin.matches": "Matches", "admin.courtsInUse": "Courts in use", "admin.courtListPlaceholder": "1, 2 or 3, 4, 16", "admin.rulesGroupTitle": "Rules", "admin.tournamentFormat": "Tournament format", "admin.roundRobinFormat": "Round robin", "admin.cupFormat": "Cup", "admin.cupTeamSetup": "Cup team setup", "admin.tablePoints": "Table points", "admin.gamesPerSet": "Games per set", "admin.setsPerMatch": "Sets per match", "admin.lobbyPlayers": "Lobby / players", "admin.addPlayersPlaceholder": "Add one or more players", "admin.matchesHistory": "Matches and history",
   "common.name": "Name", "common.automatic": "Automatic", "common.manual": "Manual", "common.matches": "Matches", "common.sets": "Sets", "common.games": "Games", "common.standings": "Standings", "common.rules": "Rules", "common.match": "Match", "common.round": "Round", "common.status": "Status", "common.points": "Points", "common.server": "Server", "common.court": "Court", "common.winner": "Winner", "common.ready": "Ready", "common.missing": "Missing", "common.waiting": "Waiting", "common.finished": "Finished", "common.completed": "Completed", "common.playing": "In progress", "common.active": "Active", "common.betweenRounds": "Between rounds", "common.cancelled": "Cancelled", "common.resting": "Resting", "common.next": "Next", "common.select": "Select", "common.player": "Player", "common.teamOne": "Team 1", "common.teamTwo": "Team 2", "common.single": "Singles", "common.double": "Doubles", "common.lobby": "Lobby", "common.against": "vs", "common.now": "Now", "common.none": "None", "common.minimumTwo": "At least 2", "common.teamCount": "{count} teams", "common.playingMatches": "Matches in progress",
   "actions.createTournament": "Create tournament", "actions.joinTournament": "Join tournament", "actions.adminAddedMe": "Admin added me", "actions.update": "Update", "actions.saveRules": "Save rules", "actions.downloadBackup": "Download backup", "actions.importBackup": "Import backup", "actions.endTournament": "End tournament", "actions.resetTournament": "Reset tournament", "actions.copyCode": "Copy code", "actions.copyLink": "Copy link", "actions.copySpectatorLink": "Copy spectator link", "actions.add": "Add", "actions.saveCupTeams": "Save cup teams", "actions.close": "Close", "actions.save": "Save", "actions.remove": "Remove", "actions.removePlayerAria": "Remove {name}", "actions.editPlayerNameAria": "Edit name for {name}", "actions.playerAvatarAria": "Avatar for {name}", "actions.saveCourt": "Save court", "actions.updateResult": "Update", "actions.setResult": "Set result", "actions.startMatch": "Start match", "actions.startTournament": "Start tournament", "actions.completeTournament": "Finish tournament", "actions.largeScore": "Large score", "actions.undoResult": "Undo result", "actions.undoLast": "Undo last", "actions.cancelMatch": "Cancel match", "actions.leaveTournament": "Leave tournament", "actions.markAway": "Mark as away", "actions.returnToTournament": "Return to tournament", "actions.viewAsSpectator": "View as spectator", "actions.choosePlayer": "Choose player", "actions.joinAgain": "Join again",
   "player.nextMatch": "Your next match", "player.chooseProfile": "Choose player profile", "player.chooseProfileHint": "The app will show your court, teammate and opponents.", "player.yourMatches": "Your matches", "player.yourStatus": "Your status", "player.currentPlayer": "Current player", "player.teammate": "Teammate", "player.opponents": "Opponents", "player.playingNow": "You are playing now", "player.tournamentFinished": "The tournament is finished", "player.restingThisRound": "Resting this round", "player.restingTitle": "{name}, you are sitting out now.", "player.waitingTitle": "{name}, you have no active match right now.", "player.identityEmpty": "Open the invite link, scan the QR code or choose Admin added me from the start page.", "player.adminPlays": "Admin plays", "player.registeredSelf": "Registered yourself", "player.joinedSelf": "Joined yourself", "player.addedByAdmin": "Added by admin", "player.away": "Away",
@@ -770,10 +789,10 @@ Object.assign(padelstarTranslations.es, {
   "hero.title": "Juega más. Organiza menos.",
   "hero.subtitle": "Crea el torneo, invita a los jugadores y deja que Padelstar se encargue del resto.",
   "nav.homeAria": "Ir al inicio", "nav.modulesAria": "Módulos", "nav.home": "Inicio", "nav.create": "Crear", "nav.join": "Unirse", "nav.admin": "Admin", "nav.player": "Jugador", "nav.tournament": "Torneo", "nav.frontPageAria": "Página principal", "nav.openMenu": "Abrir menú", "nav.closeMenu": "Cerrar menú", "nav.startChoicesAria": "Opciones de inicio", "nav.openViewMenu": "Abrir menú de vista", "nav.closeViewMenu": "Cerrar menú de vista", "nav.viewAria": "Vista", "nav.leaveSpectator": "Salir de la vista de espectador", "role.admin": "Admin", "role.player": "Jugador", "role.spectator": "Espectador",
-  "resume.localSaved": "Guardado localmente", "resume.defaultSummary": "Torneos guardados que puedes volver a abrir en este dispositivo.", "resume.title": "Tus torneos", "resume.adminSummary": "{players} jugadores · {courts} pistas · código {code}", "resume.summary": "{players} jugadores · {courts} pistas", "resume.continueAdmin": "Continuar como admin", "resume.continueTournament": "Continuar torneo", "resume.openTournament": "Abrir torneo", "resume.players": "jugadores", "resume.courts": "pistas",
+  "resume.localSaved": "Guardado localmente", "resume.emptyTitle": "Aún no hay torneos", "resume.emptyText": "Crea tu primer torneo, o únete a uno con un código de invitación.", "resume.defaultSummary": "Torneos guardados que puedes volver a abrir en este dispositivo.", "resume.title": "Tus torneos", "resume.adminSummary": "{players} jugadores · {courts} pistas · código {code}", "resume.summary": "{players} jugadores · {courts} pistas", "resume.continueAdmin": "Continuar como admin", "resume.continueTournament": "Continuar torneo", "resume.openTournament": "Abrir torneo", "resume.players": "jugadores", "resume.courts": "pistas",
   "setup.createEyebrow": "Crear", "setup.joinEyebrow": "Unirse", "setup.newTournament": "Nuevo torneo", "setup.tournamentName": "Nombre del torneo", "setup.playersOptional": "Jugadores, opcional", "setup.playersOptionalPlaceholder": "Añade jugadores manualmente si alguien no tiene su propio dispositivo.", "setup.adminParticipation": "Participación del admin", "setup.adminPlays": "El admin juega", "setup.adminPlaysHint": "Elige esto si quien crea el torneo también tendrá un perfil de jugador.", "setup.adminPlayerName": "Nombre del jugador admin", "setup.courtCount": "Número de pistas", "setup.playerNamePlaceholder": "Escribe tu nombre", "setup.yourAvatar": "Tu avatar", "setup.yourName": "Tu nombre", "setup.chooseAvatar": "Elige avatar", "setup.localJoinHint": "En esta versión local, el código funciona para el torneo creado en este dispositivo.",
   "share.title": "Compartir torneo", "share.inviteCode": "Código de invitación", "share.qrCode": "Código QR", "share.qrCodeAlt": "Código QR para inscribirse", "share.joinLink": "Enlace para unirse", "share.spectatorLink": "Enlace de espectador", "share.joinHint": "Escanea el código QR o usa el enlace para unirte al torneo.",
-  "admin.sectionsAria": "Secciones de admin", "admin.control": "Control", "admin.share": "Compartir", "admin.players": "Jugadores", "admin.matches": "Partidos", "admin.courtsInUse": "Pistas en uso", "admin.courtListPlaceholder": "1, 2 o 3, 4, 16", "admin.tournamentFormat": "Formato del torneo", "admin.roundRobinFormat": "Todos contra todos", "admin.cupFormat": "Copa", "admin.cupTeamSetup": "Configuración de equipos de copa", "admin.tablePoints": "Puntos de tabla", "admin.gamesPerSet": "Juegos por set", "admin.setsPerMatch": "Sets por partido", "admin.lobbyPlayers": "Lobby / jugadores", "admin.addPlayersPlaceholder": "Añadir uno o más jugadores", "admin.matchesHistory": "Partidos e historial",
+  "admin.sectionsAria": "Secciones de admin", "admin.control": "Control", "admin.share": "Compartir", "admin.players": "Jugadores", "admin.matches": "Partidos", "admin.courtsInUse": "Pistas en uso", "admin.courtListPlaceholder": "1, 2 o 3, 4, 16", "admin.rulesGroupTitle": "Reglas", "admin.tournamentFormat": "Formato del torneo", "admin.roundRobinFormat": "Todos contra todos", "admin.cupFormat": "Copa", "admin.cupTeamSetup": "Configuración de equipos de copa", "admin.tablePoints": "Puntos de tabla", "admin.gamesPerSet": "Juegos por set", "admin.setsPerMatch": "Sets por partido", "admin.lobbyPlayers": "Lobby / jugadores", "admin.addPlayersPlaceholder": "Añadir uno o más jugadores", "admin.matchesHistory": "Partidos e historial",
   "common.name": "Nombre", "common.automatic": "Automático", "common.manual": "Manual", "common.matches": "Partidos", "common.sets": "Sets", "common.games": "Juegos", "common.standings": "Clasificación", "common.rules": "Reglas", "common.match": "Partido", "common.round": "Ronda", "common.status": "Estado", "common.points": "Puntos", "common.server": "Saque", "common.court": "Pista", "common.winner": "Ganador", "common.ready": "Listo", "common.missing": "Falta", "common.waiting": "Esperando", "common.finished": "Finalizado", "common.completed": "Completado", "common.playing": "En juego", "common.active": "Activos", "common.betweenRounds": "Entre rondas", "common.cancelled": "Cancelado", "common.resting": "Descanso", "common.next": "Siguiente", "common.select": "Seleccionar", "common.player": "Jugador", "common.teamOne": "Equipo 1", "common.teamTwo": "Equipo 2", "common.single": "Individual", "common.double": "Dobles", "common.lobby": "Lobby", "common.against": "contra", "common.now": "Ahora", "common.none": "Ninguno", "common.minimumTwo": "Al menos 2", "common.teamCount": "{count} equipos", "common.playingMatches": "Partidos en juego",
   "actions.createTournament": "Crear torneo", "actions.joinTournament": "Unirse al torneo", "actions.adminAddedMe": "El admin me ha añadido", "actions.update": "Actualizar", "actions.saveRules": "Guardar reglas", "actions.downloadBackup": "Descargar copia", "actions.importBackup": "Importar copia", "actions.endTournament": "Terminar torneo", "actions.resetTournament": "Restablecer torneo", "actions.copyCode": "Copiar código", "actions.copyLink": "Copiar enlace", "actions.copySpectatorLink": "Copiar enlace de espectador", "actions.add": "Añadir", "actions.saveCupTeams": "Guardar equipos de copa", "actions.close": "Cerrar", "actions.save": "Guardar", "actions.remove": "Eliminar", "actions.removePlayerAria": "Eliminar a {name}", "actions.editPlayerNameAria": "Editar nombre de {name}", "actions.playerAvatarAria": "Avatar de {name}", "actions.saveCourt": "Guardar pista", "actions.updateResult": "Actualizar", "actions.setResult": "Establecer resultado", "actions.startMatch": "Iniciar partido", "actions.startTournament": "Iniciar torneo", "actions.completeTournament": "Terminar torneo", "actions.largeScore": "Marcador grande", "actions.undoResult": "Deshacer resultado", "actions.undoLast": "Deshacer último", "actions.cancelMatch": "Cancelar partido", "actions.leaveTournament": "Salir del torneo", "actions.markAway": "Marcar como ausente", "actions.returnToTournament": "Volver al torneo", "actions.viewAsSpectator": "Ver como espectador", "actions.choosePlayer": "Elegir jugador", "actions.joinAgain": "Volver a unirse",
   "player.nextMatch": "Tu próximo partido", "player.chooseProfile": "Elige un perfil de jugador", "player.chooseProfileHint": "La app mostrará tu pista, compañero y oponentes.", "player.yourMatches": "Tus partidos", "player.yourStatus": "Tu estado", "player.currentPlayer": "Jugador actual", "player.teammate": "Compañero", "player.opponents": "Oponentes", "player.playingNow": "Estás jugando ahora", "player.tournamentFinished": "El torneo ha terminado", "player.restingThisRound": "Descanso esta ronda", "player.restingTitle": "{name}, ahora estás descansando.", "player.waitingTitle": "{name}, no tienes un partido activo ahora.", "player.identityEmpty": "Abre el enlace de invitación, escanea el código QR o elige El admin me ha añadido en la página inicial.", "player.adminPlays": "Juega el admin", "player.registeredSelf": "Registrado por sí mismo", "player.joinedSelf": "Se unió por sí mismo", "player.addedByAdmin": "Añadido por el admin", "player.away": "Ausente",
@@ -1156,15 +1175,106 @@ const finalizationErrors = {
 for (const [language, message] of Object.entries(finalizationErrors)) {
   Object.assign(padelstarTranslations[language], { "lifecycle.finalizeFailed": message });
 }
+
+for (const [language, values] of Object.entries({
+  nb: { "podium.stats": "{rounds} runder · {matches} kamper · {players} spillere", "actions.viewFullStandings": "Se full tabell" },
+  nn: { "podium.stats": "{rounds} rundar · {matches} kampar · {players} spelarar", "actions.viewFullStandings": "Sjå heile tabellen" },
+  en: { "podium.stats": "{rounds} rounds · {matches} matches · {players} players", "actions.viewFullStandings": "View full standings" },
+  es: { "podium.stats": "{rounds} rondas · {matches} partidos · {players} jugadores", "actions.viewFullStandings": "Ver tabla completa" },
+  de: { "podium.stats": "{rounds} Runden · {matches} Spiele · {players} Spieler", "actions.viewFullStandings": "Vollständige Tabelle anzeigen" },
+  fr: { "podium.stats": "{rounds} manches · {matches} matchs · {players} joueurs", "actions.viewFullStandings": "Voir le classement complet" },
+  sv: { "podium.stats": "{rounds} omgångar · {matches} matcher · {players} spelare", "actions.viewFullStandings": "Visa hela tabellen" },
+  da: { "podium.stats": "{rounds} runder · {matches} kampe · {players} spillere", "actions.viewFullStandings": "Se hele tabellen" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+
+for (const [language, values] of Object.entries({
+  nb: { "common.back": "Tilbake", "wizard.stepOf": "Steg {step} av {total} · {title}", "wizard.stepName": "Navn og format", "wizard.stepRules": "Regler", "wizard.stepPlayers": "Spillere", "wizard.stepConfirm": "Bekreft", "wizard.confirmRulesValue": "{games} games per sett · {sets} sett per kamp" },
+  nn: { "common.back": "Tilbake", "wizard.stepOf": "Steg {step} av {total} · {title}", "wizard.stepName": "Namn og format", "wizard.stepRules": "Reglar", "wizard.stepPlayers": "Spelarar", "wizard.stepConfirm": "Stadfest", "wizard.confirmRulesValue": "{games} games per sett · {sets} sett per kamp" },
+  en: { "common.back": "Back", "wizard.stepOf": "Step {step} of {total} · {title}", "wizard.stepName": "Name and format", "wizard.stepRules": "Rules", "wizard.stepPlayers": "Players", "wizard.stepConfirm": "Confirm", "wizard.confirmRulesValue": "{games} games per set · {sets} sets per match" },
+  es: { "common.back": "Atrás", "wizard.stepOf": "Paso {step} de {total} · {title}", "wizard.stepName": "Nombre y formato", "wizard.stepRules": "Reglas", "wizard.stepPlayers": "Jugadores", "wizard.stepConfirm": "Confirmar", "wizard.confirmRulesValue": "{games} games por set · {sets} sets por partido" },
+  de: { "common.back": "Zurück", "wizard.stepOf": "Schritt {step} von {total} · {title}", "wizard.stepName": "Name und Format", "wizard.stepRules": "Regeln", "wizard.stepPlayers": "Spieler", "wizard.stepConfirm": "Bestätigen", "wizard.confirmRulesValue": "{games} Games pro Satz · {sets} Sätze pro Spiel" },
+  fr: { "common.back": "Retour", "wizard.stepOf": "Étape {step} sur {total} · {title}", "wizard.stepName": "Nom et format", "wizard.stepRules": "Règles", "wizard.stepPlayers": "Joueurs", "wizard.stepConfirm": "Confirmer", "wizard.confirmRulesValue": "{games} jeux par set · {sets} sets par match" },
+  sv: { "common.back": "Tillbaka", "wizard.stepOf": "Steg {step} av {total} · {title}", "wizard.stepName": "Namn och format", "wizard.stepRules": "Regler", "wizard.stepPlayers": "Spelare", "wizard.stepConfirm": "Bekräfta", "wizard.confirmRulesValue": "{games} games per set · {sets} set per match" },
+  da: { "common.back": "Tilbage", "wizard.stepOf": "Trin {step} af {total} · {title}", "wizard.stepName": "Navn og format", "wizard.stepRules": "Regler", "wizard.stepPlayers": "Spillere", "wizard.stepConfirm": "Bekræft", "wizard.confirmRulesValue": "{games} games per sæt · {sets} sæt per kamp" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 const entryAccountMessages = { "nb": ["Velg hvordan du vil fortsette", "Fortsett uten konto", "Med konto beholder du turneringen etter avslutning. Uten konto kan alle spille og synkronisere mens turneringen pågår.", "Med konto beholder du egen statistikk. Uten konto kan du delta normalt, men får ikke permanent personlig historikk."], "nn": ["Vel korleis du vil halde fram", "Hald fram utan konto", "Med konto tek du vare på turneringa etter avslutning. Utan konto kan alle spele og synkronisere medan turneringa går føre seg.", "Med konto tek du vare på eigen statistikk. Utan konto kan du delta som vanleg, men får ikkje varig personleg historikk."], "en": ["Choose how to continue", "Continue without an account", "An account keeps your tournament after it ends. Without an account, everyone can still play and sync during the tournament.", "An account keeps your personal statistics. Without an account, you can play normally but have no permanent personal history."], "es": ["Elige cómo continuar", "Continuar sin cuenta", "Con una cuenta conservas el torneo al finalizar. Sin cuenta, todos pueden jugar y sincronizar durante el torneo.", "Con una cuenta conservas tus estadísticas. Sin cuenta puedes jugar normalmente, pero no tendrás un historial personal permanente."], "de": ["Wähle, wie du fortfahren möchtest", "Ohne Konto fortfahren", "Mit einem Konto bleibt dein Turnier nach dem Ende gespeichert. Ohne Konto können alle während des Turniers spielen und synchronisieren.", "Mit einem Konto bleiben deine persönlichen Statistiken gespeichert. Ohne Konto kannst du normal mitspielen, erhältst aber keinen dauerhaften persönlichen Verlauf."], "fr": ["Choisissez comment continuer", "Continuer sans compte", "Avec un compte, votre tournoi est conservé après sa fin. Sans compte, tous peuvent jouer et synchroniser pendant le tournoi.", "Avec un compte, vos statistiques personnelles sont conservées. Sans compte, vous pouvez jouer normalement, mais sans historique personnel permanent."], "sv": ["Välj hur du vill fortsätta", "Fortsätt utan konto", "Med konto behåller du turneringen efter avslut. Utan konto kan alla spela och synkronisera medan turneringen pågår.", "Med konto behåller du din statistik. Utan konto kan du delta som vanligt, men får ingen permanent personlig historik."], "da": ["Vælg, hvordan du vil fortsætte", "Fortsæt uden konto", "Med en konto beholder du turneringen efter afslutning. Uden konto kan alle spille og synkronisere, mens turneringen er i gang.", "Med en konto beholder du din statistik. Uden konto kan du deltage normalt, men får ingen permanent personlig historik."] };
 for (const [language, values] of Object.entries(entryAccountMessages)) {
   Object.assign(padelstarTranslations[language], { "entry.accountTitle": values[0], "entry.continueGuest": values[1], "entry.accountAdminHint": values[2], "entry.accountPlayerHint": values[3] });
+}
+for (const [language, values] of Object.entries({
+  nb: { "setup.chooseColor": "Velg farge" },
+  nn: { "setup.chooseColor": "Vel farge" },
+  en: { "setup.chooseColor": "Choose color" },
+  es: { "setup.chooseColor": "Elige color" },
+  de: { "setup.chooseColor": "Farbe wählen" },
+  fr: { "setup.chooseColor": "Choisir une couleur" },
+  sv: { "setup.chooseColor": "Välj färg" },
+  da: { "setup.chooseColor": "Vælg farve" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+for (const [language, values] of Object.entries({
+  nb: { "score.undoLastAria": "Angre siste poeng" },
+  nn: { "score.undoLastAria": "Angre siste poeng" },
+  en: { "score.undoLastAria": "Undo last point" },
+  es: { "score.undoLastAria": "Deshacer último punto" },
+  de: { "score.undoLastAria": "Letzten Punkt rückgängig machen" },
+  fr: { "score.undoLastAria": "Annuler le dernier point" },
+  sv: { "score.undoLastAria": "Ångra senaste poängen" },
+  da: { "score.undoLastAria": "Fortryd sidste point" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+for (const [language, values] of Object.entries({
+  nb: { "round.endSummaryTitle": "Runde {round} ferdig", "round.endSummaryConfirm": "{finished}/{total} kamper spilt i runde {round}. Klar for neste runde?" },
+  nn: { "round.endSummaryTitle": "Runde {round} ferdig", "round.endSummaryConfirm": "{finished}/{total} kampar spelte i runde {round}. Klar for neste runde?" },
+  en: { "round.endSummaryTitle": "Round {round} complete", "round.endSummaryConfirm": "{finished}/{total} matches played in round {round}. Ready for the next round?" },
+  es: { "round.endSummaryTitle": "Ronda {round} completa", "round.endSummaryConfirm": "{finished}/{total} partidos jugados en la ronda {round}. ¿Listo para la siguiente ronda?" },
+  de: { "round.endSummaryTitle": "Runde {round} abgeschlossen", "round.endSummaryConfirm": "{finished}/{total} Spiele in Runde {round} gespielt. Bereit für die nächste Runde?" },
+  fr: { "round.endSummaryTitle": "Manche {round} terminée", "round.endSummaryConfirm": "{finished}/{total} matchs joués lors de la manche {round}. Prêt pour la manche suivante ?" },
+  sv: { "round.endSummaryTitle": "Omgång {round} klar", "round.endSummaryConfirm": "{finished}/{total} matcher spelade i omgång {round}. Redo för nästa omgång?" },
+  da: { "round.endSummaryTitle": "Runde {round} færdig", "round.endSummaryConfirm": "{finished}/{total} kampe spillet i runde {round}. Klar til næste runde?" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+for (const [language, values] of Object.entries({
+  nb: { "player.matchesAhead": "Du spiller om {count} kamper" },
+  nn: { "player.matchesAhead": "Du speler om {count} kampar" },
+  en: { "player.matchesAhead": "You play in {count} matches" },
+  es: { "player.matchesAhead": "Juegas en {count} partidos" },
+  de: { "player.matchesAhead": "Du spielst in {count} Spielen" },
+  fr: { "player.matchesAhead": "Vous jouez dans {count} matchs" },
+  sv: { "player.matchesAhead": "Du spelar om {count} matcher" },
+  da: { "player.matchesAhead": "Du spiller om {count} kampe" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+for (const [language, values] of Object.entries({
+  nb: { "profile.activeTournaments": "Mine aktive turneringer", "profile.noActiveTournaments": "Ingen aktive turneringer akkurat nå.", "profile.accountSettings": "Kontoinnstillinger" },
+  nn: { "profile.activeTournaments": "Mine aktive turneringar", "profile.noActiveTournaments": "Ingen aktive turneringar akkurat no.", "profile.accountSettings": "Kontoinnstillingar" },
+  en: { "profile.activeTournaments": "My active tournaments", "profile.noActiveTournaments": "No active tournaments right now.", "profile.accountSettings": "Account settings" },
+  es: { "profile.activeTournaments": "Mis torneos activos", "profile.noActiveTournaments": "No hay torneos activos ahora mismo.", "profile.accountSettings": "Configuración de la cuenta" },
+  de: { "profile.activeTournaments": "Meine aktiven Turniere", "profile.noActiveTournaments": "Gerade keine aktiven Turniere.", "profile.accountSettings": "Kontoeinstellungen" },
+  fr: { "profile.activeTournaments": "Mes tournois actifs", "profile.noActiveTournaments": "Aucun tournoi actif pour le moment.", "profile.accountSettings": "Paramètres du compte" },
+  sv: { "profile.activeTournaments": "Mina aktiva turneringar", "profile.noActiveTournaments": "Inga aktiva turneringar just nu.", "profile.accountSettings": "Kontoinställningar" },
+  da: { "profile.activeTournaments": "Mine aktive turneringer", "profile.noActiveTournaments": "Ingen aktive turneringer lige nu.", "profile.accountSettings": "Kontoindstillinger" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
 }
 window.PadelstarTranslations = padelstarTranslations;
 window.PadelstarI18n = {
   fallbackLanguage,
   supportedLanguages() {
     return padelstarLanguageMeta.map((entry) => ({ ...entry }));
+  },
+  productionLanguages() {
+    return padelstarLanguageMeta
+      .filter((entry) => padelstarProductionLanguageCodes.includes(entry.code))
+      .map((entry) => ({ ...entry }));
   },
   normalizeLanguage(language) {
     return languageFor(language).code;

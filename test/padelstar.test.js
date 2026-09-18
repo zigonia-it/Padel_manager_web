@@ -50,6 +50,11 @@ const tournamentRuntimePath = path.join(appRoot, "tournament-runtime.js");
 const workspaceOverviewPath = path.join(appRoot, "workspace-overview.js");
 const matchListPath = path.join(appRoot, "match-list.js");
 const standingsPath = path.join(appRoot, "standings.js");
+const podiumPath = path.join(appRoot, "podium.js");
+const lobbyPath = path.join(appRoot, "lobby.js");
+const createWizardPath = path.join(appRoot, "create-wizard.js");
+const inviteCodeInputPath = path.join(appRoot, "invite-code-input.js");
+const accentPickerPath = path.join(appRoot, "accent-picker.js");
 const playerListPath = path.join(appRoot, "player-list.js");
 const cupBracketPath = path.join(appRoot, "cup-bracket.js");
 const playerStatusPath = path.join(appRoot, "player-status.js");
@@ -194,6 +199,11 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(workspaceOverviewPath, "utf8"), context, { filename: workspaceOverviewPath });
   vm.runInContext(fs.readFileSync(matchListPath, "utf8"), context, { filename: matchListPath });
   vm.runInContext(fs.readFileSync(standingsPath, "utf8"), context, { filename: standingsPath });
+  vm.runInContext(fs.readFileSync(podiumPath, "utf8"), context, { filename: podiumPath });
+  vm.runInContext(fs.readFileSync(lobbyPath, "utf8"), context, { filename: lobbyPath });
+  vm.runInContext(fs.readFileSync(createWizardPath, "utf8"), context, { filename: createWizardPath });
+  vm.runInContext(fs.readFileSync(inviteCodeInputPath, "utf8"), context, { filename: inviteCodeInputPath });
+  vm.runInContext(fs.readFileSync(accentPickerPath, "utf8"), context, { filename: accentPickerPath });
   vm.runInContext(fs.readFileSync(playerListPath, "utf8"), context, { filename: playerListPath });
   vm.runInContext(fs.readFileSync(cupBracketPath, "utf8"), context, { filename: cupBracketPath });
   vm.runInContext(fs.readFileSync(playerStatusPath, "utf8"), context, { filename: playerStatusPath });
@@ -581,7 +591,6 @@ test("admin role can open admin module and falls back there without a player ide
   assert.equal(api.isCurrentUserAdmin(), true);
   assert.equal(api.normalizeModule("admin"), "admin");
   assert.equal(api.normalizeModule("player"), "admin");
-  assert.equal(api.normalizeModule("tournament"), "tournament");
 });
 
 test("player role cannot open admin module and falls back to player workspace", () => {
@@ -596,7 +605,6 @@ test("player role cannot open admin module and falls back to player workspace", 
   assert.equal(api.isCurrentUserAdmin(), false);
   assert.equal(api.normalizeModule("admin"), "player");
   assert.equal(api.normalizeModule("player"), "player");
-  assert.equal(api.normalizeModule("tournament"), "tournament");
 });
 
 test("player can leave local tournament session without mutating tournament data", () => {
@@ -635,7 +643,7 @@ test("admin player can leave player role without losing the tournament", () => {
   assert.equal(api.normalizeModule("admin"), "admin");
 });
 
-test("spectator role can see tournament view but not admin or player modules", () => {
+test("spectator role cannot open admin or player modules", () => {
   const api = loadPadelstar();
   makeTournament(api, ["Ada", "Bo"]);
 
@@ -644,9 +652,8 @@ test("spectator role can see tournament view but not admin or player modules", (
 
   assert.equal(api.currentLocalRole(), "spectator");
   assert.equal(api.isCurrentUserAdmin(), false);
-  assert.equal(api.normalizeModule("admin"), "tournament");
-  assert.equal(api.normalizeModule("player"), "tournament");
-  assert.equal(api.normalizeModule("tournament"), "tournament");
+  assert.equal(api.normalizeModule("admin"), "landing");
+  assert.equal(api.normalizeModule("player"), "landing");
 });
 
 test("spectator can leave the viewing session without keeping a local tournament", () => {
@@ -782,7 +789,7 @@ test("link utility keeps local join and spectator URLs isolated", () => {
   const location = { hostname: "localhost", origin: "http://localhost:8080" };
 
   assert.equal(api.links.createJoinLink({ location, inviteCode: "TEST1" }), "http://localhost:8080/?join=TEST1");
-  assert.equal(api.links.createSpectatorLink({ location, inviteCode: "TEST1" }), "http://localhost:8080/?spectate=TEST1");
+  assert.equal(api.links.createSpectatorLink({ location, inviteCode: "TEST1" }), "http://localhost:8080/tv.html?spectate=TEST1");
   assert.match(api.links.createQrCodeUrl("http://localhost:8080/?join=TEST1"), /quickchart\.io\/qr\?/);
 });
 
@@ -828,6 +835,25 @@ test("initial view boundary routes join URLs and saved sessions", () => {
     callbacks,
   });
   assert.deepEqual(calls, ["module:setup-player"]);
+});
+
+test("initial view boundary redirects spectator links to TV Mode instead of the app", () => {
+  const { initialView } = loadPadelstar();
+  const calls = [];
+  const location = { search: "?spectate=ABCD" };
+  initialView.restore({
+    windowRef: { location },
+    storage: { getItem: () => null },
+    keys: { storageKey: "state", spectatorQueryKey: "spectate" },
+    callbacks: {
+      isCurrentUserAdmin: () => false,
+      hasSelectedPlayer: () => false,
+      showModule: (moduleName) => calls.push(`module:${moduleName}`),
+      showWorkspace: (view) => calls.push(`workspace:${view}`),
+    },
+  });
+  assert.equal(location.href, "tv.html?spectate=ABCD");
+  assert.deepEqual(calls, []);
 });
 
 test("initial visible fallback labels are translation-bound", () => {

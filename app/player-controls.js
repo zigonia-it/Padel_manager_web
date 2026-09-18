@@ -1,5 +1,5 @@
 window.PadelstarPlayerControls = (() => {
-  function create({ accentStyle, avatarMarkup, elements, escapeHtml, getPlayerById, getState, getSpectatorMode, t }) {
+  function create({ accentStyle, avatarMarkup, elements, escapeHtml, getPlayerById, getState, getSpectatorMode, pendingRemoteWriteCount = () => 0, t }) {
     function renderPlayerIdentity() {
       const state = getState();
       const player = getPlayerById(state.selectedPlayerId);
@@ -11,13 +11,15 @@ window.PadelstarPlayerControls = (() => {
       const joinSourceLabel = player.joinedFrom === "admin-self"
         ? t("player.adminPlays")
         : player.joinedFrom === "self" ? t("player.registeredSelf") : t("player.addedByAdmin");
+      const pending = pendingRemoteWriteCount();
       elements.playerIdentityCard.setAttribute("style", accentStyle(player.accent));
       elements.playerIdentityCard.innerHTML = `
         <div class="player-identity-main">
           ${avatarMarkup(player, "avatar", 44)}
           <div><span>${t("player.currentPlayer")}</span><strong>${escapeHtml(player.name)}</strong></div>
         </div>
-        <span class="join-source-chip">${joinSourceLabel}</span>`;
+        <span class="join-source-chip">${joinSourceLabel}</span>
+        ${pending > 0 ? `<span class="status-chip offline-pending-chip">${t("syncPending")} (${pending})</span>` : ""}`;
     }
 
     function renderLeaveTournamentControl() {
