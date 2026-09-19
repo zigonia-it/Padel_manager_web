@@ -88,6 +88,7 @@
         setsToWinMatch: Number(formData.get("setsToWinMatch")) || 1,
         gameMode: formData.get("gameMode") || "advantage",
         setTiebreak: formData.get("setTiebreak") === "on",
+        timedMinutes: Number(formData.get("timedMinutes")) || 0,
         pointMode: formData.get("pointMode") || "matches",
         cupTeamSetupMode: formData.get("cupTeamSetupMode") || "auto",
         includesThirdPlaceMatch: formData.get("includesThirdPlaceMatch") === "on",

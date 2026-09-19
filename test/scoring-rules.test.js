@@ -22,19 +22,34 @@ function expandSteps(steps) {
   });
 }
 
+const T0 = Date.parse("2026-09-19T10:00:00.000Z");
+
 function playScenario(scenario) {
   const match = {
     state: "playing", currentGame: { teamOne: 0, teamTwo: 0 }, currentSet: { teamOne: 0, teamTwo: 0 }, completedSets: [],
     teamOne: { players: [] }, teamTwo: { players: [] },
   };
-  for (const teamIndex of expandSteps(scenario.steps)) {
-    const result = scoring.awardPoint(match, teamIndex, scenario.settings);
-    if (result.matchWon) {
-      match.state = "finished";
-      match.winnerTeamIndex = match.completedSets.filter((set) => set.teamOne > set.teamTwo).length
-        > match.completedSets.filter((set) => set.teamTwo > set.teamOne).length ? 0 : 1;
-      break;
+  const pair = ([teamOne, teamTwo]) => ({ teamOne, teamTwo });
+  if (scenario.initial) {
+    match.completedSets = (scenario.initial.completedSets ?? []).map(pair);
+    if (scenario.initial.currentSet) match.currentSet = pair(scenario.initial.currentSet);
+    if (scenario.initial.currentGame) match.currentGame = pair(scenario.initial.currentGame);
+    match.startedAt = new Date(T0).toISOString();
+  }
+  let clock = T0;
+  for (const step of scenario.steps) {
+    if (step === "x") { clock = T0 + ((scenario.settings.timedMinutes ?? 0) * 60 + 30) * 1000; continue; }
+    for (const teamIndex of expandSteps([step])) {
+      const result = scoring.awardPoint(match, teamIndex, scenario.settings, clock);
+      if (result.matchWon) {
+        match.state = "finished";
+        const bySets = match.completedSets.filter((set) => set.teamOne > set.teamTwo).length
+          > match.completedSets.filter((set) => set.teamTwo > set.teamOne).length ? 0 : 1;
+        match.winnerTeamIndex = match.timeWinnerTeamIndex ?? bySets;
+        break;
+      }
     }
+    if (match.state === "finished") break;
   }
   return match;
 }
@@ -49,6 +64,8 @@ for (const scenario of fixture.scenarios) {
     assert.deepEqual([match.currentSet.teamOne, match.currentSet.teamTwo], expected.currentSet);
     assert.deepEqual(match.completedSets.map((set) => [set.teamOne, set.teamTwo]), expected.completedSets);
     assert.equal(Boolean(match.inTiebreak), expected.inTiebreak);
+    assert.equal(Boolean(match.decidingGame), Boolean(expected.decidingGame));
+    assert.equal(match.endReason ?? null, expected.endReason ?? null);
   });
 }
 
@@ -73,7 +90,7 @@ test("the rule profile is snapshotted on the first point and later setting chang
 });
 
 test("unknown or missing rule settings fall back to classic scoring", () => {
-  assert.deepEqual({ ...scoring.matchRules({}, {}) }, { gamesToWinSet: 6, setsToWinMatch: 1, gameMode: "advantage", setTiebreak: false });
+  assert.deepEqual({ ...scoring.matchRules({}, {}) }, { gamesToWinSet: 6, setsToWinMatch: 1, gameMode: "advantage", setTiebreak: false, timedMinutes: 0 });
   assert.equal(scoring.matchRules({}, { gameMode: "nonsense" }).gameMode, "advantage");
 });
 

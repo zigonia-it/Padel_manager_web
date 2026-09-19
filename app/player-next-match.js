@@ -3,6 +3,7 @@ window.PadelstarPlayerNextMatch = (() => {
     accentStyle,
     approvalPanelMarkup,
     bindApprovalPanel,
+    timerMarkup,
     bindScoreboardTable,
     elements,
     escapeHtml,
@@ -115,6 +116,7 @@ window.PadelstarPlayerNextMatch = (() => {
       <div><span>${t("player.teammate")}</span><strong>${teammate ? escapeHtml(teammate.name) : t("common.single")}</strong></div>
       <div><span>${t("player.opponents")}</span><strong>${opponentNames}</strong></div>
     </div>
+    ${isPlaying ? `<p class="hint">${timerMarkup(match)}</p>` : ""}
     ${isPlaying ? scoreboardTableMarkup(match, true) : ""}
     <div class="next-match-summary">
       <span>${escapeHtml(matchContextText(match))}</span>

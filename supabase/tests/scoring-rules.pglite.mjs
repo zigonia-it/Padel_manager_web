@@ -36,19 +36,33 @@ function expandSteps(steps) {
   });
 }
 
+function expandStepsWithClock(steps) {
+  return steps.flatMap((step) => (step === 'x' ? ['x'] : expandSteps([step])));
+}
+
 let pass = 0, fail = 0;
 let n = 0;
 for (const scenario of scenarios) {
   n += 1;
   const T = uuid(1000 + n);
+  const pair = ([teamOne, teamTwo]) => ({ teamOne, teamTwo });
+  const initial = scenario.initial ?? {};
   const match = { id: M1, state: 'playing', status: 'active', teamOne: team([A, uuid(102)]), teamTwo: team([uuid(103), uuid(104)]),
-    currentGame: { teamOne: 0, teamTwo: 0 }, currentSet: { teamOne: 0, teamTwo: 0 }, completedSets: [], undoStack: [], courtId: 'c1', courtName: 'Bane 1' };
+    currentGame: initial.currentGame ? pair(initial.currentGame) : { teamOne: 0, teamTwo: 0 },
+    currentSet: initial.currentSet ? pair(initial.currentSet) : { teamOne: 0, teamTwo: 0 },
+    completedSets: (initial.completedSets ?? []).map(pair), undoStack: [], courtId: 'c1', courtName: 'Bane 1' };
+  if (scenario.initial) match.startedAt = new Date().toISOString();
   const state = { status: 'Runde pågår', settings: scenario.settings, revision: 1, rounds: [{ id: 'r1', status: 'active', matches: [match] }] };
   await pg.query(`insert into public.tournaments(id,invite_code,admin_token,state,revision) values ($1,'ABCD2345','admintoken-1234567890',$2::jsonb,1)`, [T, JSON.stringify(state)]);
   await pg.query(`insert into public.player_sessions values ($1,$2,encode(extensions.digest($3,'sha256'),'hex'))`, [T, A, TOK]);
 
   let last = null, error = null;
-  for (const teamIndex of expandSteps(scenario.steps)) {
+  for (const teamIndex of expandStepsWithClock(scenario.steps)) {
+    if (teamIndex === 'x') {
+      // the match clock runs out: move the match start into the past
+      await pg.query(`update public.tournaments set state = jsonb_set(state, '{rounds,0,matches,0,startedAt}', to_jsonb(now() - ($2 || ' minutes')::interval)) where id = $1`, [T, String((scenario.settings.timedMinutes ?? 0) + 1)]);
+      continue;
+    }
     try {
       const r = await pg.query(`select public.save_player_point_impl($1,'ABCD2345',$2,$3,$4,$5) as r`, [T, A, M1, teamIndex, TOK]);
       last = r.rows[0].r;
@@ -66,6 +80,8 @@ for (const scenario of scenarios) {
     if (JSON.stringify([got.currentSet.teamOne, got.currentSet.teamTwo]) !== JSON.stringify(e.currentSet)) problems.push(`set ${JSON.stringify(got.currentSet)}`);
     if (JSON.stringify(got.completedSets.map((s) => [s.teamOne, s.teamTwo])) !== JSON.stringify(e.completedSets)) problems.push(`completed ${JSON.stringify(got.completedSets)}`);
     if (Boolean(got.inTiebreak) !== e.inTiebreak) problems.push(`inTiebreak ${got.inTiebreak}`);
+    if (Boolean(got.decidingGame) !== Boolean(e.decidingGame)) problems.push(`decidingGame ${got.decidingGame}`);
+    if ((got.endReason ?? null) !== (e.endReason ?? null)) problems.push(`endReason ${got.endReason}`);
     if (got.rules?.gameMode !== scenario.settings.gameMode) problems.push(`rules snapshot ${JSON.stringify(got.rules)}`);
   }
   if (problems.length) { fail += 1; console.log('  FAIL', scenario.name, problems.join('; ')); } else { pass += 1; console.log('  ok  ', scenario.name); }

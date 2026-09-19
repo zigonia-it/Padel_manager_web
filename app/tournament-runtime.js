@@ -252,7 +252,7 @@ window.PadelstarTournamentRuntime = (() => {
       match.currentGame = { teamOne: 0, teamTwo: 0 };
       match.approval = {
         status: "draft",
-        winnerTeamIndex: setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1,
+        winnerTeamIndex: match.timeWinnerTeamIndex ?? (setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1),
         completedSets: structuredClone(match.completedSets ?? []),
         approvals: [],
         corrections: 0,
@@ -270,7 +270,7 @@ window.PadelstarTournamentRuntime = (() => {
       match.state = "finished";
       match.status = "completed";
       match.currentGame = { teamOne: 0, teamTwo: 0 };
-      match.winnerTeamIndex = setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1;
+      match.winnerTeamIndex = match.timeWinnerTeamIndex ?? (setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1);
       match.isWalkover = false;
       match.completedAt = now();
       recordEvent?.("match_completed", "match", match.id, { winnerTeamIndex: match.winnerTeamIndex, isWalkover: false });

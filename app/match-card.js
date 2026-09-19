@@ -120,6 +120,40 @@
     }
 
 
+
+    // ---- Timed matches (Phase 14) --------------------------------------------------------------
+    function timerSeconds(startedAt, minutes, now = Date.now()) {
+      const start = Date.parse(startedAt);
+      if (!minutes || Number.isNaN(start)) return null;
+      return Math.max(0, Math.ceil((start + minutes * 60000 - now) / 1000));
+    }
+
+    function timerLabel(seconds) {
+      return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    }
+
+    function timerMarkup(match) {
+      if (match.endReason === "timeExpired") return `<span class="match-timer match-timer-ended">${translate("match.timeExpired")}</span>`;
+      const minutes = match.rules?.timedMinutes ?? getState().settings?.timedMinutes ?? 0;
+      if (!minutes || match.state !== "playing") return "";
+      const seconds = match.startedAt ? timerSeconds(match.startedAt, minutes) : minutes * 60;
+      const deciding = Boolean(match.decidingGame);
+      return `<span class="match-timer ${deciding ? "match-timer-expired" : ""}" role="timer" data-timer-start="${escapeAttribute(match.startedAt ?? "")}" data-timer-minutes="${minutes}" ${deciding ? "data-deciding=\"true\"" : ""} aria-label="${translate("match.timeLeft")}">${deciding ? translate("match.decidingGame") : timerLabel(seconds)}</span>`;
+    }
+
+    // Called every second: updates every visible countdown (the last minute is highlighted, never negative).
+    function updateTimers(root = global.document, now = Date.now()) {
+      root.querySelectorAll(".match-timer[data-timer-minutes]").forEach((element) => {
+        if (element.dataset.deciding === "true") return;
+        const minutes = Number(element.dataset.timerMinutes);
+        const seconds = element.dataset.timerStart ? timerSeconds(element.dataset.timerStart, minutes, now) : minutes * 60;
+        const expired = seconds === 0;
+        element.textContent = expired ? `00:00 · ${translate("match.timeExpiredNote")}` : timerLabel(seconds);
+        element.classList.toggle("match-timer-warning", seconds !== null && seconds > 0 && seconds <= 60);
+        element.classList.toggle("match-timer-expired", expired);
+      });
+    }
+
     // ---- Result approval (Phase 11) ------------------------------------------------------------
     function approvalSetsText(approval) {
       return (approval?.completedSets ?? []).map((set) => `${set.teamOne}–${set.teamTwo}`).join(", ");
@@ -264,6 +298,7 @@
         </div>
         <div class="match-top-actions">
           <span class="match-court">${escapeHtml(match.courtName ?? translate("tournament.noCourtAssigned"))}</span>
+          ${timerMarkup(match)}
           <span class="match-status ${match.state}">${matchStateText(match.state)}</span>
         </div>
       </div>
@@ -351,7 +386,7 @@
       return card;
     }
 
-    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable, scorerPanelMarkup, approvalPanelMarkup, bindApprovalPanel };
+    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable, scorerPanelMarkup, approvalPanelMarkup, bindApprovalPanel, timerMarkup, updateTimers };
   }
 
   global.PadelstarMatchCard = { create };

@@ -35,6 +35,7 @@
       elements.tournamentSettingsForm.elements.setsToWinMatch.value = state.settings.setsToWinMatch;
       elements.tournamentSettingsForm.elements.gameMode.value = state.settings.gameMode ?? "advantage";
       elements.tournamentSettingsForm.elements.setTiebreak.checked = Boolean(state.settings.setTiebreak);
+      elements.tournamentSettingsForm.elements.timedMinutes.value = state.settings.timedMinutes ?? 0;
       elements.generateRoundButton.disabled = Boolean(callbacks.generateRoundBlockReason());
       elements.generateRoundButton.textContent = callbacks.tournamentActionText();
       elements.completeRoundButton.textContent = translate("finishTournament");

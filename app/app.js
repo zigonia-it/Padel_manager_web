@@ -552,6 +552,7 @@ const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   scoreSummary: (match) => scoreSummary(match),
   scoreboardTableMarkup: (match, editable) => matchCard.scoreboardTableMarkup(match, editable),
   approvalPanelMarkup: (match, editable, scoreOnly) => matchCard.approvalPanelMarkup(match, editable, scoreOnly),
+  timerMarkup: (match) => matchCard.timerMarkup(match),
   bindApprovalPanel: (root, match) => matchCard.bindApprovalPanel(root, match),
   t: (key, values) => t(key, values),
 });
@@ -1173,8 +1174,8 @@ function activateSupabaseClient() {
   connectRealtimeForCurrentState();
 }
 
-function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
-  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
+function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, timedMinutes, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
+  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, timedMinutes, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
 }
 
 function createPlayer(name, index, avatarId = null, accent = null) {
@@ -1564,6 +1565,8 @@ function activateAdminPanel(panel) {
   window.PadelstarWorkspaceRail?.syncActiveState();
   return result;
 }
+
+window.setInterval?.(() => matchCard.updateTimers(), 1000);
 
 function render() {
   const result = appRenderer?.render();

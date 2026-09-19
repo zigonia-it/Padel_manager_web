@@ -141,3 +141,45 @@
     flex: 1 1 calc(50% - 8px);
   }
 }
+
+/* =========================================================
+   MATCH TIMER (Phase 14): countdown of a timed match
+   ========================================================= */
+
+.match-timer {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.3));
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.match-timer-warning {
+  border-color: var(--warning, #f2b84b);
+  color: var(--warning, #f2b84b);
+  animation: match-timer-pulse 1s ease-in-out infinite;
+}
+
+.match-timer-expired {
+  border-color: var(--danger, #ff8a8a);
+  color: var(--danger, #ff8a8a);
+  white-space: normal;
+}
+
+.match-timer-ended {
+  color: var(--ui-muted, #9fb4cc);
+  font-weight: 700;
+}
+
+@keyframes match-timer-pulse {
+  50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .match-timer-warning { animation: none; }
+}

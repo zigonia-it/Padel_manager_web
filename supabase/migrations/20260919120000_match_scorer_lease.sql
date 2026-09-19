@@ -629,6 +629,14 @@ declare
   game_won boolean;
   tiebreak_won boolean;
   tiebreak_points jsonb;
+  time_minutes integer;
+  time_expired boolean;
+  deciding boolean;
+  match_over boolean;
+  time_winner integer;
+  games_one integer;
+  games_two integer;
+  winner_index integer;
 begin
   if p_tournament_id is null
     or p_invite_code is null
@@ -730,13 +738,22 @@ begin
             'gamesToWinSet', games_to_win_set,
             'setsToWinMatch', sets_to_win_match,
             'gameMode', case when current_state->'settings'->>'gameMode' = 'goldenPoint' then 'goldenPoint' else 'advantage' end,
-            'setTiebreak', coalesce((current_state->'settings'->>'setTiebreak')::boolean, false));
+            'setTiebreak', coalesce((current_state->'settings'->>'setTiebreak')::boolean, false),
+            'timedMinutes', greatest(0, coalesce((current_state->'settings'->>'timedMinutes')::integer, 0)));
           match_item := jsonb_set(match_item, '{rules}', rules, true);
+        end if;
+        -- The clock of a timed match starts with the first point.
+        if match_item->>'startedAt' is null then
+          match_item := jsonb_set(match_item, '{startedAt}', to_jsonb(now()), true);
         end if;
         games_to_win_set := coalesce((rules->>'gamesToWinSet')::integer, games_to_win_set);
         sets_to_win_match := coalesce((rules->>'setsToWinMatch')::integer, sets_to_win_match);
         game_mode := coalesce(rules->>'gameMode', 'advantage');
         set_tiebreak := coalesce((rules->>'setTiebreak')::boolean, false);
+        deciding := coalesce((match_item->>'decidingGame')::boolean, false);
+        if deciding then
+          game_mode := 'goldenPoint';
+        end if;
         in_tiebreak := coalesce((match_item->>'inTiebreak')::boolean, false);
 
         scoring_key := case when p_team_index = 0 then 'teamOne' else 'teamTwo' end;
@@ -766,6 +783,8 @@ begin
           current_game := jsonb_set(current_game, ARRAY[scoring_key], to_jsonb(scoring_points + 1), true);
         end if;
 
+        match_over := false;
+        time_winner := null;
         if game_won then
           current_game := '{"teamOne": 0, "teamTwo": 0}'::jsonb;
           if tiebreak_won then
@@ -776,69 +795,107 @@ begin
           end if;
           scoring_games := coalesce((current_set->>scoring_key)::integer, 0);
           other_games := coalesce((current_set->>other_key)::integer, 0);
+          completed_sets := coalesce(match_item->'completedSets', '[]'::jsonb);
 
           if not tiebreak_won and set_tiebreak
             and scoring_games = games_to_win_set and other_games = games_to_win_set then
             in_tiebreak := true;
           elsif (scoring_games = games_to_win_set and scoring_games - other_games >= 2)
             or (scoring_games = games_to_win_set + 1 and other_games in (games_to_win_set - 1, games_to_win_set)) then
-            completed_sets := coalesce(match_item->'completedSets', '[]'::jsonb)
+            completed_sets := completed_sets
               || jsonb_build_array(case when tiebreak_points is null then current_set else current_set || jsonb_build_object('tiebreak', tiebreak_points) end);
-            set_one_wins := (
-              select count(*) from jsonb_array_elements(completed_sets) set_item
-              where (set_item->>'teamOne')::integer > (set_item->>'teamTwo')::integer
-            );
-            set_two_wins := (
-              select count(*) from jsonb_array_elements(completed_sets) set_item
-              where (set_item->>'teamTwo')::integer > (set_item->>'teamOne')::integer
-            );
             match_item := jsonb_set(match_item, '{completedSets}', completed_sets, true);
+            set_one_wins := (select count(*) from jsonb_array_elements(completed_sets) set_item where (set_item->>'teamOne')::integer > (set_item->>'teamTwo')::integer);
+            set_two_wins := (select count(*) from jsonb_array_elements(completed_sets) set_item where (set_item->>'teamTwo')::integer > (set_item->>'teamOne')::integer);
             if greatest(set_one_wins, set_two_wins) >= sets_to_win_match then
-              -- Phase 11: the match is not final until the result is approved. The court is freed now
-              -- (the next waiting match starts), the scorer submits the result, the teams approve it.
-              match_item := jsonb_set(match_item, '{state}', '"awaitingApproval"'::jsonb, true);
-              match_item := jsonb_set(match_item, '{approval}', jsonb_build_object(
-                'status', 'draft',
-                'winnerTeamIndex', case when set_one_wins > set_two_wins then 0 else 1 end,
-                'completedSets', completed_sets,
-                'approvals', '[]'::jsonb,
-                'corrections', 0,
-                'endedAt', now(),
-                'escalateAt', now() + interval '10 minutes',
-                'autoApproveAt', now() + interval '30 minutes'), true);
-              next_waiting_index := null;
-              for waiting_match_index in 0..(jsonb_array_length(matches) - 1) loop
-                if matches->waiting_match_index->>'state' = 'waiting' then
-                  next_waiting_index := waiting_match_index;
-                  exit;
-                end if;
-              end loop;
-              if next_waiting_index is not null then
-                matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'state'], '"playing"'::jsonb, true);
-                matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'courtId'], match_item->'courtId', true);
-                matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'courtName'], match_item->'courtName', true);
-              end if;
-              -- Only one side uses the app: nobody on the other team can approve or dispute, so the result is
-              -- approved automatically when the scorer registers the winning point (no submit step).
-              if not exists (
-                select 1
-                from jsonb_array_elements(coalesce(match_item->(case when public._approval_team_of(match_item, p_player_id) = 0 then 'teamTwo' else 'teamOne' end)->'players', '[]'::jsonb)) opp
-                join public.player_sessions ps on ps.tournament_id = p_tournament_id and ps.player_id::text = opp->>'id'
-              ) then
-                match_item := jsonb_set(match_item, '{approval,approvals}', jsonb_build_array(
-                  jsonb_build_object('playerId', p_player_id, 'teamIndex', public._approval_team_of(match_item, p_player_id), 'at', now(), 'submitter', true),
-                  jsonb_build_object('playerId', null, 'teamIndex', 1 - public._approval_team_of(match_item, p_player_id), 'at', now(), 'auto', true, 'reason', 'no_device')), true);
-                match_item := jsonb_set(match_item, '{approval,submittedBy}', to_jsonb(p_player_id), true);
-                match_item := jsonb_set(match_item, '{approval,autoReason}', '"noOpponentDevice"'::jsonb, true);
-                match_item := public._approval_finalize(match_item, true, '"auto"'::jsonb);
-              end if;
+              match_over := true;
             else
               current_set := '{"teamOne": 0, "teamTwo": 0}'::jsonb;
+            end if;
+          end if;
+
+          -- Timed match: a game won after the clock ran out ends the match. The leader on sets, then on games,
+          -- wins; when level a deciding golden-point game (or the tiebreak that is due) decides.
+          time_minutes := coalesce((rules->>'timedMinutes')::integer, 0);
+          time_expired := time_minutes > 0
+            and match_item->>'startedAt' is not null
+            and now() >= (match_item->>'startedAt')::timestamptz + time_minutes * interval '1 minute';
+          if not match_over and (deciding or time_expired) then
+            if deciding then
+              time_winner := p_team_index;
+            else
+              set_one_wins := (select count(*) from jsonb_array_elements(completed_sets) set_item where (set_item->>'teamOne')::integer > (set_item->>'teamTwo')::integer);
+              set_two_wins := (select count(*) from jsonb_array_elements(completed_sets) set_item where (set_item->>'teamTwo')::integer > (set_item->>'teamOne')::integer);
+              games_one := (select coalesce(sum((set_item->>'teamOne')::integer), 0) from jsonb_array_elements(completed_sets) set_item) + coalesce((current_set->>'teamOne')::integer, 0);
+              games_two := (select coalesce(sum((set_item->>'teamTwo')::integer), 0) from jsonb_array_elements(completed_sets) set_item) + coalesce((current_set->>'teamTwo')::integer, 0);
+              if set_one_wins <> set_two_wins then
+                time_winner := case when set_one_wins > set_two_wins then 0 else 1 end;
+              elsif games_one <> games_two then
+                time_winner := case when games_one > games_two then 0 else 1 end;
+              else
+                deciding := true;
+              end if;
+            end if;
+            if time_winner is not null then
+              -- keep the unfinished set in the record when it points the same way as the result
+              if (current_set->>'teamOne')::integer <> (current_set->>'teamTwo')::integer
+                and (case when (current_set->>'teamOne')::integer > (current_set->>'teamTwo')::integer then 0 else 1 end) = time_winner then
+                completed_sets := completed_sets || jsonb_build_array(jsonb_build_object(
+                  'teamOne', (current_set->>'teamOne')::integer, 'teamTwo', (current_set->>'teamTwo')::integer));
+              end if;
+              match_item := jsonb_set(match_item, '{completedSets}', completed_sets, true);
+              match_item := jsonb_set(match_item, '{timeWinnerTeamIndex}', to_jsonb(time_winner), true);
+              match_item := jsonb_set(match_item, '{endReason}', '"timeExpired"'::jsonb, true);
+              deciding := false;
+              match_over := true;
+            end if;
+          end if;
+
+          if match_over then
+            winner_index := coalesce(time_winner, case when set_one_wins > set_two_wins then 0 else 1 end);
+            -- Phase 11: the match is not final until the result is approved. The court is freed now
+            -- (the next waiting match starts), the scorer submits the result, the teams approve it.
+            match_item := jsonb_set(match_item, '{state}', '"awaitingApproval"'::jsonb, true);
+            match_item := jsonb_set(match_item, '{approval}', jsonb_build_object(
+              'status', 'draft',
+              'winnerTeamIndex', winner_index,
+              'completedSets', completed_sets,
+              'approvals', '[]'::jsonb,
+              'corrections', 0,
+              'endedAt', now(),
+              'escalateAt', now() + interval '10 minutes',
+              'autoApproveAt', now() + interval '30 minutes'), true);
+            next_waiting_index := null;
+            for waiting_match_index in 0..(jsonb_array_length(matches) - 1) loop
+              if matches->waiting_match_index->>'state' = 'waiting' then
+                next_waiting_index := waiting_match_index;
+                exit;
+              end if;
+            end loop;
+            if next_waiting_index is not null then
+              matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'state'], '"playing"'::jsonb, true);
+              matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'courtId'], match_item->'courtId', true);
+              matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'courtName'], match_item->'courtName', true);
+            end if;
+            -- Only one side uses the app: nobody on the other team can approve or dispute, so the result is
+            -- approved automatically when the scorer registers the winning point (no submit step).
+            if not exists (
+              select 1
+              from jsonb_array_elements(coalesce(match_item->(case when public._approval_team_of(match_item, p_player_id) = 0 then 'teamTwo' else 'teamOne' end)->'players', '[]'::jsonb)) opp
+              join public.player_sessions ps on ps.tournament_id = p_tournament_id and ps.player_id::text = opp->>'id'
+            ) then
+              match_item := jsonb_set(match_item, '{approval,approvals}', jsonb_build_array(
+                jsonb_build_object('playerId', p_player_id, 'teamIndex', public._approval_team_of(match_item, p_player_id), 'at', now(), 'submitter', true),
+                jsonb_build_object('playerId', null, 'teamIndex', 1 - public._approval_team_of(match_item, p_player_id), 'at', now(), 'auto', true, 'reason', 'no_device')), true);
+              match_item := jsonb_set(match_item, '{approval,submittedBy}', to_jsonb(p_player_id), true);
+              match_item := jsonb_set(match_item, '{approval,autoReason}', '"noOpponentDevice"'::jsonb, true);
+              match_item := public._approval_finalize(match_item, true, '"auto"'::jsonb);
             end if;
           end if;
         end if;
 
         match_item := jsonb_set(match_item, '{inTiebreak}', to_jsonb(in_tiebreak), true);
+        match_item := jsonb_set(match_item, '{decidingGame}', to_jsonb(deciding), true);
         match_item := jsonb_set(match_item, '{currentSet}', coalesce(current_set, match_item->'currentSet'), true);
         match_item := jsonb_set(match_item, '{currentGame}', current_game, true);
         matches := jsonb_set(matches, ARRAY[match_index::text], match_item, false);

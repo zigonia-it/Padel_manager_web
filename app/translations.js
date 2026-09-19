@@ -1503,6 +1503,27 @@ Object.assign(padelstarTranslations.en, {
   "result.failed": "Couldn't update the result. Try again.",
   "result.finishBlocked": "Some results are awaiting approval. Approve them before finishing the tournament.",
 });
+// Timed matches (Phase 14).
+Object.assign(padelstarTranslations.nb, {
+  "admin.timedMinutes": "Tidsbegrenset kamp (minutter, 0 = ingen)",
+  "common.minutesValue": "{minutes} min",
+  "rules.timedTitle": "Tidsbegrenset kamp",
+  "rules.timedText": "Kampen varer {minutes} minutter fra første poeng. Når tiden er ute fullføres pågående game, og den som leder på sett (deretter games) vinner. Er det likt, avgjør ett golden point-game.",
+  "match.timeExpired": "Tid utløpt",
+  "match.timeExpiredNote": "Tiden er ute – pågående game fullføres.",
+  "match.decidingGame": "Avgjørende game (golden point)",
+  "match.timeLeft": "Tid igjen",
+});
+Object.assign(padelstarTranslations.en, {
+  "admin.timedMinutes": "Timed match (minutes, 0 = none)",
+  "common.minutesValue": "{minutes} min",
+  "rules.timedTitle": "Timed match",
+  "rules.timedText": "The match lasts {minutes} minutes from the first point. When time is up the game in progress is finished and the leader on sets (then games) wins. If level, one golden-point game decides.",
+  "match.timeExpired": "Time expired",
+  "match.timeExpiredNote": "Time is up – the game in progress is finished.",
+  "match.decidingGame": "Deciding game (golden point)",
+  "match.timeLeft": "Time left",
+});
 window.PadelstarTranslations = padelstarTranslations;
 window.PadelstarI18n = {
   fallbackLanguage,

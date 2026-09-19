@@ -67,6 +67,7 @@ window.PadelstarCreateWizard = (() => {
         })],
         ...(form.elements.gameMode.value === "goldenPoint" ? [[t("admin.gameMode"), t("admin.gameModeGoldenPoint")]] : []),
         ...(form.elements.setTiebreak.checked ? [[t("admin.setTiebreak"), t("common.yes")]] : []),
+        ...(Number(form.elements.timedMinutes.value) > 0 ? [[t("admin.timedMinutes"), t("common.minutesValue", { minutes: form.elements.timedMinutes.value })]] : []),
       ];
       elements.createWizardSummary.innerHTML = rows
         .map(([label, value]) => `<li><span>${label}</span><strong>${value}</strong></li>`)

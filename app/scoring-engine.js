@@ -202,6 +202,7 @@ window.PadelstarScoring = (() => {
       setsToWinMatch: source.setsToWinMatch ?? settings.setsToWinMatch ?? 1,
       gameMode: GAME_MODES.includes(source.gameMode ?? settings.gameMode) ? (source.gameMode ?? settings.gameMode) : "advantage",
       setTiebreak: Boolean(source.setTiebreak ?? settings.setTiebreak ?? false),
+      timedMinutes: Math.max(0, Math.floor(Number(source.timedMinutes ?? settings.timedMinutes ?? 0)) || 0),
     };
   }
 
@@ -210,9 +211,60 @@ window.PadelstarScoring = (() => {
     return match.rules;
   }
 
+  // A timed match ends when the clock has run out and the game in progress is finished.
+  function timeExpired(match, rules, nowMs) {
+    if (!rules.timedMinutes || !match.startedAt) return false;
+    return nowMs >= Date.parse(match.startedAt) + rules.timedMinutes * 60000;
+  }
+
+  function remainingSeconds(match, nowMs = Date.now()) {
+    const minutes = match?.rules?.timedMinutes;
+    if (!minutes || !match.startedAt) return null;
+    return Math.max(0, Math.ceil((Date.parse(match.startedAt) + minutes * 60000 - nowMs) / 1000));
+  }
+
+  function totalGames(match, teamIndex) {
+    const key = teamIndex === 0 ? "teamOne" : "teamTwo";
+    return match.completedSets.reduce((sum, set) => sum + (set[key] ?? 0), 0) + (match.currentSet?.[key] ?? 0);
+  }
+
   // Applies one point to the match. Returns { gameWon, setWon, matchWon }; the caller finishes the match.
-  function awardPoint(match, teamIndex, settings) {
+  // Timed matches: a game won after the clock ran out ends the match. The leader on sets, then on games, wins;
+  // when level, one deciding golden-point game (or tiebreak, if one is due) decides. The winner is stored in
+  // timeWinnerTeamIndex because the set count alone cannot always express it.
+  function awardPoint(match, teamIndex, settings, nowMs = Date.now()) {
     const rules = snapshotRules(match, settings);
+    if (!match.startedAt) match.startedAt = new Date(nowMs).toISOString();
+    const result = applyPoint(match, teamIndex, rules);
+    if (!result.gameWon || result.matchWon) return result;
+    if (!match.decidingGame && !timeExpired(match, rules, nowMs)) return result;
+
+    let winner;
+    if (match.decidingGame) {
+      winner = teamIndex;
+    } else {
+      const sets = [setsWonByTeam(match, 0), setsWonByTeam(match, 1)];
+      const games = [totalGames(match, 0), totalGames(match, 1)];
+      if (sets[0] !== sets[1]) winner = sets[0] > sets[1] ? 0 : 1;
+      else if (games[0] !== games[1]) winner = games[0] > games[1] ? 0 : 1;
+      else {
+        match.decidingGame = true;
+        return result;
+      }
+    }
+    // Keep the unfinished set in the record when it points the same way as the result (for the statistics).
+    const partial = { teamOne: match.currentSet.teamOne, teamTwo: match.currentSet.teamTwo };
+    if (partial.teamOne !== partial.teamTwo && (partial.teamOne > partial.teamTwo ? 0 : 1) === winner) {
+      match.completedSets.push(partial);
+    }
+    match.timeWinnerTeamIndex = winner;
+    match.endReason = "timeExpired";
+    match.decidingGame = false;
+    return { gameWon: true, setWon: true, matchWon: true };
+  }
+
+  function applyPoint(match, teamIndex, rules) {
+    const gameMode = match.decidingGame ? "goldenPoint" : rules.gameMode;
     const scoringTeam = teamIndex === 0 ? "teamOne" : "teamTwo";
     const otherTeam = teamIndex === 0 ? "teamTwo" : "teamOne";
     const game = match.currentGame;
@@ -226,7 +278,7 @@ window.PadelstarScoring = (() => {
         gameWon = true;
         tiebreakWon = true;
       }
-    } else if (scoring === 4 || (scoring === 3 && (other < 3 || rules.gameMode === "goldenPoint"))) {
+    } else if (scoring === 4 || (scoring === 3 && (other < 3 || gameMode === "goldenPoint"))) {
       gameWon = true;
     } else if (scoring === 3 && other === 3) {
       game[scoringTeam] = 4;
@@ -290,6 +342,7 @@ window.PadelstarScoring = (() => {
     matchRules,
     snapshotRules,
     awardPoint,
+    remainingSeconds,
     pointLabel,
   };
 })();
