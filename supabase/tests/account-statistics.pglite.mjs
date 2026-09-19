@@ -118,5 +118,19 @@ await finalize(id, 'cancelled');
 s = await stats(id);
 ok('a cancelled tournament still records what was played, marked cancelled', s[U1]?.outcome === 'cancelled' && s[U1].matches === 1);
 
+console.log('a failed statistics transfer changes nothing (all or nothing)');
+id = await tournament({ sets: [{ teamOne: 6, teamTwo: 3 }], winner: 0 });
+// corrupt one finished match so the statistics cannot be computed
+await pg.query(`update public.tournaments set state = jsonb_set(state, '{rounds,0,matches,0,completedSets}', '[{"teamOne":-1,"teamTwo":3}]') where id = $1`, [id]);
+const statsBefore = (await pg.query('select count(*)::int as n from public.account_tournament_statistics')).rows[0].n;
+const failedFinalize = await finalize(id).then(() => null, (e) => e.message);
+ok('the finalization is refused with a clear error', typeof failedFinalize === 'string' && failedFinalize.includes('Invalid set score'), failedFinalize);
+ok('no statistics rows were written', (await pg.query('select count(*)::int as n from public.account_tournament_statistics')).rows[0].n === statsBefore);
+ok('no receipt was written, so the tournament is not marked as saved', (await pg.query('select count(*)::int as n from public.tournament_finalization_receipts where tournament_id = $1', [id])).rows[0].n === 0);
+ok('the tournament is still running and can be corrected and finished', (await pg.query(`select state->>'status' as s from public.tournaments where id = $1`, [id])).rows[0].s === 'Runde pågår');
+await pg.query(`update public.tournaments set state = jsonb_set(state, '{rounds,0,matches,0,completedSets}', '[{"teamOne":6,"teamTwo":4}]') where id = $1`, [id]);
+await finalize(id);
+ok('after the data is fixed the same finalization succeeds', Object.keys(await stats(id)).length === 2);
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

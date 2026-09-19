@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&amp;family=Instrument+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#eef3f9;color:#0d1b2a}
+body{font-family:'Instrument Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:#1b8a52;text-decoration:none;border-bottom:1px solid rgba(27,138,82,.42);padding-bottom:1px}
+a:hover{color:#0d1b2a;border-bottom-color:#0d1b2a}
+button{font-family:inherit}
+@keyframes psIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes psTick{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes psPulse{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes psBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes psPop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:rgba(91,173,255,.22);border-radius:9px}
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #eef3f9, #ccdced)">
+
+<div style="position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 14px; padding: 10px 16px; background: rgba(255,255,255,.9); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(20,60,105,.13)">
+  <img src="./padelstar-icon-mu34ykay-glen.png" alt="" width="30" height="30" style="border-radius: 8px; flex: none; width: 60px; height: 60px">
+  <img src="./main_logo_without_icon-mu34x7n3-17bd.png" alt="" width="30" height="30" style="border-radius: 8px; flex: none; object-fit: contain; position: static; width: 200px; align-self: auto; height: 50px"><span style="font-size: 12px; color: #1F2831; letter-spacing: .09em; text-transform: none; line-height: 1.3">v. 0.6.0</span><div style="display:flex;flex-direction:column;min-width:0">
+    
+    
+  </div>
+  <h1 style="margin: 0; font-family: 'Archivo',sans-serif; font-size: clamp(28px,4vw,34px); font-weight: 800; line-height: .92; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; align-self: center; color: #214A75">RISLØKKA PADEL UKE 39</h1><div style="flex:1"></div>
+  <div role="group" aria-label="Fargetema" style="display:flex;align-items:center;gap:2px;padding:3px;border:1px solid rgba(20,60,105,.16);border-radius:999px;background:rgba(13,27,42,.04);flex:none">
+    <span aria-current="true" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.02em;color:#0a4b80;background:#ffffff;box-shadow:0 1px 2px rgba(15,40,70,.12)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f7ae0" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"></path></svg>Lys
+    </span>
+    <a href="./Padelstar%20UI.dc.html" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.02em;color:#56708c;border-bottom:0;text-decoration:none" style-hover="color:#0d1b2a;background:rgba(13,27,42,.05)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7.5 7.5 0 1 0 10.5 10.5z"></path></svg>Mørk
+    </a>
+  </div><div style="position:relative;display:flex;align-items:center;justify-content:space-between;gap:clamp(16px,2vw,30px);min-height:62px">
+    
+    <div style="flex:1;min-width:0;text-align:center">
+      
+      
+    </div>
+    
+  </div><span style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:#1b8a52;padding:5px 10px;border:1px solid rgba(27,138,82,.34);border-radius:999px;background:rgba(27,138,82,.08)">
+    <span style="width:6px;height:6px;border-radius:50%;background:#1b8a52;animation:psPulse 2.4s ease-in-out infinite"></span>Online
+  </span>
+  <select value="{{ screen }}" onChange="{{ onScreenPick }}" aria-label="Prototype-indeks" style="appearance:none;background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:600;max-width:190px;cursor:pointer">
+    <sc-for list="{{ allScreens }}" as="s" hint-placeholder-count="3">
+      <option value="{{ s.id }}" label="{{ s.label }}"></option>
+    </sc-for>
+  </select>
+  
+</div><sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:0 20px 60px">
+  <div style="width:100%;max-width:1080px">
+
+    <div style="position:relative;overflow:hidden;border-radius:22px;border:1px solid rgba(20,60,105,.13);background:#ffffff;margin-top:26px">
+      <div style="position:absolute;inset:0;background:linear-gradient(165deg,#d7e6f6 0%,#e7eef7 62%)"></div>
+      <div style="position:absolute;top:-120px;right:-80px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(79,168,255,.22),transparent 68%)"></div>
+      <div style="position:relative;padding:44px 34px 38px;display:flex;flex-direction:column;gap:26px">
+        
+        <div style="max-width:680px;display:flex;flex-direction:column;gap:17px">
+          <h1 style="margin: 0; font-family: 'Archivo',sans-serif; font-weight: 900; font-size: clamp(36px,6.4vw,62px); line-height: .98; letter-spacing: -.028em; text-wrap: balance; text-transform: uppercase; width: 730px; height: 120px">Spill mer<span style="color: #005FA8">.</span><br>Organiser mindre<span style="color: #005FA8">.</span></h1>
+          <p style="margin:0;font-size:17.5px;line-height:1.55;color:#3c5470;max-width:46ch;text-wrap:pretty">Opprett turneringen, inviter spillerne og la Padelstar ordne med resten.</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+          <button type="button" onClick="{{ goLogin }}" style="background: linear-gradient(180deg, #C4E5FF, #6CBBF8); color: #04121f; border: 0; border-radius: 6px; padding: 15px 24px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 26px rgba(35,108,168,.4); min-height: 48px">Logg inn</button>
+          <button type="button" onClick="{{ goCreate }}" style="background: linear-gradient(180deg, #5badff0d, #5badff30); border: 1px solid rgba(91,173,255,.42); color: #0a4b80; border-radius: 6px; padding: 15px 22px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 48px">Opprett turnering</button>
+          <button type="button" onClick="{{ goJoin }}" style="background: linear-gradient(180deg, #5BADFF00, #5badff26); border: 1px solid rgba(20,60,105,.18); color: #3c5470; border-radius: 6px; padding: 15px 22px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 48px">Bli med med kode</button>
+        </div>
+        <p style="margin:0;font-size:12.5px;color:#5b7490">Konto er valgfritt for å spille, men gir historikk og statistikk.</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,238px),1fr));gap:12px;margin-top:14px">
+      <sc-for list="{{ features }}" as="f" hint-placeholder-count="3">
+        <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:15px;padding:20px">
+          <div style="width:32px;height:3px;border-radius:2px;background:#0f7ae0;margin-bottom:14px"></div>
+          <h3 style="margin:0 0 7px;font-family:'Archivo',sans-serif;font-size:16.5px;font-weight:700;letter-spacing:-.01em">{{ f.title }}</h3>
+          <p style="margin:0;font-size:13.5px;line-height:1.5;color:#5b7490;text-wrap:pretty">{{ f.text }}</p>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:22px;background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:16px;overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(20,60,105,.1);flex-wrap:wrap">
+        <div>
+          <span style="font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: #0890F9; font-weight: 700">Lagret lokalt</span>
+          <h3 style="margin:5px 0 0;font-family:'Archivo',sans-serif;font-size:17px;font-weight:700">Dine turneringer</h3>
+        </div>
+        <button type="button" onClick="{{ toggleEmpty }}" style="background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#56708c;border-radius:6px;padding:8px 12px;font-size:11.5px;font-weight:600;cursor:pointer">{{ emptyToggleLabel }}</button>
+      </div>
+      <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 18px;flex-wrap:wrap">
+          <div style="width:40px;height:40px;flex:none;position:relative">
+            <div style="position:absolute;inset:0;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:linear-gradient(150deg,#62b6ff,#1a59f2)"></div>
+            <div style="position:absolute;inset:3px;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:13px;font-weight:800;color:#1470c4">RP</div>
+          </div>
+          <div style="flex:1;min-width:150px">
+            <div style="font-size:15.5px;font-weight:700">Risløkka Padel Uke 39</div>
+            <div style="font-size:12.5px;color:#56708c;font-variant-numeric:tabular-nums">7 spillere · 2 baner · kode TQA5CU6N</div>
+          </div>
+          <button type="button" onClick="{{ goKamper }}" style="background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:11px 16px;font-size:13px;font-weight:600;cursor:pointer;min-height:44px">Fortsett som admin</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ noSaved }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:38px 18px 42px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(91,173,255,.42)" stroke-width="1.2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M12 4v16M3 12h18"></path></svg>
+          <div>
+            <div style="font-family:'Archivo',sans-serif;font-size:16px;font-weight:700;margin-bottom:5px">Ingen turneringer ennå</div>
+            <p style="margin:0;font-size:13px;color:#56708c;max-width:34ch;line-height:1.5">Opprett din første turnering, eller bli med i en med invitasjonskode.</p>
+          </div>
+          <button type="button" onClick="{{ goCreate }}" style="background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:13px 20px;font-size:14px;font-weight:700;cursor:pointer;min-height:44px">Opprett turnering</button>
+        </div>
+      </sc-if>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;align-items:center;justify-content:space-between">
+      <button type="button" onClick="{{ goInstall }}" style="display:flex;align-items:center;gap:9px;background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#3c5470;border-radius:6px;padding:13px 16px;font-size:13px;font-weight:600;cursor:pointer;min-height:44px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0f7ae0" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"></path></svg>
+        Installer Padelstar på din enhet
+      </button>
+      <div style="display:flex;gap:16px;font-size:12.5px;color:#5b7490">
+        <a href="#" style="color: #0f7ae0; font-weight: 600">Bruksanvisning</a><a href="#" style="color: #0f7ae0; font-weight: 600">Personvern</a>
+      </div>
+    </div>
+    <p style="margin: 24px 0 0; font-size: 11.5px; color: #0d1b2a; text-align: center; font-weight: 600">Utviklet av Sigurd Steen Grødem · Copyright © 2026. All rights reserved.</p>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLogin }}">
+<div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding:34px 20px 60px">
+  <div style="width:100%;max-width:420px;animation:psIn .35s ease both">
+    <span style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#1b8a52;font-weight:700">Innlogging</span>
+    <h2 style="margin:7px 0 6px;font-family:'Archivo',sans-serif;font-size:29px;font-weight:800;letter-spacing:-.02em">Konto med passord</h2>
+    <p style="margin:0 0 24px;font-size:14px;color:#5b7490;line-height:1.5">Opprett eller oppdater spillerprofilen din for å ta vare på egen statistikk og historikk.</p>
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.13);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:16px">
+      <label style="display:grid;gap:7px;font-size:12.5px;font-weight:600;color:#3c5470">E-post
+        <input type="email" value="sigurd@zigonia.no" style="width:100%;background:rgba(255,255,255,.82);border:1px solid rgba(20,60,105,.18);border-radius:10px;padding:13px 13px;color:#0d1b2a;font-size:15px;min-height:48px">
+      </label>
+      <label style="display:grid;gap:7px;font-size:12.5px;font-weight:600;color:#3c5470">Passord
+        <input type="password" value="············" style="width:100%;background:rgba(255,255,255,.82);border:1px solid rgba(98,182,255,.62);border-radius:10px;padding:13px 13px;color:#0d1b2a;font-size:15px;min-height:48px;box-shadow:0 0 0 3px rgba(79,168,255,.1)">
+      </label>
+      <button type="button" onClick="{{ goCreate }}" style="background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px">Logg inn</button>
+      <div style="display:flex;align-items:center;gap:12px;color:#6a8299;font-size:11.5px"><span style="flex:1;height:1px;background:rgba(20,60,105,.13)"></span>eller<span style="flex:1;height:1px;background:rgba(20,60,105,.13)"></span></div>
+      <button type="button" style="background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:14px;font-size:14px;font-weight:600;cursor:pointer;min-height:48px">Opprett konto</button>
+      <button type="button" onClick="{{ goJoin }}" style="background:transparent;border:0;color:#56708c;font-size:13px;font-weight:600;cursor:pointer;padding:4px">Fortsett som gjest</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isJoin }}">
+<div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding:34px 20px 60px">
+  <div style="width:100%;max-width:440px;animation:psIn .35s ease both">
+    <span style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#1b8a52;font-weight:700">Bli med</span>
+    <h2 style="margin:7px 0 6px;font-family:'Archivo',sans-serif;font-size:29px;font-weight:800;letter-spacing:-.02em">Bli med i turnering</h2>
+    <p style="margin:0 0 22px;font-size:14px;color:#5b7490;line-height:1.5">Skriv inn invitasjonskoden du har fått fra arrangøren.</p>
+
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.13);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:18px">
+      <div style="display:grid;gap:9px">
+        <span style="font-size:12.5px;font-weight:600;color:#3c5470">Invitasjonskode</span>
+        <div style="display:flex;gap:7px">
+          <sc-for list="{{ codeCells }}" as="c" hint-placeholder-count="8">
+            <div style="flex:1;min-width:0;aspect-ratio:3/4;max-height:58px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.82);border:1px solid {{ c.border }};border-radius:9px;font-family:'Archivo',sans-serif;font-size:19px;font-weight:800;color:{{ c.color }}">{{ c.ch }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ joinError }}">
+        <div style="display:flex;gap:11px;padding:13px 14px;background:rgba(199,10,51,.1);border:1px solid rgba(192,48,79,.36);border-radius:11px;animation:psPop .25s ease both">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#c0304f" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4m0 4h.01"></path></svg>
+          <div>
+            <div style="font-size:13.5px;font-weight:700;color:#d4506b">Fant ikke turnering med kode TQA5CU6X.</div>
+            <div style="font-size:12.5px;color:#a04058;margin-top:3px">Kontroller koden, eller be arrangøren dele lenken på nytt.</div>
+          </div>
+        </div>
+      </sc-if>
+      <label style="display:grid;gap:7px;font-size:12.5px;font-weight:600;color:#3c5470">Navnet ditt
+        <input type="text" value="Marte" style="width:100%;background:rgba(255,255,255,.82);border:1px solid rgba(20,60,105,.18);border-radius:10px;padding:13px;color:#0d1b2a;font-size:15px;min-height:48px">
+      </label>
+      <div style="display:grid;gap:9px">
+        <span style="font-size:12.5px;font-weight:600;color:#3c5470">Din farge</span>
+        <div style="display:flex;flex-wrap:wrap;gap:9px">
+          <sc-for list="{{ gemSwatches }}" as="g" hint-placeholder-count="8">
+            <button type="button" aria-label="{{ g.name }}" style="width:34px;height:34px;padding:0;border:0;background:transparent;cursor:pointer;position:relative">
+              <span style="position:absolute;inset:0;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:{{ g.hex }};opacity:{{ g.opacity }}"></span>
+              <span style="position:absolute;inset:0;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);box-shadow:inset 0 0 0 2px {{ g.ring }}"></span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <button type="button" onClick="{{ toggleJoinError }}" style="background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#56708c;border-radius:6px;padding:10px;font-size:12px;font-weight:600;cursor:pointer">{{ joinErrorToggleLabel }}</button>
+      <button type="button" onClick="{{ goMin }}" style="background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px">Bli med i turnering</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCreate }}">
+<div style="flex:1;display:flex;justify-content:center;padding:26px 20px 90px">
+  <div style="width:100%;max-width:620px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+      <div>
+        <span style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#1b8a52;font-weight:700">Opprett · Steg {{ step }} av 4</span>
+        <h2 style="margin:6px 0 0;font-family:'Archivo',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.02em">{{ stepTitle }}</h2>
+      </div>
+    </div>
+    <div style="display:flex;gap:5px;margin-bottom:22px">
+      <sc-for list="{{ stepBars }}" as="b" hint-placeholder-count="4">
+        <div style="flex:1;height:4px;border-radius:2px;background:{{ b.bg }};transition:background .3s ease"></div>
+      </sc-for>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.13);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:20px;animation:psIn .3s ease both">
+      <sc-if value="{{ isStepName }}">
+        <label style="display:grid;gap:7px;font-size:12.5px;font-weight:600;color:#3c5470">Turneringsnavn
+          <input type="text" value="Risløkka Padel Uke 39" style="width:100%;background:rgba(255,255,255,.82);border:1px solid rgba(20,60,105,.18);border-radius:10px;padding:13px;color:#0d1b2a;font-size:16px;min-height:48px">
+        </label>
+        <div style="display:grid;gap:10px">
+          <span style="font-size:12.5px;font-weight:600;color:#3c5470">Turneringsformat</span>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px">
+            <sc-for list="{{ formats }}" as="fm" hint-placeholder-count="3">
+              <button type="button" onClick="{{ fm.pick }}" style="text-align:left;background:{{ fm.bg }};border:1px solid {{ fm.border }};border-radius:6px;padding:15px;cursor:pointer;color:#0d1b2a;min-height:88px;display:flex;flex-direction:column;gap:5px">
+                <span style="font-family:'Archivo',sans-serif;font-size:15px;font-weight:700">{{ fm.name }}</span>
+                <span style="font-size:12px;color:#56708c;line-height:1.45">{{ fm.desc }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isStepRules }}">
+        <div style="display:grid;gap:10px">
+          <span style="font-size:12.5px;font-weight:600;color:#3c5470">Baner i bruk</span>
+          <div style="display:flex;align-items:center;gap:14px">
+            <button type="button" onClick="{{ courtsDown }}" style="width:48px;height:48px;border-radius:6px;background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;font-size:22px;font-weight:700;cursor:pointer">−</button>
+            <div style="flex:1;text-align:center;font-family:'Archivo',sans-serif;font-size:38px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1">{{ courts }}</div>
+            <button type="button" onClick="{{ courtsUp }}" style="width:48px;height:48px;border-radius:6px;background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;font-size:22px;font-weight:700;cursor:pointer">+</button>
+          </div>
+          <input type="text" value="Bane 1, Bane 2" placeholder="1, 2 eller 3, 4, 16" style="width:100%;background:rgba(255,255,255,.82);border:1px solid rgba(20,60,105,.18);border-radius:10px;padding:12px;color:#0d1b2a;font-size:14px;min-height:46px">
+        </div>
+        <div style="height:1px;background:rgba(20,60,105,.1)"></div>
+        <div style="display:grid;gap:14px">
+          <span style="font-size:12.5px;font-weight:600;color:#3c5470">Regler</span>
+          <sc-for list="{{ ruleRows }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <div style="min-width:140px">
+                <div style="font-size:14px;font-weight:600">{{ r.label }}</div>
+                <div style="font-size:11.5px;color:#5b7490">{{ r.hint }}</div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <sc-for list="{{ r.options }}" as="o" hint-placeholder-count="3">
+                  <span style="padding:9px 13px;border-radius:9px;font-size:13px;font-weight:600;background:{{ o.bg }};border:1px solid {{ o.border }};color:{{ o.color }};font-variant-numeric:tabular-nums">{{ o.label }}</span>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isStepPlayers }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <span style="font-size:12.5px;font-weight:600;color:#3c5470">Spillere · {{ playerCount }}</span>
+          <span style="font-size:11.5px;color:#5b7490">Valgfritt — spillere kan også koble seg på selv</span>
+        </div>
+        <div style="display:flex;gap:9px">
+          <input type="text" placeholder="Legg til én eller flere spillere" style="flex:1;background:rgba(255,255,255,.82);border:1px solid rgba(20,60,105,.18);border-radius:10px;padding:13px;color:#0d1b2a;font-size:14px;min-height:48px">
+          <button type="button" style="background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:0 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:48px">Legg til</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <sc-for list="{{ players }}" as="p" hint-placeholder-count="7">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(91,173,255,.05);border:1px solid rgba(20,60,105,.1);border-left:3px solid {{ p.hex }};border-radius:10px">
+              <div style="width:32px;height:32px;position:relative;flex:none">
+                <div style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,{{ p.light }},{{ p.hex }})"></div>
+                <div style="position:absolute;inset:2.5px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:11px;font-weight:800;color:{{ p.light }}">{{ p.initials }}</div>
+              </div>
+              <span style="flex:1;font-size:14.5px;font-weight:600">{{ p.name }}</span>
+              <span style="font-size:11px;color:#5b7490">{{ p.source }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isStepConfirm }}">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <sc-for list="{{ confirmRows }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid rgba(20,60,105,.08)">
+              <span style="font-size:13px;color:#56708c">{{ c.label }}</span>
+              <span style="font-family:'Archivo',sans-serif;font-size:15px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums">{{ c.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:13px;padding:15px;background:rgba(79,168,255,.07);border:1px solid rgba(91,173,255,.24);border-radius:12px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#62b6ff" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 16v-5m0-3h.01"></path></svg>
+          <p style="margin:0;font-size:13px;color:#3c5470;line-height:1.5">Når turneringen starter genereres alle kamper i runden. Rotasjonen sørger for at alle spiller på lag med alle.</p>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;gap:10px;margin-top:4px">
+        <sc-if value="{{ canBack }}">
+          <button type="button" onClick="{{ prevStep }}" style="background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#3c5470;border-radius:6px;padding:14px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:48px">Tilbake</button>
+        </sc-if>
+        <button type="button" onClick="{{ nextStep }}" style="flex:1;background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;min-height:48px">{{ nextLabel }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLobby }}">
+<div style="flex:1;display:flex;justify-content:center;padding:26px 20px 80px">
+  <div style="width:100%;max-width:900px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;align-items:start">
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.13);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:20px">
+      <div>
+        <span style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#1b8a52;font-weight:700">Lobby</span>
+        <h2 style="margin:6px 0 4px;font-family:'Archivo',sans-serif;font-size:23px;font-weight:800;letter-spacing:-.02em">Del koden og fyll spillerlisten<span style="color:#1b8a52">.</span></h2>
+        <p style="margin:0;font-size:13.5px;color:#56708c">Round robin · 2 baner · venter på start</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:18px;background:rgba(255,255,255,.72);border:1px dashed rgba(91,173,255,.34);border-radius:13px;flex-wrap:wrap">
+        <div style="width:96px;height:96px;flex:none;background:#0d1b2a;border-radius:9px;padding:7px;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:2px">
+          <sc-for list="{{ qrCells }}" as="q" hint-placeholder-count="49">
+            <span style="background:{{ q.c }};border-radius:1px"></span>
+          </sc-for>
+        </div>
+        <div style="flex:1;min-width:150px">
+          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5b7490;font-weight:700">Invitasjonskode</div>
+          <div style="font-family: 'Archivo',sans-serif; font-size: 27px; font-weight: 900; letter-spacing: .09em; color: #3681C1; margin: 5px 0 9px">TQA5CU6N</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <button type="button" style="background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:9px 12px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px">Kopier kode</button>
+            <button type="button" style="background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:9px 12px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px">Kopier lenke</button>
+          </div>
+        </div>
+      </div>
+      <button type="button" onClick="{{ goKamper }}" style="background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:16px;font-size:15.5px;font-weight:700;cursor:pointer;min-height:50px;box-shadow:0 10px 26px rgba(35,108,168,.36)">Start turnering</button>
+      <p style="margin:0;font-size:12px;color:#5b7490;text-align:center">7 spillere klare · 2 baner</p>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.13);border-radius:16px;overflow:hidden">
+      <div style="padding:16px 18px;border-bottom:1px solid rgba(20,60,105,.1);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:'Archivo',sans-serif;font-size:15px;font-weight:700">Spillere</span>
+        <span style="font-size:12px;color:#1b8a52;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#1b8a52;animation:psPulse 2s ease-in-out infinite"></span>kobler seg på</span>
+      </div>
+      <div style="display:flex;flex-direction:column">
+        <sc-for list="{{ players }}" as="p" hint-placeholder-count="7">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid rgba(20,60,105,.06);animation:psTick .4s ease both">
+            <div style="width:34px;height:34px;position:relative;flex:none">
+              <div style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,{{ p.light }},{{ p.hex }})"></div>
+              <div style="position:absolute;inset:2.5px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:11.5px;font-weight:800;color:{{ p.light }}">{{ p.initials }}</div>
+            </div>
+            <span style="flex:1;font-size:14.5px;font-weight:600">{{ p.name }}</span>
+            <span style="font-size:10.5px;color:#5b7490;padding:4px 8px;border:1px solid rgba(20,60,105,.14);border-radius:999px">{{ p.source }}</span>
+          </div>
+        </sc-for>
+        <div style="display:flex;align-items:center;gap:12px;padding:16px 18px;color:#6a8299">
+          <div style="width:34px;height:34px;flex:none;clip-path:{{ clip }};border:1px dashed rgba(91,173,255,.3);background:rgba(91,173,255,.04)"></div>
+          <span style="font-size:13.5px">Venter på flere …</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ inWorkspace }}">
+<div style="flex:1;display:flex;min-height:0">
+  <nav aria-label="Moduler" style="flex:none;width:{{ railWidth }};display:{{ railDisplay }};flex-direction:column;gap:4px;padding:16px 10px;background:#e7eef7;border-right:1px solid rgba(20,60,105,.11)">
+    <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+      <button type="button" onClick="{{ n.go }}" style="display:flex;align-items:center;gap:11px;background:{{ n.bg }};border:0;border-left:3px solid {{ n.mark }};color:{{ n.color }};border-radius:0 9px 9px 0;padding:12px 13px;font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;min-height:46px;white-space:nowrap">
+        <span style="width:7px;height:7px;border-radius:2px;background:{{ n.dot }};flex:none"></span>{{ n.label }}
+      </button>
+    </sc-for>
+    <div style="flex:1"></div>
+    <button type="button" onClick="{{ goTv }}" style="display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:11px 12px;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px">TV Mode</button>
+    <button type="button" onClick="{{ goPodium }}" style="display:flex;align-items:center;gap:10px;background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#56708c;border-radius:6px;padding:11px 12px;font-size:12.5px;font-weight:600;cursor:pointer;min-height:44px">Fullfør</button>
+  </nav>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="padding:16px 20px 12px;border-bottom:1px solid rgba(20,60,105,.1);background:#e7eef7">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="min-width:0">
+          <div style="font-family:'Archivo',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.015em">Risløkka Padel Uke 39</div>
+          <div style="font-size:12px;color:#56708c;font-variant-numeric:tabular-nums">Round robin · Runde 2 · 3/4 kamper ferdig · 2 baner</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" style="background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:10px 14px;font-size:12.5px;font-weight:600;cursor:pointer;min-height:42px">Del turnering</button>
+          <button type="button" style="background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:10px 14px;font-size:12.5px;font-weight:700;cursor:pointer;min-height:42px">Start neste runde</button>
+        </div>
+      </div>
+      <div style="margin-top:12px;height:5px;border-radius:3px;background:rgba(91,173,255,.14);overflow:hidden">
+        <div style="width:42%;height:100%;border-radius:3px;background:linear-gradient(90deg,#9cc4e8,#62b6ff);transform-origin:left;animation:psBar .7s cubic-bezier(.2,.8,.2,1) both"></div>
+      </div>
+    </div>
+
+    <div style="flex:1;min-height:0;overflow:auto;padding:18px 20px 96px">
+
+      <sc-if value="{{ isKamper }}">
+      <div style="display:grid;grid-template-columns:{{ kamperCols }};gap:16px;align-items:start;max-width:1240px">
+        <div style="min-width:0;display:flex;flex-direction:column;gap:10px">
+          <sc-if value="{{ conflict }}">
+            <div style="display:flex;gap:12px;padding:14px 15px;background:rgba(199,10,51,.1);border:1px solid rgba(192,48,79,.36);border-radius:12px;animation:psPop .25s ease both">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c0304f" stroke-width="2" style="flex:none;margin-top:1px"><path d="M12 3l9 16H3z"></path><path d="M12 9v4m0 3h.01"></path></svg>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13.5px;font-weight:700;color:#d4506b">Resultatkonflikt · Kamp 7</div>
+                <div style="font-size:12.5px;color:#a04058;margin-top:3px">Lag 1 sendte 6–4, Lag 2 sendte 4–6. Bruk «Sett resultat» for å avklare.</div>
+                <div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">
+                  <button type="button" style="background:rgba(13,27,42,.06);border:1px solid rgba(192,48,79,.3);color:#7a1f33;border-radius:6px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px">Bruk 6–4</button>
+                  <button type="button" style="background:rgba(13,27,42,.06);border:1px solid rgba(192,48,79,.3);color:#7a1f33;border-radius:6px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px">Bruk 4–6</button>
+                  <button type="button" onClick="{{ toggleConflict }}" style="background:transparent;border:1px solid rgba(192,48,79,.2);color:#a04058;border-radius:6px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px">Sett manuelt</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <span style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5b7490;font-weight:700">Runde 2 · 4 kamper</span>
+            <button type="button" onClick="{{ toggleConflict }}" style="background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#5b7490;border-radius:6px;padding:6px 10px;font-size:11px;font-weight:600;cursor:pointer">{{ conflictToggleLabel }}</button>
+          </div>
+
+          <sc-for list="{{ matches }}" as="m" hint-placeholder-count="4">
+            <div style="background:#ffffff;border:1px solid {{ m.border }};border-radius:14px;overflow:hidden;transition:border-color .2s ease">
+              <button type="button" onClick="{{ m.toggle }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:{{ pad }};background:transparent;border:0;cursor:pointer;color:#0d1b2a;text-align:left;min-height:64px">
+                <span style="flex:none;width:34px;font-family:'Archivo',sans-serif;font-size:12px;font-weight:800;color:#6a8299;font-variant-numeric:tabular-nums">#{{ m.no }}</span>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+                  <span style="font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.teamOne }} <span style="color:#6a8299;font-weight:400">mot</span> {{ m.teamTwo }}</span>
+                  <span style="font-size:11.5px;color:#5b7490;font-variant-numeric:tabular-nums">{{ m.court }} · {{ m.detail }}</span>
+                </span>
+                <span style="flex:none;font-family:'Archivo',sans-serif;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ m.scoreColor }}">{{ m.score }}</span>
+                <span style="flex:none;padding:5px 9px;border-radius:999px;font-size:10.5px;font-weight:700;letter-spacing:.04em;background:{{ m.statusBg }};color:{{ m.statusColor }};white-space:nowrap">{{ m.status }}</span>
+              </button>
+
+              <sc-if value="{{ m.open }}">
+                <div style="border-top:1px solid rgba(20,60,105,.1);padding:18px;display:flex;flex-direction:column;gap:16px;animation:psIn .28s ease both">
+                  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center">
+                    <div style="display:flex;flex-direction:column;gap:8px;min-width:0">
+                      <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#5b7490;font-weight:700">Lag 1</span>
+                      <span style="font-size:15px;font-weight:700;line-height:1.3">{{ m.teamOne }}</span>
+                      <button type="button" onClick="{{ pointOne }}" style="background:linear-gradient(180deg,#c3d8ee,#d3e2f1);border:1px solid rgba(98,182,255,.4);color:#0d1b2a;border-radius:6px;padding:18px;font-family:'Archivo',sans-serif;font-size:30px;font-weight:800;cursor:pointer;font-variant-numeric:tabular-nums;min-height:72px">{{ pointA }}</button>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#6a8299">
+                      <span style="font-family:'Archivo',sans-serif;font-size:12px;font-weight:800;letter-spacing:.08em">VS</span>
+                      <span style="width:1px;height:46px;background:rgba(20,60,105,.14)"></span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;min-width:0;text-align:right">
+                      <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#5b7490;font-weight:700">Lag 2</span>
+                      <span style="font-size:15px;font-weight:700;line-height:1.3">{{ m.teamTwo }}</span>
+                      <button type="button" onClick="{{ pointTwo }}" style="background:linear-gradient(180deg,#c3d8ee,#d3e2f1);border:1px solid rgba(98,182,255,.4);color:#0d1b2a;border-radius:6px;padding:18px;font-family:'Archivo',sans-serif;font-size:30px;font-weight:800;cursor:pointer;font-variant-numeric:tabular-nums;min-height:72px">{{ pointB }}</button>
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                    <div style="background:rgba(255,255,255,.72);border:1px solid rgba(20,60,105,.1);border-radius:10px;padding:11px;text-align:center">
+                      <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                        <img src="assets/icons/games-96.png" alt="" width="15" height="15" style="flex:none;opacity:.9">
+                        <span style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#5b7490;font-weight:700">Games</span>
+                      </div>
+                      <div style="font-family:'Archivo',sans-serif;font-size:17px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums">4–3</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,.72);border:1px solid rgba(20,60,105,.1);border-radius:10px;padding:11px;text-align:center">
+                      <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#5b7490;font-weight:700">Poeng</div>
+                      <div style="font-family:'Archivo',sans-serif;font-size:17px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums">{{ pointScore }}</div>
+                    </div>
+                    <div style="background:rgba(255,255,255,.72);border:1px solid rgba(20,60,105,.1);border-radius:10px;padding:11px;text-align:center">
+                      <div style="font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#5b7490;font-weight:700">Sett</div>
+                      <div style="font-family:'Archivo',sans-serif;font-size:17px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums">0–0</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px">
+                    <button type="button" style="flex:1;min-width:130px;background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:12px;font-size:13.5px;font-weight:700;cursor:pointer;min-height:46px">Sett resultat</button>
+                    <button type="button" style="flex:1;min-width:130px;background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:12px;font-size:13.5px;font-weight:600;cursor:pointer;min-height:46px">Stor score</button>
+                    <button type="button" onClick="{{ toggleSheet }}" aria-label="Flere handlinger" style="flex:none;width:46px;background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#3c5470;border-radius:6px;font-size:17px;font-weight:700;cursor:pointer;min-height:46px">⋮</button>
+                  </div>
+                  <sc-if value="{{ sheetOpen }}">
+                    <div style="background:rgba(255,255,255,.8);border:1px solid rgba(20,60,105,.13);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:11px;animation:psIn .24s ease both">
+                      <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#5b7490;font-weight:700">Flere handlinger</span>
+                      <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <sc-for list="{{ sheetActions }}" as="a" hint-placeholder-count="5">
+                          <button type="button" style="background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:{{ a.color }};border-radius:6px;padding:10px 13px;font-size:12.5px;font-weight:600;cursor:pointer;min-height:42px">{{ a.label }}</button>
+                        </sc-for>
+                      </div>
+                      <label style="display:grid;gap:6px;font-size:11.5px;font-weight:600;color:#56708c">Bane
+                        <input type="text" value="Bane 1" style="width:100%;background:rgba(255,255,255,.82);border:1px solid rgba(20,60,105,.16);border-radius:9px;padding:11px;color:#0d1b2a;font-size:13.5px;min-height:44px">
+                      </label>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+            <span style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5b7490;font-weight:700">Banekø</span>
+            <sc-for list="{{ courtQueue }}" as="c" hint-placeholder-count="2">
+              <div style="display:flex;align-items:center;gap:13px;padding:13px 15px;background:#ffffff;border:1px solid rgba(20,60,105,.11);border-radius:12px">
+                <span style="flex:none;font-family:'Archivo',sans-serif;font-size:13px;font-weight:800;color:#62b6ff">{{ c.court }}</span>
+                <span style="flex:none;padding:4px 9px;border-radius:999px;font-size:10.5px;font-weight:700;background:{{ c.stateBg }};color:{{ c.stateColor }}">{{ c.state }}</span>
+                <span style="flex:1;min-width:0;font-size:13px;color:#3c5470;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.now }}</span>
+                <span style="flex:none;font-size:11.5px;color:#5b7490">Neste: {{ c.next }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <aside style="min-width:0;display:{{ tickerDisplay }};flex-direction:column;gap:10px">
+          <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;overflow:hidden">
+            <div style="padding:14px 16px;border-bottom:1px solid rgba(20,60,105,.1);display:flex;align-items:center;gap:9px">
+              <span style="width:6px;height:6px;border-radius:50%;background:#1b8a52;animation:psPulse 2s ease-in-out infinite"></span>
+              <span style="font-family:'Archivo',sans-serif;font-size:14px;font-weight:700">Live</span>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ ticker }}" as="t" hint-placeholder-count="6">
+                <div style="display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(20,60,105,.06);animation:psTick .45s ease both">
+                  <span style="flex:none;font-size:11px;color:#6a8299;font-variant-numeric:tabular-nums;padding-top:2px;width:34px">{{ t.time }}</span>
+                  <span style="flex:none;width:3px;border-radius:2px;background:{{ t.hex }}"></span>
+                  <span style="flex:1;min-width:0;font-size:13px;line-height:1.45;color:#3c5470">{{ t.text }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </aside>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isStilling }}">
+      <div style="max-width:900px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <span style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5b7490;font-weight:700">Rangeres på</span>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <sc-for list="{{ rankOptions }}" as="r" hint-placeholder-count="3">
+                <button type="button" onClick="{{ r.pick }}" style="background:{{ r.bg }};border:1px solid {{ r.border }};color:{{ r.color }};border-radius:6px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;min-height:42px">{{ r.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <p style="margin:0;font-size:12px;color:#5b7490;max-width:28ch;line-height:1.45">Poengmotoren er konfigurerbar. Kolonnen som rangerer er markert.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:11px">
+          <sc-for list="{{ podium }}" as="p" hint-placeholder-count="3">
+            <div style="position:relative;overflow:hidden;background:#ffffff;border:1px solid {{ p.border }};border-radius:15px;padding:17px;display:flex;align-items:center;gap:13px">
+              <div style="position:absolute;inset:0;background:linear-gradient(120deg,{{ p.glow }},transparent 62%)"></div>
+              <div style="position:relative;width:46px;height:46px;flex:none">
+                <div style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,{{ p.light }},{{ p.hex }})"></div>
+                <div style="position:absolute;inset:3px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:14px;font-weight:800;color:{{ p.light }}">{{ p.initials }}</div>
+              </div>
+              <div style="position:relative;min-width:0;flex:1">
+                <div style="font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:{{ p.light }};font-weight:700">{{ p.rankLabel }}</div>
+                <div style="font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+                <div style="font-family:'Archivo',sans-serif;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;margin-top:2px">{{ p.hero }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:34px 1fr repeat(4,52px);gap:8px;padding:12px 15px;border-bottom:1px solid rgba(20,60,105,.1);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#5b7490;font-weight:700">
+            <span>#</span><span>Spiller</span>
+            <sc-for list="{{ columns }}" as="c" hint-placeholder-count="4">
+              <span style="text-align:right;color:{{ c.color }}">{{ c.label }}</span>
+            </sc-for>
+          </div>
+          <sc-for list="{{ standings }}" as="s" hint-placeholder-count="7">
+            <div style="display:grid;grid-template-columns:34px 1fr repeat(4,52px);gap:8px;align-items:center;padding:11px 15px;border-bottom:1px solid rgba(20,60,105,.06);background:{{ s.rowBg }}">
+              <span style="font-family:'Archivo',sans-serif;font-size:13px;font-weight:800;color:#6a8299;font-variant-numeric:tabular-nums">{{ s.rank }}</span>
+              <span style="display:flex;align-items:center;gap:10px;min-width:0">
+                <span style="width:28px;height:28px;position:relative;flex:none">
+                  <span style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,{{ s.light }},{{ s.hex }})"></span>
+                  <span style="position:absolute;inset:2px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:10px;font-weight:800;color:{{ s.light }}">{{ s.initials }}</span>
+                </span>
+                <span style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</span>
+              </span>
+              <span style="text-align:right;font-family:'Archivo',sans-serif;font-size:14px;font-weight:{{ s.wPoeng }};color:{{ s.cPoeng }};font-variant-numeric:tabular-nums">{{ s.poeng }}</span>
+              <span style="text-align:right;font-family:'Archivo',sans-serif;font-size:14px;font-weight:{{ s.wSeire }};color:{{ s.cSeire }};font-variant-numeric:tabular-nums">{{ s.seire }}</span>
+              <span style="text-align:right;font-family:'Archivo',sans-serif;font-size:14px;font-weight:400;color:#56708c;font-variant-numeric:tabular-nums">{{ s.sett }}</span>
+              <span style="text-align:right;font-family:'Archivo',sans-serif;font-size:14px;font-weight:{{ s.wGames }};color:{{ s.cGames }};font-variant-numeric:tabular-nums">{{ s.games }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isMin }}">
+      <div style="max-width:620px;display:flex;flex-direction:column;gap:16px">
+        <div style="position:relative;overflow:hidden;background:#ffffff;border:1px solid rgba(98,182,255,.36);border-radius:18px;padding:24px;animation:psIn .35s ease both">
+          <div style="position:absolute;inset:0;background:linear-gradient(150deg,rgba(79,168,255,.16),transparent 60%)"></div>
+          <div style="position:relative;display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <span style="display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#62b6ff;font-weight:700">
+                <span style="width:7px;height:7px;border-radius:50%;background:#1b8a52;animation:psPulse 1.8s ease-in-out infinite"></span>Du spiller nå
+              </span>
+              <span style="font-family:'Archivo',sans-serif;font-size:13px;font-weight:800;color:#0a4b80;padding:6px 12px;background:rgba(91,173,255,.14);border-radius:999px">Bane 1</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+                <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5b7490;font-weight:700">Registrer poeng</span>
+                <span style="font-size:11.5px;color:#5b7490">Kamp 5 · runde 2</span>
+              </div>
+
+              <div style="border:1px solid rgba(20,60,105,.14);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.62)">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 44px 44px 128px;gap:8px;align-items:center;padding:9px 12px;border-bottom:1px solid rgba(20,60,105,.12);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#5b7490;font-weight:700">
+                  <span>Lag</span><span style="text-align:center">Sett</span><span style="text-align:center">Game</span><span style="text-align:center">Poeng</span>
+                </div>
+                <sc-for list="{{ scoreRows }}" as="r" hint-placeholder-count="2">
+                  <div style="display:grid;grid-template-columns:minmax(0,1fr) 44px 44px 128px;gap:8px;align-items:center;padding:12px;border-bottom:1px solid rgba(20,60,105,.07);background:{{ r.rowBg }}">
+                    <div style="min-width:0;display:flex;flex-direction:column;gap:5px">
+                      <span style="font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:{{ r.tagColor }};font-weight:700">{{ r.tag }}</span>
+                      <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                        <sc-for list="{{ r.players }}" as="p" hint-placeholder-count="2">
+                          <span style="width:26px;height:26px;position:relative;flex:none">
+                            <span style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,{{ p.light }},{{ p.hex }})"></span>
+                            <span style="position:absolute;inset:2px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:9.5px;font-weight:800;color:{{ p.light }}">{{ p.initials }}</span>
+                          </span>
+                        </sc-for>
+                        <span style="min-width:0;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.names }}</span>
+                      </div>
+                    </div>
+                    <span style="text-align:center;font-family:'Archivo',sans-serif;font-size:16px;font-weight:800;color:#3c5470;font-variant-numeric:tabular-nums">{{ r.sets }}</span>
+                    <span style="text-align:center;font-family:'Archivo',sans-serif;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums">{{ r.games }}</span>
+                    <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+                      <button type="button" onClick="{{ r.sub }}" aria-label="Minus poeng" style="width:36px;height:44px;flex:none;background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#3c5470;border-radius:6px;font-size:17px;font-weight:700;cursor:pointer">−</button>
+                      <span style="flex:1;text-align:center;font-family:'Archivo',sans-serif;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">{{ r.point }}</span>
+                      <button type="button" onClick="{{ r.add }}" aria-label="Pluss poeng" style="width:36px;height:44px;flex:none;background:linear-gradient(180deg,#A1D6FF,#008DF9);border:0;color:#04121f;border-radius:6px;font-size:19px;font-weight:800;cursor:pointer">+</button>
+                    </div>
+                  </div>
+                </sc-for>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;flex-wrap:wrap">
+                  <div style="display:flex;align-items:baseline;gap:10px">
+                    <span style="font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#5b7490;font-weight:700">Stilling nå</span>
+                    <span style="font-family:'Archivo',sans-serif;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">{{ liveScore }}</span>
+                  </div>
+                  <button type="button" onClick="{{ undoPoint }}" disabled="{{ undoDisabled }}" style="{{ undoStyle }}">Angre</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:9px;flex-wrap:wrap">
+              <button type="button" style="flex:1;min-width:150px;background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:14px;font-size:14.5px;font-weight:700;cursor:pointer;min-height:48px">Send resultat</button>
+              <button type="button" style="background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#3c5470;border-radius:6px;padding:14px 16px;font-size:13.5px;font-weight:600;cursor:pointer;min-height:48px">Meld deg ute</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;overflow:hidden">
+          <div style="padding:14px 16px;border-bottom:1px solid rgba(20,60,105,.1);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-family:'Archivo',sans-serif;font-size:14.5px;font-weight:700">Tabell</span>
+            <button type="button" onClick="{{ goStilling }}" style="background:transparent;border:0;color:#62b6ff;font-size:12.5px;font-weight:600;cursor:pointer">Se hele</button>
+          </div>
+          <sc-for list="{{ standingsShort }}" as="s" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 16px;border-bottom:1px solid rgba(20,60,105,.06);background:{{ s.rowBg }}">
+              <span style="flex:none;width:18px;font-family:'Archivo',sans-serif;font-size:12.5px;font-weight:800;color:#6a8299;font-variant-numeric:tabular-nums">{{ s.rank }}</span>
+              <span style="width:26px;height:26px;position:relative;flex:none">
+                <span style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,{{ s.light }},{{ s.hex }})"></span>
+                <span style="position:absolute;inset:2px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:9.5px;font-weight:800;color:{{ s.light }}">{{ s.initials }}</span>
+              </span>
+              <span style="flex:1;min-width:0;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</span>
+              <span style="flex:none;font-family:'Archivo',sans-serif;font-size:14.5px;font-weight:800;font-variant-numeric:tabular-nums">{{ s.poeng }}<span style="font-size:11px;color:#5b7490;font-weight:600"> p</span></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isSettings }}">
+      <div style="max-width:620px;display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ settingGroups }}" as="g" hint-placeholder-count="3">
+          <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;overflow:hidden">
+            <div style="padding:14px 16px;border-bottom:1px solid rgba(20,60,105,.1);font-family:'Archivo',sans-serif;font-size:14.5px;font-weight:700">{{ g.title }}</div>
+            <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-bottom:1px solid rgba(20,60,105,.06);flex-wrap:wrap">
+                <div style="min-width:150px">
+                  <div style="font-size:14px;font-weight:600">{{ r.label }}</div>
+                  <div style="font-size:11.5px;color:#5b7490;margin-top:2px">{{ r.hint }}</div>
+                </div>
+                <span style="font-family:'Archivo',sans-serif;font-size:13.5px;font-weight:700;color:{{ r.color }};padding:7px 12px;background:{{ r.bg }};border:1px solid {{ r.border }};border-radius:999px;font-variant-numeric:tabular-nums">{{ r.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <button type="button" style="background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:13px 16px;font-size:13.5px;font-weight:600;cursor:pointer;min-height:46px">Last ned backup</button>
+          <button type="button" onClick="{{ goPodium }}" style="background:transparent;border:1px solid rgba(192,48,79,.36);color:#c0304f;border-radius:6px;padding:13px 16px;font-size:13.5px;font-weight:600;cursor:pointer;min-height:46px">Avslutt turnering</button>
+        </div>
+      </div>
+      </sc-if>
+
+    </div>
+
+    <nav aria-label="Moduler" style="display:{{ tabsDisplay }};position:sticky;bottom:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-top:1px solid rgba(20,60,105,.13)">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr)">
+        <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4">
+          <button type="button" onClick="{{ n.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;background:transparent;border:0;border-top:2px solid {{ n.mark }};color:{{ n.color }};padding:10px 4px 12px;font-size:11px;font-weight:600;cursor:pointer;min-height:56px">
+            <span style="width:8px;height:8px;border-radius:2px;background:{{ n.dot }}"></span>{{ n.short }}
+          </button>
+        </sc-for>
+      </div>
+    </nav>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPodium }}">
+<div style="flex:1;display:flex;justify-content:center;padding:30px 20px 70px">
+  <div style="width:100%;max-width:760px;display:flex;flex-direction:column;gap:22px;align-items:center;text-align:center">
+    <div style="animation:psIn .4s ease both">
+      <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#0f7ae0;font-weight:700">Turneringen er avsluttet</span>
+      <h2 style="margin:8px 0 0;font-family:'Archivo',sans-serif;font-size:clamp(28px,5vw,42px);font-weight:900;letter-spacing:-.025em">Risløkka Padel Uke 39</h2>
+      <p style="margin:8px 0 0;font-size:14px;color:#56708c;font-variant-numeric:tabular-nums">5 runder · 20 kamper · 7 spillere</p>
+      <img src="assets/icons/trophy-96.png" alt="" width="62" height="62" style="margin:14px auto 0;display:block">
+    </div>
+    <div style="width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end;max-width:560px">
+      <sc-for list="{{ podiumFinal }}" as="p" hint-placeholder-count="3">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:11px;animation:psPop .5s ease both;animation-delay:{{ p.delay }}">
+          <div style="width:{{ p.size }};height:{{ p.size }};position:relative;max-width:100%">
+            <div style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,{{ p.light }},{{ p.hex }})"></div>
+            <div style="position:absolute;inset:4px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:{{ p.fs }};font-weight:800;color:{{ p.light }}">{{ p.initials }}</div>
+          </div>
+          <div>
+            <div style="font-size:14.5px;font-weight:700;line-height:1.25">{{ p.name }}</div>
+            <div style="font-family:'Archivo',sans-serif;font-size:17px;font-weight:800;color:{{ p.light }};font-variant-numeric:tabular-nums;margin-top:2px">{{ p.poeng }} p</div>
+          </div>
+          <div style="width:100%;height:{{ p.plinth }};background:linear-gradient(180deg,rgba(91,173,255,.16),rgba(91,173,255,.04));border:1px solid rgba(20,60,105,.13);border-bottom:0;border-radius:10px 10px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:10px;font-family:'Archivo',sans-serif;font-size:22px;font-weight:900;color:rgba(20,60,105,.5)">{{ p.rank }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <button type="button" onClick="{{ goStilling }}" style="background:linear-gradient(180deg,#5badff0d,#5badff30);border:1px solid rgba(91,173,255,.42);color:#0a4b80;border-radius:6px;padding:13px 18px;font-size:14px;font-weight:600;cursor:pointer;min-height:46px">Se full tabell</button>
+      <button type="button" onClick="{{ goCreate }}" style="background:linear-gradient(180deg,#A1D6FF,#008DF9);color:#04121f;border:0;border-radius:6px;padding:13px 18px;font-size:14px;font-weight:700;cursor:pointer;min-height:46px">Ny turnering</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isProfil }}">
+<div style="flex:1;display:flex;justify-content:center;padding:26px 20px 70px">
+  <div style="width:100%;max-width:820px;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:18px;background:#ffffff;border:1px solid rgba(20,60,105,.13);border-radius:16px;padding:22px;flex-wrap:wrap">
+      <div style="width:76px;height:76px;position:relative;flex:none">
+        <div style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,#1470c4,#1a59f2)"></div>
+        <div style="position:absolute;inset:4px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:23px;font-weight:800;color:#1470c4">SG</div>
+      </div>
+      <div style="flex:1;min-width:170px">
+        <h2 style="margin:0;font-family:'Archivo',sans-serif;font-size:25px;font-weight:800;letter-spacing:-.02em">Sigurd Grødem</h2>
+        <p style="margin:5px 0 0;font-size:13px;color:#56708c">sigurd@zigonia.no · Medlem siden mars 2026</p>
+        <span style="display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11.5px;color:#1b8a52;padding:5px 10px;border:1px solid rgba(27,138,82,.34);border-radius:999px">E-post bekreftet</span>
+      </div>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;padding:18px">
+      <div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#5b7490;font-weight:700;margin-bottom:14px">Din farge</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <sc-for list="{{ gemSwatches }}" as="g" hint-placeholder-count="10">
+          <button type="button" aria-label="{{ g.name }}" style="width:38px;height:38px;padding:0;border:0;background:transparent;cursor:pointer;position:relative">
+            <span style="position:absolute;inset:0;clip-path:{{ clip }};background:{{ g.hex }};opacity:{{ g.opacity }}"></span>
+            <span style="position:absolute;inset:0;clip-path:{{ clip }};box-shadow:inset 0 0 0 2px {{ g.ring }}"></span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:11px">
+      <sc-for list="{{ careerStats }}" as="c" hint-placeholder-count="4">
+        <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;padding:18px">
+          <div style="font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#5b7490;font-weight:700">{{ c.label }}</div>
+          <div style="font-family:'Archivo',sans-serif;font-size:31px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.02em">{{ c.value }}</div>
+          <div style="font-size:11.5px;color:#6a8299;margin-top:2px">{{ c.sub }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid rgba(20,60,105,.1);font-family:'Archivo',sans-serif;font-size:14.5px;font-weight:700">Mine aktive turneringer</div>
+      <sc-for list="{{ activeTournaments }}" as="a" hint-placeholder-count="2">
+        <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid rgba(20,60,105,.06);flex-wrap:wrap">
+          <span style="flex:none;padding:5px 9px;border-radius:999px;font-size:10.5px;font-weight:700;background:{{ a.bg }};color:{{ a.color }}">{{ a.state }}</span>
+          <span style="flex:1;min-width:130px;font-size:14px;font-weight:600">{{ a.name }}</span>
+          <span style="font-size:12px;color:#5b7490;font-variant-numeric:tabular-nums">{{ a.meta }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;overflow:hidden">
+      <div style="padding:14px 16px;border-bottom:1px solid rgba(20,60,105,.1);font-family:'Archivo',sans-serif;font-size:14.5px;font-weight:700">Kontoinnstillinger</div>
+      <sc-for list="{{ accountRows }}" as="r" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-bottom:1px solid rgba(20,60,105,.06);flex-wrap:wrap">
+          <span style="font-size:14px;font-weight:600;min-width:130px">{{ r.label }}</span>
+          <span style="font-size:13px;color:#3c5470">{{ r.value }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isInstall }}">
+<div style="flex:1;display:flex;justify-content:center;padding:30px 20px 70px">
+  <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:16px">
+    <div style="text-align:center">
+      <img src="./padelstar-icon-mu34ykay-glen.png" alt="" width="66" height="66" style="border-radius:16px;box-shadow:0 12px 34px rgba(15,40,70,.16)">
+      <h2 style="margin:16px 0 6px;font-family:'Archivo',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.02em">Installer Padelstar</h2>
+      <p style="margin:0;font-size:14px;color:#56708c;line-height:1.5">Legg appen på hjemskjermen. Turneringer lagres lokalt og synkes når du er online.</p>
+    </div>
+    <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;overflow:hidden">
+      <sc-for list="{{ installSteps }}" as="s" hint-placeholder-count="3">
+        <div style="display:flex;gap:14px;padding:16px;border-bottom:1px solid rgba(20,60,105,.06)">
+          <span style="flex:none;width:26px;height:26px;border-radius:8px;background:rgba(91,173,255,.14);border:1px solid rgba(91,173,255,.3);display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:12px;font-weight:800;color:#62b6ff">{{ s.n }}</span>
+          <div>
+            <div style="font-size:14px;font-weight:600">{{ s.title }}</div>
+            <div style="font-size:12.5px;color:#56708c;margin-top:3px;line-height:1.45">{{ s.text }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:13px;padding:15px;background:rgba(79,168,255,.07);border:1px solid rgba(91,173,255,.24);border-radius:12px">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#62b6ff" stroke-width="2" style="flex:none;margin-top:1px"><path d="M4 12a8 8 0 018-8m8 8a8 8 0 01-8 8"></path><path d="M12 8v4l3 2"></path></svg>
+      <p style="margin:0;font-size:13px;color:#3c5470;line-height:1.5">Offline: poeng du registrerer uten nett lagres på enheten og sendes automatisk når forbindelsen er tilbake.</p>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isTv }}">
+<div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:18px;background:#eef3f9">
+  <div style="width:100%;max-width:1600px;aspect-ratio:16/9;max-height:100%;container-type:size;overflow:hidden;border-radius:16px;box-shadow:0 24px 70px rgba(15,40,70,.18)">
+<div style="width:100%;height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:1.35cqw;padding:1.7cqw 2.1cqw;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.98)),linear-gradient(360deg,#cfe3ea,#e9eef5);text-transform:uppercase;min-height:0">
+
+  
+
+  <div style="display:grid;grid-template-columns:{{ tvPanelCols }};gap:1.1cqw;min-height:0">
+
+    <section style="display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 1.15cqw; border: 1px solid rgba(99,181,255,.42); border-radius: 14px; background: rgba(255,255,255,.84); box-shadow: inset 0 1px rgba(13,27,42,.05),0 12px 30px rgba(15,40,70,.1); overflow: hidden">
+      <h2 style="display:flex;align-items:center;gap:.55em;margin:0 0 1cqw;font-family:'Archivo',sans-serif;font-size:1.45cqw;font-weight:800;letter-spacing:.035em;line-height:1">
+        <span style="width:.72em;height:.72em;flex:none;border-radius:50%;background:#0a93c9;box-shadow:0 0 0 .18em rgba(10,147,201,.14)"></span>LIVE <span style="font-weight:800">– PÅGÅR NÅ</span>
+      </h2>
+      <div style="display:grid;gap:8px;min-height:0;overflow:auto">
+        <sc-for list="{{ tvLive }}" as="m" hint-placeholder-count="2">
+          <article style="padding:.85cqw;border:1px solid rgba(10,147,201,.76);border-radius:12px;background:rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(10,147,201,.1),0 0 18px rgba(10,147,201,.1);overflow:hidden">
+            <h3 style="display:flex;justify-content:space-between;gap:8px;margin:0 0 8px;color:#12283f;font-family:'Archivo',sans-serif;font-size:1.05cqw;font-weight:800;line-height:1">
+              <span style="color:#0a93c9;font-size:.78em;white-space:nowrap">{{ m.court }}</span>{{ m.context }}
+            </h3>
+            <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(2.2cqw,auto) auto minmax(2.2cqw,auto) minmax(0,1.35fr);align-items:center;gap:.75cqw;min-width:0">
+              <div style="display:grid;gap:1px;font-size:1cqw;font-weight:800;line-height:1.15;min-width:0">
+                <sc-for list="{{ m.teamOnePlayers }}" as="p" hint-placeholder-count="2">
+                  <span style="overflow-wrap:anywhere;hyphens:auto">{{ p.name }}</span>
+                </sc-for>
+              </div>
+              <strong style="font-family:'Archivo',sans-serif;font-size:2.5cqw;font-weight:900;line-height:.85;font-variant-numeric:tabular-nums">{{ m.scoreOne }}</strong>
+              <span style="color:#0a93c9;font-family:'Archivo',sans-serif;font-size:.95cqw;font-weight:800">VS</span>
+              <strong style="font-family:'Archivo',sans-serif;font-size:2.5cqw;font-weight:900;line-height:.85;font-variant-numeric:tabular-nums">{{ m.scoreTwo }}</strong>
+              <div style="display:grid;gap:1px;font-size:1cqw;font-weight:800;line-height:1.15;min-width:0;text-align:right;justify-items:end">
+                <sc-for list="{{ m.teamTwoPlayers }}" as="p" hint-placeholder-count="2">
+                  <span style="overflow-wrap:anywhere;hyphens:auto">{{ p.name }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px;padding-top:7px;border-top:1px solid rgba(20,60,105,.2);color:#56708c;font-size:.8cqw;min-width:0">
+              <span style="color:#0a93c9;font-weight:900;text-shadow:0 0 10px rgba(10,147,201,.55);animation:psPulse 2.4s ease-in-out infinite;white-space:nowrap">● PÅGÅR</span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.meta }}</span>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;min-width:0;min-height:0;padding:1.15cqw;border:1px solid rgba(99,181,255,.42);border-radius:14px;background:rgba(255,255,255,.84);box-shadow:inset 0 1px rgba(13,27,42,.05),0 12px 30px rgba(15,40,70,.1);overflow:hidden">
+      <h2 style="display:flex;align-items:center;gap:.55em;margin:0 0 1cqw;font-family:'Archivo',sans-serif;font-size:1.45cqw;font-weight:800;letter-spacing:.035em;line-height:1">
+        <img src="assets/icons/games-96.png" alt="" style="width:1.8cqw;height:1.8cqw;flex:none;object-fit:contain;filter:drop-shadow(0 0 5px rgba(10,147,201,.25))">NESTE KAMP
+      </h2>
+      <div style="display:grid;gap:8px;min-height:0;overflow:auto">
+        <sc-for list="{{ tvNext }}" as="m" hint-placeholder-count="3">
+          <article style="padding:.85cqw;border:1px solid rgba(89,174,255,.5);border-radius:12px;background:rgba(255,255,255,.9);overflow:hidden">
+            <h3 style="display:flex;justify-content:space-between;gap:8px;margin:0 0 8px;color:#12283f;font-family:'Archivo',sans-serif;font-size:1.05cqw;font-weight:800;line-height:1">
+              <span style="color:#0a93c9;font-size:.78em;white-space:nowrap">{{ m.court }}</span>{{ m.context }}
+            </h3>
+            <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(2.2cqw,auto) auto minmax(2.2cqw,auto) minmax(0,1.35fr);align-items:center;gap:.75cqw;min-width:0">
+              <div style="display:grid;gap:1px;font-size:1cqw;font-weight:800;line-height:1.15;min-width:0">
+                <sc-for list="{{ m.teamOnePlayers }}" as="p" hint-placeholder-count="2">
+                  <span style="overflow-wrap:anywhere;hyphens:auto">{{ p.name }}</span>
+                </sc-for>
+              </div>
+              <strong style="font-family:'Archivo',sans-serif;font-size:2.5cqw;font-weight:900;line-height:.85;color:#56708c">–</strong>
+              <span style="color:#0a93c9;font-family:'Archivo',sans-serif;font-size:.95cqw;font-weight:800">VS</span>
+              <strong style="font-family:'Archivo',sans-serif;font-size:2.5cqw;font-weight:900;line-height:.85;color:#56708c">–</strong>
+              <div style="display:grid;gap:1px;font-size:1cqw;font-weight:800;line-height:1.15;min-width:0;text-align:right;justify-items:end">
+                <sc-for list="{{ m.teamTwoPlayers }}" as="p" hint-placeholder-count="2">
+                  <span style="overflow-wrap:anywhere;hyphens:auto">{{ p.name }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:8px;margin-top:9px;padding-top:7px;border-top:1px solid rgba(20,60,105,.2);color:#56708c;font-size:.8cqw;min-width:0">
+              <span style="white-space:nowrap">◷ Starter snart</span>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.meta }}</span>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;min-width:0;min-height:0;padding:1.15cqw;border:1px solid rgba(99,181,255,.42);border-radius:14px;background:rgba(255,255,255,.84);box-shadow:inset 0 1px rgba(13,27,42,.05),0 12px 30px rgba(15,40,70,.1);overflow:hidden">
+      <h2 style="display:flex;align-items:center;gap:.55em;margin:0 0 1cqw;font-family:'Archivo',sans-serif;font-size:1.45cqw;font-weight:800;letter-spacing:.035em;line-height:1">
+        <img src="assets/icons/trophy-96.png" alt="" style="width:1.8cqw;height:1.8cqw;flex:none;object-fit:contain;filter:drop-shadow(0 0 5px rgba(10,147,201,.25))">{{ tvStandingTitle }}
+      </h2>
+
+      <sc-if value="{{ tvIsRR }}" hint-placeholder-val="{{ true }}">
+        <div style="display: grid; grid-template-columns: 1.8cqw minmax(0,1fr) 3.3cqw 3cqw 3.3cqw; align-items: center; gap: .4cqw; padding: 0 .5cqw 8px; border-bottom: 1px solid rgba(20,60,105,.24); color: #12283f; font-family: 'Archivo',sans-serif; font-size: .72cqw; font-weight: 800; align-self: auto; justify-content: flex-start">
+          <span>#</span><span>Spiller</span>
+          <span style="text-align:right">Kamper</span><span style="text-align:right">Seier</span><span style="text-align:right">Poeng</span>
+        </div>
+        <div style="flex:1;min-height:0;overflow:auto">
+          <sc-for list="{{ tvStandRows }}" as="s" hint-placeholder-count="7">
+            <div style="display:grid;grid-template-columns:1.8cqw minmax(0,1fr) 3.3cqw 3cqw 3.3cqw;align-items:center;gap:.4cqw;min-height:4.9cqh;padding:0 .5cqw;border-bottom:1px solid rgba(20,60,105,.2);font-size:1cqw;font-weight:800">
+              <span style="display:grid;place-items:center;width:1.8cqw;height:1.8cqw;border-radius:50%;color:#f4f8fc;background:{{ s.badge }};font-family:'Archivo',sans-serif;font-size:.72cqw;font-variant-numeric:tabular-nums">{{ s.rank }}</span>
+              <span style="display:flex;align-items:center;gap:.55cqw;min-width:0">
+                <span style="width:1.8cqw;height:1.8cqw;position:relative;flex:none">
+                  <span style="position:absolute;inset:0;clip-path:{{ clip }};background:linear-gradient(150deg,{{ s.light }},{{ s.hex }})"></span>
+                  <span style="position:absolute;inset:2.5px;clip-path:{{ clip }};background:#ffffff;display:flex;align-items:center;justify-content:center;font-family:'Archivo',sans-serif;font-size:.66cqw;font-weight:800;color:{{ s.light }}">{{ s.initials }}</span>
+                </span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ s.name }}</span>
+              </span>
+              <span style="text-align:right;font-variant-numeric:tabular-nums">{{ s.kamper }}</span>
+              <span style="text-align:right;font-variant-numeric:tabular-nums">{{ s.seire }}</span>
+              <span style="text-align:right;font-variant-numeric:tabular-nums;color:#0a93c9">{{ s.poeng }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ tvIsCup }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:auto">
+          <div style="display:flex;gap:1.4cqw;min-height:30cqh">
+            <sc-for list="{{ bracketTree }}" as="col" hint-placeholder-count="3">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-around;gap:10px">
+                <div style="flex:none;margin-bottom:2px;color:#56708c;font-family:'Archivo',sans-serif;font-size:.75cqw;font-weight:800;letter-spacing:.08em;text-align:center">{{ col.title }}</div>
+                <sc-for list="{{ col.matches }}" as="bm" hint-placeholder-count="4">
+                  <div style="flex:none;display:grid;border:1px solid {{ bm.treeBorder }};border-style:{{ bm.treeStyle }};border-radius:8px;background:rgba(255,255,255,.9);overflow:hidden;font-size:.85cqw;font-weight:700">
+                    <div style="padding:.55cqw .8cqw;border-bottom:1px solid rgba(20,60,105,.18);overflow-wrap:anywhere;line-height:1.2;color:{{ bm.treeColorOne }}">{{ bm.one }}</div>
+                    <div style="padding:.55cqw .8cqw;overflow-wrap:anywhere;line-height:1.2;color:{{ bm.treeColorTwo }}">{{ bm.two }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:none;display:flex;gap:10px;flex-wrap:wrap">
+            <div style="flex:0 0 100%;color:#56708c;font-family:'Archivo',sans-serif;font-size:.75cqw;font-weight:800;letter-spacing:.08em">Bronsefinale</div>
+            <div style="flex:1 1 200px;display:grid;border:1px dashed rgba(20,60,105,.24);border-radius:8px;background:rgba(255,255,255,.9);overflow:hidden;font-size:.85cqw;font-weight:700">
+              <div style="padding:.55cqw .8cqw;border-bottom:1px solid rgba(20,60,105,.18);color:#56708c;text-align:center">Venter</div>
+              <div style="padding:.55cqw .8cqw;color:#56708c;text-align:center">Venter</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </section>
+  </div>
+
+  <div style="display:flex;flex-wrap:nowrap;min-height:4cqw;border:1px solid rgba(99,181,255,.42);border-radius:14px;background:rgba(255,255,255,.88);overflow:hidden;width:100%;align-self:flex-end;gap:1cqw;padding:.4cqw;align-items:center">
+    <div style="display:flex;align-items:center;flex:none;gap:8px;min-height:2.2cqw;padding:0 1.2cqw;border-right:1px solid rgba(20,60,105,.22);font-weight:800;white-space:nowrap">
+      <span style="color:#0a93c9;font-size:1.8em">◎</span><strong style="font-variant-numeric:tabular-nums">{{ tvProgress }}</strong>
+    </div>
+    <div style="display:flex;align-items:center;flex:none;gap:8px;min-height:2.2cqw;padding:0 1.2cqw;border-right:1px solid rgba(20,60,105,.22);font-weight:800;white-space:nowrap">
+      <span style="color:#0a93c9;font-size:1.8em">♟</span><strong style="font-variant-numeric:tabular-nums">{{ tvMatchProgress }}</strong><span style="color:#56708c;font-weight:700">kamper ferdig</span>
+    </div>
+    <p style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:8px;margin:0;min-height:2.2cqw;padding:0 1.2cqw;border-right:1px solid rgba(20,60,105,.22);color:#0d1b2a;font-family:'Archivo',sans-serif;font-size:1.05cqw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800;letter-spacing:.02em;text-align:center">Gode kamper. Gode øyeblikk.</p>
+    <div style="display:flex;align-items:center;flex:none;gap:8px;min-height:2.2cqw;padding:0 1.2cqw;border-right:1px solid rgba(20,60,105,.22);white-space:nowrap">
+      <span style="width:.72em;height:.72em;border-radius:50%;background:#3f8f22;box-shadow:0 0 0 .18em rgba(63,143,34,.14)"></span><strong style="color:#3f8f22">Live</strong>
+    </div>
+    <div style="display:flex;align-items:center;flex:none;gap:6px;min-height:2.2cqw;padding:0 1cqw;border-right:1px solid rgba(20,60,105,.22)">
+      <sc-for list="{{ tvTabs }}" as="t" hint-placeholder-count="2">
+        <button type="button" onClick="{{ t.pick }}" style="background:{{ t.bg }};border:1px solid {{ t.border }};color:{{ t.color }};border-radius:6px;padding:8px 12px;font-size:.78cqw;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;min-height:2.6cqw">{{ t.label }}</button>
+      </sc-for>
+    </div>
+    <button type="button" onClick="{{ goKamper }}" style="display:flex;align-items:center;min-height:2.2cqw;padding:0 1.2cqw;border:0;background:transparent;color:#56708c;font-size:.85cqw;font-weight:800;letter-spacing:.04em;text-transform:uppercase;cursor:pointer">Tilbake</button><span style="flex:none;display:flex;align-items:center;gap:.3em;font-family:'Archivo',sans-serif;font-size:2cqw;font-weight:700;font-variant-numeric:tabular-nums;color:#0d1b2a;line-height:1;white-space:nowrap;padding:.4cqw 1cqw"><span style="color:#0a93c9;font-size:.9em;line-height:1;display:block">◷</span><span style="display:block;line-height:1">19:42</span></span>
+  </div>
+</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isAdmin }}">
+<div style="flex:1;display:flex;min-height:0">
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="padding:18px 22px 0;border-bottom:1px solid rgba(20,60,105,.11);background:#e7eef7">
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px">
+        <span style="padding:5px 10px;border-radius:7px;background:rgba(192,48,79,.12);border:1px solid rgba(192,48,79,.32);color:#c0304f;font-size:10.5px;font-weight:800;letter-spacing:.08em">SYSTEMEIER</span>
+        <span style="font-family:'Archivo',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.015em">Administrasjon</span>
+      </div>
+      <div style="display:flex;gap:4px;overflow-x:auto">
+        <sc-for list="{{ adminTabs }}" as="t" hint-placeholder-count="5">
+          <button type="button" onClick="{{ t.pick }}" style="background:transparent;border:0;border-bottom:2px solid {{ t.mark }};color:{{ t.color }};padding:12px 14px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;min-height:46px">{{ t.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="flex:1;min-height:0;overflow:auto;padding:20px 22px 60px">
+      <sc-if value="{{ adminIsOverview }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:11px;max-width:1100px">
+          <sc-for list="{{ adminMetrics }}" as="m" hint-placeholder-count="6">
+            <div style="background: linear-gradient(180deg, #b9cbe3, #28211A00); border: 1px solid rgba(20,60,105,.12); border-radius: 14px; padding: 18px">
+              <div style="font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:#5b7490;font-weight:700">{{ m.label }}</div>
+              <div style="font-family:'Archivo',sans-serif;font-size:30px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:{{ m.color }}">{{ m.value }}</div>
+              <div style="font-size:11.5px;color:#6a8299;margin-top:2px">{{ m.sub }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ adminIsUsers }}">
+        <div style="max-width:1100px;background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:14px;overflow:hidden">
+          <div style="padding:13px 16px;border-bottom:1px solid rgba(20,60,105,.1)">
+            <input type="text" placeholder="Søk på navn eller e-post" style="width:100%;max-width:320px;background:rgba(255,255,255,.82);border:1px solid rgba(20,60,105,.16);border-radius:9px;padding:11px;color:#0d1b2a;font-size:13.5px;min-height:44px">
+          </div>
+          <div style="overflow-x:auto">
+            <div style="min-width:620px">
+              <div style="display:grid;grid-template-columns:1.4fr 1.6fr 80px 90px 110px;gap:10px;padding:11px 16px;border-bottom:1px solid rgba(20,60,105,.1);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#5b7490;font-weight:700">
+                <span>Navn</span><span>E-post</span><span>Turn.</span><span>Status</span><span></span>
+              </div>
+              <sc-for list="{{ adminUsers }}" as="u" hint-placeholder-count="5">
+                <div style="display:grid;grid-template-columns:1.4fr 1.6fr 80px 90px 110px;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(20,60,105,.06)">
+                  <span style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.name }}</span>
+                  <span style="font-size:12.5px;color:#56708c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.email }}</span>
+                  <span style="font-family:'Archivo',sans-serif;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums">{{ u.count }}</span>
+                  <span style="font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:999px;background:{{ u.bg }};color:{{ u.color }};justify-self:start">{{ u.status }}</span>
+                  <span style="display:flex;gap:6px;justify-self:end">
+                    <button type="button" style="background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#3c5470;border-radius:6px;padding:6px 9px;font-size:11px;font-weight:600;cursor:pointer">Sperr</button>
+                    <button type="button" style="background:transparent;border:1px solid rgba(192,48,79,.3);color:#c0304f;border-radius:6px;padding:6px 9px;font-size:11px;font-weight:600;cursor:pointer">Slett</button>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ adminIsTournaments }}">
+        <div style="max-width:1100px;display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ adminTournaments }}" as="t" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:13px;padding:14px 16px;background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:12px;flex-wrap:wrap">
+              <span style="flex:none;padding:5px 9px;border-radius:999px;font-size:10.5px;font-weight:700;background:{{ t.bg }};color:{{ t.color }}">{{ t.state }}</span>
+              <span style="flex:1;min-width:150px;font-size:14px;font-weight:600">{{ t.name }}</span>
+              <span style="font-size:12px;color:#5b7490;font-variant-numeric:tabular-nums">{{ t.meta }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ adminIsRetention }}">
+        <div style="max-width:700px;display:flex;flex-direction:column;gap:11px">
+          <sc-for list="{{ retentionJobs }}" as="j" hint-placeholder-count="4">
+            <div style="background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:13px;padding:17px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+                <div style="min-width:0">
+                  <div style="font-size:14.5px;font-weight:700">{{ j.name }}</div>
+                  <div style="font-size:12px;color:#5b7490;margin-top:3px;font-variant-numeric:tabular-nums">{{ j.schedule }} · sist {{ j.last }}</div>
+                </div>
+                <span style="font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:{{ j.bg }};color:{{ j.color }}">{{ j.status }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ adminIsLogs }}">
+        <div style="max-width:900px;background:#ffffff;border:1px solid rgba(20,60,105,.12);border-radius:13px;overflow:hidden">
+          <sc-for list="{{ logs }}" as="l" hint-placeholder-count="8">
+            <div style="display:flex;gap:13px;padding:11px 15px;border-bottom:1px solid rgba(20,60,105,.06);font-size:12.5px;font-family:ui-monospace,Menlo,monospace">
+              <span style="flex:none;color:#6a8299;font-variant-numeric:tabular-nums">{{ l.time }}</span>
+              <span style="flex:none;width:52px;font-weight:700;color:{{ l.color }}">{{ l.level }}</span>
+              <span style="flex:1;min-width:0;color:#3c5470;line-height:1.5">{{ l.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;density&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;comfortable&quot;,&quot;compact&quot;],&quot;default&quot;:&quot;compact&quot;,&quot;tsType&quot;:&quot;\&quot;comfortable\&quot; | \&quot;compact\&quot;&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;showTicker&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;monogramShape&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;hex&quot;,&quot;shield&quot;,&quot;circle&quot;],&quot;default&quot;:&quot;circle&quot;,&quot;tsType&quot;:&quot;\&quot;hex\&quot; | \&quot;shield\&quot; | \&quot;circle\&quot;&quot;,&quot;section&quot;:&quot;Spillere&quot;}}">
+const GEM = {
+  blue: "#1a59f2", orange: "#e67a0a", mint: "#148f42", pink: "#d12e52", indigo: "#7030d1",
+  teal: "#0a8080", red: "#c70a33", yellow: "#b88c00", gold: "#8a6a10", silver: "#616b7a",
+  bronze: "#9e560f", sapphire: "#052e9e", emerald: "#0a7538", garnet: "#991020",
+  amethyst: "#8524b8", onyx: "#1f2126",
+};
+
+function lighten(hex, amount) {
+  const n = hex.replace("#", "");
+  const p = [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16));
+  return "#" + p.map((v) => Math.round(v + (255 - v) * amount).toString(16).padStart(2, "0")).join("");
+}
+function rgba(hex, a) {
+  const n = hex.replace("#", "");
+  const [r, g, b] = [0, 2, 4].map((i) => parseInt(n.slice(i, i + 2), 16));
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+function initials(name) {
+  return name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+}
+
+const CLIPS = {
+  hex: "polygon(50% 0, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)",
+  shield: "polygon(50% 0, 100% 16%, 100% 62%, 50% 100%, 0 62%, 0 16%)",
+  circle: "circle(50% at 50% 50%)",
+};
+
+const ROSTER = [
+  { name: "Sigurd Grødem", accent: "blue", poeng: 14, seire: 5, sett: 9, games: 58, source: "Admin spiller" },
+  { name: "Marte Lien", accent: "amethyst", poeng: 13, seire: 4, sett: 8, games: 55, source: "Påmeldt selv" },
+  { name: "Jonas Berg", accent: "emerald", poeng: 11, seire: 4, sett: 7, games: 52, source: "Påmeldt selv" },
+  { name: "Ingrid Solum", accent: "orange", poeng: 10, seire: 3, sett: 7, games: 49, source: "Lagt til av admin" },
+  { name: "Håkon Rud", accent: "teal", poeng: 8, seire: 3, sett: 5, games: 46, source: "Påmeldt selv" },
+  { name: "Elise Fjell", accent: "pink", poeng: 7, seire: 2, sett: 4, games: 41, source: "Lagt til av admin" },
+  { name: "Tobias Aas", accent: "gold", poeng: 5, seire: 1, sett: 3, games: 37, source: "Påmeldt selv" },
+];
+
+const SCREENS = [
+  { id: "landing", label: "1 · Forside" },
+  { id: "login", label: "2 · Logg inn" },
+  { id: "create", label: "3 · Opprett (wizard)" },
+  { id: "join", label: "4 · Bli med med kode" },
+  { id: "lobby", label: "5 · Lobby" },
+  { id: "kamper", label: "6 · Kamper (live)" },
+  { id: "stilling", label: "7 · Stilling" },
+  { id: "minkamp", label: "8 · Min kamp" },
+  { id: "settings", label: "9 · Innstillinger" },
+  { id: "podium", label: "10 · Podium" },
+  { id: "profil", label: "11 · Profil" },
+  { id: "install", label: "12 · Installer / offline" },
+  { id: "tv", label: "13 · TV Mode" },
+  { id: "admin", label: "14 · Administrasjon" },
+];
+
+const WORKSPACE = ["kamper", "stilling", "minkamp", "settings"];
+
+class Component extends DCLogic {
+  state = {
+    screen: "landing",
+    step: 1,
+    format: "rr",
+    courts: 2,
+    hasSaved: true,
+    joinError: false,
+    conflict: false,
+    openMatch: 1,
+    sheetOpen: false,
+    points: [2, 1],
+    myGames: [4, 3],
+    scoreHistory: [],
+    mySets: [0, 0],
+    myPoints: [2, 1],
+    rankBy: "poeng",
+    tvTab: "rr",
+    adminTab: "oversikt",
+    wide: true,
+  };
+
+  componentDidMount() {
+    this._onResize = () => {
+      const w = (this.el && this.el.offsetWidth) || window.innerWidth;
+      const wide = w >= 860;
+      if (wide !== this.state.wide) this.setState({ wide });
+    };
+    window.addEventListener("resize", this._onResize);
+    this._onResize();
+  }
+  componentWillUnmount() { window.removeEventListener("resize", this._onResize); }
+
+  go(screen) { return () => this.setState({ screen }); }
+
+  players() {
+    return ROSTER.map((p) => {
+      const hex = GEM[p.accent];
+      return { ...p, hex, light: lighten(hex, 0.45), initials: initials(p.name) };
+    });
+  }
+
+  sortedStandings() {
+    const key = this.state.rankBy;
+    const list = this.players().slice().sort((a, b) => b[key] - a[key] || b.seire - a.seire || a.name.localeCompare(b.name, "nb"));
+    return list.map((p, i) => {
+      const lead = i === 0;
+      const w = (k) => (k === key ? "800" : "400");
+      const c = (k) => (k === key ? "#0d1b2a" : "#56708c");
+      return {
+        ...p, rank: i + 1,
+        rowBg: lead ? rgba(p.hex, 0.09) : i % 2 ? "rgba(91,173,255,.025)" : "transparent",
+        wPoeng: w("poeng"), wSeire: w("seire"), wGames: w("games"),
+        cPoeng: c("poeng"), cSeire: c("seire"), cGames: c("games"),
+      };
+    });
+  }
+
+  pushHistory() {
+    return this.state.scoreHistory.concat([{ points: this.state.myPoints.slice(), games: this.state.myGames.slice() }]).slice(-40);
+  }
+
+  undoScore() {
+    const hist = this.state.scoreHistory.slice();
+    const prev = hist.pop();
+    if (!prev) return;
+    this.setState({ myPoints: prev.points, myGames: prev.games, scoreHistory: hist });
+  }
+
+  addPoint(i) {
+    const history = this.pushHistory();
+    const pts = this.state.myPoints.slice();
+    const games = this.state.myGames.slice();
+    const other = i === 0 ? 1 : 0;
+    if (pts[i] >= 3 && pts[other] < 3) {          // 40 and opponent below 40 -> game
+      games[i] += 1; pts[0] = 0; pts[1] = 0;
+    } else if (pts[i] === 4) {                     // advantage converted
+      games[i] += 1; pts[0] = 0; pts[1] = 0;
+    } else if (pts[i] === 3 && pts[other] === 4) { // back to 40–40
+      pts[other] = 3;
+    } else {
+      pts[i] = Math.min(4, pts[i] + 1);
+    }
+    this.setState({ myPoints: pts, myGames: games, scoreHistory: history });
+  }
+
+  subPoint(i) {
+    const history = this.pushHistory();
+    const pts = this.state.myPoints.slice();
+    pts[i] = Math.max(0, pts[i] - 1);
+    this.setState({ myPoints: pts, scoreHistory: history });
+  }
+
+  bracketColumns() {
+    return [
+        {
+          title: "KVARTFINALE", matches: [
+            { one: "Sigurd + Jonas", two: "Tobias + Kari", sOne: "6", sTwo: "3", win: 1 },
+            { one: "Marte + Elise", two: "Per + Nina", sOne: "4", sTwo: "6", win: 2 },
+            { one: "Ingrid + Håkon", two: "Ola + Siri", sOne: "5", sTwo: "4", win: 1, live: true, court: "Bane 1" },
+            { one: "Emil + Vera", two: "Anne + Leif", sOne: "6", sTwo: "1", win: 1 },
+          ],
+        },
+        {
+          title: "SEMIFINALE", matches: [
+            { one: "Sigurd + Jonas", two: "Per + Nina", sOne: "6", sTwo: "4", win: 1 },
+            { one: "Venter på vinnere", two: "Emil + Vera", sOne: "–", sTwo: "–", win: 0 },
+          ],
+        },
+        { title: "FINALE", matches: [{ one: "Sigurd + Jonas", two: "Venter på kamp", sOne: "–", sTwo: "–", win: 0 }] },
+        { title: "BRONSEFINALE", matches: [{ one: "Venter på vinnere", two: "Venter på vinnere", sOne: "–", sTwo: "–", win: 0 }] },
+      ].map((col) => ({
+        ...col,
+        matches: col.matches.map((m) => ({
+          ...m,
+          live: !!m.live,
+          court: m.court ?? "",
+          bg: m.live ? "rgba(27,138,82,.06)" : "#ffffff",
+          border: m.live ? "rgba(27,138,82,.4)" : "rgba(20,60,105,.13)",
+          shadow: m.live ? "0 0 0 3px rgba(27,138,82,.08)" : "none",
+          treeBorder: m.win === 0 ? "rgba(20,60,105,.24)" : m.live ? "rgba(10,147,201,.76)" : "rgba(63,143,34,.55)",
+          treeStyle: m.win === 0 ? "dashed" : "solid",
+          treeColorOne: m.win === 1 ? "#3f8f22" : m.win === 0 ? "#56708c" : "#0d1b2a",
+          treeColorTwo: m.win === 2 ? "#3f8f22" : m.win === 0 ? "#56708c" : "#0d1b2a",
+          wOne: m.win === 1 ? "700" : "500",
+          wTwo: m.win === 2 ? "700" : "500",
+          cOne: m.win === 1 ? "#0d1b2a" : m.win === 0 ? "#6a8299" : "#56708c",
+          cTwo: m.win === 2 ? "#0d1b2a" : m.win === 0 ? "#6a8299" : "#56708c",
+        })),
+      }));
+  }
+
+  renderVals() {
+    const s = this.state;
+    const P = this.props;
+    const density = P.density ?? "comfortable";
+    const clip = CLIPS[P.monogramShape ?? "hex"] ?? CLIPS.hex;
+    const showTicker = P.showTicker ?? true;
+    const sorted = this.sortedStandings();
+    const pick = (v, k) => () => this.setState({ [k]: v });
+
+    const navDefs = [
+      { id: "kamper", label: "Kamper", short: "Kamper" },
+      { id: "stilling", label: "Stilling", short: "Stilling" },
+      { id: "minkamp", label: "Min kamp", short: "Min kamp" },
+      { id: "settings", label: "Innstillinger", short: "Innst." },
+    ];
+
+    const seg = (active, value, label, key) => ({
+      label, pick: pick(value, key),
+      bg: active ? "linear-gradient(180deg,#5badff0d,#5badff30)" : "linear-gradient(180deg,#5BADFF00,#5badff26)",
+      border: active ? "rgba(98,182,255,.55)" : "rgba(20,60,105,.18)",
+      color: active ? "#0d1b2a" : "#56708c",
+    });
+
+    const stepTitles = { 1: "Spillere", 2: "Navn og format", 3: "Baner og regler", 4: "Bekreft og start" };
+    const bracketCols = this.bracketColumns();
+
+    return {
+      clip,
+      pad: density === "compact" ? "10px 13px" : "14px 15px",
+      allScreens: SCREENS,
+      screen: s.screen,
+      onScreenPick: (e) => this.setState({ screen: e.target.value }),
+
+      isLanding: s.screen === "landing",
+      isLogin: s.screen === "login",
+      isJoin: s.screen === "join",
+      isCreate: s.screen === "create",
+      isLobby: s.screen === "lobby",
+      isPodium: s.screen === "podium",
+      isProfil: s.screen === "profil",
+      isInstall: s.screen === "install",
+      isTv: s.screen === "tv",
+      isAdmin: s.screen === "admin",
+      inWorkspace: WORKSPACE.includes(s.screen),
+      isKamper: s.screen === "kamper",
+      isStilling: s.screen === "stilling",
+      isMin: s.screen === "minkamp",
+      isSettings: s.screen === "settings",
+
+      goLogin: this.go("login"), goCreate: this.go("create"), goJoin: this.go("join"),
+      goKamper: this.go("kamper"), goStilling: this.go("stilling"), goMin: this.go("minkamp"),
+      goPodium: this.go("podium"), goTv: this.go("tv"), goInstall: this.go("install"),
+
+      features: [
+        { title: "Enklere turneringer", text: "Opprett og organiser kamper uten unødvendig administrasjon." },
+        { title: "Alle kan bli med", text: "Del en kode og la spillerne koble seg på fra egne enheter." },
+        { title: "Resultater i sanntid", text: "Følg kamper, poeng og neste runde mens turneringen pågår." },
+      ],
+      hasSaved: s.hasSaved,
+      noSaved: !s.hasSaved,
+      toggleEmpty: () => this.setState({ hasSaved: !s.hasSaved }),
+      emptyToggleLabel: s.hasSaved ? "Vis tom tilstand" : "Vis lagret turnering",
+
+      codeCells: "TQA5CU6N".split("").map((ch, i) => ({
+        ch, border: i < 6 ? "rgba(98,182,255,.5)" : "rgba(20,60,105,.15)",
+        color: i < 6 ? "#0d1b2a" : "#6a8299",
+      })),
+      joinError: s.joinError,
+      toggleJoinError: () => this.setState({ joinError: !s.joinError }),
+      joinErrorToggleLabel: s.joinError ? "Skjul feiltilstand" : "Vis feiltilstand",
+      gemSwatches: Object.entries(GEM).map(([name, hex], i) => ({
+        name, hex, opacity: i === 0 ? 1 : 0.62,
+        ring: i === 0 ? "#0d1b2a" : hex === "#1f2126" ? "rgba(13,27,42,.32)" : "rgba(13,27,42,.1)",
+      })),
+
+      step: s.step,
+      stepTitle: stepTitles[s.step],
+      stepBars: [1, 2, 3, 4].map((n) => ({ bg: n <= s.step ? "#0f7ae0" : "rgba(91,173,255,.16)" })),
+      isStepPlayers: s.step === 1, isStepName: s.step === 2, isStepRules: s.step === 3, isStepConfirm: s.step === 4,
+      canBack: s.step > 1,
+      nextLabel: s.step === 4 ? "Start turnering" : "Neste",
+      nextStep: () => (s.step === 4 ? this.setState({ screen: "lobby" }) : this.setState({ step: s.step + 1 })),
+      prevStep: () => this.setState({ step: Math.max(1, s.step - 1) }),
+      formats: [
+        { key: "rr", name: "Round robin", desc: "Alle spiller på lag med alle. Rotasjon per runde." },
+        { key: "cup", name: "Cup", desc: "Utslag med bracket, bronsefinale og finale." },
+        { key: "liga", name: "Liga", desc: "Tabell over flere spilledager. Kommer i 1.0." },
+      ].map((f) => ({
+        ...f, pick: pick(f.key, "format"),
+        bg: s.format === f.key ? "rgba(91,173,255,.13)" : "rgba(255,255,255,.62)",
+        border: s.format === f.key ? "rgba(98,182,255,.6)" : "rgba(20,60,105,.13)",
+      })),
+      courts: s.courts,
+      courtsUp: () => this.setState({ courts: Math.min(8, s.courts + 1) }),
+      courtsDown: () => this.setState({ courts: Math.max(1, s.courts - 1) }),
+      ruleRows: [
+        { label: "Games per sett", hint: "Vinnes med to games margin", options: [4, 6, 9], active: 6 },
+        { label: "Sett per kamp", hint: "Best av", options: [1, 3, 5], active: 1 },
+        { label: "Tabellpoeng", hint: "Hva som gir poeng", options: ["Kamp", "Sett", "Games"], active: "Kamp" },
+      ].map((r) => ({
+        ...r,
+        options: r.options.map((o) => ({
+          label: String(o),
+          bg: o === r.active ? "rgba(91,173,255,.2)" : "transparent",
+          border: o === r.active ? "rgba(98,182,255,.55)" : "rgba(20,60,105,.16)",
+          color: o === r.active ? "#0d1b2a" : "#56708c",
+        })),
+      })),
+      players: this.players(),
+      playerCount: ROSTER.length,
+      confirmRows: [
+        { label: "Turneringsnavn", value: "Risløkka Padel Uke 39" },
+        { label: "Format", value: s.format === "cup" ? "Cup" : s.format === "liga" ? "Liga" : "Round robin" },
+        { label: "Baner", value: String(s.courts) },
+        { label: "Spillere", value: String(ROSTER.length) },
+        { label: "Regler", value: "6 games · 1 sett · poeng for kampseier" },
+      ],
+
+      qrCells: Array.from({ length: 49 }, (_, i) => {
+        const r = Math.floor(i / 7), c = i % 7;
+        const corner = (r < 2 && c < 2) || (r < 2 && c > 4) || (r > 4 && c < 2);
+        const on = corner || (r * 7 + c * 3) % 4 < 2;
+        return { c: on ? "#f4f8fc" : "transparent" };
+      }),
+
+      railWidth: s.wide ? "186px" : "0",
+      railDisplay: s.wide ? "flex" : "none",
+      tabsDisplay: s.wide ? "none" : "block",
+      kamperCols: s.wide && showTicker ? "minmax(0,1.55fr) minmax(0,1fr)" : "minmax(0,1fr)",
+      tickerDisplay: showTicker ? "flex" : "none",
+      navItems: navDefs.map((n) => {
+        const active = s.screen === n.id;
+        return {
+          ...n, go: this.go(n.id),
+          bg: active ? "rgba(91,173,255,.12)" : "transparent",
+          mark: active ? "#0f7ae0" : "transparent",
+          dot: active ? "#0f7ae0" : "rgba(20,60,105,.28)",
+          color: active ? "#0d1b2a" : "#56708c",
+        };
+      }),
+
+      conflict: s.conflict,
+      toggleConflict: () => this.setState({ conflict: !s.conflict }),
+      conflictToggleLabel: s.conflict ? "Skjul konflikt" : "Vis konflikt",
+      matches: [
+        { no: 5, teamOne: "Sigurd + Jonas", teamTwo: "Marte + Elise", court: "Bane 1", detail: "Runde 2 · sett 1", score: "4–3", status: "Pågår", state: "playing" },
+        { no: 6, teamOne: "Ingrid + Håkon", teamTwo: "Tobias + Marte", court: "Bane 2", detail: "Runde 2 · ferdig", score: "6–2", status: "Ferdig", state: "finished" },
+        { no: 7, teamOne: "Elise + Tobias", teamTwo: "Sigurd + Ingrid", court: "Bane 1", detail: "Runde 2 · neste", score: "–", status: "Venter", state: "waiting" },
+        { no: 8, teamOne: "Jonas + Håkon", teamTwo: "Marte + Ingrid", court: "Ikke tildelt", detail: "Runde 2 · i kø", score: "–", status: "Venter", state: "waiting" },
+      ].map((m) => ({
+        ...m,
+        open: s.openMatch === m.no,
+        toggle: () => this.setState({ openMatch: s.openMatch === m.no ? null : m.no, sheetOpen: false }),
+        border: s.openMatch === m.no ? "rgba(98,182,255,.5)" : m.state === "playing" ? "rgba(27,138,82,.34)" : "rgba(20,60,105,.11)",
+        scoreColor: m.state === "finished" ? "#1b8a52" : m.state === "playing" ? "#0d1b2a" : "#aec4dc",
+        statusBg: m.state === "playing" ? "rgba(27,138,82,.12)" : m.state === "finished" ? "rgba(91,173,255,.12)" : "rgba(20,60,105,.07)",
+        statusColor: m.state === "playing" ? "#1b8a52" : m.state === "finished" ? "#1470c4" : "#5b7490",
+      })),
+      pointA: ["0", "15", "30", "40", "A"][s.points[0]] ?? "40",
+      pointB: ["0", "15", "30", "40", "A"][s.points[1]] ?? "40",
+      pointOne: () => this.setState({ points: [Math.min(4, s.points[0] + 1), s.points[1]] }),
+      pointTwo: () => this.setState({ points: [s.points[0], Math.min(4, s.points[1] + 1)] }),
+      pointScore: `${["0", "15", "30", "40", "A"][s.points[0]]}–${["0", "15", "30", "40", "A"][s.points[1]]}`,
+      sheetOpen: s.sheetOpen,
+      toggleSheet: () => this.setState({ sheetOpen: !s.sheetOpen }),
+      sheetActions: [
+        { label: "Start kamp", color: "#0a4b80" },
+        { label: "Angre siste", color: "#0a4b80" },
+        { label: "Walkover Lag 1", color: "#3c5470" },
+        { label: "Walkover Lag 2", color: "#3c5470" },
+        { label: "Avbryt kamp", color: "#c0304f" },
+      ],
+      courtQueue: [
+        { court: "Bane 1", state: "Pågår", now: "Sigurd + Jonas mot Marte + Elise", next: "Kamp 7" },
+        { court: "Bane 2", state: "Ledig", now: "Ingen kamp akkurat nå", next: "Kamp 8" },
+      ].map((c) => ({
+        ...c,
+        stateBg: c.state === "Pågår" ? "rgba(27,138,82,.12)" : "rgba(20,60,105,.07)",
+        stateColor: c.state === "Pågår" ? "#1b8a52" : "#5b7490",
+      })),
+      ticker: [
+        { time: "19:42", text: "Ingrid + Håkon vant 6–2 mot Tobias + Marte", accent: "orange" },
+        { time: "19:40", text: "Kamp 5 startet på Bane 1", accent: "blue" },
+        { time: "19:38", text: "Elise meldte seg klar for runde 2", accent: "pink" },
+        { time: "19:31", text: "Runde 2 generert · 4 kamper, 1 pause", accent: "emerald" },
+        { time: "19:28", text: "Sigurd + Marte vant 6–4 mot Jonas + Ingrid", accent: "blue" },
+        { time: "19:14", text: "Tobias koblet seg på med kode", accent: "gold" },
+      ].map((t) => ({ ...t, hex: GEM[t.accent] })),
+
+      rankOptions: [
+        seg(s.rankBy === "poeng", "poeng", "Poeng", "rankBy"),
+        seg(s.rankBy === "seire", "seire", "Seire", "rankBy"),
+        seg(s.rankBy === "games", "games", "Games", "rankBy"),
+      ],
+      columns: [
+        { label: "Poeng", key: "poeng" }, { label: "Seire", key: "seire" },
+        { label: "Sett", key: "sett" }, { label: "Games", key: "games" },
+      ].map((c) => ({ ...c, color: c.key === s.rankBy ? "#62b6ff" : "#5b7490" })),
+      standings: sorted,
+      standingsShort: sorted.slice(0, 5),
+      podium: sorted.slice(0, 3).map((p, i) => ({
+        ...p,
+        rankLabel: ["1. plass", "2. plass", "3. plass"][i],
+        hero: `${p[s.rankBy]} ${s.rankBy === "poeng" ? "poeng" : s.rankBy}`,
+        border: i === 0 ? rgba(p.hex, 0.5) : "rgba(20,60,105,.13)",
+        glow: rgba(p.hex, i === 0 ? 0.16 : 0.08),
+      })),
+      podiumFinal: [sorted[1], sorted[0], sorted[2]].map((p, i) => {
+        const rank = [2, 1, 3][i];
+        return {
+          ...p, rank: String(rank),
+          size: rank === 1 ? "84px" : "64px",
+          fs: rank === 1 ? "25px" : "19px",
+          plinth: rank === 1 ? "84px" : rank === 2 ? "60px" : "44px",
+          delay: `${i * 0.12}s`,
+        };
+      }),
+      scoreRows: [
+        { tag: "Ditt lag", tagColor: "#1b8a52", names: "Deg + Jonas Berg", i: 0,
+          players: [
+            { initials: "SG", hex: GEM.blue, light: lighten(GEM.blue, 0.45) },
+            { initials: "JB", hex: GEM.emerald, light: lighten(GEM.emerald, 0.45) },
+          ] },
+        { tag: "Motstandere", tagColor: "#5b7490", names: "Marte + Elise", i: 1,
+          players: [
+            { initials: "ML", hex: GEM.amethyst, light: lighten(GEM.amethyst, 0.45) },
+            { initials: "EF", hex: GEM.pink, light: lighten(GEM.pink, 0.45) },
+          ] },
+      ].map((r) => ({
+        ...r,
+        rowBg: r.i === 0 ? "rgba(27,138,82,.06)" : "transparent",
+        sets: s.mySets[r.i],
+        games: s.myGames[r.i],
+        point: ["0", "15", "30", "40", "A"][s.myPoints[r.i]],
+        add: () => this.addPoint(r.i),
+        sub: () => this.subPoint(r.i),
+      })),
+      liveScore: `${s.myGames[0]}–${s.myGames[1]} · ${["0", "15", "30", "40", "A"][s.myPoints[0]]}–${["0", "15", "30", "40", "A"][s.myPoints[1]]}`,
+      undoPoint: () => this.undoScore(),
+      undoDisabled: s.scoreHistory.length === 0,
+      undoStyle: s.scoreHistory.length
+        ? "background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.18);color:#3c5470;border-radius:6px;padding:9px 13px;font-size:12px;font-weight:600;cursor:pointer;min-height:40px"
+        : "background:linear-gradient(180deg,#5BADFF00,#5badff26);border:1px solid rgba(20,60,105,.1);color:#6a8299;border-radius:6px;padding:9px 13px;font-size:12px;font-weight:600;cursor:default;min-height:40px",
+
+      opponents: [
+        { name: "Marte Lien", hex: GEM.amethyst, light: lighten(GEM.amethyst, 0.45), initials: "ML" },
+        { name: "Elise Fjell", hex: GEM.pink, light: lighten(GEM.pink, 0.45), initials: "EF" },
+      ],
+
+      settingGroups: [
+        {
+          title: "Regler", rows: [
+            { label: "Games per sett", hint: "Vinnes med to games margin", value: "6" },
+            { label: "Sett per kamp", hint: "Best av", value: "1" },
+            { label: "Tabellpoeng", hint: "Poengmotor", value: "Kampseier" },
+          ],
+        },
+        {
+          title: "Baner", rows: [
+            { label: "Baner i bruk", hint: "Bane 1, Bane 2", value: "2" },
+            { label: "Banetildeling", hint: "Kø eller fast", value: "Automatisk" },
+          ],
+        },
+        {
+          title: "Turnering", rows: [
+            { label: "Invitasjonskode", hint: "Deles med spillere", value: "TQA5CU6N" },
+            { label: "Varsler", hint: "Push til spillerne", value: "På" },
+            { label: "Spillere kan sende resultat", hint: "Admin godkjenner konflikt", value: "På" },
+          ],
+        },
+      ].map((g) => ({
+        ...g,
+        rows: g.rows.map((r) => ({
+          ...r, color: "#0a4b80",
+          bg: "rgba(91,173,255,.1)", border: "rgba(91,173,255,.28)",
+        })),
+      })),
+
+      careerStats: [
+        { label: "Kamper", value: "128", sub: "siden mars 2026" },
+        { label: "Seire", value: "74", sub: "58 % vinnerandel" },
+        { label: "Turneringer", value: "19", sub: "11 som arrangør" },
+        { label: "Beste plass", value: "1.", sub: "4 ganger" },
+      ],
+      activeTournaments: [
+        { name: "Risløkka Padel Uke 39", state: "Pågår", meta: "Runde 2 · 7 spillere", bg: "rgba(27,138,82,.12)", color: "#1b8a52" },
+        { name: "Torsdagspadel høst", state: "Lobby", meta: "3 spillere påmeldt", bg: "rgba(91,173,255,.12)", color: "#1470c4" },
+      ],
+      accountRows: [
+        { label: "E-post", value: "sigurd@zigonia.no" },
+        { label: "Passord", value: "Endret 12. mars 2026" },
+        { label: "Språk", value: "Bokmål · følg enheten" },
+        { label: "Varsler", value: "Push og e-post" },
+        { label: "Personvern", value: "Last ned eller slett data" },
+      ],
+      installSteps: [
+        { n: "1", title: "Åpne i nettleseren", text: "Padelstar kjører i Safari, Chrome og Edge uten nedlasting." },
+        { n: "2", title: "Velg Legg til på hjemskjerm", text: "Del-menyen i Safari, eller menyen i Chrome." },
+        { n: "3", title: "Start fra ikonet", text: "Appen åpner i fullskjerm og husker turneringen din." },
+      ],
+
+      tvTabs: [
+        seg(s.tvTab === "rr", "rr", "Round robin", "tvTab"),
+        seg(s.tvTab === "cup", "cup", "Cup", "tvTab"),
+      ],
+      tvIsRR: s.tvTab === "rr",
+      tvIsCup: s.tvTab === "cup",
+      tvPanelCols: !s.wide ? "minmax(0,1fr)" : s.tvTab === "cup" ? "1.15fr 1.15fr 1.6fr" : "1.15fr 1.1fr 1.15fr",
+      tvRoundLabel: s.tvTab === "cup" ? "Kvartfinale" : "Runde 2",
+      tvStandingTitle: s.tvTab === "cup" ? "Cup-bracket" : "Stilling",
+      tvProgress: s.tvTab === "cup" ? "Kvartfinale / 3" : "Runde 2 / 5",
+      tvMatchProgress: s.tvTab === "cup" ? "3 / 8" : "7 / 20",
+      tvLive: [
+        { court: "Bane 1", context: "Runde 2 · Kamp 5", meta: "Sett 0–0 · game 30–15",
+          teamOnePlayers: [{ name: "Sigurd Grødem" }, { name: "Jonas Berg" }],
+          teamTwoPlayers: [{ name: "Marte Lien" }, { name: "Elise Fjell" }],
+          scoreOne: "4", scoreTwo: "3" },
+        { court: "Bane 2", context: "Runde 2 · Kamp 6", meta: "Sett 1–0 · game 40–30",
+          teamOnePlayers: [{ name: "Ingrid Solum" }, { name: "Håkon Rud" }],
+          teamTwoPlayers: [{ name: "Tobias Aas" }, { name: "Marte Lien" }],
+          scoreOne: "6", scoreTwo: "2" },
+      ],
+      tvNext: [
+        { court: "Bane 1", context: "Runde 2 · Kamp 7", meta: "Starter etter kamp 5",
+          teamOnePlayers: [{ name: "Elise Fjell" }, { name: "Tobias Aas" }],
+          teamTwoPlayers: [{ name: "Sigurd Grødem" }, { name: "Ingrid Solum" }] },
+        { court: "Bane 2", context: "Runde 2 · Kamp 8", meta: "Starter etter kamp 6",
+          teamOnePlayers: [{ name: "Jonas Berg" }, { name: "Håkon Rud" }],
+          teamTwoPlayers: [{ name: "Marte Lien" }, { name: "Ingrid Solum" }] },
+        { court: "Ikke tildelt", context: "Runde 3 · Kamp 9", meta: "I kø",
+          teamOnePlayers: [{ name: "Sigurd Grødem" }, { name: "Elise Fjell" }],
+          teamTwoPlayers: [{ name: "Tobias Aas" }, { name: "Håkon Rud" }] },
+      ],
+      tvStandRows: sorted.map((p, i) => ({
+        ...p,
+        kamper: 5,
+        diff: p.games - 40 > 0 ? `+${p.games - 40}` : String(p.games - 40),
+        badge: ["#8a6a10", "#3c5470", "#8a5a12"][i] ?? "#12283f",
+      })),
+      bracket: bracketCols,
+      bracketTree: bracketCols.filter((c) => c.title !== "BRONSEFINALE"),
+
+      adminTabs: [
+        { id: "oversikt", label: "Oversikt" }, { id: "brukere", label: "Brukere" },
+        { id: "turneringer", label: "Turneringer" }, { id: "retention", label: "Retention" },
+        { id: "logger", label: "Logger" },
+      ].map((t) => ({
+        ...t, pick: pick(t.id, "adminTab"),
+        mark: s.adminTab === t.id ? "#0f7ae0" : "transparent",
+        color: s.adminTab === t.id ? "#0d1b2a" : "#5b7490",
+      })),
+      adminIsOverview: s.adminTab === "oversikt",
+      adminIsUsers: s.adminTab === "brukere",
+      adminIsTournaments: s.adminTab === "turneringer",
+      adminIsRetention: s.adminTab === "retention",
+      adminIsLogs: s.adminTab === "logger",
+      adminMetrics: [
+        { label: "Kontoer", value: "1 284", sub: "+42 siste 7 dager", color: "#0d1b2a" },
+        { label: "Aktive turneringer", value: "37", sub: "9 pågår nå", color: "#1b8a52" },
+        { label: "Kamper i dag", value: "412", sub: "snitt 11 per turnering", color: "#0d1b2a" },
+        { label: "Lagring", value: "2,4 GB", sub: "av 8 GB kvote", color: "#0d1b2a" },
+        { label: "Feil siste døgn", value: "3", sub: "alle håndtert", color: "#c0304f" },
+        { label: "Sync-etterslep", value: "0,4 s", sub: "p95 realtime", color: "#1470c4" },
+      ],
+      adminUsers: [
+        { name: "Sigurd Grødem", email: "sigurd@zigonia.no", count: 19, status: "Eier" },
+        { name: "Marte Lien", email: "marte.lien@example.no", count: 7, status: "Aktiv" },
+        { name: "Jonas Berg", email: "jonas@example.no", count: 4, status: "Aktiv" },
+        { name: "Ingrid Solum", email: "ingrid.solum@example.no", count: 2, status: "Ubekreftet" },
+        { name: "Tobias Aas", email: "tobias@example.no", count: 1, status: "Sperret" },
+      ].map((u) => {
+        const map = {
+          Eier: ["rgba(91,173,255,.14)", "#1470c4"],
+          Aktiv: ["rgba(27,138,82,.12)", "#1b8a52"],
+          Ubekreftet: ["rgba(184,140,0,.16)", "#8a6a10"],
+          Sperret: ["rgba(199,10,51,.13)", "#c0304f"],
+        };
+        return { ...u, bg: map[u.status][0], color: map[u.status][1] };
+      }),
+      adminTournaments: [
+        { name: "Risløkka Padel Uke 39", state: "Pågår", meta: "7 spillere · runde 2 · TQA5CU6N" },
+        { name: "Bergen Padelklubb høstcup", state: "Pågår", meta: "16 lag · semifinale · KQ81M2XP" },
+        { name: "Torsdagspadel høst", state: "Lobby", meta: "3 spillere · venter · R4TT9BN2" },
+        { name: "Trondheim Americano", state: "Fullført", meta: "12 spillere · 5 runder · arkivert" },
+      ].map((t) => {
+        const map = {
+          Pågår: ["rgba(27,138,82,.12)", "#1b8a52"],
+          Lobby: ["rgba(91,173,255,.12)", "#1470c4"],
+          Fullført: ["rgba(20,60,105,.08)", "#5b7490"],
+        };
+        return { ...t, bg: map[t.state][0], color: map[t.state][1] };
+      }),
+      retentionJobs: [
+        { name: "Sletting av gjesteturneringer", schedule: "Daglig 03:00", last: "i dag 03:00", status: "OK" },
+        { name: "Anonymisering av profilhistorikk", schedule: "Ukentlig søndag", last: "13. sep", status: "OK" },
+        { name: "Opprydding av push-abonnement", schedule: "Daglig 04:00", last: "i dag 04:00", status: "OK" },
+        { name: "Arkivering av fullførte turneringer", schedule: "Månedlig", last: "1. sep", status: "Venter" },
+      ].map((j) => ({
+        ...j,
+        bg: j.status === "OK" ? "rgba(27,138,82,.12)" : "rgba(184,140,0,.16)",
+        color: j.status === "OK" ? "#1b8a52" : "#8a6a10",
+      })),
+      logs: [
+        { time: "19:42:08", level: "INFO", text: "admin_set_result tournament=TQA5CU6N match=6 by=owner", color: "#1470c4" },
+        { time: "19:40:55", level: "INFO", text: "match_started tournament=TQA5CU6N match=5 court=1", color: "#1470c4" },
+        { time: "19:39:12", level: "WARN", text: "score_conflict tournament=TQA5CU6N match=7 submissions=2", color: "#8a6a10" },
+        { time: "19:31:44", level: "INFO", text: "advance_round tournament=TQA5CU6N round=2 matches=4", color: "#1470c4" },
+        { time: "19:22:03", level: "ERROR", text: "realtime_disconnect retry=1 device=ios-safari", color: "#c0304f" },
+        { time: "19:21:58", level: "INFO", text: "player_join tournament=TQA5CU6N name=Tobias source=code", color: "#1470c4" },
+        { time: "19:14:30", level: "INFO", text: "tournament_create owner=sigurd format=round_robin courts=2", color: "#1470c4" },
+        { time: "19:02:11", level: "INFO", text: "retention_cleanup deleted=14 guest_tournaments", color: "#1470c4" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

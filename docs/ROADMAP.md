@@ -441,7 +441,7 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 ## Phase 24 — v1 security/data integrity
 
-- [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, NOT applied); leaked-password protection is disabled — it is a Supabase Pro-plan feature and the project is on the free plan, so it cannot be enabled (accepted 2026-09-19; the password rules of Supabase Auth still apply). Revisit if the project moves to Pro.
+- [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, applied by the developer and confirmed by the advisors on 2026-09-19); leaked-password protection is disabled — it is a Supabase Pro-plan feature and the project is on the free plan, so it cannot be enabled (accepted 2026-09-19; the password rules of Supabase Auth still apply). Revisit if the project moves to Pro.
 - [ ] Stable IDs for auth/relations.
 - [ ] Guest/player/admin/owner/TV access.
 - [ ] Duplicate/race handling.
@@ -450,13 +450,13 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 ## Phase 25 — v1 resilience and UI verification
 
-- [ ] Network loss during active match.
-- [ ] Refresh during active match.
-- [ ] Stale client state.
-- [ ] Duplicate result submit.
-- [ ] Concurrent scoring/takeover attempt.
-- [ ] Failed database write.
-- [ ] Failed permanent-stat transfer.
+- [ ] Network loss during active match. — covered by tests: a transient error keeps a player's point queued for retry, scorer/result actions refuse to run offline with a message, admin writes wait and show "pending" (`test/scorer-role.test.js`, `test/result-approval.test.js`, `test/pwa.test.js`). **Not yet tried with a real network cut on a phone** (airplane mode during a running match): see USER ACTIONS.
+- [x] Refresh during active match. — verified live in the Phase 8 pass (a full reload restored the running tournament from the server) and by the last-known-good recovery tests; a reloaded page also keeps its scorer role because the state comes from the server.
+- [x] Stale client state. — every write carries the expected revision and the server refuses an old one; the client rejects older remote states and offers "refresh from server" or "keep my local copy" (`test/remote-state-controller.test.js`, `test/supabase-contract.test.js`, the opt-in live test, and the Realtime catch-up in `test/realtime-broadcast.test.js`).
+- [x] Duplicate result submit. — a second submit is refused ("already submitted"), one approval per team, corrections limited to two (`supabase/tests/result-approval.pglite.mjs`); finalizing twice adds nothing (`account-statistics.pglite.mjs`).
+- [ ] Concurrent scoring/takeover attempt. — one active scorer per match with claim, request, transfer and a takeover only after 2 minutes offline (`scorer-lease.pglite.mjs`); all writes lock the tournament row (`FOR UPDATE`, checked by `test/supabase-contract.test.js`). A truly parallel two-connection race is not exercised by the in-memory database and has not been run live.
+- [ ] Failed database write. — server writes are single transactions that roll back completely on error (finalization, corrections, replacement of state are tested that way) and the client keeps unsent changes and shows the sync state; a real failing write on the live system has not been provoked.
+- [x] Failed permanent-stat transfer. — finalization is one transaction: with a corrupt result it is refused, writes no statistics and no receipt, leaves the tournament running, and succeeds once the data is fixed (`supabase/tests/account-statistics.pglite.mjs`, 22 checks).
 - [ ] Desktop responsive verification. — partial: landing, join, account, create wizard and the admin workspace tabs checked at desktop width with an automated overflow check; profile, TV, podium and cup views not yet.
 - [ ] Mobile responsive verification. — partial: same screens checked at 375px in English. Found and fixed three defects: the Kamper tab scrolled sideways (walkover buttons couldn't wrap), scoreboard team names collapsed to one letter, and the create wizard's hidden format radios stretched the page to 433px.
 - [ ] Tablet verification where relevant. — partial: same screens at 768px, no overflow.
