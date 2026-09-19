@@ -469,14 +469,14 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 ## Phase 26 — Documentation consolidation 
 **With each phase update these documents**
 
-- [ ] `PROJECT.md` matches current approved product behavior.
+- [ ] `PROJECT.md` matches current approved product behavior. — updated 2026-09-19 with the approved behaviour of every area built so far (see "Approved product behaviour").
 - [ ] `ROADMAP.md` is the only active development plan.
-- [ ] `BUGS.md` contains only active defects.
+- [ ] `BUGS.md` contains only active defects. — done 2026-09-19: the resolved history moved to `docs/archive/bugs-resolved-2026-09.md`; `BUGS.md` lists the one active defect (feedback email needs the Vercel variables) and the known limitations.
 - [ ] `CHANGELOG.md` contains completed verified release changes.
-- [ ] Relevant `docs/technical/*` reflects verified implementation.
+- [ ] Relevant `docs/technical/*` reflects verified implementation. — written 2026-09-19: `architecture.md`, `database.md` (checked against the live database), `tournament_logic.md`, `privacy-retention.md`, `operations.md`, `feedback-setup.md`. Keep them in step with each phase.
 - [ ] Superseded plans moved to `docs/archive/plans/`.
 - [ ] Old contradictory design/development docs archived.
-- [ ] Archive clearly marked non-authoritative.
+- [ ] Archive clearly marked non-authoritative. — `docs/archive/README.md` says so and the moved bug history carries a banner.
 
 ## Phase 27 — Theme system (light/dark mode) (Version 0.9.0 reqiurement)
 
