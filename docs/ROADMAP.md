@@ -345,11 +345,11 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 15 — Permanent history/statistics
 
-- [ ] Account-owned history.
-- [ ] Personal statistics.
-- [ ] Corrections recalculate authoritative stats.
-- [ ] Owner history deletion does not delete other players' stats.
-- [ ] Guest has no permanent account history.
+- [ ] Account-owned history. — an account's history is `account_tournament_statistics` (one row per finished/cancelled tournament and account, written by `finalize_tournament` for players bound to that account); an account reads only its own rows (RLS), cannot edit or delete them through the API, and the profile page shows them. Verified on 2026-09-19 with `supabase/tests/account-statistics.pglite.mjs` (17 checks on the real table definitions and the live `finalize_tournament`).
+- [ ] Personal statistics. — matches, wins, sets and games per tournament are saved at the finish and summed on the profile page (`app/player-statistics.js`, covered by earlier tests).
+- [ ] Corrections recalculate authoritative stats. — statistics are derived only at the finish from the final, locked snapshot, so every correction made before the finish (Phase 12) is included (tested: a flipped result flips the saved statistics). After the finish the result is read-only (tested), so statistics cannot drift. **Open decision:** corrections *after* the finish are closed by design; allowing them would need a re-run of the statistics for that tournament. Say if you want that.
+- [ ] Owner history deletion does not delete other players' stats. — `account_tournament_statistics` deliberately has no foreign key to `tournaments`: deleting a tournament removes only the bindings, every player's statistics stay (tested); a tournament cannot be deleted before its statistics were saved (tested).
+- [ ] Guest has no permanent account history. — only players bound to an account get a statistics row; guests get none (tested).
 
 ## Phase 16 — Retention/cleanup
 
