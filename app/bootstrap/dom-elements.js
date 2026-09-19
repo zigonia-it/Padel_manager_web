@@ -95,6 +95,7 @@
       courtQueue: document.querySelector("#courtQueue"),
       tvModeButton: document.querySelector("#tvModeButton"),
       tvModeMenuButton: document.querySelector("#tvModeMenuButton"),
+      tvModeRailButton: document.querySelector("#tvModeRailButton"),
       lobbyStatus: document.querySelector("#lobbyStatus"),
       playerCount: document.querySelector("#playerCount"),
       matchCount: document.querySelector("#matchCount"),

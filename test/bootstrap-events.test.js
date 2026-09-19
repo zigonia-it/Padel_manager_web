@@ -19,7 +19,7 @@ test("bootstrap event module binds direct app controls to explicit callbacks", (
   vm.runInContext(fs.readFileSync(filename, "utf8"), context, { filename });
   const names = [
     "profileForm", "createAccountAuthButton", "adminAccountAuthButton", "playerResultForm",
-    "tvModeButton", "tvModeMenuButton", "deleteProfileButton", "cancelProfileDeletionButton",
+    "tvModeButton", "tvModeMenuButton", "tvModeRailButton", "deleteProfileButton", "cancelProfileDeletionButton",
     "profileHistoryFilter", "adminMatchFilter", "playerMatchFilter", "adminParticipatesInput",
     "createAdminSignInLinkButton", "languageSelect", "refreshRemoteButton", "keepLocalBackupButton",
     "endTournamentButton", "resetTournamentButton",
@@ -36,6 +36,6 @@ test("bootstrap event module binds direct app controls to explicit callbacks", (
   );
   assert.deepEqual(
     Object.values(elements).map((element) => [...element.handlers.keys()][0]),
-    ["submit", "click", "click", "submit", "click", "click", "click", "click", "change", "change", "change", "change", "click", "change", "click", "click", "click", "click"],
+    ["submit", "click", "click", "submit", "click", "click", "click", "click", "click", "change", "change", "change", "change", "click", "change", "click", "click", "click", "click"],
   );
 });

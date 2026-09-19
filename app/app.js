@@ -1169,8 +1169,7 @@ function bindGlobalEvents() {
       activateAdminPanel,
       activatePlayerAction: (playerAction) => {
         if (playerAction === "spectate") {
-          const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
-          window.location.href = `tv.html${inviteCode}`;
+          openTvMode();
         }
         if (playerAction === "choose") showModule("setup-player");
         if (playerAction === "rejoin") {
@@ -1592,10 +1591,17 @@ function renderRoleVisibility() {
   return result;
 }
 
+// TV Mode always opens in its own tab/window (the app stays where it is); it is read-only and needs no login.
+function openTvMode() {
+  const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
+  const opened = window.open(`tv.html${inviteCode}`, "_blank", "noopener");
+  // A blocked pop-up must not swallow the click: fall back to the current tab.
+  if (!opened) window.location.href = `tv.html${inviteCode}`;
+}
+
 function toggleTvMode() {
   if (!tvMode && !window.PADELSTAR_TEST_MODE) {
-    const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
-    window.location.href = `tv.html${inviteCode}`;
+    openTvMode();
     return;
   }
   tvMode = !tvMode;

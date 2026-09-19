@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v319";
+const cacheName = "padelstar-v320";
 
 const appShell = [
   "./",
@@ -18,7 +18,7 @@ const appShell = [
   "./styles/responsive.css?v=padelstar-responsive-1",
   "./styles/ui-consistency.css?v=padelstar-ui-consistency-51",
   "./styles/components-v2.css?v=padelstar-components-v2-2",
-  "./styles/workspace-nav.css?v=padelstar-workspace-nav-3",
+  "./styles/workspace-nav.css?v=padelstar-workspace-nav-4",
   "./styles/podium.css?v=padelstar-podium-3",
   "./styles/lobby.css?v=padelstar-lobby-1",
   "./styles/scoreboard-table.css?v=padelstar-scoreboard-table-2",
@@ -110,9 +110,9 @@ const appShell = [
   "./app/core/session-controller.js?v=padelstar-session-controller-2",
   "./app/core/remote-state-controller.js?v=padelstar-remote-state-controller-2",
   "./app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1",
-  "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-11",
+  "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-12",
   "./app/bootstrap/app-meta.js?v=padelstar-app-meta-5",
-  "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-1",
+  "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-2",
   "./app/bootstrap/app-init.js?v=padelstar-app-init-2",
   "./app/ui/theme.js?v=padelstar-theme-1",
   "./app/ui/app-renderer.js?v=padelstar-app-renderer-5",
@@ -132,7 +132,7 @@ const appShell = [
   "./app/remote-player-score.js?v=padelstar-remote-player-score-4",
   "./app/score-actions.js?v=padelstar-score-actions-6",
   "./app/workspace-navigation.js?v=padelstar-workspace-navigation-4",
-  "./app/app-events.js?v=padelstar-app-events-4",
+  "./app/app-events.js?v=padelstar-app-events-5",
   "./app/workspace-events.js?v=padelstar-workspace-events-1",
   "./app/tournament-entry.js?v=padelstar-tournament-entry-7",
   "./app/create-wizard.js?v=padelstar-create-wizard-3",
@@ -141,7 +141,7 @@ const appShell = [
   "./app/admin-form-events.js?v=padelstar-admin-form-events-6",
   "./app/match-actions.js?v=padelstar-match-actions-3",
   "./app/initial-view.js?v=padelstar-initial-view-3",
-  "./app/app.js?v=padelstar-session-72",
+  "./app/app.js?v=padelstar-session-73",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",

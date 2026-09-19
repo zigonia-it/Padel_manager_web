@@ -142,3 +142,28 @@ body[data-theme] .admin-subtabs {
     background: var(--ds-glass);
   }
 }
+
+
+/* TV Mode: pinned at the bottom of the side rail (desktop). The menu entry stays for widths/roles without the rail. */
+@media (min-width: 860px) {
+  .workspace-rail {
+    min-height: calc(100vh - 150px);
+  }
+
+  .workspace-rail-tv {
+    margin-top: auto;
+    border-top: 1px solid var(--ds-border-hairline);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+  }
+
+  .app-shell:has(.workspace-rail:not(.hidden)) #tvModeMenuButton {
+    display: none;
+  }
+}
+
+@media not all and (min-width: 860px) {
+  .workspace-rail-tv {
+    display: none;
+  }
+}

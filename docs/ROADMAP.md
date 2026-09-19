@@ -389,8 +389,8 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 - [ ] Read-only public viewing.
 - [ ] Link/QR.
-- [ ] Always opens in new window/tab.
-- [ ] Button toggle moved to side bar and pinned at bottom.
+- [ ] Always opens in new window/tab. — built 2026-09-19 on `v0.8`: every entry point (rail button, menu, "view as spectator") calls `openTvMode()` → `window.open(tv.html?spectate=CODE, "_blank", "noopener")`, falling back to the current tab only if a pop-up blocker refuses. Checked in the browser (test in `test/tv-entry.test.js`).
+- [ ] Button toggle moved to side bar and pinned at bottom. — built 2026-09-19 on `v0.8`: a "TV Mode" item at the bottom of the desktop side rail (`#tvModeRailButton`, pushed down with `margin-top: auto`); while the rail is visible the duplicate menu entry is hidden, on narrow screens and for roles without the rail the menu entry remains. Not built: a TV button in the mobile bottom tab bar (the menu entry covers it) — say if you want it there too.
 - [ ] No admin/player rights.
 - [ ] Live score/status.
 - [ ] Final standings/result after completion.
