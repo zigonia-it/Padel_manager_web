@@ -365,6 +365,8 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 19 — TV Mode
 
+Status 2026-09-19 (nothing ticked yet, live check pending): TV Mode now ranks with the same head-to-head standings as the app. With migration `20260919170000_guest_finish_retention.sql` a finished guest tournament stays viewable for 24 hours, which is what "Final standings/result after completion" needs for guests (before, the spectator link found nothing once the tournament was finished). Still open: TV Mode is Norwegian only (no translation), does not list matches awaiting approval, and does not show the match countdown; the reset/nullified state and the Court Queue view are not re-verified.
+
 - [ ] Read-only public viewing.
 - [ ] Link/QR.
 - [ ] Opens in new window/tab.
