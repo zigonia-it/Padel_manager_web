@@ -161,4 +161,7 @@ test("the selections are toggle switches (role=switch), not plain check marks", 
   const css = fs.readFileSync(path.join(root, "styles", "notification-center.css"), "utf8");
   assert.match(css, /input\.switch\s*\{[^}]*appearance:\s*none/);
   assert.match(css, /input\.switch:checked::after/);
+  const switchCss = css.slice(css.indexOf("/* Toggle switches"), css.indexOf("prefers-reduced-motion"));
+  assert.match(switchCss, /var\(--ui-blue-soft/, "the switch accent is the same blue as the eyebrow text (\"Denne enheten\")");
+  assert.doesNotMatch(switchCss, /--gold-bright/);
 });

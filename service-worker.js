@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v333";
+const cacheName = "padelstar-v334";
 
 const appShell = [
   "./",
@@ -25,7 +25,7 @@ const appShell = [
   "./styles/match-list-collapse.css?v=padelstar-match-list-collapse-1",
   "./styles/feedback.css?v=padelstar-feedback-2",
   "./styles/info-dialog.css?v=padelstar-info-dialog-2",
-  "./styles/notification-center.css?v=padelstar-notification-center-6",
+  "./styles/notification-center.css?v=padelstar-notification-center-7",
   "./styles/scorer-panel.css?v=padelstar-scorer-panel-7",
   "./styles/settings-rows.css?v=padelstar-settings-rows-1",
   "./styles/create-wizard.css?v=padelstar-create-wizard-3",
@@ -104,8 +104,8 @@ const appShell = [
   "./app/player-visuals.js?v=padelstar-player-visuals-3",
   "./app/ui-feedback.js?v=padelstar-ui-feedback-2",
   "./app/notification-system.js?v=padelstar-notification-system-2",
-  "./app/notification-center.js?v=padelstar-notification-center-6",
-  "./app/notification-center-ui.js?v=padelstar-notification-center-6",
+  "./app/notification-center.js?v=padelstar-notification-center-7",
+  "./app/notification-center-ui.js?v=padelstar-notification-center-7",
   "./assets/sounds/notification1.mp3",
   "./assets/sounds/notification2.mp3",
   "./app/profile-session.js?v=padelstar-profile-session-3",

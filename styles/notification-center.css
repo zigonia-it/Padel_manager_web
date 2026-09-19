@@ -161,17 +161,17 @@ body[data-theme="classic"] input.switch::after {
 }
 
 body[data-theme="classic"] input.switch:checked {
-  border-color: var(--gold-bright, #f5c04a);
-  background: color-mix(in srgb, var(--gold-bright, #f5c04a) 32%, transparent);
+  border-color: var(--ui-blue-soft, #63b5ff);
+  background: color-mix(in srgb, var(--ui-blue-soft, #63b5ff) 32%, transparent);
 }
 
 body[data-theme="classic"] input.switch:checked::after {
-  background: var(--gold-bright, #f5c04a);
+  background: var(--ui-blue-soft, #63b5ff);
   transform: translateX(20px);
 }
 
 body[data-theme="classic"] input.switch:focus-visible {
-  outline: 2px solid var(--gold-bright, #f5c04a);
+  outline: 2px solid var(--ui-blue-soft, #63b5ff);
   outline-offset: 2px;
 }
 
