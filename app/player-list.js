@@ -15,6 +15,8 @@ window.PadelstarPlayerList = (() => {
     render,
     removePlayer,
     replacePlayer,
+    restorePlayer,
+    requestConfirmation,
     saveState,
     setLocalRole,
     showWorkspace,
@@ -36,6 +38,10 @@ window.PadelstarPlayerList = (() => {
       }
       state.players.forEach((player) => {
         const entry = standings.find((item) => item.player.id === player.id);
+        const replacedBy = player.replacedBy ? state.players.find((item) => item.id === player.replacedBy) : null;
+        const replaces = player.replacedPlayerId ? state.players.find((item) => item.id === player.replacedPlayerId) : null;
+        const isActive = player.active !== false;
+        const canRestore = lobbyLocked && replaces && replaces.replacedBy === player.id && isActive;
         const item = document.createElement("li");
         item.className = lobbyLocked ? "" : "editable-player";
         item.setAttribute("style", accentStyle(player.accent));
@@ -44,10 +50,13 @@ window.PadelstarPlayerList = (() => {
         ${avatarMarkup(player, "avatar", 34)}
         <span class="player-name-badge">${escapeHtml(player.name)}</span>
         <small class="join-source-chip">${playerStatusLabel(player)}</small>
+        ${replacedBy ? `<small class="join-source-chip replacement-chip">${t("players.replacedBy", { name: escapeHtml(replacedBy.name) })}</small>` : ""}
+        ${replaces && isActive ? `<small class="join-source-chip replacement-chip">${t("players.replaces", { name: escapeHtml(replaces.name) })}</small>` : ""}
       </span>
       <span class="player-actions">
         <strong>${t("standings.pointsShort", { points: entry?.points ?? 0 })}</strong>
-        ${lobbyLocked ? `<button class="icon-button replace-player-button" type="button">${t("actions.replacePlayer")}</button>` : ""}
+        ${lobbyLocked && isActive ? `<button class="icon-button replace-player-button" type="button">${t("actions.replacePlayer")}</button>` : ""}
+        ${canRestore ? `<button class="icon-button restore-player-button" type="button">${t("actions.restorePlayer", { name: escapeHtml(replaces.name) })}</button>` : ""}
         <button class="icon-button danger-button" type="button" aria-label="${t("actions.removePlayerAria", { name: escapeHtml(player.name) })}" ${lobbyLocked ? "disabled" : ""}>${t("actions.remove")}</button>
       </span>`;
         if (!lobbyLocked) {
@@ -64,9 +73,20 @@ window.PadelstarPlayerList = (() => {
           item.append(editor);
         }
         item.querySelector(".danger-button").addEventListener("click", () => removePlayer(player.id));
-        item.querySelector(".replace-player-button")?.addEventListener("click", () => {
+        item.querySelector(".replace-player-button")?.addEventListener("click", async () => {
           const replacementName = globalThis.prompt(t("messages.replacePlayerPrompt", { name: player.name }));
-          if (replacementName) replacePlayer(player.id, replacementName);
+          if (!replacementName) return;
+          const result = replacePlayer(player.id, replacementName);
+          // A match in progress is restarted from 0-0: warn first and only continue when the admin confirms.
+          if (result?.needsConfirmation && await requestConfirmation(t("messages.replaceRestartConfirm", { name: player.name }))) {
+            replacePlayer(player.id, replacementName, { confirmed: true });
+          }
+        });
+        item.querySelector(".restore-player-button")?.addEventListener("click", async () => {
+          const result = restorePlayer(player.id);
+          if (result?.needsConfirmation && await requestConfirmation(t("messages.replaceRestartConfirm", { name: player.name }))) {
+            restorePlayer(player.id, { confirmed: true });
+          }
         });
         elements.playersList.append(item);
       });

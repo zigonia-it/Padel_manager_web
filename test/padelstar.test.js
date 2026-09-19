@@ -68,6 +68,7 @@ const setScoreDialogPath = path.join(appRoot, "set-score-dialog.js");
 const adminStatusPath = path.join(appRoot, "admin-status.js");
 const profileUiPath = path.join(appRoot, "profile-ui.js");
 const backupUiPath = path.join(appRoot, "backup-ui.js");
+const playerReplacementPath = path.join(appRoot, "player-replacement.js");
 const playerStatePath = path.join(appRoot, "player-state.js");
 const tournamentStatusPath = path.join(appRoot, "tournament-status.js");
 const scoringEnginePath = path.join(appRoot, "scoring-engine.js");
@@ -219,6 +220,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(adminStatusPath, "utf8"), context, { filename: adminStatusPath });
   vm.runInContext(fs.readFileSync(profileUiPath, "utf8"), context, { filename: profileUiPath });
   vm.runInContext(fs.readFileSync(backupUiPath, "utf8"), context, { filename: backupUiPath });
+  vm.runInContext(fs.readFileSync(playerReplacementPath, "utf8"), context, { filename: playerReplacementPath });
   vm.runInContext(fs.readFileSync(playerStatePath, "utf8"), context, { filename: playerStatePath });
   vm.runInContext(fs.readFileSync(tournamentStatusPath, "utf8"), context, { filename: tournamentStatusPath });
   vm.runInContext(fs.readFileSync(scoringEnginePath, "utf8"), context, { filename: scoringEnginePath });

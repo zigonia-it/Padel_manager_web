@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v312";
+const cacheName = "padelstar-v313";
 
 const appShell = [
   "./",
@@ -29,7 +29,7 @@ const appShell = [
   "./styles/invite-code-input.css?v=padelstar-invite-code-input-1",
   "./styles/accent-picker.css?v=padelstar-accent-picker-1",
   "./styles/privacy.css?v=padelstar-privacy-3",
-  "./app/translations.js?v=padelstar-i18n-44",
+  "./app/translations.js?v=padelstar-i18n-45",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-6",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -63,7 +63,7 @@ const appShell = [
   "./app/standings.js?v=padelstar-standings-3",
   "./app/podium.js?v=padelstar-podium-3",
   "./app/lobby.js?v=padelstar-lobby-1",
-  "./app/player-list.js?v=padelstar-player-list-1",
+  "./app/player-list.js?v=padelstar-player-list-2",
   "./app/cup-bracket.js?v=padelstar-cup-bracket-2",
   "./app/player-status.js?v=padelstar-player-status-1",
   "./app/player-next-match.js?v=padelstar-player-next-match-5",
@@ -74,7 +74,8 @@ const appShell = [
   "./app/admin-status.js?v=padelstar-admin-status-3",
   "./app/profile-ui.js?v=padelstar-profile-ui-3",
   "./app/backup-ui.js?v=padelstar-backup-ui-2",
-  "./app/player-state.js?v=padelstar-player-state-2",
+  "./app/player-replacement.js?v=padelstar-player-replacement-1",
+  "./app/player-state.js?v=padelstar-player-state-3",
   "./app/tournament-status.js?v=padelstar-tournament-status-1",
   "./app/tournament-finalization.js?v=padelstar-finalization-1",
   "./app/scoring-engine.js?v=padelstar-scoring-5",
@@ -137,7 +138,7 @@ const appShell = [
   "./app/admin-form-events.js?v=padelstar-admin-form-events-6",
   "./app/match-actions.js?v=padelstar-match-actions-3",
   "./app/initial-view.js?v=padelstar-initial-view-3",
-  "./app/app.js?v=padelstar-session-68",
+  "./app/app.js?v=padelstar-session-69",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",

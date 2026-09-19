@@ -1692,6 +1692,29 @@ Object.assign(padelstarTranslations.en, {
   "notifications.resultCorrectedTitle": "Result corrected",
   "notifications.resultCorrectedBody": "A match result was corrected by the admin. Check the standings.",
 });
+// Player replacement (Phase 13).
+Object.assign(padelstarTranslations.nb, {
+  "messages.replaceBlockedApproval": "Et resultat der {name} deltar venter på godkjenning. Avklar eller annuller resultatet før du bytter spiller.",
+  "messages.replaceBlockedEnded": "Turneringen er avsluttet – spillere kan ikke byttes.",
+  "messages.replaceBlockedInactive": "Denne spilleren kan ikke byttes akkurat nå.",
+  "messages.replaceRestartConfirm": "{name} spiller en pågående kamp. Kampen startes på nytt fra 0–0 og den pågående poengstillingen annulleres. Fortsette?",
+  "messages.playerReplaced": "{from} er erstattet av {to}.",
+  "messages.playerRestored": "{name} er satt tilbake.",
+  "players.replacedBy": "Erstattet av {name}",
+  "players.replaces": "Erstatter {name}",
+  "actions.restorePlayer": "Sett {name} tilbake",
+});
+Object.assign(padelstarTranslations.en, {
+  "messages.replaceBlockedApproval": "A result involving {name} is awaiting approval. Resolve or annul the result before replacing the player.",
+  "messages.replaceBlockedEnded": "The tournament has finished – players can't be replaced.",
+  "messages.replaceBlockedInactive": "This player can't be replaced right now.",
+  "messages.replaceRestartConfirm": "{name} is playing a match in progress. The match restarts from 0–0 and the current score is annulled. Continue?",
+  "messages.playerReplaced": "{from} has been replaced by {to}.",
+  "messages.playerRestored": "{name} is back in.",
+  "players.replacedBy": "Replaced by {name}",
+  "players.replaces": "Replaces {name}",
+  "actions.restorePlayer": "Put {name} back",
+});
 window.PadelstarTranslations = padelstarTranslations;
 window.PadelstarI18n = {
   fallbackLanguage,

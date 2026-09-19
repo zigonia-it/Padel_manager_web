@@ -510,7 +510,9 @@ const playerList = window.PadelstarPlayerList.create({
   leaderboardEntries: (matches) => leaderboardEntries(matches),
   playerStatusLabel: (player) => playerStatusLabel(player),
   removePlayer: (playerId) => removePlayer(playerId),
-  replacePlayer: (playerId, name) => replacePlayer(playerId, name),
+  replacePlayer: (playerId, name, options) => replacePlayer(playerId, name, options),
+  restorePlayer: (playerId, options) => playerState.restorePlayer(playerId, options),
+  requestConfirmation: (message) => requestConfirmation(message),
   render: () => render(),
   saveState: (options) => saveState(options),
   setLocalRole: (role) => setLocalRole(role),
@@ -1869,8 +1871,8 @@ function addPlayer(name, joinedFrom, avatarId, accent) {
   return playerState.addPlayer(name, joinedFrom, avatarId, accent);
 }
 
-function replacePlayer(playerId, name) {
-  return playerState.replacePlayer(playerId, name);
+function replacePlayer(playerId, name, options) {
+  return playerState.replacePlayer(playerId, name, options);
 }
 
 function updatePlayer(playerId, updates) {

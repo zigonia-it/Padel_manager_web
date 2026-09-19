@@ -312,12 +312,16 @@ Not built: correcting the result of a Cup match whose later round already exists
 
 ## Phase 13 — Replacement/withdrawal
 
-- [ ] Structural slot vs actual-person behavior.
-- [ ] Personal stats follow actual player.
-- [ ] Historical participant preserved.
-- [ ] Active-match restart rules.
-- [ ] Disputed/unconfirmed match restrictions.
-- [ ] Regression tests.
+Built 2026-09-19 (spec: archived plan FASE K) as client logic (`app/player-replacement.js`, wired into `app/player-state.js` and the players list) with 13 tests (`test/player-replacement.test.js`). Checked in the browser with a live guest tournament: replacing a player in a running match shows the restart warning, restarts the match at 0–0 and the list shows "Erstattet av …" / "Erstatter …" with a "Sett … tilbake" button. There is no server migration: like all admin edits it is saved as tournament state by the admin (revision-checked). Items stay unchecked until the developer has reviewed the behaviour on a real tournament.
+
+- [ ] Structural slot vs actual-person behavior. — every player has a `slotId`; the replacement inherits the slot of the player it replaces (and keeps it through further replacements); unplayed matches and Cup teams follow the slot, finished matches keep the person who played; the same person cannot fill two active slots (name check).
+- [ ] Personal stats follow actual player. — statistics are per player id: the original keeps everything they played, the replacement starts from 0 (tested with the leaderboard).
+- [ ] Historical participant preserved. — the replaced player stays in the player list (inactive, "Erstattet av …") and in every finished match; the replacement/restore events are recorded (`player_replaced`, `player_restored`, `match_restarted`).
+- [ ] Active-match restart rules. — a match in progress is restarted from 0–0 after a warning and confirmation (score, undo/redo history, scorer role, clock and rule snapshot are dropped, `restartCount`/`restartReason` recorded); the original can be put back the same way.
+- [ ] Disputed/unconfirmed match restrictions. — a match awaiting approval (draft, pending or flagged) blocks the replacement for every player in it until the result is resolved or undone; a finished tournament cannot be changed.
+- [ ] Regression tests. — 13 tests.
+
+Not built: withdrawal without a replacement (a player leaving with no substitute needs a product decision about the matches that player would have played), and server-side enforcement of the approval block (the admin writes the whole tournament state, so this is a client rule).
 
 ## Phase 14 — Timed matches/scoring rules
 
