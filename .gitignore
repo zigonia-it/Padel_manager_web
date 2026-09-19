@@ -41,3 +41,6 @@ assets/icons/padelstar-512.png
 assets/logos/main_logo_without_icon@0.5x.png
 assets/logos/main_logo_without_icon@2x.png
 figma-review.png
+
+# Design handoff bundles (reference material for the developer, large, must not be published)
+assets/padelstar-webapp-ui-design/
