@@ -20,6 +20,8 @@ A bug is complete only when it was reproduced or clearly verified, the smallest 
 - Corrections of a result are closed once the tournament is finished, so statistics cannot change afterwards. Decision pending if post-finish corrections are wanted.
 - Invitations are shown in the app only; no email is sent to the invited person. Decision pending.
 - The hidden languages (nn, es, de, fr, sv, da) still have old privacy/guide text; they are not offered until Phase 21 completes them.
+- Dark mode: white text on the mid-blue primary buttons is 3.8:1 (below 4.5:1); existing design, not changed by the light theme.
+- Light mode uses `color-mix()` for players' own colors; browsers older than iOS 16.2 / Chrome 111 fall back to the dark-theme color there.
 - Sound and vibration depend on the browser: a browser may block sound until the page has been tapped once, and vibration does not exist on iPhone.
 - The 8 invite-code cells are 31px wide on a 375px phone (eight must fit across).
 - Not yet verified by a person on real devices: push notifications on a phone, sound levels, network loss during a running match (see `docs/USER_ACTIONS.md`).
