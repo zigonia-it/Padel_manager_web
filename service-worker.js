@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v320";
+const cacheName = "padelstar-v321";
 
 const appShell = [
   "./",
@@ -18,7 +18,7 @@ const appShell = [
   "./styles/responsive.css?v=padelstar-responsive-1",
   "./styles/ui-consistency.css?v=padelstar-ui-consistency-51",
   "./styles/components-v2.css?v=padelstar-components-v2-2",
-  "./styles/workspace-nav.css?v=padelstar-workspace-nav-4",
+  "./styles/workspace-nav.css?v=padelstar-workspace-nav-5",
   "./styles/podium.css?v=padelstar-podium-3",
   "./styles/lobby.css?v=padelstar-lobby-1",
   "./styles/scoreboard-table.css?v=padelstar-scoreboard-table-2",
@@ -44,6 +44,7 @@ const appShell = [
   "./app/result-submissions.js?v=padelstar-result-submissions-1",
   "./app/player-actions.js?v=padelstar-player-actions-1",
   "./app/privacy-i18n.js?v=padelstar-privacy-i18n-5",
+  "./app/page-language.js?v=padelstar-page-language-1",
   "./app/guide-i18n.js?v=padelstar-guide-i18n-3",
   "./app/tournament-engine.js?v=padelstar-engine-2",
   "./app/tournament-modes.js?v=padelstar-modes-1",
@@ -94,7 +95,7 @@ const appShell = [
   "./app/remote-rpc.js?v=padelstar-remote-rpc-1",
   "./app/ui-effects.js?v=padelstar-ui-effects-1",
   "./app/navigation.js?v=padelstar-navigation-2",
-  "./app/workspace-rail.js?v=padelstar-workspace-rail-1",
+  "./app/workspace-rail.js?v=padelstar-workspace-rail-2",
   "./app/avatar-system.js?v=padelstar-avatar-system-1",
   "./app/pwa-install.js?v=padelstar-pwa-install-3",
   "./app/accent-system.js?v=padelstar-accent-system-1",

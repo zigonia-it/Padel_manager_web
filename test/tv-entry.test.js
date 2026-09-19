@@ -23,3 +23,14 @@ test("the TV Mode button sits at the bottom of the side rail", () => {
   assert.match(css, /\.workspace-rail-tv\s*\{[^}]*margin-top:\s*auto/);
   assert.match(read("app", "bootstrap", "app-events.js"), /tvModeRailButton\?\.addEventListener\("click"/);
 });
+
+test("the side rail is sized to the visible window so the pinned TV Mode button never needs scrolling", () => {
+  const rail = read("app", "workspace-rail.js");
+  assert.match(rail, /function fitRailToViewport\(\)/);
+  assert.match(rail, /window\.innerHeight - top - RAIL_BOTTOM_GAP/);
+  assert.match(rail, /addEventListener\("resize", scheduleFit\)/);
+  assert.match(rail, /addEventListener\("scroll", scheduleFit, \{ passive: true \}\)/);
+  const css = read("styles", "workspace-nav.css");
+  assert.match(css, /\.workspace-rail\s*\{[^}]*overflow-y:\s*auto;[^}]*max-height:\s*calc\(100dvh/);
+  assert.doesNotMatch(css, /min-height:\s*calc\(100vh - 150px\)/, "the old fixed minimum height overflowed short windows");
+});
