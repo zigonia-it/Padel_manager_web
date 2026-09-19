@@ -512,6 +512,8 @@ const playerList = window.PadelstarPlayerList.create({
   removePlayer: (playerId) => removePlayer(playerId),
   replacePlayer: (playerId, name, options) => replacePlayer(playerId, name, options),
   restorePlayer: (playerId, options) => playerState.restorePlayer(playerId, options),
+  withdrawPlayer: (playerId, options) => playerState.withdrawPlayer(playerId, options),
+  reinstatePlayer: (playerId) => playerState.reinstatePlayer(playerId),
   requestConfirmation: (message) => requestConfirmation(message),
   render: () => render(),
   saveState: (options) => saveState(options),
@@ -557,6 +559,8 @@ const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   approvalPanelMarkup: (match, editable, scoreOnly) => matchCard.approvalPanelMarkup(match, editable, scoreOnly),
   timerMarkup: (match) => matchCard.timerMarkup(match),
   bindApprovalPanel: (root, match) => matchCard.bindApprovalPanel(root, match),
+  withdrawalPanelMarkup: (match, editable, scoreOnly) => matchCard.withdrawalPanelMarkup(match, editable, scoreOnly),
+  bindWithdrawalPanel: (root, match) => matchCard.bindWithdrawalPanel(root, match),
   t: (key, values) => t(key, values),
 });
 const rules = window.PadelstarRules.create({
@@ -651,6 +655,7 @@ const backupUi = window.PadelstarBackupUi.create({
   t: (key, values) => t(key, values),
 });
 const playerState = window.PadelstarPlayerState.create({
+  activateNextWaitingMatch: (court) => activateNextWaitingMatch(court),
   buildSchedule: (players, format) => buildSchedule(players, format),
   createPlayer: (name, index, avatarId, accent) => createPlayer(name, index, avatarId, accent),
   createTeam: (players) => createTeam(players),
@@ -774,6 +779,7 @@ const matchCard = window.PadelstarMatchCard.create({
   resultAction: (match, action, payload) => remotePlayerScore.resultAction(match.id, action, payload),
   adminResolveResult: (match) => remoteAdminActions.queueRemoteResolveResult(match),
   openCorrection: (match, options) => resultCorrectionDialog.open(match, options),
+  withdrawalDecision: (match, decision) => decideWithdrawal(match, decision),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),
@@ -1710,6 +1716,16 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
   return matchCard.createMatchCard(match, editable, highlightedPlayerId, scoreOnly);
 }
 
+// The remaining teammate (through the RPC) or the admin (through the normal state write) decides after a withdrawal.
+async function decideWithdrawal(match, decision) {
+  if (decision === "walkover") {
+    const winner = match.withdrawal?.teamIndex === 0 ? match.teamTwo : match.teamOne;
+    if (!(await requestConfirmation(t("withdrawal.walkoverConfirm", { winner: winner?.displayName ?? "" })))) return false;
+  }
+  if (currentLocalRole() === "player" && isSupabaseReady()) return remotePlayerScore.withdrawalDecision(match.id, decision);
+  return Boolean(playerState.decideWithdrawal(match.id, decision, { by: currentLocalRole() === "player" ? "teammate" : "admin" }));
+}
+
 function isEditablePlayerMatch(match, player) {
   return Boolean(player && ["playing", "awaitingApproval"].includes(match.state) && matchIncludesPlayer(match, player.id));
 }
@@ -2008,8 +2024,11 @@ function roundProgress(round) {
 }
 
 function isEditableAdminMatch(match) {
+  if (state.status === "Avsluttet") return false;
+  // A match waiting for a withdrawal decision can be decided at any time, also in a round that has not started.
+  if (match.state === "awaitingWithdrawalDecision") return true;
   const activeRound = getActiveRound();
-  return Boolean(state.status !== "Avsluttet" && activeRound && activeRound.matches.some((roundMatch) => roundMatch.id === match.id));
+  return Boolean(activeRound && activeRound.matches.some((roundMatch) => roundMatch.id === match.id));
 }
 
 function teamDisplay(team, variant = "default") {
@@ -2255,6 +2274,7 @@ function matchStateText(stateName) {
     awaitingApproval: t("common.awaitingApproval"),
     finished: t("common.finished"),
     cancelled: t("common.cancelled"),
+    awaitingWithdrawalDecision: t("common.awaitingWithdrawal"),
   }[stateName] ?? stateName;
 }
 

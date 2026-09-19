@@ -2,15 +2,20 @@
 
 # Padelstar – Active Release Roadmap
 
-> **Primary objective:** Restore a reliably usable Padelstar as fast as possible.
+> **Primary objective:** 
+> Restore a reliably usable Padelstar as fast as possible.
 >
-> **Hard milestone:** functioning build by **Monday 21 September 2026**.
+> **Hard milestone:** 
+> functioning build by **Monday 21 September 2026**.
 >
-> **Version baseline:** `0.7.0` — the Monday critical path was verified end-to-end for `0.6.0`, `0.6.1` was a verified UI-redesign/polish batch, and `0.7.0` (applied on the developer's instruction, 2026-09-19) is the beta feature milestone that adds scorer roles, result approval and correction, timed matches, scoring rules, player replacement, TV Mode in every supported language and a feedback button (see `docs/CHANGELOG.md`, which lists what has and has not been verified live). Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
+> **Version baseline:** 
+> `0.7.0` — the Monday critical path was verified end-to-end for `0.6.0`, `0.6.1` was a verified UI-redesign/polish batch, and `0.7.0` (applied on the developer's instruction, 2026-09-19) is the beta feature milestone that adds scorer roles, result approval and correction, timed matches, scoring rules, player replacement, TV Mode in every supported language and a feedback button (see `docs/CHANGELOG.md`, which lists what has and has not been verified live). Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
 >
-> **Token reset:** **Saturday 19 September 2026 at 11:31**. Before the reset, spend tokens only on the shortest path to a functioning app and verified blockers.
+> This is the **only active development plan**. 
+> The previous detailed `Padelstar_v1_0_0_plan.md` is superseded and may be archived.
 >
-> This is the **only active development plan**. The previous detailed `Padelstar_v1_0_0_plan.md` is superseded and may be archived.
+> **Branching logic** 
+> Make one branch per version number: 0.8 one branch, 0.9 one branch and so on. Do not start a new branch until the current is stabile and can be pushed to main.
 
 ---
 
@@ -321,7 +326,9 @@ Built 2026-09-19 (spec: archived plan FASE K) as client logic (`app/player-repla
 - [ ] Disputed/unconfirmed match restrictions. — a match awaiting approval (draft, pending or flagged) blocks the replacement for every player in it until the result is resolved or undone; a finished tournament cannot be changed.
 - [ ] Regression tests. — 13 tests.
 
-Not built: withdrawal without a replacement (a player leaving with no substitute needs a product decision about the matches that player would have played), and server-side enforcement of the approval block (the admin writes the whole tournament state, so this is a client rule).
+Withdrawal without a replacement, built 2026-09-19 on branch `v0.8` per the developer's decision: the withdrawn player's unplayed matches are kept and wait for the remaining teammate, who plays alone (1 against 2) or gives a walkover; the admin can decide for them (`app/player-withdrawal.js`, 19 tests in `test/player-withdrawal.test.js`, 9 UI tests in `test/withdrawal-ui.test.js`, database function `match_withdrawal_decision` in migration `20260920100000_withdrawal_decision.sql` with 25 checks in `supabase/tests/withdrawal-decision.pglite.mjs`). Checked in the browser (local tournament): withdraw with confirmation, running match annulled and court freed, admin "play alone" (starts on the free court), admin walkover with confirmation and correct standings, reinstate refused while a match is played alone, replacement taking over the waiting match, and the teammate's own decision notice. Not yet checked: the teammate's decision through the real database (needs the migration applied). Decisions still open: a withdrawal in a Cup is blocked (the bracket refers to team ids); when players on **both** teams have withdrawn from the same match it is cancelled (no rule was given for that case).
+
+Not built: server-side enforcement of the approval block (the admin writes the whole tournament state, so this is a client rule).
 
 ## Phase 14 — Timed matches/scoring rules
 
@@ -372,6 +379,9 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 - [ ] Individual read/unread.
 - [ ] Lifecycle cleanup.
 - [ ] System sounds for first version.
+- [ ] Custom Padelstar notification sounds. path for sound files: /Users/sigurd/Documents/Developer/Notification sounds
+      - notification1 is to be used when the players next match is ready.
+      - notification2 is to be used when a tournament is live and have updates to the user other than the next match.
 
 ## Phase 19 — TV Mode
 
@@ -379,7 +389,8 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 - [ ] Read-only public viewing.
 - [ ] Link/QR.
-- [ ] Opens in new window/tab.
+- [ ] Always opens in new window/tab.
+- [ ] Button toggle moved to side bar and pinned at bottom.
 - [ ] No admin/player rights.
 - [ ] Live score/status.
 - [ ] Final standings/result after completion.
@@ -413,12 +424,14 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 ## Phase 22 — Help/privacy/info
 
-- [x] Guide matches current product. — rewritten for `nb`/`en` (create wizard, lobby, guest use without account, invite code/QR, profile colour).
+- [ ] Guide matches current product. Use clear and easy language, not production notes or technical language. (Use "in the cloud" instead of "supabase" etc. Its for the user/player, not the developer. — rewritten for `nb`/`en` (create wizard, lobby, guest use without account, invite code/QR, profile colour).
 - [ ] Privacy matches actual data flow. — added push-subscription and colour-choice data and the real retention lifecycle; the retention wording depends on migration `20260919090500_...` being applied.
-- [x] Navigation matches current UI. — guide/privacy menus now read Home/Join/Create/Profile (they said "Konto"), are translated, and offer only Bokmål/English like the app.
-- [x] Contradictory old text removed. — removed "the admin must be signed in to create a live tournament" (guests can create tournaments).
+- [ ] Display in chosen language
+- [ ] Contradictory old text nust be removed.
+- [ ] Use clear and easy language, not production notes or technical language. (Use "in the cloud" instead of "supabase" etc. Its for the user/player, not the developer.
+- [ ] Always opens in popup with an x button on the top right to close.
 
-## Phase 23 — Initial system owner
+## Phase 23 — Initial system owner (v.0.8.0 reqiurement)
 
 - [ ] Exactly one protected Systemeier.
 - [ ] Backend/database enforcement.
@@ -453,7 +466,8 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 - [ ] No unintended overlap: text/buttons/icons/cards never collide, fixed/sticky elements never cover interactive content, at mobile/tablet/standard-desktop/wide-desktop widths. Intentional overlap (modals, dropdowns, menus, tooltips) is exempt.
 - [ ] Long translated strings (English is often longer than Norwegian) don't cause overlap or broken layout at any of the above widths — check this against whichever languages Phase 21 ships for the v1.0 RC.
 
-## Phase 26 — Documentation consolidation
+## Phase 26 — Documentation consolidation 
+**With each phase update these documents**
 
 - [ ] `PROJECT.md` matches current approved product behavior.
 - [ ] `ROADMAP.md` is the only active development plan.
@@ -464,7 +478,7 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 - [ ] Old contradictory design/development docs archived.
 - [ ] Archive clearly marked non-authoritative.
 
-## Phase 27 — Theme system (light/dark mode)
+## Phase 27 — Theme system (light/dark mode) (Version 0.9.0 reqiurement)
 
 An extensible theme system rather than isolated page-specific styling — dark mode remains PADELSTAR's primary visual identity, light mode is the second v1.0-required mode, and the architecture must not need rewriting to add future seasonal themes (see the Priority 2 "Owner Admin global theme management" entry below, which builds on this).
 
@@ -506,7 +520,10 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 
 - [x] Landing page, header, footer, language picker and connection pill aligned to the design file — the landing hero is now a rounded gradient card with left-aligned copy (no more clipped hero content; the old `.intro` grid + `overflow: hidden` cut off the account hint), feature cards and the always-visible "Dine turneringer" card (with an empty state) share one 1080px column, the header is the design's compact sticky blurred bar (60px icon, 200px wordmark, version text beside it), the footer is the design's install + links row over a single centred credit line, and the language picker is a compact flag-only button (the "Språk" label and language name were redundant next to the flag; the open menu still lists names in proper case — a `.language-picker span { text-transform: uppercase }` rule in `layout.css` had been forcing them uppercase). The connection pill is now a neutral grey badge by default and only turns green (with the pulsing dot) when `data-status="connected"`, so "Offline" never reads as healthy. Fixed a real pre-existing bug this exposed: `#connectionStatus` carried a static `data-i18n="localPwa"` (which translates to "Offline"), so every generic translation pass overwrote the live text set by `syncConnectionStatus()` — the pill could say "Offline" while `data-status` was "connected". The attribute is removed and pinned by a test. Verified live at desktop and mobile widths, online and offline states.
 
-## Phase 29 — v1.0 Definition of Done
+## Phase 29 - Debugging
+- Fix and repair all the current bugs in the BUGS.md list.
+
+## Phase 30 — v1.0 Definition of Done
 
 - [x] Priority 0 critical path passes end-to-end.
 - [x] Round Robin verified.
@@ -530,7 +547,7 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 ---
 
 # PRIORITY 2 — Later 1.x
-
+## Templates v.1.1
 - [ ] Rule templates.
 - [ ] Time templates.
 - [ ] Tournament templates.
@@ -538,16 +555,22 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 - [ ] Participant templates.
 - [ ] Official standard templates.
 - [ ] Setup conveniences for the above templates: reuse-last-setup, favorites, archive/restore.
+
+## Additional tournaments v.1.2
 - [ ] Additional tournament modes: Americano, Team-Americano, Mexicano, Team-Mexicano, King of the Court, Groups+Playoffs are already exposed in the UI with client-side scheduling logic (`app/tournament-modes.js`) but have no server-side round-advancement RPC (`admin_advance_round_impl` only accepts `roundRobin`) — deactivated in the UI until each is server-wired and verified end-to-end like Round Robin; re-enable one at a time as they pass verification.
 - [ ] Liga tournament format (league setup, match generation, table/ranking, final standings) — pushed out of the v1.0 Monday/RC critical scope per explicit developer decision; Round Robin and Cup remain the v1.0 formats. Revisit once both are fully stable and the Priority 1 phases above are done.
 - [ ] Redesign the in-tournament admin UI ("Styring" tab): contextual visibility — hide/collapse settings that can't be changed given the tournament's current state (e.g. court-count/format settings once active) — before considering a fuller redesign.
 - [ ] Player-first UI: "Min neste kamp" (my next match) and "Mine kamper" (my matches) surfaced more prominently than the full tournament overview.
+
+## Tournament assitant and pdf-share v1.3
 - [ ] PDF export of standings/results.
 - [ ] Tournament Assistant: rule-based (non-AI) live-insights engine surfacing things like a stuck court, a missing result, playtime imbalance, repeated partner pairings, plus an estimated finish time.
 - [ ] Rating/Elo system as a separate post-hoc calculation layer over raw match results (not mixed into stored scores, so the algorithm can change without rewriting history).
 - [ ] Leagues & seasons: group multiple tournaments into a season with combined points/rating/participation/wins/final standing.
 - [ ] Club/venue entity: group recurring tournaments under a venue for regular groups.
 - [ ] Recurring league automation: auto-generate next week's tournament from a saved template + last week's roster.
+
+## Calendar export and other features v1.4
 - [ ] Organizer analytics dashboard: average match duration, court utilization, no-show rate, built on the existing tournament `events[]` activity log.
 - [ ] Calendar/.ics export and reminders for scheduled tournaments.
 - [ ] Sponsor/prize-pool display (informational only — name, logo, prize description; no payment processing).
@@ -558,14 +581,30 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 - [ ] MFA/step-up/recovery where required.
 - [ ] Secure guest-device transfer.
 - [ ] Template sharing/public library when approved — concrete deliverable: a template marketplace living inside the `admin.html` dashboard above.
-- [ ] Custom Padelstar notification sounds.
 - [ ] Player result-error reporting/admin cases (D67–D71) if not already implemented.
 - [ ] Owner Admin global theme management, built on Phase 27's theme architecture and living inside the `admin.html` dashboard above: Systemeier selects which installed theme (standard PADELSTAR, plus future seasonal ones — Christmas, Winter, Pride, Summer, etc.) is the app-wide default, stored centrally (not just in the admin's own browser) so it applies to all users without a redeploy. Visual theme (standard/Christmas/Pride/...) and display mode (light/dark) stay separate concepts, combinable freely (e.g. "Christmas + Dark"). Each installed theme carries an explicit status (`active`/`available`/`disabled`/`development`); only `active` ones are selectable as the production default, and a theme that fails to load falls back to the standard PADELSTAR theme safely. Changing the global theme must never touch tournament or user data.
 - [ ] Scheduled theme activation (e.g. auto-switch to Christmas Dec 1–26) — build the manual Owner Admin theme switch above first; automatic scheduling is a later enhancement on top of it, not required alongside it.
 
+## Debugging
+- Fix and repair all the current bugs in the BUGS.md list.
+
+---
+# PRIORITY 3 — Scoring engine v1.5
+- [ ] Standalone reusable scoring engine: generalize `app/scoring-engine.js` into an engine decoupled from padel-specific concepts, usable to power scoring for other point/set/match-based sports apps (football, handball, hockey, etc.), with padel as one configured ruleset on top of a generic core. Bigger commitment than a simple multi-sport mode — scope once the padel-specific engine is stable, since a shared interface is harder to change once other consumers depend on it.
+
+## Additional languages part 1
+- [ ] French
+- [ ] German
+- [ ] Spanish
+- [ ] Norsk - Nynorsk
+- [ ] Dutch
+- [ ] Portugies
+ 
+  **Do not mark finished until the whole app is translated to the languages above**
+
 ---
 
-# PRIORITY 3 — v2.0.0 Social
+# PRIORITY 4 — v2.0.0 Social
 
 - [ ] Player dashboard: a personal hub beyond a stats page — next match at a glance, avatar/profile picture change, a Discord-style status message; becomes the home the rest of this section attaches to.
 - [ ] Friend requests.
@@ -573,9 +612,27 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 - [ ] Private friend list.
 - [ ] Friend-based invitations.
 - [ ] Friend status.
+
+## Rivalries and achivements v2.1
 - [ ] Rivalries/head-to-head stats between two specific players across all shared tournaments.
 - [ ] Achievements/badges layered on existing per-account tournament statistics — confirmed as a good addition, detailed design deferred to a later planning pass.
 - [ ] Broader social activity/profile functionality, including optional public statistics sharing and optional social activity/history — both explicitly pending a future product decision.
+
+## Additional languages part 2
+- [ ] Polish
+- [ ] Samisk
+- [ ] Arabic
+- [ ] Chinese
+- [ ] Japanise
+- [ ] Turkish
+- [ ] Russian
+
+**Do not mark finished until the whole app is translated to the languages above**
+
+---
+
+## Debugging
+- Fix and repair all the current bugs in the BUGS.md list.
 
 ---
 
@@ -583,5 +640,3 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 
 - [ ] Permanent tamper-protected security audit log.
 - [ ] Broader public template ecosystem.
-- [ ] Standalone reusable scoring engine: generalize `app/scoring-engine.js` into an engine decoupled from padel-specific concepts, usable to power scoring for other point/set/match-based sports apps (football, handball, hockey, etc.), with padel as one configured ruleset on top of a generic core. Bigger commitment than a simple multi-sport mode — scope once the padel-specific engine is stable, since a shared interface is harder to change once other consumers depend on it.
-- [ ] Additional languages.

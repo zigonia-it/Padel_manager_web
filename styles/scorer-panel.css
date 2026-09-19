@@ -215,3 +215,23 @@
 .correction-restore { min-height: 32px; padding: 2px 10px; }
 
 .correction-dialog { max-height: 92vh; overflow-y: auto; }
+
+/* Withdrawal without a replacement (Phase 13): the remaining teammate decides, or the admin for them. */
+#appConfirmMessage { white-space: pre-line; }
+.withdrawal-panel {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--ds-border-strong, rgba(255, 255, 255, 0.22));
+  border-left: 4px solid var(--gold-bright, #f5c04a);
+  border-radius: 12px;
+  background: rgba(245, 192, 74, 0.08);
+}
+.withdrawal-summary, .withdrawal-hint, .withdrawal-note { margin: 0; }
+.withdrawal-hint, .withdrawal-note { font-size: 0.9rem; opacity: 0.85; }
+.withdrawal-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.withdrawal-controls .withdrawal-button { flex: 1 1 180px; min-height: 44px; }
+.player-withdrawal-notice { margin-bottom: 14px; }
+.match-status.awaitingWithdrawalDecision { color: var(--gold-bright, #f5c04a); }
+.withdrawn-chip { opacity: 0.85; border-style: dashed; }

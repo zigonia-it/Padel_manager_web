@@ -6,6 +6,9 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+### Added (branch `v0.8`, not yet released)
+- **Player withdrawal without a replacement (Phase 13)**: "Trekk spiller" in the players list (after a confirmation that lists the effects). The player's finished matches and statistics stay. Their unplayed matches are kept and wait for the remaining teammate, who chooses to **play alone (1 against 2)** or **give a walkover** (the opponents win); the admin can decide for them, also in a later round. If nobody is left on that side the opponents win by walkover automatically; a match in progress is restarted at 0–0 and annulled first (its court goes to the next waiting match); a result awaiting approval blocks the withdrawal. A withdrawn player can be put back ("Sett tilbake", not while a match is being played 1 against 2) or replaced ("Bytt"), and a replacement takes over the waiting matches. Not offered in a Cup. Database: migration `20260920100000_withdrawal_decision.sql` (the teammate's own decision, with token check and rate limit).
+
 ## 0.7.0
 
 Beta feature milestone, applied on the developer's instruction (2026-09-19). Everything below has automated tests (client, and the database logic run on an in-memory Postgres) and was checked in the browser; the items under "Verified live" were additionally run against the real Supabase database; the items under "Awaiting a live check" have only been tested against the in-memory copy.

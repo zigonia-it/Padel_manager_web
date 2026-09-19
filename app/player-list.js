@@ -16,6 +16,8 @@ window.PadelstarPlayerList = (() => {
     removePlayer,
     replacePlayer,
     restorePlayer,
+    withdrawPlayer,
+    reinstatePlayer,
     requestConfirmation,
     saveState,
     setLocalRole,
@@ -41,6 +43,7 @@ window.PadelstarPlayerList = (() => {
         const replacedBy = player.replacedBy ? state.players.find((item) => item.id === player.replacedBy) : null;
         const replaces = player.replacedPlayerId ? state.players.find((item) => item.id === player.replacedPlayerId) : null;
         const isActive = player.active !== false;
+        const isWithdrawn = Boolean(player.withdrawn) && !player.replacedBy;
         const canRestore = lobbyLocked && replaces && replaces.replacedBy === player.id && isActive;
         const item = document.createElement("li");
         item.className = lobbyLocked ? "" : "editable-player";
@@ -52,10 +55,13 @@ window.PadelstarPlayerList = (() => {
         <small class="join-source-chip">${playerStatusLabel(player)}</small>
         ${replacedBy ? `<small class="join-source-chip replacement-chip">${t("players.replacedBy", { name: escapeHtml(replacedBy.name) })}</small>` : ""}
         ${replaces && isActive ? `<small class="join-source-chip replacement-chip">${t("players.replaces", { name: escapeHtml(replaces.name) })}</small>` : ""}
+        ${isWithdrawn ? `<small class="join-source-chip withdrawn-chip">${t("players.withdrawn")}</small>` : ""}
       </span>
       <span class="player-actions">
         <strong>${t("standings.pointsShort", { points: entry?.points ?? 0 })}</strong>
-        ${lobbyLocked && isActive ? `<button class="icon-button replace-player-button" type="button">${t("actions.replacePlayer")}</button>` : ""}
+        ${lobbyLocked && (isActive || isWithdrawn) ? `<button class="icon-button replace-player-button" type="button">${t("actions.replacePlayer")}</button>` : ""}
+        ${lobbyLocked && isActive ? `<button class="icon-button withdraw-player-button" type="button">${t("actions.withdrawPlayer")}</button>` : ""}
+        ${isWithdrawn ? `<button class="icon-button reinstate-player-button" type="button">${t("actions.reinstatePlayer")}</button>` : ""}
         ${canRestore ? `<button class="icon-button restore-player-button" type="button">${t("actions.restorePlayer", { name: escapeHtml(replaces.name) })}</button>` : ""}
         <button class="icon-button danger-button" type="button" aria-label="${t("actions.removePlayerAria", { name: escapeHtml(player.name) })}" ${lobbyLocked ? "disabled" : ""}>${t("actions.remove")}</button>
       </span>`;
@@ -82,6 +88,16 @@ window.PadelstarPlayerList = (() => {
             replacePlayer(player.id, replacementName, { confirmed: true });
           }
         });
+        item.querySelector(".withdraw-player-button")?.addEventListener("click", async () => {
+          const result = withdrawPlayer(player.id);
+          if (!result?.needsConfirmation) return;
+          const effects = [t("messages.withdrawConfirm", { name: player.name })];
+          if (result.plan.restart.length) effects.push(t("messages.withdrawConfirmRestart"));
+          if (result.plan.walkover.length) effects.push(t("messages.withdrawConfirmWalkover", { count: result.plan.walkover.length, name: player.name }));
+          if (result.plan.cancel.length) effects.push(t("messages.withdrawConfirmCancel", { count: result.plan.cancel.length }));
+          if (await requestConfirmation(effects.join("\n\n"))) withdrawPlayer(player.id, { confirmed: true });
+        });
+        item.querySelector(".reinstate-player-button")?.addEventListener("click", () => reinstatePlayer(player.id));
         item.querySelector(".restore-player-button")?.addEventListener("click", async () => {
           const result = restorePlayer(player.id);
           if (result?.needsConfirmation && await requestConfirmation(t("messages.replaceRestartConfirm", { name: player.name }))) {
