@@ -87,14 +87,14 @@ Prefer implementation over commentary.
 
 ## Versioning
 
-The actual current development baseline is **`0.8.0`** (bumped 2026-09-19 under the developer's standing authorization to bump fully verified milestones; `0.7.0` was bumped by explicit instruction for the beta feature milestone; see `docs/CHANGELOG.md`). `0.6.0` was bumped by explicit developer decision once the complete Monday critical path (owner account → login → create Round Robin → start → register results → Supabase/server persistence → natural completion → finish tournament → create/start another tournament) was verified end-to-end, guest and account-owned paths both.
+The actual current development baseline is **`0.9.0`** (bumped 2026-09-19 under the developer's standing authorization to bump fully verified milestones; `0.7.0` was bumped by explicit instruction for the beta feature milestone; see `docs/CHANGELOG.md`). `0.6.0` was bumped by explicit developer decision once the complete Monday critical path (owner account → login → create Round Robin → start → register results → Supabase/server persistence → natural completion → finish tournament → create/start another tournament) was verified end-to-end, guest and account-owned paths both.
 
 Version numbers represent **completed and verified milestones**, not planned work.
 
 Use this model:
 
-- `0.8.0` — current actual baseline.
-- `0.8.1`, `0.8.2`, etc. — coherent verified bug-fix batches that do not complete a new feature milestone.
+- `0.9.0` — current actual baseline.
+- `0.9.1`, `0.9.2`, etc. — coherent verified bug-fix batches that do not complete a new feature milestone.
 - later `0.x` minor versions — coherent new feature milestones on the path to v1.0 (see `docs/ROADMAP.md` Priority 1 phases).
 - `1.0.0` — only when the complete defined v1.0 scope and Definition of Done are implemented and verified.
 
