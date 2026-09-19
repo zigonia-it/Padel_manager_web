@@ -13,6 +13,10 @@
 -- scorerLog [...], eventLog [...], redoStack [...]. Heartbeats live in their own table so that pure
 -- keep-alives never bump the tournament revision (which would break the admin's optimistic saves).
 --
+-- Phase 11 note: the winning point of a player-scored match no longer finishes it; it becomes
+-- 'awaitingApproval' (approval.status 'draft'). The approval workflow is in migration 20260919150000_result_approval.sql
+-- (apply both together, in order).
+--
 -- save_player_point_impl now (a) requires the caller to be the active scorer (the first point on an
 -- unclaimed match claims the role), (b) lets the scorer score for both teams, and (c) clears the redo branch.
 
@@ -336,6 +340,12 @@ begin
     end if;
     if round_item->>'status' not in ('active', 'finished') then
       raise exception 'Match is not available for undo';
+    end if;
+    if match_item->>'state' = 'awaitingApproval' and match_item->'approval'->>'status' is distinct from 'draft' then
+      raise exception 'Result already submitted for approval';
+    end if;
+    if match_item->>'state' = 'finished' then
+      raise exception 'Result already approved';
     end if;
     undo_stack := coalesce(match_item->'undoStack', '[]'::jsonb);
     redo_stack := coalesce(match_item->'redoStack', '[]'::jsonb);
@@ -740,9 +750,18 @@ begin
             );
             match_item := jsonb_set(match_item, '{completedSets}', completed_sets, true);
             if greatest(set_one_wins, set_two_wins) >= sets_to_win_match then
-              match_item := jsonb_set(match_item, '{state}', '"finished"'::jsonb, true);
-              match_item := jsonb_set(match_item, '{winnerTeamIndex}', to_jsonb(case when set_one_wins > set_two_wins then 0 else 1 end), true);
-              match_item := jsonb_set(match_item, '{completedAt}', to_jsonb(now()), true);
+              -- Phase 11: the match is not final until the result is approved. The court is freed now
+              -- (the next waiting match starts), the scorer submits the result, the teams approve it.
+              match_item := jsonb_set(match_item, '{state}', '"awaitingApproval"'::jsonb, true);
+              match_item := jsonb_set(match_item, '{approval}', jsonb_build_object(
+                'status', 'draft',
+                'winnerTeamIndex', case when set_one_wins > set_two_wins then 0 else 1 end,
+                'completedSets', completed_sets,
+                'approvals', '[]'::jsonb,
+                'corrections', 0,
+                'endedAt', now(),
+                'escalateAt', now() + interval '10 minutes',
+                'autoApproveAt', now() + interval '30 minutes'), true);
               next_waiting_index := null;
               for waiting_match_index in 0..(jsonb_array_length(matches) - 1) loop
                 if matches->waiting_match_index->>'state' = 'waiting' then

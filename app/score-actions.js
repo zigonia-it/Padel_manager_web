@@ -73,7 +73,10 @@
         match.status = "active";
       }
       const { matchWon } = deps.scoring.awardPoint(match, teamIndex, deps.getState().settings);
-      if (matchWon) deps.finishMatch(match);
+      if (matchWon) {
+        if (deps.currentLocalRole() === "player") deps.enterApproval(match);
+        else deps.finishMatch(match);
+      }
       deps.saveState();
       if (deps.currentLocalRole() === "player" && deps.matchIncludesPlayer(match, deps.getState().selectedPlayerId)) {
         deps.queuePlayerScore(match.id, teamIndex);

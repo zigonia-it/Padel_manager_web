@@ -59,8 +59,10 @@ for (const scenario of scenarios) {
   const problems = [];
   if (error) problems.push(`error: ${error}`);
   else {
-    if (got.state !== e.state) problems.push(`state ${got.state} != ${e.state}`);
-    if (e.winnerTeamIndex !== undefined && got.winnerTeamIndex !== e.winnerTeamIndex) problems.push(`winner ${got.winnerTeamIndex} != ${e.winnerTeamIndex}`);
+    // a finished match waits for approval on the server; the proposed winner is stored on the approval
+    const expectedState = e.state === 'finished' ? 'awaitingApproval' : e.state;
+    if (got.state !== expectedState) problems.push(`state ${got.state} != ${expectedState}`);
+    if (e.winnerTeamIndex !== undefined && got.approval?.winnerTeamIndex !== e.winnerTeamIndex) problems.push(`winner ${got.approval?.winnerTeamIndex} != ${e.winnerTeamIndex}`);
     if (JSON.stringify([got.currentGame.teamOne, got.currentGame.teamTwo]) !== JSON.stringify(e.currentGame)) problems.push(`game ${JSON.stringify(got.currentGame)}`);
     if (JSON.stringify([got.currentSet.teamOne, got.currentSet.teamTwo]) !== JSON.stringify(e.currentSet)) problems.push(`set ${JSON.stringify(got.currentSet)}`);
     if (JSON.stringify(got.completedSets.map((s) => [s.teamOne, s.teamTwo])) !== JSON.stringify(e.completedSets)) problems.push(`completed ${JSON.stringify(got.completedSets)}`);

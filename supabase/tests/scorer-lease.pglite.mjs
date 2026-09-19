@@ -89,14 +89,14 @@ ok('undone events stay in the event history', /point/.test(evTypes) && /undo/.te
 console.log('finishing a match, undo/redo across the finish');
 // C is scorer; play team 0 to 6 games. current game has teamOne=2 points (0-fresh). Score until finished.
 let guard = 0; r = null;
-while (guard++ < 40) { r = await point('C', 0); if (r.error || m(r.data).state === 'finished') break; }
-ok('match finishes via player scoring', !r.error && m(r.data).state === 'finished', r.error);
+while (guard++ < 40) { r = await point('C', 0); if (r.error || m(r.data).state === 'awaitingApproval') break; }
+ok('the winning point puts the match up for approval', !r.error && m(r.data).state === 'awaitingApproval' && m(r.data).approval.status === 'draft', r.error);
 ok('next waiting match started with the same court', m(r.data, M2).state === 'playing' && m(r.data, M2).courtName === 'Bane 1');
 const finished = m(r.data);
 r = await act('C','undo');
-ok('undo after the finishing point reopens the match', !r.error && m(r.data).state === 'playing' && m(r.data, M2).state === 'waiting', r.error);
+ok('undo after the winning point reopens the match', !r.error && m(r.data).state === 'playing' && m(r.data, M2).state === 'waiting', r.error);
 r = await act('C','redo');
-ok('redo finishes the match again', !r.error && m(r.data).state === 'finished' && m(r.data, M2).state === 'playing', r.error);
+ok('redo puts the match up for approval again', !r.error && m(r.data).state === 'awaitingApproval' && m(r.data, M2).state === 'playing', r.error);
 ok('redo restores identical score', JSON.stringify(m(r.data).completedSets) === JSON.stringify(finished.completedSets));
 
 console.log('offline takeover, release, heartbeat');

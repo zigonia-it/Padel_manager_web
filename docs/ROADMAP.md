@@ -270,21 +270,27 @@ Built 2026-09-19 against the approved spec (`docs/archive/plans/Padelstar_v1_0_0
 - [ ] Scorer transfer/request. — `match_scorer_action` actions `claim` / `request` / `transfer` (defaults to the requester) / `decline` / `release`, with a panel on the match card.
 - [ ] Admin override. — `admin_set_match_scorer` (admin token + expected revision); the admin can also still score directly.
 - [ ] Offline takeover. — a participant can claim once the scorer's server-side heartbeat is older than 2 minutes (30 s client heartbeat in its own table, so it never bumps the tournament revision); the old scorer does not get the role back; logged as `offline_takeover`.
-- [ ] Undo/Redo. — scorer undo/redo through the server (`undo`/`redo` actions), undone events stay in `eventLog`, a new point drops the redo branch, admin undo keeps the current scorer. "Undo/Redo ends when the result is sent for approval" belongs to Phase 11 (results are still auto-finished today).
+- [ ] Undo/Redo. — scorer undo/redo through the server (`undo`/`redo` actions), undone events stay in `eventLog`, a new point drops the redo branch, admin undo keeps the current scorer. Undo/redo closes when the result is submitted for approval (Phase 11).
 - [ ] Multi-device verification. — needs the migration applied, then two real devices/browsers (scorer + second player + admin).
 
 Also fixed here: a point the server rejects (for example a tap on the opponent row) is now dropped from the local sync queue instead of being retried forever and blocking later points.
 
 ## Phase 11 — Result approval
 
-- [ ] Explicit submission for approval.
-- [ ] Required approvals.
-- [ ] Dispute/correction proposal.
-- [ ] 10-minute admin escalation.
-- [ ] 30-minute conditional auto-approval.
-- [ ] Dependent progression waits for authoritative result.
-- [ ] Concrete `score_conflict` state when two submissions for the same match disagree; auto-confirmed only when submissions match, otherwise routed to admin.
-- [ ] Visible "flagged for review" state for admin/referee escalation beyond auto-resolve.
+Built 2026-09-19 on the developer's decision to use an "awaiting approval" match state. Server side: migration `20260919150000_result_approval.sql` (needs `20260919120000_match_scorer_lease.sql` first; apply both in order, NOT applied yet), 45 database tests (`supabase/tests/result-approval.pglite.mjs`); client: `test/result-approval.test.js`. The panel was checked visually in the browser with a match put into the state. Items stay unchecked until the migrations are applied and a real multi-device run confirms them.
+
+Flow: the winning point of a player-scored match makes the match `awaitingApproval` (the court is freed and the next match starts); the active scorer submits the result; one player per team approves (the submitter counts for their team; a team where nobody has a device is approved automatically); standings, statistics, round advance and cup advance only count `finished` matches. Admin scoring and admin set-result still finish a match immediately.
+
+- [ ] Explicit submission for approval. — `submit` action, scorer only; the panel shows the result summary; undo/redo stays open until submission.
+- [ ] Required approvals. — at least one player per team; device-less (admin-added) teams auto-approve.
+- [ ] Dispute/correction proposal. — `dispute` flags the result for the admin, or proposes a corrected result (validated against the tournament rules) that resets approvals; the player UI proposes single-set corrections only (server accepts multi-set).
+- [ ] 10-minute admin escalation. — `approval.escalatedAt` is set after 10 minutes and shown as an "Admin varslet" badge; a push notification to the admin is not built.
+- [ ] 30-minute conditional auto-approval. — `process_result_approvals()` runs every minute (pg_cron); never for flagged results; timers restart on a corrected proposal; an unsubmitted draft follows the same clock from the end of the match.
+- [ ] Dependent progression waits for authoritative result. — round advance already requires every match finished/cancelled; the client blocks finishing the tournament while results await approval (the server-side `finalize_tournament` would cancel them, so direct RPC calls are not protected).
+- [ ] Concrete `score_conflict` state when two submissions for the same match disagree. — not integrated: the older `submit_match_result` submissions mechanism still exists separately from this workflow.
+- [ ] Visible "flagged for review" state for admin/referee escalation beyond auto-resolve. — flagged status with a badge on the match card, in the "Venter på godkjenning" group.
+
+Known gaps: TV Mode does not list matches that await approval; an approved cup final does not mark the cup finished until the admin advances (the client does this only for admin-finished matches); the admin corrects a wrong result with the existing undo and re-score.
 
 ## Phase 12 — Result correction/consequences
 

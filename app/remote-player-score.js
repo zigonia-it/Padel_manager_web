@@ -113,6 +113,49 @@
       return true;
     }
 
+    function resultErrorMessage(error) {
+      const message = String(error?.message ?? "");
+      if (/active scorer can submit/i.test(message)) return deps.t("result.notScorer");
+      if (/flagged/i.test(message)) return deps.t("result.flagged");
+      if (/Invalid corrected result/i.test(message)) return deps.t("result.invalidCorrection");
+      if (/already submitted|not awaiting|not been submitted|not open for dispute/i.test(message)) return deps.t("result.outOfDate");
+      return deps.t("result.failed");
+    }
+
+    // submit | approve | dispute (payload: { completedSets } proposes a corrected result)
+    async function resultAction(matchId, action, payload = null) {
+      if (!canScore()) return false;
+      if (!deps.isOnline()) {
+        deps.showToast(deps.t("scorer.offline"), "status-message-error");
+        return false;
+      }
+      if (deps.getPendingScores().length > 0) {
+        await processPlayerScoreQueue();
+        if (deps.getPendingScores().length > 0) {
+          deps.showToast(deps.t("scorer.offline"), "status-message-error");
+          return false;
+        }
+      }
+      const state = deps.getState();
+      const { data, error } = await deps.remoteRpc(deps.getSupabaseClient(), "match_result_action", {
+        p_tournament_id: state.id,
+        p_invite_code: state.inviteCode,
+        p_player_id: state.selectedPlayerId,
+        p_match_id: matchId,
+        p_player_token: state.playerToken,
+        p_action: action,
+        p_payload: payload,
+      });
+      if (error) {
+        console.warn(`Supabase result action ${action} failed`, error);
+        deps.showToast(resultErrorMessage(error), "status-message-error");
+        deps.refreshRemoteState?.("result-action-failed");
+        return false;
+      }
+      if (data) deps.applyRemoteState(data, { source: "rpc", clearConflict: true });
+      return true;
+    }
+
     function ownScoringMatchIds() {
       const state = deps.getState();
       if (!state.selectedPlayerId) return [];
@@ -136,7 +179,7 @@
       }
     }
 
-    return { queuePlayerScore, processPlayerScoreQueue, scorerAction, syncHeartbeat };
+    return { queuePlayerScore, processPlayerScoreQueue, scorerAction, resultAction, syncHeartbeat };
   }
 
   global.PadelstarRemotePlayerScore = { create };

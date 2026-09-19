@@ -86,6 +86,21 @@
       }, "messages.matchUpdateFailed");
     }
 
+    // Admin approves an awaiting result as it stands.
+    function queueRemoteResolveResult(match) {
+      if (!canWrite("messages.offlineAdminChange")) return;
+      recordAdminEvent("result_approved_by_admin", "match", match.id, {});
+      enqueue("admin_resolve_result", () => {
+        const state = deps.getState();
+        return {
+          p_tournament_id: state.id,
+          p_admin_token: state.adminToken,
+          p_match_id: match.id,
+          p_expected_revision: state.revision,
+        };
+      }, "messages.matchUpdateFailed");
+    }
+
     function queueRemoteSetResult(match, teamOne, teamTwo) {
       if (!canWrite("messages.offlineSetResult")) return;
       recordAdminEvent("result_corrected", "match", match.id, { teamOne, teamTwo });
@@ -120,7 +135,7 @@
       }, "messages.nextCupRoundFailed", () => deps.sendPushNotification("round_ready"));
     }
 
-    return { queueRemoteMatchAction, queueRemoteScorerAssign, queueRemoteSetResult, queueRemoteRoundAdvance, queueRemoteCupAdvance };
+    return { queueRemoteMatchAction, queueRemoteScorerAssign, queueRemoteResolveResult, queueRemoteSetResult, queueRemoteRoundAdvance, queueRemoteCupAdvance };
   }
 
   global.PadelstarRemoteAdminActions = { create };

@@ -298,6 +298,7 @@ const remotePlayerScore = window.PadelstarRemotePlayerScore.create({
 const scoreActions = window.PadelstarScoreActions.create({
   captureMatchUndoState: (match) => captureMatchUndoState(match),
   currentLocalRole: () => currentLocalRole(),
+  enterApproval: (match) => tournamentRuntime.enterApproval(match),
   finishMatch: (match) => finishMatch(match),
   flashMatchCards: (matchId) => uiEffects?.flashMatchCards(matchId),
   getState: () => state,
@@ -550,6 +551,8 @@ const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   playerTournamentState: (player, matches) => playerTournamentState(player, matches),
   scoreSummary: (match) => scoreSummary(match),
   scoreboardTableMarkup: (match, editable) => matchCard.scoreboardTableMarkup(match, editable),
+  approvalPanelMarkup: (match, editable, scoreOnly) => matchCard.approvalPanelMarkup(match, editable, scoreOnly),
+  bindApprovalPanel: (root, match) => matchCard.bindApprovalPanel(root, match),
   t: (key, values) => t(key, values),
 });
 const rules = window.PadelstarRules.create({
@@ -731,6 +734,8 @@ const matchCard = window.PadelstarMatchCard.create({
   scoreSummary: (match) => scoreSummary(match),
   scorerAction: (match, action, targetPlayerId) => remotePlayerScore.scorerAction(match.id, action, targetPlayerId),
   adminSetScorer: (match, playerId) => remoteAdminActions.queueRemoteScorerAssign(match, playerId),
+  resultAction: (match, action, payload) => remotePlayerScore.resultAction(match.id, action, payload),
+  adminResolveResult: (match) => remoteAdminActions.queueRemoteResolveResult(match),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),
@@ -1664,7 +1669,7 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
 }
 
 function isEditablePlayerMatch(match, player) {
-  return Boolean(player && match.state === "playing" && matchIncludesPlayer(match, player.id));
+  return Boolean(player && ["playing", "awaitingApproval"].includes(match.state) && matchIncludesPlayer(match, player.id));
 }
 
 function renderStandings(matches) {
@@ -1882,6 +1887,11 @@ function buildPodiumSnapshot() {
 }
 
 async function endTournament() {
+  // Finishing would cancel every unfinished match, which would throw away results that still wait for approval.
+  if (getAllMatches().some((match) => match.state === "awaitingApproval")) {
+    showToast(t("result.finishBlocked"), "status-message-error");
+    return false;
+  }
   const snapshot = buildPodiumSnapshot();
   const success = await tournamentFinalization.finalize("completed");
   if (success) {
@@ -2200,6 +2210,7 @@ function matchStateText(stateName) {
   return {
     waiting: t("common.waiting"),
     playing: t("common.playing"),
+    awaitingApproval: t("common.awaitingApproval"),
     finished: t("common.finished"),
     cancelled: t("common.cancelled"),
   }[stateName] ?? stateName;
