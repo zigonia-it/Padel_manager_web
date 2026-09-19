@@ -170,6 +170,23 @@ begin
 end
 $function$;
 
+-- A match can only be undone/redone while its round is the latest one that has started. Round Robin
+-- generates every round up front, so the round in play is not necessarily the last entry of `rounds`.
+create or replace function public._round_is_latest_started(p_state jsonb, p_round_idx integer)
+returns boolean
+language sql
+immutable
+set search_path to 'public', 'pg_catalog'
+as $function$
+  select not exists (
+    select 1
+    from jsonb_array_elements(coalesce(p_state->'rounds', '[]'::jsonb)) with ordinality as r(value, ordinality)
+    where r.ordinality - 1 > p_round_idx and r.value->>'status' in ('active', 'finished')
+  );
+$function$;
+
+revoke execute on function public._round_is_latest_started(jsonb, integer) from public, anon, authenticated;
+
 revoke execute on function public._scorer_locate(jsonb, uuid) from public, anon, authenticated;
 revoke execute on function public._scorer_match_has_player(jsonb, uuid) from public, anon, authenticated;
 revoke execute on function public._scorer_append(jsonb, text, jsonb, integer) from public, anon, authenticated;
@@ -379,7 +396,7 @@ begin
     if not is_scorer then
       raise exception 'Not the active scorer';
     end if;
-    if r_idx <> jsonb_array_length(current_state->'rounds') - 1 then
+    if not public._round_is_latest_started(current_state, r_idx) then
       raise exception 'Match is not in the current round';
     end if;
     if round_item->>'status' not in ('active', 'finished') then
@@ -998,7 +1015,7 @@ begin
         continue;
       end if;
 
-      if round_index <> jsonb_array_length(rounds) - 1 then
+      if not public._round_is_latest_started(current_state, round_index) then
         raise exception 'Match is not in the current round';
       end if;
 

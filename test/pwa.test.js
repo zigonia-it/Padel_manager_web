@@ -95,7 +95,7 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v308/);
+  assert.match(serviceWorkerSource, /padelstar-v309/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -811,8 +811,8 @@ test("remote feedback has its own RPC and status boundary", () => {
 test("realtime connection has its own lifecycle boundary", () => {
   assert.match(realtimeConnectionSource, /scheduleReconnect/);
   assert.match(realtimeConnectionSource, /global\.PadelstarRealtimeConnection/);
-  assert.match(indexSource, /app\/realtime-connection\.js\?v=padelstar-realtime-connection-1/);
-  assert.match(serviceWorkerSource, /app\/realtime-connection\.js\?v=padelstar-realtime-connection-1/);
+  assert.match(indexSource, /app\/realtime-connection\.js\?v=padelstar-realtime-connection-2/);
+  assert.match(serviceWorkerSource, /app\/realtime-connection\.js\?v=padelstar-realtime-connection-2/);
 });
 
 test("link and QR generation has its own module boundary", () => {

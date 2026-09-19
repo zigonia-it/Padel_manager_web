@@ -30,7 +30,8 @@ const TOK = { A: tok('a'), B: tok('b'), C: tok('c'), D: tok('d'), E: tok('e') };
 const team = (a,b)=>({ players:[{id:P[a],name:a},{id:P[b],name:b}], displayName:`${a} & ${b}` });
 const mk = (id, state, a, b) => ({ id, state, status: state==='playing'?'active':'scheduled', teamOne: team(a[0],a[1]), teamTwo: team(b[0],b[1]),
   currentGame:{teamOne:0,teamTwo:0}, currentSet:{teamOne:0,teamTwo:0}, completedSets:[], courtId:'court-1', courtName:'Bane 1', undoStack:[] });
-const state0 = { status:'Runde pågår', settings:{gamesToWinSet:6,setsToWinMatch:1}, revision:1, rounds:[{ id:'r1', status:'active', matches:[ mk(M1,'playing','AB','CD'), mk(M2,'waiting','AB','CD') ] }] };
+// Round Robin generates every round up front: round 1 is active, later rounds are only scheduled.
+const state0 = { status:'Runde pågår', settings:{gamesToWinSet:6,setsToWinMatch:1}, revision:1, rounds:[{ id:'r1', status:'active', matches:[ mk(M1,'playing','AB','CD'), mk(M2,'waiting','AB','CD') ] }, { id:'r2', status:'scheduled', matches:[ mk(uuid(21),'waiting','AB','CD') ] }, { id:'r3', status:'scheduled', matches:[ mk(uuid(31),'waiting','AB','CD') ] }] };
 await pg.query(`insert into public.tournaments(id,invite_code,admin_token,state,revision) values ($1,'ABCD2345','admintoken-1234567890',$2::jsonb,1)`, [T, JSON.stringify(state0)]);
 for (const k of Object.keys(P)) await pg.query(`insert into public.player_sessions values ($1,$2,encode(extensions.digest($3,'sha256'),'hex'))`, [T, P[k], TOK[k]]);
 
@@ -145,6 +146,14 @@ console.log('admin undo keeps the scorer');
   ok('admin undo keeps the current scorer role', !rr.error && m(rr.data, M2).scorer?.playerId === P.B);
   ok('admin undo clears the redo branch', !rr.error && Array.isArray(m(rr.data, M2).redoStack) && m(rr.data, M2).redoStack.length === 0);
   ok('admin undo keeps the event history', !rr.error && m(rr.data, M2).eventLog.length >= 1);
+}
+
+console.log('undo needs the latest started round');
+{
+  await pg.query(`update public.tournaments set state = jsonb_set(state, '{rounds,1,status}', '"active"') where id = $1`, [T]);
+  const rr = await act('B','undo',null,M2);
+  ok('undo is refused once a later round has started', rr.error?.includes('not in the current round'), rr.error);
+  await pg.query(`update public.tournaments set state = jsonb_set(state, '{rounds,1,status}', '"scheduled"') where id = $1`, [T]);
 }
 
 console.log('validation');

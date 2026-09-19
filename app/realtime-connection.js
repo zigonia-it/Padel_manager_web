@@ -7,6 +7,8 @@
     let connectionState = "disconnected";
     let connectionGeneration = 0;
     let refreshPromise = null;
+    let announcedRevision = 0;
+    let catchingUp = false;
 
     function setConnectionState(nextState) {
       connectionState = nextState;
@@ -20,6 +22,7 @@
       if (channel) getClient()?.removeChannel(channel);
       channel = null;
       tournamentId = null;
+      announcedRevision = 0;
     }
 
     function scheduleReconnect() {
@@ -69,6 +72,29 @@
       return refreshPromise;
     }
 
+    // The database broadcasts only the new revision number on the tournament's channel (the postgres_changes
+    // feed is not readable by the anonymous role). A newer revision than ours is fetched through the RPC.
+    function handleRevisionNotice(revision) {
+      if (!Number.isInteger(revision)) return;
+      announcedRevision = Math.max(announcedRevision, revision);
+      void catchUp();
+    }
+
+    async function catchUp() {
+      if (catchingUp) return;
+      catchingUp = true;
+      try {
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+          const local = Number(getState().revision) || 0;
+          if (local >= announcedRevision) break;
+          await refresh("broadcast");
+          if ((Number(getState().revision) || 0) === local) break;
+        }
+      } finally {
+        catchingUp = false;
+      }
+    }
+
     function connect() {
       const state = getState();
       if (!isReady() || !state.id || !hasActiveTournament()) {
@@ -102,7 +128,11 @@
               }, { source: "realtime" });
             }
           },
-        );
+        )
+        .on("broadcast", { event: "revision" }, (message) => {
+          if (generation !== connectionGeneration || currentChannel !== channel) return;
+          handleRevisionNotice(Number(message?.payload?.revision));
+        });
       channel = currentChannel;
       currentChannel.subscribe((status, error) => {
         if (generation !== connectionGeneration || currentChannel !== channel) return;

@@ -31,7 +31,7 @@ let seq = 0;
 async function fixture(devices = ['A', 'B', 'C', 'D', 'E']) {
   seq += 1;
   const T = uuid(2000 + seq);
-  const state = { status: 'Runde pågår', settings: { gamesToWinSet: 2, setsToWinMatch: 1 }, revision: 1, rounds: [{ id: 'r1', status: 'active', matches: [mk(M1, 'playing'), mk(M2, 'waiting')] }] };
+  const state = { status: 'Runde pågår', settings: { gamesToWinSet: 2, setsToWinMatch: 1 }, revision: 1, rounds: [{ id: 'r1', status: 'active', matches: [mk(M1, 'playing'), mk(M2, 'waiting')] }, { id: 'r2', status: 'scheduled', matches: [mk(uuid(21), 'waiting')] }, { id: 'r3', status: 'scheduled', matches: [mk(uuid(31), 'waiting')] }] };
   await pg.query(`insert into public.tournaments(id,invite_code,admin_token,state,revision) values ($1,'ABCD2345','admintoken-1234567890',$2::jsonb,1)`, [T, JSON.stringify(state)]);
   for (const k of devices) await pg.query(`insert into public.player_sessions values ($1,$2,encode(extensions.digest($3,'sha256'),'hex'))`, [T, P[k], TOK[k]]);
   return T;

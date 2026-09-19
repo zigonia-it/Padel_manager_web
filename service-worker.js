@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v308";
+const cacheName = "padelstar-v309";
 
 const appShell = [
   "./",
@@ -84,7 +84,7 @@ const appShell = [
   "./app/persistence.js?v=padelstar-persistence-1",
   "./app/admin-identity.js?v=padelstar-admin-identity-1",
   "./app/remote-feedback.js?v=padelstar-remote-feedback-1",
-  "./app/realtime-connection.js?v=padelstar-realtime-connection-1",
+  "./app/realtime-connection.js?v=padelstar-realtime-connection-2",
   "./app/observability.js?v=padelstar-observability-1",
   "./app/profile-manager.js?v=padelstar-profile-2",
   "./app/profile-history.js?v=padelstar-profile-history-1",
