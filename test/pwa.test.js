@@ -95,7 +95,7 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v335/);
+  assert.match(serviceWorkerSource, /padelstar-v336/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -137,8 +137,8 @@ test("profile history has its own domain boundary", () => {
 });
 
 test("court settings have their own domain boundary", () => {
-  assert.match(indexSource, /app\/court-settings\.js\?v=padelstar-court-settings-1/);
-  assert.match(serviceWorkerSource, /app\/court-settings\.js\?v=padelstar-court-settings-1/);
+  assert.match(indexSource, /app\/court-settings\.js\?v=padelstar-court-settings-2/);
+  assert.match(serviceWorkerSource, /app\/court-settings\.js\?v=padelstar-court-settings-2/);
   assert.match(courtSettingsSource, /global\.PadelstarCourtSettings/);
   assert.doesNotMatch(courtSettingsSource, /localStorage|document\.querySelector/);
   assert.match(appSource, /courtSettings\.renderCourtNames\(\)/);
@@ -310,8 +310,8 @@ test("accent picker lets a player choose their own gem color on join and profile
 test("admin form mutations have their own event boundary", () => {
   assert.match(adminFormEventsSource, /generateRoundBlockReason/);
   assert.match(adminFormEventsSource, /global\.PadelstarAdminFormEvents/);
-  assert.match(indexSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-6/);
-  assert.match(serviceWorkerSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-6/);
+  assert.match(indexSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-7/);
+  assert.match(serviceWorkerSource, /app\/admin-form-events\.js\?v=padelstar-admin-form-events-7/);
   assert.match(appSource, /PadelstarAdminFormEvents\?\.create/);
 });
 
@@ -552,10 +552,10 @@ test("profile session lifecycle has its own storage and RPC boundary", () => {
   assert.match(profileSessionSource, /global\.PadelstarProfileSession/);
   assert.match(indexSource, /app\/profile-session\.js\?v=padelstar-profile-session-3/);
   assert.match(serviceWorkerSource, /app\/profile-session\.js\?v=padelstar-profile-session-3/);
-  assert.match(indexSource, /app\/bootstrap\/dom-elements\.js\?v=padelstar-dom-elements-12/);
+  assert.match(indexSource, /app\/bootstrap\/dom-elements\.js\?v=padelstar-dom-elements-13/);
   assert.match(indexSource, /app\/bootstrap\/app-meta\.js\?v=padelstar-app-meta-5/);
   assert.match(indexSource, /app\/ui\/theme\.js\?v=padelstar-theme-1/);
-  assert.match(serviceWorkerSource, /app\/bootstrap\/dom-elements\.js\?v=padelstar-dom-elements-12/);
+  assert.match(serviceWorkerSource, /app\/bootstrap\/dom-elements\.js\?v=padelstar-dom-elements-13/);
   assert.match(serviceWorkerSource, /app\/bootstrap\/app-meta\.js\?v=padelstar-app-meta-5/);
   assert.match(serviceWorkerSource, /app\/ui\/theme\.js\?v=padelstar-theme-1/);
   assert.doesNotMatch(appSource, /p_profile_token:\s*profile\.accessToken/);
@@ -638,10 +638,10 @@ test("podium is a real post-finish screen, not just a redirect to standings", ()
 
 test("lobby is a real pre-start screen reached from tournament creation", () => {
   assert.match(indexSource, /data-module="lobby"/);
-  assert.match(indexSource, /app\/lobby\.js\?v=padelstar-lobby-1/);
-  assert.match(serviceWorkerSource, /app\/lobby\.js\?v=padelstar-lobby-1/);
-  assert.match(indexSource, /styles\/lobby\.css\?v=padelstar-lobby-1/);
-  assert.match(serviceWorkerSource, /styles\/lobby\.css\?v=padelstar-lobby-1/);
+  assert.match(indexSource, /app\/lobby\.js\?v=padelstar-lobby-2/);
+  assert.match(serviceWorkerSource, /app\/lobby\.js\?v=padelstar-lobby-2/);
+  assert.match(indexSource, /styles\/lobby\.css\?v=padelstar-lobby-2/);
+  assert.match(serviceWorkerSource, /styles\/lobby\.css\?v=padelstar-lobby-2/);
   assert.match(lobbySource, /window\.PadelstarLobby/);
   assert.match(lobbySource, /renderLobby/);
   assert.match(moduleRoutingSource, /requestedModule === "lobby"/);

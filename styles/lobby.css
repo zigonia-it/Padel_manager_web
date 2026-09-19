@@ -51,3 +51,22 @@
   flex-wrap: wrap;
   gap: 10px;
 }
+
+
+/* Adding players and naming the courts without leaving the lobby */
+.lobby-add-form {
+  margin-top: 12px;
+}
+
+.lobby-courts-card {
+  padding: 16px;
+  border: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+  border-radius: var(--radius-lg, 18px);
+  background: var(--ds-surface-1, rgba(255, 255, 255, 0.03));
+}
+
+.lobby-courts-card .court-names-list {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0;
+}

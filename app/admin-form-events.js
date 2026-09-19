@@ -26,7 +26,8 @@
     } = deps;
 
     function bind(elements) {
-      elements.addPlayerForm?.addEventListener("submit", (event) => {
+      // The Styring tab and the lobby offer the same two forms, so both use the same handlers.
+      const submitAddPlayers = (event) => {
         event.preventDefault();
         const state = getState();
         if (state.rounds.length > 0) {
@@ -40,7 +41,9 @@
         event.currentTarget.reset();
         saveState();
         deps.render();
-      });
+      };
+      elements.addPlayerForm?.addEventListener("submit", submitAddPlayers);
+      elements.lobbyAddPlayerForm?.addEventListener("submit", submitAddPlayers);
 
       elements.courtSettingsForm?.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -54,7 +57,7 @@
         deps.render();
       });
 
-      elements.courtNamesForm?.addEventListener("submit", (event) => {
+      const submitCourtNames = (event) => {
         event.preventDefault();
         const state = getState();
         if (state.rounds.length > 0 || state.status === "Avsluttet") {
@@ -70,7 +73,9 @@
         updateCourtNames(formData.getAll("courtName"));
         saveState();
         deps.render();
-      });
+      };
+      elements.courtNamesForm?.addEventListener("submit", submitCourtNames);
+      elements.lobbyCourtNamesForm?.addEventListener("submit", submitCourtNames);
 
       elements.tournamentSettingsForm?.addEventListener("submit", (event) => {
         event.preventDefault();

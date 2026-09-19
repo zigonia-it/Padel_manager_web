@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="styles/create-wizard.css?v=padelstar-create-wizard-3">
   <link rel="stylesheet" href="styles/invite-code-input.css?v=padelstar-invite-code-input-1">
   <link rel="stylesheet" href="styles/accent-picker.css?v=padelstar-accent-picker-1">
-  <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-1">
+  <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-2">
   <link rel="stylesheet" href="styles/scoreboard-table.css?v=padelstar-scoreboard-table-2">
   <link rel="stylesheet" href="styles/match-list-collapse.css?v=padelstar-match-list-collapse-1">
   <link rel="stylesheet" href="styles/feedback.css?v=padelstar-feedback-2">
@@ -1003,6 +1003,25 @@
               <h3 data-i18n="admin.lobbyPlayers">Lobby / spillere</h3>
             </div>
             <ul class="compact-list" id="lobbyPlayersList"></ul>
+            <form class="inline-form lobby-add-form" id="lobbyAddPlayerForm">
+              <textarea name="playerName" rows="2" maxlength="2048" placeholder="Legg til én eller flere spillere"
+                autocomplete="off" aria-label="Legg til spillere" data-i18n-placeholder="admin.addPlayersPlaceholder"
+                data-i18n-aria-label="lobby.addPlayers" required></textarea>
+              <button class="secondary" type="submit" data-i18n="actions.add">Legg til</button>
+            </form>
+          </div>
+          <div class="lobby-courts-card">
+            <form class="court-names-form" id="lobbyCourtNamesForm">
+              <div class="panel-heading">
+                <h3 data-i18n="lobby.courts">Baner</h3>
+                <label class="court-count-control">
+                  <span data-i18n="setup.courtCount">Antall baner</span>
+                  <input name="courtCount" type="number" min="1" max="12" value="1" required>
+                </label>
+              </div>
+              <div class="court-names-list" id="lobbyCourtNamesList"></div>
+              <button class="secondary" type="submit" data-i18n="lobby.saveCourts">Lagre baner</button>
+            </form>
           </div>
         </div>
         <div class="lobby-actions">
@@ -1104,13 +1123,13 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-52"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-53"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-6"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
   <script defer src="app/remote-tournament.js?v=padelstar-remote-tournament-2"></script>
   <script defer src="app/admin-actions.js?v=padelstar-admin-actions-4"></script>
-  <script defer src="app/court-settings.js?v=padelstar-court-settings-1"></script>
+  <script defer src="app/court-settings.js?v=padelstar-court-settings-2"></script>
   <script defer src="app/setup-forms.js?v=padelstar-setup-forms-5"></script>
   <script defer src="app/tournament-queries.js?v=padelstar-tournament-queries-1"></script>
   <script defer src="app/tournament-sharing.js?v=padelstar-tournament-sharing-1"></script>
@@ -1134,7 +1153,7 @@
   <script defer src="app/match-list.js?v=padelstar-match-list-4"></script>
   <script defer src="app/standings.js?v=padelstar-standings-3"></script>
   <script defer src="app/podium.js?v=padelstar-podium-3"></script>
-  <script defer src="app/lobby.js?v=padelstar-lobby-1"></script>
+  <script defer src="app/lobby.js?v=padelstar-lobby-2"></script>
   <script defer src="app/player-list.js?v=padelstar-player-list-3"></script>
   <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-2"></script>
   <script defer src="app/player-status.js?v=padelstar-player-status-1"></script>
@@ -1184,7 +1203,7 @@
   <script defer src="app/core/session-controller.js?v=padelstar-session-controller-2"></script>
   <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
-  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-12"></script>
+  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-13"></script>
   <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-5"></script>
   <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-2"></script>
   <script defer src="app/bootstrap/app-init.js?v=padelstar-app-init-2"></script>
@@ -1213,7 +1232,7 @@
   <script defer src="app/create-wizard.js?v=padelstar-create-wizard-3"></script>
   <script defer src="app/invite-code-input.js?v=padelstar-invite-code-input-1"></script>
   <script defer src="app/accent-picker.js?v=padelstar-accent-picker-1"></script>
-  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-6"></script>
+  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-7"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-3"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
   <script defer src="app/app.js?v=padelstar-session-76"></script>
