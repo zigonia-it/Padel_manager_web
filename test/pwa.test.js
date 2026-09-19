@@ -95,7 +95,7 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v336/);
+  assert.match(serviceWorkerSource, /padelstar-v337/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -638,10 +638,10 @@ test("podium is a real post-finish screen, not just a redirect to standings", ()
 
 test("lobby is a real pre-start screen reached from tournament creation", () => {
   assert.match(indexSource, /data-module="lobby"/);
-  assert.match(indexSource, /app\/lobby\.js\?v=padelstar-lobby-2/);
-  assert.match(serviceWorkerSource, /app\/lobby\.js\?v=padelstar-lobby-2/);
-  assert.match(indexSource, /styles\/lobby\.css\?v=padelstar-lobby-2/);
-  assert.match(serviceWorkerSource, /styles\/lobby\.css\?v=padelstar-lobby-2/);
+  assert.match(indexSource, /app\/lobby\.js\?v=padelstar-lobby-3/);
+  assert.match(serviceWorkerSource, /app\/lobby\.js\?v=padelstar-lobby-3/);
+  assert.match(indexSource, /styles\/lobby\.css\?v=padelstar-lobby-3/);
+  assert.match(serviceWorkerSource, /styles\/lobby\.css\?v=padelstar-lobby-3/);
   assert.match(lobbySource, /window\.PadelstarLobby/);
   assert.match(lobbySource, /renderLobby/);
   assert.match(moduleRoutingSource, /requestedModule === "lobby"/);
@@ -976,7 +976,7 @@ test("active app files do not reference archived assets", () => {
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
   assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-103/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-76/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-77/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
@@ -987,7 +987,7 @@ test("browser entrypoint and service worker use the same cache-busting versions"
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-4/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-103/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-76/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-77/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-1/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);

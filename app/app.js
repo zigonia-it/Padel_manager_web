@@ -130,7 +130,7 @@ const profileHistory = window.PadelstarProfileHistory.create({
 });
 const observability = window.PadelstarObservability;
 const uiEffects = window.PadelstarUiEffects;
-const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history"]);
+const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history", "admin_list_invitations", "list_my_invitations"]);
 const remoteRpc = (client, name, payload = {}) => {
   if (!remoteReadRpcNames.has(name)) markSyncAttempt();
   return window.PadelstarRemoteRpc.call(client, name, payload);
@@ -706,6 +706,20 @@ const notificationCenterUi = window.PadelstarNotificationCenterUi.create({
 });
 notificationCenterUi.bind();
 const systemAdminLink = window.PadelstarSystemAdmin.createLink({ document, getClient: () => supabaseClient });
+const invitations = window.PadelstarInvitations.create({
+  document,
+  getState: () => state,
+  getClient: () => supabaseClient,
+  isShared: (current) => current.remoteMode === "shared",
+  remoteRpc: (client, name, payload) => remoteRpc(client, name, payload),
+  t: (key, values) => t(key, values),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  escapeHtml: (value) => escapeHtml(value),
+  prefillJoinForm: (code) => prefillJoinForm(code),
+  showModule: (moduleName) => showModule(moduleName),
+  getAccountUser: () => accountAuth?.currentUser(),
+});
+invitations.bind();
 const profileSession = window.PadelstarProfileSession.create({
   defaultAvatarId,
   getElements: () => elements,
@@ -816,7 +830,7 @@ const accountAuth = window.PadelstarAccountAuth?.create({
   getClient: () => supabaseClient,
   getElements: () => elements,
   getProfile: () => profile,
-  onAuthChange: (user) => { void systemAdminLink.refresh(user); syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
+  onAuthChange: (user) => { void systemAdminLink.refresh(user); void invitations.loadMine(); syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
   onProfileLoaded: (remoteProfile) => {
     profile = profile
       ? profileManager.normalizeProfile({ ...profile, ...remoteProfile })
@@ -1634,6 +1648,7 @@ function render() {
   const result = appRenderer?.render();
   remotePlayerScore.syncHeartbeat();
   notificationCenterUi.render();
+  invitations.renderAdmin();
   return result;
 }
 

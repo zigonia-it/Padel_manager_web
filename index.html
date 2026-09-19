@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="styles/create-wizard.css?v=padelstar-create-wizard-3">
   <link rel="stylesheet" href="styles/invite-code-input.css?v=padelstar-invite-code-input-1">
   <link rel="stylesheet" href="styles/accent-picker.css?v=padelstar-accent-picker-1">
-  <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-2">
+  <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-3">
   <link rel="stylesheet" href="styles/scoreboard-table.css?v=padelstar-scoreboard-table-2">
   <link rel="stylesheet" href="styles/match-list-collapse.css?v=padelstar-match-list-collapse-1">
   <link rel="stylesheet" href="styles/feedback.css?v=padelstar-feedback-2">
@@ -333,6 +333,15 @@
               <div><span class="status-chip" id="profileAccountEmailStatus"></span></div>
             </div>
           </div>
+        </section>
+        <section class="panel my-invitations-panel hidden" id="myInvitationsPanel" aria-labelledby="myInvitationsTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow" data-i18n="invitations.eyebrow">Turneringer</p>
+              <h3 id="myInvitationsTitle" data-i18n="invitations.myTitle">Invitasjoner</h3>
+            </div>
+          </div>
+          <ul class="compact-list" id="myInvitationsList"></ul>
         </section>
         <section class="panel notification-settings-panel" aria-labelledby="notificationSettingsTitle">
           <div class="panel-heading">
@@ -1010,6 +1019,18 @@
               <button class="secondary" type="submit" data-i18n="actions.add">Legg til</button>
             </form>
           </div>
+          <div class="lobby-invite-card hidden" id="lobbyInviteCard">
+            <div class="panel-heading">
+              <h3 data-i18n="invitations.title">Inviter med e-post</h3>
+            </div>
+            <p class="hint" data-i18n="invitations.hint">Personen ser invitasjonen når vedkommende logger inn med denne e-postadressen. Ingen plass reserveres før vedkommende blir med.</p>
+            <form class="inline-form" id="lobbyInviteForm">
+              <input name="email" type="email" maxlength="200" autocomplete="off" required
+                placeholder="navn@eksempel.no" aria-label="E-postadresse" data-i18n-aria-label="invitations.email">
+              <button class="secondary" type="submit" data-i18n="invitations.send">Send invitasjon</button>
+            </form>
+            <ul class="compact-list" id="lobbyInvitationsList"></ul>
+          </div>
           <div class="lobby-courts-card">
             <form class="court-names-form" id="lobbyCourtNamesForm">
               <div class="panel-heading">
@@ -1123,7 +1144,7 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-53"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-54"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-6"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
@@ -1153,7 +1174,7 @@
   <script defer src="app/match-list.js?v=padelstar-match-list-4"></script>
   <script defer src="app/standings.js?v=padelstar-standings-3"></script>
   <script defer src="app/podium.js?v=padelstar-podium-3"></script>
-  <script defer src="app/lobby.js?v=padelstar-lobby-2"></script>
+  <script defer src="app/lobby.js?v=padelstar-lobby-3"></script>
   <script defer src="app/player-list.js?v=padelstar-player-list-3"></script>
   <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-2"></script>
   <script defer src="app/player-status.js?v=padelstar-player-status-1"></script>
@@ -1194,6 +1215,7 @@
   <script defer src="app/notification-center.js?v=padelstar-notification-center-7"></script>
   <script defer src="app/notification-center-ui.js?v=padelstar-notification-center-7"></script>
   <script defer src="app/system-admin.js?v=padelstar-system-admin-1"></script>
+  <script defer src="app/invitations.js?v=padelstar-invitations-1"></script>
   <script defer src="app/profile-session.js?v=padelstar-profile-session-3"></script>
   <script defer src="app/account-auth.js?v=padelstar-account-auth-6"></script>
   <script defer src="app/config/storage-keys.js?v=padelstar-storage-keys-1"></script>
@@ -1235,7 +1257,7 @@
   <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-7"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-3"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
-  <script defer src="app/app.js?v=padelstar-session-76"></script>
+  <script defer src="app/app.js?v=padelstar-session-77"></script>
 </body>
 
 </html>

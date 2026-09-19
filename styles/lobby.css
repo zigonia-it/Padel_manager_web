@@ -70,3 +70,27 @@
   gap: 8px;
   margin: 10px 0;
 }
+
+/* Invitations by email (lobby) and my invitations (profile) */
+.lobby-invite-card {
+  padding: 16px;
+  border: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+  border-radius: var(--radius-lg, 18px);
+  background: var(--ds-surface-1, rgba(255, 255, 255, 0.03));
+}
+
+.lobby-invite-card.hidden { display: none; }
+.lobby-invite-card .compact-list { margin-top: 10px; }
+
+.invitation-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.invitation-email { overflow-wrap: anywhere; }
+.invitation-actions { display: flex; gap: 8px; }
+.invitation-declined .invitation-email,
+.invitation-expired .invitation-email { opacity: 0.6; }

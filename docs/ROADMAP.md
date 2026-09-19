@@ -362,11 +362,11 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 17 — Claiming/invitations
 
-- [ ] Claim unlinked slot.
-- [ ] Invitations without friend list.
-- [ ] Acceptance/cutoff rules.
-- [ ] Guest temporary session identity.
-- [ ] No unsafe name-only takeover.
+- [ ] Claim unlinked slot. — fixed 2026-09-19 (migration `20260920120000_claim_unlinked_slot.sql`, applied live): a signed-in account can now claim a pre-added slot that nobody has claimed or linked; the slot is linked to the account so statistics and permissions follow it. A slot already linked to another account, or already claimed by a guest device, is still refused. 17 checks in `supabase/tests/claim-slot.pglite.mjs` (real `join_tournament_impl`); function and grants re-checked live.
+- [ ] Invitations without friend list. — built and applied live (migration `20260920130000_tournament_invitations.sql`): the admin invites by email in the lobby; the invited person sees it under "Invitasjoner" on the profile page after signing in with that verified email and joins through the normal join flow, or declines. The server never checks whether the address has an account (no way to find out who has one). Status "accepted" is derived from the account really being in the tournament. 30 checks in `supabase/tests/invitations.pglite.mjs`, live check rolled back, client tests in `test/invitations.test.js`. **Not verified end to end with two real accounts** (I cannot sign in): see USER ACTIONS. Delivery is in-app only; no invitation email is sent (decision for you: do you want an email too, through Resend?).
+- [ ] Acceptance/cutoff rules. — a pending invitation never counts as a participant or occupies a slot; it is valid until the first round starts (then "expired" for the admin and invisible for the invitee); accepting = joining, so there is no accepted-but-not-incorporated limbo; after the start the replacement flow is used. Round Robin schedules are generated at the start, so an acceptance before the start needs no regeneration. Tested in the database checks above.
+- [ ] Guest temporary session identity. — a guest gets a random session token per slot (`player_sessions`, stored only as a hash); it can be kept in the browser for refresh/restart, is not a permanent identity and cannot be turned into an account (an account cannot take over a slot a guest device holds: tested).
+- [ ] No unsafe name-only takeover. — a name alone never takes over a claimed slot: for guests a second claim of the same name is refused, and for accounts a slot linked to another account or held by a guest device is refused (tested). Secure takeover by code/QR/admin confirmation stays a later version. Known limit: two players with exactly the same name cannot be told apart by the claim flow (recorded in BUGS.md).
 - [ ] Retroactive guest-stat claiming (a guest player later links their historical stats to an account) — explicitly pending a fresh product decision, not yet approved.
 
 ## Phase 18 — Notifications

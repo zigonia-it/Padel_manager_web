@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v336";
+const cacheName = "padelstar-v337";
 
 const appShell = [
   "./",
@@ -20,7 +20,7 @@ const appShell = [
   "./styles/components-v2.css?v=padelstar-components-v2-2",
   "./styles/workspace-nav.css?v=padelstar-workspace-nav-6",
   "./styles/podium.css?v=padelstar-podium-3",
-  "./styles/lobby.css?v=padelstar-lobby-2",
+  "./styles/lobby.css?v=padelstar-lobby-3",
   "./styles/scoreboard-table.css?v=padelstar-scoreboard-table-2",
   "./styles/match-list-collapse.css?v=padelstar-match-list-collapse-1",
   "./styles/feedback.css?v=padelstar-feedback-2",
@@ -32,7 +32,7 @@ const appShell = [
   "./styles/invite-code-input.css?v=padelstar-invite-code-input-1",
   "./styles/accent-picker.css?v=padelstar-accent-picker-1",
   "./styles/privacy.css?v=padelstar-privacy-5",
-  "./app/translations.js?v=padelstar-i18n-53",
+  "./app/translations.js?v=padelstar-i18n-54",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-6",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -66,7 +66,7 @@ const appShell = [
   "./app/match-list.js?v=padelstar-match-list-4",
   "./app/standings.js?v=padelstar-standings-3",
   "./app/podium.js?v=padelstar-podium-3",
-  "./app/lobby.js?v=padelstar-lobby-2",
+  "./app/lobby.js?v=padelstar-lobby-3",
   "./app/player-list.js?v=padelstar-player-list-3",
   "./app/cup-bracket.js?v=padelstar-cup-bracket-2",
   "./app/player-status.js?v=padelstar-player-status-1",
@@ -107,6 +107,7 @@ const appShell = [
   "./app/notification-center.js?v=padelstar-notification-center-7",
   "./app/notification-center-ui.js?v=padelstar-notification-center-7",
   "./app/system-admin.js?v=padelstar-system-admin-1",
+  "./app/invitations.js?v=padelstar-invitations-1",
   "./styles/system-admin.css?v=padelstar-system-admin-1",
   "./admin.html",
   "./assets/sounds/notification1.mp3",
@@ -152,7 +153,7 @@ const appShell = [
   "./app/admin-form-events.js?v=padelstar-admin-form-events-7",
   "./app/match-actions.js?v=padelstar-match-actions-3",
   "./app/initial-view.js?v=padelstar-initial-view-3",
-  "./app/app.js?v=padelstar-session-76",
+  "./app/app.js?v=padelstar-session-77",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",
