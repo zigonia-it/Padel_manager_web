@@ -7,6 +7,7 @@ Only verified completed changes belong here.
 ## Unreleased
 
 ### Added (branch `v0.8`, not yet released)
+- **Notifications (Phase 18)**: a bell with an unread badge and a notification center for the player (match ready, result to approve, teammate withdrew, result corrected, tournament finished), the Padelstar sounds (notification1 = your match is ready, notification2 = other updates) and vibration, with a "Varsler og lyd" settings panel on the profile page to turn sound and vibration on or off.
 - **Guide and privacy as a popup (Phase 22)**: the footer links open the pages in a popup with an X inside the card (also Escape and a click outside); they follow the chosen language, including "device language" (they showed Norwegian on an English device). The privacy text and guide are in plain language, the guide covers scoring, approval and withdrawal, and the outdated retention text is gone.
 - **TV Mode (Phase 19)**: always opens in a new tab; the button sits at the bottom of the side rail, which now fits the window height (no scrolling to reach it).
 - **Menu and footer**: with a tournament running the top menu shows Home, Current tournament and Profile (plus language, online status and feedback); the footer feedback button now looks like the install button.

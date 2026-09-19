@@ -371,15 +371,15 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 18 — Notifications
 
-- [ ] In-app notifications.
+- [ ] In-app notifications. — built 2026-09-19 on `v0.8` (`app/notification-center.js`, `notification-center-ui.js`): every applied remote state is compared with the previous one and the player gets an in-app notification (plus a toast) when their match is ready, a result needs their team's approval, a withdrawn teammate needs a decision, a result was corrected, or the tournament finished. Tests: `test/notification-center*.test.js`; checked in the browser.
 - [ ] Push/PWA where supported.
 - [ ] Richer push categories: invites, results, "notify me for my own matches only" — beyond today's match-ready/round-ready triggers.
 - [ ] Necessary vs optional.
-- [ ] Notification center.
-- [ ] Individual read/unread.
-- [ ] Lifecycle cleanup.
-- [ ] System sounds for first version.
-- [ ] Custom Padelstar notification sounds. path for sound files: /Users/sigurd/Documents/Developer/Notification sounds
+- [ ] Notification center. — a bell in the header (players only) with an unread badge opens a list; a click on an item opens the player view.
+- [ ] Individual read/unread. — each item is unread until clicked; "Marker alle som lest".
+- [ ] Lifecycle cleanup. — items older than 7 days and items of another tournament/player are dropped, max 50.
+- [ ] System sounds for first version. — superseded by the custom sounds below.
+- [ ] Custom Padelstar notification sounds. path for sound files: /Users/sigurd/Documents/Developer/Notification sounds — built: the files are copied to `assets/sounds/` (mp3, m4a fallback for browsers without mp3) and play in the app; a browser may block sound until the person has tapped the page once. Sound and vibration (double pulse / short pulse, where the device supports it) can be turned on or off in a new "Varsler og lyd" panel on the profile page, with a test button (developer request 2026-09-19). Not verified on real devices (sound levels, iOS/Android behaviour): see USER ACTIONS.
       - notification1 is to be used when the players next match is ready.
       - notification2 is to be used when a tournament is live and have updates to the user other than the next match.
 

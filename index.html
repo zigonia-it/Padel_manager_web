@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="styles/match-list-collapse.css?v=padelstar-match-list-collapse-1">
   <link rel="stylesheet" href="styles/feedback.css?v=padelstar-feedback-2">
   <link rel="stylesheet" href="styles/info-dialog.css?v=padelstar-info-dialog-2">
+  <link rel="stylesheet" href="styles/notification-center.css?v=padelstar-notification-center-3">
   <link rel="stylesheet" href="styles/scorer-panel.css?v=padelstar-scorer-panel-6">
   <link rel="stylesheet" href="styles/settings-rows.css?v=padelstar-settings-rows-1">
   <script>
@@ -127,6 +128,10 @@
             </details>
           </label>
         </div>
+        <button class="notification-bell hidden" id="notificationBellButton" type="button" aria-label="Varsler" data-i18n-aria-label="notifications.center.open">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 17h12l-1.5-2V10a4.5 4.5 0 0 0-9 0v5L6 17zm4 2a2 2 0 0 0 4 0" /></svg>
+          <span class="notification-bell-badge hidden" id="notificationBellBadge">0</span>
+        </button>
         <div class="status-pill" id="connectionStatus" aria-live="polite">Lokal</div>
       </div>
     </header>
@@ -326,6 +331,27 @@
               <div><span id="profileAccountCreated"></span></div>
               <div><span class="status-chip" id="profileAccountEmailStatus"></span></div>
             </div>
+          </div>
+        </section>
+        <section class="panel notification-settings-panel" aria-labelledby="notificationSettingsTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow" data-i18n="notifications.settings.eyebrow">Denne enheten</p>
+              <h3 id="notificationSettingsTitle" data-i18n="notifications.settings.title">Varsler og lyd</h3>
+            </div>
+          </div>
+          <p class="hint" data-i18n="notifications.settings.hint">Velg hva som skjer når noe nytt skjer i turneringen din, for eksempel når kampen din er klar.</p>
+          <label class="notification-setting-row">
+            <input type="checkbox" id="notificationSettingsSound" checked>
+            <span data-i18n="notifications.settings.sound">Lyd ved varsler</span>
+          </label>
+          <label class="notification-setting-row">
+            <input type="checkbox" id="notificationSettingsVibration" checked>
+            <span data-i18n="notifications.settings.vibration">Vibrasjon ved varsler</span>
+          </label>
+          <p class="hint hidden" id="notificationSettingsVibrationHint" data-i18n="notifications.settings.vibrationUnsupported">Vibrasjon støttes ikke på denne enheten.</p>
+          <div class="button-row">
+            <button class="secondary" id="notificationSettingsTest" type="button" data-i18n="notifications.settings.test">Test lyd og vibrasjon</button>
           </div>
         </section>
       </section>
@@ -1020,6 +1046,20 @@
       </div>
     </dialog>
 
+    <dialog class="notification-dialog" id="notificationCenterDialog" aria-labelledby="notificationCenterTitle">
+      <div class="notification-dialog-card">
+        <div class="notification-dialog-head">
+          <h2 id="notificationCenterTitle" data-i18n="notifications.center.title">Varsler</h2>
+          <button class="ghost icon-button" id="notificationCenterClose" type="button" data-i18n="actions.close">Lukk</button>
+        </div>
+        <ul class="notification-list" id="notificationCenterList"></ul>
+        <div class="notification-dialog-foot">
+          <label class="notification-sound-toggle"><input type="checkbox" id="notificationSoundToggle" checked> <span data-i18n="notifications.center.sound">Lyd</span></label>
+          <button class="secondary" id="notificationMarkAllRead" type="button" data-i18n="notifications.center.markAllRead">Marker alle som lest</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog class="install-modal" id="installModal" aria-labelledby="installModalTitle">
       <div class="install-modal-card">
         <div class="panel-heading">
@@ -1063,7 +1103,7 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-49"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-51"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-6"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
@@ -1131,6 +1171,8 @@
   <script defer src="app/player-visuals.js?v=padelstar-player-visuals-3"></script>
   <script defer src="app/ui-feedback.js?v=padelstar-ui-feedback-2"></script>
   <script defer src="app/notification-system.js?v=padelstar-notification-system-2"></script>
+  <script defer src="app/notification-center.js?v=padelstar-notification-center-3"></script>
+  <script defer src="app/notification-center-ui.js?v=padelstar-notification-center-3"></script>
   <script defer src="app/profile-session.js?v=padelstar-profile-session-3"></script>
   <script defer src="app/account-auth.js?v=padelstar-account-auth-6"></script>
   <script defer src="app/config/storage-keys.js?v=padelstar-storage-keys-1"></script>
@@ -1138,7 +1180,7 @@
   <script defer src="app/core/utilities.js?v=padelstar-utilities-1"></script>
   <script defer src="app/core/language-controller.js?v=padelstar-language-controller-1"></script>
   <script defer src="app/core/session-controller.js?v=padelstar-session-controller-2"></script>
-  <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-2"></script>
+  <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
   <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-12"></script>
   <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-5"></script>
@@ -1172,7 +1214,7 @@
   <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-6"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-3"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
-  <script defer src="app/app.js?v=padelstar-session-74"></script>
+  <script defer src="app/app.js?v=padelstar-session-75"></script>
 </body>
 
 </html>

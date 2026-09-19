@@ -1,0 +1,131 @@
+/* Bell in the header and the notification center dialog (Phase 18). */
+.notification-bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary, #c2d4e5);
+  cursor: pointer;
+}
+
+.notification-bell.hidden { display: none; }
+
+.notification-bell svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.notification-bell:hover,
+.notification-bell:focus-visible {
+  color: var(--gold-bright, #f5c04a);
+  border-color: var(--gold-bright, #f5c04a);
+}
+
+.notification-bell-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--gold-bright, #f5c04a);
+  color: #06152c;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+}
+
+.notification-bell-badge.hidden { display: none; }
+
+.notification-dialog {
+  width: min(460px, 94vw);
+  max-height: 86dvh;
+  padding: 0;
+  border: 1px solid var(--ds-border-strong, rgba(91, 173, 255, 0.58));
+  border-radius: var(--radius-lg, 18px);
+  background: #06152c;
+  color: inherit;
+}
+
+.notification-dialog::backdrop { background: rgba(2, 8, 18, 0.72); }
+
+.notification-dialog-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 86dvh;
+  padding: 18px;
+}
+
+.notification-dialog-head,
+.notification-dialog-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notification-dialog-head h2 {
+  margin: 0;
+  min-width: 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.notification-dialog-head .icon-button { flex: none; }
+
+.notification-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.notification-item button {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 10px 12px 10px 16px;
+  border: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+  border-left: 4px solid transparent;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-item.is-unread button {
+  border-left-color: var(--gold-bright, #f5c04a);
+  background: rgba(245, 192, 74, 0.08);
+}
+
+.notification-item small { opacity: 0.7; }
+.notification-item span { opacity: 0.85; font-size: 0.9rem; }
+.notification-empty { padding: 18px 4px; opacity: 0.75; text-align: center; }
+.notification-sound-toggle { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Settings panel on the profile page */
+.notification-setting-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.notification-setting-row input { width: 20px; height: 20px; }

@@ -695,6 +695,16 @@ const notificationSystem = window.PadelstarNotificationSystem.create({
   remoteRpc,
   translate: (key, values) => t(key, values),
 });
+const notificationCenterUi = window.PadelstarNotificationCenterUi.create({
+  document,
+  storage: localStorage,
+  getState: () => state,
+  isSpectator: () => spectatorMode,
+  showModule: (moduleName) => showModule(moduleName),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  t: (key, values) => t(key, values),
+});
+notificationCenterUi.bind();
 const profileSession = window.PadelstarProfileSession.create({
   defaultAvatarId,
   getElements: () => elements,
@@ -1622,6 +1632,7 @@ window.setInterval?.(() => matchCard.updateTimers(), 1000);
 function render() {
   const result = appRenderer?.render();
   remotePlayerScore.syncHeartbeat();
+  notificationCenterUi.render();
   return result;
 }
 
@@ -2471,6 +2482,7 @@ remoteStateController = window.PadelstarRemoteStateController.create({
   hasRealtimeChannel: () => realtimeConnection.hasChannel(),
   render,
   saveProfileHistory,
+  onRemoteStateApplied: (previous, next, meta) => notificationCenterUi.handleStateChange(previous, next, meta),
   translate: (key, values) => t(key, values),
 });
 remoteSyncController = window.PadelstarRemoteSyncController.create({
