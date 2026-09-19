@@ -38,34 +38,74 @@ window.PadelstarPlayerState = (() => {
       saveState();
       render();
     }
-    function replacePlayer(playerId, replacementName) {
+    function blockedMessage(reason, name) {
+      const key = {
+        awaitingApproval: "messages.replaceBlockedApproval",
+        ended: "messages.replaceBlockedEnded",
+        duplicate: "messages.duplicatePlayer",
+        inactive: "messages.replaceBlockedInactive",
+        notFound: "messages.replaceBlockedInactive",
+      }[reason] ?? "messages.replaceBlockedInactive";
+      return t(key, { name });
+    }
+
+    // Returns { needsConfirmation, matches } when a running match would be restarted and it has not been confirmed.
+    function replacePlayer(playerId, replacementName, { confirmed = false } = {}) {
       const state = getState();
       const outgoing = getPlayerById(playerId);
       const name = String(replacementName ?? "").trim();
-      if (!outgoing || !name || state.status === "Avsluttet") return null;
+      if (!outgoing || !name) return null;
+      const replacement = createPlayer(name, state.players.length);
+      const checked = window.PadelstarPlayerReplacement.plan(state, playerId);
+      if (!checked.ok) {
+        showToast(blockedMessage(checked.blocked, name), "status-message-error");
+        return null;
+      }
       if (findPlayerByName(name)) {
         showToast(t("messages.duplicatePlayer", { name }), "status-message-error");
         return null;
       }
-      const replacement = { ...createPlayer(name, state.players.length), joinedFrom: "admin-replacement", replacedPlayerId: playerId };
-      outgoing.active = false;
-      outgoing.availability = "away";
-      outgoing.replacedBy = replacement.id;
-      state.players.push(replacement);
-      recordEvent?.("player_replaced", "player", playerId, { replacementPlayerId: replacement.id, replacementName: replacement.name });
-      const replaceInTeam = (team) => createTeam((team?.players ?? []).map((player) => player.id === playerId ? replacement : player));
-      state.cupTeams = state.cupTeams.map((team) => replaceInTeam(team));
-      state.rounds.forEach((round) => round.matches.forEach((match) => {
-        if (!["waiting", "scheduled", "ready"].includes(match.state) && !["scheduled", "ready"].includes(match.status)) return;
-        if (match.teamOne?.players.some((player) => player.id === playerId)) match.teamOne = replaceInTeam(match.teamOne);
-        if (match.teamTwo?.players.some((player) => player.id === playerId)) match.teamTwo = replaceInTeam(match.teamTwo);
-      }));
+      if (checked.restart.length > 0 && !confirmed) return { needsConfirmation: true, matches: checked.restart, name: outgoing.name };
+      const result = window.PadelstarPlayerReplacement.replace(state, playerId, replacement, { createTeam, nameTaken: (candidate) => Boolean(findPlayerByName(candidate)) });
+      if (!result.ok) {
+        showToast(blockedMessage(result.blocked, name), "status-message-error");
+        return null;
+      }
+      recordEvent?.("player_replaced", "player", playerId, { replacementPlayerId: replacement.id, replacementName: replacement.name, slotId: replacement.slotId, restartedMatches: result.restarted });
+      result.restarted.forEach((matchId) => recordEvent?.("match_restarted", "match", matchId, { reason: "playerReplaced" }));
       state.schedule = buildSchedule(state.players, state.settings.format);
       saveState();
       render();
+      showToast(t("messages.playerReplaced", { from: outgoing.name, to: replacement.name }), "status-message-success");
       return replacement;
     }
-    return { addPlayer, addPlayers, parsePlayerNames, removePlayer, replacePlayer, updatePlayer };
+
+    // Puts the original player back in the slot (the replacement becomes inactive again).
+    function restorePlayer(replacementId, { confirmed = false } = {}) {
+      const state = getState();
+      const replacement = getPlayerById(replacementId);
+      const original = getPlayerById(replacement?.replacedPlayerId);
+      if (!replacement || !original) return null;
+      const checked = window.PadelstarPlayerReplacement.plan(state, replacementId);
+      if (!checked.ok) {
+        showToast(blockedMessage(checked.blocked, original.name), "status-message-error");
+        return null;
+      }
+      if (checked.restart.length > 0 && !confirmed) return { needsConfirmation: true, matches: checked.restart, name: replacement.name };
+      const result = window.PadelstarPlayerReplacement.restore(state, replacementId, { createTeam, nameTaken: (candidate, other) => other.name.localeCompare(candidate, "nb", { sensitivity: "accent" }) === 0 });
+      if (!result.ok) {
+        showToast(blockedMessage(result.blocked, original.name), "status-message-error");
+        return null;
+      }
+      recordEvent?.("player_restored", "player", original.id, { replacementPlayerId: replacementId, slotId: original.slotId, restartedMatches: result.restarted });
+      result.restarted.forEach((matchId) => recordEvent?.("match_restarted", "match", matchId, { reason: "playerRestored" }));
+      state.schedule = buildSchedule(state.players, state.settings.format);
+      saveState();
+      render();
+      showToast(t("messages.playerRestored", { name: original.name }), "status-message-success");
+      return original;
+    }
+    return { addPlayer, addPlayers, parsePlayerNames, removePlayer, replacePlayer, restorePlayer, updatePlayer };
   }
   return { create };
 })();

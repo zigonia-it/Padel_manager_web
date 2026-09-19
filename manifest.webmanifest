@@ -14,6 +14,12 @@
       "type": "image/png"
     },
     {
+      "src": "assets/icons/padelstar-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "assets/icons/padelstar-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",

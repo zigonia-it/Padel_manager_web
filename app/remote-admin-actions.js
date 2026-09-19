@@ -70,6 +70,60 @@
       }, "messages.matchUpdateFailed", action === "start" ? () => deps.sendPushNotification("match_started", match.id) : null);
     }
 
+    // Admin override: assign (playerId) or clear (null) the scorer of a match.
+    function queueRemoteScorerAssign(match, playerId) {
+      if (!canWrite("messages.offlineAdminChange")) return;
+      recordAdminEvent("match_scorer_assigned", "match", match.id, { playerId });
+      enqueue("admin_set_match_scorer", () => {
+        const state = deps.getState();
+        return {
+          p_tournament_id: state.id,
+          p_admin_token: state.adminToken,
+          p_match_id: match.id,
+          p_player_id: playerId,
+          p_expected_revision: state.revision,
+        };
+      }, "messages.matchUpdateFailed");
+    }
+
+    // Admin corrects a finished result (reason and consequence level are recorded by the server).
+    function queueRemoteCorrection(match, { sets, reason, comment, level }) {
+      if (!canWrite("messages.offlineAdminChange")) return false;
+      recordAdminEvent("result_correction_requested", "match", match.id, { reason });
+      enqueue("admin_correct_result", () => {
+        const state = deps.getState();
+        return {
+          p_tournament_id: state.id,
+          p_admin_token: state.adminToken,
+          p_match_id: match.id,
+          p_completed_sets: sets,
+          p_reason: reason,
+          p_comment: comment || null,
+          p_displayed_level: level ?? null,
+          p_expected_revision: state.revision,
+        };
+      }, "messages.matchUpdateFailed", () => {
+        deps.showToast?.(deps.t("correction.applied"), "status-message-success");
+        deps.sendPushNotification("result_corrected", match.id);
+      });
+      return true;
+    }
+
+    // Admin approves an awaiting result as it stands.
+    function queueRemoteResolveResult(match) {
+      if (!canWrite("messages.offlineAdminChange")) return;
+      recordAdminEvent("result_approved_by_admin", "match", match.id, {});
+      enqueue("admin_resolve_result", () => {
+        const state = deps.getState();
+        return {
+          p_tournament_id: state.id,
+          p_admin_token: state.adminToken,
+          p_match_id: match.id,
+          p_expected_revision: state.revision,
+        };
+      }, "messages.matchUpdateFailed");
+    }
+
     function queueRemoteSetResult(match, teamOne, teamTwo) {
       if (!canWrite("messages.offlineSetResult")) return;
       recordAdminEvent("result_corrected", "match", match.id, { teamOne, teamTwo });
@@ -104,7 +158,7 @@
       }, "messages.nextCupRoundFailed", () => deps.sendPushNotification("round_ready"));
     }
 
-    return { queueRemoteMatchAction, queueRemoteSetResult, queueRemoteRoundAdvance, queueRemoteCupAdvance };
+    return { queueRemoteMatchAction, queueRemoteScorerAssign, queueRemoteResolveResult, queueRemoteCorrection, queueRemoteSetResult, queueRemoteRoundAdvance, queueRemoteCupAdvance };
   }
 
   global.PadelstarRemoteAdminActions = { create };

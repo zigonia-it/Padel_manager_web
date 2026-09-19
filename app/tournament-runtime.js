@@ -243,12 +243,34 @@ window.PadelstarTournamentRuntime = (() => {
         : finalMatch?.winnerTeamIndex === 1 ? finalMatch.teamTwo : null;
     }
 
+    // Player scoring: the winning point does not finish the match, it puts the result up for approval
+    // (mirrors save_player_point_impl). The court is freed right away; standings wait for the approval.
+    function enterApproval(match) {
+      const currentState = state();
+      const endedAt = Date.now();
+      match.state = "awaitingApproval";
+      match.currentGame = { teamOne: 0, teamTwo: 0 };
+      match.approval = {
+        status: "draft",
+        winnerTeamIndex: match.timeWinnerTeamIndex ?? (setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1),
+        completedSets: structuredClone(match.completedSets ?? []),
+        approvals: [],
+        corrections: 0,
+        endedAt: new Date(endedAt).toISOString(),
+        escalateAt: new Date(endedAt + 10 * 60000).toISOString(),
+        autoApproveAt: new Date(endedAt + 30 * 60000).toISOString(),
+      };
+      recordEvent?.("match_awaiting_approval", "match", match.id, { winnerTeamIndex: match.approval.winnerTeamIndex });
+      activateNextWaitingMatch(match);
+      return currentState;
+    }
+
     function finishMatch(match) {
       const currentState = state();
       match.state = "finished";
       match.status = "completed";
       match.currentGame = { teamOne: 0, teamTwo: 0 };
-      match.winnerTeamIndex = setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1;
+      match.winnerTeamIndex = match.timeWinnerTeamIndex ?? (setsWonByTeam(match, 0) > setsWonByTeam(match, 1) ? 0 : 1);
       match.isWalkover = false;
       match.completedAt = now();
       recordEvent?.("match_completed", "match", match.id, { winnerTeamIndex: match.winnerTeamIndex, isWalkover: false });
@@ -260,7 +282,7 @@ window.PadelstarTournamentRuntime = (() => {
       return currentState;
     }
 
-    return { activateNextWaitingMatch, cupCanAdvance, cupCanFinalize, createNextCupRound, finishMatch, generateCupTournament, generateFullTournamentSchedule, markCupCompleteIfDone, startNextScheduledRound };
+    return { activateNextWaitingMatch, cupCanAdvance, cupCanFinalize, createNextCupRound, enterApproval, finishMatch, generateCupTournament, generateFullTournamentSchedule, markCupCompleteIfDone, startNextScheduledRound };
   }
 
   return { create };

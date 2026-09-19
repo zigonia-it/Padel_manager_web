@@ -98,9 +98,9 @@ Permanent tamper-protected security audit logging is post-1.0.
 
 ## Version baseline
 
-The actual current development baseline is `0.6.1`.
+The actual current development baseline is `0.7.0`.
 
-`0.6.0` was set once the Monday critical path was verified end-to-end (see `docs/CHANGELOG.md`); `0.6.1` is a verified UI-redesign/polish batch on top of it (fonts, design tokens, gem avatars, workspace nav shell, a handful of real bug fixes) that changed no critical-path behavior.
+`0.7.0` was applied on the developer's explicit instruction (2026-09-19) for the beta feature milestone (scorer roles, result approval and correction, timed matches and scoring rules, player replacement, TV Mode in every supported language, feedback button); `docs/CHANGELOG.md` lists which parts have been verified live and which still await it. `0.6.0` was set once the Monday critical path was verified end-to-end; `0.6.1` is a verified UI-redesign/polish batch on top of it (fonts, design tokens, gem avatars, workspace nav shell, a handful of real bug fixes) that changed no critical-path behavior.
 
 Version changes are milestone-based:
 

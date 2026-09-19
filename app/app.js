@@ -269,6 +269,7 @@ const remoteAdminActions = window.PadelstarRemoteAdminActions.create({
   },
   saveRemoteState: () => saveRemoteState(),
   sendPushNotification: (kind, matchId) => sendPushNotification(kind, matchId),
+  showToast: (message, statusClass) => showToast(message, statusClass),
   setLastPersistedSequence: (sequence) => {
     lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, sequence);
   },
@@ -287,15 +288,18 @@ const remotePlayerScore = window.PadelstarRemotePlayerScore.create({
   isOnline: () => navigator.onLine,
   isSupabaseReady: () => isSupabaseReady(),
   persistSyncMetadata: () => persistSyncMetadata(),
+  refreshRemoteState: (reason) => refreshRemoteState(reason),
   removeFirstPendingScore: () => { pendingPlayerScores.shift(); },
   remoteRpc,
   render: () => render(),
+  showToast: (message, statusClass) => showToast(message, statusClass),
   syncConnectionStatus: () => syncConnectionStatus(),
   t: (key, values) => t(key, values),
 });
 const scoreActions = window.PadelstarScoreActions.create({
   captureMatchUndoState: (match) => captureMatchUndoState(match),
   currentLocalRole: () => currentLocalRole(),
+  enterApproval: (match) => tournamentRuntime.enterApproval(match),
   finishMatch: (match) => finishMatch(match),
   flashMatchCards: (matchId) => uiEffects?.flashMatchCards(matchId),
   getState: () => state,
@@ -506,7 +510,9 @@ const playerList = window.PadelstarPlayerList.create({
   leaderboardEntries: (matches) => leaderboardEntries(matches),
   playerStatusLabel: (player) => playerStatusLabel(player),
   removePlayer: (playerId) => removePlayer(playerId),
-  replacePlayer: (playerId, name) => replacePlayer(playerId, name),
+  replacePlayer: (playerId, name, options) => replacePlayer(playerId, name, options),
+  restorePlayer: (playerId, options) => playerState.restorePlayer(playerId, options),
+  requestConfirmation: (message) => requestConfirmation(message),
   render: () => render(),
   saveState: (options) => saveState(options),
   setLocalRole: (role) => setLocalRole(role),
@@ -548,6 +554,9 @@ const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   playerTournamentState: (player, matches) => playerTournamentState(player, matches),
   scoreSummary: (match) => scoreSummary(match),
   scoreboardTableMarkup: (match, editable) => matchCard.scoreboardTableMarkup(match, editable),
+  approvalPanelMarkup: (match, editable, scoreOnly) => matchCard.approvalPanelMarkup(match, editable, scoreOnly),
+  timerMarkup: (match) => matchCard.timerMarkup(match),
+  bindApprovalPanel: (root, match) => matchCard.bindApprovalPanel(root, match),
   t: (key, values) => t(key, values),
 });
 const rules = window.PadelstarRules.create({
@@ -710,6 +719,39 @@ const profileSession = window.PadelstarProfileSession.create({
   setProfile: (nextProfile) => { profile = nextProfile; },
 });
 profile = profileSession.loadLocalProfile();
+const feedback = window.PadelstarFeedback.create({
+  document,
+  t: (key, values) => t(key, values),
+  escapeHtml: (value) => escapeHtml(value),
+  getContext: () => ({
+    version: window.PadelstarAppMeta.APP_VERSION,
+    language: state.settings?.language ?? "",
+    view: activeModule,
+    role: currentLocalRole(),
+  }),
+});
+feedback.bind();
+const resultCorrectionDialog = window.PadelstarResultCorrectionDialog.create({
+  document,
+  t: (key, values) => t(key, values),
+  escapeHtml: (value) => escapeHtml(value),
+  getState: () => state,
+  scoring,
+  correction: window.PadelstarResultCorrection,
+  applyCorrection: (match, payload) => applyResultCorrection(match, payload),
+});
+function applyResultCorrection(match, payload) {
+  if (isSupabaseReady()) return remoteAdminActions.queueRemoteCorrection(match, payload);
+  const result = window.PadelstarResultCorrection.applyLocally(state, match.id, payload.sets, payload.reason, payload.comment, payload.level, scoring);
+  if (!result.ok) {
+    showToast(t(`correction.error.${result.error}`), "status-message-error");
+    return false;
+  }
+  saveState();
+  render();
+  showToast(t("correction.applied"), "status-message-success");
+  return true;
+}
 const matchCard = window.PadelstarMatchCard.create({
   awardTennisPoint: (match, teamIndex) => awardTennisPoint(match, teamIndex),
   cancelMatch: (match) => cancelMatch(match),
@@ -727,6 +769,11 @@ const matchCard = window.PadelstarMatchCard.create({
   setWalkover: (match, teamIndex) => setWalkover(match, teamIndex),
   setsWonByTeam: (match, teamIndex) => setsWonByTeam(match, teamIndex),
   scoreSummary: (match) => scoreSummary(match),
+  scorerAction: (match, action, targetPlayerId) => remotePlayerScore.scorerAction(match.id, action, targetPlayerId),
+  adminSetScorer: (match, playerId) => remoteAdminActions.queueRemoteScorerAssign(match, playerId),
+  resultAction: (match, action, payload) => remotePlayerScore.resultAction(match.id, action, payload),
+  adminResolveResult: (match) => remoteAdminActions.queueRemoteResolveResult(match),
+  openCorrection: (match, options) => resultCorrectionDialog.open(match, options),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),
@@ -893,7 +940,9 @@ const tournamentFinalization = window.PadelstarTournamentFinalization.create({
     pendingAdminSync = false;
     pendingPlayerScores = [];
     remoteConflict = false;
-    if (result.deleted) {
+    // A guest tournament is kept on the server for 24 hours (TV Mode and players can still see the final result),
+    // but the guest admin's device does not keep it: the podium shows the result and the local copy is wiped.
+    if (result.deleted || !state.ownerUserId) {
       const id = state.id;
       state = { ...structuredClone(defaultTournament), id, status: "Avsluttet",
         lifecycleStatus: result.outcome, players: [], rounds: [], adminToken: null,
@@ -1164,8 +1213,8 @@ function activateSupabaseClient() {
   connectRealtimeForCurrentState();
 }
 
-function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
-  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
+function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, timedMinutes, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
+  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, timedMinutes, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
 }
 
 function createPlayer(name, index, avatarId = null, accent = null) {
@@ -1556,7 +1605,13 @@ function activateAdminPanel(panel) {
   return result;
 }
 
-function render() { return appRenderer?.render(); }
+window.setInterval?.(() => matchCard.updateTimers(), 1000);
+
+function render() {
+  const result = appRenderer?.render();
+  remotePlayerScore.syncHeartbeat();
+  return result;
+}
 
 function syncConnectionStatus() {
   adminStatus.syncConnectionStatus();
@@ -1656,7 +1711,7 @@ function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly 
 }
 
 function isEditablePlayerMatch(match, player) {
-  return Boolean(player && match.state === "playing" && matchIncludesPlayer(match, player.id));
+  return Boolean(player && ["playing", "awaitingApproval"].includes(match.state) && matchIncludesPlayer(match, player.id));
 }
 
 function renderStandings(matches) {
@@ -1828,8 +1883,8 @@ function addPlayer(name, joinedFrom, avatarId, accent) {
   return playerState.addPlayer(name, joinedFrom, avatarId, accent);
 }
 
-function replacePlayer(playerId, name) {
-  return playerState.replacePlayer(playerId, name);
+function replacePlayer(playerId, name, options) {
+  return playerState.replacePlayer(playerId, name, options);
 }
 
 function updatePlayer(playerId, updates) {
@@ -1874,6 +1929,11 @@ function buildPodiumSnapshot() {
 }
 
 async function endTournament() {
+  // Finishing would cancel every unfinished match, which would throw away results that still wait for approval.
+  if (getAllMatches().some((match) => match.state === "awaitingApproval")) {
+    showToast(t("result.finishBlocked"), "status-message-error");
+    return false;
+  }
   const snapshot = buildPodiumSnapshot();
   const success = await tournamentFinalization.finalize("completed");
   if (success) {
@@ -2192,6 +2252,7 @@ function matchStateText(stateName) {
   return {
     waiting: t("common.waiting"),
     playing: t("common.playing"),
+    awaitingApproval: t("common.awaitingApproval"),
     finished: t("common.finished"),
     cancelled: t("common.cancelled"),
   }[stateName] ?? stateName;
@@ -2234,7 +2295,8 @@ function setScoreText(match) {
 
 function gameScoreText(match) {
   const currentGame = match.currentGame ?? { teamOne: 0, teamTwo: 0 };
-  return `${tennisPointLabel(currentGame.teamOne)}-${tennisPointLabel(currentGame.teamTwo)}`;
+  const label = (value) => (match.inTiebreak ? String(value ?? 0) : tennisPointLabel(value));
+  return `${label(currentGame.teamOne)}-${label(currentGame.teamTwo)}`;
 }
 
 function tennisPointLabel(value) {

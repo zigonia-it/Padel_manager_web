@@ -6,6 +6,40 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.7.0
+
+Beta feature milestone, applied on the developer's instruction (2026-09-19). Everything below has automated tests (client, and the database logic run on an in-memory Postgres) and was checked in the browser; the items under "Verified live" were additionally run against the real Supabase database; the items under "Awaiting a live check" have only been tested against the in-memory copy.
+
+### Added
+- **Scorer roles (Phase 10)**: one active scorer per match (claim, request, transfer, admin override, takeover after 2 minutes offline), server-side undo/redo, a scorer panel on every match card.
+- **Result approval (Phase 11)**: the winning point of a player-scored match goes up for approval (court freed at once); the scorer submits, one player per team approves, disputes with corrected proposals (max two, then the admin decides), 10-minute admin alert, 30-minute auto-approval, admin approve; auto-approved when nobody on the other side uses the app.
+- **Result corrections (Phase 12)**: the admin can correct a finished result with a mandatory reason, after a consequence simulation (green/yellow/orange/red); the old result is kept in a history and can be restored; Cup results that later matches depend on are protected.
+- **Player replacement (Phase 13)**: a replacement takes over the structural slot (unplayed matches follow it, finished matches keep the original), a running match restarts at 0–0 after a warning, a result awaiting approval blocks it, and the original can be put back.
+- **Scoring rules (Phase 14)**: golden point, set tiebreak, timed matches with a countdown (a game won after time is up ends the match, a deciding golden-point game when level), a per-match rule snapshot, and a head-to-head standings tiebreak used by the app, the podium and TV Mode.
+- **Guest retention (Phases 16/19)**: a finished guest tournament stays read-only for 24 hours (TV Mode and other devices can still show the result); abandoned guest tournaments expire after 30 idle days and are deleted after 7 more.
+- **TV Mode (Phases 19/21)**: available in every supported language (Norwegian and English, guarded by a test), the app's gem avatars instead of generated faces (no third-party image service any more), matches awaiting approval and the match countdown.
+- **Feedback button**: "Gi tilbakemelding" in the footer and the menu opens a form (type, message, optional email) that is emailed to the developer through a Vercel function and Resend; if that is not configured or reachable the user gets a ready-made email draft. The privacy page describes the data flow.
+- Language: 96 missing English strings added, the footer, guide and privacy pages aligned with the product, mobile overflow fixes (walkover buttons, scoreboard names, create wizard), a plain 512px PWA icon.
+
+### Changed
+- Undo of a scored point for players now goes through the server (the scorer's undo), and a point the server rejects is dropped from the sync queue instead of blocking every later point.
+- Security: leftover public execute grants revoked on two functions.
+
+### Verified live (real Supabase database, 4 real players through the join RPC)
+- Scorer claim, rejection of non-scorers, request/transfer, scoring for both teams.
+- Approval: submit, teammate versus opponent approval, corrections and the two-correction limit, flagged results, admin approve, the real cron job escalating and auto-approving.
+- Guest retention: a finished guest tournament stays readable (TV Mode shows it), and the cleanup deletes it after 24 hours while keeping the statistics receipt.
+- A real 1-minute timed match in the browser, and the Phase 8 guest path (create, start, score, advance, finish).
+
+### Verified live after the follow-up migrations were applied
+- Undo and redo on a Round Robin with pre-generated rounds; live updates between devices (an open admin screen shows joins, every point, undo and a finished match without a reload); result corrections through the real dialog (a flipped winner, the history with reason/comment/level, and "Gjenopprett" restoring the original).
+
+### Awaiting a live check
+- The timed-match server path (a timed match scored by players), corrections of a Cup, push notifications after a correction, and the feedback email (needs the Vercel settings).
+
+### Known gaps
+- Withdrawal of a player without a replacement is not built; corrections are closed once a tournament is finished; personal-statistics recalculation (Phase 15), claiming and invitations (17), notification center (18), the system owner (23) and the resilience/responsive sweep (25) are not done. Leaked-password protection is unavailable on the free Supabase plan.
+
 ## 0.6.1
 
 UI redesign imported from a Claude Design mockup, shipped across six reviewable commits (fonts/tokens → components → workspace content → nav shell → landing/login/join/create → lobby/podium/profil/install → cleanup), plus the TV Mode Cup bracket work and a database desync fix carried over from before the redesign started. No change to the Monday critical-path flow itself — same create/start/score/persist/finish behavior, restyled.

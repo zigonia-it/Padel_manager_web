@@ -1,7 +1,7 @@
 window.PadelstarMatchList = (() => {
   function create({ appendEmptyText, document, t }) {
     function filterMatches(matches, filter) {
-      if (filter === "active") return matches.filter((match) => match.state === "playing");
+      if (filter === "active") return matches.filter((match) => ["playing", "awaitingApproval"].includes(match.state));
       if (filter === "next") return matches.filter((match) => match.state === "waiting");
       if (filter === "finished") return matches.filter((match) => ["finished", "cancelled"].includes(match.state));
       return matches;
@@ -16,6 +16,7 @@ window.PadelstarMatchList = (() => {
 
       const groups = [
         { title: t("common.playing"), matches: matches.filter((match) => match.state === "playing") },
+        { title: t("common.awaitingApproval"), matches: matches.filter((match) => match.state === "awaitingApproval") },
         { title: t("common.waiting"), matches: matches.filter((match) => match.state === "waiting") },
         { title: t("common.finished"), matches: matches.filter((match) => ["finished", "cancelled"].includes(match.state)) },
       ].filter((group) => group.matches.length > 0);

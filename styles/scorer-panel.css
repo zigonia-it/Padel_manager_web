@@ -1,0 +1,217 @@
+/* =========================================================
+   SCORER PANEL (Phase 10): who is scoring this match, and the role controls
+   ========================================================= */
+
+.scorer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.2));
+  border-radius: var(--radius-md, 10px);
+  background: var(--ds-surface-1, rgba(16, 31, 52, 0.6));
+}
+
+.scorer-status {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.scorer-status strong {
+  color: var(--ui-muted, #9fb4cc);
+  font-weight: 700;
+}
+
+.scorer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.scorer-controls .scorer-button {
+  min-height: 40px;
+}
+
+.scorer-controls select {
+  width: auto;
+  min-width: 0;
+  min-height: 40px;
+}
+
+.scorer-request {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--gold-bright, #62b6ff);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (max-width: 680px) {
+  .scorer-controls .scorer-button,
+  .scorer-controls select {
+    flex: 1 1 calc(50% - 8px);
+  }
+}
+
+/* =========================================================
+   RESULT APPROVAL PANEL (Phase 11)
+   ========================================================= */
+
+.approval-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid var(--ds-border-strong, rgba(91, 173, 255, 0.58));
+  border-radius: var(--radius-md, 10px);
+  background: linear-gradient(150deg, rgba(91, 173, 255, 0.14), rgba(2, 11, 25, 0.5));
+}
+
+.approval-panel.approval-flagged {
+  border-color: var(--danger, #e5484d);
+  background: linear-gradient(150deg, rgba(229, 72, 77, 0.16), rgba(2, 11, 25, 0.5));
+}
+
+.approval-summary,
+.approval-status {
+  margin: 0;
+}
+
+.approval-status {
+  color: var(--ui-muted, #9fb4cc);
+  font-size: 0.88rem;
+}
+
+.approval-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.approval-badge-flagged {
+  color: var(--danger, #ff8a8a);
+}
+
+.approval-badge-escalated {
+  color: var(--warning, #f2b84b);
+}
+
+.approval-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.approval-controls .approval-button {
+  min-height: 40px;
+}
+
+.approval-note {
+  color: var(--ui-muted, #9fb4cc);
+  font-size: 0.88rem;
+}
+
+.approval-correct {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.approval-correct input {
+  width: 3.4rem;
+  min-height: 40px;
+  text-align: center;
+}
+
+.player-approval-notice {
+  margin-bottom: 14px;
+}
+
+@media (max-width: 680px) {
+  .approval-controls .approval-button {
+    flex: 1 1 calc(50% - 8px);
+  }
+}
+
+/* =========================================================
+   MATCH TIMER (Phase 14): countdown of a timed match
+   ========================================================= */
+
+.match-timer {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.3));
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.match-timer-warning {
+  border-color: var(--warning, #f2b84b);
+  color: var(--warning, #f2b84b);
+  animation: match-timer-pulse 1s ease-in-out infinite;
+}
+
+.match-timer-expired {
+  border-color: var(--danger, #ff8a8a);
+  color: var(--danger, #ff8a8a);
+  white-space: normal;
+}
+
+.match-timer-ended {
+  color: var(--ui-muted, #9fb4cc);
+  font-weight: 700;
+}
+
+@keyframes match-timer-pulse {
+  50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .match-timer-warning { animation: none; }
+}
+
+/* =========================================================
+   RESULT CORRECTION (Phase 12): dialog, consequence level and history
+   ========================================================= */
+
+.correction-row { margin-top: 10px; }
+
+.correction-card { display: flex; flex-direction: column; gap: 12px; max-width: min(560px, 94vw); }
+
+.correction-sets { border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.25)); border-radius: var(--radius-md, 10px); padding: 10px 12px; }
+
+.correction-set { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.correction-set > span:first-child { min-width: 4.5rem; color: var(--ui-muted, #9fb4cc); }
+.correction-set input { width: 4rem; min-height: 40px; text-align: center; }
+
+.correction-level { display: flex; align-items: center; gap: 8px; margin: 0; }
+.correction-level-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--ui-muted, #9fb4cc); flex: 0 0 auto; }
+.correction-level-green .correction-level-dot, .correction-level-dot.correction-level-green { background: #3ecf8e; }
+.correction-level-yellow .correction-level-dot, .correction-level-dot.correction-level-yellow { background: #f2d24b; }
+.correction-level-orange .correction-level-dot, .correction-level-dot.correction-level-orange { background: #f2994a; }
+.correction-level-red .correction-level-dot, .correction-level-dot.correction-level-red { background: #ff6b6b; }
+
+.correction-consequences { margin: 6px 0 0; padding-left: 1.1rem; font-size: 0.9rem; }
+.correction-error { margin: 0; color: var(--danger, #ff8a8a); font-weight: 700; }
+
+.correction-history { margin: 10px 0; font-size: 0.85rem; }
+.correction-history ul { margin: 6px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.correction-history li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.correction-history .correction-level-dot { width: 10px; height: 10px; }
+.correction-restore { min-height: 32px; padding: 2px 10px; }
+
+.correction-dialog { max-height: 92vh; overflow-y: auto; }

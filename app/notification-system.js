@@ -39,7 +39,12 @@
           title: t("notifications.matchReadyTitle"),
           body: t("notifications.matchPlayingBody"),
         }
-        : {
+        : kind === "result_corrected"
+          ? {
+            title: t("notifications.resultCorrectedTitle"),
+            body: t("notifications.resultCorrectedBody"),
+          }
+          : {
           title: t("notifications.matchReadyTitle"),
           body: t("notifications.matchReadyBody"),
         };

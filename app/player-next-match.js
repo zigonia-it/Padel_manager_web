@@ -1,6 +1,9 @@
 window.PadelstarPlayerNextMatch = (() => {
   function create({
     accentStyle,
+    approvalPanelMarkup,
+    bindApprovalPanel,
+    timerMarkup,
     bindScoreboardTable,
     elements,
     escapeHtml,
@@ -15,7 +18,29 @@ window.PadelstarPlayerNextMatch = (() => {
     scoreboardTableMarkup,
     t,
   }) {
+    // A finished match that still waits for approval is no longer "my match", so it is shown above it.
+    function renderApprovalNotices(matches) {
+      const state = getState();
+      const playerId = state.selectedPlayerId;
+      elements.playerNextMatch.querySelectorAll(".player-approval-notice").forEach((node) => node.remove());
+      if (!playerId || state.status === "Avsluttet") return;
+      const awaiting = matches.filter((match) => match.state === "awaitingApproval"
+        && [...match.teamOne.players, ...match.teamTwo.players].some((player) => player.id === playerId));
+      awaiting.reverse().forEach((match) => {
+        const notice = document.createElement("section");
+        notice.className = "player-approval-notice";
+        notice.innerHTML = `<p class="eyebrow">${t("result.needsAttention")}</p><h3>${escapeHtml(match.courtName ?? "")}</h3>${approvalPanelMarkup(match, true, true)}`;
+        elements.playerNextMatch.prepend(notice);
+        bindApprovalPanel(notice, match);
+      });
+    }
+
     function renderPlayerNextMatch(matches) {
+      renderPlayerNextMatchCore(matches);
+      renderApprovalNotices(matches);
+    }
+
+    function renderPlayerNextMatchCore(matches) {
       const state = getState();
       const player = getPlayerById(state.selectedPlayerId);
       if (!player) {
@@ -91,6 +116,7 @@ window.PadelstarPlayerNextMatch = (() => {
       <div><span>${t("player.teammate")}</span><strong>${teammate ? escapeHtml(teammate.name) : t("common.single")}</strong></div>
       <div><span>${t("player.opponents")}</span><strong>${opponentNames}</strong></div>
     </div>
+    ${isPlaying ? `<p class="hint">${timerMarkup(match)}</p>` : ""}
     ${isPlaying ? scoreboardTableMarkup(match, true) : ""}
     <div class="next-match-summary">
       <span>${escapeHtml(matchContextText(match))}</span>

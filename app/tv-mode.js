@@ -5,58 +5,100 @@
   let state = null;
   let remoteConnected = false;
   let messageIndex = 0;
-  const footerMessages = [
-    "SPILL SMART. SPILL SAMMEN.",
-    "HVER BALL TELLER.",
-    "NY KAMP. NY MULIGHET.",
-    "NESTE KAMP VENTER.",
-    "SPILL VIDERE.",
-  ];
+  const footerMessageKeys = ["tv.message1", "tv.message2", "tv.message3", "tv.message4", "tv.message5"];
+  const supportedLanguages = () => global.PadelstarI18n.productionLanguages().map((entry) => entry.code);
+
+  // The language of the screen: an explicit ?lang=, the choice saved in this browser, then the device language.
+  function resolveLanguage(search = global.location?.search ?? "", storage = global.localStorage, navigatorRef = global.navigator) {
+    const supported = supportedLanguages();
+    const fallback = global.PadelstarI18n.fallbackLanguage;
+    const requested = new URLSearchParams(search).get("lang");
+    if (supported.includes(requested)) return requested;
+    let stored = null;
+    try { stored = storage?.getItem("padelstar-language"); } catch { /* storage unavailable */ }
+    if (supported.includes(stored)) return stored;
+    const device = [...(navigatorRef?.languages ?? []), navigatorRef?.language].filter(Boolean).map((code) => String(code).toLowerCase());
+    for (const code of device) {
+      const match = supported.find((language) => code === language || code.startsWith(`${language}-`)) ?? (code.startsWith("no") || code.startsWith("nn") ? "nb" : null);
+      if (match && supported.includes(match)) return match;
+    }
+    return fallback;
+  }
+
+  let language = "nb";
+  const t = (key, values) => global.PadelstarI18n.translate(language, key, values);
+  const locale = () => (language === "en" ? "en-GB" : "nb-NO");
+
+  function applyStaticTranslations() {
+    document.documentElement.lang = language;
+    document.querySelectorAll("[data-tv-i18n]").forEach((node) => {
+      let values = {};
+      try { values = node.dataset.tvValues ? JSON.parse(node.dataset.tvValues) : {}; } catch { values = {}; }
+      node.textContent = t(node.dataset.tvI18n, values);
+    });
+  }
 
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
   const allMatches = () => (state?.rounds ?? []).flatMap((round) => round.matches ?? []);
   const playersIn = (match, index) => match?.[index === 0 ? "teamOne" : "teamTwo"]?.players ?? [];
-  const avatarUrl = (player) => `https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=${encodeURIComponent(`${player.name ?? "Sophie"}-${player.avatarId ?? "smash"}`)}&size=96`;
+  // The same gem avatar as the app (accent colour + initials); no third-party image service.
+  const visuals = global.PadelstarPlayerVisuals.create({ accentStyle: global.PadelstarAccentSystem.accentStyle, escapeHtml });
   const teamNames = (team) => (team?.players ?? []).map((player) => `<span>${escapeHtml(player.name)}</span>`).join("");
-  const standingPlayer = (player) => `<span class="tv-standing-player"><img src="${avatarUrl(player)}" alt=""><span class="tv-standing-name">${escapeHtml(player.name)}</span></span>`;
+  const standingPlayer = (player) => `<span class="tv-standing-player">${visuals.avatarMarkup(player, "tv-avatar", 36)}<span class="tv-standing-name">${escapeHtml(player.name)}</span></span>`;
   const score = (match, index) => Number(match?.currentSet?.[index === 0 ? "teamOne" : "teamTwo"] ?? 0);
 
+  // Same ranking as the app (points, head-to-head, wins, sets, game difference, games, name).
   function playerStats() {
-    const stats = new Map((state?.players ?? []).map((player) => [player.id, { player, matches: 0, wins: 0, points: 0, diff: 0 }]));
-    allMatches().filter((match) => match.state === "finished").forEach((match) => {
-      for (const index of [0, 1]) for (const player of playersIn(match, index)) {
-        const entry = stats.get(player.id); if (!entry) continue;
-        entry.matches += 1; entry.wins += Number(match.winnerTeamIndex === index);
-        const won = (match.completedSets ?? []).reduce((total, set) => total + Number(index === 0 ? set.teamOne : set.teamTwo), 0);
-        const lost = (match.completedSets ?? []).reduce((total, set) => total + Number(index === 0 ? set.teamTwo : set.teamOne), 0);
-        entry.points += won; entry.diff += won - lost;
-      }
+    return global.PadelstarScoring.leaderboardEntries(state?.players ?? [], allMatches(), state?.settings?.pointMode ?? "matches").map((entry) => ({
+      player: entry.player, matches: entry.matchesPlayed, wins: entry.matchWins, points: entry.gamesWon, diff: entry.gameDifference,
+    }));
+  }
+
+  function timerLabel(startedAt, minutes, now = Date.now()) {
+    const start = Date.parse(startedAt);
+    const seconds = Number.isNaN(start) ? minutes * 60 : Math.max(0, Math.ceil((start + minutes * 60000 - now) / 1000));
+    return { seconds, text: `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}` };
+  }
+
+  function timerHtml(match) {
+    if (match.endReason === "timeExpired") return `<span class="tv-timer tv-timer-ended">${t("tv.timeExpired")}</span>`;
+    const minutes = match.rules?.timedMinutes ?? 0;
+    if (!minutes || match.state !== "playing") return "";
+    return `<span class="tv-timer" data-timer-start="${escapeHtml(match.startedAt ?? "")}" data-timer-minutes="${minutes}">${timerLabel(match.startedAt, minutes).text}</span>`;
+  }
+
+  function updateTimers() {
+    document.querySelectorAll(".tv-timer[data-timer-minutes]").forEach((node) => {
+      const { seconds, text } = timerLabel(node.dataset.timerStart, Number(node.dataset.timerMinutes));
+      node.textContent = text;
+      node.classList.toggle("tv-timer-warning", seconds > 0 && seconds <= 60);
+      node.classList.toggle("tv-timer-expired", seconds === 0);
     });
-    return [...stats.values()].sort((a, b) => b.wins - a.wins || b.points - a.points || b.diff - a.diff || a.player.name.localeCompare(b.player.name, "nb"));
   }
 
   function matchCard(match, next = false) {
-    return `<article class="tv-match-card${next ? "" : " tv-live-match"}"><h3><span>${escapeHtml(match.courtName ?? "BANE")}</span>${escapeHtml(matchContext(match))}</h3><div class="tv-match-teams"><div class="tv-team">${teamNames(match.teamOne)}</div><strong class="tv-team-score">${next ? "–" : score(match, 0)}</strong><span class="tv-versus">VS</span><strong class="tv-team-score">${next ? "–" : score(match, 1)}</strong><div class="tv-team">${teamNames(match.teamTwo)}</div></div><div class="tv-match-meta"><span class="${next ? "" : "tv-live-label"}">${next ? "◷ Starter snart" : "● PÅGÅR"}</span><span>${escapeHtml(matchContext(match))}</span></div></article>`;
+    const awaiting = match.state === "awaitingApproval";
+    return `<article class="tv-match-card${next ? "" : " tv-live-match"}"><h3><span>${escapeHtml(match.courtName ?? t("tv.court"))}</span>${escapeHtml(matchContext(match))}</h3><div class="tv-match-teams"><div class="tv-team">${teamNames(match.teamOne)}</div><strong class="tv-team-score">${next ? "–" : score(match, 0)}</strong><span class="tv-versus">${t("tv.versus")}</span><strong class="tv-team-score">${next ? "–" : score(match, 1)}</strong><div class="tv-team">${teamNames(match.teamTwo)}</div></div><div class="tv-match-meta"><span class="${next ? "" : "tv-live-label"}">${next ? t("tv.startingSoon") : awaiting ? t("tv.awaitingApproval") : t("tv.playing")}</span><span>${escapeHtml(matchContext(match))}</span>${timerHtml(match)}</div></article>`;
   }
 
-  function matchContext(match) { return `Runde ${match.rotationNumber ?? 1} · Kamp`; }
+  function matchContext(match) { return t("tv.matchContext", { round: match.rotationNumber ?? 1 }); }
 
   const isCup = () => state?.settings?.format === "cup";
   const cupBracket = () => state?.cup?.bracket;
   const matchById = (id) => allMatches().find((match) => match.id === id);
 
   function cupRoundLabel(round, index, totalRounds) {
-    if (totalRounds === 1 || index === totalRounds - 1) return "FINALE";
-    if (index === totalRounds - 2) return "SEMIFINALE";
-    if (index === 0) return "FØRSTE RUNDE";
-    return `RUNDE ${round.roundNumber ?? index + 1}`;
+    if (totalRounds === 1 || index === totalRounds - 1) return t("tv.final");
+    if (index === totalRounds - 2) return t("tv.semifinal");
+    if (index === 0) return t("tv.firstRound");
+    return t("tv.round", { round: round.roundNumber ?? index + 1 });
   }
 
   function bracketCardHtml(slot, roundIndex, slotIndex) {
     const position = `data-round="${roundIndex}" data-slot="${slotIndex}"`;
     const match = slot && slot.type !== "pending" ? matchById(slot.matchId) : null;
     if (!match) {
-      return `<div class="tv-bracket-card pending" ${position}><div class="tv-bracket-team placeholder">Venter</div><div class="tv-bracket-team placeholder">Venter</div></div>`;
+      return `<div class="tv-bracket-card pending" ${position}><div class="tv-bracket-team placeholder">${t("tv.waiting")}</div><div class="tv-bracket-team placeholder">${t("tv.waiting")}</div></div>`;
     }
     const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
     const stateClass = match.state === "finished" ? "finished" : match.state === "playing" ? "playing" : "pending";
@@ -71,14 +113,14 @@
       <div class="tv-bracket-col" data-round-index="${index}">
         <div class="tv-bracket-col-label">${cupRoundLabel(round, index, bracket.rounds.length)}</div>
         ${round.slots.map((slot, slotIndex) => bracketCardHtml(slot, index, slotIndex)).join("")}
-        ${round.byeTeams?.length ? `<div class="tv-bracket-bye">Bye: ${round.byeTeams.map((team) => escapeHtml(team.displayName)).join(", ")}</div>` : ""}
+        ${round.byeTeams?.length ? `<div class="tv-bracket-bye">${t("tv.bye", { teams: round.byeTeams.map((team) => escapeHtml(team.displayName)).join(", ") })}</div>` : ""}
       </div>`).join("");
   }
 
   function renderBracketExtraHtml(bracket) {
     const thirdRound = bracket.rounds.find((round) => round.thirdPlaceSlot);
     if (!thirdRound?.thirdPlaceSlot) return "";
-    return `<div class="tv-bracket-extra-label">BRONSEFINALE</div>${bracketCardHtml(thirdRound.thirdPlaceSlot, -1, 0)}`;
+    return `<div class="tv-bracket-extra-label">${t("tv.thirdPlace")}</div>${bracketCardHtml(thirdRound.thirdPlaceSlot, -1, 0)}`;
   }
 
   function svgLine(svg, x1, y1, x2, y2) {
@@ -126,11 +168,11 @@
     const bracket = cupBracket();
     const winnerTeam = state?.cup?.winnerTeam;
     document.querySelector("#tvCupChampion").classList.toggle("hidden", !winnerTeam);
-    if (winnerTeam) document.querySelector("#tvCupChampion").innerHTML = `<span>🏆 CUPMESTER</span><strong>${escapeHtml(winnerTeam.displayName)}</strong>`;
+    if (winnerTeam) document.querySelector("#tvCupChampion").innerHTML = `<span>${t("tv.cupChampion")}</span><strong>${escapeHtml(winnerTeam.displayName)}</strong>`;
     const tree = document.querySelector("#tvBracketTree");
     const extra = document.querySelector("#tvBracketExtra");
     if (!bracket?.rounds?.length) {
-      tree.innerHTML = `<p>Bracket genereres...</p>`;
+      tree.innerHTML = `<p>${t("tv.bracketPending")}</p>`;
       extra.innerHTML = "";
       document.querySelector("#tvBracketSvg").innerHTML = "";
       return;
@@ -143,20 +185,22 @@
   function render() {
     if (!state) return;
     const matches = allMatches();
-    const live = matches.filter((match) => match.state === "playing");
+    const playing = matches.filter((match) => match.state === "playing");
+    const awaitingApproval = matches.filter((match) => match.state === "awaitingApproval");
+    const live = [...playing, ...awaitingApproval];
     const next = matches.filter((match) => match.state === "waiting");
-    document.querySelector("#tvTournamentTitle").textContent = String(state.name || "PADELSTAR").toLocaleUpperCase("nb-NO");
-    document.querySelector("#tvRoundLabel").textContent = `RUNDE ${state.currentRound || 1}`;
+    document.querySelector("#tvTournamentTitle").textContent = String(state.name || "PADELSTAR").toLocaleUpperCase(locale());
+    document.querySelector("#tvRoundLabel").textContent = t("tv.round", { round: state.currentRound || 1 });
     const idle = live.length === 0 && next.length === 0;
-    document.querySelector("#tvLiveMatches").innerHTML = (live.length ? live : next.slice(0, 3)).map((match) => matchCard(match, !live.includes(match))).join("") || `<p>Ingen aktive kamper akkurat nå.</p>`;
-    document.querySelector("#tvNextMatches").innerHTML = next.slice(0, 5).map((match) => matchCard(match, true)).join("") || `<p>Ingen kamper i kø.</p>`;
+    document.querySelector("#tvLiveMatches").innerHTML = (live.length ? live : next.slice(0, 3)).map((match) => matchCard(match, !live.includes(match))).join("") || `<p>${t("tv.noActive")}</p>`;
+    document.querySelector("#tvNextMatches").innerHTML = next.slice(0, 5).map((match) => matchCard(match, true)).join("") || `<p>${t("tv.noQueue")}</p>`;
     document.querySelector(".tv-live-panel").classList.toggle("hidden", idle);
     document.querySelector(".tv-next-panel").classList.toggle("hidden", idle);
     document.querySelector(".tv-columns").classList.toggle("tv-idle", idle);
     const cup = isCup();
     document.querySelector("#standingTitle").innerHTML = cup
-      ? `<img class="heading-icon" src="assets/icons/trophy-96.png" alt="">CUP-BRACKET`
-      : `<img class="heading-icon" src="assets/icons/trophy-96.png" alt="">STILLING`;
+      ? `<img class="heading-icon" src="assets/icons/trophy-96.png" alt="">${t("tv.cupBracket")}`
+      : `<img class="heading-icon" src="assets/icons/trophy-96.png" alt="">${t("tv.standings")}`;
     document.querySelector("#tvStandingsHead").classList.toggle("hidden", cup);
     document.querySelector("#tvStandings").classList.toggle("hidden", cup);
     document.querySelector("#tvCupBracket").classList.toggle("hidden", !cup);
@@ -167,13 +211,13 @@
       document.querySelector("#tvStandings").innerHTML = playerStats().map((entry) => `<li class="tv-standing-row">${standingPlayer(entry.player)}<span>${entry.matches}</span><span>${entry.wins}</span><span class="tv-standing-points">${entry.points}</span><span>${entry.diff > 0 ? "+" : ""}${entry.diff}</span></li>`).join("");
     }
     const finished = matches.filter((match) => match.state === "finished").length;
-    document.querySelector("#tvProgress").textContent = `RUNDE ${state.currentRound || 1} / ${Math.max((state.rounds ?? []).length, 1)}`;
+    document.querySelector("#tvProgress").textContent = t("tv.roundOf", { round: state.currentRound || 1, total: Math.max((state.rounds ?? []).length, 1) });
     document.querySelector("#tvPlayerProgress").textContent = `${finished} / ${matches.length}`;
-    document.querySelector("#tvStatus").textContent = state.status === "Avsluttet" ? "FERDIG" : "LIVE";
     const status = document.querySelector(".tv-footer-status");
     const offline = !navigator.onLine || (!remoteConnected && new URLSearchParams(global.location.search).has(queryKey));
     status.classList.toggle("offline", offline);
-    document.querySelector("#tvStatus").textContent = offline ? "OFFLINE" : (state.status === "Avsluttet" ? "FERDIG" : "LIVE");
+    document.querySelector("#tvStatus").textContent = offline ? t("tv.statusOffline") : (state.status === "Avsluttet" ? t("tv.statusDone") : t("tv.statusLive"));
+    updateTimers();
   }
 
   async function loadRemote() {
@@ -184,16 +228,18 @@
   }
 
   async function start() {
+    language = resolveLanguage();
+    applyStaticTranslations();
     try { state = JSON.parse(global.localStorage.getItem(storageKey) ?? "null"); } catch { state = null; }
     await loadRemote();
     state ||= { name: "PADELSTAR", currentRound: 1, rounds: [], players: [], status: "Pågår" };
     render(); setInterval(async () => { await loadRemote(); if (!state) { try { state = JSON.parse(global.localStorage.getItem(storageKey) ?? "null"); } catch { /* keep last state */ } } render(); }, 15000);
-    setInterval(() => { const now = new Date(); const clock = document.querySelector("#tvClock"); clock.textContent = now.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" }); clock.dateTime = now.toISOString(); }, 1000);
-    setInterval(() => { messageIndex = (messageIndex + 1) % footerMessages.length; document.querySelector("#tvMessage").textContent = footerMessages[messageIndex]; }, 60000);
+    setInterval(() => { const now = new Date(); const clock = document.querySelector("#tvClock"); clock.textContent = now.toLocaleTimeString(locale(), { hour: "2-digit", minute: "2-digit" }); clock.dateTime = now.toISOString(); updateTimers(); }, 1000);
+    setInterval(() => { messageIndex = (messageIndex + 1) % footerMessageKeys.length; document.querySelector("#tvMessage").textContent = t(footerMessageKeys[messageIndex]); }, 60000);
     document.querySelector("#tvExitButton").addEventListener("click", () => { if (global.history.length > 1) global.history.back(); else global.location.href = "index.html"; });
     global.addEventListener("resize", () => { if (isCup()) drawBracketLines(); });
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./service-worker.js").catch(() => { });
   }
-  global.PadelstarTvMode = { start };
+  global.PadelstarTvMode = { start, resolveLanguage };
   global.addEventListener("DOMContentLoaded", start, { once: true });
 })(window);

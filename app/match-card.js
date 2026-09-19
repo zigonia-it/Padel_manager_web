@@ -18,6 +18,11 @@
       setsWonByTeam,
       scoreConflict,
       scoreSummary,
+      scorerAction,
+      adminSetScorer,
+      resultAction,
+      adminResolveResult,
+      openCorrection,
       sittingOutSummary,
       startMatch,
       teamAccentStyle,
@@ -31,14 +36,235 @@
     const expandState = new Map();
 
     function isExpanded(match) {
-      return expandState.has(match.id) ? expandState.get(match.id) : match.state === "playing";
+      return expandState.has(match.id) ? expandState.get(match.id) : ["playing", "awaitingApproval"].includes(match.state);
+    }
+
+
+    function selectedPlayerId() {
+      return getState().selectedPlayerId ?? null;
+    }
+
+    // Players may score only when they are the active scorer (or nobody is: the first point claims the role).
+    function playerMayScore(match) {
+      if (currentLocalRole() !== "player") return true;
+      const scorerId = match.scorer?.playerId;
+      return !scorerId || scorerId === selectedPlayerId();
+    }
+
+    // Undo needs an established scorer role for players; admins are unaffected.
+    function playerIsScorerOrNotPlayer(match) {
+      if (currentLocalRole() !== "player") return true;
+      return match.scorer?.playerId === selectedPlayerId();
+    }
+
+    function matchPlayers(match) {
+      return [...(match.teamOne?.players ?? []), ...(match.teamTwo?.players ?? [])];
+    }
+
+    function playerNameById(match, playerId) {
+      return matchPlayers(match).find((player) => player.id === playerId)?.name ?? "";
+    }
+
+    function scorerPanelMarkup(match, editable, scoreOnly) {
+      if (match.state !== "playing") return "";
+      const role = currentLocalRole();
+      const me = selectedPlayerId();
+      const scorerId = match.scorer?.playerId ?? null;
+      const requestId = match.scorerRequest?.playerId ?? null;
+      const participant = role === "player" && Boolean(me) && matchIncludesPlayer(match, me);
+      const iAmScorer = participant && scorerId === me;
+      const status = !scorerId
+        ? translate(role === "player" ? "scorer.none" : "scorer.unassigned")
+        : iAmScorer
+          ? translate("scorer.you")
+          : translate("scorer.current", { name: escapeHtml(playerNameById(match, scorerId)) });
+      const button = (action, label, extra = "") => `<button class="secondary scorer-button" type="button" data-scorer-action="${action}" ${extra}>${label}</button>`;
+      const options = (ids, blank) => `${blank ? `<option value="">${blank}</option>` : ""}${ids.map((id) => `<option value="${escapeAttribute(id)}" ${id === scorerId ? "selected" : ""}>${escapeHtml(playerNameById(match, id))}</option>`).join("")}`;
+      const others = matchPlayers(match).map((player) => player.id).filter((id) => id !== me);
+      let controls = "";
+      if (participant && !scorerId) {
+        controls = button("claim", translate("scorer.claim"));
+      } else if (iAmScorer) {
+        controls = [
+          button("redo", translate("scorer.redo"), match.redoStack?.length ? "" : "disabled"),
+          `<select class="scorer-transfer-select" aria-label="${translate("scorer.transferTo")}">${options(others)}</select>`,
+          button("transfer", translate("scorer.transfer")),
+          button("release", translate("scorer.release")),
+          requestId ? `<p class="scorer-request">${translate("scorer.requestedBy", { name: escapeHtml(playerNameById(match, requestId)) })}</p>${button("accept", translate("scorer.accept", { name: escapeHtml(playerNameById(match, requestId)) }))}${button("decline", translate("scorer.decline"))}` : "",
+        ].join("");
+      } else if (participant) {
+        controls = [
+          requestId === me ? `<span class="scorer-request">${translate("scorer.requestSent")}</span>` : button("request", translate("scorer.request")),
+          button("claim", translate("scorer.takeOver")),
+        ].join("");
+      } else if (role !== "player" && editable && !scoreOnly) {
+        controls = `<select class="scorer-admin-select" aria-label="${translate("scorer.assign")}">${options(matchPlayers(match).map((player) => player.id), translate("scorer.assignNone"))}</select>${button("admin-assign", translate("scorer.assign"))}`;
+      }
+      return `<div class="scorer-panel"><p class="scorer-status"><strong>${translate("scorer.title")}</strong> ${status}</p>${controls ? `<div class="scorer-controls">${controls}</div>` : ""}</div>`;
+    }
+
+    function bindScorerPanel(root, match) {
+      root.querySelectorAll("[data-scorer-action]").forEach((control) => {
+        control.addEventListener("click", () => {
+          const action = control.dataset.scorerAction;
+          if (action === "admin-assign") {
+            adminSetScorer(match, root.querySelector(".scorer-admin-select")?.value || null);
+          } else if (action === "transfer") {
+            void scorerAction(match, "transfer", root.querySelector(".scorer-transfer-select")?.value || null);
+          } else if (action === "accept") {
+            void scorerAction(match, "transfer", null);
+          } else {
+            void scorerAction(match, action);
+          }
+        });
+      });
+    }
+
+
+
+
+    // ---- Result corrections (Phase 12): the old results are never overwritten -------------------------
+    function correctionSetsText(sets) {
+      return (sets ?? []).map((set) => `${set.teamOne}–${set.teamTwo}`).join(", ");
+    }
+
+    function correctionHistoryMarkup(match, canRestore) {
+      const history = match.correctionHistory ?? [];
+      if (!history.length) return "";
+      const running = getState().status !== "Avsluttet";
+      const items = history.map((entry, index) => {
+        const time = new Date(entry.at);
+        const when = Number.isNaN(time.getTime()) ? "" : time.toLocaleString(undefined, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+        const comment = entry.comment ? ` – ${escapeHtml(entry.comment)}` : "";
+        const restore = canRestore && running && match.state === "finished"
+          ? ` <button class="ghost correction-restore" type="button" data-correction-restore="${index}">${translate("correction.restore")}</button>` : "";
+        return `<li><span class="correction-level-dot correction-level-${escapeAttribute(entry.level ?? "green")}" aria-hidden="true"></span>${escapeHtml(when)}: ${escapeHtml(correctionSetsText(entry.before?.completedSets))} → ${escapeHtml(correctionSetsText(entry.after?.completedSets))} (${escapeHtml(translate(`correction.reason.${entry.reason}`))})${comment}${restore}</li>`;
+      });
+      return `<div class="correction-history"><strong>${translate("correction.historyTitle")}</strong><ul>${items.join("")}</ul></div>`;
+    }
+
+    function bindCorrectionHistory(root, match) {
+      root.querySelectorAll("[data-correction-restore]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const entry = (match.correctionHistory ?? [])[Number(button.dataset.correctionRestore)];
+          if (entry) openCorrection(match, { prefill: entry.before?.completedSets, reason: "restore" });
+        });
+      });
+    }
+
+    // ---- Timed matches (Phase 14) --------------------------------------------------------------
+    function timerSeconds(startedAt, minutes, now = Date.now()) {
+      const start = Date.parse(startedAt);
+      if (!minutes || Number.isNaN(start)) return null;
+      return Math.max(0, Math.ceil((start + minutes * 60000 - now) / 1000));
+    }
+
+    function timerLabel(seconds) {
+      return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    }
+
+    function timerMarkup(match) {
+      if (match.endReason === "timeExpired") return `<span class="match-timer match-timer-ended">${translate("match.timeExpired")}</span>`;
+      const minutes = match.rules?.timedMinutes ?? getState().settings?.timedMinutes ?? 0;
+      if (!minutes || match.state !== "playing") return "";
+      const seconds = match.startedAt ? timerSeconds(match.startedAt, minutes) : minutes * 60;
+      const deciding = Boolean(match.decidingGame);
+      return `<span class="match-timer ${deciding ? "match-timer-expired" : ""}" role="timer" data-timer-start="${escapeAttribute(match.startedAt ?? "")}" data-timer-minutes="${minutes}" ${deciding ? "data-deciding=\"true\"" : ""} aria-label="${translate("match.timeLeft")}">${deciding ? translate("match.decidingGame") : timerLabel(seconds)}</span>`;
+    }
+
+    // Called every second: updates every visible countdown (the last minute is highlighted, never negative).
+    function updateTimers(root = global.document, now = Date.now()) {
+      root.querySelectorAll(".match-timer[data-timer-minutes]").forEach((element) => {
+        if (element.dataset.deciding === "true") return;
+        const minutes = Number(element.dataset.timerMinutes);
+        const seconds = element.dataset.timerStart ? timerSeconds(element.dataset.timerStart, minutes, now) : minutes * 60;
+        const expired = seconds === 0;
+        element.textContent = expired ? `00:00 · ${translate("match.timeExpiredNote")}` : timerLabel(seconds);
+        element.classList.toggle("match-timer-warning", seconds !== null && seconds > 0 && seconds <= 60);
+        element.classList.toggle("match-timer-expired", expired);
+      });
+    }
+
+    // ---- Result approval (Phase 11) ------------------------------------------------------------
+    function approvalSetsText(approval) {
+      return (approval?.completedSets ?? []).map((set) => `${set.teamOne}–${set.teamTwo}`).join(", ");
+    }
+
+    function approvalTimeText(iso) {
+      const date = new Date(iso);
+      return Number.isNaN(date.getTime()) ? "" : date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function approvalPanelMarkup(match, editable, scoreOnly) {
+      if (match.state !== "awaitingApproval" || !match.approval) return "";
+      const approval = match.approval;
+      const role = currentLocalRole();
+      const me = selectedPlayerId();
+      const participant = role === "player" && Boolean(me) && matchIncludesPlayer(match, me);
+      const myTeam = participant ? (match.teamOne.players.some((player) => player.id === me) ? 0 : 1) : null;
+      const winnerTeam = approval.winnerTeamIndex === 0 ? match.teamOne : match.teamTwo;
+      const summary = translate("result.summary", { winner: escapeHtml(winnerTeam.displayName), score: approvalSetsText(approval) });
+      const approvals = approval.approvals ?? [];
+      const myTeamApproved = myTeam !== null && approvals.some((entry) => entry.teamIndex === myTeam);
+      const iAmScorer = participant && match.scorer?.playerId === me;
+      const button = (action, label, extra = "") => `<button class="secondary approval-button" type="button" data-approval-action="${action}" ${extra}>${label}</button>`;
+      let status;
+      if (approval.status === "flagged") status = translate("result.flaggedStatus");
+      else if (approval.status === "draft") status = translate("result.draftStatus");
+      else status = translate("result.pendingStatus", { time: approvalTimeText(approval.autoApproveAt) });
+      const badges = [
+        approval.status === "flagged" ? `<span class="approval-badge approval-badge-flagged">${translate("result.flaggedBadge")}</span>` : "",
+        approval.escalatedAt && approval.status !== "flagged" ? `<span class="approval-badge approval-badge-escalated">${translate("result.escalatedBadge")}</span>` : "",
+      ].join("");
+      let controls = "";
+      if (participant && approval.status === "draft") {
+        controls = iAmScorer
+          ? button("submit", translate("result.submit"))
+          : `<span class="approval-note">${translate("result.waitingForScorer")}</span>`;
+      } else if (participant && approval.status === "pending") {
+        controls = myTeamApproved
+          ? `<span class="approval-note">${translate("result.yourTeamApproved")}</span>`
+          : [
+            button("approve", translate("result.approve")),
+            button("dispute", translate("result.dispute")),
+            Number(getState().settings?.setsToWinMatch ?? 1) === 1
+              ? `<span class="approval-correct"><input class="approval-correct-one" type="number" min="0" max="9" inputmode="numeric" aria-label="${escapeAttribute(match.teamOne.displayName)}"><span>–</span><input class="approval-correct-two" type="number" min="0" max="9" inputmode="numeric" aria-label="${escapeAttribute(match.teamTwo.displayName)}">${button("correct", translate("result.correct"))}</span>`
+              : "",
+          ].join("");
+      } else if (participant && approval.status === "flagged") {
+        controls = `<span class="approval-note">${translate("result.waitingForAdmin")}</span>`;
+      } else if (role !== "player" && editable && !scoreOnly) {
+        controls = button("admin-approve", translate("result.adminApprove"));
+      }
+      return `<div class="approval-panel approval-${approval.status}"><p class="approval-summary"><strong>${summary}</strong></p><p class="approval-status">${status} ${badges}</p>${controls ? `<div class="approval-controls">${controls}</div>` : ""}</div>`;
+    }
+
+    function bindApprovalPanel(root, match) {
+      root.querySelectorAll("[data-approval-action]").forEach((control) => {
+        control.addEventListener("click", () => {
+          const action = control.dataset.approvalAction;
+          if (action === "admin-approve") {
+            adminResolveResult(match);
+          } else if (action === "correct") {
+            const one = Number(root.querySelector(".approval-correct-one")?.value);
+            const two = Number(root.querySelector(".approval-correct-two")?.value);
+            if (!Number.isInteger(one) || !Number.isInteger(two)) return;
+            void resultAction(match, "dispute", { completedSets: [{ teamOne: one, teamTwo: two }] });
+          } else {
+            void resultAction(match, action);
+          }
+        });
+      });
     }
 
     function scoreboardRow(match, teamIndex, teamName, pointControlsEnabled) {
       const team = teamIndex === 0 ? match.teamOne : match.teamTwo;
       const key = teamIndex === 0 ? "teamOne" : "teamTwo";
-      const canUndo = pointControlsEnabled && match.state !== "finished" && Boolean(match.undoStack?.length);
-      const canAward = pointControlsEnabled && match.state !== "finished";
+      const awaiting = match.state === "awaitingApproval";
+      // While a result waits for approval only an unsubmitted draft (scorer) or the admin can still undo.
+      const undoOpen = !awaiting || currentLocalRole() !== "player" || match.approval?.status === "draft";
+      const canUndo = pointControlsEnabled && match.state !== "finished" && undoOpen && Boolean(match.undoStack?.length) && playerIsScorerOrNotPlayer(match);
+      const canAward = pointControlsEnabled && match.state !== "finished" && !awaiting;
       return `
     <tr class="scoreboard-row" style="${teamAccentStyle(team)}">
       <td class="scoreboard-team-name">${teamName}</td>
@@ -46,14 +272,14 @@
       <td class="scoreboard-cell scoreboard-games">${match.currentSet?.[key] ?? 0}</td>
       <td class="scoreboard-cell scoreboard-points">
         <button class="scoreboard-point-minus" type="button" data-undo-team="${teamIndex}" aria-label="${translate("score.undoLastAria")}" ${canUndo ? "" : "disabled"}>−</button>
-        <strong class="scoreboard-point-value">${tennisPointLabel(match.currentGame?.[key] ?? 0)}</strong>
+        <strong class="scoreboard-point-value">${match.inTiebreak ? (match.currentGame?.[key] ?? 0) : tennisPointLabel(match.currentGame?.[key] ?? 0)}</strong>
         <button class="scoreboard-point-plus" type="button" data-point-team="${teamIndex}" aria-label="${translate("score.pointsLabel", { team: teamName })}" ${canAward ? "" : "disabled"}>+</button>
       </td>
     </tr>`;
     }
 
     function scoreboardTableMarkup(match, editable) {
-      const pointControlsEnabled = editable && match.state !== "cancelled";
+      const pointControlsEnabled = editable && match.state !== "cancelled" && playerMayScore(match);
       return `
     <table class="scoreboard-table" aria-label="${translate("score.scoreboardAria")}">
       <thead>
@@ -74,7 +300,7 @@
       root.querySelectorAll("[data-undo-team]").forEach((button) => {
         button.addEventListener("click", () => {
           if (currentLocalRole() === "player" && matchIncludesPlayer(match, getState().selectedPlayerId)) {
-            if (match.undoStack?.length) undoMatch(match);
+            if (match.undoStack?.length) void scorerAction(match, "undo");
             return;
           }
           reopenMatch(match);
@@ -103,6 +329,7 @@
         </div>
         <div class="match-top-actions">
           <span class="match-court">${escapeHtml(match.courtName ?? translate("tournament.noCourtAssigned"))}</span>
+          ${timerMarkup(match)}
           <span class="match-status ${match.state}">${matchStateText(match.state)}</span>
         </div>
       </div>
@@ -124,11 +351,17 @@
         </section>
       </div>
       ${scoreboardTableMarkup(match, editable)}
+      ${scorerPanelMarkup(match, editable, scoreOnly)}
+      ${approvalPanelMarkup(match, editable, scoreOnly)}
+      ${correctionHistoryMarkup(match, editable && !scoreOnly)}
       ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
     </div>
   `;
 
       bindScoreboardTable(card, match, editable && match.state !== "cancelled");
+      bindScorerPanel(card, match);
+      bindApprovalPanel(card, match);
+      bindCorrectionHistory(card, match);
 
       const summaryToggle = card.querySelector(".match-summary");
       const body = card.querySelector(".match-card-body");
@@ -156,17 +389,18 @@
         <button class="secondary save-court-button" type="button">${translate("actions.saveCourt")}</button>
       </div>
       <div class="button-row">
-        <button class="secondary set-score-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${translate("actions.setResult")}</button>
+        <button class="secondary set-score-button" type="button" ${["finished", "cancelled", "awaitingApproval"].includes(match.state) ? "disabled" : ""}>${translate("actions.setResult")}</button>
         <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>${translate("actions.startMatch")}</button>
         <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>${translate("actions.largeScore")}</button>
-        <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.undoStack?.length ? "disabled" : ""}>${match.state === "finished" ? translate("actions.undoResult") : translate("actions.undoLast")}</button>
+        <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.undoStack?.length ? "disabled" : ""}>${["finished", "awaitingApproval"].includes(match.state) ? translate("actions.undoResult") : translate("actions.undoLast")}</button>
         <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${translate("actions.cancelMatch")}</button>
         <div class="walkover-row">
           <span>${translate("score.walkover")}</span>
-          <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="${translate("score.walkoverForAria", { team: teamOneName })}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
-          <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="${translate("score.walkoverForAria", { team: teamTwoName })}" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
+          <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="${translate("score.walkoverForAria", { team: teamOneName })}" ${["finished", "cancelled", "awaitingApproval"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
+          <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="${translate("score.walkoverForAria", { team: teamTwoName })}" ${["finished", "cancelled", "awaitingApproval"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
         </div>
-      </div>`}
+      </div>
+      ${match.state === "finished" && getState().status !== "Avsluttet" ? `<div class="correction-row"><button class="secondary correct-result-button" type="button">${translate("correction.button")}</button></div>` : ""}`}
     `;
 
         if (!scoreOnly) {
@@ -176,6 +410,7 @@
           controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
           controls.querySelector(".large-score-button").addEventListener("click", () => openLargeScore(match.id));
           controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
+          controls.querySelector(".correct-result-button")?.addEventListener("click", () => openCorrection(match));
           controls.querySelector(".cancel-match-button").addEventListener("click", () => void cancelMatch(match));
           controls.querySelectorAll(".walkover-button").forEach((button) => {
             button.addEventListener("click", () => void setWalkover(match, Number(button.dataset.walkoverTeam)));
@@ -186,7 +421,7 @@
       return card;
     }
 
-    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable };
+    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable, scorerPanelMarkup, approvalPanelMarkup, bindApprovalPanel, timerMarkup, updateTimers, correctionHistoryMarkup };
   }
 
   global.PadelstarMatchCard = { create };

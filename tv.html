@@ -8,7 +8,7 @@
   <title>Padelstar TV</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/icons/padelstar-icon.png" type="image/png">
-  <link rel="stylesheet" href="styles/tv.css?v=padelstar-tv-11">
+  <link rel="stylesheet" href="styles/tv.css?v=padelstar-tv-13">
 </head>
 
 <body class="tv-page">
@@ -16,7 +16,7 @@
     <header class="tv-header">
       <img class="tv-brand" src="assets/logos/tv-brand.png" alt="Padelstar">
       <span class="tv-header-lines" aria-hidden="true"></span>
-      <div class="tv-title-wrap"><span id="tvRoundLabel">RUNDE 1</span>
+      <div class="tv-title-wrap"><span id="tvRoundLabel" data-tv-i18n="tv.round" data-tv-values='{"round":1}'>RUNDE 1</span>
         <h1 id="tvTournamentTitle">PADELSTAR</h1>
       </div>
       <span class="tv-header-lines tv-header-lines-right" aria-hidden="true"></span>
@@ -25,17 +25,17 @@
 
     <section class="tv-columns">
       <section class="tv-panel tv-live-panel" aria-labelledby="liveTitle">
-        <h2 id="liveTitle"><span class="live-dot"></span>LIVE <em>– PÅGÅR NÅ</em></h2>
+        <h2 id="liveTitle"><span class="live-dot"></span><span data-tv-i18n="tv.live">LIVE</span> <em data-tv-i18n="tv.liveNow">– PÅGÅR NÅ</em></h2>
         <div id="tvLiveMatches" class="tv-card-list"></div>
       </section>
       <section class="tv-panel tv-next-panel" aria-labelledby="nextTitle">
-        <h2 id="nextTitle"><img class="heading-icon" src="assets/icons/games-96.png" alt="">NESTE KAMP</h2>
+        <h2 id="nextTitle"><img class="heading-icon" src="assets/icons/games-96.png" alt=""><span data-tv-i18n="tv.next">NESTE KAMP</span></h2>
         <div id="tvNextMatches" class="tv-card-list"></div>
       </section>
       <section class="tv-panel tv-standing-panel" id="tvStandingPanel" aria-labelledby="standingTitle">
-        <h2 id="standingTitle"><img class="heading-icon" src="assets/icons/trophy-96.png" alt="">STILLING</h2>
+        <h2 id="standingTitle"><img class="heading-icon" src="assets/icons/trophy-96.png" alt=""><span data-tv-i18n="tv.standings">STILLING</span></h2>
         <div class="tv-table-head" id="tvStandingsHead">
-          <span>#</span><span>SPILLER</span><span>KAMPER</span><span>SEIER</span><span>POENG</span><span>DIFF</span>
+          <span>#</span><span data-tv-i18n="tv.colPlayer">SPILLER</span><span data-tv-i18n="tv.colMatches">KAMPER</span><span data-tv-i18n="tv.colWins">SEIER</span><span data-tv-i18n="tv.colPoints">POENG</span><span data-tv-i18n="tv.colDiff">DIFF</span>
         </div>
         <ol id="tvStandings" class="tv-standings"></ol>
         <div id="tvCupBracket" class="tv-cup-bracket hidden">
@@ -50,17 +50,21 @@
     </section>
 
     <footer class="tv-footer">
-      <div><span class="footer-icon">◎</span><strong id="tvProgress">RUNDE 1 / 1</strong></div>
-      <div><span class="footer-icon">♟</span><strong id="tvPlayerProgress">0 / 0</strong><span>KAMPER FERDIG</span>
+      <div><span class="footer-icon">◎</span><strong id="tvProgress" data-tv-i18n="tv.roundOf" data-tv-values='{"round":1,"total":1}'>RUNDE 1 / 1</strong></div>
+      <div><span class="footer-icon">♟</span><strong id="tvPlayerProgress">0 / 0</strong><span data-tv-i18n="tv.matchesDone">KAMPER FERDIG</span>
       </div>
-      <p id="tvMessage">GODE KAMPER. GODE ØYEBLIKK.</p>
-      <div class="tv-footer-status"><span class="live-dot"></span><strong id="tvStatus">LIVE</strong></div>
-      <button id="tvExitButton" type="button">TILBAKE</button>
+      <p id="tvMessage" data-tv-i18n="tv.message0">GODE KAMPER. GODE ØYEBLIKK.</p>
+      <div class="tv-footer-status"><span class="live-dot"></span><strong id="tvStatus" data-tv-i18n="tv.statusLive">LIVE</strong></div>
+      <button id="tvExitButton" type="button" data-tv-i18n="tv.exit">TILBAKE</button>
     </footer>
   </main>
   <script src="supabase-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app/tv-mode.js?v=padelstar-tv-mode-7"></script>
+  <script src="app/accent-system.js?v=padelstar-accent-system-1"></script>
+  <script src="app/player-visuals.js?v=padelstar-player-visuals-3"></script>
+  <script src="app/translations.js?v=padelstar-i18n-46"></script>
+  <script src="app/scoring-engine.js?v=padelstar-scoring-5"></script>
+  <script src="app/tv-mode.js?v=padelstar-tv-mode-10"></script>
 </body>
 
 </html>

@@ -24,6 +24,7 @@
       const activeRound = getRoundForMatch(match);
       const matchSnapshot = structuredClone(match);
       delete matchSnapshot.undoStack;
+      delete matchSnapshot.redoStack;
       const nextWaitingMatch = activeRound?.matches.find((item) => item.id !== match.id && item.state === "waiting");
       return {
         match: matchSnapshot,
@@ -45,10 +46,16 @@
         return;
       }
       const restoredMatch = structuredClone(undoState.match);
+      // The scorer role, its log and the event history are not part of a score snapshot.
+      for (const field of ["scorer", "scorerRequest", "scorerLog", "eventLog"]) {
+        if (field in match) restoredMatch[field] = match[field];
+        else delete restoredMatch[field];
+      }
       deps.recordEvent?.("match_undone", "match", match.id, { restoredState: restoredMatch.state });
       undoStack.pop();
       Object.assign(match, restoredMatch);
       match.undoStack = undoStack;
+      match.redoStack = [];
       if (undoState.nextWaitingMatch) {
         const nextMatch = getMatchById(undoState.nextWaitingMatch.id);
         if (nextMatch) Object.assign(nextMatch, structuredClone(undoState.nextWaitingMatch));

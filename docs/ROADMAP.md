@@ -6,7 +6,7 @@
 >
 > **Hard milestone:** functioning build by **Monday 21 September 2026**.
 >
-> **Version baseline:** `0.6.1` — the Monday critical path was verified end-to-end for `0.6.0` (see `docs/CHANGELOG.md`), and `0.6.1` is a verified UI-redesign/polish batch on top of it that changed no critical-path behavior. Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
+> **Version baseline:** `0.7.0` — the Monday critical path was verified end-to-end for `0.6.0`, `0.6.1` was a verified UI-redesign/polish batch, and `0.7.0` (applied on the developer's instruction, 2026-09-19) is the beta feature milestone that adds scorer roles, result approval and correction, timed matches, scoring rules, player replacement, TV Mode in every supported language and a feedback button (see `docs/CHANGELOG.md`, which lists what has and has not been verified live). Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
 >
 > **Token reset:** **Saturday 19 September 2026 at 11:31**. Before the reset, spend tokens only on the shortest path to a functioning app and verified blockers.
 >
@@ -210,34 +210,34 @@ This is part of the Monday acceptance test, not an optional polish item.
 
 Run this only after Phases 1–7 are individually passing.
 
-**Not yet run as a single continuous pass.** Every step below has been verified individually (see Phases 1–7 above and `docs/BUGS.md`), but split across separate guest-mode and account-owned sessions rather than one unbroken clean-session run-through, and a few Phase 1–7 items remain open (validation errors, logout, failed-write surfacing). Natural Round Robin completion and final standings are now verified (see Phase 4/6 above). Recommended next step before calling Monday fully done: one uninterrupted pass through this exact checklist, starting from a logged-out state.
+**Guest path run as one continuous pass (2026-09-18); account steps still open.** A clean session (localStorage, service worker and caches wiped) ran the whole chain in one go against the live Supabase project: create a 4-player/2-court Round Robin through the wizard → lobby → start → register a result → refresh (state restored) → play the remaining rounds through the round-end confirmation → finish → podium/standings → "Ny turnering" (clean form, no carry-over) → create, start and score a second tournament, with direct database checks after each step. The account steps (create owner account, log in) were **not** run: this environment cannot enter real credentials, so they remain the developer's to confirm on the deployed site. One real defect was found and is fixed in a migration awaiting application: from round 2 on, the server's round advance starts matches without assigning them a court (see `docs/BUGS.md`).
 
 ## Clean-session test
 
-- [ ] Start from logged-out/clean app state.
-- [ ] Create owner account.
-- [ ] Log in.
-- [ ] Create Round Robin.
-- [ ] Add participants/courts.
-- [ ] Start tournament.
-- [ ] Register first result.
-- [ ] Refresh.
-- [ ] Verify result/tournament restored from server.
-- [ ] Continue remaining matches.
-- [ ] Finish tournament.
-- [ ] Verify final standings.
-- [ ] Create a second tournament.
-- [ ] Start second tournament.
-- [ ] Register at least one result.
-- [ ] No critical console/runtime errors occurred.
-- [ ] No manual database fix/local-storage deletion was required.
+- [x] Start from logged-out/clean app state. — guest session, storage/service worker/caches wiped.
+- [ ] Create owner account. — not run (needs real credentials; developer to confirm).
+- [ ] Log in. — not run (needs real credentials; developer to confirm).
+- [x] Create Round Robin. — via the 4-step wizard; server row confirmed (format roundRobin, 4 players, 2 courts).
+- [x] Add participants/courts.
+- [x] Start tournament. — from the lobby; 3 rounds generated, round 1 playing on Bane 1.
+- [x] Register first result. — 6-4 via "Set resultat"; database revision 2 matched.
+- [x] Refresh.
+- [x] Verify result/tournament restored from server. — workspace, result and revision intact after reload.
+- [x] Continue remaining matches. — rounds 2 and 3 via "Start neste runde" (with the round-end recap dialog) and registered results. Round 2+ matches started with no court assigned; fix migration written, see BUGS.md.
+- [x] Finish tournament. — guest tournament deleted server-side as designed.
+- [x] Verify final standings. — points/wins/sets/games all correct against the entered results (Alice 9 p, 3 wins, 19 games). Ties after sets fall back to alphabetical order, not games — see Phase 14 "Tiebreak".
+- [x] Create a second tournament. — form opened clean, no players/name carried over.
+- [x] Start second tournament.
+- [x] Register at least one result. — 6-3, persisted (revision 2).
+- [x] No critical console/runtime errors occurred. — no uncaught JS errors; the only console errors are local-dev artifacts (Vercel Insights script 404s off Vercel; push-send CORS only allows the `padelstar.app` origin).
+- [x] No manual database fix/local-storage deletion was required. — the only storage wipe was the deliberate clean-session start.
 
 ## Browser/device sanity
 
-- [ ] Primary desktop browser works.
-- [ ] Primary mobile/PWA path is usable if currently supported.
-- [ ] Layout does not block core controls.
-- [ ] Supabase/network failure gives safe visible behavior.
+- [x] Primary desktop browser works. — Chromium.
+- [x] Primary mobile/PWA path is usable if currently supported. — workspace, bottom nav and header checked at 375px.
+- [x] Layout does not block core controls.
+- [x] Supabase/network failure gives safe visible behavior. — offline admin action shows "Du er offline. Koble til igjen før admin-endringen sendes.", pill turns grey "Offline", revision and match state unchanged.
 
 ## Monday release decision
 
@@ -262,57 +262,79 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 10 — Player live scoring
 
-- [ ] Player can score own active match.
-- [ ] One active scorer.
-- [ ] Others live-view.
-- [ ] Scorer transfer/request.
-- [ ] Admin override.
-- [ ] Offline takeover.
-- [ ] Undo/Redo.
-- [ ] Multi-device verification.
+Built 2026-09-19 against the approved spec (`docs/archive/plans/Padelstar_v1_0_0_plan.md`, FASE H). Server side is migration `20260919120000_match_scorer_lease.sql` (NOT applied yet); it is covered by 48 database tests that run the SQL on an in-memory Postgres (`supabase/tests/scorer-lease.pglite.mjs`), and the client by `test/scorer-role.test.js`. Items stay unchecked until the migration is applied and a two-device run confirms them live.
+
+- [x] Player can score own active match. — verified live 2026-09-19 (4 real players via `join_tournament`, real RPCs). The scorer can now score for both teams; `save_player_point_impl` rejects anyone who is not the active scorer (an unclaimed match is claimed by the first point).
+- [x] One active scorer. — verified live (a non-scorer's point is rejected, a second claim is refused, the first point claims the role). Stored on the match (`scorer`), enforced by the tournament row lock, logged in `scorerLog`.
+- [x] Others live-view. — verified live 2026-09-19 after the broadcast fix: an open admin screen showed joined players, every point (30–0), undo (15–0, 0–0) and the finished match without a reload. The scorer is part of the shared match state; every match card shows "Scorer: <name>" (the normal realtime update path).
+- [x] Scorer transfer/request. — verified live (request recorded, a second pending request refused, transfer defaults to the requester, the old scorer is locked out). `match_scorer_action` actions `claim` / `request` / `transfer` (defaults to the requester) / `decline` / `release`, with a panel on the match card.
+- [ ] Admin override. — `admin_set_match_scorer` (admin token + expected revision); the admin can also still score directly.
+- [ ] Offline takeover. — a participant can claim once the scorer's server-side heartbeat is older than 2 minutes (30 s client heartbeat in its own table, so it never bumps the tournament revision); the old scorer does not get the role back; logged as `offline_takeover`.
+- [x] Undo/Redo. — verified live after the round fix (undo, redo and undo back to 0–0 on a Round Robin with pre-generated rounds). Scorer undo/redo through the server (`undo`/`redo` actions), undone events stay in `eventLog`, a new point drops the redo branch, admin undo keeps the current scorer. Undo/redo closes when the result is submitted for approval (Phase 11).
+- [ ] Multi-device verification. — first live run 2026-09-19 (4 real players joined through `join_tournament`, driven through the real RPCs): claim, rejection of non-scorers, request/pending, transfer, scoring for both teams, submit rules, teammate vs opponent approval and finalisation all passed on the live database. It found two defects, both fixed but not yet re-verified live: undo/redo refused for pre-generated rounds (`20260919190000_fix_undo_current_round.sql`) and live updates never reaching other devices (`20260919200000_realtime_revision_broadcast.sql`, see BUGS.md). Still to run live after applying them: undo/redo, dispute/correction, the 10/30-minute cron path, admin approve, and a second browser seeing changes without a reload.
+
+Also fixed here: a point the server rejects (for example a tap on the opponent row) is now dropped from the local sync queue instead of being retried forever and blocking later points.
 
 ## Phase 11 — Result approval
 
-- [ ] Explicit submission for approval.
-- [ ] Required approvals.
-- [ ] Dispute/correction proposal.
-- [ ] 10-minute admin escalation.
-- [ ] 30-minute conditional auto-approval.
-- [ ] Dependent progression waits for authoritative result.
-- [ ] Concrete `score_conflict` state when two submissions for the same match disagree; auto-confirmed only when submissions match, otherwise routed to admin.
-- [ ] Visible "flagged for review" state for admin/referee escalation beyond auto-resolve.
+Built 2026-09-19 on the developer's decision to use an "awaiting approval" match state. Server side: migration `20260919150000_result_approval.sql` (needs `20260919120000_match_scorer_lease.sql` first; apply both in order, NOT applied yet), 45 database tests (`supabase/tests/result-approval.pglite.mjs`); client: `test/result-approval.test.js`. The panel was checked visually in the browser with a match put into the state. Items stay unchecked until the migrations are applied and a real multi-device run confirms them.
+
+Flow: the winning point of a player-scored match makes the match `awaitingApproval` (the court is freed and the next match starts) — unless nobody on the opposing team has a device (only one side uses the app), in which case it is approved automatically at once, per the developer's instruction; the active scorer submits the result; one player per team approves (the submitter counts for their team; a team where nobody has a device is approved automatically); standings, statistics, round advance and cup advance only count `finished` matches. Admin scoring and admin set-result still finish a match immediately.
+
+- [x] Explicit submission for approval. — verified live. `submit` action, scorer only; the panel shows the result summary; undo/redo stays open until submission.
+- [x] Required approvals. — verified live for two device-equipped teams (a teammate does not complete it, one opponent does); the device-less/solo auto-approval is covered by database tests only. At least one player per team; device-less (admin-added) teams auto-approve.
+- [x] Dispute/correction proposal. — verified live (invalid proposal refused, a correction resets approvals, two corrections allowed, the third flags the match, players cannot approve or dispute a flagged result, the admin's approve button finishes it). `dispute` flags the result for the admin, or proposes a corrected result (validated against the tournament rules) that resets approvals; the player UI proposes single-set corrections only (server accepts multi-set).
+- [x] 10-minute admin escalation. — verified live with the real pg_cron job (`escalatedAt` set within a minute of the deadline). `approval.escalatedAt` is set after 10 minutes and shown as an "Admin varslet" badge; a push notification to the admin is not built.
+- [x] 30-minute conditional auto-approval. — verified live with the real pg_cron job (approved automatically, `auto: true`). `process_result_approvals()` runs every minute (pg_cron); never for flagged results; timers restart on a corrected proposal; an unsubmitted draft follows the same clock from the end of the match.
+- [ ] Dependent progression waits for authoritative result. — round advance already requires every match finished/cancelled; the client blocks finishing the tournament while results await approval (the server-side `finalize_tournament` would cancel them, so direct RPC calls are not protected).
+- [ ] Concrete `score_conflict` state when two submissions for the same match disagree. — not integrated: the older `submit_match_result` submissions mechanism still exists separately from this workflow.
+- [x] Visible "flagged for review" state for admin/referee escalation beyond auto-resolve. — verified live in the admin UI. Flagged status with a badge on the match card, in the "Venter på godkjenning" group.
+
+Known gaps: TV Mode does not list matches that await approval; an approved cup final does not mark the cup finished until the admin advances (the client does this only for admin-finished matches); the admin corrects a wrong result with the existing undo and re-score.
 
 ## Phase 12 — Result correction/consequences
 
-- [ ] Admin-only finalized correction.
-- [ ] Correction history.
-- [ ] Mandatory reason.
-- [ ] Consequence simulation.
-- [ ] Future-match handling.
-- [ ] Already-played matches protected.
-- [ ] Atomic commit/rollback.
-- [ ] Successful-change notifications.
-- [ ] Regression tests.
+Built 2026-09-19 (spec: archived plan FASE J). Server: migration `20260919210000_admin_result_correction.sql` (NOT applied; needs the scorer and approval migrations, which are), 29 database tests (`supabase/tests/result-correction.pglite.mjs`). Client: `app/result-correction.js` (consequence simulation), `app/result-correction-dialog.js`, a "Korriger resultat" button and a correction history on finished match cards; 13 client tests (`test/result-correction.test.js`). The dialog and its simulation were checked in the browser; the confirm step needs the migration applied and then a live check.
+
+How it works: on a finished match the admin enters the new set score(s), picks a mandatory reason (wrong points entered / wrong team credited / players agree / referee decision / restore an earlier result / other, which needs a comment) and presses "Simuler konsekvens". The simulation runs on a copy (nothing changes) with the same scoring engine and shows a level with text and colour: green (standings unchanged), yellow (ranking positions change), orange (winner changes, points move), red (blocked), plus the concrete changes (winner, points and place per player) and "ongoing matches are not affected". Only after a successful simulation can the admin confirm. The server function is atomic, admin-token only, revision-checked, refuses invalid sets/unchanged results/unfinished matches, and appends every correction to `match.correctionHistory` (old result, new result, reason, comment, level, time) so nothing is overwritten. Restoring an old result is another correction (reason `restore`, one click from the history). Players get a push notification only after the correction succeeded.
+
+- [x] Admin-only finalized correction. — verified live (a finished result corrected through the real dialog and server function). Admin token only, for finished matches while the tournament is running. Closed once the tournament is finished: statistics have been saved by then, and recalculating them is part of Phase 15.
+- [x] Correction history. — verified live (reason, comment, level, before/after stored and shown on the match card; "Gjenopprett" restored the original as a second entry). `match.correctionHistory`, shown on the match card (also to players); never overwritten.
+- [x] Mandatory reason. — six standard reasons, `other` requires a comment (both enforced in the dialog and on the server).
+- [x] Consequence simulation. — verified live (orange for a flipped winner). Client-side on a copy with the shared scoring engine, levels green/yellow/orange/red shown as text plus colour.
+- [ ] Future-match handling. — Round Robin rounds are independent, so standings recalculate; a Cup winner change is red/blocked once a later round exists, a score-only Cup correction is allowed.
+- [ ] Already-played matches protected. — the Cup block above; ongoing and unplayed matches are never changed by a correction.
+- [ ] Atomic commit/rollback. — a single database transaction; a refused correction changes nothing (tested).
+- [ ] Successful-change notifications. — push message `result_corrected` after the RPC succeeded (same push path as match-ready notifications).
+- [x] Regression tests. — 29 database + 13 client tests.
+
+Not built: correcting the result of a Cup match whose later round already exists (blocked by design), correcting after the tournament finished, and personal-statistics recalculation (Phase 15).
 
 ## Phase 13 — Replacement/withdrawal
 
-- [ ] Structural slot vs actual-person behavior.
-- [ ] Personal stats follow actual player.
-- [ ] Historical participant preserved.
-- [ ] Active-match restart rules.
-- [ ] Disputed/unconfirmed match restrictions.
-- [ ] Regression tests.
+Built 2026-09-19 (spec: archived plan FASE K) as client logic (`app/player-replacement.js`, wired into `app/player-state.js` and the players list) with 13 tests (`test/player-replacement.test.js`). Checked in the browser with a live guest tournament: replacing a player in a running match shows the restart warning, restarts the match at 0–0 and the list shows "Erstattet av …" / "Erstatter …" with a "Sett … tilbake" button. There is no server migration: like all admin edits it is saved as tournament state by the admin (revision-checked). Items stay unchecked until the developer has reviewed the behaviour on a real tournament.
+
+- [ ] Structural slot vs actual-person behavior. — every player has a `slotId`; the replacement inherits the slot of the player it replaces (and keeps it through further replacements); unplayed matches and Cup teams follow the slot, finished matches keep the person who played; the same person cannot fill two active slots (name check).
+- [ ] Personal stats follow actual player. — statistics are per player id: the original keeps everything they played, the replacement starts from 0 (tested with the leaderboard).
+- [ ] Historical participant preserved. — the replaced player stays in the player list (inactive, "Erstattet av …") and in every finished match; the replacement/restore events are recorded (`player_replaced`, `player_restored`, `match_restarted`).
+- [ ] Active-match restart rules. — a match in progress is restarted from 0–0 after a warning and confirmation (score, undo/redo history, scorer role, clock and rule snapshot are dropped, `restartCount`/`restartReason` recorded); the original can be put back the same way.
+- [ ] Disputed/unconfirmed match restrictions. — a match awaiting approval (draft, pending or flagged) blocks the replacement for every player in it until the result is resolved or undone; a finished tournament cannot be changed.
+- [ ] Regression tests. — 13 tests.
+
+Not built: withdrawal without a replacement (a player leaving with no substitute needs a product decision about the matches that player would have played), and server-side enforcement of the approval block (the admin writes the whole tournament state, so this is a client rule).
 
 ## Phase 14 — Timed matches/scoring rules
 
-- [ ] Generic point/margin engine.
-- [ ] Classic scoring.
-- [ ] No-ad/Golden Point.
-- [ ] Tiebreak.
-- [ ] Timed matches.
-- [ ] 00:00 finish-current-game behavior.
-- [ ] Rule lock/snapshots.
-- [ ] Cup time overrides.
+Step 1 built 2026-09-19: the point-by-point engine now lives in one pure function (`awardPoint` in `app/scoring-engine.js`) with a SQL twin in `save_player_point_impl` (migration `20260919120000_match_scorer_lease.sql`, not applied yet). Both are run against the same 14 scenarios in `test/fixtures/scoring-scenarios.json` (`test/scoring-rules.test.js`, `supabase/tests/scoring-rules.pglite.mjs`), so client and server cannot drift. Verified live in the browser as admin (golden point, tiebreak, numeric tiebreak points, finished 3–2 with the 7–1 tiebreak stored).
+
+- [ ] Generic point/margin engine. — not built: only the fixed classic 0/15/30/40 model plus the options below; configurable minimum points / winner margin (numeric scoring) is not implemented.
+- [x] Classic scoring. — deuce/advantage, verified by scenarios (JS and SQL).
+- [x] No-ad/Golden Point. — setting `gameMode` (`advantage` | `goldenPoint`) in the create wizard and the Styring rules form; the point at 40–40 wins the game. Server-side player scoring needs the migration.
+- [x] Tiebreak. — set tiebreak: setting `setTiebreak`; at equal games a tiebreak to 7 (win by 2) is played, points shown as plain numbers, stored on the completed set, winner takes the set. Standings tiebreak (decided by the developer 2026-09-19: head-to-head first): points, then head-to-head among the players tied on points (mini-league of direct results as opponents), then match wins, sets won, game difference, games won, name. Same ranking in the app, podium and TV Mode (`test/standings-tiebreak.test.js`).
+- [x] Timed matches. — setting `timedMinutes` (create wizard + Styring rules form, 0 = none, snapshotted on the match). The clock starts with the first point of the match (the actual start of play; `match.startedAt`), a countdown shows on the match card and the player's match panel, the last minute is highlighted, it never goes negative, and a match that ended on time shows "Tid utløpt" (`endReason: timeExpired`). Verified live with a real 1-minute match and by 9 shared JS/SQL scenarios (`test/match-timer.test.js`, `test/scoring-rules.test.js`, `supabase/tests/scoring-rules.pglite.mjs`). Not shown in the large-score view or TV Mode yet.
+- [x] 00:00 finish-current-game behavior. — after 00:00 the game in progress is finished; a game won after time ended the match: the leader on sets wins, then on games; level games start one deciding golden-point game (developer's decision, 2026-09-19; draws are not offered because no scoring mode supports them). The unfinished set is kept in the record when it points the same way as the result.
+- [x] Rule lock/snapshots. — tournament rules are locked once round 1 exists (existing behaviour); the rule profile is now also snapshotted onto each match on its first point (`match.rules`) and the engine reads the snapshot, so a later setting change cannot alter a running match.
+- [ ] Cup time overrides. — not built.
 
 ## Phase 15 — Permanent history/statistics
 
@@ -324,12 +346,12 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 16 — Retention/cleanup
 
-- [ ] Guest completed/aborted retention.
-- [ ] Stats saved before guest deletion.
-- [ ] 30-day inactivity → expired.
-- [ ] 7-day recovery.
-- [ ] Account deletion lifecycle.
-- [ ] Privacy documentation matches implementation.
+- [x] Guest completed/aborted retention. — verified live 2026-09-19: finishing a guest tournament as admin keeps the row (`Avsluttet`, `retention_expires_at` +24 h, receipt `deleted = false`, no admin token in the state), the podium still shows and the local copy is wiped, the spectator/TV link shows FERDIG with full standings, and after expiry `cleanup_expired_tournaments()` deletes the row (sessions and heartbeats cascade) while the receipt stays. Decided 2026-09-19: keep a finished/cancelled guest tournament read-only for 24 hours. Migration `20260919170000_guest_finish_retention.sql` (NOT applied): `finalize_tournament` keeps the row with `retention_expires_at` = finish + 24 h (statistics still saved first, read-only through the existing guard trigger), the hourly cleanup deletes it afterwards. The guest admin's own device keeps today's flow (podium from a snapshot, local copy wiped). 23 database tests (`supabase/tests/guest-retention.pglite.mjs`); needs a live check after applying.
+- [x] Stats saved before guest deletion. — enforced in the database: `tournament_history_before_delete` refuses to delete a tournament without a `tournament_finalization_receipts` row, and `finalize_tournament` writes the receipt and every account-linked player's statistics in the same transaction (returns `statisticsSaved: true`).
+- [ ] 30-day inactivity → expired. — migration `20260919090500_cleanup_stale_guest_tournaments.sql` written, NOT applied (adds `expired_at`, a trigger that reactivates on any state write, the 30-day/7-day cleanup, and an hourly schedule); covered by `supabase/tests/guest-retention.pglite.mjs`. Live data before the fix: 29 of 40 guest tournaments were >7 days stale and nothing ever cleaned them.
+- [ ] 7-day recovery. — same migration; there is no admin-facing "expired, resume" banner yet (any state write reactivates).
+- [ ] Account deletion lifecycle. — not re-verified this pass.
+- [ ] Privacy documentation matches implementation. — `privacy.html` text updated to the 24-hour / 30-day / 7-day lifecycle; becomes true once the migrations above are applied.
 
 ## Phase 17 — Claiming/invitations
 
@@ -353,6 +375,8 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 19 — TV Mode
 
+Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app, is translated (Norwegian and English; language from `?lang=`, the saved choice, then the device language; `test/tv-i18n.test.js` fails if a production language lacks a TV key or text gets hard-coded, so TV Mode supports every supported language at all times), lists matches awaiting approval, and shows the countdown of timed matches. Verified live: with the retention change a finished guest tournament stays viewable (TV shows FERDIG with full standings) for 24 hours. Still open: the reset/nullified state and the Court Queue view are not re-verified, and the remaining Phase 19 items are not ticked yet.
+
 - [ ] Read-only public viewing.
 - [ ] Link/QR.
 - [ ] Opens in new window/tab.
@@ -365,34 +389,34 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 20 — PWA
 
-- [ ] Manifest.
-- [ ] Service worker.
-- [ ] Installability.
-- [ ] Standalone detection.
-- [ ] Correct install CTA.
-- [ ] Cache/update behavior.
-- [ ] Desktop/mobile install guide.
+- [x] Manifest. — verified: name, `display: standalone`, scope/start_url, 192 px icon, plain 512 px icon (added 2026-09-19) and a 512 px maskable icon.
+- [x] Service worker. — verified by running `service-worker.js` against the real files in a Node sandbox: install caches all 156 shell entries, activate deletes old caches, offline navigation (including deep links) is served from the cached `index.html`. The in-app Browser pane does not persist service workers, so real-browser registration was not observed.
+- [ ] Installability. — criteria are met on paper; needs a Chrome/Lighthouse and iOS Safari check on the deployed HTTPS site.
+- [x] Standalone detection. — `app/pwa-install.js` checks `display-mode: standalone` and `navigator.standalone`, and updates live on change (covered by tests).
+- [x] Correct install CTA. — button shows a native prompt when `beforeinstallprompt` fired, otherwise manual per-platform steps; hidden when already standalone. Modal verified in the browser.
+- [x] Cache/update behavior. — network-first with cache fallback, `skipWaiting` + `clients.claim`, cache name bumped every release; stale caches removed on activate (simulated).
+- [x] Desktop/mobile install guide. — iOS, Android, Windows, macOS, ChromeOS and generic instructions in `nb` and `en`.
 
 ## Phase 21 — Language/i18n
 
-- [ ] Norwegian.
-- [ ] English.
-- [ ] Device default.
-- [ ] Persistent manual override.
+- [x] Norwegian. — source language; every key referenced by `index.html`/`app/*.js` resolves in `nb` (checked 2026-09-19: 461 referenced keys, 0 missing).
+- [x] English. — `en` had 96 keys that silently fell back to Norwegian (round/cup/queue/score/player/message strings); all added, `nb`/`en` dictionaries now have identical key sets (529/529). Norwegian footer copyright line was English; fixed. The create form's default tournament name is now translated (was hardcoded `Padelstar-turnering`).
+- [ ] Device default. — the `Følg enhetens språk` option exists and resolves only to `nb`/`en`; not yet re-tested with a non-Norwegian/English device language.
+- [x] Persistent manual override. — choice is stored in `localStorage` (`padelstar-language`) and survives a reload.
 - [ ] `Følg enhetens språk`.
-- [ ] Key surfaces translated.
+- [x] Key surfaces translated. — scanned landing, join, account, create wizard (all 4 steps), account dialog, lobby and the admin workspace (Styring/Kamper/Tabell) plus player view in English for leftover Norwegian text and aria-labels: none left (a hardcoded Norwegian footer `aria-label` was found and fixed). Not yet scanned: TV mode, podium, cup bracket, profile with data, guide/privacy pages.
 - [ ] Selector redesign: closed state shows only the current language's flag (no permanent language name/code next to it — `index.html`'s `.language-current` currently renders both `.language-current-flag` and a `.language-current-name` span; drop the visible name, keep it available to assistive tech via the existing `aria-label`). Opening the selector clearly lists the available languages.
-- [ ] Production language list trimmed to only fully translated and verified languages — for the v1.0.0 Release Candidate that's Norwegian Bokmål (`nb`) and English (`en`) only; `nn`/`es`/`de`/`fr`/`sv`/`da` (currently all offered in `index.html`'s `#languageSelect` and the custom `.language-options` dropdown) are hidden from the production selector until each is independently completed and verified, then can be re-added one at a time — same "flag it off until verified" pattern already used for the tournament-format picker (docs/BUGS.md P1, Americano/Mexicano/etc.).
-- [ ] No untranslated keys or fallback strings visible in either shipped language.
-- [ ] Switching language updates the interface immediately, no reload required (already true today via `app/core/language-controller.js` — verify it still holds once the selector is redesigned).
-- [ ] Selector and switching work consistently on desktop and mobile.
+- [x] Production language list trimmed to only fully translated and verified languages — for the v1.0.0 Release Candidate that's Norwegian Bokmål (`nb`) and English (`en`) only; `nn`/`es`/`de`/`fr`/`sv`/`da` (currently all offered in `index.html`'s `#languageSelect` and the custom `.language-options` dropdown) are hidden from the production selector until each is independently completed and verified, then can be re-added one at a time — same "flag it off until verified" pattern already used for the tournament-format picker (docs/BUGS.md P1, Americano/Mexicano/etc.).
+- [x] No untranslated keys or fallback strings visible in either shipped language. — see the key-parity result above; re-run the key check whenever strings are added.
+- [x] Switching language updates the interface immediately, no reload required (already true today via `app/core/language-controller.js` — verify it still holds once the selector is redesigned). — verified after the redesign.
+- [x] Selector and switching work consistently on desktop and mobile. — verified at 375px, 768px and desktop width.
 
 ## Phase 22 — Help/privacy/info
 
-- [ ] Guide matches current product.
-- [ ] Privacy matches actual data flow.
-- [ ] Navigation matches current UI.
-- [ ] Contradictory old text removed.
+- [x] Guide matches current product. — rewritten for `nb`/`en` (create wizard, lobby, guest use without account, invite code/QR, profile colour).
+- [ ] Privacy matches actual data flow. — added push-subscription and colour-choice data and the real retention lifecycle; the retention wording depends on migration `20260919090500_...` being applied.
+- [x] Navigation matches current UI. — guide/privacy menus now read Home/Join/Create/Profile (they said "Konto"), are translated, and offer only Bokmål/English like the app.
+- [x] Contradictory old text removed. — removed "the admin must be signed in to create a live tournament" (guests can create tournaments).
 
 ## Phase 23 — Initial system owner
 
@@ -404,12 +428,12 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 24 — v1 security/data integrity
 
-- [ ] Supabase RLS for v1 flows.
+- [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, NOT applied); leaked-password protection is disabled — it is a Supabase Pro-plan feature and the project is on the free plan, so it cannot be enabled (accepted 2026-09-19; the password rules of Supabase Auth still apply). Revisit if the project moves to Pro.
 - [ ] Stable IDs for auth/relations.
 - [ ] Guest/player/admin/owner/TV access.
 - [ ] Duplicate/race handling.
 - [ ] Correction atomicity.
-- [ ] Cleanup cannot destroy required permanent data.
+- [x] Cleanup cannot destroy required permanent data. — deletion is guarded by a database trigger that requires saved statistics; cleanup never touches account-owned tournaments, `account_tournament_statistics` or receipts; tournaments with account-linked players are skipped rather than deleted.
 
 ## Phase 25 — v1 resilience and UI verification
 
@@ -420,9 +444,9 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Concurrent scoring/takeover attempt.
 - [ ] Failed database write.
 - [ ] Failed permanent-stat transfer.
-- [ ] Desktop responsive verification.
-- [ ] Mobile responsive verification.
-- [ ] Tablet verification where relevant.
+- [ ] Desktop responsive verification. — partial: landing, join, account, create wizard and the admin workspace tabs checked at desktop width with an automated overflow check; profile, TV, podium and cup views not yet.
+- [ ] Mobile responsive verification. — partial: same screens checked at 375px in English. Found and fixed three defects: the Kamper tab scrolled sideways (walkover buttons couldn't wrap), scoreboard team names collapsed to one letter, and the create wizard's hidden format radios stretched the page to 433px.
+- [ ] Tablet verification where relevant. — partial: same screens at 768px, no overflow.
 - [ ] TV 16:9 verification.
 - [ ] Touch targets usable.
 - [ ] Status does not rely only on color.

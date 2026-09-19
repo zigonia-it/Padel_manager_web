@@ -4,7 +4,7 @@
   function create({ elements, getDefaultTournament, getProfile, initials, accentStyle, translate, syncInviteCodeCells, accentPicker }) {
     function syncCreateFormDefaults() {
       const defaultTournament = getDefaultTournament();
-      elements.createTournamentForm.elements.tournamentName.value = defaultTournament.name;
+      elements.createTournamentForm.elements.tournamentName.value = translate("setup.defaultTournamentName");
       elements.createTournamentForm.elements.players.value = defaultTournament.players
         .map((player) => player.name)
         .join("\n");
