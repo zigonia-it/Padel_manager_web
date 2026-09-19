@@ -1,2 +1,34 @@
-this is where the owners admin page is located in future versions of the app
-this page will be used to manage the app, templates and its users.
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08090b"><meta name="description" content="Padelstar system administration (owner only).">
+  <title>Padelstar – System</title>
+  <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="assets/icons/padelstar-icon.png" type="image/png">
+  <link rel="stylesheet" href="styles/base.css?v=padelstar-base-7"><link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-9"><link rel="stylesheet" href="styles/components.css?v=padelstar-components-19"><link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-14"><link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-103"><link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1"><link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-51"><link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-5">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="styles/system-admin.css?v=padelstar-system-admin-1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script defer src="app/config/supabase-config.js?v=padelstar-supabase-config-1"></script>
+  <script defer src="app/page-language.js?v=padelstar-page-language-1"></script>
+  <script defer src="app/system-admin.js?v=padelstar-system-admin-1"></script>
+</head>
+<body data-theme="classic"><main class="privacy-page">
+  <header class="privacy-header">
+    <div class="brand-lockup">
+      <a class="brand-home-button" href="./">
+        <img class="brand-logo" src="assets/icons/padelstar-icon.png" alt="" width="3000" height="3000">
+        <img class="brand-wordmark" src="assets/logos/main_logo_without_icon.png" alt="Padelstar" width="1500" height="352">
+      </a>
+    </div>
+    <a class="secondary" href="./" data-admin-i18n="back">Til forsiden</a>
+  </header>
+  <article class="privacy-document" id="systemAdminRoot" aria-labelledby="systemAdminTitle">
+    <p class="eyebrow">PADELSTAR</p>
+    <h1 id="systemAdminTitle" data-admin-i18n="title">Systemadministrasjon</h1>
+    <p class="hint" id="systemAdminStatus" role="status" aria-live="polite" data-admin-i18n="checking">Sjekker tilgang …</p>
+    <div id="systemAdminContent" hidden></div>
+  </article>
+  <div class="system-admin-toast" id="systemAdminToast" role="alert" aria-live="assertive"></div>
+</main></body></html>

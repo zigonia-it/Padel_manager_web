@@ -705,6 +705,7 @@ const notificationCenterUi = window.PadelstarNotificationCenterUi.create({
   t: (key, values) => t(key, values),
 });
 notificationCenterUi.bind();
+const systemAdminLink = window.PadelstarSystemAdmin.createLink({ document, getClient: () => supabaseClient });
 const profileSession = window.PadelstarProfileSession.create({
   defaultAvatarId,
   getElements: () => elements,
@@ -815,7 +816,7 @@ const accountAuth = window.PadelstarAccountAuth?.create({
   getClient: () => supabaseClient,
   getElements: () => elements,
   getProfile: () => profile,
-  onAuthChange: (user) => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
+  onAuthChange: (user) => { void systemAdminLink.refresh(user); syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
   onProfileLoaded: (remoteProfile) => {
     profile = profile
       ? profileManager.normalizeProfile({ ...profile, ...remoteProfile })

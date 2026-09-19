@@ -7,6 +7,7 @@ Only verified completed changes belong here.
 ## Unreleased
 
 ### Added (branch `v0.8`, not yet released)
+- **System owner (Phase 23)**: one protected system owner stored in the database (only the database owner can hand it over), an owner-only `admin.html` with a minimal overview, and a "System" menu link that only the owner sees. Nothing on the page is granted by the front end: the server decides.
 - **Notifications (Phase 18)**: a bell with an unread badge and a notification center for the player (match ready, result to approve, teammate withdrew, result corrected, tournament finished), the Padelstar sounds (notification1 = your match is ready, notification2 = other updates) and vibration, with a "Varsler og lyd" settings panel on the profile page to turn sound and vibration on or off.
 - **Guide and privacy as a popup (Phase 22)**: the footer links open the pages in a popup with an X inside the card (also Escape and a click outside); they follow the chosen language, including "device language" (they showed Norwegian on an English device). The privacy text and guide are in plain language, the guide covers scoring, approval and withdrawal, and the outdated retention text is gone.
 - **TV Mode (Phase 19)**: always opens in a new tab; the button sits at the bottom of the side rail, which now fits the window height (no scrolling to reach it).

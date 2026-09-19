@@ -1,0 +1,52 @@
+/* Owner-only system administration page (admin.html). Reuses the information-page layout from privacy.css. */
+.system-admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 12px 0 24px;
+}
+
+.system-admin-stat {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.system-admin-stat span { font-size: 0.8rem; opacity: 0.75; }
+.system-admin-stat strong { font-size: 1.6rem; }
+
+.system-admin-table-wrap { overflow-x: auto; }
+
+.system-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.system-admin-table th,
+.system-admin-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+  text-align: left;
+  white-space: nowrap;
+}
+
+.system-admin-toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 12px 16px;
+  border: 1px solid var(--danger, #ff8a8a);
+  border-radius: 12px;
+  background: #06152c;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.system-admin-toast.is-visible { opacity: 1; }

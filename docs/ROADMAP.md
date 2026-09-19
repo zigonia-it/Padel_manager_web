@@ -433,11 +433,11 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 ## Phase 23 — Initial system owner (v.0.8.0 reqiurement)
 
-- [ ] Exactly one protected Systemeier.
-- [ ] Backend/database enforcement.
-- [ ] Cannot be removed/restricted by ordinary superuser.
-- [ ] Unauthorized system-admin access blocked.
-- [ ] Minimum owner administration verified.
+- [ ] Exactly one protected Systemeier. — built and applied to the live database 2026-09-19 (migration `20260920110000_system_owner.sql`): singleton table `public.system_owner` seeded with `sigurd.grodem@live.no` (the developer's decision). Verified live: one row, the account id matches.
+- [ ] Backend/database enforcement. — the table is closed to `anon`/`authenticated` (RLS on, no grants); triggers refuse delete, truncate and any update unless the database owner deliberately sets `app.system_owner_transfer = 'confirmed'`; deleting the owner's account is refused (foreign key restrict). All checks run on `auth.uid()` in SECURITY DEFINER functions. 22 checks in `supabase/tests/system-owner.pglite.mjs` and the same protections re-checked on the live database (rolled back).
+- [ ] Cannot be removed/restricted by ordinary superuser. — there is no superuser concept yet (Priority 2); the protection does not depend on one. Only the database owner can transfer the role, on purpose, in SQL.
+- [ ] Unauthorized system-admin access blocked. — `is_system_owner()` / `admin_overview()` are not executable by `anon`, and refuse any signed-in user who is not the owner (verified live). `admin.html` sends a signed-out visitor to sign-in and a stranger Home with a message, and requests no administration data before the server confirmed ownership (`test/system-admin.test.js`; the signed-out redirect was checked in the browser). The menu link "System" exists only for the owner.
+- [ ] Minimum owner administration verified. — `admin.html` shows counts (tournaments, running, finished, expired, with account, profiles) and the 20 latest tournaments, without tokens, invite codes or personal data. Database side verified live as the owner; the page itself as the signed-in owner still needs your check (I cannot sign in for you): see USER ACTIONS.
 
 ## Phase 24 — v1 security/data integrity
 

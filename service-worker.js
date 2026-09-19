@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v334";
+const cacheName = "padelstar-v335";
 
 const appShell = [
   "./",
@@ -32,7 +32,7 @@ const appShell = [
   "./styles/invite-code-input.css?v=padelstar-invite-code-input-1",
   "./styles/accent-picker.css?v=padelstar-accent-picker-1",
   "./styles/privacy.css?v=padelstar-privacy-5",
-  "./app/translations.js?v=padelstar-i18n-51",
+  "./app/translations.js?v=padelstar-i18n-52",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-6",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -106,6 +106,9 @@ const appShell = [
   "./app/notification-system.js?v=padelstar-notification-system-2",
   "./app/notification-center.js?v=padelstar-notification-center-7",
   "./app/notification-center-ui.js?v=padelstar-notification-center-7",
+  "./app/system-admin.js?v=padelstar-system-admin-1",
+  "./styles/system-admin.css?v=padelstar-system-admin-1",
+  "./admin.html",
   "./assets/sounds/notification1.mp3",
   "./assets/sounds/notification2.mp3",
   "./app/profile-session.js?v=padelstar-profile-session-3",
@@ -149,7 +152,7 @@ const appShell = [
   "./app/admin-form-events.js?v=padelstar-admin-form-events-6",
   "./app/match-actions.js?v=padelstar-match-actions-3",
   "./app/initial-view.js?v=padelstar-initial-view-3",
-  "./app/app.js?v=padelstar-session-75",
+  "./app/app.js?v=padelstar-session-76",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",
