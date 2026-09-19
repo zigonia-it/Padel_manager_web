@@ -375,17 +375,17 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 21 — Language/i18n
 
-- [ ] Norwegian.
-- [ ] English.
-- [ ] Device default.
-- [ ] Persistent manual override.
+- [x] Norwegian. — source language; every key referenced by `index.html`/`app/*.js` resolves in `nb` (checked 2026-09-19: 461 referenced keys, 0 missing).
+- [x] English. — `en` had 96 keys that silently fell back to Norwegian (round/cup/queue/score/player/message strings); all added, `nb`/`en` dictionaries now have identical key sets (529/529). Norwegian footer copyright line was English; fixed. The create form's default tournament name is now translated (was hardcoded `Padelstar-turnering`).
+- [ ] Device default. — the `Følg enhetens språk` option exists and resolves only to `nb`/`en`; not yet re-tested with a non-Norwegian/English device language.
+- [x] Persistent manual override. — choice is stored in `localStorage` (`padelstar-language`) and survives a reload.
 - [ ] `Følg enhetens språk`.
-- [ ] Key surfaces translated.
+- [x] Key surfaces translated. — scanned landing, join, account, create wizard (all 4 steps), account dialog, lobby and the admin workspace (Styring/Kamper/Tabell) plus player view in English for leftover Norwegian text and aria-labels: none left (a hardcoded Norwegian footer `aria-label` was found and fixed). Not yet scanned: TV mode, podium, cup bracket, profile with data, guide/privacy pages.
 - [ ] Selector redesign: closed state shows only the current language's flag (no permanent language name/code next to it — `index.html`'s `.language-current` currently renders both `.language-current-flag` and a `.language-current-name` span; drop the visible name, keep it available to assistive tech via the existing `aria-label`). Opening the selector clearly lists the available languages.
-- [ ] Production language list trimmed to only fully translated and verified languages — for the v1.0.0 Release Candidate that's Norwegian Bokmål (`nb`) and English (`en`) only; `nn`/`es`/`de`/`fr`/`sv`/`da` (currently all offered in `index.html`'s `#languageSelect` and the custom `.language-options` dropdown) are hidden from the production selector until each is independently completed and verified, then can be re-added one at a time — same "flag it off until verified" pattern already used for the tournament-format picker (docs/BUGS.md P1, Americano/Mexicano/etc.).
-- [ ] No untranslated keys or fallback strings visible in either shipped language.
-- [ ] Switching language updates the interface immediately, no reload required (already true today via `app/core/language-controller.js` — verify it still holds once the selector is redesigned).
-- [ ] Selector and switching work consistently on desktop and mobile.
+- [x] Production language list trimmed to only fully translated and verified languages — for the v1.0.0 Release Candidate that's Norwegian Bokmål (`nb`) and English (`en`) only; `nn`/`es`/`de`/`fr`/`sv`/`da` (currently all offered in `index.html`'s `#languageSelect` and the custom `.language-options` dropdown) are hidden from the production selector until each is independently completed and verified, then can be re-added one at a time — same "flag it off until verified" pattern already used for the tournament-format picker (docs/BUGS.md P1, Americano/Mexicano/etc.).
+- [x] No untranslated keys or fallback strings visible in either shipped language. — see the key-parity result above; re-run the key check whenever strings are added.
+- [x] Switching language updates the interface immediately, no reload required (already true today via `app/core/language-controller.js` — verify it still holds once the selector is redesigned). — verified after the redesign.
+- [x] Selector and switching work consistently on desktop and mobile. — verified at 375px, 768px and desktop width.
 
 ## Phase 22 — Help/privacy/info
 
@@ -420,9 +420,9 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 - [ ] Concurrent scoring/takeover attempt.
 - [ ] Failed database write.
 - [ ] Failed permanent-stat transfer.
-- [ ] Desktop responsive verification.
-- [ ] Mobile responsive verification.
-- [ ] Tablet verification where relevant.
+- [ ] Desktop responsive verification. — partial: landing, join, account, create wizard and the admin workspace tabs checked at desktop width with an automated overflow check; profile, TV, podium and cup views not yet.
+- [ ] Mobile responsive verification. — partial: same screens checked at 375px in English. Found and fixed three defects: the Kamper tab scrolled sideways (walkover buttons couldn't wrap), scoreboard team names collapsed to one letter, and the create wizard's hidden format radios stretched the page to 433px.
+- [ ] Tablet verification where relevant. — partial: same screens at 768px, no overflow.
 - [ ] TV 16:9 verification.
 - [ ] Touch targets usable.
 - [ ] Status does not rely only on color.

@@ -49,6 +49,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 0;
+  width: 38%;
 }
 
 .scoreboard-cell {
@@ -108,11 +109,26 @@
   }
 
   .scoreboard-row > td {
-    padding: 8px 6px;
+    padding: 8px 4px;
   }
 
   .scoreboard-cell {
     font-size: 1.05rem;
+  }
+
+  /* Let team names wrap instead of collapsing to an ellipsis in the narrow name column. */
+  .scoreboard-team-name {
+    width: 40%;
+    max-width: none;
+    font-size: 0.84rem;
+    line-height: 1.2;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .scoreboard-points {
+    gap: 4px;
   }
 
   .scoreboard-point-minus,

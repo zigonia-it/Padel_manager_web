@@ -95,9 +95,9 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v291/);
-  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-50/);
-  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-50/);
+  assert.match(serviceWorkerSource, /padelstar-v296/);
+  assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
+  assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(serviceWorkerSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
   assert.match(indexSource, /app\/player-visuals\.js\?v=padelstar-player-visuals-3/);
@@ -145,8 +145,8 @@ test("court settings have their own domain boundary", () => {
 });
 
 test("setup forms have their own boundary", () => {
-  assert.match(indexSource, /app\/setup-forms\.js\?v=padelstar-setup-forms-4/);
-  assert.match(serviceWorkerSource, /app\/setup-forms\.js\?v=padelstar-setup-forms-4/);
+  assert.match(indexSource, /app\/setup-forms\.js\?v=padelstar-setup-forms-5/);
+  assert.match(serviceWorkerSource, /app\/setup-forms\.js\?v=padelstar-setup-forms-5/);
   assert.match(setupFormsSource, /global\.PadelstarSetupForms/);
   assert.doesNotMatch(setupFormsSource, /localStorage|document\.querySelector/);
   assert.match(appSource, /setupForms\.syncJoinPreview\(\)/);
@@ -570,8 +570,8 @@ test("match card rendering has its own DOM and action boundary", () => {
 });
 
 test("scoreboard table (SETT/GAME/POENG) is shared by the admin match card and the player's own match, with a real multi-step undo stack", () => {
-  assert.match(indexSource, /styles\/scoreboard-table\.css\?v=padelstar-scoreboard-table-1/);
-  assert.match(serviceWorkerSource, /styles\/scoreboard-table\.css\?v=padelstar-scoreboard-table-1/);
+  assert.match(indexSource, /styles\/scoreboard-table\.css\?v=padelstar-scoreboard-table-2/);
+  assert.match(serviceWorkerSource, /styles\/scoreboard-table\.css\?v=padelstar-scoreboard-table-2/);
   assert.match(matchCardSource, /scoreboardTableMarkup/);
   assert.match(matchCardSource, /bindScoreboardTable/);
   assert.match(matchCardSource, /setsWonByTeam/);

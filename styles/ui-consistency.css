@@ -1192,3 +1192,23 @@ body[data-theme="classic"] .intro { padding-inline: 0; }
 
 /* The "saved locally" hint only makes sense when something is saved. */
 .resume-panel:has(#resumeEmptyState:not(.hidden)) .hint { display: none; }
+
+/* Walkover row: let the two team buttons wrap instead of overflowing the card on phones. */
+@media (max-width: 680px) {
+  .match-card .walkover-row {
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .match-card .walkover-row span {
+    flex: 1 0 100%;
+  }
+
+  .match-card .walkover-row .walkover-button {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
