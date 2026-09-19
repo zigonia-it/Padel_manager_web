@@ -124,3 +124,16 @@
     min-width: 40px;
   }
 }
+
+/* The account forms: on phones .inline-form is a column, so its labels must not keep their row sizing
+   (flex: 1 1 220px meant a 220px-tall box, and align-items: end pushed them to the right). */
+@media (max-width: 760px) {
+  .account-auth-panel .inline-form {
+    align-items: stretch;
+    flex-wrap: nowrap;
+  }
+
+  .account-auth-panel .inline-form > label {
+    flex: 0 0 auto;
+  }
+}

@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v344";
+const cacheName = "padelstar-v345";
 
 const appShell = [
   "./",
@@ -15,7 +15,7 @@ const appShell = [
   "./assets/logos/tv-brand.png",
   "./styles/modules.css?v=padelstar-modules-14",
   "./styles/styles.css?v=padelstar-ui-103",
-  "./styles/responsive.css?v=padelstar-responsive-3",
+  "./styles/responsive.css?v=padelstar-responsive-4",
   "./styles/ui-consistency.css?v=padelstar-ui-consistency-51",
   "./styles/components-v2.css?v=padelstar-components-v2-2",
   "./styles/workspace-nav.css?v=padelstar-workspace-nav-6",
@@ -27,7 +27,7 @@ const appShell = [
   "./styles/info-dialog.css?v=padelstar-info-dialog-2",
   "./styles/notification-center.css?v=padelstar-notification-center-7",
   "./styles/theme-toggle.css?v=padelstar-color-mode-1",
-  "./styles/theme-light.css?v=padelstar-theme-light-5",
+  "./styles/theme-light.css?v=padelstar-theme-light-6",
   "./styles/theme-light-manual.css?v=padelstar-theme-light-manual-1",
   "./styles/scorer-panel.css?v=padelstar-scorer-panel-7",
   "./styles/settings-rows.css?v=padelstar-settings-rows-1",
