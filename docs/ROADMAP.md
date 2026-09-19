@@ -336,12 +336,12 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 16 — Retention/cleanup
 
-- [ ] Guest completed/aborted retention. — today `finalize_tournament` deletes a guest tournament immediately (verified for `completed` and `cancelled`); the approved spec (FASE P1) keeps it read-only for 24 hours so final standings/matches/stats can still be shown. Differs from the spec and from the verified Monday flow, so not changed without a developer decision.
+- [ ] Guest completed/aborted retention. — decided 2026-09-19: keep a finished/cancelled guest tournament read-only for 24 hours. Migration `20260919170000_guest_finish_retention.sql` (NOT applied): `finalize_tournament` keeps the row with `retention_expires_at` = finish + 24 h (statistics still saved first, read-only through the existing guard trigger), the hourly cleanup deletes it afterwards. The guest admin's own device keeps today's flow (podium from a snapshot, local copy wiped). 23 database tests (`supabase/tests/guest-retention.pglite.mjs`); needs a live check after applying.
 - [x] Stats saved before guest deletion. — enforced in the database: `tournament_history_before_delete` refuses to delete a tournament without a `tournament_finalization_receipts` row, and `finalize_tournament` writes the receipt and every account-linked player's statistics in the same transaction (returns `statisticsSaved: true`).
-- [ ] 30-day inactivity → expired. — migration `20260919090500_cleanup_stale_guest_tournaments.sql` written, NOT applied (adds `expired_at`, a trigger that reactivates on any state write, and the 30-day/7-day cleanup). Live data before the fix: 29 of 40 guest tournaments were >7 days stale and nothing ever cleaned them.
+- [ ] 30-day inactivity → expired. — migration `20260919090500_cleanup_stale_guest_tournaments.sql` written, NOT applied (adds `expired_at`, a trigger that reactivates on any state write, the 30-day/7-day cleanup, and an hourly schedule); covered by `supabase/tests/guest-retention.pglite.mjs`. Live data before the fix: 29 of 40 guest tournaments were >7 days stale and nothing ever cleaned them.
 - [ ] 7-day recovery. — same migration; there is no admin-facing "expired, resume" banner yet (any state write reactivates).
 - [ ] Account deletion lifecycle. — not re-verified this pass.
-- [ ] Privacy documentation matches implementation. — `privacy.html` text updated to the 30-day/7-day lifecycle; becomes true once the migration above is applied.
+- [ ] Privacy documentation matches implementation. — `privacy.html` text updated to the 24-hour / 30-day / 7-day lifecycle; becomes true once the migrations above are applied.
 
 ## Phase 17 — Claiming/invitations
 

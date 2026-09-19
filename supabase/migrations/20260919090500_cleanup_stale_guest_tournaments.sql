@@ -59,10 +59,12 @@ begin
     raise exception 'Invalid retention window';
   end if;
 
-  -- 1. Finished guest tournaments whose statistics were already saved.
+  -- 1. Finished guest tournaments whose statistics were saved and whose 24 hours of read-only viewing have
+  --    passed (finalize_tournament sets retention_expires_at, see 20260919170000_guest_finish_retention.sql).
   delete from public.tournaments t
   where t.owner_user_id is null
     and t.state->>'status' = 'Avsluttet'
+    and coalesce(t.retention_expires_at, t.updated_at + interval '24 hours') <= now()
     and exists (select 1 from public.tournament_finalization_receipts r where r.tournament_id = t.id);
   get diagnostics n = row_count;
   total := total + n;
@@ -100,3 +102,14 @@ $function$;
 
 -- Reachable only by the scheduler (postgres), like before.
 revoke execute on function public.cleanup_expired_tournaments(integer, integer) from public, anon, authenticated;
+
+-- Finished guest tournaments are deleted 24 hours after they finish, so the cleanup runs every hour
+-- (it was nightly at 03:15). cron.schedule with an existing job name replaces the job.
+do $schedule$
+begin
+  if exists (select 1 from pg_extension where extname = 'pg_cron') then
+    perform cron.schedule('padelstar-retention-cleanup', '15 * * * *',
+      'select public.cleanup_expired_tournaments(); select public.cleanup_expired_player_profiles();');
+  end if;
+end
+$schedule$;

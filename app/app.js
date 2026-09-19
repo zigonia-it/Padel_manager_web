@@ -903,7 +903,9 @@ const tournamentFinalization = window.PadelstarTournamentFinalization.create({
     pendingAdminSync = false;
     pendingPlayerScores = [];
     remoteConflict = false;
-    if (result.deleted) {
+    // A guest tournament is kept on the server for 24 hours (TV Mode and players can still see the final result),
+    // but the guest admin's device does not keep it: the podium shows the result and the local copy is wiped.
+    if (result.deleted || !state.ownerUserId) {
       const id = state.id;
       state = { ...structuredClone(defaultTournament), id, status: "Avsluttet",
         lifecycleStatus: result.outcome, players: [], rounds: [], adminToken: null,

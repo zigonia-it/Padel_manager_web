@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v307";
+const cacheName = "padelstar-v308";
 
 const appShell = [
   "./",
@@ -42,7 +42,7 @@ const appShell = [
   "./app/tournament-sharing.js?v=padelstar-tournament-sharing-1",
   "./app/result-submissions.js?v=padelstar-result-submissions-1",
   "./app/player-actions.js?v=padelstar-player-actions-1",
-  "./app/privacy-i18n.js?v=padelstar-privacy-i18n-3",
+  "./app/privacy-i18n.js?v=padelstar-privacy-i18n-4",
   "./app/guide-i18n.js?v=padelstar-guide-i18n-3",
   "./app/tournament-engine.js?v=padelstar-engine-2",
   "./app/tournament-modes.js?v=padelstar-modes-1",
@@ -135,7 +135,7 @@ const appShell = [
   "./app/admin-form-events.js?v=padelstar-admin-form-events-6",
   "./app/match-actions.js?v=padelstar-match-actions-3",
   "./app/initial-view.js?v=padelstar-initial-view-3",
-  "./app/app.js?v=padelstar-session-66",
+  "./app/app.js?v=padelstar-session-67",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",
