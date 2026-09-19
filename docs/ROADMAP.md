@@ -263,7 +263,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 ## Phase 10 — Player live scoring
 
 - [ ] Player can score own active match.
-- [ ] One active scorer. — not defined in the docs yet and not enforced: `save_player_point_impl` lets any member of the scored team add that team's points; there is no scorer lease/claim/transfer. Needs a product decision (who may score which team, lease timeout, offline takeover) before the backend work; see the suspected sync-queue defect in BUGS.md.
+- [ ] One active scorer. — approved spec is in the archived plan (`docs/archive/plans/Padelstar_v1_0_0_plan.md`, FASE H): one active scorer per match, visible to others; scorer can transfer the role, other players can request it, admin can override, the server decides concurrent takeovers; after 2 minutes offline another participant can take over (first valid server request wins, old scorer does not get the role back automatically, the switch is logged). Not implemented: `save_player_point_impl` lets any member of the scored team add that team's points and has no scorer lease. See also the suspected sync-queue defect in BUGS.md.
 - [ ] Others live-view.
 - [ ] Scorer transfer/request.
 - [ ] Admin override.
@@ -324,12 +324,12 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 16 — Retention/cleanup
 
-- [ ] Guest completed/aborted retention.
-- [ ] Stats saved before guest deletion.
-- [ ] 30-day inactivity → expired.
-- [ ] 7-day recovery.
-- [ ] Account deletion lifecycle.
-- [ ] Privacy documentation matches implementation.
+- [ ] Guest completed/aborted retention. — today `finalize_tournament` deletes a guest tournament immediately (verified for `completed` and `cancelled`); the approved spec (FASE P1) keeps it read-only for 24 hours so final standings/matches/stats can still be shown. Differs from the spec and from the verified Monday flow, so not changed without a developer decision.
+- [x] Stats saved before guest deletion. — enforced in the database: `tournament_history_before_delete` refuses to delete a tournament without a `tournament_finalization_receipts` row, and `finalize_tournament` writes the receipt and every account-linked player's statistics in the same transaction (returns `statisticsSaved: true`).
+- [ ] 30-day inactivity → expired. — migration `20260919090500_cleanup_stale_guest_tournaments.sql` written, NOT applied (adds `expired_at`, a trigger that reactivates on any state write, and the 30-day/7-day cleanup). Live data before the fix: 29 of 40 guest tournaments were >7 days stale and nothing ever cleaned them.
+- [ ] 7-day recovery. — same migration; there is no admin-facing "expired, resume" banner yet (any state write reactivates).
+- [ ] Account deletion lifecycle. — not re-verified this pass.
+- [ ] Privacy documentation matches implementation. — `privacy.html` text updated to the 30-day/7-day lifecycle; becomes true once the migration above is applied.
 
 ## Phase 17 — Claiming/invitations
 
@@ -365,13 +365,13 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 20 — PWA
 
-- [ ] Manifest.
-- [ ] Service worker.
-- [ ] Installability.
-- [ ] Standalone detection.
-- [ ] Correct install CTA.
-- [ ] Cache/update behavior.
-- [ ] Desktop/mobile install guide.
+- [x] Manifest. — verified: name, `display: standalone`, scope/start_url, 192 px icon, plain 512 px icon (added 2026-09-19) and a 512 px maskable icon.
+- [x] Service worker. — verified by running `service-worker.js` against the real files in a Node sandbox: install caches all 156 shell entries, activate deletes old caches, offline navigation (including deep links) is served from the cached `index.html`. The in-app Browser pane does not persist service workers, so real-browser registration was not observed.
+- [ ] Installability. — criteria are met on paper; needs a Chrome/Lighthouse and iOS Safari check on the deployed HTTPS site.
+- [x] Standalone detection. — `app/pwa-install.js` checks `display-mode: standalone` and `navigator.standalone`, and updates live on change (covered by tests).
+- [x] Correct install CTA. — button shows a native prompt when `beforeinstallprompt` fired, otherwise manual per-platform steps; hidden when already standalone. Modal verified in the browser.
+- [x] Cache/update behavior. — network-first with cache fallback, `skipWaiting` + `clients.claim`, cache name bumped every release; stale caches removed on activate (simulated).
+- [x] Desktop/mobile install guide. — iOS, Android, Windows, macOS, ChromeOS and generic instructions in `nb` and `en`.
 
 ## Phase 21 — Language/i18n
 
@@ -389,10 +389,10 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 22 — Help/privacy/info
 
-- [ ] Guide matches current product.
-- [ ] Privacy matches actual data flow.
-- [ ] Navigation matches current UI.
-- [ ] Contradictory old text removed.
+- [x] Guide matches current product. — rewritten for `nb`/`en` (create wizard, lobby, guest use without account, invite code/QR, profile colour).
+- [ ] Privacy matches actual data flow. — added push-subscription and colour-choice data and the real retention lifecycle; the retention wording depends on migration `20260919090500_...` being applied.
+- [x] Navigation matches current UI. — guide/privacy menus now read Home/Join/Create/Profile (they said "Konto"), are translated, and offer only Bokmål/English like the app.
+- [x] Contradictory old text removed. — removed "the admin must be signed in to create a live tournament" (guests can create tournaments).
 
 ## Phase 23 — Initial system owner
 
@@ -404,12 +404,12 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 24 — v1 security/data integrity
 
-- [ ] Supabase RLS for v1 flows.
+- [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, NOT applied); leaked-password protection is disabled (Auth setting in the Dashboard — developer action).
 - [ ] Stable IDs for auth/relations.
 - [ ] Guest/player/admin/owner/TV access.
 - [ ] Duplicate/race handling.
 - [ ] Correction atomicity.
-- [ ] Cleanup cannot destroy required permanent data.
+- [x] Cleanup cannot destroy required permanent data. — deletion is guarded by a database trigger that requires saved statistics; cleanup never touches account-owned tournaments, `account_tournament_statistics` or receipts; tournaments with account-linked players are skipped rather than deleted.
 
 ## Phase 25 — v1 resilience and UI verification
 

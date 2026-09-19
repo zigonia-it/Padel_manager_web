@@ -6,7 +6,7 @@
   <title data-guide-i18n="title">Bruksanvisning - Padelstar</title>
   <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="assets/icons/padelstar-icon.png" type="image/png">
   <link rel="stylesheet" href="styles/base.css?v=padelstar-base-7"><link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-9"><link rel="stylesheet" href="styles/components.css?v=padelstar-components-19"><link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-13"><link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-103"><link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1"><link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-51"><link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-3">
-  <script defer src="app/guide-i18n.js?v=padelstar-guide-i18n-2"></script>
+  <script defer src="app/guide-i18n.js?v=padelstar-guide-i18n-3"></script>
 </head>
 <body data-theme="classic"><main class="privacy-page">
   <header class="privacy-header">
@@ -17,19 +17,19 @@
       </a>
     </div>
     <div class="topbar-actions">
-      <button class="app-menu-toggle" id="appMenuToggle" type="button" aria-expanded="false" aria-controls="appMenu" aria-label="Meny">
+      <button class="app-menu-toggle" id="appMenuToggle" type="button" aria-expanded="false" aria-controls="appMenu" aria-label="Meny" data-guide-aria-label="menu">
         <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
       </button>
       <div class="menu-drawer">
-        <nav class="app-menu" id="appMenu" aria-label="Meny">
-          <a class="module-link" href="index.html">Hjem</a>
-          <a class="module-link" href="index.html?view=setup-player">Bli med</a>
-          <a class="module-link" href="index.html?view=setup-admin">Opprett</a>
-          <a class="module-link" href="index.html?view=account">Konto</a>
+        <nav class="app-menu" id="appMenu" aria-label="Meny" data-guide-aria-label="menu">
+          <a class="module-link" href="index.html" data-guide-i18n="navHome">Hjem</a>
+          <a class="module-link" href="index.html?view=setup-player" data-guide-i18n="navJoin">Bli med</a>
+          <a class="module-link" href="index.html?view=setup-admin" data-guide-i18n="navCreate">Opprett</a>
+          <a class="module-link" href="index.html?view=account" data-guide-i18n="navProfile">Profil</a>
         </nav>
       </div>
     </div>
-    <label class="privacy-language"><span data-guide-i18n="language">Språk</span><select id="guideLanguage" aria-label="Språk"><option value="nb">Bokmål</option><option value="nn">Nynorsk</option><option value="en">English</option><option value="es">Español</option><option value="de">Deutsch</option><option value="fr">Français</option></select></label>
+    <label class="privacy-language"><span data-guide-i18n="language">Språk</span><select id="guideLanguage" aria-label="Språk"><option value="nb">Bokmål</option><option value="en">English</option></select></label>
   </header>
   <script>
     (function () {
