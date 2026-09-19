@@ -156,6 +156,89 @@ window.PadelstarScoring = (() => {
     return { kind: "idle", match: null };
   }
 
+
+  // ---- Point-by-point engine (Phase 14) -------------------------------------------------------
+  // The same rules are implemented in SQL (save_player_point_impl); supabase/tests/scoring-rules.pglite.mjs
+  // and test/scoring-rules.test.js run both against test/fixtures/scoring-scenarios.json.
+
+  const TIEBREAK_TARGET = 7;
+  const GAME_MODES = ["advantage", "goldenPoint"];
+
+  // The rule profile a match is played by. Tournament rules are locked once round 1 exists,
+  // and the profile is snapshotted onto the match on its first point.
+  function matchRules(match, settings = {}) {
+    const source = match?.rules ?? {};
+    return {
+      gamesToWinSet: source.gamesToWinSet ?? settings.gamesToWinSet ?? 6,
+      setsToWinMatch: source.setsToWinMatch ?? settings.setsToWinMatch ?? 1,
+      gameMode: GAME_MODES.includes(source.gameMode ?? settings.gameMode) ? (source.gameMode ?? settings.gameMode) : "advantage",
+      setTiebreak: Boolean(source.setTiebreak ?? settings.setTiebreak ?? false),
+    };
+  }
+
+  function snapshotRules(match, settings) {
+    if (!match.rules) match.rules = matchRules(match, settings);
+    return match.rules;
+  }
+
+  // Applies one point to the match. Returns { gameWon, setWon, matchWon }; the caller finishes the match.
+  function awardPoint(match, teamIndex, settings) {
+    const rules = snapshotRules(match, settings);
+    const scoringTeam = teamIndex === 0 ? "teamOne" : "teamTwo";
+    const otherTeam = teamIndex === 0 ? "teamTwo" : "teamOne";
+    const game = match.currentGame;
+    const scoring = game[scoringTeam] ?? 0;
+    const other = game[otherTeam] ?? 0;
+    let gameWon = false;
+    let tiebreakWon = false;
+    if (match.inTiebreak) {
+      game[scoringTeam] = scoring + 1;
+      if (scoring + 1 >= TIEBREAK_TARGET && scoring + 1 - other >= 2) {
+        gameWon = true;
+        tiebreakWon = true;
+      }
+    } else if (scoring === 4 || (scoring === 3 && (other < 3 || rules.gameMode === "goldenPoint"))) {
+      gameWon = true;
+    } else if (scoring === 3 && other === 3) {
+      game[scoringTeam] = 4;
+    } else if (other === 4) {
+      game[otherTeam] = 3;
+    } else {
+      game[scoringTeam] = scoring + 1;
+    }
+    if (!gameWon) return { gameWon: false, setWon: false, matchWon: false };
+
+    const tiebreakPoints = tiebreakWon ? { teamOne: game.teamOne, teamTwo: game.teamTwo } : null;
+    match.currentGame = { teamOne: 0, teamTwo: 0 };
+    if (tiebreakWon) {
+      match.currentSet[scoringTeam] = rules.gamesToWinSet + 1;
+      match.currentSet[otherTeam] = rules.gamesToWinSet;
+      match.inTiebreak = false;
+    } else {
+      match.currentSet[scoringTeam] += 1;
+      if (rules.setTiebreak
+        && match.currentSet.teamOne === rules.gamesToWinSet
+        && match.currentSet.teamTwo === rules.gamesToWinSet) {
+        match.inTiebreak = true;
+        return { gameWon: true, setWon: false, matchWon: false };
+      }
+    }
+    if (!isSetComplete(match.currentSet.teamOne, match.currentSet.teamTwo, rules)) {
+      return { gameWon: true, setWon: false, matchWon: false };
+    }
+    match.completedSets.push({ ...match.currentSet, ...(tiebreakPoints ? { tiebreak: tiebreakPoints } : {}) });
+    if (hasMatchWinner(match, rules)) return { gameWon: true, setWon: true, matchWon: true };
+    match.currentSet = { teamOne: 0, teamTwo: 0 };
+    return { gameWon: true, setWon: true, matchWon: false };
+  }
+
+  // Display label for one side's points in the current game (tiebreak points are plain numbers).
+  const POINT_LABELS = ["0", "15", "30", "40", "A"];
+  function pointLabel(match, value) {
+    if (match?.inTiebreak) return String(value ?? 0);
+    return POINT_LABELS[value] ?? "0";
+  }
+
   return {
     validateSetScore,
     isSetComplete,
@@ -173,5 +256,11 @@ window.PadelstarScoring = (() => {
     uniquePlayers,
     matchIncludesPlayer,
     playerTournamentState,
+    TIEBREAK_TARGET,
+    GAME_MODES,
+    matchRules,
+    snapshotRules,
+    awardPoint,
+    pointLabel,
   };
 })();

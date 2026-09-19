@@ -17,7 +17,7 @@ window.PadelstarLargeScore = (() => {
           <button class="large-score-team" type="button" data-large-score-team="${index}" style="${teamAccentStyle(team)}">
             <span>${teamDisplay(team)}</span>
             <strong>${match.currentSet[teamKey]}</strong>
-            <small>${tennisPointLabel(match.currentGame[teamKey])}</small>
+            <small>${match.inTiebreak ? match.currentGame[teamKey] : tennisPointLabel(match.currentGame[teamKey])}</small>
           </button>`;
       }).join("");
       elements.largeScoreActions.innerHTML = `

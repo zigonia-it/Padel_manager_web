@@ -9,8 +9,9 @@ window.PadelstarRules = (() => {
         games: t("rules.rankingGames"),
       }[state.settings.pointMode] ?? t("rules.rankingFallback");
       const rules = [
-        { title: t("rules.tennisPointsTitle"), text: t("rules.tennisPointsText") },
+        { title: t("rules.tennisPointsTitle"), text: state.settings.gameMode === "goldenPoint" ? t("rules.goldenPointText") : t("rules.tennisPointsText") },
         { title: t("rules.setsTitle"), text: t("rules.setsText", { sets: state.settings.setsToWinMatch, games: state.settings.gamesToWinSet }) },
+        ...(state.settings.setTiebreak ? [{ title: t("rules.tiebreakTitle"), text: t("rules.tiebreakText", { games: state.settings.gamesToWinSet }) }] : []),
         { title: t("rules.rankingTitle"), text: t("rules.rankingText", { pointModeText }) },
         { title: t("rules.restTitle"), text: t("rules.restText") },
       ];

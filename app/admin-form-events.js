@@ -82,6 +82,8 @@
           pointMode: formData.get("pointMode"),
           gamesToWinSet: Number(formData.get("gamesToWinSet")),
           setsToWinMatch: Number(formData.get("setsToWinMatch")),
+          gameMode: formData.get("gameMode"),
+          setTiebreak: formData.get("setTiebreak") === "on",
         });
         saveState();
         deps.render();

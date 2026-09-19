@@ -1,0 +1,89 @@
+{
+  "tokens": "\"0\"/\"1\" = one point for team one/two; \"g0\"/\"g1\" = four straight points; \"d\" = reach 40-40 (three points each); \"a0:N\"/\"a1:N\" = N straight points.",
+  "scenarios": [
+    {
+      "name": "advantage: a point after deuce gives advantage, not the game",
+      "settings": { "gamesToWinSet": 6, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": false },
+      "steps": ["d", "0"],
+      "expect": { "state": "playing", "currentGame": [4, 3], "currentSet": [0, 0], "completedSets": [], "inTiebreak": false }
+    },
+    {
+      "name": "advantage: advantage lost returns to deuce",
+      "settings": { "gamesToWinSet": 6, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": false },
+      "steps": ["d", "0", "1"],
+      "expect": { "state": "playing", "currentGame": [3, 3], "currentSet": [0, 0], "completedSets": [], "inTiebreak": false }
+    },
+    {
+      "name": "advantage: advantage converted wins the game",
+      "settings": { "gamesToWinSet": 6, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": false },
+      "steps": ["d", "0", "0"],
+      "expect": { "state": "playing", "currentGame": [0, 0], "currentSet": [1, 0], "completedSets": [], "inTiebreak": false }
+    },
+    {
+      "name": "golden point: the point at 40-40 wins the game",
+      "settings": { "gamesToWinSet": 6, "setsToWinMatch": 1, "gameMode": "goldenPoint", "setTiebreak": false },
+      "steps": ["d", "0"],
+      "expect": { "state": "playing", "currentGame": [0, 0], "currentSet": [1, 0], "completedSets": [], "inTiebreak": false }
+    },
+    {
+      "name": "golden point: the opponent can win it too",
+      "settings": { "gamesToWinSet": 6, "setsToWinMatch": 1, "gameMode": "goldenPoint", "setTiebreak": false },
+      "steps": ["d", "1"],
+      "expect": { "state": "playing", "currentGame": [0, 0], "currentSet": [0, 1], "completedSets": [], "inTiebreak": false }
+    },
+    {
+      "name": "golden point: a normal game is unchanged",
+      "settings": { "gamesToWinSet": 6, "setsToWinMatch": 1, "gameMode": "goldenPoint", "setTiebreak": false },
+      "steps": ["g0"],
+      "expect": { "state": "playing", "currentGame": [0, 0], "currentSet": [1, 0], "completedSets": [], "inTiebreak": false }
+    },
+    {
+      "name": "tiebreak: equal games start a tiebreak",
+      "settings": { "gamesToWinSet": 2, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": true },
+      "steps": ["g0", "g1", "g0", "g1"],
+      "expect": { "state": "playing", "currentGame": [0, 0], "currentSet": [2, 2], "completedSets": [], "inTiebreak": true }
+    },
+    {
+      "name": "tiebreak: points count as plain numbers",
+      "settings": { "gamesToWinSet": 2, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": true },
+      "steps": ["g0", "g1", "g0", "g1", "0", "0", "1"],
+      "expect": { "state": "playing", "currentGame": [2, 1], "currentSet": [2, 2], "completedSets": [], "inTiebreak": true }
+    },
+    {
+      "name": "tiebreak: 7-0 wins the tiebreak, the set and the match",
+      "settings": { "gamesToWinSet": 2, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": true },
+      "steps": ["g0", "g1", "g0", "g1", "a0:7"],
+      "expect": { "state": "finished", "winnerTeamIndex": 0, "currentGame": [0, 0], "currentSet": [3, 2], "completedSets": [[3, 2]], "inTiebreak": false }
+    },
+    {
+      "name": "tiebreak: 7-6 is not enough, it needs a 2 point margin",
+      "settings": { "gamesToWinSet": 2, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": true },
+      "steps": ["g0", "g1", "g0", "g1", "0", "1", "0", "1", "0", "1", "0", "1", "0", "1", "0", "1", "0"],
+      "expect": { "state": "playing", "currentGame": [7, 6], "currentSet": [2, 2], "completedSets": [], "inTiebreak": true }
+    },
+    {
+      "name": "tiebreak: 8-6 wins for the second team",
+      "settings": { "gamesToWinSet": 2, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": true },
+      "steps": ["g0", "g1", "g0", "g1", "0", "1", "0", "1", "0", "1", "0", "1", "0", "1", "0", "1", "1", "1"],
+      "expect": { "state": "finished", "winnerTeamIndex": 1, "currentGame": [0, 0], "currentSet": [2, 3], "completedSets": [[2, 3]], "inTiebreak": false }
+    },
+    {
+      "name": "no tiebreak: equal games are decided by the next game (7-6 style)",
+      "settings": { "gamesToWinSet": 2, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": false },
+      "steps": ["g0", "g1", "g0", "g1", "g0"],
+      "expect": { "state": "finished", "winnerTeamIndex": 0, "currentGame": [0, 0], "currentSet": [3, 2], "completedSets": [[3, 2]], "inTiebreak": false }
+    },
+    {
+      "name": "tiebreak does not trigger before equal games (2-0 lead ends the set)",
+      "settings": { "gamesToWinSet": 2, "setsToWinMatch": 1, "gameMode": "advantage", "setTiebreak": true },
+      "steps": ["g0", "g0"],
+      "expect": { "state": "finished", "winnerTeamIndex": 0, "currentGame": [0, 0], "currentSet": [2, 0], "completedSets": [[2, 0]], "inTiebreak": false }
+    },
+    {
+      "name": "best of three: a tiebreak set does not end the match",
+      "settings": { "gamesToWinSet": 2, "setsToWinMatch": 2, "gameMode": "goldenPoint", "setTiebreak": true },
+      "steps": ["g0", "g1", "g0", "g1", "a1:7"],
+      "expect": { "state": "playing", "currentGame": [0, 0], "currentSet": [0, 0], "completedSets": [[2, 3]], "inTiebreak": false }
+    }
+  ]
+}

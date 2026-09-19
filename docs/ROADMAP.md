@@ -309,14 +309,16 @@ Also fixed here: a point the server rejects (for example a tap on the opponent r
 
 ## Phase 14 — Timed matches/scoring rules
 
-- [ ] Generic point/margin engine.
-- [ ] Classic scoring.
-- [ ] No-ad/Golden Point.
-- [ ] Tiebreak. — no rule is defined yet: `leaderboardEntries()` sorts by points, wins, sets, then alphabetically by name (games are shown in the table but not used to rank). Needs a product decision (e.g. game difference) before implementing.
-- [ ] Timed matches.
-- [ ] 00:00 finish-current-game behavior.
-- [ ] Rule lock/snapshots.
-- [ ] Cup time overrides.
+Step 1 built 2026-09-19: the point-by-point engine now lives in one pure function (`awardPoint` in `app/scoring-engine.js`) with a SQL twin in `save_player_point_impl` (migration `20260919120000_match_scorer_lease.sql`, not applied yet). Both are run against the same 14 scenarios in `test/fixtures/scoring-scenarios.json` (`test/scoring-rules.test.js`, `supabase/tests/scoring-rules.pglite.mjs`), so client and server cannot drift. Verified live in the browser as admin (golden point, tiebreak, numeric tiebreak points, finished 3–2 with the 7–1 tiebreak stored).
+
+- [ ] Generic point/margin engine. — not built: only the fixed classic 0/15/30/40 model plus the options below; configurable minimum points / winner margin (numeric scoring) is not implemented.
+- [x] Classic scoring. — deuce/advantage, verified by scenarios (JS and SQL).
+- [x] No-ad/Golden Point. — setting `gameMode` (`advantage` | `goldenPoint`) in the create wizard and the Styring rules form; the point at 40–40 wins the game. Server-side player scoring needs the migration.
+- [ ] Tiebreak. — set tiebreak done: setting `setTiebreak`; at equal games a tiebreak to 7 (win by 2) is played, points shown as plain numbers, stored on the completed set, winner takes the set. Still open: the standings tiebreak (see below) needs a product decision — `leaderboardEntries()` sorts by points, wins, sets, then alphabetically by name.
+- [ ] Timed matches. — not built (needs a reliable match start timestamp on every start path, client and SQL).
+- [ ] 00:00 finish-current-game behavior. — not built.
+- [x] Rule lock/snapshots. — tournament rules are locked once round 1 exists (existing behaviour); the rule profile is now also snapshotted onto each match on its first point (`match.rules`) and the engine reads the snapshot, so a later setting change cannot alter a running match.
+- [ ] Cup time overrides. — not built.
 
 ## Phase 15 — Permanent history/statistics
 

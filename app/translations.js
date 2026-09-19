@@ -1433,6 +1433,27 @@ Object.assign(padelstarTranslations.en, {
   "scorer.failed": "Couldn't update the scorer role. Try again.",
   "scorer.offline": "You are offline. Reconnect to change the scorer role.",
 });
+// Scoring rule options (Phase 14).
+Object.assign(padelstarTranslations.nb, {
+  "admin.gameMode": "Poengregel",
+  "admin.gameModeAdvantage": "Klassisk (fordel)",
+  "admin.gameModeGoldenPoint": "Golden point (ingen fordel)",
+  "admin.setTiebreak": "Tiebreak ved lik stilling",
+  "rules.goldenPointText": "Poeng føres som 0, 15, 30 og 40. Golden point: ved 40–40 avgjør neste poeng gamet – ingen fordel.",
+  "rules.tiebreakTitle": "Tiebreak",
+  "rules.tiebreakText": "Ved {games}–{games} spilles tiebreak til 7 poeng med minst 2 poengs margin. Vinneren tar settet.",
+  "common.yes": "Ja",
+});
+Object.assign(padelstarTranslations.en, {
+  "admin.gameMode": "Scoring rule",
+  "admin.gameModeAdvantage": "Classic (advantage)",
+  "admin.gameModeGoldenPoint": "Golden point (no-ad)",
+  "admin.setTiebreak": "Tiebreak at equal games",
+  "rules.goldenPointText": "Points are counted 0, 15, 30 and 40. Golden point: at 40–40 the next point decides the game – no advantage.",
+  "rules.tiebreakTitle": "Tiebreak",
+  "rules.tiebreakText": "At {games}–{games} a tiebreak is played to 7 points, win by 2. The winner takes the set.",
+  "common.yes": "Yes",
+});
 window.PadelstarTranslations = padelstarTranslations;
 window.PadelstarI18n = {
   fallbackLanguage,

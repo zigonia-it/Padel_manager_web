@@ -190,7 +190,7 @@ test("a player's point claims the scorer role locally, and a new point drops the
     render: () => {},
     renderLargeScore: () => {},
     saveState: () => {},
-    scoring: { isSetComplete: () => false, hasMatchWinner: () => false, setsWonByTeam: () => 0 },
+    scoring: load("scoring-engine.js").PadelstarScoring,
     showToast: () => {},
     t: (key) => key,
   };

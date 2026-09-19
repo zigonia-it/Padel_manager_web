@@ -1168,8 +1168,8 @@ function activateSupabaseClient() {
   connectRealtimeForCurrentState();
 }
 
-function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
-  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
+function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
+  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
 }
 
 function createPlayer(name, index, avatarId = null, accent = null) {
@@ -2242,7 +2242,8 @@ function setScoreText(match) {
 
 function gameScoreText(match) {
   const currentGame = match.currentGame ?? { teamOne: 0, teamTwo: 0 };
-  return `${tennisPointLabel(currentGame.teamOne)}-${tennisPointLabel(currentGame.teamTwo)}`;
+  const label = (value) => (match.inTiebreak ? String(value ?? 0) : tennisPointLabel(value));
+  return `${label(currentGame.teamOne)}-${label(currentGame.teamTwo)}`;
 }
 
 function tennisPointLabel(value) {

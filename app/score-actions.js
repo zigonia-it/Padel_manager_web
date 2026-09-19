@@ -72,14 +72,8 @@
         match.state = "playing";
         match.status = "active";
       }
-      const scoringTeam = teamIndex === 0 ? "teamOne" : "teamTwo";
-      const otherTeam = teamIndex === 0 ? "teamTwo" : "teamOne";
-      const scoringPoints = match.currentGame[scoringTeam] ?? 0;
-      const otherPoints = match.currentGame[otherTeam] ?? 0;
-      if (scoringPoints === 4 || (scoringPoints === 3 && otherPoints < 3)) awardGame(match, scoringTeam);
-      else if (scoringPoints === 3 && otherPoints === 3) match.currentGame[scoringTeam] = 4;
-      else if (otherPoints === 4) match.currentGame[otherTeam] = 3;
-      else match.currentGame[scoringTeam] = scoringPoints + 1;
+      const { matchWon } = deps.scoring.awardPoint(match, teamIndex, deps.getState().settings);
+      if (matchWon) deps.finishMatch(match);
       deps.saveState();
       if (deps.currentLocalRole() === "player" && deps.matchIncludesPlayer(match, deps.getState().selectedPlayerId)) {
         deps.queuePlayerScore(match.id, teamIndex);
@@ -87,16 +81,6 @@
       deps.render();
       deps.renderLargeScore();
       deps.flashMatchCards(match.id);
-    }
-
-    function awardGame(match, scoringTeam) {
-      match.currentSet[scoringTeam] += 1;
-      match.currentGame = { teamOne: 0, teamTwo: 0 };
-      if (isSetComplete(match.currentSet.teamOne, match.currentSet.teamTwo)) {
-        match.completedSets.push({ ...match.currentSet });
-        if (hasMatchWinner(match)) deps.finishMatch(match);
-        else match.currentSet = { teamOne: 0, teamTwo: 0 };
-      }
     }
 
     function isSetComplete(teamOne, teamTwo) {

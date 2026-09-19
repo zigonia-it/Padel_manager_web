@@ -114,7 +114,7 @@ declare
   existing_next jsonb;
   keep_field text;
 begin
-  if jsonb_typeof(p_snapshot->'match') <> 'object' then
+  if jsonb_typeof(p_snapshot->'match') is distinct from 'object' then
     raise exception 'Invalid undo state';
   end if;
   restored := (p_snapshot->'match') - 'undoStack' - 'redoStack';
@@ -568,6 +568,13 @@ declare
   undo_state jsonb;
   next_waiting_match jsonb;
   scorer jsonb;
+  rules jsonb;
+  game_mode text;
+  set_tiebreak boolean;
+  in_tiebreak boolean;
+  game_won boolean;
+  tiebreak_won boolean;
+  tiebreak_points jsonb;
 begin
   if p_tournament_id is null
     or p_invite_code is null
@@ -662,22 +669,67 @@ begin
         match_item := public._scorer_append(match_item, 'eventLog', jsonb_build_object(
           'at', now(), 'type', 'point', 'playerId', p_player_id, 'teamIndex', p_team_index), 300);
 
+        -- Rule profile snapshot (Phase 14): taken from the tournament settings on the match's first point.
+        rules := match_item->'rules';
+        if jsonb_typeof(rules) is distinct from 'object' then
+          rules := jsonb_build_object(
+            'gamesToWinSet', games_to_win_set,
+            'setsToWinMatch', sets_to_win_match,
+            'gameMode', case when current_state->'settings'->>'gameMode' = 'goldenPoint' then 'goldenPoint' else 'advantage' end,
+            'setTiebreak', coalesce((current_state->'settings'->>'setTiebreak')::boolean, false));
+          match_item := jsonb_set(match_item, '{rules}', rules, true);
+        end if;
+        games_to_win_set := coalesce((rules->>'gamesToWinSet')::integer, games_to_win_set);
+        sets_to_win_match := coalesce((rules->>'setsToWinMatch')::integer, sets_to_win_match);
+        game_mode := coalesce(rules->>'gameMode', 'advantage');
+        set_tiebreak := coalesce((rules->>'setTiebreak')::boolean, false);
+        in_tiebreak := coalesce((match_item->>'inTiebreak')::boolean, false);
+
         scoring_key := case when p_team_index = 0 then 'teamOne' else 'teamTwo' end;
         other_key := case when p_team_index = 0 then 'teamTwo' else 'teamOne' end;
         current_game := coalesce(match_item->'currentGame', '{"teamOne": 0, "teamTwo": 0}'::jsonb);
+        current_set := coalesce(match_item->'currentSet', '{"teamOne": 0, "teamTwo": 0}'::jsonb);
         scoring_points := coalesce((current_game->>scoring_key)::integer, 0);
         other_points := coalesce((current_game->>other_key)::integer, 0);
+        game_won := false;
+        tiebreak_won := false;
+        tiebreak_points := null;
 
-        if scoring_points = 4 or (scoring_points = 3 and other_points < 3) then
-          current_set := coalesce(match_item->'currentSet', '{"teamOne": 0, "teamTwo": 0}'::jsonb);
-          scoring_games := coalesce((current_set->>scoring_key)::integer, 0) + 1;
-          current_set := jsonb_set(current_set, ARRAY[scoring_key], to_jsonb(scoring_games), true);
+        if in_tiebreak then
+          current_game := jsonb_set(current_game, ARRAY[scoring_key], to_jsonb(scoring_points + 1), true);
+          if scoring_points + 1 >= 7 and scoring_points + 1 - other_points >= 2 then
+            game_won := true;
+            tiebreak_won := true;
+            tiebreak_points := current_game;
+          end if;
+        elsif scoring_points = 4 or (scoring_points = 3 and (other_points < 3 or game_mode = 'goldenPoint')) then
+          game_won := true;
+        elsif scoring_points = 3 and other_points = 3 then
+          current_game := jsonb_set(current_game, ARRAY[scoring_key], '4'::jsonb, true);
+        elsif other_points = 4 then
+          current_game := jsonb_set(current_game, ARRAY[other_key], '3'::jsonb, true);
+        else
+          current_game := jsonb_set(current_game, ARRAY[scoring_key], to_jsonb(scoring_points + 1), true);
+        end if;
+
+        if game_won then
           current_game := '{"teamOne": 0, "teamTwo": 0}'::jsonb;
-
+          if tiebreak_won then
+            current_set := jsonb_build_object(scoring_key, games_to_win_set + 1, other_key, games_to_win_set);
+            in_tiebreak := false;
+          else
+            current_set := jsonb_set(current_set, ARRAY[scoring_key], to_jsonb(coalesce((current_set->>scoring_key)::integer, 0) + 1), true);
+          end if;
+          scoring_games := coalesce((current_set->>scoring_key)::integer, 0);
           other_games := coalesce((current_set->>other_key)::integer, 0);
-          if (scoring_games = games_to_win_set and scoring_games - other_games >= 2)
+
+          if not tiebreak_won and set_tiebreak
+            and scoring_games = games_to_win_set and other_games = games_to_win_set then
+            in_tiebreak := true;
+          elsif (scoring_games = games_to_win_set and scoring_games - other_games >= 2)
             or (scoring_games = games_to_win_set + 1 and other_games in (games_to_win_set - 1, games_to_win_set)) then
-            completed_sets := coalesce(match_item->'completedSets', '[]'::jsonb) || jsonb_build_array(current_set);
+            completed_sets := coalesce(match_item->'completedSets', '[]'::jsonb)
+              || jsonb_build_array(case when tiebreak_points is null then current_set else current_set || jsonb_build_object('tiebreak', tiebreak_points) end);
             set_one_wins := (
               select count(*) from jsonb_array_elements(completed_sets) set_item
               where (set_item->>'teamOne')::integer > (set_item->>'teamTwo')::integer
@@ -707,14 +759,9 @@ begin
               current_set := '{"teamOne": 0, "teamTwo": 0}'::jsonb;
             end if;
           end if;
-        elsif scoring_points = 3 and other_points = 3 then
-          current_game := jsonb_set(current_game, ARRAY[scoring_key], '4'::jsonb, true);
-        elsif other_points = 4 then
-          current_game := jsonb_set(current_game, ARRAY[other_key], '3'::jsonb, true);
-        else
-          current_game := jsonb_set(current_game, ARRAY[scoring_key], to_jsonb(scoring_points + 1), true);
         end if;
 
+        match_item := jsonb_set(match_item, '{inTiebreak}', to_jsonb(in_tiebreak), true);
         match_item := jsonb_set(match_item, '{currentSet}', coalesce(current_set, match_item->'currentSet'), true);
         match_item := jsonb_set(match_item, '{currentGame}', current_game, true);
         matches := jsonb_set(matches, ARRAY[match_index::text], match_item, false);

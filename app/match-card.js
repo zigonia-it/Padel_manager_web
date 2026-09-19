@@ -129,7 +129,7 @@
       <td class="scoreboard-cell scoreboard-games">${match.currentSet?.[key] ?? 0}</td>
       <td class="scoreboard-cell scoreboard-points">
         <button class="scoreboard-point-minus" type="button" data-undo-team="${teamIndex}" aria-label="${translate("score.undoLastAria")}" ${canUndo ? "" : "disabled"}>−</button>
-        <strong class="scoreboard-point-value">${tennisPointLabel(match.currentGame?.[key] ?? 0)}</strong>
+        <strong class="scoreboard-point-value">${match.inTiebreak ? (match.currentGame?.[key] ?? 0) : tennisPointLabel(match.currentGame?.[key] ?? 0)}</strong>
         <button class="scoreboard-point-plus" type="button" data-point-team="${teamIndex}" aria-label="${translate("score.pointsLabel", { team: teamName })}" ${canAward ? "" : "disabled"}>+</button>
       </td>
     </tr>`;

@@ -25,6 +25,8 @@
       format = "roundRobin",
       gamesToWinSet = 6,
       setsToWinMatch = 1,
+      gameMode = "advantage",
+      setTiebreak = false,
       pointMode = "matches",
       cupTeamSetupMode = "auto",
       includesThirdPlaceMatch = false,
@@ -41,6 +43,8 @@
         settings: {
           gamesToWinSet: Math.max(1, Math.min(12, gamesToWinSet || 6)),
           setsToWinMatch: Math.max(1, Math.min(5, setsToWinMatch || 1)),
+          gameMode: ["advantage", "goldenPoint"].includes(gameMode) ? gameMode : "advantage",
+          setTiebreak: Boolean(setTiebreak),
           pointMode: ["matches", "sets", "games"].includes(pointMode) ? pointMode : "matches",
           format: validatedFormat,
           seasonId: null,

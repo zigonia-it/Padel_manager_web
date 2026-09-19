@@ -1,6 +1,6 @@
 (() => {
   function create({ getState, translate, showToast, buildSchedule, createTeam, findPlayerByName, saveState, render, parseCourtNumbers, randomUUID }) {
-    function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMatch, pointMode, gamesToWinSet, setsToWinMatch }) {
+    function updateTournamentRules({ format, cupTeamSetupMode, includesThirdPlaceMatch, pointMode, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak }) {
       const state = getState();
       if (state.rounds.length > 0) {
         showToast(translate("messages.rulesLocked"), "status-message-error");
@@ -15,6 +15,8 @@
       state.settings.pointMode = pointMode;
       state.settings.gamesToWinSet = Math.max(1, Math.min(12, gamesToWinSet || 6));
       state.settings.setsToWinMatch = Math.max(1, Math.min(5, setsToWinMatch || 1));
+      state.settings.gameMode = ["advantage", "goldenPoint"].includes(gameMode) ? gameMode : "advantage";
+      state.settings.setTiebreak = Boolean(setTiebreak);
       state.cup = null;
       state.schedule = buildSchedule(state.players, state.settings.format);
     }
