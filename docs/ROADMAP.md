@@ -263,7 +263,7 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 ## Phase 10 — Player live scoring
 
 - [ ] Player can score own active match.
-- [ ] One active scorer.
+- [ ] One active scorer. — not defined in the docs yet and not enforced: `save_player_point_impl` lets any member of the scored team add that team's points; there is no scorer lease/claim/transfer. Needs a product decision (who may score which team, lease timeout, offline takeover) before the backend work; see the suspected sync-queue defect in BUGS.md.
 - [ ] Others live-view.
 - [ ] Scorer transfer/request.
 - [ ] Admin override.
