@@ -111,21 +111,76 @@
 
 .notification-item.is-unread button {
   border-left-color: var(--gold-bright, #f5c04a);
-  background: rgba(245, 192, 74, 0.08);
+  background: color-mix(in srgb, var(--gold-bright, #f5c04a) 10%, transparent);
 }
 
 .notification-item small { opacity: 0.7; }
 .notification-item span { opacity: 0.85; font-size: 0.9rem; }
 .notification-empty { padding: 18px 4px; opacity: 0.75; text-align: center; }
-.notification-sound-toggle { display: inline-flex; align-items: center; gap: 8px; }
+.notification-sound-toggle { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
 
 /* Settings panel on the profile page */
 .notification-setting-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  gap: 14px;
   min-height: 44px;
   cursor: pointer;
 }
 
-.notification-setting-row input { width: 20px; height: 20px; }
+/* Toggle switches (a checkbox with role="switch"): the whole row is the target, the state is also announced by screen readers. */
+body[data-theme="classic"] input.switch {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  border: 1px solid var(--ds-border-strong, rgba(159, 207, 255, 0.35));
+  padding: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+body[data-theme="classic"] input.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #c2d4e5;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+body[data-theme="classic"] input.switch:checked {
+  border-color: var(--gold-bright, #f5c04a);
+  background: color-mix(in srgb, var(--gold-bright, #f5c04a) 32%, transparent);
+}
+
+body[data-theme="classic"] input.switch:checked::after {
+  background: var(--gold-bright, #f5c04a);
+  transform: translateX(20px);
+}
+
+body[data-theme="classic"] input.switch:focus-visible {
+  outline: 2px solid var(--gold-bright, #f5c04a);
+  outline-offset: 2px;
+}
+
+body[data-theme="classic"] input.switch:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-theme="classic"] input.switch,
+  body[data-theme="classic"] input.switch::after { transition: none; }
+}

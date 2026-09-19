@@ -226,7 +226,7 @@
   border: 1px solid var(--ds-border-strong, rgba(255, 255, 255, 0.22));
   border-left: 4px solid var(--gold-bright, #f5c04a);
   border-radius: 12px;
-  background: rgba(245, 192, 74, 0.08);
+  background: color-mix(in srgb, var(--gold-bright, #f5c04a) 10%, transparent);
 }
 .withdrawal-summary, .withdrawal-hint, .withdrawal-note { margin: 0; }
 .withdrawal-hint, .withdrawal-note { font-size: 0.9rem; opacity: 0.85; }

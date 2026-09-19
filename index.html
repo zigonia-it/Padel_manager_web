@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="styles/match-list-collapse.css?v=padelstar-match-list-collapse-1">
   <link rel="stylesheet" href="styles/feedback.css?v=padelstar-feedback-2">
   <link rel="stylesheet" href="styles/info-dialog.css?v=padelstar-info-dialog-2">
-  <link rel="stylesheet" href="styles/notification-center.css?v=padelstar-notification-center-3">
-  <link rel="stylesheet" href="styles/scorer-panel.css?v=padelstar-scorer-panel-6">
+  <link rel="stylesheet" href="styles/notification-center.css?v=padelstar-notification-center-6">
+  <link rel="stylesheet" href="styles/scorer-panel.css?v=padelstar-scorer-panel-7">
   <link rel="stylesheet" href="styles/settings-rows.css?v=padelstar-settings-rows-1">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -342,11 +342,11 @@
           </div>
           <p class="hint" data-i18n="notifications.settings.hint">Velg hva som skjer når noe nytt skjer i turneringen din, for eksempel når kampen din er klar.</p>
           <label class="notification-setting-row">
-            <input type="checkbox" id="notificationSettingsSound" checked>
+            <input type="checkbox" role="switch" class="switch" id="notificationSettingsSound" checked>
             <span data-i18n="notifications.settings.sound">Lyd ved varsler</span>
           </label>
           <label class="notification-setting-row">
-            <input type="checkbox" id="notificationSettingsVibration" checked>
+            <input type="checkbox" role="switch" class="switch" id="notificationSettingsVibration" checked>
             <span data-i18n="notifications.settings.vibration">Vibrasjon ved varsler</span>
           </label>
           <p class="hint hidden" id="notificationSettingsVibrationHint" data-i18n="notifications.settings.vibrationUnsupported">Vibrasjon støttes ikke på denne enheten.</p>
@@ -1054,7 +1054,7 @@
         </div>
         <ul class="notification-list" id="notificationCenterList"></ul>
         <div class="notification-dialog-foot">
-          <label class="notification-sound-toggle"><input type="checkbox" id="notificationSoundToggle" checked> <span data-i18n="notifications.center.sound">Lyd</span></label>
+          <label class="notification-sound-toggle"><input type="checkbox" role="switch" class="switch" id="notificationSoundToggle" checked> <span data-i18n="notifications.center.sound">Lyd</span></label>
           <button class="secondary" id="notificationMarkAllRead" type="button" data-i18n="notifications.center.markAllRead">Marker alle som lest</button>
         </div>
       </div>
@@ -1171,8 +1171,8 @@
   <script defer src="app/player-visuals.js?v=padelstar-player-visuals-3"></script>
   <script defer src="app/ui-feedback.js?v=padelstar-ui-feedback-2"></script>
   <script defer src="app/notification-system.js?v=padelstar-notification-system-2"></script>
-  <script defer src="app/notification-center.js?v=padelstar-notification-center-3"></script>
-  <script defer src="app/notification-center-ui.js?v=padelstar-notification-center-3"></script>
+  <script defer src="app/notification-center.js?v=padelstar-notification-center-6"></script>
+  <script defer src="app/notification-center-ui.js?v=padelstar-notification-center-6"></script>
   <script defer src="app/profile-session.js?v=padelstar-profile-session-3"></script>
   <script defer src="app/account-auth.js?v=padelstar-account-auth-6"></script>
   <script defer src="app/config/storage-keys.js?v=padelstar-storage-keys-1"></script>

@@ -152,3 +152,13 @@ test("on a device without vibration the switch is disabled and explained", () =>
   assert.equal(doc.nodes["#notificationSettingsVibration"].checked, false);
   assert.equal(doc.nodes["#notificationSettingsVibrationHint"].classList.contains("hidden"), false);
 });
+
+test("the selections are toggle switches (role=switch), not plain check marks", () => {
+  const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  for (const id of ["notificationSettingsSound", "notificationSettingsVibration", "notificationSoundToggle"]) {
+    assert.match(html, new RegExp(`<input type="checkbox" role="switch" class="switch" id="${id}"`), id);
+  }
+  const css = fs.readFileSync(path.join(root, "styles", "notification-center.css"), "utf8");
+  assert.match(css, /input\.switch\s*\{[^}]*appearance:\s*none/);
+  assert.match(css, /input\.switch:checked::after/);
+});
