@@ -45,11 +45,11 @@
   font-weight: 700;
   font-size: 0.92rem;
   color: var(--player-accent-light, inherit);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 0;
+  /* long doubles names wrap onto a second line instead of being cut off */
   width: 38%;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .scoreboard-cell {

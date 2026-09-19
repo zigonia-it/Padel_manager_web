@@ -3,6 +3,8 @@ window.PadelstarPlayerNextMatch = (() => {
     accentStyle,
     approvalPanelMarkup,
     bindApprovalPanel,
+    withdrawalPanelMarkup,
+    bindWithdrawalPanel,
     timerMarkup,
     bindScoreboardTable,
     elements,
@@ -35,9 +37,27 @@ window.PadelstarPlayerNextMatch = (() => {
       });
     }
 
+    // A teammate who withdrew is not "my match" either: the remaining player decides here (play alone / walkover).
+    function renderWithdrawalNotices(matches) {
+      const state = getState();
+      const playerId = state.selectedPlayerId;
+      elements.playerNextMatch.querySelectorAll(".player-withdrawal-notice").forEach((node) => node.remove());
+      if (!playerId || state.status === "Avsluttet") return;
+      matches.filter((match) => match.state === "awaitingWithdrawalDecision" && match.withdrawal?.status === "pending" && match.withdrawal.teammateId === playerId)
+        .reverse()
+        .forEach((match) => {
+          const notice = document.createElement("section");
+          notice.className = "player-withdrawal-notice";
+          notice.innerHTML = `<p class="eyebrow">${t("withdrawal.needsAttention")}</p><h3>${escapeHtml(matchContextText(match))}</h3>${withdrawalPanelMarkup(match, true, true)}`;
+          elements.playerNextMatch.prepend(notice);
+          bindWithdrawalPanel(notice, match);
+        });
+    }
+
     function renderPlayerNextMatch(matches) {
       renderPlayerNextMatchCore(matches);
       renderApprovalNotices(matches);
+      renderWithdrawalNotices(matches);
     }
 
     function renderPlayerNextMatchCore(matches) {
@@ -64,6 +84,15 @@ window.PadelstarPlayerNextMatch = (() => {
       <p class="eyebrow">${t("player.tournamentFinished")}</p>
       <h3>${placement ? t("player.finishedWithPlacement", { name: escapeHtml(player.name), placement }) : t("player.finishedWithoutPlacement", { name: escapeHtml(player.name) })}</h3>
       <p>${t("player.checkFinalStandings")}</p>`;
+        return;
+      }
+
+      if (player.withdrawn && !player.replacedBy) {
+        elements.playerNextMatch.setAttribute("style", accentStyle(player.accent));
+        elements.playerNextMatch.innerHTML = `
+      <p class="eyebrow">${t("players.withdrawn")}</p>
+      <h3>${escapeHtml(player.name)}</h3>
+      <p>${t("withdrawal.youWithdrew")}</p>`;
         return;
       }
 

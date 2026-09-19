@@ -6,8 +6,8 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
-const retentionSource = fs.readFileSync(path.join(root, "docs", "data_retention.md"), "utf8");
-const runbookSource = fs.readFileSync(path.join(root, "docs", "operations_runbook.md"), "utf8");
+const retentionSource = fs.readFileSync(path.join(root, "docs", "technical", "privacy-retention.md"), "utf8");
+const runbookSource = fs.readFileSync(path.join(root, "docs", "technical", "operations.md"), "utf8");
 const pushSource = fs.readFileSync(path.join(root, "supabase", "functions", "push-send", "index.ts"), "utf8");
 const vercelSource = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
 
@@ -21,8 +21,8 @@ test("privacy page covers the beta data handling basics", () => {
   assert.match(privacySource, /spillernavn/i);
   assert.match(privacySource, /Supabase/);
   assert.match(privacySource, /Vercel Analytics/);
-  assert.match(privacySource, /localStorage/);
-  assert.match(privacySource, /IndexedDB/);
+  assert.match(privacySource, /på enheten din/i);
+  assert.doesNotMatch(privacySource, /localStorage|IndexedDB|row-level|token-hash|Supabase Auth/, "plain language for players, no technical terms");
   assert.match(privacySource, /Lagringstid og sletting/);
   assert.match(privacySource, /beta-tekst/i);
 });
@@ -31,8 +31,10 @@ test("privacy page reflects the current profile and retention behavior", () => {
   assert.match(privacySource, /lokal brukerprofil/i);
   assert.match(privacySource, /profilhistorikk/i);
   assert.match(privacySource, /språkvalg/i);
-  assert.match(privacySource, /innen 7 dager/i);
-  assert.match(privacySource, /2026-09-03/);
+  assert.match(privacySource, /24 timer/i);
+  assert.match(privacySource, /30 dager/i);
+  assert.match(privacySource, /7 dager/i);
+  assert.match(privacySource, /2026-09-19/);
   assert.match(privacySource, /styles\/privacy\.css/);
   assert.match(privacySource, /theme-color" content="#08090b"/);
 });

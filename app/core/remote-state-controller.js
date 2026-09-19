@@ -21,6 +21,7 @@
     hasRealtimeChannel,
     render,
     saveProfileHistory,
+    onRemoteStateApplied,
     translate,
   }) {
     function markRemoteConflict() {
@@ -68,6 +69,8 @@
       nextState.playerToken = playerToken;
       nextState.ownerUserId = remoteState.ownerUserId ?? ownerUserId;
       setState(nextState);
+      // what is new for this player (match ready, result to approve, ...): a failure here must never break syncing
+      try { onRemoteStateApplied?.(state, nextState, { source, sameTournament }); } catch { /* ignore */ }
       const currentState = getState();
       currentState.ownerProfileId = remoteState.ownerProfileId ?? currentState.ownerProfileId ?? null;
       currentState.settings.language = loadUserLanguage(currentState.settings?.language ?? "nb");

@@ -142,3 +142,32 @@ body[data-theme] .admin-subtabs {
     background: var(--ds-glass);
   }
 }
+
+
+/* TV Mode: pinned at the bottom of the side rail (desktop). The menu entry stays for widths/roles without the rail. */
+@media (min-width: 860px) {
+  /* The rail always fits the visible window (app/workspace-rail.js sets its height); if the window is very short the rail
+     scrolls inside itself, so the pinned TV Mode button never ends up below the fold. */
+  .workspace-rail {
+    overflow-y: auto;
+    max-height: calc(100dvh - 126px);
+  }
+
+  .workspace-rail-tv {
+    margin-top: auto;
+    border-top: 1px solid var(--ds-border-hairline);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+  }
+
+  /* The desktop menu is Home, Current tournament, Profile and feedback; TV Mode lives in the side rail. */
+  #tvModeMenuButton {
+    display: none;
+  }
+}
+
+@media not all and (min-width: 860px) {
+  .workspace-rail-tv {
+    display: none;
+  }
+}

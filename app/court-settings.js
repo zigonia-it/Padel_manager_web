@@ -11,19 +11,31 @@
   }
 
   function create({ elements, getState, translate, escapeAttribute, escapeHtml }) {
-    function renderCourtNames() {
+    // The court names are edited in the Styring tab and in the lobby: the same rows and the same lock in both.
+    function renderCourtNamesInto(list, form) {
       const state = getState();
-      if (!elements.courtNamesList) return;
+      if (!list) return;
       const locked = state.rounds.length > 0 || state.status === "Avsluttet";
-      elements.courtNamesList.innerHTML = state.courts.map((court) => `
+      // do not rebuild the rows while the person is typing in one of them
+      if (list.contains?.(global.document?.activeElement) && list.dataset.locked === String(locked) && list.children.length === state.courts.length) return;
+      list.dataset.locked = String(locked);
+      list.innerHTML = state.courts.map((court) => `
     <label class="court-name-row">
       <span>${escapeHtml(translate("common.court"))} ${court.courtNumber}</span>
       <input name="courtName" type="text" maxlength="80" value="${escapeAttribute(court.name ?? "")}" placeholder="${escapeAttribute(translate("common.court"))} ${court.courtNumber}" ${locked ? "disabled" : ""}>
     </label>`).join("");
-      const submitButton = elements.courtNamesForm?.querySelector("button");
+      const submitButton = form?.querySelector("button");
       if (submitButton) submitButton.disabled = locked;
-      const countInput = elements.courtNamesForm?.elements.courtCount;
-      if (countInput) countInput.disabled = locked;
+      const countInput = form?.elements.courtCount;
+      if (countInput) {
+        countInput.disabled = locked;
+        if (global.document?.activeElement !== countInput) countInput.value = String(state.courts.length);
+      }
+    }
+
+    function renderCourtNames() {
+      renderCourtNamesInto(elements.courtNamesList, elements.courtNamesForm);
+      renderCourtNamesInto(elements.lobbyCourtNamesList, elements.lobbyCourtNamesForm);
     }
 
     function localizeGeneratedCourtNames() {

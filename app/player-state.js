@@ -1,5 +1,5 @@
 window.PadelstarPlayerState = (() => {
-  function create({ buildSchedule, createPlayer, createTeam, defaultAvatarId, findPlayerByName, getPlayerById, getState, recordEvent, render, saveState, showToast, t }) {
+  function create({ activateNextWaitingMatch, buildSchedule, createPlayer, createTeam, defaultAvatarId, findPlayerByName, getPlayerById, getState, recordEvent, render, saveState, showToast, t }) {
     function parsePlayerNames(value) {
       return String(value).split(/[\n,;]+/).map((name) => name.trim()).filter(Boolean);
     }
@@ -105,7 +105,79 @@ window.PadelstarPlayerState = (() => {
       showToast(t("messages.playerRestored", { name: original.name }), "status-message-success");
       return original;
     }
-    return { addPlayer, addPlayers, parsePlayerNames, removePlayer, replacePlayer, restorePlayer, updatePlayer };
+
+    // ---- Withdrawal without a replacement (Phase 13) ----
+    function withdrawBlockedMessage(reason, name) {
+      const key = {
+        awaitingApproval: "messages.withdrawBlockedApproval",
+        ended: "messages.withdrawBlockedEnded",
+        cup: "messages.withdrawBlockedCup",
+      }[reason] ?? "messages.withdrawBlockedInactive";
+      return t(key, { name });
+    }
+
+    // The admin always confirms first: returns { needsConfirmation, plan, name } until called with { confirmed: true }.
+    function withdrawPlayer(playerId, { confirmed = false } = {}) {
+      const state = getState();
+      const player = getPlayerById(playerId);
+      if (!player) return null;
+      const checked = window.PadelstarPlayerWithdrawal.plan(state, playerId);
+      if (!checked.ok) {
+        showToast(withdrawBlockedMessage(checked.blocked, player.name), "status-message-error");
+        return null;
+      }
+      if (!confirmed) return { needsConfirmation: true, plan: checked, name: player.name };
+      const result = window.PadelstarPlayerWithdrawal.withdraw(state, playerId, { createTeam, restartMatch: window.PadelstarPlayerReplacement.restartMatch });
+      if (!result.ok) {
+        showToast(withdrawBlockedMessage(result.blocked, player.name), "status-message-error");
+        return null;
+      }
+      // a court freed by an annulled match goes to the next waiting match
+      result.freed.forEach((court) => activateNextWaitingMatch?.(court));
+      recordEvent?.("player_withdrawn", "player", playerId, { slotId: player.slotId, awaitingDecision: result.decide, walkover: result.walkover, cancelled: result.cancel, restartedMatches: result.restarted });
+      result.restarted.forEach((matchId) => recordEvent?.("match_restarted", "match", matchId, { reason: "playerWithdrawn" }));
+      saveState();
+      render();
+      showToast(t("messages.playerWithdrawn", { name: player.name }), "status-message-success");
+      return result;
+    }
+
+    function reinstateBlockedMessage(reason, name) {
+      const key = { matchInProgress: "messages.reinstateBlockedRunning", replaced: "messages.reinstateBlockedReplaced", ended: "messages.withdrawBlockedEnded" }[reason] ?? "messages.withdrawBlockedInactive";
+      return t(key, { name });
+    }
+
+    function reinstatePlayer(playerId) {
+      const state = getState();
+      const player = getPlayerById(playerId);
+      if (!player) return null;
+      const result = window.PadelstarPlayerWithdrawal.reinstate(state, playerId, { createTeam });
+      if (!result.ok) {
+        showToast(reinstateBlockedMessage(result.blocked, player.name), "status-message-error");
+        return null;
+      }
+      recordEvent?.("player_reinstated", "player", playerId, { restoredMatches: result.restored });
+      saveState();
+      render();
+      showToast(t("messages.playerReinstated", { name: player.name }), "status-message-success");
+      return result;
+    }
+
+    // The admin decides for the remaining teammate (the teammate's own decision goes through match_withdrawal_decision).
+    function decideWithdrawal(matchId, decision, { by = "admin" } = {}) {
+      const state = getState();
+      const result = window.PadelstarPlayerWithdrawal.decide(state, matchId, decision, { createTeam, by });
+      if (!result.ok) {
+        showToast(t("withdrawal.error.outOfDate"), "status-message-error");
+        return null;
+      }
+      recordEvent?.("withdrawal_decided", "match", matchId, { decision, by, started: result.started });
+      saveState();
+      render();
+      return result;
+    }
+
+    return { addPlayer, addPlayers, parsePlayerNames, removePlayer, replacePlayer, restorePlayer, updatePlayer, withdrawPlayer, reinstatePlayer, decideWithdrawal };
   }
   return { create };
 })();

@@ -23,6 +23,7 @@
       resultAction,
       adminResolveResult,
       openCorrection,
+      withdrawalDecision,
       sittingOutSummary,
       startMatch,
       teamAccentStyle,
@@ -36,7 +37,7 @@
     const expandState = new Map();
 
     function isExpanded(match) {
-      return expandState.has(match.id) ? expandState.get(match.id) : ["playing", "awaitingApproval"].includes(match.state);
+      return expandState.has(match.id) ? expandState.get(match.id) : ["playing", "awaitingApproval", "awaitingWithdrawalDecision"].includes(match.state);
     }
 
 
@@ -257,6 +258,48 @@
       });
     }
 
+    // A player withdrew without a replacement: the remaining teammate decides (or the admin for them).
+    function withdrawalTeammate(match) {
+      const record = match.withdrawal;
+      const team = record?.teamIndex === 0 ? match.teamOne : match.teamTwo;
+      return team?.players?.find((player) => player.id === record?.teammateId) ?? null;
+    }
+
+    function withdrawalPanelMarkup(match, editable, scoreOnly) {
+      const record = match.withdrawal;
+      if (match.state !== "awaitingWithdrawalDecision" || !record || record.status !== "pending") return "";
+      const teammate = withdrawalTeammate(match);
+      const teammateName = escapeHtml(teammate?.name ?? "");
+      const absentName = escapeHtml(record.absent?.name ?? "");
+      const isTeammate = currentLocalRole() === "player" && Boolean(teammate) && selectedPlayerId() === teammate.id;
+      const isAdmin = currentLocalRole() !== "player" && editable && !scoreOnly;
+      const button = (decision, label) => `<button class="secondary withdrawal-button" type="button" data-withdrawal-decision="${decision}">${label}</button>`;
+      const controls = isTeammate || isAdmin
+        ? `<div class="withdrawal-controls">${button("playAlone", translate("withdrawal.playAlone"))}${button("walkover", translate("withdrawal.walkover"))}</div>${isAdmin && !isTeammate ? `<p class="withdrawal-hint">${translate("withdrawal.adminHint", { teammate: teammateName })}</p>` : ""}`
+        : `<p class="withdrawal-hint">${translate("withdrawal.waitingFor", { teammate: teammateName })}</p>`;
+      return `<div class="withdrawal-panel"><p class="withdrawal-summary"><strong>${translate("withdrawal.notice", { absent: absentName, teammate: teammateName })}</strong></p>${controls}</div>`;
+    }
+
+    function bindWithdrawalPanel(root, match) {
+      root.querySelectorAll("[data-withdrawal-decision]").forEach((control) => {
+        control.addEventListener("click", () => {
+          control.disabled = true;
+          void Promise.resolve(withdrawalDecision(match, control.dataset.withdrawalDecision)).finally(() => { control.disabled = false; });
+        });
+      });
+    }
+
+    // Short note on a match that was decided after a withdrawal.
+    function withdrawalNoteMarkup(match) {
+      const record = match.withdrawal;
+      if (!record || match.state === "awaitingWithdrawalDecision") return "";
+      const absent = escapeHtml(record.absent?.name ?? "");
+      if (record.bothSides) return `<p class="withdrawal-note">${translate("withdrawal.cancelledNote")}</p>`;
+      if (record.status === "playAlone") return `<p class="withdrawal-note">${translate("withdrawal.playedAlone", { teammate: escapeHtml(withdrawalTeammate(match)?.name ?? ""), absent })}</p>`;
+      if (record.status === "walkover") return `<p class="withdrawal-note">${translate("withdrawal.walkoverNote", { absent })}</p>`;
+      return "";
+    }
+
     function scoreboardRow(match, teamIndex, teamName, pointControlsEnabled) {
       const team = teamIndex === 0 ? match.teamOne : match.teamTwo;
       const key = teamIndex === 0 ? "teamOne" : "teamTwo";
@@ -279,7 +322,7 @@
     }
 
     function scoreboardTableMarkup(match, editable) {
-      const pointControlsEnabled = editable && match.state !== "cancelled" && playerMayScore(match);
+      const pointControlsEnabled = editable && match.state !== "cancelled" && match.state !== "awaitingWithdrawalDecision" && playerMayScore(match);
       return `
     <table class="scoreboard-table" aria-label="${translate("score.scoreboardAria")}">
       <thead>
@@ -318,7 +361,7 @@
       const teamTwoName = escapeHtml(match.teamTwo.displayName);
       const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
       const sittingOut = sittingOutSummary(match);
-      const matchNote = [sittingOut, winner ? `<p class="winner-note">${translate("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : "", scoreConflict?.(match) ? `<p class="match-conflict">${translate("score.conflictAdminHint")}</p>` : ""]
+      const matchNote = [sittingOut, withdrawalNoteMarkup(match), winner ? `<p class="winner-note">${translate("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : "", scoreConflict?.(match) ? `<p class="match-conflict">${translate("score.conflictAdminHint")}</p>` : ""]
         .filter(Boolean)
         .join("");
       card.innerHTML = `
@@ -353,6 +396,7 @@
       ${scoreboardTableMarkup(match, editable)}
       ${scorerPanelMarkup(match, editable, scoreOnly)}
       ${approvalPanelMarkup(match, editable, scoreOnly)}
+      ${withdrawalPanelMarkup(match, editable, scoreOnly)}
       ${correctionHistoryMarkup(match, editable && !scoreOnly)}
       ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
     </div>
@@ -361,6 +405,7 @@
       bindScoreboardTable(card, match, editable && match.state !== "cancelled");
       bindScorerPanel(card, match);
       bindApprovalPanel(card, match);
+      bindWithdrawalPanel(card, match);
       bindCorrectionHistory(card, match);
 
       const summaryToggle = card.querySelector(".match-summary");
@@ -389,15 +434,15 @@
         <button class="secondary save-court-button" type="button">${translate("actions.saveCourt")}</button>
       </div>
       <div class="button-row">
-        <button class="secondary set-score-button" type="button" ${["finished", "cancelled", "awaitingApproval"].includes(match.state) ? "disabled" : ""}>${translate("actions.setResult")}</button>
+        <button class="secondary set-score-button" type="button" ${["finished", "cancelled", "awaitingApproval", "awaitingWithdrawalDecision"].includes(match.state) ? "disabled" : ""}>${translate("actions.setResult")}</button>
         <button class="secondary start-match-button" type="button" ${match.state !== "waiting" ? "disabled" : ""}>${translate("actions.startMatch")}</button>
         <button class="secondary large-score-button" type="button" ${match.state !== "playing" ? "disabled" : ""}>${translate("actions.largeScore")}</button>
         <button class="secondary reopen-match-button" type="button" ${["cancelled"].includes(match.state) || !match.undoStack?.length ? "disabled" : ""}>${["finished", "awaitingApproval"].includes(match.state) ? translate("actions.undoResult") : translate("actions.undoLast")}</button>
         <button class="ghost cancel-match-button" type="button" ${["finished", "cancelled"].includes(match.state) ? "disabled" : ""}>${translate("actions.cancelMatch")}</button>
         <div class="walkover-row">
           <span>${translate("score.walkover")}</span>
-          <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="${translate("score.walkoverForAria", { team: teamOneName })}" ${["finished", "cancelled", "awaitingApproval"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
-          <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="${translate("score.walkoverForAria", { team: teamTwoName })}" ${["finished", "cancelled", "awaitingApproval"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
+          <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="${translate("score.walkoverForAria", { team: teamOneName })}" ${["finished", "cancelled", "awaitingApproval", "awaitingWithdrawalDecision"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
+          <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="${translate("score.walkoverForAria", { team: teamTwoName })}" ${["finished", "cancelled", "awaitingApproval", "awaitingWithdrawalDecision"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
         </div>
       </div>
       ${match.state === "finished" && getState().status !== "Avsluttet" ? `<div class="correction-row"><button class="secondary correct-result-button" type="button">${translate("correction.button")}</button></div>` : ""}`}
@@ -421,7 +466,7 @@
       return card;
     }
 
-    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable, scorerPanelMarkup, approvalPanelMarkup, bindApprovalPanel, timerMarkup, updateTimers, correctionHistoryMarkup };
+    return { createMatchCard, withdrawalPanelMarkup, bindWithdrawalPanel, scoreboardTableMarkup, bindScoreboardTable, scorerPanelMarkup, approvalPanelMarkup, bindApprovalPanel, timerMarkup, updateTimers, correctionHistoryMarkup };
   }
 
   global.PadelstarMatchCard = { create };

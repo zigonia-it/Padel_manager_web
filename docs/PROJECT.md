@@ -88,6 +88,17 @@ Beyond the Monday critical path, v1.0 includes the approved core functionality f
 
 Detailed sequencing is in `ROADMAP.md`.
 
+## Approved product behaviour (built so far)
+
+- **Scoring**: golden point, set tiebreak and timed matches (a game won after time is up ends the match; level after time = deciding golden-point game) are rule settings; ties in the table are broken head-to-head. One active scorer per match; a player-scored result is approved by one player of each team (auto-approved after 30 minutes, or at once when only one team uses the app); the admin can always approve and can correct a finished result with a reason (the old result is kept and can be restored). Nothing can be corrected after the tournament is finished.
+- **Players who leave**: the admin can replace a player (a running match restarts at 0–0 after a warning) or withdraw them without a replacement: their unplayed matches wait for the remaining teammate, who plays alone (1 against 2) or gives a walkover (the admin can decide for them).
+- **Guests and accounts**: guests use a temporary session per device; a name alone never takes over a claimed slot. A signed-in account can claim an unclaimed pre-added slot; statistics follow the account. The admin can invite people by email; an invitation reserves nothing until the person joins and lapses when the first round starts.
+- **History**: only account players get permanent statistics, written once at the finish; deleting a tournament never deletes anyone's statistics.
+- **Retention**: a finished guest tournament stays readable for 24 hours; an idle one expires after 30 days and is deleted 7 days later unless resumed; account tournaments and statistics are kept.
+- **Notifications**: in-app notifications (match ready, result to approve, teammate withdrew, correction, finished) with a notification center; sounds and vibration can be switched off on the profile page.
+- **TV Mode** opens in a new tab, read-only, in the chosen language. **Guide and privacy** open as a popup.
+- **System owner**: exactly one protected owner, stored in the database; `admin.html` shows a minimal overview and only to the owner.
+
 ## Later versions
 
 1.x may add templates, additional tournament modes and expanded system administration.
@@ -98,7 +109,7 @@ Permanent tamper-protected security audit logging is post-1.0.
 
 ## Version baseline
 
-The actual current development baseline is `0.7.0`.
+The actual current development baseline is `0.8.0` (applied 2026-09-19 under the developer's standing authorization to bump fully verified milestones; `docs/CHANGELOG.md` lists what was verified and what still awaits a person on real devices). `0.7.0` was the beta feature milestone.
 
 `0.7.0` was applied on the developer's explicit instruction (2026-09-19) for the beta feature milestone (scorer roles, result approval and correction, timed matches and scoring rules, player replacement, TV Mode in every supported language, feedback button); `docs/CHANGELOG.md` lists which parts have been verified live and which still await it. `0.6.0` was set once the Monday critical path was verified end-to-end; `0.6.1` is a verified UI-redesign/polish batch on top of it (fonts, design tokens, gem avatars, workspace nav shell, a handful of real bug fixes) that changed no critical-path behavior.
 

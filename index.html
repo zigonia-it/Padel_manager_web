@@ -22,19 +22,21 @@
   <link rel="stylesheet" href="styles/components.css?v=padelstar-components-19">
   <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-14">
   <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-103">
-  <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
+  <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-3">
   <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-51">
   <link rel="stylesheet" href="styles/components-v2.css?v=padelstar-components-v2-2">
-  <link rel="stylesheet" href="styles/workspace-nav.css?v=padelstar-workspace-nav-3">
-  <link rel="stylesheet" href="styles/podium.css?v=padelstar-podium-3">
+  <link rel="stylesheet" href="styles/workspace-nav.css?v=padelstar-workspace-nav-6">
+  <link rel="stylesheet" href="styles/podium.css?v=padelstar-podium-4">
   <link rel="stylesheet" href="styles/create-wizard.css?v=padelstar-create-wizard-3">
   <link rel="stylesheet" href="styles/invite-code-input.css?v=padelstar-invite-code-input-1">
   <link rel="stylesheet" href="styles/accent-picker.css?v=padelstar-accent-picker-1">
-  <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-1">
-  <link rel="stylesheet" href="styles/scoreboard-table.css?v=padelstar-scoreboard-table-2">
+  <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-3">
+  <link rel="stylesheet" href="styles/scoreboard-table.css?v=padelstar-scoreboard-table-3">
   <link rel="stylesheet" href="styles/match-list-collapse.css?v=padelstar-match-list-collapse-1">
-  <link rel="stylesheet" href="styles/feedback.css?v=padelstar-feedback-1">
-  <link rel="stylesheet" href="styles/scorer-panel.css?v=padelstar-scorer-panel-5">
+  <link rel="stylesheet" href="styles/feedback.css?v=padelstar-feedback-2">
+  <link rel="stylesheet" href="styles/info-dialog.css?v=padelstar-info-dialog-2">
+  <link rel="stylesheet" href="styles/notification-center.css?v=padelstar-notification-center-7">
+  <link rel="stylesheet" href="styles/scorer-panel.css?v=padelstar-scorer-panel-7">
   <link rel="stylesheet" href="styles/settings-rows.css?v=padelstar-settings-rows-1">
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -91,6 +93,8 @@
         <div class="menu-drawer">
           <nav class="app-menu" id="appMenu" aria-label="Moduler" data-i18n-aria-label="nav.modulesAria">
             <button class="module-link" type="button" data-module-link="landing" data-i18n="nav.home">Hjem</button>
+            <button id="currentTournamentLink" class="module-link hidden" type="button" data-module-link="admin"
+              data-i18n="nav.currentTournament">Gjeldende turnering</button>
             <button class="module-link" type="button" data-module-link="setup-player" data-i18n="nav.join">Bli
               med</button>
             <button id="createModuleLink" class="module-link" type="button" data-module-link="setup-admin"
@@ -101,6 +105,7 @@
               data-i18n="nav.player">Spiller</button>
             <button id="signInModuleLink" class="module-link" type="button" data-module-link="account"
               data-focus-target="profileNameInput" data-i18n="nav.account">Konto</button>
+            <a id="systemAdminLink" class="module-link hidden" href="admin.html" data-i18n="nav.systemAdmin">System</a>
             <button id="feedbackMenuButton" class="module-link" type="button" data-feedback-open data-i18n="feedback.open">Gi tilbakemelding</button>
             <button id="tvModeMenuButton" class="module-link" type="button" data-action="tv-mode"
               data-i18n="actions.tvMode">TV Mode</button>
@@ -124,6 +129,10 @@
             </details>
           </label>
         </div>
+        <button class="notification-bell hidden" id="notificationBellButton" type="button" aria-label="Varsler" data-i18n-aria-label="notifications.center.open">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 17h12l-1.5-2V10a4.5 4.5 0 0 0-9 0v5L6 17zm4 2a2 2 0 0 0 4 0" /></svg>
+          <span class="notification-bell-badge hidden" id="notificationBellBadge">0</span>
+        </button>
         <div class="status-pill" id="connectionStatus" aria-live="polite">Lokal</div>
       </div>
     </header>
@@ -323,6 +332,36 @@
               <div><span id="profileAccountCreated"></span></div>
               <div><span class="status-chip" id="profileAccountEmailStatus"></span></div>
             </div>
+          </div>
+        </section>
+        <section class="panel my-invitations-panel hidden" id="myInvitationsPanel" aria-labelledby="myInvitationsTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow" data-i18n="invitations.eyebrow">Turneringer</p>
+              <h3 id="myInvitationsTitle" data-i18n="invitations.myTitle">Invitasjoner</h3>
+            </div>
+          </div>
+          <ul class="compact-list" id="myInvitationsList"></ul>
+        </section>
+        <section class="panel notification-settings-panel" aria-labelledby="notificationSettingsTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow" data-i18n="notifications.settings.eyebrow">Denne enheten</p>
+              <h3 id="notificationSettingsTitle" data-i18n="notifications.settings.title">Varsler og lyd</h3>
+            </div>
+          </div>
+          <p class="hint" data-i18n="notifications.settings.hint">Velg hva som skjer når noe nytt skjer i turneringen din, for eksempel når kampen din er klar.</p>
+          <label class="notification-setting-row">
+            <input type="checkbox" role="switch" class="switch" id="notificationSettingsSound" checked>
+            <span data-i18n="notifications.settings.sound">Lyd ved varsler</span>
+          </label>
+          <label class="notification-setting-row">
+            <input type="checkbox" role="switch" class="switch" id="notificationSettingsVibration" checked>
+            <span data-i18n="notifications.settings.vibration">Vibrasjon ved varsler</span>
+          </label>
+          <p class="hint hidden" id="notificationSettingsVibrationHint" data-i18n="notifications.settings.vibrationUnsupported">Vibrasjon støttes ikke på denne enheten.</p>
+          <div class="button-row">
+            <button class="secondary" id="notificationSettingsTest" type="button" data-i18n="notifications.settings.test">Test lyd og vibrasjon</button>
           </div>
         </section>
       </section>
@@ -554,6 +593,9 @@
             </button>
             <button type="button" class="workspace-rail-item hidden" data-rail-target="player">
               <span class="workspace-rail-label" data-i18n="nav.player">Spiller</span>
+            </button>
+            <button type="button" class="workspace-rail-item workspace-rail-tv" id="tvModeRailButton" data-action="tv-mode">
+              <span class="workspace-rail-label" data-i18n="actions.tvMode">TV Mode</span>
             </button>
           </nav>
 
@@ -970,6 +1012,37 @@
               <h3 data-i18n="admin.lobbyPlayers">Lobby / spillere</h3>
             </div>
             <ul class="compact-list" id="lobbyPlayersList"></ul>
+            <form class="inline-form lobby-add-form" id="lobbyAddPlayerForm">
+              <textarea name="playerName" rows="2" maxlength="2048" placeholder="Legg til én eller flere spillere"
+                autocomplete="off" aria-label="Legg til spillere" data-i18n-placeholder="admin.addPlayersPlaceholder"
+                data-i18n-aria-label="lobby.addPlayers" required></textarea>
+              <button class="secondary" type="submit" data-i18n="actions.add">Legg til</button>
+            </form>
+          </div>
+          <div class="lobby-invite-card hidden" id="lobbyInviteCard">
+            <div class="panel-heading">
+              <h3 data-i18n="invitations.title">Inviter med e-post</h3>
+            </div>
+            <p class="hint" data-i18n="invitations.hint">Personen ser invitasjonen når vedkommende logger inn med denne e-postadressen. Ingen plass reserveres før vedkommende blir med.</p>
+            <form class="inline-form" id="lobbyInviteForm">
+              <input name="email" type="email" maxlength="200" autocomplete="off" required
+                placeholder="navn@eksempel.no" aria-label="E-postadresse" data-i18n-aria-label="invitations.email">
+              <button class="secondary" type="submit" data-i18n="invitations.send">Send invitasjon</button>
+            </form>
+            <ul class="compact-list" id="lobbyInvitationsList"></ul>
+          </div>
+          <div class="lobby-courts-card">
+            <form class="court-names-form" id="lobbyCourtNamesForm">
+              <div class="panel-heading">
+                <h3 data-i18n="lobby.courts">Baner</h3>
+                <label class="court-count-control">
+                  <span data-i18n="setup.courtCount">Antall baner</span>
+                  <input name="courtCount" type="number" min="1" max="12" value="1" required>
+                </label>
+              </div>
+              <div class="court-names-list" id="lobbyCourtNamesList"></div>
+              <button class="secondary" type="submit" data-i18n="lobby.saveCourts">Lagre baner</button>
+            </form>
           </div>
         </div>
         <div class="lobby-actions">
@@ -1007,6 +1080,27 @@
       </div>
     </dialog>
 
+    <dialog class="info-dialog" id="infoDialog" aria-labelledby="infoDialogTitle">
+      <div class="info-dialog-card">
+        <h2 class="sr-only" id="infoDialogTitle"></h2>
+        <iframe class="info-dialog-frame" id="infoDialogFrame" title="" loading="lazy"></iframe>
+      </div>
+    </dialog>
+
+    <dialog class="notification-dialog" id="notificationCenterDialog" aria-labelledby="notificationCenterTitle">
+      <div class="notification-dialog-card">
+        <div class="notification-dialog-head">
+          <h2 id="notificationCenterTitle" data-i18n="notifications.center.title">Varsler</h2>
+          <button class="ghost icon-button" id="notificationCenterClose" type="button" data-i18n="actions.close">Lukk</button>
+        </div>
+        <ul class="notification-list" id="notificationCenterList"></ul>
+        <div class="notification-dialog-foot">
+          <label class="notification-sound-toggle"><input type="checkbox" role="switch" class="switch" id="notificationSoundToggle" checked> <span data-i18n="notifications.center.sound">Lyd</span></label>
+          <button class="secondary" id="notificationMarkAllRead" type="button" data-i18n="notifications.center.markAllRead">Marker alle som lest</button>
+        </div>
+      </div>
+    </dialog>
+
     <dialog class="install-modal" id="installModal" aria-labelledby="installModalTitle">
       <div class="install-modal-card">
         <div class="panel-heading">
@@ -1026,10 +1120,15 @@
           </svg>
           <span data-i18n="pwa.install">Installer Padelstar på din enhet</span>
         </button>
+        <button class="secondary install-app-button feedback-app-button" id="feedbackFooterButton" type="button" data-feedback-open>
+          <svg class="install-app-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M5 4h14a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-8l-5 4v-4H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" />
+          </svg>
+          <span data-i18n="feedback.open">Gi tilbakemelding</span>
+        </button>
         <nav class="footer-links" aria-label="Bruksanvisning og personvern" data-i18n-aria-label="footer.linksAria">
-          <a href="guide.html" data-i18n="guide.link">Bruksanvisning</a>
-          <a href="privacy.html" data-i18n="footer.privacy">Personvern</a>
-          <button class="footer-feedback-link" type="button" data-feedback-open data-i18n="feedback.open">Gi tilbakemelding</button>
+          <a href="guide.html" data-info-dialog="guide" data-i18n="guide.link">Bruksanvisning</a>
+          <a href="privacy.html" data-info-dialog="privacy" data-i18n="footer.privacy">Personvern</a>
         </nav>
       </div>
       <p class="footer-credit">
@@ -1045,13 +1144,13 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-46"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-54"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-6"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
   <script defer src="app/remote-tournament.js?v=padelstar-remote-tournament-2"></script>
   <script defer src="app/admin-actions.js?v=padelstar-admin-actions-4"></script>
-  <script defer src="app/court-settings.js?v=padelstar-court-settings-1"></script>
+  <script defer src="app/court-settings.js?v=padelstar-court-settings-2"></script>
   <script defer src="app/setup-forms.js?v=padelstar-setup-forms-5"></script>
   <script defer src="app/tournament-queries.js?v=padelstar-tournament-queries-1"></script>
   <script defer src="app/tournament-sharing.js?v=padelstar-tournament-sharing-1"></script>
@@ -1072,14 +1171,14 @@
   <script defer src="app/score-submissions.js?v=padelstar-score-submissions-1"></script>
   <script defer src="app/retention-policy.js?v=padelstar-retention-1"></script>
   <script defer src="app/remote-player-result.js?v=padelstar-player-result-1"></script>
-  <script defer src="app/match-list.js?v=padelstar-match-list-3"></script>
+  <script defer src="app/match-list.js?v=padelstar-match-list-4"></script>
   <script defer src="app/standings.js?v=padelstar-standings-3"></script>
   <script defer src="app/podium.js?v=padelstar-podium-3"></script>
-  <script defer src="app/lobby.js?v=padelstar-lobby-1"></script>
-  <script defer src="app/player-list.js?v=padelstar-player-list-2"></script>
+  <script defer src="app/lobby.js?v=padelstar-lobby-3"></script>
+  <script defer src="app/player-list.js?v=padelstar-player-list-3"></script>
   <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-2"></script>
   <script defer src="app/player-status.js?v=padelstar-player-status-1"></script>
-  <script defer src="app/player-next-match.js?v=padelstar-player-next-match-5"></script>
+  <script defer src="app/player-next-match.js?v=padelstar-player-next-match-7"></script>
   <script defer src="app/rules.js?v=padelstar-rules-4"></script>
   <script defer src="app/player-controls.js?v=padelstar-player-controls-2"></script>
   <script defer src="app/large-score.js?v=padelstar-large-score-2"></script>
@@ -1087,8 +1186,9 @@
   <script defer src="app/admin-status.js?v=padelstar-admin-status-3"></script>
   <script defer src="app/profile-ui.js?v=padelstar-profile-ui-3"></script>
   <script defer src="app/backup-ui.js?v=padelstar-backup-ui-2"></script>
-  <script defer src="app/player-replacement.js?v=padelstar-player-replacement-1"></script>
-  <script defer src="app/player-state.js?v=padelstar-player-state-3"></script>
+  <script defer src="app/player-replacement.js?v=padelstar-player-replacement-2"></script>
+  <script defer src="app/player-withdrawal.js?v=padelstar-player-withdrawal-1"></script>
+  <script defer src="app/player-state.js?v=padelstar-player-state-4"></script>
   <script defer src="app/tournament-status.js?v=padelstar-tournament-status-1"></script>
   <script defer src="app/tournament-finalization.js?v=padelstar-finalization-1"></script>
   <script defer src="app/scoring-engine.js?v=padelstar-scoring-5"></script>
@@ -1105,13 +1205,17 @@
   <script defer src="app/remote-rpc.js?v=padelstar-remote-rpc-1"></script>
   <script defer src="app/ui-effects.js?v=padelstar-ui-effects-1"></script>
   <script defer src="app/navigation.js?v=padelstar-navigation-2"></script>
-  <script defer src="app/workspace-rail.js?v=padelstar-workspace-rail-1"></script>
+  <script defer src="app/workspace-rail.js?v=padelstar-workspace-rail-2"></script>
   <script defer src="app/avatar-system.js?v=padelstar-avatar-system-1"></script>
   <script defer src="app/pwa-install.js?v=padelstar-pwa-install-3"></script>
   <script defer src="app/accent-system.js?v=padelstar-accent-system-1"></script>
   <script defer src="app/player-visuals.js?v=padelstar-player-visuals-3"></script>
   <script defer src="app/ui-feedback.js?v=padelstar-ui-feedback-2"></script>
   <script defer src="app/notification-system.js?v=padelstar-notification-system-2"></script>
+  <script defer src="app/notification-center.js?v=padelstar-notification-center-7"></script>
+  <script defer src="app/notification-center-ui.js?v=padelstar-notification-center-7"></script>
+  <script defer src="app/system-admin.js?v=padelstar-system-admin-1"></script>
+  <script defer src="app/invitations.js?v=padelstar-invitations-1"></script>
   <script defer src="app/profile-session.js?v=padelstar-profile-session-3"></script>
   <script defer src="app/account-auth.js?v=padelstar-account-auth-6"></script>
   <script defer src="app/config/storage-keys.js?v=padelstar-storage-keys-1"></script>
@@ -1119,18 +1223,19 @@
   <script defer src="app/core/utilities.js?v=padelstar-utilities-1"></script>
   <script defer src="app/core/language-controller.js?v=padelstar-language-controller-1"></script>
   <script defer src="app/core/session-controller.js?v=padelstar-session-controller-2"></script>
-  <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-2"></script>
+  <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
-  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-11"></script>
-  <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-5"></script>
-  <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-1"></script>
+  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-13"></script>
+  <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-6"></script>
+  <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-2"></script>
   <script defer src="app/bootstrap/app-init.js?v=padelstar-app-init-2"></script>
   <script defer src="app/ui/theme.js?v=padelstar-theme-1"></script>
   <script defer src="app/ui/app-renderer.js?v=padelstar-app-renderer-5"></script>
-  <script defer src="app/feedback.js?v=padelstar-feedback-1"></script>
+  <script defer src="app/feedback.js?v=padelstar-feedback-2"></script>
+  <script defer src="app/info-dialog.js?v=padelstar-info-dialog-2"></script>
   <script defer src="app/result-correction.js?v=padelstar-result-correction-1"></script>
   <script defer src="app/result-correction-dialog.js?v=padelstar-result-correction-dialog-1"></script>
-  <script defer src="app/match-card.js?v=padelstar-match-card-12"></script>
+  <script defer src="app/match-card.js?v=padelstar-match-card-13"></script>
   <script defer src="app/backup-format.js?v=padelstar-backup-format-2"></script>
   <script defer src="app/link-utils.js?v=padelstar-link-utils-2"></script>
   <script defer src="app/tournament-state.js?v=padelstar-tournament-state-5"></script>
@@ -1140,19 +1245,19 @@
   <script defer src="app/session-policy.js?v=padelstar-session-policy-1"></script>
   <script defer src="app/remote-state-write.js?v=padelstar-remote-state-write-1"></script>
   <script defer src="app/remote-admin-actions.js?v=padelstar-remote-admin-actions-4"></script>
-  <script defer src="app/remote-player-score.js?v=padelstar-remote-player-score-3"></script>
+  <script defer src="app/remote-player-score.js?v=padelstar-remote-player-score-4"></script>
   <script defer src="app/score-actions.js?v=padelstar-score-actions-6"></script>
-  <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-4"></script>
-  <script defer src="app/app-events.js?v=padelstar-app-events-4"></script>
+  <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-5"></script>
+  <script defer src="app/app-events.js?v=padelstar-app-events-5"></script>
   <script defer src="app/workspace-events.js?v=padelstar-workspace-events-1"></script>
   <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-7"></script>
   <script defer src="app/create-wizard.js?v=padelstar-create-wizard-3"></script>
   <script defer src="app/invite-code-input.js?v=padelstar-invite-code-input-1"></script>
   <script defer src="app/accent-picker.js?v=padelstar-accent-picker-1"></script>
-  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-6"></script>
+  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-7"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-3"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
-  <script defer src="app/app.js?v=padelstar-session-70"></script>
+  <script defer src="app/app.js?v=padelstar-session-77"></script>
 </body>
 
 </html>

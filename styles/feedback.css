@@ -1,14 +1,5 @@
-/* Beta feedback dialog and footer link */
-.footer-links .footer-feedback-link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
+/* Beta feedback dialog */
+/* The footer button reuses the install button (same class, icon and layout): see .install-app-button */
 
 .feedback-card {
   display: flex;

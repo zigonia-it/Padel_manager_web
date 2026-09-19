@@ -82,7 +82,8 @@
     const outgoing = (state.players ?? []).find((item) => item.id === playerId);
     const checked = plan(state, playerId);
     if (!checked.ok) return checked;
-    if (!outgoing.active && outgoing.active !== undefined) return { ok: false, blocked: "inactive" };
+    if (!outgoing.active && outgoing.active !== undefined && !outgoing.withdrawn) return { ok: false, blocked: "inactive" };
+    if (outgoing.replacedBy) return { ok: false, blocked: "inactive" };
     if (nameTaken(replacement.name)) return { ok: false, blocked: "duplicate" };
     outgoing.slotId = outgoing.slotId ?? outgoing.id;
     replacement.slotId = outgoing.slotId;
@@ -93,7 +94,9 @@
     outgoing.replacedBy = replacement.id;
     state.players.push(replacement);
     const moved = transfer(state, outgoing, replacement, createTeam, nowIso);
-    return { ok: true, replacement, ...moved };
+    // matches that were waiting for the teammate's decision (or being played alone) get the replacement as partner
+    const resolved = global.PadelstarPlayerWithdrawal?.restoreForSlot(state, outgoing.id, replacement, { createTeam }) ?? [];
+    return { ok: true, replacement, ...moved, resolvedWithdrawals: resolved };
   }
 
   // Puts the original player back in the slot they lost to `replacementId`.
@@ -107,6 +110,8 @@
     if ((state.players ?? []).some((player) => player.id !== original.id && player.active !== false && nameTaken(original.name, player))) return { ok: false, blocked: "duplicate" };
     original.active = true;
     original.availability = "available";
+    original.withdrawn = false;
+    delete original.withdrawnAt;
     delete original.replacedBy;
     replacement.active = false;
     replacement.availability = "away";
@@ -116,5 +121,5 @@
     return { ok: true, original, ...moved };
   }
 
-  global.PadelstarPlayerReplacement = { plan, replace, restore, isFuture };
+  global.PadelstarPlayerReplacement = { plan, replace, restore, isFuture, restartMatch };
 })(window);

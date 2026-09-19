@@ -2,15 +2,20 @@
 
 # Padelstar – Active Release Roadmap
 
-> **Primary objective:** Restore a reliably usable Padelstar as fast as possible.
+> **Primary objective:** 
+> Restore a reliably usable Padelstar as fast as possible.
 >
-> **Hard milestone:** functioning build by **Monday 21 September 2026**.
+> **Hard milestone:** 
+> functioning build by **Monday 21 September 2026**.
 >
-> **Version baseline:** `0.7.0` — the Monday critical path was verified end-to-end for `0.6.0`, `0.6.1` was a verified UI-redesign/polish batch, and `0.7.0` (applied on the developer's instruction, 2026-09-19) is the beta feature milestone that adds scorer roles, result approval and correction, timed matches, scoring rules, player replacement, TV Mode in every supported language and a feedback button (see `docs/CHANGELOG.md`, which lists what has and has not been verified live). Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
+> **Version baseline:** 
+> `0.8.0` — released 2026-09-19 (see `docs/CHANGELOG.md`): adds withdrawal without replacement, invitations and claiming, notifications with sounds, the popup guide/privacy, the protected system owner and the layout/documentation passes on top of `0.7.0`. Earlier: `0.7.0` — the Monday critical path was verified end-to-end for `0.6.0`, `0.6.1` was a verified UI-redesign/polish batch, and `0.7.0` (applied on the developer's instruction, 2026-09-19) is the beta feature milestone that adds scorer roles, result approval and correction, timed matches, scoring rules, player replacement, TV Mode in every supported language and a feedback button (see `docs/CHANGELOG.md`, which lists what has and has not been verified live). Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
 >
-> **Token reset:** **Saturday 19 September 2026 at 11:31**. Before the reset, spend tokens only on the shortest path to a functioning app and verified blockers.
+> This is the **only active development plan**. 
+> The previous detailed `Padelstar_v1_0_0_plan.md` is superseded and may be archived.
 >
-> This is the **only active development plan**. The previous detailed `Padelstar_v1_0_0_plan.md` is superseded and may be archived.
+> **Branching logic** 
+> Make one branch per version number: 0.8 one branch, 0.9 one branch and so on. Do not start a new branch until the current is stabile and can be pushed to main.
 
 ---
 
@@ -321,7 +326,9 @@ Built 2026-09-19 (spec: archived plan FASE K) as client logic (`app/player-repla
 - [ ] Disputed/unconfirmed match restrictions. — a match awaiting approval (draft, pending or flagged) blocks the replacement for every player in it until the result is resolved or undone; a finished tournament cannot be changed.
 - [ ] Regression tests. — 13 tests.
 
-Not built: withdrawal without a replacement (a player leaving with no substitute needs a product decision about the matches that player would have played), and server-side enforcement of the approval block (the admin writes the whole tournament state, so this is a client rule).
+Withdrawal without a replacement, built 2026-09-19 on branch `v0.8` per the developer's decision: the withdrawn player's unplayed matches are kept and wait for the remaining teammate, who plays alone (1 against 2) or gives a walkover; the admin can decide for them (`app/player-withdrawal.js`, 19 tests in `test/player-withdrawal.test.js`, 9 UI tests in `test/withdrawal-ui.test.js`, database function `match_withdrawal_decision` in migration `20260920100000_withdrawal_decision.sql` with 25 checks in `supabase/tests/withdrawal-decision.pglite.mjs`). Checked in the browser (local tournament): withdraw with confirmation, running match annulled and court freed, admin "play alone" (starts on the free court), admin walkover with confirmation and correct standings, reinstate refused while a match is played alone, replacement taking over the waiting match, and the teammate's own decision notice. Not yet checked: the teammate's decision through the real database (needs the migration applied). Decisions still open: a withdrawal in a Cup is blocked (the bracket refers to team ids); when players on **both** teams have withdrawn from the same match it is cancelled (no rule was given for that case).
+
+Not built: server-side enforcement of the approval block (the admin writes the whole tournament state, so this is a client rule).
 
 ## Phase 14 — Timed matches/scoring rules
 
@@ -338,11 +345,11 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 15 — Permanent history/statistics
 
-- [ ] Account-owned history.
-- [ ] Personal statistics.
-- [ ] Corrections recalculate authoritative stats.
-- [ ] Owner history deletion does not delete other players' stats.
-- [ ] Guest has no permanent account history.
+- [ ] Account-owned history. — an account's history is `account_tournament_statistics` (one row per finished/cancelled tournament and account, written by `finalize_tournament` for players bound to that account); an account reads only its own rows (RLS), cannot edit or delete them through the API, and the profile page shows them. Verified on 2026-09-19 with `supabase/tests/account-statistics.pglite.mjs` (17 checks on the real table definitions and the live `finalize_tournament`).
+- [ ] Personal statistics. — matches, wins, sets and games per tournament are saved at the finish and summed on the profile page (`app/player-statistics.js`, covered by earlier tests).
+- [ ] Corrections recalculate authoritative stats. — statistics are derived only at the finish from the final, locked snapshot, so every correction made before the finish (Phase 12) is included (tested: a flipped result flips the saved statistics). After the finish the result is read-only (tested), so statistics cannot drift. **Open decision:** corrections *after* the finish are closed by design; allowing them would need a re-run of the statistics for that tournament. Say if you want that.
+- [ ] Owner history deletion does not delete other players' stats. — `account_tournament_statistics` deliberately has no foreign key to `tournaments`: deleting a tournament removes only the bindings, every player's statistics stay (tested); a tournament cannot be deleted before its statistics were saved (tested).
+- [ ] Guest has no permanent account history. — only players bound to an account get a statistics row; guests get none (tested).
 
 ## Phase 16 — Retention/cleanup
 
@@ -355,23 +362,26 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 17 — Claiming/invitations
 
-- [ ] Claim unlinked slot.
-- [ ] Invitations without friend list.
-- [ ] Acceptance/cutoff rules.
-- [ ] Guest temporary session identity.
-- [ ] No unsafe name-only takeover.
+- [ ] Claim unlinked slot. — fixed 2026-09-19 (migration `20260920120000_claim_unlinked_slot.sql`, applied live): a signed-in account can now claim a pre-added slot that nobody has claimed or linked; the slot is linked to the account so statistics and permissions follow it. A slot already linked to another account, or already claimed by a guest device, is still refused. 17 checks in `supabase/tests/claim-slot.pglite.mjs` (real `join_tournament_impl`); function and grants re-checked live.
+- [ ] Invitations without friend list. — built and applied live (migration `20260920130000_tournament_invitations.sql`): the admin invites by email in the lobby; the invited person sees it under "Invitasjoner" on the profile page after signing in with that verified email and joins through the normal join flow, or declines. The server never checks whether the address has an account (no way to find out who has one). Status "accepted" is derived from the account really being in the tournament. 30 checks in `supabase/tests/invitations.pglite.mjs`, live check rolled back, client tests in `test/invitations.test.js`. **Not verified end to end with two real accounts** (I cannot sign in): see USER ACTIONS. Delivery is in-app only; no invitation email is sent (decision for you: do you want an email too, through Resend?).
+- [ ] Acceptance/cutoff rules. — a pending invitation never counts as a participant or occupies a slot; it is valid until the first round starts (then "expired" for the admin and invisible for the invitee); accepting = joining, so there is no accepted-but-not-incorporated limbo; after the start the replacement flow is used. Round Robin schedules are generated at the start, so an acceptance before the start needs no regeneration. Tested in the database checks above.
+- [ ] Guest temporary session identity. — a guest gets a random session token per slot (`player_sessions`, stored only as a hash); it can be kept in the browser for refresh/restart, is not a permanent identity and cannot be turned into an account (an account cannot take over a slot a guest device holds: tested).
+- [ ] No unsafe name-only takeover. — a name alone never takes over a claimed slot: for guests a second claim of the same name is refused, and for accounts a slot linked to another account or held by a guest device is refused (tested). Secure takeover by code/QR/admin confirmation stays a later version. Known limit: two players with exactly the same name cannot be told apart by the claim flow (recorded in BUGS.md).
 - [ ] Retroactive guest-stat claiming (a guest player later links their historical stats to an account) — explicitly pending a fresh product decision, not yet approved.
 
 ## Phase 18 — Notifications
 
-- [ ] In-app notifications.
+- [ ] In-app notifications. — built 2026-09-19 on `v0.8` (`app/notification-center.js`, `notification-center-ui.js`): every applied remote state is compared with the previous one and the player gets an in-app notification (plus a toast) when their match is ready, a result needs their team's approval, a withdrawn teammate needs a decision, a result was corrected, or the tournament finished. Tests: `test/notification-center*.test.js`; checked in the browser.
 - [ ] Push/PWA where supported.
 - [ ] Richer push categories: invites, results, "notify me for my own matches only" — beyond today's match-ready/round-ready triggers.
 - [ ] Necessary vs optional.
-- [ ] Notification center.
-- [ ] Individual read/unread.
-- [ ] Lifecycle cleanup.
-- [ ] System sounds for first version.
+- [ ] Notification center. — a bell in the header (players only) with an unread badge opens a list; a click on an item opens the player view.
+- [ ] Individual read/unread. — each item is unread until clicked; "Marker alle som lest".
+- [ ] Lifecycle cleanup. — items older than 7 days and items of another tournament/player are dropped, max 50.
+- [ ] System sounds for first version. — superseded by the custom sounds below.
+- [ ] Custom Padelstar notification sounds. path for sound files: /Users/sigurd/Documents/Developer/Notification sounds — built: the files are copied to `assets/sounds/` (mp3, m4a fallback for browsers without mp3) and play in the app; a browser may block sound until the person has tapped the page once. Sound and vibration (double pulse / short pulse, where the device supports it) can be turned on or off in a new "Varsler og lyd" panel on the profile page, with a test button (developer request 2026-09-19). Not verified on real devices (sound levels, iOS/Android behaviour): see USER ACTIONS.
+      - notification1 is to be used when the players next match is ready.
+      - notification2 is to be used when a tournament is live and have updates to the user other than the next match.
 
 ## Phase 19 — TV Mode
 
@@ -379,7 +389,8 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 - [ ] Read-only public viewing.
 - [ ] Link/QR.
-- [ ] Opens in new window/tab.
+- [ ] Always opens in new window/tab. — built 2026-09-19 on `v0.8`: every entry point (rail button, menu, "view as spectator") calls `openTvMode()` → `window.open(tv.html?spectate=CODE, "_blank", "noopener")`, falling back to the current tab only if a pop-up blocker refuses. Checked in the browser (test in `test/tv-entry.test.js`).
+- [ ] Button toggle moved to side bar and pinned at bottom. — built 2026-09-19 on `v0.8`: a "TV Mode" item at the bottom of the desktop side rail (`#tvModeRailButton`, pushed down with `margin-top: auto`); while the rail is visible the duplicate menu entry is hidden, on narrow screens and for roles without the rail the menu entry remains. Not built: a TV button in the mobile bottom tab bar (the menu entry covers it) — say if you want it there too.
 - [ ] No admin/player rights.
 - [ ] Live score/status.
 - [ ] Final standings/result after completion.
@@ -391,7 +402,7 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 - [x] Manifest. — verified: name, `display: standalone`, scope/start_url, 192 px icon, plain 512 px icon (added 2026-09-19) and a 512 px maskable icon.
 - [x] Service worker. — verified by running `service-worker.js` against the real files in a Node sandbox: install caches all 156 shell entries, activate deletes old caches, offline navigation (including deep links) is served from the cached `index.html`. The in-app Browser pane does not persist service workers, so real-browser registration was not observed.
-- [ ] Installability. — criteria are met on paper; needs a Chrome/Lighthouse and iOS Safari check on the deployed HTTPS site.
+- [x] Installability. — criteria are met on paper, and the developer confirmed (2026-09-19) that installation works through Safari on macOS 26 and on an iPhone with iOS 27, so the install logic is tested in the Apple environment. Windows and Linux cannot be tested by the developer and are accepted as confirmed on that basis; the install guide already covers them.
 - [x] Standalone detection. — `app/pwa-install.js` checks `display-mode: standalone` and `navigator.standalone`, and updates live on change (covered by tests).
 - [x] Correct install CTA. — button shows a native prompt when `beforeinstallprompt` fired, otherwise manual per-platform steps; hidden when already standalone. Modal verified in the browser.
 - [x] Cache/update behavior. — network-first with cache fallback, `skipWaiting` + `clients.claim`, cache name bumped every release; stale caches removed on activate (simulated).
@@ -413,22 +424,24 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 ## Phase 22 — Help/privacy/info
 
-- [x] Guide matches current product. — rewritten for `nb`/`en` (create wizard, lobby, guest use without account, invite code/QR, profile colour).
+- [ ] Guide matches current product. Use clear and easy language, not production notes or technical language. (Use "in the cloud" instead of "supabase" etc. Its for the user/player, not the developer. — rewritten for `nb`/`en` (create wizard, lobby, guest use without account, invite code/QR, profile colour).
 - [ ] Privacy matches actual data flow. — added push-subscription and colour-choice data and the real retention lifecycle; the retention wording depends on migration `20260919090500_...` being applied.
-- [x] Navigation matches current UI. — guide/privacy menus now read Home/Join/Create/Profile (they said "Konto"), are translated, and offer only Bokmål/English like the app.
-- [x] Contradictory old text removed. — removed "the admin must be signed in to create a live tournament" (guests can create tournaments).
+- [x] Display in chosen language — verified by the developer for the app (Norwegian, device language, English). Fixed 2026-09-19 on `v0.8`: the guide and privacy pages did not understand the saved value `device` and showed Norwegian on an English device; they now share `app/page-language.js` (tests in `test/page-language.test.js`).
+- [ ] Contradictory old text nust be removed. — done on `v0.8`: the outdated retention text in `app/privacy-i18n.js` (which a hidden override was silently replacing) is gone; one source of truth, mirrored in `privacy.html`. The hidden languages (nn/es/de/fr) still carry old text and stay hidden until Phase 21 completes them.
+- [ ] Use clear and easy language, not production notes or technical language. (Use "in the cloud" instead of "supabase" etc. Its for the user/player, not the developer. — privacy text rewritten in plain nb/en ("in the cloud", "on your device"); the guide gained "during a match" and "if a player has to leave". Decision for you: the privacy text still names Supabase, Vercel, Vercel Analytics and Resend once each, in parentheses, because a privacy notice normally has to name who processes the data; say if you want them removed anyway.
+- [ ] Always opens in popup with an x button on the top right to close. — built on `v0.8`: the footer links to the guide and privacy page open a popup (`app/info-dialog.js`) with the page inside and an X in the card's top right corner (also Escape and a click outside); the links still work as normal links when opened in a new tab or without JavaScript. Framing is allowed for the site itself only (`frame-ancestors 'self'`). Checked in the browser in nb and en.
 
-## Phase 23 — Initial system owner
+## Phase 23 — Initial system owner (v.0.8.0 reqiurement)
 
-- [ ] Exactly one protected Systemeier.
-- [ ] Backend/database enforcement.
-- [ ] Cannot be removed/restricted by ordinary superuser.
-- [ ] Unauthorized system-admin access blocked.
-- [ ] Minimum owner administration verified.
+- [ ] Exactly one protected Systemeier. — built and applied to the live database 2026-09-19 (migration `20260920110000_system_owner.sql`): singleton table `public.system_owner` seeded with `sigurd.grodem@live.no` (the developer's decision). Verified live: one row, the account id matches.
+- [ ] Backend/database enforcement. — the table is closed to `anon`/`authenticated` (RLS on, no grants); triggers refuse delete, truncate and any update unless the database owner deliberately sets `app.system_owner_transfer = 'confirmed'`; deleting the owner's account is refused (foreign key restrict). All checks run on `auth.uid()` in SECURITY DEFINER functions. 22 checks in `supabase/tests/system-owner.pglite.mjs` and the same protections re-checked on the live database (rolled back).
+- [ ] Cannot be removed/restricted by ordinary superuser. — there is no superuser concept yet (Priority 2); the protection does not depend on one. Only the database owner can transfer the role, on purpose, in SQL.
+- [ ] Unauthorized system-admin access blocked. — `is_system_owner()` / `admin_overview()` are not executable by `anon`, and refuse any signed-in user who is not the owner (verified live). `admin.html` sends a signed-out visitor to sign-in and a stranger Home with a message, and requests no administration data before the server confirmed ownership (`test/system-admin.test.js`; the signed-out redirect was checked in the browser). The menu link "System" exists only for the owner.
+- [ ] Minimum owner administration verified. — `admin.html` shows counts (tournaments, running, finished, expired, with account, profiles) and the 20 latest tournaments, without tokens, invite codes or personal data. Database side verified live as the owner; the page itself as the signed-in owner still needs your check (I cannot sign in for you): see USER ACTIONS.
 
 ## Phase 24 — v1 security/data integrity
 
-- [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, NOT applied); leaked-password protection is disabled — it is a Supabase Pro-plan feature and the project is on the free plan, so it cannot be enabled (accepted 2026-09-19; the password rules of Supabase Auth still apply). Revisit if the project moves to Pro.
+- [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, applied by the developer and confirmed by the advisors on 2026-09-19); leaked-password protection is disabled — it is a Supabase Pro-plan feature and the project is on the free plan, so it cannot be enabled (accepted 2026-09-19; the password rules of Supabase Auth still apply). Revisit if the project moves to Pro.
 - [ ] Stable IDs for auth/relations.
 - [ ] Guest/player/admin/owner/TV access.
 - [ ] Duplicate/race handling.
@@ -437,34 +450,35 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 ## Phase 25 — v1 resilience and UI verification
 
-- [ ] Network loss during active match.
-- [ ] Refresh during active match.
-- [ ] Stale client state.
-- [ ] Duplicate result submit.
-- [ ] Concurrent scoring/takeover attempt.
-- [ ] Failed database write.
-- [ ] Failed permanent-stat transfer.
-- [ ] Desktop responsive verification. — partial: landing, join, account, create wizard and the admin workspace tabs checked at desktop width with an automated overflow check; profile, TV, podium and cup views not yet.
-- [ ] Mobile responsive verification. — partial: same screens checked at 375px in English. Found and fixed three defects: the Kamper tab scrolled sideways (walkover buttons couldn't wrap), scoreboard team names collapsed to one letter, and the create wizard's hidden format radios stretched the page to 433px.
-- [ ] Tablet verification where relevant. — partial: same screens at 768px, no overflow.
-- [ ] TV 16:9 verification.
-- [ ] Touch targets usable.
-- [ ] Status does not rely only on color.
-- [ ] No unintended overlap: text/buttons/icons/cards never collide, fixed/sticky elements never cover interactive content, at mobile/tablet/standard-desktop/wide-desktop widths. Intentional overlap (modals, dropdowns, menus, tooltips) is exempt.
-- [ ] Long translated strings (English is often longer than Norwegian) don't cause overlap or broken layout at any of the above widths — check this against whichever languages Phase 21 ships for the v1.0 RC.
+- [ ] Network loss during active match. — covered by tests: a transient error keeps a player's point queued for retry, scorer/result actions refuse to run offline with a message, admin writes wait and show "pending" (`test/scorer-role.test.js`, `test/result-approval.test.js`, `test/pwa.test.js`). **Not yet tried with a real network cut on a phone** (airplane mode during a running match): see USER ACTIONS.
+- [x] Refresh during active match. — verified live in the Phase 8 pass (a full reload restored the running tournament from the server) and by the last-known-good recovery tests; a reloaded page also keeps its scorer role because the state comes from the server.
+- [x] Stale client state. — every write carries the expected revision and the server refuses an old one; the client rejects older remote states and offers "refresh from server" or "keep my local copy" (`test/remote-state-controller.test.js`, `test/supabase-contract.test.js`, the opt-in live test, and the Realtime catch-up in `test/realtime-broadcast.test.js`).
+- [x] Duplicate result submit. — a second submit is refused ("already submitted"), one approval per team, corrections limited to two (`supabase/tests/result-approval.pglite.mjs`); finalizing twice adds nothing (`account-statistics.pglite.mjs`).
+- [ ] Concurrent scoring/takeover attempt. — one active scorer per match with claim, request, transfer and a takeover only after 2 minutes offline (`scorer-lease.pglite.mjs`); all writes lock the tournament row (`FOR UPDATE`, checked by `test/supabase-contract.test.js`). A truly parallel two-connection race is not exercised by the in-memory database and has not been run live.
+- [ ] Failed database write. — server writes are single transactions that roll back completely on error (finalization, corrections, replacement of state are tested that way) and the client keeps unsent changes and shows the sync state; a real failing write on the live system has not been provoked.
+- [x] Failed permanent-stat transfer. — finalization is one transaction: with a corrupt result it is refused, writes no statistics and no receipt, leaves the tournament running, and succeeds once the data is fixed (`supabase/tests/account-statistics.pglite.mjs`, 22 checks).
+- [ ] Desktop responsive verification. — Audited 2026-09-19 with `scripts/ui-audit.js` (sideways scroll, elements beyond the edge, tap targets, overlapping controls, clipped text) on a local tournament: landing, join, create, account, lobby, the three admin tabs and the player view, plus the podium (phone) and TV Mode. 1280x800 (English) and 1920x1080 (Norwegian): clean after fixing long names cut off in the scoreboard. Still to check: the signed-in profile page and a Cup bracket (they need an account / a Cup).
+- [ ] Mobile responsive verification. — 375x812 in Norwegian and English: clean after fixes (the notification bell wrapped in the phone header, footer links and read-only link fields were too small to tap, the scoreboard +/- were 30px wide, long names cut off on the podium). Same open views as desktop.
+- [ ] Tablet verification where relevant. — 768x1024 (English): clean. Same open views as desktop.
+- [x] TV 16:9 verification. — 1920x1080 and 1280x720: the screen fits exactly with no scrolling and nothing overlaps; long standings names now wrap instead of being cut off.
+- [x] Touch targets usable. — on screens up to 900px every tap target is at least 32px and the footer links and link fields have 44px areas; the 8 invite-code cells are 31px wide by 41px high because eight fit across a phone (kept on purpose). Inline text links on desktop are mouse targets.
+- [x] Status does not rely only on color. — match states, the connection pill, approval badges and withdrawal states all carry text; switches show their state by the thumb position and `role="switch"`; standings use numbers.
+- [x] No unintended overlap: text/buttons/icons/cards never collide, fixed/sticky elements never cover interactive content, at mobile/tablet/standard-desktop/wide-desktop widths. Intentional overlap (modals, dropdowns, menus, tooltips) is exempt. — the audit reports no overlapping controls in the audited views at any width; the sticky bottom tab bar on phones is an intentional overlay and sits after the content.
+- [x] Long translated strings (English is often longer than Norwegian) don't cause overlap or broken layout at any of the above widths — check this against whichever languages Phase 21 ships for the v1.0 RC. — the two shipped languages (Norwegian and English) were both audited at 375px and English also at 768px and 1280px.
 
-## Phase 26 — Documentation consolidation
+## Phase 26 — Documentation consolidation 
+**With each phase update these documents**
 
-- [ ] `PROJECT.md` matches current approved product behavior.
+- [ ] `PROJECT.md` matches current approved product behavior. — updated 2026-09-19 with the approved behaviour of every area built so far (see "Approved product behaviour").
 - [ ] `ROADMAP.md` is the only active development plan.
-- [ ] `BUGS.md` contains only active defects.
+- [ ] `BUGS.md` contains only active defects. — done 2026-09-19: the resolved history moved to `docs/archive/bugs-resolved-2026-09.md`; `BUGS.md` lists the one active defect (feedback email needs the Vercel variables) and the known limitations.
 - [ ] `CHANGELOG.md` contains completed verified release changes.
-- [ ] Relevant `docs/technical/*` reflects verified implementation.
+- [ ] Relevant `docs/technical/*` reflects verified implementation. — written 2026-09-19: `architecture.md`, `database.md` (checked against the live database), `tournament_logic.md`, `privacy-retention.md`, `operations.md`, `feedback-setup.md`. Keep them in step with each phase.
 - [ ] Superseded plans moved to `docs/archive/plans/`.
 - [ ] Old contradictory design/development docs archived.
-- [ ] Archive clearly marked non-authoritative.
+- [ ] Archive clearly marked non-authoritative. — `docs/archive/README.md` says so and the moved bug history carries a banner.
 
-## Phase 27 — Theme system (light/dark mode)
+## Phase 27 — Theme system (light/dark mode) (Version 0.9.0 reqiurement)
 
 An extensible theme system rather than isolated page-specific styling — dark mode remains PADELSTAR's primary visual identity, light mode is the second v1.0-required mode, and the architecture must not need rewriting to add future seasonal themes (see the Priority 2 "Owner Admin global theme management" entry below, which builds on this).
 
@@ -506,7 +520,10 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 
 - [x] Landing page, header, footer, language picker and connection pill aligned to the design file — the landing hero is now a rounded gradient card with left-aligned copy (no more clipped hero content; the old `.intro` grid + `overflow: hidden` cut off the account hint), feature cards and the always-visible "Dine turneringer" card (with an empty state) share one 1080px column, the header is the design's compact sticky blurred bar (60px icon, 200px wordmark, version text beside it), the footer is the design's install + links row over a single centred credit line, and the language picker is a compact flag-only button (the "Språk" label and language name were redundant next to the flag; the open menu still lists names in proper case — a `.language-picker span { text-transform: uppercase }` rule in `layout.css` had been forcing them uppercase). The connection pill is now a neutral grey badge by default and only turns green (with the pulsing dot) when `data-status="connected"`, so "Offline" never reads as healthy. Fixed a real pre-existing bug this exposed: `#connectionStatus` carried a static `data-i18n="localPwa"` (which translates to "Offline"), so every generic translation pass overwrote the live text set by `syncConnectionStatus()` — the pill could say "Offline" while `data-status` was "connected". The attribute is removed and pinned by a test. Verified live at desktop and mobile widths, online and offline states.
 
-## Phase 29 — v1.0 Definition of Done
+## Phase 29 - Debugging
+- Fix and repair all the current bugs in the BUGS.md list.
+
+## Phase 30 — v1.0 Definition of Done
 
 - [x] Priority 0 critical path passes end-to-end.
 - [x] Round Robin verified.
@@ -530,7 +547,7 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 ---
 
 # PRIORITY 2 — Later 1.x
-
+## Templates v.1.1
 - [ ] Rule templates.
 - [ ] Time templates.
 - [ ] Tournament templates.
@@ -538,16 +555,22 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 - [ ] Participant templates.
 - [ ] Official standard templates.
 - [ ] Setup conveniences for the above templates: reuse-last-setup, favorites, archive/restore.
+
+## Additional tournaments v.1.2
 - [ ] Additional tournament modes: Americano, Team-Americano, Mexicano, Team-Mexicano, King of the Court, Groups+Playoffs are already exposed in the UI with client-side scheduling logic (`app/tournament-modes.js`) but have no server-side round-advancement RPC (`admin_advance_round_impl` only accepts `roundRobin`) — deactivated in the UI until each is server-wired and verified end-to-end like Round Robin; re-enable one at a time as they pass verification.
 - [ ] Liga tournament format (league setup, match generation, table/ranking, final standings) — pushed out of the v1.0 Monday/RC critical scope per explicit developer decision; Round Robin and Cup remain the v1.0 formats. Revisit once both are fully stable and the Priority 1 phases above are done.
 - [ ] Redesign the in-tournament admin UI ("Styring" tab): contextual visibility — hide/collapse settings that can't be changed given the tournament's current state (e.g. court-count/format settings once active) — before considering a fuller redesign.
 - [ ] Player-first UI: "Min neste kamp" (my next match) and "Mine kamper" (my matches) surfaced more prominently than the full tournament overview.
+
+## Tournament assitant and pdf-share v1.3
 - [ ] PDF export of standings/results.
 - [ ] Tournament Assistant: rule-based (non-AI) live-insights engine surfacing things like a stuck court, a missing result, playtime imbalance, repeated partner pairings, plus an estimated finish time.
 - [ ] Rating/Elo system as a separate post-hoc calculation layer over raw match results (not mixed into stored scores, so the algorithm can change without rewriting history).
 - [ ] Leagues & seasons: group multiple tournaments into a season with combined points/rating/participation/wins/final standing.
 - [ ] Club/venue entity: group recurring tournaments under a venue for regular groups.
 - [ ] Recurring league automation: auto-generate next week's tournament from a saved template + last week's roster.
+
+## Calendar export and other features v1.4
 - [ ] Organizer analytics dashboard: average match duration, court utilization, no-show rate, built on the existing tournament `events[]` activity log.
 - [ ] Calendar/.ics export and reminders for scheduled tournaments.
 - [ ] Sponsor/prize-pool display (informational only — name, logo, prize description; no payment processing).
@@ -558,14 +581,30 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 - [ ] MFA/step-up/recovery where required.
 - [ ] Secure guest-device transfer.
 - [ ] Template sharing/public library when approved — concrete deliverable: a template marketplace living inside the `admin.html` dashboard above.
-- [ ] Custom Padelstar notification sounds.
 - [ ] Player result-error reporting/admin cases (D67–D71) if not already implemented.
 - [ ] Owner Admin global theme management, built on Phase 27's theme architecture and living inside the `admin.html` dashboard above: Systemeier selects which installed theme (standard PADELSTAR, plus future seasonal ones — Christmas, Winter, Pride, Summer, etc.) is the app-wide default, stored centrally (not just in the admin's own browser) so it applies to all users without a redeploy. Visual theme (standard/Christmas/Pride/...) and display mode (light/dark) stay separate concepts, combinable freely (e.g. "Christmas + Dark"). Each installed theme carries an explicit status (`active`/`available`/`disabled`/`development`); only `active` ones are selectable as the production default, and a theme that fails to load falls back to the standard PADELSTAR theme safely. Changing the global theme must never touch tournament or user data.
 - [ ] Scheduled theme activation (e.g. auto-switch to Christmas Dec 1–26) — build the manual Owner Admin theme switch above first; automatic scheduling is a later enhancement on top of it, not required alongside it.
 
+## Debugging
+- Fix and repair all the current bugs in the BUGS.md list.
+
+---
+# PRIORITY 3 — Scoring engine v1.5
+- [ ] Standalone reusable scoring engine: generalize `app/scoring-engine.js` into an engine decoupled from padel-specific concepts, usable to power scoring for other point/set/match-based sports apps (football, handball, hockey, etc.), with padel as one configured ruleset on top of a generic core. Bigger commitment than a simple multi-sport mode — scope once the padel-specific engine is stable, since a shared interface is harder to change once other consumers depend on it.
+
+## Additional languages part 1
+- [ ] French
+- [ ] German
+- [ ] Spanish
+- [ ] Norsk - Nynorsk
+- [ ] Dutch
+- [ ] Portugies
+ 
+  **Do not mark finished until the whole app is translated to the languages above**
+
 ---
 
-# PRIORITY 3 — v2.0.0 Social
+# PRIORITY 4 — v2.0.0 Social
 
 - [ ] Player dashboard: a personal hub beyond a stats page — next match at a glance, avatar/profile picture change, a Discord-style status message; becomes the home the rest of this section attaches to.
 - [ ] Friend requests.
@@ -573,9 +612,27 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 - [ ] Private friend list.
 - [ ] Friend-based invitations.
 - [ ] Friend status.
+
+## Rivalries and achivements v2.1
 - [ ] Rivalries/head-to-head stats between two specific players across all shared tournaments.
 - [ ] Achievements/badges layered on existing per-account tournament statistics — confirmed as a good addition, detailed design deferred to a later planning pass.
 - [ ] Broader social activity/profile functionality, including optional public statistics sharing and optional social activity/history — both explicitly pending a future product decision.
+
+## Additional languages part 2
+- [ ] Polish
+- [ ] Samisk
+- [ ] Arabic
+- [ ] Chinese
+- [ ] Japanise
+- [ ] Turkish
+- [ ] Russian
+
+**Do not mark finished until the whole app is translated to the languages above**
+
+---
+
+## Debugging
+- Fix and repair all the current bugs in the BUGS.md list.
 
 ---
 
@@ -583,5 +640,3 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 
 - [ ] Permanent tamper-protected security audit log.
 - [ ] Broader public template ecosystem.
-- [ ] Standalone reusable scoring engine: generalize `app/scoring-engine.js` into an engine decoupled from padel-specific concepts, usable to power scoring for other point/set/match-based sports apps (football, handball, hockey, etc.), with padel as one configured ruleset on top of a generic core. Bigger commitment than a simple multi-sport mode — scope once the padel-specific engine is stable, since a shared interface is harder to change once other consumers depend on it.
-- [ ] Additional languages.

@@ -130,7 +130,7 @@ const profileHistory = window.PadelstarProfileHistory.create({
 });
 const observability = window.PadelstarObservability;
 const uiEffects = window.PadelstarUiEffects;
-const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history"]);
+const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history", "admin_list_invitations", "list_my_invitations"]);
 const remoteRpc = (client, name, payload = {}) => {
   if (!remoteReadRpcNames.has(name)) markSyncAttempt();
   return window.PadelstarRemoteRpc.call(client, name, payload);
@@ -512,6 +512,8 @@ const playerList = window.PadelstarPlayerList.create({
   removePlayer: (playerId) => removePlayer(playerId),
   replacePlayer: (playerId, name, options) => replacePlayer(playerId, name, options),
   restorePlayer: (playerId, options) => playerState.restorePlayer(playerId, options),
+  withdrawPlayer: (playerId, options) => playerState.withdrawPlayer(playerId, options),
+  reinstatePlayer: (playerId) => playerState.reinstatePlayer(playerId),
   requestConfirmation: (message) => requestConfirmation(message),
   render: () => render(),
   saveState: (options) => saveState(options),
@@ -557,6 +559,8 @@ const playerNextMatch = window.PadelstarPlayerNextMatch.create({
   approvalPanelMarkup: (match, editable, scoreOnly) => matchCard.approvalPanelMarkup(match, editable, scoreOnly),
   timerMarkup: (match) => matchCard.timerMarkup(match),
   bindApprovalPanel: (root, match) => matchCard.bindApprovalPanel(root, match),
+  withdrawalPanelMarkup: (match, editable, scoreOnly) => matchCard.withdrawalPanelMarkup(match, editable, scoreOnly),
+  bindWithdrawalPanel: (root, match) => matchCard.bindWithdrawalPanel(root, match),
   t: (key, values) => t(key, values),
 });
 const rules = window.PadelstarRules.create({
@@ -651,6 +655,7 @@ const backupUi = window.PadelstarBackupUi.create({
   t: (key, values) => t(key, values),
 });
 const playerState = window.PadelstarPlayerState.create({
+  activateNextWaitingMatch: (court) => activateNextWaitingMatch(court),
   buildSchedule: (players, format) => buildSchedule(players, format),
   createPlayer: (name, index, avatarId, accent) => createPlayer(name, index, avatarId, accent),
   createTeam: (players) => createTeam(players),
@@ -690,6 +695,31 @@ const notificationSystem = window.PadelstarNotificationSystem.create({
   remoteRpc,
   translate: (key, values) => t(key, values),
 });
+const notificationCenterUi = window.PadelstarNotificationCenterUi.create({
+  document,
+  storage: localStorage,
+  getState: () => state,
+  isSpectator: () => spectatorMode,
+  showModule: (moduleName) => showModule(moduleName),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  t: (key, values) => t(key, values),
+});
+notificationCenterUi.bind();
+const systemAdminLink = window.PadelstarSystemAdmin.createLink({ document, getClient: () => supabaseClient });
+const invitations = window.PadelstarInvitations.create({
+  document,
+  getState: () => state,
+  getClient: () => supabaseClient,
+  isShared: (current) => current.remoteMode === "shared",
+  remoteRpc: (client, name, payload) => remoteRpc(client, name, payload),
+  t: (key, values) => t(key, values),
+  showToast: (message, statusClass) => showToast(message, statusClass),
+  escapeHtml: (value) => escapeHtml(value),
+  prefillJoinForm: (code) => prefillJoinForm(code),
+  showModule: (moduleName) => showModule(moduleName),
+  getAccountUser: () => accountAuth?.currentUser(),
+});
+invitations.bind();
 const profileSession = window.PadelstarProfileSession.create({
   defaultAvatarId,
   getElements: () => elements,
@@ -774,6 +804,7 @@ const matchCard = window.PadelstarMatchCard.create({
   resultAction: (match, action, payload) => remotePlayerScore.resultAction(match.id, action, payload),
   adminResolveResult: (match) => remoteAdminActions.queueRemoteResolveResult(match),
   openCorrection: (match, options) => resultCorrectionDialog.open(match, options),
+  withdrawalDecision: (match, decision) => decideWithdrawal(match, decision),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),
@@ -799,7 +830,7 @@ const accountAuth = window.PadelstarAccountAuth?.create({
   getClient: () => supabaseClient,
   getElements: () => elements,
   getProfile: () => profile,
-  onAuthChange: (user) => { syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
+  onAuthChange: (user) => { void systemAdminLink.refresh(user); void invitations.loadMine(); syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
   onProfileLoaded: (remoteProfile) => {
     profile = profile
       ? profileManager.normalizeProfile({ ...profile, ...remoteProfile })
@@ -1163,8 +1194,7 @@ function bindGlobalEvents() {
       activateAdminPanel,
       activatePlayerAction: (playerAction) => {
         if (playerAction === "spectate") {
-          const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
-          window.location.href = `tv.html${inviteCode}`;
+          openTvMode();
         }
         if (playerAction === "choose") showModule("setup-player");
         if (playerAction === "rejoin") {
@@ -1586,10 +1616,17 @@ function renderRoleVisibility() {
   return result;
 }
 
+// TV Mode always opens in its own tab/window (the app stays where it is); it is read-only and needs no login.
+function openTvMode() {
+  const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
+  const opened = window.open(`tv.html${inviteCode}`, "_blank", "noopener");
+  // A blocked pop-up must not swallow the click: fall back to the current tab.
+  if (!opened) window.location.href = `tv.html${inviteCode}`;
+}
+
 function toggleTvMode() {
   if (!tvMode && !window.PADELSTAR_TEST_MODE) {
-    const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
-    window.location.href = `tv.html${inviteCode}`;
+    openTvMode();
     return;
   }
   tvMode = !tvMode;
@@ -1610,6 +1647,8 @@ window.setInterval?.(() => matchCard.updateTimers(), 1000);
 function render() {
   const result = appRenderer?.render();
   remotePlayerScore.syncHeartbeat();
+  notificationCenterUi.render();
+  invitations.renderAdmin();
   return result;
 }
 
@@ -1708,6 +1747,16 @@ window.addEventListener("resize", scheduleWrappedScorecardPlayers);
 
 function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly = false) {
   return matchCard.createMatchCard(match, editable, highlightedPlayerId, scoreOnly);
+}
+
+// The remaining teammate (through the RPC) or the admin (through the normal state write) decides after a withdrawal.
+async function decideWithdrawal(match, decision) {
+  if (decision === "walkover") {
+    const winner = match.withdrawal?.teamIndex === 0 ? match.teamTwo : match.teamOne;
+    if (!(await requestConfirmation(t("withdrawal.walkoverConfirm", { winner: winner?.displayName ?? "" })))) return false;
+  }
+  if (currentLocalRole() === "player" && isSupabaseReady()) return remotePlayerScore.withdrawalDecision(match.id, decision);
+  return Boolean(playerState.decideWithdrawal(match.id, decision, { by: currentLocalRole() === "player" ? "teammate" : "admin" }));
 }
 
 function isEditablePlayerMatch(match, player) {
@@ -2008,8 +2057,11 @@ function roundProgress(round) {
 }
 
 function isEditableAdminMatch(match) {
+  if (state.status === "Avsluttet") return false;
+  // A match waiting for a withdrawal decision can be decided at any time, also in a round that has not started.
+  if (match.state === "awaitingWithdrawalDecision") return true;
   const activeRound = getActiveRound();
-  return Boolean(state.status !== "Avsluttet" && activeRound && activeRound.matches.some((roundMatch) => roundMatch.id === match.id));
+  return Boolean(activeRound && activeRound.matches.some((roundMatch) => roundMatch.id === match.id));
 }
 
 function teamDisplay(team, variant = "default") {
@@ -2255,6 +2307,7 @@ function matchStateText(stateName) {
     awaitingApproval: t("common.awaitingApproval"),
     finished: t("common.finished"),
     cancelled: t("common.cancelled"),
+    awaitingWithdrawalDecision: t("common.awaitingWithdrawal"),
   }[stateName] ?? stateName;
 }
 
@@ -2445,6 +2498,7 @@ remoteStateController = window.PadelstarRemoteStateController.create({
   hasRealtimeChannel: () => realtimeConnection.hasChannel(),
   render,
   saveProfileHistory,
+  onRemoteStateApplied: (previous, next, meta) => notificationCenterUi.handleStateChange(previous, next, meta),
   translate: (key, values) => t(key, values),
 });
 remoteSyncController = window.PadelstarRemoteSyncController.create({

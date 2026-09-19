@@ -95,9 +95,16 @@
       }
       document.querySelectorAll("#appMenu [data-module-link]").forEach((link) => {
         const moduleName = deps.normalizeWorkspaceModule(link.dataset.moduleLink);
-        link.classList.toggle("hidden", !visibleModules.has(moduleName));
-        link.classList.toggle("active", moduleName === activeModule);
-        if (moduleName === activeModule) link.setAttribute("aria-current", "page");
+        // With a tournament running the menu is Home, Current tournament and Profile: joining or creating another one
+        // starts from Home. "Current tournament" opens the admin or player view, whichever the routing allows.
+        const isCurrentTournamentLink = link.id === "currentTournamentLink";
+        const hidden = isCurrentTournamentLink
+          ? !tournamentIsActive
+          : !visibleModules.has(moduleName) || (tournamentIsActive && ["setup-admin", "setup-player"].includes(moduleName));
+        const active = isCurrentTournamentLink ? ["admin", "player", "lobby"].includes(activeModule) : moduleName === activeModule;
+        link.classList.toggle("hidden", hidden);
+        link.classList.toggle("active", active);
+        if (active) link.setAttribute("aria-current", "page");
         else link.removeAttribute("aria-current");
       });
       document.querySelectorAll("[data-section]").forEach((section) => {

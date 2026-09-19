@@ -156,6 +156,39 @@
       return true;
     }
 
+    function withdrawalErrorMessage(error) {
+      const message = String(error?.message ?? "");
+      if (/Only the remaining teammate/i.test(message)) return deps.t("withdrawal.error.notTeammate");
+      if (/not waiting for a withdrawal decision|finished|Match not found/i.test(message)) return deps.t("withdrawal.error.outOfDate");
+      return deps.t("withdrawal.error.failed");
+    }
+
+    // The remaining teammate decides after a withdrawal: playAlone (1 against 2) or walkover.
+    async function withdrawalDecision(matchId, decision) {
+      if (!canScore()) return false;
+      if (!deps.isOnline()) {
+        deps.showToast(deps.t("scorer.offline"), "status-message-error");
+        return false;
+      }
+      const state = deps.getState();
+      const { data, error } = await deps.remoteRpc(deps.getSupabaseClient(), "match_withdrawal_decision", {
+        p_tournament_id: state.id,
+        p_invite_code: state.inviteCode,
+        p_player_id: state.selectedPlayerId,
+        p_match_id: matchId,
+        p_player_token: state.playerToken,
+        p_decision: decision,
+      });
+      if (error) {
+        console.warn(`Supabase withdrawal decision ${decision} failed`, error);
+        deps.showToast(withdrawalErrorMessage(error), "status-message-error");
+        deps.refreshRemoteState?.("withdrawal-decision-failed");
+        return false;
+      }
+      if (data) deps.applyRemoteState(data, { source: "rpc", clearConflict: true });
+      return true;
+    }
+
     function ownScoringMatchIds() {
       const state = deps.getState();
       if (!state.selectedPlayerId) return [];
@@ -179,7 +212,7 @@
       }
     }
 
-    return { queuePlayerScore, processPlayerScoreQueue, scorerAction, resultAction, syncHeartbeat };
+    return { queuePlayerScore, processPlayerScoreQueue, scorerAction, resultAction, withdrawalDecision, syncHeartbeat };
   }
 
   global.PadelstarRemotePlayerScore = { create };
