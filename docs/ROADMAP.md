@@ -6,7 +6,7 @@
 >
 > **Hard milestone:** functioning build by **Monday 21 September 2026**.
 >
-> **Version baseline:** `0.6.1` — the Monday critical path was verified end-to-end for `0.6.0` (see `docs/CHANGELOG.md`), and `0.6.1` is a verified UI-redesign/polish batch on top of it that changed no critical-path behavior. Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
+> **Version baseline:** `0.7.0` — the Monday critical path was verified end-to-end for `0.6.0`, `0.6.1` was a verified UI-redesign/polish batch, and `0.7.0` (applied on the developer's instruction, 2026-09-19) is the beta feature milestone that adds scorer roles, result approval and correction, timed matches, scoring rules, player replacement, TV Mode in every supported language and a feedback button (see `docs/CHANGELOG.md`, which lists what has and has not been verified live). Version bumps are recommended only after coherent milestones are fully implemented and verified; Codex never applies them automatically — this one was applied on explicit developer instruction.
 >
 > **Token reset:** **Saturday 19 September 2026 at 11:31**. Before the reset, spend tokens only on the shortest path to a functioning app and verified blockers.
 >

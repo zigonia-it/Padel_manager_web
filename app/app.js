@@ -719,6 +719,18 @@ const profileSession = window.PadelstarProfileSession.create({
   setProfile: (nextProfile) => { profile = nextProfile; },
 });
 profile = profileSession.loadLocalProfile();
+const feedback = window.PadelstarFeedback.create({
+  document,
+  t: (key, values) => t(key, values),
+  escapeHtml: (value) => escapeHtml(value),
+  getContext: () => ({
+    version: window.PadelstarAppMeta.APP_VERSION,
+    language: state.settings?.language ?? "",
+    view: activeModule,
+    role: currentLocalRole(),
+  }),
+});
+feedback.bind();
 const resultCorrectionDialog = window.PadelstarResultCorrectionDialog.create({
   document,
   t: (key, values) => t(key, values),

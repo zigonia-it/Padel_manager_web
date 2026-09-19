@@ -1,0 +1,67 @@
+/* Beta feedback dialog and footer link */
+.footer-links .footer-feedback-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.feedback-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: min(520px, 94vw);
+}
+
+.feedback-dialog {
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.feedback-beta {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border: 1px solid var(--ds-border-strong, rgba(91, 173, 255, 0.58));
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.feedback-card textarea {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* Honeypot: invisible to people, still in the DOM for bots. */
+.feedback-trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.feedback-privacy {
+  font-size: 0.8rem;
+}
+
+.feedback-error {
+  margin: 0;
+  color: var(--danger, #ff8a8a);
+  font-weight: 700;
+}
+
+.feedback-thanks {
+  margin: 0;
+  color: var(--success, #3ecf8e);
+  font-weight: 700;
+}

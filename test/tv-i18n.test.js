@@ -81,7 +81,7 @@ test("tv.html loads the shared translations before the TV script", () => {
 });
 
 function resolver() {
-  const context = { console, URLSearchParams, PadelstarI18n, location: { search: "" }, localStorage: { getItem: () => null }, navigator: {}, document: { documentElement: {}, addEventListener() {} } };
+  const context = { console, URLSearchParams, PadelstarI18n, PadelstarPlayerVisuals: { create: () => ({ avatarMarkup: () => "" }) }, PadelstarAccentSystem: { accentStyle: () => "" }, location: { search: "" }, localStorage: { getItem: () => null }, navigator: {}, document: { documentElement: {}, addEventListener() {} } };
   context.window = context;
   context.addEventListener = () => {};
   vm.createContext(context);
@@ -100,4 +100,11 @@ test("language resolution: ?lang first, then the saved choice, then the device l
   assert.equal(resolve("", storage(null), { languages: ["nn-NO"], language: "nn-NO" }), "nb", "Nynorsk devices get Bokmål");
   assert.equal(resolve("", storage(null), { languages: ["fr-FR"], language: "fr-FR" }), "nb", "unsupported device languages fall back");
   assert.equal(resolve("", { getItem() { throw new Error("blocked"); } }, { language: "en-US" }), "en", "blocked storage is tolerated");
+});
+
+test("TV Mode uses the app's gem avatars, not a third-party image service", () => {
+  assert.ok(!/dicebear/i.test(tvSource) && !/dicebear/i.test(tvHtml), "no Dicebear");
+  assert.match(tvSource, /avatarMarkup\(player, "tv-avatar"/);
+  const order = ["app/accent-system.js", "app/player-visuals.js", "app/tv-mode.js"].map((file) => tvHtml.indexOf(file));
+  assert.ok(order.every((position) => position > -1) && order[0] < order[1] && order[1] < order[2]);
 });

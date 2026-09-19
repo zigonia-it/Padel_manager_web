@@ -41,9 +41,10 @@
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
   const allMatches = () => (state?.rounds ?? []).flatMap((round) => round.matches ?? []);
   const playersIn = (match, index) => match?.[index === 0 ? "teamOne" : "teamTwo"]?.players ?? [];
-  const avatarUrl = (player) => `https://api.dicebear.com/10.x/lorelei-neutral/svg?seed=${encodeURIComponent(`${player.name ?? "Sophie"}-${player.avatarId ?? "smash"}`)}&size=96`;
+  // The same gem avatar as the app (accent colour + initials); no third-party image service.
+  const visuals = global.PadelstarPlayerVisuals.create({ accentStyle: global.PadelstarAccentSystem.accentStyle, escapeHtml });
   const teamNames = (team) => (team?.players ?? []).map((player) => `<span>${escapeHtml(player.name)}</span>`).join("");
-  const standingPlayer = (player) => `<span class="tv-standing-player"><img src="${avatarUrl(player)}" alt=""><span class="tv-standing-name">${escapeHtml(player.name)}</span></span>`;
+  const standingPlayer = (player) => `<span class="tv-standing-player">${visuals.avatarMarkup(player, "tv-avatar", 36)}<span class="tv-standing-name">${escapeHtml(player.name)}</span></span>`;
   const score = (match, index) => Number(match?.currentSet?.[index === 0 ? "teamOne" : "teamTwo"] ?? 0);
 
   // Same ranking as the app (points, head-to-head, wins, sets, game difference, games, name).
