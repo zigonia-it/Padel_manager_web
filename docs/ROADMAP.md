@@ -365,7 +365,7 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 19 — TV Mode
 
-Status 2026-09-19 (nothing ticked yet, live check pending): TV Mode now ranks with the same head-to-head standings as the app. With migration `20260919170000_guest_finish_retention.sql` a finished guest tournament stays viewable for 24 hours, which is what "Final standings/result after completion" needs for guests (before, the spectator link found nothing once the tournament was finished). Still open: TV Mode is Norwegian only (no translation), does not list matches awaiting approval, and does not show the match countdown; the reset/nullified state and the Court Queue view are not re-verified.
+Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app, is translated (Norwegian and English; language from `?lang=`, the saved choice, then the device language; `test/tv-i18n.test.js` fails if a production language lacks a TV key or text gets hard-coded, so TV Mode supports every supported language at all times), lists matches awaiting approval, and shows the countdown of timed matches. Verified live: with the retention change a finished guest tournament stays viewable (TV shows FERDIG with full standings) for 24 hours. Still open: the reset/nullified state and the Court Queue view are not re-verified, and the remaining Phase 19 items are not ticked yet.
 
 - [ ] Read-only public viewing.
 - [ ] Link/QR.
@@ -418,7 +418,7 @@ Status 2026-09-19 (nothing ticked yet, live check pending): TV Mode now ranks wi
 
 ## Phase 24 — v1 security/data integrity
 
-- [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, NOT applied); leaked-password protection is disabled (Auth setting in the Dashboard — developer action).
+- [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, NOT applied); leaked-password protection is disabled — it is a Supabase Pro-plan feature and the project is on the free plan, so it cannot be enabled (accepted 2026-09-19; the password rules of Supabase Auth still apply). Revisit if the project moves to Pro.
 - [ ] Stable IDs for auth/relations.
 - [ ] Guest/player/admin/owner/TV access.
 - [ ] Duplicate/race handling.

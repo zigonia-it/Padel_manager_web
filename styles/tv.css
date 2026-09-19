@@ -75,3 +75,9 @@ button { font: inherit; color: inherit; }
 .tv-bracket-extra .tv-bracket-card { flex: 1 1 200px; }
 .tv-bracket-extra-label { flex: 0 0 100%; color: var(--muted); font-family: "Titillium Web", sans-serif; font-size: clamp(.6rem, .68vw, .78rem); letter-spacing: .08em; }
 
+
+/* Match countdown and status labels for timed / awaiting-approval matches */
+.tv-timer { font-weight: 900; font-variant-numeric: tabular-nums; color: #b9f2ff; }
+.tv-timer-warning { color: #f2b84b; animation: tv-live-pulse 1.2s ease-in-out infinite; }
+.tv-timer-expired { color: #ff8a8a; }
+.tv-timer-ended { color: var(--muted); }

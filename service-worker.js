@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v309";
+const cacheName = "padelstar-v310";
 
 const appShell = [
   "./",
@@ -9,7 +9,7 @@ const appShell = [
   "./styles/base.css?v=padelstar-base-7",
   "./styles/layout.css?v=padelstar-layout-9",
   "./styles/components.css?v=padelstar-components-19",
-  "./styles/tv.css?v=padelstar-tv-11",
+  "./styles/tv.css?v=padelstar-tv-12",
   "./assets/logos/main_logo_without_icon.png",
   "./assets/icons/padelstar-icon.png",
   "./assets/logos/tv-brand.png",
@@ -29,7 +29,7 @@ const appShell = [
   "./styles/invite-code-input.css?v=padelstar-invite-code-input-1",
   "./styles/accent-picker.css?v=padelstar-accent-picker-1",
   "./styles/privacy.css?v=padelstar-privacy-3",
-  "./app/translations.js?v=padelstar-i18n-42",
+  "./app/translations.js?v=padelstar-i18n-43",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-6",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -120,7 +120,7 @@ const appShell = [
   "./app/state-bootstrap.js?v=padelstar-state-bootstrap-1",
   "./app/module-routing.js?v=padelstar-module-routing-4",
   "./app/session-policy.js?v=padelstar-session-policy-1",
-  "./app/tv-mode.js?v=padelstar-tv-mode-8",
+  "./app/tv-mode.js?v=padelstar-tv-mode-9",
   "./app/remote-state-write.js?v=padelstar-remote-state-write-1",
   "./app/remote-admin-actions.js?v=padelstar-remote-admin-actions-3",
   "./app/remote-player-score.js?v=padelstar-remote-player-score-3",
