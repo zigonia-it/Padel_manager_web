@@ -86,6 +86,29 @@
       }, "messages.matchUpdateFailed");
     }
 
+    // Admin corrects a finished result (reason and consequence level are recorded by the server).
+    function queueRemoteCorrection(match, { sets, reason, comment, level }) {
+      if (!canWrite("messages.offlineAdminChange")) return false;
+      recordAdminEvent("result_correction_requested", "match", match.id, { reason });
+      enqueue("admin_correct_result", () => {
+        const state = deps.getState();
+        return {
+          p_tournament_id: state.id,
+          p_admin_token: state.adminToken,
+          p_match_id: match.id,
+          p_completed_sets: sets,
+          p_reason: reason,
+          p_comment: comment || null,
+          p_displayed_level: level ?? null,
+          p_expected_revision: state.revision,
+        };
+      }, "messages.matchUpdateFailed", () => {
+        deps.showToast?.(deps.t("correction.applied"), "status-message-success");
+        deps.sendPushNotification("result_corrected", match.id);
+      });
+      return true;
+    }
+
     // Admin approves an awaiting result as it stands.
     function queueRemoteResolveResult(match) {
       if (!canWrite("messages.offlineAdminChange")) return;
@@ -135,7 +158,7 @@
       }, "messages.nextCupRoundFailed", () => deps.sendPushNotification("round_ready"));
     }
 
-    return { queueRemoteMatchAction, queueRemoteScorerAssign, queueRemoteResolveResult, queueRemoteSetResult, queueRemoteRoundAdvance, queueRemoteCupAdvance };
+    return { queueRemoteMatchAction, queueRemoteScorerAssign, queueRemoteResolveResult, queueRemoteCorrection, queueRemoteSetResult, queueRemoteRoundAdvance, queueRemoteCupAdvance };
   }
 
   global.PadelstarRemoteAdminActions = { create };

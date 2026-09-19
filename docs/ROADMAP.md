@@ -294,15 +294,21 @@ Known gaps: TV Mode does not list matches that await approval; an approved cup f
 
 ## Phase 12 — Result correction/consequences
 
-- [ ] Admin-only finalized correction.
-- [ ] Correction history.
-- [ ] Mandatory reason.
-- [ ] Consequence simulation.
-- [ ] Future-match handling.
-- [ ] Already-played matches protected.
-- [ ] Atomic commit/rollback.
-- [ ] Successful-change notifications.
-- [ ] Regression tests.
+Built 2026-09-19 (spec: archived plan FASE J). Server: migration `20260919210000_admin_result_correction.sql` (NOT applied; needs the scorer and approval migrations, which are), 29 database tests (`supabase/tests/result-correction.pglite.mjs`). Client: `app/result-correction.js` (consequence simulation), `app/result-correction-dialog.js`, a "Korriger resultat" button and a correction history on finished match cards; 13 client tests (`test/result-correction.test.js`). The dialog and its simulation were checked in the browser; the confirm step needs the migration applied and then a live check.
+
+How it works: on a finished match the admin enters the new set score(s), picks a mandatory reason (wrong points entered / wrong team credited / players agree / referee decision / restore an earlier result / other, which needs a comment) and presses "Simuler konsekvens". The simulation runs on a copy (nothing changes) with the same scoring engine and shows a level with text and colour: green (standings unchanged), yellow (ranking positions change), orange (winner changes, points move), red (blocked), plus the concrete changes (winner, points and place per player) and "ongoing matches are not affected". Only after a successful simulation can the admin confirm. The server function is atomic, admin-token only, revision-checked, refuses invalid sets/unchanged results/unfinished matches, and appends every correction to `match.correctionHistory` (old result, new result, reason, comment, level, time) so nothing is overwritten. Restoring an old result is another correction (reason `restore`, one click from the history). Players get a push notification only after the correction succeeded.
+
+- [ ] Admin-only finalized correction. — admin token only, for finished matches while the tournament is running. Closed once the tournament is finished: statistics have been saved by then, and recalculating them is part of Phase 15.
+- [ ] Correction history. — `match.correctionHistory`, shown on the match card (also to players); never overwritten.
+- [ ] Mandatory reason. — six standard reasons, `other` requires a comment (both enforced in the dialog and on the server).
+- [ ] Consequence simulation. — client-side on a copy with the shared scoring engine, levels green/yellow/orange/red shown as text plus colour.
+- [ ] Future-match handling. — Round Robin rounds are independent, so standings recalculate; a Cup winner change is red/blocked once a later round exists, a score-only Cup correction is allowed.
+- [ ] Already-played matches protected. — the Cup block above; ongoing and unplayed matches are never changed by a correction.
+- [ ] Atomic commit/rollback. — a single database transaction; a refused correction changes nothing (tested).
+- [ ] Successful-change notifications. — push message `result_corrected` after the RPC succeeded (same push path as match-ready notifications).
+- [ ] Regression tests. — 29 database + 13 client tests.
+
+Not built: correcting the result of a Cup match whose later round already exists (blocked by design), correcting after the tournament finished, and personal-statistics recalculation (Phase 15).
 
 ## Phase 13 — Replacement/withdrawal
 

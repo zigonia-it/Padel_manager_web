@@ -269,6 +269,7 @@ const remoteAdminActions = window.PadelstarRemoteAdminActions.create({
   },
   saveRemoteState: () => saveRemoteState(),
   sendPushNotification: (kind, matchId) => sendPushNotification(kind, matchId),
+  showToast: (message, statusClass) => showToast(message, statusClass),
   setLastPersistedSequence: (sequence) => {
     lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, sequence);
   },
@@ -716,6 +717,27 @@ const profileSession = window.PadelstarProfileSession.create({
   setProfile: (nextProfile) => { profile = nextProfile; },
 });
 profile = profileSession.loadLocalProfile();
+const resultCorrectionDialog = window.PadelstarResultCorrectionDialog.create({
+  document,
+  t: (key, values) => t(key, values),
+  escapeHtml: (value) => escapeHtml(value),
+  getState: () => state,
+  scoring,
+  correction: window.PadelstarResultCorrection,
+  applyCorrection: (match, payload) => applyResultCorrection(match, payload),
+});
+function applyResultCorrection(match, payload) {
+  if (isSupabaseReady()) return remoteAdminActions.queueRemoteCorrection(match, payload);
+  const result = window.PadelstarResultCorrection.applyLocally(state, match.id, payload.sets, payload.reason, payload.comment, payload.level, scoring);
+  if (!result.ok) {
+    showToast(t(`correction.error.${result.error}`), "status-message-error");
+    return false;
+  }
+  saveState();
+  render();
+  showToast(t("correction.applied"), "status-message-success");
+  return true;
+}
 const matchCard = window.PadelstarMatchCard.create({
   awardTennisPoint: (match, teamIndex) => awardTennisPoint(match, teamIndex),
   cancelMatch: (match) => cancelMatch(match),
@@ -737,6 +759,7 @@ const matchCard = window.PadelstarMatchCard.create({
   adminSetScorer: (match, playerId) => remoteAdminActions.queueRemoteScorerAssign(match, playerId),
   resultAction: (match, action, payload) => remotePlayerScore.resultAction(match.id, action, payload),
   adminResolveResult: (match) => remoteAdminActions.queueRemoteResolveResult(match),
+  openCorrection: (match, options) => resultCorrectionDialog.open(match, options),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),

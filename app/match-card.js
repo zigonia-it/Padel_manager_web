@@ -22,6 +22,7 @@
       adminSetScorer,
       resultAction,
       adminResolveResult,
+      openCorrection,
       sittingOutSummary,
       startMatch,
       teamAccentStyle,
@@ -120,6 +121,36 @@
     }
 
 
+
+
+    // ---- Result corrections (Phase 12): the old results are never overwritten -------------------------
+    function correctionSetsText(sets) {
+      return (sets ?? []).map((set) => `${set.teamOne}–${set.teamTwo}`).join(", ");
+    }
+
+    function correctionHistoryMarkup(match, canRestore) {
+      const history = match.correctionHistory ?? [];
+      if (!history.length) return "";
+      const running = getState().status !== "Avsluttet";
+      const items = history.map((entry, index) => {
+        const time = new Date(entry.at);
+        const when = Number.isNaN(time.getTime()) ? "" : time.toLocaleString(undefined, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+        const comment = entry.comment ? ` – ${escapeHtml(entry.comment)}` : "";
+        const restore = canRestore && running && match.state === "finished"
+          ? ` <button class="ghost correction-restore" type="button" data-correction-restore="${index}">${translate("correction.restore")}</button>` : "";
+        return `<li><span class="correction-level-dot correction-level-${escapeAttribute(entry.level ?? "green")}" aria-hidden="true"></span>${escapeHtml(when)}: ${escapeHtml(correctionSetsText(entry.before?.completedSets))} → ${escapeHtml(correctionSetsText(entry.after?.completedSets))} (${escapeHtml(translate(`correction.reason.${entry.reason}`))})${comment}${restore}</li>`;
+      });
+      return `<div class="correction-history"><strong>${translate("correction.historyTitle")}</strong><ul>${items.join("")}</ul></div>`;
+    }
+
+    function bindCorrectionHistory(root, match) {
+      root.querySelectorAll("[data-correction-restore]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const entry = (match.correctionHistory ?? [])[Number(button.dataset.correctionRestore)];
+          if (entry) openCorrection(match, { prefill: entry.before?.completedSets, reason: "restore" });
+        });
+      });
+    }
 
     // ---- Timed matches (Phase 14) --------------------------------------------------------------
     function timerSeconds(startedAt, minutes, now = Date.now()) {
@@ -322,6 +353,7 @@
       ${scoreboardTableMarkup(match, editable)}
       ${scorerPanelMarkup(match, editable, scoreOnly)}
       ${approvalPanelMarkup(match, editable, scoreOnly)}
+      ${correctionHistoryMarkup(match, editable && !scoreOnly)}
       ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
     </div>
   `;
@@ -329,6 +361,7 @@
       bindScoreboardTable(card, match, editable && match.state !== "cancelled");
       bindScorerPanel(card, match);
       bindApprovalPanel(card, match);
+      bindCorrectionHistory(card, match);
 
       const summaryToggle = card.querySelector(".match-summary");
       const body = card.querySelector(".match-card-body");
@@ -366,7 +399,8 @@
           <button class="ghost walkover-button" type="button" data-walkover-team="0" aria-label="${translate("score.walkoverForAria", { team: teamOneName })}" ${["finished", "cancelled", "awaitingApproval"].includes(match.state) ? "disabled" : ""}>${teamOneName}</button>
           <button class="ghost walkover-button" type="button" data-walkover-team="1" aria-label="${translate("score.walkoverForAria", { team: teamTwoName })}" ${["finished", "cancelled", "awaitingApproval"].includes(match.state) ? "disabled" : ""}>${teamTwoName}</button>
         </div>
-      </div>`}
+      </div>
+      ${match.state === "finished" && getState().status !== "Avsluttet" ? `<div class="correction-row"><button class="secondary correct-result-button" type="button">${translate("correction.button")}</button></div>` : ""}`}
     `;
 
         if (!scoreOnly) {
@@ -376,6 +410,7 @@
           controls.querySelector(".start-match-button").addEventListener("click", () => startMatch(match));
           controls.querySelector(".large-score-button").addEventListener("click", () => openLargeScore(match.id));
           controls.querySelector(".reopen-match-button").addEventListener("click", () => reopenMatch(match));
+          controls.querySelector(".correct-result-button")?.addEventListener("click", () => openCorrection(match));
           controls.querySelector(".cancel-match-button").addEventListener("click", () => void cancelMatch(match));
           controls.querySelectorAll(".walkover-button").forEach((button) => {
             button.addEventListener("click", () => void setWalkover(match, Number(button.dataset.walkoverTeam)));
@@ -386,7 +421,7 @@
       return card;
     }
 
-    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable, scorerPanelMarkup, approvalPanelMarkup, bindApprovalPanel, timerMarkup, updateTimers };
+    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable, scorerPanelMarkup, approvalPanelMarkup, bindApprovalPanel, timerMarkup, updateTimers, correctionHistoryMarkup };
   }
 
   global.PadelstarMatchCard = { create };

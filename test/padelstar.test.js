@@ -37,6 +37,8 @@ const tournamentQueriesPath = path.join(appRoot, "tournament-queries.js");
 const tournamentSharingPath = path.join(appRoot, "tournament-sharing.js");
 const resultSubmissionsPath = path.join(appRoot, "result-submissions.js");
 const matchCardPath = path.join(appRoot, "match-card.js");
+const resultCorrectionPath = path.join(appRoot, "result-correction.js");
+const resultCorrectionDialogPath = path.join(appRoot, "result-correction-dialog.js");
 const backupFormatPath = path.join(appRoot, "backup-format.js");
 const linkUtilsPath = path.join(appRoot, "link-utils.js");
 const tournamentStatePath = path.join(appRoot, "tournament-state.js");
@@ -185,6 +187,8 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(tournamentQueriesPath, "utf8"), context, { filename: tournamentQueriesPath });
   vm.runInContext(fs.readFileSync(tournamentSharingPath, "utf8"), context, { filename: tournamentSharingPath });
   vm.runInContext(fs.readFileSync(resultSubmissionsPath, "utf8"), context, { filename: resultSubmissionsPath });
+  vm.runInContext(fs.readFileSync(resultCorrectionPath, "utf8"), context, { filename: resultCorrectionPath });
+  vm.runInContext(fs.readFileSync(resultCorrectionDialogPath, "utf8"), context, { filename: resultCorrectionDialogPath });
   vm.runInContext(fs.readFileSync(matchCardPath, "utf8"), context, { filename: matchCardPath });
   vm.runInContext(fs.readFileSync(backupFormatPath, "utf8"), context, { filename: backupFormatPath });
   vm.runInContext(fs.readFileSync(linkUtilsPath, "utf8"), context, { filename: linkUtilsPath });
