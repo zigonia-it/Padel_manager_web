@@ -24,3 +24,22 @@ configured or reachable the user gets a ready-made email draft instead.
   plain-text email only, line breaks stripped from single-line fields.
 - Privacy: described on `privacy.html` (Vercel and Resend process the message).
 - Errors seen by the user: offline, not configured (503/404), too many messages (429), or a provider failure (502).
+
+## Troubleshooting: "Feedback can't be sent from the app right now"
+
+That message means the endpoint answered `503 notConfigured` (or `404` on a local preview, where `/api` does not exist).
+On the deployed site check what it says (this sends nothing):
+
+```bash
+curl -s -X POST https://padelstar.app/api/feedback -H "Content-Type: application/json" \
+  -d '{"category":"bug","message":"config check","website":"","email":""}' -w "\nHTTP %{http_code}\n"
+```
+
+- `503` with `"missing": ["RESEND_API_KEY"]` (or `FEEDBACK_TO_EMAIL`, or both): the *running* deployment cannot see that variable.
+  Check the exact name (no spaces), that **Production** is ticked for it, and then **redeploy** (Deployments -> ... -> Redeploy).
+  Adding a variable does not change a deployment that already exists.
+- `502`: the variables are read, but Resend refused the send. Check the API key and that `FEEDBACK_TO_EMAIL` is the address you
+  registered with Resend (required while using the free `onboarding@resend.dev` sender); Resend's dashboard shows the exact error.
+- `200 {"ok":true}`: it works; check inbox and spam.
+
+(Note: that command carries a valid payload, so once configured it *does* send a real email to you.)
