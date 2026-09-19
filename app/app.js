@@ -287,9 +287,11 @@ const remotePlayerScore = window.PadelstarRemotePlayerScore.create({
   isOnline: () => navigator.onLine,
   isSupabaseReady: () => isSupabaseReady(),
   persistSyncMetadata: () => persistSyncMetadata(),
+  refreshRemoteState: (reason) => refreshRemoteState(reason),
   removeFirstPendingScore: () => { pendingPlayerScores.shift(); },
   remoteRpc,
   render: () => render(),
+  showToast: (message, statusClass) => showToast(message, statusClass),
   syncConnectionStatus: () => syncConnectionStatus(),
   t: (key, values) => t(key, values),
 });
@@ -727,6 +729,8 @@ const matchCard = window.PadelstarMatchCard.create({
   setWalkover: (match, teamIndex) => setWalkover(match, teamIndex),
   setsWonByTeam: (match, teamIndex) => setsWonByTeam(match, teamIndex),
   scoreSummary: (match) => scoreSummary(match),
+  scorerAction: (match, action, targetPlayerId) => remotePlayerScore.scorerAction(match.id, action, targetPlayerId),
+  adminSetScorer: (match, playerId) => remoteAdminActions.queueRemoteScorerAssign(match, playerId),
   sittingOutSummary: (match) => sittingOutSummary(match),
   startMatch: (match) => startMatch(match),
   teamAccentStyle: (team) => teamAccentStyle(team),
@@ -1556,7 +1560,11 @@ function activateAdminPanel(panel) {
   return result;
 }
 
-function render() { return appRenderer?.render(); }
+function render() {
+  const result = appRenderer?.render();
+  remotePlayerScore.syncHeartbeat();
+  return result;
+}
 
 function syncConnectionStatus() {
   adminStatus.syncConnectionStatus();

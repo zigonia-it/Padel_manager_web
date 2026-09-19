@@ -1,0 +1,56 @@
+/* =========================================================
+   SCORER PANEL (Phase 10): who is scoring this match, and the role controls
+   ========================================================= */
+
+.scorer-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.2));
+  border-radius: var(--radius-md, 10px);
+  background: var(--ds-surface-1, rgba(16, 31, 52, 0.6));
+}
+
+.scorer-status {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.scorer-status strong {
+  color: var(--ui-muted, #9fb4cc);
+  font-weight: 700;
+}
+
+.scorer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.scorer-controls .scorer-button {
+  min-height: 40px;
+}
+
+.scorer-controls select {
+  width: auto;
+  min-width: 0;
+  min-height: 40px;
+}
+
+.scorer-request {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--gold-bright, #62b6ff);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (max-width: 680px) {
+  .scorer-controls .scorer-button,
+  .scorer-controls select {
+    flex: 1 1 calc(50% - 8px);
+  }
+}

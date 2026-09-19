@@ -59,8 +59,15 @@
 
     function awardTennisPoint(match, teamIndex) {
       if (["finished", "cancelled"].includes(match.state)) return;
+      if (deps.currentLocalRole() === "player") {
+        const playerId = deps.getState().selectedPlayerId;
+        const scorerId = match.scorer?.playerId;
+        if (scorerId && scorerId !== playerId) return;
+        if (!scorerId) match.scorer = { playerId, claimedAt: new Date().toISOString() };
+      }
       match.undoStack = match.undoStack ?? [];
       match.undoStack.push(deps.captureMatchUndoState(match));
+      match.redoStack = [];
       if (match.state === "waiting") {
         match.state = "playing";
         match.status = "active";

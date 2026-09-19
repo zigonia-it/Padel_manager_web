@@ -18,6 +18,8 @@
       setsWonByTeam,
       scoreConflict,
       scoreSummary,
+      scorerAction,
+      adminSetScorer,
       sittingOutSummary,
       startMatch,
       teamAccentStyle,
@@ -34,10 +36,91 @@
       return expandState.has(match.id) ? expandState.get(match.id) : match.state === "playing";
     }
 
+
+    function selectedPlayerId() {
+      return getState().selectedPlayerId ?? null;
+    }
+
+    // Players may score only when they are the active scorer (or nobody is: the first point claims the role).
+    function playerMayScore(match) {
+      if (currentLocalRole() !== "player") return true;
+      const scorerId = match.scorer?.playerId;
+      return !scorerId || scorerId === selectedPlayerId();
+    }
+
+    // Undo needs an established scorer role for players; admins are unaffected.
+    function playerIsScorerOrNotPlayer(match) {
+      if (currentLocalRole() !== "player") return true;
+      return match.scorer?.playerId === selectedPlayerId();
+    }
+
+    function matchPlayers(match) {
+      return [...(match.teamOne?.players ?? []), ...(match.teamTwo?.players ?? [])];
+    }
+
+    function playerNameById(match, playerId) {
+      return matchPlayers(match).find((player) => player.id === playerId)?.name ?? "";
+    }
+
+    function scorerPanelMarkup(match, editable, scoreOnly) {
+      if (match.state !== "playing") return "";
+      const role = currentLocalRole();
+      const me = selectedPlayerId();
+      const scorerId = match.scorer?.playerId ?? null;
+      const requestId = match.scorerRequest?.playerId ?? null;
+      const participant = role === "player" && Boolean(me) && matchIncludesPlayer(match, me);
+      const iAmScorer = participant && scorerId === me;
+      const status = !scorerId
+        ? translate(role === "player" ? "scorer.none" : "scorer.unassigned")
+        : iAmScorer
+          ? translate("scorer.you")
+          : translate("scorer.current", { name: escapeHtml(playerNameById(match, scorerId)) });
+      const button = (action, label, extra = "") => `<button class="secondary scorer-button" type="button" data-scorer-action="${action}" ${extra}>${label}</button>`;
+      const options = (ids, blank) => `${blank ? `<option value="">${blank}</option>` : ""}${ids.map((id) => `<option value="${escapeAttribute(id)}" ${id === scorerId ? "selected" : ""}>${escapeHtml(playerNameById(match, id))}</option>`).join("")}`;
+      const others = matchPlayers(match).map((player) => player.id).filter((id) => id !== me);
+      let controls = "";
+      if (participant && !scorerId) {
+        controls = button("claim", translate("scorer.claim"));
+      } else if (iAmScorer) {
+        controls = [
+          button("redo", translate("scorer.redo"), match.redoStack?.length ? "" : "disabled"),
+          `<select class="scorer-transfer-select" aria-label="${translate("scorer.transferTo")}">${options(others)}</select>`,
+          button("transfer", translate("scorer.transfer")),
+          button("release", translate("scorer.release")),
+          requestId ? `<p class="scorer-request">${translate("scorer.requestedBy", { name: escapeHtml(playerNameById(match, requestId)) })}</p>${button("accept", translate("scorer.accept", { name: escapeHtml(playerNameById(match, requestId)) }))}${button("decline", translate("scorer.decline"))}` : "",
+        ].join("");
+      } else if (participant) {
+        controls = [
+          requestId === me ? `<span class="scorer-request">${translate("scorer.requestSent")}</span>` : button("request", translate("scorer.request")),
+          button("claim", translate("scorer.takeOver")),
+        ].join("");
+      } else if (role !== "player" && editable && !scoreOnly) {
+        controls = `<select class="scorer-admin-select" aria-label="${translate("scorer.assign")}">${options(matchPlayers(match).map((player) => player.id), translate("scorer.assignNone"))}</select>${button("admin-assign", translate("scorer.assign"))}`;
+      }
+      return `<div class="scorer-panel"><p class="scorer-status"><strong>${translate("scorer.title")}</strong> ${status}</p>${controls ? `<div class="scorer-controls">${controls}</div>` : ""}</div>`;
+    }
+
+    function bindScorerPanel(root, match) {
+      root.querySelectorAll("[data-scorer-action]").forEach((control) => {
+        control.addEventListener("click", () => {
+          const action = control.dataset.scorerAction;
+          if (action === "admin-assign") {
+            adminSetScorer(match, root.querySelector(".scorer-admin-select")?.value || null);
+          } else if (action === "transfer") {
+            void scorerAction(match, "transfer", root.querySelector(".scorer-transfer-select")?.value || null);
+          } else if (action === "accept") {
+            void scorerAction(match, "transfer", null);
+          } else {
+            void scorerAction(match, action);
+          }
+        });
+      });
+    }
+
     function scoreboardRow(match, teamIndex, teamName, pointControlsEnabled) {
       const team = teamIndex === 0 ? match.teamOne : match.teamTwo;
       const key = teamIndex === 0 ? "teamOne" : "teamTwo";
-      const canUndo = pointControlsEnabled && match.state !== "finished" && Boolean(match.undoStack?.length);
+      const canUndo = pointControlsEnabled && match.state !== "finished" && Boolean(match.undoStack?.length) && playerIsScorerOrNotPlayer(match);
       const canAward = pointControlsEnabled && match.state !== "finished";
       return `
     <tr class="scoreboard-row" style="${teamAccentStyle(team)}">
@@ -53,7 +136,7 @@
     }
 
     function scoreboardTableMarkup(match, editable) {
-      const pointControlsEnabled = editable && match.state !== "cancelled";
+      const pointControlsEnabled = editable && match.state !== "cancelled" && playerMayScore(match);
       return `
     <table class="scoreboard-table" aria-label="${translate("score.scoreboardAria")}">
       <thead>
@@ -74,7 +157,7 @@
       root.querySelectorAll("[data-undo-team]").forEach((button) => {
         button.addEventListener("click", () => {
           if (currentLocalRole() === "player" && matchIncludesPlayer(match, getState().selectedPlayerId)) {
-            if (match.undoStack?.length) undoMatch(match);
+            if (match.undoStack?.length) void scorerAction(match, "undo");
             return;
           }
           reopenMatch(match);
@@ -124,11 +207,13 @@
         </section>
       </div>
       ${scoreboardTableMarkup(match, editable)}
+      ${scorerPanelMarkup(match, editable, scoreOnly)}
       ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
     </div>
   `;
 
       bindScoreboardTable(card, match, editable && match.state !== "cancelled");
+      bindScorerPanel(card, match);
 
       const summaryToggle = card.querySelector(".match-summary");
       const body = card.querySelector(".match-card-body");
@@ -186,7 +271,7 @@
       return card;
     }
 
-    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable };
+    return { createMatchCard, scoreboardTableMarkup, bindScoreboardTable, scorerPanelMarkup };
   }
 
   global.PadelstarMatchCard = { create };

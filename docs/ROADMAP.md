@@ -262,14 +262,18 @@ Only start these after the Monday critical path is working end-to-end, unless a 
 
 ## Phase 10 — Player live scoring
 
-- [ ] Player can score own active match.
-- [ ] One active scorer. — approved spec is in the archived plan (`docs/archive/plans/Padelstar_v1_0_0_plan.md`, FASE H): one active scorer per match, visible to others; scorer can transfer the role, other players can request it, admin can override, the server decides concurrent takeovers; after 2 minutes offline another participant can take over (first valid server request wins, old scorer does not get the role back automatically, the switch is logged). Not implemented: `save_player_point_impl` lets any member of the scored team add that team's points and has no scorer lease. See also the suspected sync-queue defect in BUGS.md.
-- [ ] Others live-view.
-- [ ] Scorer transfer/request.
-- [ ] Admin override.
-- [ ] Offline takeover.
-- [ ] Undo/Redo.
-- [ ] Multi-device verification.
+Built 2026-09-19 against the approved spec (`docs/archive/plans/Padelstar_v1_0_0_plan.md`, FASE H). Server side is migration `20260919120000_match_scorer_lease.sql` (NOT applied yet); it is covered by 48 database tests that run the SQL on an in-memory Postgres (`supabase/tests/scorer-lease.pglite.mjs`), and the client by `test/scorer-role.test.js`. Items stay unchecked until the migration is applied and a two-device run confirms them live.
+
+- [ ] Player can score own active match. — the scorer can now score for both teams; `save_player_point_impl` rejects anyone who is not the active scorer (an unclaimed match is claimed by the first point).
+- [ ] One active scorer. — stored on the match (`scorer`), enforced by the tournament row lock, logged in `scorerLog`.
+- [ ] Others live-view. — the scorer is part of the shared match state; every match card shows "Scorer: <name>" (the normal realtime update path).
+- [ ] Scorer transfer/request. — `match_scorer_action` actions `claim` / `request` / `transfer` (defaults to the requester) / `decline` / `release`, with a panel on the match card.
+- [ ] Admin override. — `admin_set_match_scorer` (admin token + expected revision); the admin can also still score directly.
+- [ ] Offline takeover. — a participant can claim once the scorer's server-side heartbeat is older than 2 minutes (30 s client heartbeat in its own table, so it never bumps the tournament revision); the old scorer does not get the role back; logged as `offline_takeover`.
+- [ ] Undo/Redo. — scorer undo/redo through the server (`undo`/`redo` actions), undone events stay in `eventLog`, a new point drops the redo branch, admin undo keeps the current scorer. "Undo/Redo ends when the result is sent for approval" belongs to Phase 11 (results are still auto-finished today).
+- [ ] Multi-device verification. — needs the migration applied, then two real devices/browsers (scorer + second player + admin).
+
+Also fixed here: a point the server rejects (for example a tap on the opponent row) is now dropped from the local sync queue instead of being retried forever and blocking later points.
 
 ## Phase 11 — Result approval
 

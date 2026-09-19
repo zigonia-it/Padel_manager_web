@@ -70,6 +70,22 @@
       }, "messages.matchUpdateFailed", action === "start" ? () => deps.sendPushNotification("match_started", match.id) : null);
     }
 
+    // Admin override: assign (playerId) or clear (null) the scorer of a match.
+    function queueRemoteScorerAssign(match, playerId) {
+      if (!canWrite("messages.offlineAdminChange")) return;
+      recordAdminEvent("match_scorer_assigned", "match", match.id, { playerId });
+      enqueue("admin_set_match_scorer", () => {
+        const state = deps.getState();
+        return {
+          p_tournament_id: state.id,
+          p_admin_token: state.adminToken,
+          p_match_id: match.id,
+          p_player_id: playerId,
+          p_expected_revision: state.revision,
+        };
+      }, "messages.matchUpdateFailed");
+    }
+
     function queueRemoteSetResult(match, teamOne, teamTwo) {
       if (!canWrite("messages.offlineSetResult")) return;
       recordAdminEvent("result_corrected", "match", match.id, { teamOne, teamTwo });
@@ -104,7 +120,7 @@
       }, "messages.nextCupRoundFailed", () => deps.sendPushNotification("round_ready"));
     }
 
-    return { queueRemoteMatchAction, queueRemoteSetResult, queueRemoteRoundAdvance, queueRemoteCupAdvance };
+    return { queueRemoteMatchAction, queueRemoteScorerAssign, queueRemoteSetResult, queueRemoteRoundAdvance, queueRemoteCupAdvance };
   }
 
   global.PadelstarRemoteAdminActions = { create };
