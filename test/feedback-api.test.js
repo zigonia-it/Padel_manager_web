@@ -125,6 +125,10 @@ test("without configuration the function says so instead of failing silently", a
   const res = await post(valid(), { env: {} });
   assert.equal(res.statusCode, 503);
   assert.equal(res.body.error, "notConfigured");
+  assert.deepEqual(res.body.missing, ["RESEND_API_KEY", "FEEDBACK_TO_EMAIL"], "names the missing variables so the fix is obvious");
+  const half = await post(valid(), { env: { RESEND_API_KEY: "re_secret" } });
+  assert.deepEqual(half.body.missing, ["FEEDBACK_TO_EMAIL"]);
+  assert.doesNotMatch(JSON.stringify(half.body), /re_secret/, "never a value");
 });
 
 test("a provider failure returns 502 and does not leak details", async () => {

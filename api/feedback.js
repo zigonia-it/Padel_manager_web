@@ -84,7 +84,11 @@ module.exports = async function handler(request, response) {
 
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.FEEDBACK_TO_EMAIL;
-  if (!apiKey || !to) return reply(response, 503, { ok: false, error: "notConfigured" });
+  if (!apiKey || !to) {
+    // Names only, never values: tells the developer which Vercel variable the running deployment cannot see.
+    const missing = [!apiKey && "RESEND_API_KEY", !to && "FEEDBACK_TO_EMAIL"].filter(Boolean);
+    return reply(response, 503, { ok: false, error: "notConfigured", missing });
+  }
 
   if (rateLimited(clientKey(request), Date.now())) return reply(response, 429, { ok: false, error: "rateLimited" });
 
