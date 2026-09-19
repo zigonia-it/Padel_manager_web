@@ -36,5 +36,5 @@ Status: `[ ]` open, `[x]` done.
 
 ## 4. Later, when the time comes
 
-- [ ] Light mode (Phase 27, 0.9): the design files are in `assets/padelstar-webapp-ui-design/`. The Claude Design connector needs an interactive login (`/design-login`) that I cannot do; if you want me to use it instead of the local copy, log in from an interactive session and tell me.
+- [x] Light mode (Phase 27) was built from the local copy of the design files in `assets/padelstar-webapp-ui-design/` (colors only, as the roadmap says); the Claude Design connector was not needed. The real-device check is in section 2.
 - [ ] Supabase leaked-password protection needs the Pro plan (accepted for now).
