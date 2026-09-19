@@ -2,7 +2,7 @@
 <html lang="no">
 
 <head>
-  <meta charset="utf-8">
+  <script>if (/[?&]embed=1\b/.test(location.search)) document.documentElement.classList.add("embedded");</script><meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#08090b">
   <meta name="description" content="Personvern for Padelstar beta.">
@@ -18,10 +18,10 @@
   <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-103">
   <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-1">
   <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-51">
-  <link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-3">
-  <script defer src="app/translations.js?v=padelstar-i18n-46"></script>
+  <link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-5">
+  <script defer src="app/translations.js?v=padelstar-i18n-48"></script>
   <script defer src="app/page-language.js?v=padelstar-page-language-1"></script>
-  <script defer src="app/privacy-i18n.js?v=padelstar-privacy-i18n-5"></script>
+  <script defer src="app/privacy-i18n.js?v=padelstar-privacy-i18n-7"></script>
 </head>
 
 <body data-theme="classic">
@@ -69,7 +69,7 @@
         });
       })();
     </script>
-    <article class="privacy-document" aria-labelledby="privacyTitle">
+    <article class="privacy-document" aria-labelledby="privacyTitle"><button class="embedded-close" type="button" aria-label="Lukk" data-privacy-aria-label="close"><span aria-hidden="true">&times;</span></button>
       <p class="eyebrow" data-privacy-i18n="beta">Beta</p>
       <h1 id="privacyTitle" data-privacy-i18n="title">Personvern</h1>
       <p data-privacy-i18n="intro">Padelstar er en betaversjon for å opprette og følge små padelturneringer. Her forklarer vi enkelt hva appen lagrer, hvorfor, hvor lenge og hvilke rettigheter du har.</p>
@@ -109,6 +109,7 @@
       <p data-privacy-i18n="updated">Sist oppdatert 2026-09-19. Dette er fortsatt en beta-tekst og bør kvalitetssikres av behandlingsansvarlig før bred bruk. Vi bruker Vercel Analytics til enkel, samlet trafikkmåling.</p>
     </article>
   </main>
+<script>if (window.parent !== window) document.addEventListener("keydown", function (e) { if (e.key === "Escape") window.parent.postMessage({ type: "padelstar-close-info" }, location.origin); }); document.addEventListener("click", function (e) { if (e.target.closest && e.target.closest(".embedded-close")) window.parent.postMessage({ type: "padelstar-close-info" }, location.origin); });</script>
 </body>
 
 </html>

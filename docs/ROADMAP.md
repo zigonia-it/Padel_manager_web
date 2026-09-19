@@ -426,10 +426,10 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 - [ ] Guide matches current product. Use clear and easy language, not production notes or technical language. (Use "in the cloud" instead of "supabase" etc. Its for the user/player, not the developer. — rewritten for `nb`/`en` (create wizard, lobby, guest use without account, invite code/QR, profile colour).
 - [ ] Privacy matches actual data flow. — added push-subscription and colour-choice data and the real retention lifecycle; the retention wording depends on migration `20260919090500_...` being applied.
-- [ ] Display in chosen language
-- [ ] Contradictory old text nust be removed.
-- [ ] Use clear and easy language, not production notes or technical language. (Use "in the cloud" instead of "supabase" etc. Its for the user/player, not the developer.
-- [ ] Always opens in popup with an x button on the top right to close.
+- [x] Display in chosen language — verified by the developer for the app (Norwegian, device language, English). Fixed 2026-09-19 on `v0.8`: the guide and privacy pages did not understand the saved value `device` and showed Norwegian on an English device; they now share `app/page-language.js` (tests in `test/page-language.test.js`).
+- [ ] Contradictory old text nust be removed. — done on `v0.8`: the outdated retention text in `app/privacy-i18n.js` (which a hidden override was silently replacing) is gone; one source of truth, mirrored in `privacy.html`. The hidden languages (nn/es/de/fr) still carry old text and stay hidden until Phase 21 completes them.
+- [ ] Use clear and easy language, not production notes or technical language. (Use "in the cloud" instead of "supabase" etc. Its for the user/player, not the developer. — privacy text rewritten in plain nb/en ("in the cloud", "on your device"); the guide gained "during a match" and "if a player has to leave". Decision for you: the privacy text still names Supabase, Vercel, Vercel Analytics and Resend once each, in parentheses, because a privacy notice normally has to name who processes the data; say if you want them removed anyway.
+- [ ] Always opens in popup with an x button on the top right to close. — built on `v0.8`: the footer links to the guide and privacy page open a popup (`app/info-dialog.js`) with the page inside and an X in the card's top right corner (also Escape and a click outside); the links still work as normal links when opened in a new tab or without JavaScript. Framing is allowed for the site itself only (`frame-ancestors 'self'`). Checked in the browser in nb and en.
 
 ## Phase 23 — Initial system owner (v.0.8.0 reqiurement)
 
