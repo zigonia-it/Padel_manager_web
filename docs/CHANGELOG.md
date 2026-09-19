@@ -8,7 +8,7 @@ Only verified completed changes belong here.
 
 ## 0.7.0
 
-Beta feature milestone, applied on the developer's instruction (2026-09-19). Everything below has automated tests (client, and the database logic run on an in-memory Postgres) and was checked in the browser; the items under "Verified live" were additionally run against the real Supabase database, the items under "Awaiting a live check" need their migrations applied first (see the pull request for the list) and have only been tested against the in-memory copy.
+Beta feature milestone, applied on the developer's instruction (2026-09-19). Everything below has automated tests (client, and the database logic run on an in-memory Postgres) and was checked in the browser; the items under "Verified live" were additionally run against the real Supabase database; the items under "Awaiting a live check" have only been tested against the in-memory copy.
 
 ### Added
 - **Scorer roles (Phase 10)**: one active scorer per match (claim, request, transfer, admin override, takeover after 2 minutes offline), server-side undo/redo, a scorer panel on every match card.
@@ -31,8 +31,11 @@ Beta feature milestone, applied on the developer's instruction (2026-09-19). Eve
 - Guest retention: a finished guest tournament stays readable (TV Mode shows it), and the cleanup deletes it after 24 hours while keeping the statistics receipt.
 - A real 1-minute timed match in the browser, and the Phase 8 guest path (create, start, score, advance, finish).
 
-### Awaiting a live check (migrations must be applied first)
-- Undo/redo (`20260919190000`), live updates between devices (`20260919200000`), result corrections (`20260919210000`), the timed-match server path, and the feedback email (needs the Vercel settings).
+### Verified live after the follow-up migrations were applied
+- Undo and redo on a Round Robin with pre-generated rounds; live updates between devices (an open admin screen shows joins, every point, undo and a finished match without a reload); result corrections through the real dialog (a flipped winner, the history with reason/comment/level, and "Gjenopprett" restoring the original).
+
+### Awaiting a live check
+- The timed-match server path (a timed match scored by players), corrections of a Cup, push notifications after a correction, and the feedback email (needs the Vercel settings).
 
 ### Known gaps
 - Withdrawal of a player without a replacement is not built; corrections are closed once a tournament is finished; personal-statistics recalculation (Phase 15), claiming and invitations (17), notification center (18), the system owner (23) and the resilience/responsive sweep (25) are not done. Leaked-password protection is unavailable on the free Supabase plan.

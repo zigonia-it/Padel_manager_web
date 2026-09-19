@@ -266,11 +266,11 @@ Built 2026-09-19 against the approved spec (`docs/archive/plans/Padelstar_v1_0_0
 
 - [x] Player can score own active match. — verified live 2026-09-19 (4 real players via `join_tournament`, real RPCs). The scorer can now score for both teams; `save_player_point_impl` rejects anyone who is not the active scorer (an unclaimed match is claimed by the first point).
 - [x] One active scorer. — verified live (a non-scorer's point is rejected, a second claim is refused, the first point claims the role). Stored on the match (`scorer`), enforced by the tournament row lock, logged in `scorerLog`.
-- [ ] Others live-view. — the scorer is part of the shared match state; every match card shows "Scorer: <name>" (the normal realtime update path).
+- [x] Others live-view. — verified live 2026-09-19 after the broadcast fix: an open admin screen showed joined players, every point (30–0), undo (15–0, 0–0) and the finished match without a reload. The scorer is part of the shared match state; every match card shows "Scorer: <name>" (the normal realtime update path).
 - [x] Scorer transfer/request. — verified live (request recorded, a second pending request refused, transfer defaults to the requester, the old scorer is locked out). `match_scorer_action` actions `claim` / `request` / `transfer` (defaults to the requester) / `decline` / `release`, with a panel on the match card.
 - [ ] Admin override. — `admin_set_match_scorer` (admin token + expected revision); the admin can also still score directly.
 - [ ] Offline takeover. — a participant can claim once the scorer's server-side heartbeat is older than 2 minutes (30 s client heartbeat in its own table, so it never bumps the tournament revision); the old scorer does not get the role back; logged as `offline_takeover`.
-- [ ] Undo/Redo. — scorer undo/redo through the server (`undo`/`redo` actions), undone events stay in `eventLog`, a new point drops the redo branch, admin undo keeps the current scorer. Undo/redo closes when the result is submitted for approval (Phase 11).
+- [x] Undo/Redo. — verified live after the round fix (undo, redo and undo back to 0–0 on a Round Robin with pre-generated rounds). Scorer undo/redo through the server (`undo`/`redo` actions), undone events stay in `eventLog`, a new point drops the redo branch, admin undo keeps the current scorer. Undo/redo closes when the result is submitted for approval (Phase 11).
 - [ ] Multi-device verification. — first live run 2026-09-19 (4 real players joined through `join_tournament`, driven through the real RPCs): claim, rejection of non-scorers, request/pending, transfer, scoring for both teams, submit rules, teammate vs opponent approval and finalisation all passed on the live database. It found two defects, both fixed but not yet re-verified live: undo/redo refused for pre-generated rounds (`20260919190000_fix_undo_current_round.sql`) and live updates never reaching other devices (`20260919200000_realtime_revision_broadcast.sql`, see BUGS.md). Still to run live after applying them: undo/redo, dispute/correction, the 10/30-minute cron path, admin approve, and a second browser seeing changes without a reload.
 
 Also fixed here: a point the server rejects (for example a tap on the opponent row) is now dropped from the local sync queue instead of being retried forever and blocking later points.
@@ -298,15 +298,15 @@ Built 2026-09-19 (spec: archived plan FASE J). Server: migration `20260919210000
 
 How it works: on a finished match the admin enters the new set score(s), picks a mandatory reason (wrong points entered / wrong team credited / players agree / referee decision / restore an earlier result / other, which needs a comment) and presses "Simuler konsekvens". The simulation runs on a copy (nothing changes) with the same scoring engine and shows a level with text and colour: green (standings unchanged), yellow (ranking positions change), orange (winner changes, points move), red (blocked), plus the concrete changes (winner, points and place per player) and "ongoing matches are not affected". Only after a successful simulation can the admin confirm. The server function is atomic, admin-token only, revision-checked, refuses invalid sets/unchanged results/unfinished matches, and appends every correction to `match.correctionHistory` (old result, new result, reason, comment, level, time) so nothing is overwritten. Restoring an old result is another correction (reason `restore`, one click from the history). Players get a push notification only after the correction succeeded.
 
-- [ ] Admin-only finalized correction. — admin token only, for finished matches while the tournament is running. Closed once the tournament is finished: statistics have been saved by then, and recalculating them is part of Phase 15.
-- [ ] Correction history. — `match.correctionHistory`, shown on the match card (also to players); never overwritten.
-- [ ] Mandatory reason. — six standard reasons, `other` requires a comment (both enforced in the dialog and on the server).
-- [ ] Consequence simulation. — client-side on a copy with the shared scoring engine, levels green/yellow/orange/red shown as text plus colour.
+- [x] Admin-only finalized correction. — verified live (a finished result corrected through the real dialog and server function). Admin token only, for finished matches while the tournament is running. Closed once the tournament is finished: statistics have been saved by then, and recalculating them is part of Phase 15.
+- [x] Correction history. — verified live (reason, comment, level, before/after stored and shown on the match card; "Gjenopprett" restored the original as a second entry). `match.correctionHistory`, shown on the match card (also to players); never overwritten.
+- [x] Mandatory reason. — six standard reasons, `other` requires a comment (both enforced in the dialog and on the server).
+- [x] Consequence simulation. — verified live (orange for a flipped winner). Client-side on a copy with the shared scoring engine, levels green/yellow/orange/red shown as text plus colour.
 - [ ] Future-match handling. — Round Robin rounds are independent, so standings recalculate; a Cup winner change is red/blocked once a later round exists, a score-only Cup correction is allowed.
 - [ ] Already-played matches protected. — the Cup block above; ongoing and unplayed matches are never changed by a correction.
 - [ ] Atomic commit/rollback. — a single database transaction; a refused correction changes nothing (tested).
 - [ ] Successful-change notifications. — push message `result_corrected` after the RPC succeeded (same push path as match-ready notifications).
-- [ ] Regression tests. — 29 database + 13 client tests.
+- [x] Regression tests. — 29 database + 13 client tests.
 
 Not built: correcting the result of a Cup match whose later round already exists (blocked by design), correcting after the tournament finished, and personal-statistics recalculation (Phase 15).
 
