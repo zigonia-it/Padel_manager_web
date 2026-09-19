@@ -21,18 +21,11 @@
   const standingPlayer = (player) => `<span class="tv-standing-player"><img src="${avatarUrl(player)}" alt=""><span class="tv-standing-name">${escapeHtml(player.name)}</span></span>`;
   const score = (match, index) => Number(match?.currentSet?.[index === 0 ? "teamOne" : "teamTwo"] ?? 0);
 
+  // Same ranking as the app (points, head-to-head, wins, sets, game difference, games, name).
   function playerStats() {
-    const stats = new Map((state?.players ?? []).map((player) => [player.id, { player, matches: 0, wins: 0, points: 0, diff: 0 }]));
-    allMatches().filter((match) => match.state === "finished").forEach((match) => {
-      for (const index of [0, 1]) for (const player of playersIn(match, index)) {
-        const entry = stats.get(player.id); if (!entry) continue;
-        entry.matches += 1; entry.wins += Number(match.winnerTeamIndex === index);
-        const won = (match.completedSets ?? []).reduce((total, set) => total + Number(index === 0 ? set.teamOne : set.teamTwo), 0);
-        const lost = (match.completedSets ?? []).reduce((total, set) => total + Number(index === 0 ? set.teamTwo : set.teamOne), 0);
-        entry.points += won; entry.diff += won - lost;
-      }
-    });
-    return [...stats.values()].sort((a, b) => b.wins - a.wins || b.points - a.points || b.diff - a.diff || a.player.name.localeCompare(b.player.name, "nb"));
+    return global.PadelstarScoring.leaderboardEntries(state?.players ?? [], allMatches(), state?.settings?.pointMode ?? "matches").map((entry) => ({
+      player: entry.player, matches: entry.matchesPlayed, wins: entry.matchWins, points: entry.gamesWon, diff: entry.gameDifference,
+    }));
   }
 
   function matchCard(match, next = false) {

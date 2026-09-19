@@ -40,16 +40,43 @@ window.PadelstarScoring = (() => {
           matchWins: stats.matchWins,
           setsWon: stats.setsWon,
           gamesWon: stats.gamesWon,
+          gamesLost: stats.gamesLost,
+          gameDifference: stats.gamesWon - stats.gamesLost,
         };
       })
-      .sort((left, right) => {
-        return (
-          right.points - left.points ||
-          right.matchWins - left.matchWins ||
-          right.setsWon - left.setsWon ||
-          left.player.name.localeCompare(right.player.name, "nb")
-        );
-      });
+      .map((entry, _index, all) => ({ ...entry, headToHead: headToHeadScore(entry, all, matches) }))
+      .sort(compareEntries);
+  }
+
+  // Ranking: points, then head-to-head among the players tied on points, then match wins, sets won,
+  // game difference, games won and finally the name.
+  function compareEntries(left, right) {
+    return (
+      right.points - left.points ||
+      right.headToHead - left.headToHead ||
+      right.matchWins - left.matchWins ||
+      right.setsWon - left.setsWon ||
+      right.gameDifference - left.gameDifference ||
+      right.gamesWon - left.gamesWon ||
+      left.player.name.localeCompare(right.player.name, "nb")
+    );
+  }
+
+  // Mini-league among the players with the same points: +1 for each finished match this player won against
+  // another player of the group (as opponents), -1 for each lost. Partners never count against each other.
+  function headToHeadScore(entry, allEntries, matches) {
+    const tied = new Set(allEntries.filter((other) => other.points === entry.points && other.player.id !== entry.player.id).map((other) => other.player.id));
+    if (tied.size === 0) return 0;
+    let score = 0;
+    matches.forEach((match) => {
+      if (match.state !== "finished" || match.winnerTeamIndex === null || match.winnerTeamIndex === undefined) return;
+      const teamIndex = playerTeamIndex(entry.player, match);
+      if (teamIndex === null) return;
+      const opponents = (teamIndex === 0 ? match.teamTwo : match.teamOne).players.filter((opponent) => tied.has(opponent.id)).length;
+      if (opponents === 0) return;
+      score += (match.winnerTeamIndex === teamIndex ? 1 : -1) * opponents;
+    });
+    return score;
   }
 
   function pointsByPlayer(matches, pointMode) {
@@ -73,15 +100,17 @@ window.PadelstarScoring = (() => {
         match.completedSets.forEach((set) => {
           stats.setsWon += teamIndex === 0 ? Number(set.teamOne > set.teamTwo) : Number(set.teamTwo > set.teamOne);
           stats.gamesWon += teamIndex === 0 ? set.teamOne : set.teamTwo;
+          stats.gamesLost += teamIndex === 0 ? set.teamTwo : set.teamOne;
         });
 
         if (match.state === "playing") {
           stats.gamesWon += teamIndex === 0 ? match.currentSet.teamOne : match.currentSet.teamTwo;
+          stats.gamesLost += teamIndex === 0 ? match.currentSet.teamTwo : match.currentSet.teamOne;
         }
 
         return stats;
       },
-      { matchesPlayed: 0, matchWins: 0, setsWon: 0, gamesWon: 0 },
+      { matchesPlayed: 0, matchWins: 0, setsWon: 0, gamesWon: 0, gamesLost: 0 },
     );
   }
 
