@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="utf-8">
+  <script>(function(){try{var t=localStorage.getItem("padelstar-theme");var m=(t==="light"||t==="dark")?t:(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");document.documentElement.dataset.themeMode=m}catch(e){document.documentElement.dataset.themeMode="dark"}})();</script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#020b1c">
   <meta name="description"
@@ -22,8 +23,11 @@
   <link rel="stylesheet" href="styles/components.css?v=padelstar-components-19">
   <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-14">
   <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-103">
-  <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-3">
+  <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-4">
   <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-51">
+  <link rel="stylesheet" href="styles/theme-toggle.css?v=padelstar-color-mode-1">
+  <link rel="stylesheet" href="styles/theme-light.css?v=padelstar-theme-light-6">
+  <link rel="stylesheet" href="styles/theme-light-manual.css?v=padelstar-theme-light-manual-1">
   <link rel="stylesheet" href="styles/components-v2.css?v=padelstar-components-v2-2">
   <link rel="stylesheet" href="styles/workspace-nav.css?v=padelstar-workspace-nav-6">
   <link rel="stylesheet" href="styles/podium.css?v=padelstar-podium-4">
@@ -106,6 +110,10 @@
             <button id="signInModuleLink" class="module-link" type="button" data-module-link="account"
               data-focus-target="profileNameInput" data-i18n="nav.account">Konto</button>
             <a id="systemAdminLink" class="module-link hidden" href="admin.html" data-i18n="nav.systemAdmin">System</a>
+            <div class="theme-toggle" role="group" aria-label="Fargetema" data-i18n-aria-label="theme.label">
+          <button class="theme-toggle-option" type="button" data-theme-option="light" data-theme-follows="resolved" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg><span data-i18n="theme.light">Lys</span></button>
+          <button class="theme-toggle-option" type="button" data-theme-option="dark" data-theme-follows="resolved" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7.5 7.5 0 1 0 10.5 10.5z"/></svg><span data-i18n="theme.dark">Mørk</span></button>
+        </div>
             <button id="feedbackMenuButton" class="module-link" type="button" data-feedback-open data-i18n="feedback.open">Gi tilbakemelding</button>
             <button id="tvModeMenuButton" class="module-link" type="button" data-action="tv-mode"
               data-i18n="actions.tvMode">TV Mode</button>
@@ -128,6 +136,10 @@
               </div>
             </details>
           </label>
+        </div>
+        <div class="theme-toggle" role="group" aria-label="Fargetema" data-i18n-aria-label="theme.label">
+          <button class="theme-toggle-option" type="button" data-theme-option="light" data-theme-follows="resolved" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg><span data-i18n="theme.light">Lys</span></button>
+          <button class="theme-toggle-option" type="button" data-theme-option="dark" data-theme-follows="resolved" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7.5 7.5 0 1 0 10.5 10.5z"/></svg><span data-i18n="theme.dark">Mørk</span></button>
         </div>
         <button class="notification-bell hidden" id="notificationBellButton" type="button" aria-label="Varsler" data-i18n-aria-label="notifications.center.open">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 17h12l-1.5-2V10a4.5 4.5 0 0 0-9 0v5L6 17zm4 2a2 2 0 0 0 4 0" /></svg>
@@ -342,6 +354,20 @@
             </div>
           </div>
           <ul class="compact-list" id="myInvitationsList"></ul>
+        </section>
+        <section class="panel appearance-panel" aria-labelledby="appearanceTitle">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow" data-i18n="notifications.settings.eyebrow">Denne enheten</p>
+              <h3 id="appearanceTitle" data-i18n="theme.title">Utseende</h3>
+            </div>
+          </div>
+          <p class="hint" data-i18n="theme.hint">Velg lys eller mørk drakt, eller la Padelstar følge enheten din. Valget gjelder bare denne enheten.</p>
+          <div class="theme-choice" role="group" aria-label="Fargetema" data-i18n-aria-label="theme.label">
+            <button class="theme-toggle-option" type="button" data-theme-option="system" aria-pressed="false" data-i18n="theme.system">Følg enheten</button>
+            <button class="theme-toggle-option" type="button" data-theme-option="light" aria-pressed="false" data-i18n="theme.light">Lys</button>
+            <button class="theme-toggle-option" type="button" data-theme-option="dark" aria-pressed="false" data-i18n="theme.dark">Mørk</button>
+          </div>
         </section>
         <section class="panel notification-settings-panel" aria-labelledby="notificationSettingsTitle">
           <div class="panel-heading">
@@ -1144,7 +1170,7 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-54"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-55"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-6"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
@@ -1212,6 +1238,7 @@
   <script defer src="app/player-visuals.js?v=padelstar-player-visuals-3"></script>
   <script defer src="app/ui-feedback.js?v=padelstar-ui-feedback-2"></script>
   <script defer src="app/notification-system.js?v=padelstar-notification-system-2"></script>
+  <script defer src="app/color-mode.js?v=padelstar-color-mode-1"></script>
   <script defer src="app/notification-center.js?v=padelstar-notification-center-7"></script>
   <script defer src="app/notification-center-ui.js?v=padelstar-notification-center-7"></script>
   <script defer src="app/system-admin.js?v=padelstar-system-admin-1"></script>
@@ -1226,7 +1253,7 @@
   <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
   <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-13"></script>
-  <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-6"></script>
+  <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-7"></script>
   <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-2"></script>
   <script defer src="app/bootstrap/app-init.js?v=padelstar-app-init-2"></script>
   <script defer src="app/ui/theme.js?v=padelstar-theme-1"></script>
@@ -1257,7 +1284,7 @@
   <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-7"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-3"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
-  <script defer src="app/app.js?v=padelstar-session-77"></script>
+  <script defer src="app/app.js?v=padelstar-session-78"></script>
 </body>
 
 </html>

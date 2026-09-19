@@ -75,6 +75,7 @@ const notificationCenterPath = path.join(appRoot, "notification-center.js");
 const notificationCenterUiPath = path.join(appRoot, "notification-center-ui.js");
 const systemAdminPath = path.join(appRoot, "system-admin.js");
 const invitationsPath = path.join(appRoot, "invitations.js");
+const colorModePath = path.join(appRoot, "color-mode.js");
 const playerStatePath = path.join(appRoot, "player-state.js");
 const tournamentStatusPath = path.join(appRoot, "tournament-status.js");
 const scoringEnginePath = path.join(appRoot, "scoring-engine.js");
@@ -175,7 +176,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(appMetaPath, "utf8"), context, { filename: appMetaPath });
   vm.runInContext(fs.readFileSync(bootstrapEventsPath, "utf8"), context, { filename: bootstrapEventsPath });
   vm.runInContext(fs.readFileSync(appInitPath, "utf8"), context, { filename: appInitPath });
-  vm.runInContext(fs.readFileSync(themePath, "utf8"), context, { filename: themePath });
+  vm.runInContext(fs.readFileSync(colorModePath, "utf8"), context, { filename: colorModePath });
   vm.runInContext(fs.readFileSync(appRendererPath, "utf8"), context, { filename: appRendererPath });
   vm.runInContext(fs.readFileSync(storagePath, "utf8"), context, { filename: storagePath });
   vm.runInContext(fs.readFileSync(renderingPath, "utf8"), context, { filename: renderingPath });
@@ -233,6 +234,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(notificationCenterUiPath, "utf8"), context, { filename: notificationCenterUiPath });
   vm.runInContext(fs.readFileSync(systemAdminPath, "utf8"), context, { filename: systemAdminPath });
   vm.runInContext(fs.readFileSync(invitationsPath, "utf8"), context, { filename: invitationsPath });
+  vm.runInContext(fs.readFileSync(themePath, "utf8"), context, { filename: themePath });
   vm.runInContext(fs.readFileSync(playerStatePath, "utf8"), context, { filename: playerStatePath });
   vm.runInContext(fs.readFileSync(tournamentStatusPath, "utf8"), context, { filename: tournamentStatusPath });
   vm.runInContext(fs.readFileSync(scoringEnginePath, "utf8"), context, { filename: scoringEnginePath });

@@ -1,0 +1,74 @@
+/* Colour theme controls (Phase 27): the Lys/Mørk switch in the header and menu, and the options on the profile page. */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid rgba(159, 207, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  flex: none;
+}
+
+.theme-toggle-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #93a8bd;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.theme-toggle-option svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-toggle-option.is-active {
+  background: rgba(91, 173, 255, 0.22);
+  color: #d8efff;
+}
+
+.theme-toggle-option:focus-visible {
+  outline: 2px solid var(--ui-blue-soft, #63b5ff);
+  outline-offset: 2px;
+}
+
+.theme-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.theme-choice .theme-toggle-option {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid rgba(159, 207, 255, 0.2);
+  font-size: 0.9rem;
+}
+
+/* header: the switch sits before the connection pill on desktop; phones use the menu drawer and the profile page */
+.topbar-actions > .theme-toggle { margin-right: 8px; }
+
+@media (max-width: 900px) {
+  .topbar-actions > .theme-toggle { display: none; }
+}
+
+.menu-drawer .theme-toggle { display: none; }
+
+@media (max-width: 900px) {
+  .menu-drawer .theme-toggle { display: inline-flex; margin: 8px 12px 4px; }
+}

@@ -22,7 +22,7 @@ test("privacy page covers the beta data handling basics", () => {
   assert.match(privacySource, /Supabase/);
   assert.match(privacySource, /Vercel Analytics/);
   assert.match(privacySource, /på enheten din/i);
-  assert.doesNotMatch(privacySource, /localStorage|IndexedDB|row-level|token-hash|Supabase Auth/, "plain language for players, no technical terms");
+  assert.doesNotMatch(privacySource.replace(/<script[\s\S]*?<\/script>/g, ""), /localStorage|IndexedDB|row-level|token-hash|Supabase Auth/, "plain language for players, no technical terms (page scripts are code, not text)");
   assert.match(privacySource, /Lagringstid og sletting/);
   assert.match(privacySource, /beta-tekst/i);
 });

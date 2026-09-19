@@ -695,6 +695,8 @@ const notificationSystem = window.PadelstarNotificationSystem.create({
   remoteRpc,
   translate: (key, values) => t(key, values),
 });
+const colorMode = window.PadelstarColorMode.create({ document, storage: localStorage });
+colorMode.bind();
 const notificationCenterUi = window.PadelstarNotificationCenterUi.create({
   document,
   storage: localStorage,
