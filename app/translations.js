@@ -1717,6 +1717,7 @@ Object.assign(padelstarTranslations.en, {
 });
 // Player withdrawal without a replacement (Phase 13).
 Object.assign(padelstarTranslations.nb, {
+  "nav.currentTournament": "Gjeldende turnering",
   "actions.withdrawPlayer": "Trekk spiller",
   "actions.reinstatePlayer": "Sett tilbake",
   "players.withdrawn": "Har trukket seg",
@@ -1750,6 +1751,7 @@ Object.assign(padelstarTranslations.nb, {
   "withdrawal.error.failed": "Avgjørelsen kunne ikke lagres. Prøv igjen.",
 });
 Object.assign(padelstarTranslations.en, {
+  "nav.currentTournament": "Current tournament",
   "actions.withdrawPlayer": "Withdraw",
   "actions.reinstatePlayer": "Put back",
   "players.withdrawn": "Withdrawn",

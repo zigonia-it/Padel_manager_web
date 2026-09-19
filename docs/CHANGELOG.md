@@ -7,6 +7,10 @@ Only verified completed changes belong here.
 ## Unreleased
 
 ### Added (branch `v0.8`, not yet released)
+- **Guide and privacy as a popup (Phase 22)**: the footer links open the pages in a popup with an X inside the card (also Escape and a click outside); they follow the chosen language, including "device language" (they showed Norwegian on an English device). The privacy text and guide are in plain language, the guide covers scoring, approval and withdrawal, and the outdated retention text is gone.
+- **TV Mode (Phase 19)**: always opens in a new tab; the button sits at the bottom of the side rail, which now fits the window height (no scrolling to reach it).
+- **Menu and footer**: with a tournament running the top menu shows Home, Current tournament and Profile (plus language, online status and feedback); the footer feedback button now looks like the install button.
+- Fixed three stale tests, filled `docs/technical/privacy-retention.md` and `operations.md`, and added a test that every asset carries the same `?v=` version on every page.
 - **Player withdrawal without a replacement (Phase 13)**: "Trekk spiller" in the players list (after a confirmation that lists the effects). The player's finished matches and statistics stay. Their unplayed matches are kept and wait for the remaining teammate, who chooses to **play alone (1 against 2)** or **give a walkover** (the opponents win); the admin can decide for them, also in a later round. If nobody is left on that side the opponents win by walkover automatically; a match in progress is restarted at 0–0 and annulled first (its court goes to the next waiting match); a result awaiting approval blocks the withdrawal. A withdrawn player can be put back ("Sett tilbake", not while a match is being played 1 against 2) or replaced ("Bytt"), and a replacement takes over the waiting matches. Not offered in a Cup. Database: migration `20260920100000_withdrawal_decision.sql` (the teammate's own decision, with token check and rate limit).
 
 ## 0.7.0

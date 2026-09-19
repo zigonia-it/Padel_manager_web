@@ -160,7 +160,8 @@ body[data-theme] .admin-subtabs {
     border-left: 3px solid transparent;
   }
 
-  .app-shell:has(.workspace-rail:not(.hidden)) #tvModeMenuButton {
+  /* The desktop menu is Home, Current tournament, Profile and feedback; TV Mode lives in the side rail. */
+  #tvModeMenuButton {
     display: none;
   }
 }
