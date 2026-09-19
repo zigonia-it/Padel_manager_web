@@ -78,9 +78,11 @@
 .podium-name {
   font-weight: 700;
   font-size: 0.94rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* a long name wraps onto a second line rather than being cut off */
+  line-height: 1.15;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
   max-width: 100%;
 }
 

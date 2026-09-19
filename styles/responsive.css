@@ -82,3 +82,45 @@
     display: contents;
   }
 }
+
+/* Phase 25: touch targets and the notification bell in the phone header. */
+@media (max-width: 900px) {
+  /* the bell gets its own column next to the status pill instead of wrapping onto a second row */
+  body[data-theme="classic"] .topbar-actions:has(> .notification-bell:not(.hidden)) {
+    grid-template-columns: auto auto auto;
+    gap: 6px;
+  }
+
+  body[data-theme="classic"] .topbar-actions > .notification-bell {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    width: 38px;
+    height: 38px;
+  }
+
+  body[data-theme="classic"] .topbar-actions:has(> .notification-bell:not(.hidden)) > .status-pill { grid-column: 2; }
+  body[data-theme="classic"] .topbar-actions:has(> .notification-bell:not(.hidden)) > .app-menu-toggle { grid-column: 3; }
+
+  /* footer links: a tap area of at least 44px */
+  body[data-theme="classic"] .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 6px;
+    border-bottom: 0;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  /* read-only links to copy (invite link, spectator link) */
+  body[data-theme="classic"] input[readonly] {
+    min-height: 44px;
+  }
+
+  /* +/- buttons in the scoreboard */
+  body[data-theme="classic"] .scoreboard-point-minus,
+  body[data-theme="classic"] .scoreboard-point-plus {
+    min-width: 40px;
+  }
+}

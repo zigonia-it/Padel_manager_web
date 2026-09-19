@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v337";
+const cacheName = "padelstar-v342";
 
 const appShell = [
   "./",
@@ -9,19 +9,19 @@ const appShell = [
   "./styles/base.css?v=padelstar-base-7",
   "./styles/layout.css?v=padelstar-layout-9",
   "./styles/components.css?v=padelstar-components-19",
-  "./styles/tv.css?v=padelstar-tv-13",
+  "./styles/tv.css?v=padelstar-tv-14",
   "./assets/logos/main_logo_without_icon.png",
   "./assets/icons/padelstar-icon.png",
   "./assets/logos/tv-brand.png",
   "./styles/modules.css?v=padelstar-modules-14",
   "./styles/styles.css?v=padelstar-ui-103",
-  "./styles/responsive.css?v=padelstar-responsive-1",
+  "./styles/responsive.css?v=padelstar-responsive-3",
   "./styles/ui-consistency.css?v=padelstar-ui-consistency-51",
   "./styles/components-v2.css?v=padelstar-components-v2-2",
   "./styles/workspace-nav.css?v=padelstar-workspace-nav-6",
-  "./styles/podium.css?v=padelstar-podium-3",
+  "./styles/podium.css?v=padelstar-podium-4",
   "./styles/lobby.css?v=padelstar-lobby-3",
-  "./styles/scoreboard-table.css?v=padelstar-scoreboard-table-2",
+  "./styles/scoreboard-table.css?v=padelstar-scoreboard-table-3",
   "./styles/match-list-collapse.css?v=padelstar-match-list-collapse-1",
   "./styles/feedback.css?v=padelstar-feedback-2",
   "./styles/info-dialog.css?v=padelstar-info-dialog-2",

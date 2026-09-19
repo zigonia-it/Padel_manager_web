@@ -95,7 +95,7 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v337/);
+  assert.match(serviceWorkerSource, /padelstar-v342/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-51/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-1/);
@@ -570,8 +570,8 @@ test("match card rendering has its own DOM and action boundary", () => {
 });
 
 test("scoreboard table (SETT/GAME/POENG) is shared by the admin match card and the player's own match, with a real multi-step undo stack", () => {
-  assert.match(indexSource, /styles\/scoreboard-table\.css\?v=padelstar-scoreboard-table-2/);
-  assert.match(serviceWorkerSource, /styles\/scoreboard-table\.css\?v=padelstar-scoreboard-table-2/);
+  assert.match(indexSource, /styles\/scoreboard-table\.css\?v=padelstar-scoreboard-table-3/);
+  assert.match(serviceWorkerSource, /styles\/scoreboard-table\.css\?v=padelstar-scoreboard-table-3/);
   assert.match(matchCardSource, /scoreboardTableMarkup/);
   assert.match(matchCardSource, /bindScoreboardTable/);
   assert.match(matchCardSource, /setsWonByTeam/);
@@ -627,8 +627,8 @@ test("podium is a real post-finish screen, not just a redirect to standings", ()
   assert.match(indexSource, /data-module="podium"/);
   assert.match(indexSource, /app\/podium\.js\?v=padelstar-podium-3/);
   assert.match(serviceWorkerSource, /app\/podium\.js\?v=padelstar-podium-3/);
-  assert.match(indexSource, /styles\/podium\.css\?v=padelstar-podium-3/);
-  assert.match(serviceWorkerSource, /styles\/podium\.css\?v=padelstar-podium-3/);
+  assert.match(indexSource, /styles\/podium\.css\?v=padelstar-podium-4/);
+  assert.match(serviceWorkerSource, /styles\/podium\.css\?v=padelstar-podium-4/);
   assert.match(podiumSource, /window\.PadelstarPodium/);
   assert.match(podiumSource, /renderPodium/);
   assert.match(moduleRoutingSource, /requestedModule === "podium"/);
