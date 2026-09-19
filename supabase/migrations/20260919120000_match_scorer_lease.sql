@@ -14,7 +14,8 @@
 -- keep-alives never bump the tournament revision (which would break the admin's optimistic saves).
 --
 -- Phase 11 note: the winning point of a player-scored match no longer finishes it; it becomes
--- 'awaitingApproval' (approval.status 'draft'). The approval workflow is in migration 20260919150000_result_approval.sql
+-- 'awaitingApproval' (approval.status 'draft') -- unless nobody on the opposing team has a device (only one side
+-- uses the app), in which case the result is approved automatically at once. The approval workflow is in migration 20260919150000_result_approval.sql
 -- (apply both together, in order).
 --
 -- save_player_point_impl now (a) requires the caller to be the active scorer (the first point on an
@@ -173,6 +174,49 @@ revoke execute on function public._scorer_locate(jsonb, uuid) from public, anon,
 revoke execute on function public._scorer_match_has_player(jsonb, uuid) from public, anon, authenticated;
 revoke execute on function public._scorer_append(jsonb, text, jsonb, integer) from public, anon, authenticated;
 revoke execute on function public._scorer_restore(jsonb, integer, integer, jsonb, jsonb, jsonb) from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------------------------------
+-- Approval helpers used by save_player_point_impl (Phase 11; the workflow itself is in migration 20260919150000).
+-- ---------------------------------------------------------------------------------------------
+
+create or replace function public._approval_team_of(p_match jsonb, p_player_id uuid)
+returns integer
+language sql
+immutable
+set search_path to 'public', 'pg_catalog'
+as $function$
+  select case
+    when exists (select 1 from jsonb_array_elements(coalesce(p_match#>'{teamOne,players}', '[]'::jsonb)) p where p->>'id' = p_player_id::text) then 0
+    when exists (select 1 from jsonb_array_elements(coalesce(p_match#>'{teamTwo,players}', '[]'::jsonb)) p where p->>'id' = p_player_id::text) then 1
+    else null
+  end;
+$function$;
+
+-- Makes an awaiting match final: state finished, winner and sets from the approved proposal.
+create or replace function public._approval_finalize(p_match jsonb, p_auto boolean, p_by jsonb)
+returns jsonb
+language plpgsql
+immutable
+set search_path to 'public', 'pg_catalog'
+as $function$
+declare
+  approval jsonb := p_match->'approval';
+  result jsonb := p_match;
+begin
+  result := jsonb_set(result, '{state}', '"finished"'::jsonb, true);
+  result := jsonb_set(result, '{status}', '"completed"'::jsonb, true);
+  result := jsonb_set(result, '{winnerTeamIndex}', approval->'winnerTeamIndex', true);
+  result := jsonb_set(result, '{completedSets}', approval->'completedSets', true);
+  result := jsonb_set(result, '{currentGame}', '{"teamOne": 0, "teamTwo": 0}'::jsonb, true);
+  result := jsonb_set(result, '{completedAt}', to_jsonb(now()), true);
+  result := jsonb_set(result, '{approval}', (approval - 'escalateAt' - 'autoApproveAt') || jsonb_build_object(
+    'status', 'approved', 'approvedAt', now(), 'auto', p_auto, 'approvedBy', p_by), true);
+  return result;
+end
+$function$;
+
+revoke execute on function public._approval_team_of(jsonb, uuid) from public, anon, authenticated;
+revoke execute on function public._approval_finalize(jsonb, boolean, jsonb) from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------------------------------
 -- Scorer actions for players: claim, request, decline, release, transfer, heartbeat, undo, redo.
@@ -773,6 +817,20 @@ begin
                 matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'state'], '"playing"'::jsonb, true);
                 matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'courtId'], match_item->'courtId', true);
                 matches := jsonb_set(matches, ARRAY[next_waiting_index::text, 'courtName'], match_item->'courtName', true);
+              end if;
+              -- Only one side uses the app: nobody on the other team can approve or dispute, so the result is
+              -- approved automatically when the scorer registers the winning point (no submit step).
+              if not exists (
+                select 1
+                from jsonb_array_elements(coalesce(match_item->(case when public._approval_team_of(match_item, p_player_id) = 0 then 'teamTwo' else 'teamOne' end)->'players', '[]'::jsonb)) opp
+                join public.player_sessions ps on ps.tournament_id = p_tournament_id and ps.player_id::text = opp->>'id'
+              ) then
+                match_item := jsonb_set(match_item, '{approval,approvals}', jsonb_build_array(
+                  jsonb_build_object('playerId', p_player_id, 'teamIndex', public._approval_team_of(match_item, p_player_id), 'at', now(), 'submitter', true),
+                  jsonb_build_object('playerId', null, 'teamIndex', 1 - public._approval_team_of(match_item, p_player_id), 'at', now(), 'auto', true, 'reason', 'no_device')), true);
+                match_item := jsonb_set(match_item, '{approval,submittedBy}', to_jsonb(p_player_id), true);
+                match_item := jsonb_set(match_item, '{approval,autoReason}', '"noOpponentDevice"'::jsonb, true);
+                match_item := public._approval_finalize(match_item, true, '"auto"'::jsonb);
               end if;
             else
               current_set := '{"teamOne": 0, "teamTwo": 0}'::jsonb;

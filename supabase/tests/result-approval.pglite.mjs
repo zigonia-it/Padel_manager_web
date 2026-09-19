@@ -117,12 +117,6 @@ ok('second correction still allowed', !r.error && m(r.data).approval.corrections
 r = await result(T, 'C', 'dispute', { completedSets: [{ teamOne: 0, teamTwo: 2 }] });
 ok('a third correction flags the match for the admin', !r.error && m(r.data).approval.status === 'flagged' && m(r.data).approval.flag === 'corrections', r.error);
 
-console.log('teams without devices approve automatically');
-T = await fixture(['A', 'B']); await scoreToWin(T);
-r = await result(T, 'A', 'submit');
-ok('submitting finishes the match when the other team has no device', !r.error && m(r.data).state === 'finished' && m(r.data).winnerTeamIndex === 0, r.error);
-ok('the automatic approval is recorded', m(r.data).approval.approvals.some((a) => a.auto && a.reason === 'no_device'));
-
 console.log('timers: 10 minute escalation, 30 minute auto-approval');
 T = await fixture(); await scoreToWin(T); await result(T, 'A', 'submit');
 r = await call('process_result_approvals', []);
@@ -162,6 +156,22 @@ let st0 = await cur(T);
 r = await call('admin_undo_match', [T, 'admintoken-1234567890', M1, st.revision]);
 ok('the admin can still undo an awaiting result (to correct it)', !r.error && m(r.data).state === 'playing' && m(r.data, M2).state === 'waiting', r.error);
 ok('undo removes the approval record', !r.error && !m(r.data).approval);
+
+console.log('only one side uses the app: auto-approved when the score is registered');
+T = await fixture(['A']);
+r = await scoreToWin(T);
+ok('a solo scorer\'s winning point finishes the match at once', !r.error && m(r.data).state === 'finished' && m(r.data).winnerTeamIndex === 0, r.error);
+ok('the approval is recorded as automatic', m(r.data).approval.status === 'approved' && m(r.data).approval.auto === true && m(r.data).approval.autoReason === 'noOpponentDevice');
+ok('the next match still starts on the freed court', m(r.data, M2).state === 'playing' && m(r.data, M2).courtName === 'Bane 1');
+T = await fixture(['A', 'B']);
+r = await scoreToWin(T);
+ok('the same when only the scorer\'s own team has devices', !r.error && m(r.data).state === 'finished');
+T = await fixture(['C']);
+r = await scoreToWin(T, 'C');
+ok('it does not matter which team the solo user is on', !r.error && m(r.data).state === 'finished' && m(r.data).winnerTeamIndex === 0, r.error);
+T = await fixture(['A', 'C']);
+r = await scoreToWin(T);
+ok('with a device on both sides the result still waits for approval', !r.error && m(r.data).state === 'awaitingApproval' && m(r.data).approval.status === 'draft', r.error);
 
 console.log('validation');
 r = await call('match_result_action', [T, 'ABCD2345', P.A, M1, 'short', 'submit', null]);

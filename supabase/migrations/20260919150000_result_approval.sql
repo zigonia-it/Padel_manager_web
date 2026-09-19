@@ -1,5 +1,6 @@
 -- Phase 11: result approval (approved spec: docs/archive/plans/Padelstar_v1_0_0_plan.md, FASE I).
--- REQUIRES migration 20260919120000_match_scorer_lease.sql (apply in order).
+-- REQUIRES migration 20260919120000_match_scorer_lease.sql (apply in order; that file also holds the shared
+-- helpers _approval_team_of and _approval_finalize).
 --
 -- Flow
 --   * The winning point of a player-scored match makes the match `awaitingApproval` with
@@ -26,19 +27,6 @@
 -- Helpers
 -- ---------------------------------------------------------------------------------------------
 
-create or replace function public._approval_team_of(p_match jsonb, p_player_id uuid)
-returns integer
-language sql
-immutable
-set search_path to 'public', 'pg_catalog'
-as $function$
-  select case
-    when exists (select 1 from jsonb_array_elements(coalesce(p_match#>'{teamOne,players}', '[]'::jsonb)) p where p->>'id' = p_player_id::text) then 0
-    when exists (select 1 from jsonb_array_elements(coalesce(p_match#>'{teamTwo,players}', '[]'::jsonb)) p where p->>'id' = p_player_id::text) then 1
-    else null
-  end;
-$function$;
-
 -- True when both teams have at least one approval.
 create or replace function public._approval_complete(p_approval jsonb)
 returns boolean
@@ -48,29 +36,6 @@ set search_path to 'public', 'pg_catalog'
 as $function$
   select exists (select 1 from jsonb_array_elements(coalesce(p_approval->'approvals', '[]'::jsonb)) a where (a->>'teamIndex')::integer = 0)
      and exists (select 1 from jsonb_array_elements(coalesce(p_approval->'approvals', '[]'::jsonb)) a where (a->>'teamIndex')::integer = 1);
-$function$;
-
--- Makes an awaiting match final: state finished, winner and sets from the approved proposal.
-create or replace function public._approval_finalize(p_match jsonb, p_auto boolean, p_by jsonb)
-returns jsonb
-language plpgsql
-immutable
-set search_path to 'public', 'pg_catalog'
-as $function$
-declare
-  approval jsonb := p_match->'approval';
-  result jsonb := p_match;
-begin
-  result := jsonb_set(result, '{state}', '"finished"'::jsonb, true);
-  result := jsonb_set(result, '{status}', '"completed"'::jsonb, true);
-  result := jsonb_set(result, '{winnerTeamIndex}', approval->'winnerTeamIndex', true);
-  result := jsonb_set(result, '{completedSets}', approval->'completedSets', true);
-  result := jsonb_set(result, '{currentGame}', '{"teamOne": 0, "teamTwo": 0}'::jsonb, true);
-  result := jsonb_set(result, '{completedAt}', to_jsonb(now()), true);
-  result := jsonb_set(result, '{approval}', (approval - 'escalateAt' - 'autoApproveAt') || jsonb_build_object(
-    'status', 'approved', 'approvedAt', now(), 'auto', p_auto, 'approvedBy', p_by), true);
-  return result;
-end
 $function$;
 
 -- Validates a corrected result proposed by a player. Returns the winner (0/1) or raises.
@@ -118,9 +83,7 @@ begin
 end
 $function$;
 
-revoke execute on function public._approval_team_of(jsonb, uuid) from public, anon, authenticated;
 revoke execute on function public._approval_complete(jsonb) from public, anon, authenticated;
-revoke execute on function public._approval_finalize(jsonb, boolean, jsonb) from public, anon, authenticated;
 revoke execute on function public._approval_validate_proposal(jsonb, integer, integer) from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------------------------------
