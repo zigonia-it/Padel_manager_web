@@ -1040,7 +1040,9 @@ test("phase 4-6 modules are wired into the shared app shell", () => {
   assert.match(indexSource, /app\/player-statistics\.js\?v=padelstar-player-statistics-1/);
   assert.match(indexSource, /app\/tournament-insights\.js\?v=padelstar-insights-1/);
   assert.match(indexSource, /app\/historical-records\.js\?v=padelstar-history-1/);
-  assert.match(indexSource, /value="groupsPlayoffs"/);
+  // The extra modes stay in the code but are not offered until each is server-wired and verified (ROADMAP: Additional tournaments).
+  assert.doesNotMatch(indexSource, /value="groupsPlayoffs"/);
+  assert.match(fs.readFileSync(path.join(root, "app", "tournament-modes.js"), "utf8"), /groupsPlayoffs/);
   assert.match(serviceWorkerSource, /app\/historical-records\.js\?v=padelstar-history-1/);
   assert.match(appSource, /PadelstarHistoricalRecords\.record/);
 });

@@ -6,8 +6,8 @@ const test = require("node:test");
 const root = path.join(__dirname, "..");
 const indexSource = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const privacySource = fs.readFileSync(path.join(root, "privacy.html"), "utf8");
-const retentionSource = fs.readFileSync(path.join(root, "docs", "data_retention.md"), "utf8");
-const runbookSource = fs.readFileSync(path.join(root, "docs", "operations_runbook.md"), "utf8");
+const retentionSource = fs.readFileSync(path.join(root, "docs", "technical", "privacy-retention.md"), "utf8");
+const runbookSource = fs.readFileSync(path.join(root, "docs", "technical", "operations.md"), "utf8");
 const pushSource = fs.readFileSync(path.join(root, "supabase", "functions", "push-send", "index.ts"), "utf8");
 const vercelSource = fs.readFileSync(path.join(root, "vercel.json"), "utf8");
 

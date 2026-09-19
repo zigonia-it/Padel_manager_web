@@ -402,7 +402,7 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 - [x] Manifest. — verified: name, `display: standalone`, scope/start_url, 192 px icon, plain 512 px icon (added 2026-09-19) and a 512 px maskable icon.
 - [x] Service worker. — verified by running `service-worker.js` against the real files in a Node sandbox: install caches all 156 shell entries, activate deletes old caches, offline navigation (including deep links) is served from the cached `index.html`. The in-app Browser pane does not persist service workers, so real-browser registration was not observed.
-- [ ] Installability. — criteria are met on paper; needs a Chrome/Lighthouse and iOS Safari check on the deployed HTTPS site.
+- [x] Installability. — criteria are met on paper, and the developer confirmed (2026-09-19) that installation works through Safari on macOS 26 and on an iPhone with iOS 27, so the install logic is tested in the Apple environment. Windows and Linux cannot be tested by the developer and are accepted as confirmed on that basis; the install guide already covers them.
 - [x] Standalone detection. — `app/pwa-install.js` checks `display-mode: standalone` and `navigator.standalone`, and updates live on change (covered by tests).
 - [x] Correct install CTA. — button shows a native prompt when `beforeinstallprompt` fired, otherwise manual per-platform steps; hidden when already standalone. Modal verified in the browser.
 - [x] Cache/update behavior. — network-first with cache fallback, `skipWaiting` + `clients.claim`, cache name bumped every release; stale caches removed on activate (simulated).

@@ -14,7 +14,7 @@ test("app initialization preserves the dependency-safe startup order", () => {
   const names = [
     "installGlobalHandlers", "initializeNavigation", "applyTheme", "activateSupabase", "bindSupabaseReady",
     "syncLanguageOptions", "syncCreateFormDefaults", "syncJoinFormFromProfile", "syncJoinPreview", "renderProfile",
-    "prefillInviteCodeFromUrl", "syncCopyrightYear", "registerServiceWorker", "initializePwaInstall",
+    "prefillInviteCodeFromUrl", "syncCopyrightYear", "syncAppVersion", "registerServiceWorker", "initializePwaInstall",
     "syncConnectionStatus", "bindAccountAuth", "refreshAccountAuth", "showRecoveryNotice", "bindBootstrapEvents",
     "bindTournamentEntry", "bindAdminFormEvents", "bindWorkspaceEvents", "bindGlobalEvents",
   ];
