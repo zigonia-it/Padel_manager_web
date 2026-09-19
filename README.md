@@ -4,7 +4,7 @@ Live app: https://padelstar.app
 
 Sist oppdatert: 2026-09-12
 
-Status: 0.5 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
+Status: 0.7.0 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
 Aktiv utviklingsplan ligger i `docs/Development/Padelstar-komplett-utviklingsplan.md`, kronologisk implementeringsdokumentasjon ligger i `docs/documentation.md`, og godkjente produktvalg med endringsvern ligger i `docs/Development/produktbeslutninger.md`. Historiske planer, logger og designutkast ligger i `docs/archive/`.
 
@@ -35,111 +35,9 @@ Avklart kontomodell: Konto er ikke nødvendig for å opprette eller delta i en t
 
 Fersk kontroll av `main` og verifikasjonsgrenser ligger i [implementasjonsstatus](docs/Development/implementasjonsstatus.md). Fase A–D er dokumentert gjennomført; fase E er beslutningsklar, men ikke startet.
 
-## Aktiv utviklingsretning
-
-Masterplanen ligger i `docs/Development/Padelstar-komplett-utviklingsplan.md`. Første leveranse følger fase 1 og dekker stabilisering, admin-eierskap, PWA-installasjon, QR-/join-flyt, banenavn, spillerresultater, profiler og dynamisk arbeidsflate. Fase 2 og 3 bygges først etter at fase 1 er verifisert.
-
-## Status etter Fase 12–15
-
-Fase 0–15 og den aktive UI-/strukturkonsolideringen er ferdige i beta-baselinen. Fase 15 inkluderer Web Share, lokale opt-in-varsler og konfigurert serverdrevet push. Videre arbeid er primært live-/browserverifisering og eksplisitt prioriterte produktvalg.
-
 ## Roller og visninger
 
 - Admin styrer turneringen, spillere, baner, kamper og resultater.
 - Spiller ser egen status, neste kamp, makker, motstandere og relevante resultater.
 - Turnering/tilskuer viser livekampene og oversikten uten personlig spillerstatus.
 - Admin kan også ha spilleridentitet dersom `Admin spiller selv` velges ved opprettelse.
-
-## Prosjektstruktur
-
-- `index.html` - appstruktur, metadata og moduler.
-- `styles/base.css` - design tokens, fonter, global reset og grunnleggende formelementer.
-- `styles/layout.css` - app-shell, toppbar, appmeny, språkvelger og merkevarelayout.
-- `styles/components.css` - typografi, landing/setup, kort, knapper og delte komponenter.
-- `styles/modules.css` - workspace-, admin-, spiller-, turnerings- og match-stil.
-- `styles/styles.css` - aktiv classic/theme- og tilgjengelighetskaskade.
-- `styles/responsive.css` - samlet responsiv toppbar, hamburger og språk-/modulmeny.
-- `app/translations.js` - språkmotor med strukturerte nøkler, variabler, fallback og manglende-nøkkel-sporing for brukerflate.
-- `app/tournament-engine.js` - ren scheduler- og teamlogikk for turneringsoppsett.
-- `app/pwa-install.js` - installasjonsknapp, native prompt og plattformtilpasset PWA-fallback.
-- `app/scoring-engine.js` - ren scoring, settvalidering, poengsummer og leaderboard/statistikk.
-- `app/state-manager.js` - state-migrering, lokal sync-metadata, shared-state-sanitizing og remote-feilklassifisering.
-- `app/realtime-sync.js` - rene realtime-regler for kanalnavn, reconnect-backoff og statusklassifisering.
-- `app/offline-storage.js` - IndexedDB-speiling av lokal state, rolle og sync-kø med localStorage som fallback.
-- `app/observability.js` - rate-begrenset, personvernbevisst teknisk telemetry til Vercel Analytics.
-- `app/ui-effects.js` - isolerte, reduced-motion-kompatible fokus- og score-feedback-effekter.
-- `app/navigation.js` - felles modulnavigasjon, hamburger, Escape-lukking og aktiv meny.
-- `app/i18n-ui.js` - brukerens lokale språkvalg og DOM-oversettelser.
-- `app/storage.js` - tolerant JSON-persistens og recovery-hjelpere.
-- `app/rendering.js` - felles tekst- og match-renderingshjelpere.
-- `app/remote-rpc.js` - samlet transportseam for Supabase RPC-kall.
-- `app/remote-tournament.js` - Supabase-operasjoner for oppretting, invitasjon og join.
-- `app/admin-actions.js` - adminregler, manuelle cup-lag og banekonfigurasjon.
-- `app/player-actions.js` - spillerens tilgjengelighetsflyt og remote/local oppdatering.
-- `scripts/browser-smoke.sh` - deterministisk desktop-/mobil-smoke med blokkert ekstern backend.
-- `api/health.js` - cachefri Vercel health-endpoint for ekstern monitorering.
-- `privacy.html` - offentlig beta-utkast for personvern.
-- `guide.html` - kort flerspråklig bruksanvisning for brukere.
-- `app/guide-i18n.js` - oversettelser og språkvalg for bruksanvisningen.
-- `docs/data_retention.md` - retensjon, sletting og profilhistorikk-policy.
-- `docs/operations_runbook.md` - deploy, database, backup, rollback og produksjonssjekker.
-- `app/app.js` - browser-entrypoint, modulvisning, localStorage, Supabase-kall og tynne delegater til domenemodulene.
-- `assets/` - logo, appikoner, designassets og fonter.
-- `manifest.webmanifest` - PWA-manifest.
-- `service-worker.js` - app-shell-cache for PWA.
-- `supabase-config.js` - Supabase URL/nøkkel for live sync.
-- `supabase_schema.sql` - databaseoppsett for live-turneringer.
-- `supabase/migrations/` - Supabase migration-filer.
-- `supabase/migrations/20260831120000_spectator_state_rpc.sql` - separat whitelistet spectator-oppslag.
-- `assets/archive/visual-redesign/` - referansearkiv for den visuelle redesignen, ikke aktiv runtime-kode.
-- `docs/archive/` - historiske planer og lokalt QA-materiale.
-
-## Kjør lokalt
-
-Start en enkel lokal server fra prosjektmappen:
-
-```bash
-python3 -m http.server 8080
-```
-
-Åpne deretter:
-
-```text
-http://localhost:8080
-```
-
-Direkte åpning av `index.html` fungerer for deler av grunnflyten, men lokal server er best for PWA, service worker, assets og realistisk browser-test.
-
-## Supabase live sync
-
-Når `supabase-config.js` inneholder prosjekt-URL og publishable/anon key, bruker appen Supabase Realtime for å dele samme turnering mellom admin, spillere og tilskuere.
-
-```js
-window.PADELSTAR_SUPABASE = {
-  url: "https://din-prosjekt-id.supabase.co",
-  anonKey: "din-anon-eller-publishable-key",
-};
-```
-
-Databaseoppsettet ligger i `supabase_schema.sql` og som migrasjoner under `supabase/migrations/`.
-
-## Publisering
-
-Appen er laget slik at den kan publiseres som en statisk frontend på Vercel. Supabase håndterer live-dataene, mens Vercel leverer HTML, CSS, JavaScript, PWA-manifest, service worker og assets.
-
-Nåværende produksjonsadresse:
-
-```text
-https://padelstar.app
-```
-
-## Dokumentasjon
-
-- `docs/Development/Padelstar-komplett-utviklingsplan.md` - samlet aktiv arbeidsplan, akseptansekriterier og åpne beslutninger.
-- `docs/product_development.md` - produktretning, roller, turneringsregler og videre idéer.
-- `docs/tournament_logic.md` - turneringslogikk hentet fra tidligere iOS-app.
-- `docs/archive/history/migration_notes_legacy.md` - historiske notater for porting fra SwiftUI/iOS.
-- `docs/documentation.md` - kronologisk oversikt over beslutninger, implementeringer og verifikasjoner.
-- `docs/Development/produktbeslutninger.md` - godkjente produktvalg og krav om tillatelse før de endres.
-
-Prosjektregel: etter hver tydelige arbeidsøkt skal `docs/documentation.md` oppdateres.
