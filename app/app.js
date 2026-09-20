@@ -489,6 +489,7 @@ const lobby = window.PadelstarLobby.create({
   generateFullTournamentSchedule: () => generateFullTournamentSchedule(),
   generateRoundBlockReason: () => generateRoundBlockReason(),
   getState: () => state,
+  removePlayer: (playerId) => removePlayer(playerId),
   render: () => render(),
   saveState: () => saveState(),
   showToast: (message, statusClass) => showToast(message, statusClass),
@@ -1088,7 +1089,7 @@ async function handleResetTournament() {
 
 function initializeNavigation() {
   window.PadelstarNavigation?.initialize({ showModule, translate: t });
-  window.PadelstarWorkspaceRail?.initialize({ showModule, activateAdminPanel });
+  window.PadelstarWorkspaceRail?.initialize({ showModule, activateAdminPanel, isLobbyAvailable: () => isCurrentUserAdmin() && (state.rounds ?? []).length === 0 && state.status !== "Avsluttet" });
 }
 
 function bindSupabaseReady() {
@@ -1662,9 +1663,15 @@ function renderRoleVisibility() {
 // TV Mode always opens in its own tab/window (the app stays where it is); it is read-only and needs no login.
 function openTvMode() {
   const inviteCode = state?.inviteCode ? `?spectate=${encodeURIComponent(state.inviteCode)}` : "";
-  const opened = window.open(`tv.html${inviteCode}`, "_blank", "noopener");
-  // A blocked pop-up must not swallow the click: fall back to the current tab.
-  if (!opened) window.location.href = `tv.html${inviteCode}`;
+  // No "noopener" feature here: with it window.open always returns null, which looked like a blocked pop-up and sent the
+  // current tab to the TV page as well. The opener link is cut by hand instead.
+  const opened = window.open(`tv.html${inviteCode}`, "_blank");
+  if (opened) {
+    try { opened.opener = null; } catch { /* cross-origin windows refuse; nothing to cut */ }
+  } else {
+    // A blocked pop-up must not swallow the click: fall back to the current tab.
+    window.location.href = `tv.html${inviteCode}`;
+  }
 }
 
 function toggleTvMode() {

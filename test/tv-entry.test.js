@@ -8,10 +8,44 @@ const read = (...parts) => fs.readFileSync(path.join(root, ...parts), "utf8");
 
 test("TV Mode always opens in a new tab and never navigates the app away", () => {
   const app = read("app", "app.js");
-  assert.match(app, /function openTvMode\(\)[\s\S]*window\.open\(`tv\.html\$\{inviteCode\}`, "_blank", "noopener"\)/);
+  // "noopener" makes window.open return null even on success, which used to look like a blocked pop-up and navigated the app as well
+  assert.match(app, /function openTvMode\(\)[\s\S]*window\.open\(`tv\.html\$\{inviteCode\}`, "_blank"\)/);
+  assert.doesNotMatch(app, /window\.open\([^)]*noopener/);
   // a blocked pop-up falls back to the current tab, only from inside openTvMode
   assert.equal((app.match(/window\.location\.href = `tv\.html/g) ?? []).length, 1);
   assert.match(app, /if \(playerAction === "spectate"\) \{\s*openTvMode\(\);/);
+});
+
+test("openTvMode: an opened window leaves the app where it is; only a blocked pop-up falls back to this tab", () => {
+  const source = read("app", "app.js").match(/function openTvMode\(\) \{[\s\S]*?\n\}\n/)[0];
+  const run = (openResult) => {
+    const win = { location: { href: "index.html" }, opened: [], open(url, target, features) { this.opened.push([url, target, features]); return openResult; } };
+    new Function("window", "state", `${source}; openTvMode();`)(win, { inviteCode: "AB CD" });
+    return win;
+  };
+  const popup = { opener: "app" };
+  let win = run(popup);
+  assert.equal(win.location.href, "index.html", "the app stays where it is");
+  assert.deepEqual(win.opened, [["tv.html?spectate=AB%20CD", "_blank", undefined]], "one window, no features string");
+  assert.equal(popup.opener, null, "the new window cannot reach back to the app");
+  win = run(null);
+  assert.equal(win.location.href, "tv.html?spectate=AB%20CD", "a blocked pop-up falls back to this tab");
+});
+
+test("TV Mode has a Lys/Mørk switch that uses the app's color choice, and a generated light theme", () => {
+  const html = read("tv.html");
+  assert.match(html, /id="tvThemeToggle"[\s\S]*data-theme-option="light"[\s\S]*data-theme-option="dark"/);
+  assert.match(html, /<script>\(function\(\)\{try\{var t=localStorage\.getItem\("padelstar-theme"\)/, "the saved choice is applied before the first paint");
+  assert.match(html, /styles\/tv-light\.css\?v=padelstar-tv-light-\d+/);
+  assert.match(html, /styles\/tv-light-manual\.css/);
+  assert.match(html, /app\/color-mode\.js\?v=padelstar-color-mode-\d+/);
+  assert.match(read("app", "tv-mode.js"), /PadelstarColorMode\?\.create\(\{ document, storage: global\.localStorage \}\)\.bind\(\)/);
+  const worker = read("service-worker.js");
+  assert.match(worker, /styles\/tv-light\.css\?v=padelstar-tv-light-\d+/);
+  assert.match(worker, /styles\/tv-light-manual\.css/);
+  const light = read("styles", "tv-light.css");
+  assert.match(light, /^\/\* GENERATED/);
+  assert.match(light, /html\[data-theme-mode="light"\] \.tv-panel/);
 });
 
 test("the TV Mode button sits at the bottom of the side rail", () => {

@@ -1,0 +1,8 @@
+/* Hand-made corrections to the generated light TV theme (styles/tv-light.css). Scope every rule with html[data-theme-mode="light"]. */
+html[data-theme-mode="light"] {
+  --line: rgba(20, 60, 105, 0.3);
+}
+
+html[data-theme-mode="light"] body {
+  background: linear-gradient(180deg, #eef3f9, #e3ecf6);
+}

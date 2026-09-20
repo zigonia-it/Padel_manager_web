@@ -25,6 +25,8 @@ Status: `[ ]` open, `[x]` done.
 
 - [ ] **0.9.1 fixes on real devices.** (a) iPhone: tap the flag in the menu, pick a language: only the custom list may open, never iOS's own list afterwards. (b) Phone menu: open it in dark and light, on a small phone too. (c) Create a tournament while signed in on the phone, sign in on the Mac, Profil → "Mine aktive turneringer" → "Fortsett som admin": it should open as admin (the lobby if not started). (d) Signed in as `sigurd.grodem@live.no`: `admin.html` → click through Oversikt, Turneringer, Brukere, Vedlikehold; look for text running outside the page. (e) Light mode: any screen where a panel still has a square background, a wrong color or a padding that looks off: tell me which screen, with a screenshot if you can.
 
+- [ ] **0.9.2 fixes.** (a) TV Mode from the rail/menu opens exactly one new tab and the app stays where it is; with pop-ups blocked in the browser it falls back to the same tab. (b) On the TV page the Lys/Mørk switch works and stays chosen after a reload; try it on the real TV. (c) In the lobby remove a player; in Styring (before starting) click "Lobby" in the rail/bottom tabs.
+
 ## 3. Decisions I need (I made a safe default; tell me if you want it different)
 
 - [ ] **Withdrawal in a Cup** is blocked (a Cup bracket refers to team ids). Use "Bytt" instead. Do you want withdrawal in Cups too? (needs a design for the bracket)

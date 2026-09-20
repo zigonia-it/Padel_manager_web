@@ -93,3 +93,13 @@ test("the hand-made corrections cover the design's buttons and the scrims that t
   assert.match(manual, /\.intro::before[\s\S]*?background: none/, "no dark vignette on the light hero");
   assert.match(manual, /input::placeholder/);
 });
+
+test("styles/tv-light.css (TV Mode's light theme) is up to date and only changes colors", () => {
+  const tv = fs.readFileSync(gen.TV_OUTPUT, "utf8");
+  assert.equal(gen.buildTv(), tv, "run: node scripts/build-light-theme.js");
+  assert.ok(tv.includes(`source ${gen.computeTvSourceHash()}`));
+  const body = tv.replace(/\/\*[\s\S]*?\*\//g, "");
+  const selectors = [...body.matchAll(/(?:^|[}\n])\s*([^{}@\n][^{}]*)\{/g)].map((m) => m[1].trim()).filter(Boolean);
+  for (const selector of selectors) for (const part of selector.split(",")) assert.match(part.trim(), /^html\[data-theme-mode="light"\]/, part.trim().slice(0, 60));
+  assert.match(tv, /--ink: #0d1b2a/, "dark text on the light page");
+});
