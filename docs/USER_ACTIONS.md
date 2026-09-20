@@ -14,6 +14,8 @@ Status: `[ ]` open, `[x]` done.
 
 - [x] **Set up two-factor for System (0.14).** Done and confirmed working by the developer 2026-09-20. Sign in on padelstar.app as `sigurd.grodem@live.no` and open **System**. The page shows a QR code and a key: open your authenticator app (you said OneProtect: any app that can add a 6-digit TOTP code by QR or manual key works; if it cannot, use Google Authenticator, Microsoft Authenticator or 1Password), scan the QR code (also on a second device as a backup, or save the key in a password manager), type the 6-digit code and press "Aktiver og åpne". After that System asks for a code each time you open it. If the page says two-factor could not be set up, switch on TOTP in Supabase (Authentication, Sign In / Providers, Multi-Factor) and reload. If you lose the app without a backup, the reset is one SQL line in `docs/technical/operations.md`.
 
+- [ ] **Push categories on a real phone (0.15).** Install padelstar.app as an app on a phone (iPhone: Add to Home Screen), join a tournament as a player and switch notifications on. Profile page, "Varsler og lyd": try (a) all categories on: the admin starts a match / next round / corrects a result: you should get a push message; (b) switch "Kampen min er klar" off: no match/round pushes; (c) "Bare mine egne kamper" on: pushes only for matches you play in, but a new round still arrives; (d) the admin withdraws your teammate: you get "Lagkameraten din har trukket seg", and your teammate's opponents do not. Production had 0 push subscriptions before this, so this is the first real test of push at all.
+
 ## 2. Verify as a person (I cannot sign in or use real devices)
 
 - [x] **Withdrawal in a Cup (0.13) with a real Cup.** Create a Cup (e.g. 8 players = 4 teams) on padelstar.app, start it, withdraw one player of a team in the admin's player list: their match waits for the teammate (play alone / walkover; the admin can decide). Then withdraw players on both sides of one match: it is cancelled; when the other matches are done, "Start neste runde" asks to confirm the best loser moving up, and the next round has that team (with a note on the match). Also check that declining the dialog changes nothing.
@@ -44,7 +46,7 @@ Status: `[ ]` open, `[x]` done.
 - [x] **TV Mode button** on the phone tab bar and TV on phones: decided 2026-09-20; built in 0.10.0.
 - [x] **Lobby vs. workspace** — decided 2026-09-20; built in 0.12.0: the lobby is the first panel of the workspace. Needs a look on your phone and desktop (see the list at the top).
 - [x] **System administration**: decided 2026-09-20: a log view and block/delete users (built, see CHANGELOG); everything else (force-finish, opening other people's tournaments, ...) is treated as privacy and is not built.
-- [ ] **Push categories** (Phase 18: invites, results, "only my own matches") need a server-side change to the push function and real-device testing; not built. Confirm you want it in 0.8 or later. **Confirmed**
+- [x] **Push categories** — confirmed 2026-09-20; built in 0.15.0 for match/round, results, withdrawal decisions and "only my own matches". Invitation push is not built yet (needs an account-level push subscription); tell me to go ahead and I build it as the next step.
 
 ## 4. Later, when the time comes
 

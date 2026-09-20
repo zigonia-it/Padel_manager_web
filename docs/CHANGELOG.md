@@ -6,6 +6,24 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.15.0
+
+Push categories (Phase 18; developer's decisions 2026-09-20: categories match/ready, results, withdrawal decisions and invitations, one "only my own matches" switch, choices stored on the push subscription). This version builds the tournament categories; **invitation push is not built yet** (it needs an account-level push subscription, see USER_ACTIONS). Verified: 514+ automated tests (new: `test/push-recipients.test.js` runs the TypeScript recipient rules directly, `test/push-preferences.test.js`), the new PGlite suite `supabase/tests/push-preferences.pglite.mjs` (15 checks), the migration applied live and the deployed function smoke-tested (unauthorized calls answer 401, bad requests 400). **Not tested with a real phone** (there were 0 push subscriptions in production): USER_ACTIONS.
+
+### Added
+- **Switches on the profile page** (panel "Varsler og lyd"): "Kampen min er klar, ny runde", "Resultater som er rettet", "Lagkameraten min har trukket seg og jeg må velge" and "Bare mine egne kamper (ny runde varsles alltid)". The choices belong to the device (`app/push-preferences.js`).
+- **Enforced on the server.** The choices are copied to the device's push subscription (`push_subscriptions.prefs`, via `set_push_preferences`, which checks the player's token; guests and signed-in players). The `push-send` edge function reads them with the service role and filters before it sends (`supabase/functions/push-send/recipients.ts`): a switched-off category is not sent, "only my matches" narrows match and result messages to the players of that match (found in the tournament's state; a match that cannot be found bothers nobody who asked for it), and a new round is always announced.
+- **Withdrawal push**: when the admin withdraws a player, the teammate of each affected match gets a push message ("Lagkameraten din har trukket seg. Velg om du vil spille alene eller gi walkover."), only to that teammate.
+- Migration `20260920230000_push_preferences.sql` (applied live) and `push-send` version 4 deployed (same `verify_jwt: false`, the function authenticates with the tournament's admin token).
+
+### Fixed
+- A signed-in player could not switch push off: `delete_push_subscription` was granted to guests only. It is now granted to signed-in players too (same player-token check).
+- The deployed `push-send` (v3) was older than the repository: it lacked the push-endpoint allow-list and the 100-subscription limit. Version 4 has both.
+
+### Not built
+- **Invitation push** (a push message to an account when it is invited): needs a push subscription per account (not per tournament), a subscribe switch on the profile page, and a server-side lookup of the invited account by email. Planned as the next step.
+- A Cup round created by the server that blocks a match for a teammate's decision does not send the withdrawal push (only the admin's withdrawal action does).
+
 ## 0.14.0
 
 Two-factor authentication for the system menu (developer's decision 2026-09-20), and a hint for common names. Verified: 514 automated tests (18 new in `test/system-two-factor.test.js`), the new PGlite suite `supabase/tests/system-owner-two-factor.pglite.mjs` (19 checks) and the existing owner suites, the migration applied live, the two-factor screens checked in the browser (dark and light). The live enrolment with a real authenticator app was done by the owner and confirmed working (2026-09-20).

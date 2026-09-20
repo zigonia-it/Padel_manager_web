@@ -1,5 +1,5 @@
 window.PadelstarPlayerState = (() => {
-  function create({ activateNextWaitingMatch, buildSchedule, createPlayer, createTeam, defaultAvatarId, findPlayerByName, getPlayerById, getState, markCupCompleteIfDone = () => {}, recordEvent, render, saveState, showToast, t }) {
+  function create({ activateNextWaitingMatch, buildSchedule, createPlayer, createTeam, defaultAvatarId, findPlayerByName, getPlayerById, getState, markCupCompleteIfDone = () => {}, notifyWithdrawalDecision = () => {}, recordEvent, render, saveState, showToast, t }) {
     function parsePlayerNames(value) {
       return String(value).split(/[\n,;]+/).map((name) => name.trim()).filter(Boolean);
     }
@@ -134,6 +134,8 @@ window.PadelstarPlayerState = (() => {
       // a court freed by an annulled match goes to the next waiting match
       result.freed.forEach((court) => activateNextWaitingMatch?.(court));
       markCupCompleteIfDone();
+      // the teammate of each affected match must choose: tell them (the push-send function respects their choices)
+      result.decide.forEach((matchId) => { const record = getState().rounds.flatMap((round) => round.matches).find((item) => item.id === matchId)?.withdrawal; notifyWithdrawalDecision(matchId, record?.teammateId); });
       recordEvent?.("player_withdrawn", "player", playerId, { slotId: player.slotId, awaitingDecision: result.decide, walkover: result.walkover, cancelled: result.cancel, restartedMatches: result.restarted });
       result.restarted.forEach((matchId) => recordEvent?.("match_restarted", "match", matchId, { reason: "playerWithdrawn" }));
       saveState();

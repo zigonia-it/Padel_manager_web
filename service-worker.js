@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v355";
+const cacheName = "padelstar-v356";
 
 const appShell = [
   "./",
@@ -35,7 +35,7 @@ const appShell = [
   "./styles/invite-code-input.css?v=padelstar-invite-code-input-2",
   "./styles/accent-picker.css?v=padelstar-accent-picker-2",
   "./styles/privacy.css?v=padelstar-privacy-7",
-  "./app/translations.js?v=padelstar-i18n-62",
+  "./app/translations.js?v=padelstar-i18n-63",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-6",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -83,7 +83,7 @@ const appShell = [
   "./app/backup-ui.js?v=padelstar-backup-ui-2",
   "./app/player-replacement.js?v=padelstar-player-replacement-2",
   "./app/player-withdrawal.js?v=padelstar-player-withdrawal-2",
-  "./app/player-state.js?v=padelstar-player-state-5",
+  "./app/player-state.js?v=padelstar-player-state-6",
   "./app/tournament-status.js?v=padelstar-tournament-status-1",
   "./app/tournament-finalization.js?v=padelstar-finalization-1",
   "./app/scoring-engine.js?v=padelstar-scoring-5",
@@ -106,9 +106,10 @@ const appShell = [
   "./app/accent-system.js?v=padelstar-accent-system-2",
   "./app/player-visuals.js?v=padelstar-player-visuals-3",
   "./app/ui-feedback.js?v=padelstar-ui-feedback-2",
-  "./app/notification-system.js?v=padelstar-notification-system-2",
+  "./app/notification-system.js?v=padelstar-notification-system-3",
   "./app/color-mode.js?v=padelstar-color-mode-2",
   "./app/notification-center.js?v=padelstar-notification-center-7",
+  "./app/push-preferences.js?v=padelstar-push-preferences-1",
   "./app/notification-center-ui.js?v=padelstar-notification-center-7",
   "./app/system-admin.js?v=padelstar-system-admin-4",
   "./app/system-two-factor.js?v=padelstar-system-two-factor-1",
@@ -128,7 +129,7 @@ const appShell = [
   "./app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3",
   "./app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1",
   "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-15",
-  "./app/bootstrap/app-meta.js?v=padelstar-app-meta-16",
+  "./app/bootstrap/app-meta.js?v=padelstar-app-meta-17",
   "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-3",
   "./app/bootstrap/app-init.js?v=padelstar-app-init-2",
   "./app/ui/theme.js?v=padelstar-theme-2",
@@ -159,7 +160,7 @@ const appShell = [
   "./app/admin-form-events.js?v=padelstar-admin-form-events-8",
   "./app/match-actions.js?v=padelstar-match-actions-3",
   "./app/initial-view.js?v=padelstar-initial-view-3",
-  "./app/app.js?v=padelstar-session-84",
+  "./app/app.js?v=padelstar-session-85",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",

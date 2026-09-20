@@ -73,6 +73,7 @@ const playerReplacementPath = path.join(appRoot, "player-replacement.js");
 const playerWithdrawalPath = path.join(appRoot, "player-withdrawal.js");
 const notificationCenterPath = path.join(appRoot, "notification-center.js");
 const notificationCenterUiPath = path.join(appRoot, "notification-center-ui.js");
+const pushPreferencesPath = path.join(appRoot, "push-preferences.js");
 const systemAdminPath = path.join(appRoot, "system-admin.js");
 const invitationsPath = path.join(appRoot, "invitations.js");
 const colorModePath = path.join(appRoot, "color-mode.js");
@@ -232,6 +233,7 @@ function loadPadelstar(options = {}) {
   vm.runInContext(fs.readFileSync(playerWithdrawalPath, "utf8"), context, { filename: playerWithdrawalPath });
   vm.runInContext(fs.readFileSync(notificationCenterPath, "utf8"), context, { filename: notificationCenterPath });
   vm.runInContext(fs.readFileSync(notificationCenterUiPath, "utf8"), context, { filename: notificationCenterUiPath });
+  vm.runInContext(fs.readFileSync(pushPreferencesPath, "utf8"), context, { filename: pushPreferencesPath });
   vm.runInContext(fs.readFileSync(systemAdminPath, "utf8"), context, { filename: systemAdminPath });
   vm.runInContext(fs.readFileSync(invitationsPath, "utf8"), context, { filename: invitationsPath });
   vm.runInContext(fs.readFileSync(themePath, "utf8"), context, { filename: themePath });
