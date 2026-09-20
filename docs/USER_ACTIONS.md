@@ -5,11 +5,8 @@ Status: `[ ]` open, `[x]` done.
 
 ## 1. Fix first (something does not work for users today)
 
-- [ ] **Feedback form cannot send from padelstar.app.**
-  Production answers `503 {"missing":["RESEND_API_KEY","FEEDBACK_TO_EMAIL"]}`: the running deployment sees neither variable (I have no access to the Vercel team `zigonia-it`).
-  1. Vercel → project `padel-manager-web` → Settings → Environment Variables. Add **`RESEND_API_KEY`** (key from resend.com → API Keys) and **`FEEDBACK_TO_EMAIL`** (the address you signed up to Resend with). Tick **Production**. Optional: `FEEDBACK_FROM`.
-  2. **Redeploy** (Deployments → the latest → ⋯ → Redeploy). Variables are not applied to existing deployments.
-  3. Check: `curl -s -X POST https://padelstar.app/api/feedback -H "Content-Type: application/json" -d '{"category":"bug","message":"config check"}' -w "\n%{http_code}\n"` → expect `200`, and the email arrives (this sends a real email to you). Details: `docs/technical/feedback-setup.md`.
+- [x] **Feedback form** works (2026-09-20): `FEEDBACK_TO_EMAIL` contained an API key, not an address; corrected, redeployed, test message received.
+- [ ] **Clean up in Vercel and Resend.** (a) Vercel → padel-manager-web → Settings → Environment Variables: delete the third variable, whose *name* is a Resend API key (`re_Hvi…`). A key in a variable name is visible in plain text. (b) Resend → API Keys: revoke the key named "Feedback" (`re_Hvi…`) and the one named "FEEDBACK_TO_EMAIL" (`re_FQd…`), which is not used. Keep "RESEND_API_KEY" (the one the site uses). (c) Vercel shows "Deployment Storage 37.92 GB / 10 GB, exceeded free resources": old deployments count against it; delete old deployments (Deployments → ⋯ → Delete) or accept that Vercel may pause new deployments until it is under 10 GB.
 
 ## 2. Verify as a person (I cannot sign in or use real devices)
 
@@ -29,14 +26,14 @@ Status: `[ ]` open, `[x]` done.
 
 ## 3. Decisions I need (I made a safe default; tell me if you want it different)
 
-- [ ] **Withdrawal in a Cup** is blocked (a Cup bracket refers to team ids). Use "Bytt" instead. Do you want withdrawal in Cups too? (needs a design for the bracket)
-- [ ] **Players on both teams withdrawn from the same match** → the match is **cancelled**. Alternative: the two teammates each decide (walkover / play 1 against 1).
-- [ ] **Corrections after the tournament is finished** are closed. Do you want them (needs statistics to be recalculated)?
-- [ ] **Invitations by email**: shown in the app only, no email is sent. Do you want an email through Resend as well (needs the feedback setup above and a sender domain)?
-- [ ] **Privacy text** names Supabase, Vercel, Vercel Analytics and Resend once in parentheses (a privacy notice normally has to name who handles the data). Remove them anyway?
-- [ ] **TV Mode button** is at the bottom of the desktop side rail and in the phone menu. Also add it to the phone bottom tab bar?
-- [ ] **Lobby vs. workspace**: I added "add players" and "name courts" to the lobby and kept Styring/Kamper/Tabell as they are. Do you want the workspace merged into one lobby screen (bigger redesign)?
-- [ ] **System administration, what next?** 0.9.1 gave `admin.html` read-only tabs (tournaments, users, maintenance). Not built until you decide: blocking/deleting users, force-finishing or deleting a tournament, opening any tournament as admin (support), a log view (there is no server-side log table today), and the global theme switch. Each of these is a new power over user data: tell me which you want and how they must be protected (confirmation, audit trail).
+- [ ] **Withdrawal in a Cup** (decided 2026-09-20: same conditions as Round Robin; all players of a team withdrawn = walkover; both sides withdrawn = the best-placed losing team takes the place, admin confirms): planned for 0.11, not built yet.
+- [ ] **Players on both teams withdrawn** (in a Cup: see above; in Round Robin the match is cancelled): planned.
+- [x] **Corrections after the tournament is finished**: decided 2026-09-20 (added to the statistics); built in 0.10.0.
+- [x] **Invitations by email**: decided 2026-09-20; built in 0.10.0 (sender `invitations@padelstar.app`, verified domain). Needs a real check: invite an address in the lobby and look for the email.
+- [x] **Privacy text**: decided 2026-09-20 (a bottom section naming the services); built in 0.10.0.
+- [x] **TV Mode button** on the phone tab bar and TV on phones: decided 2026-09-20; built in 0.10.0.
+- [ ] **Lobby vs. workspace** (decided 2026-09-20: merge into one screen): planned for 0.11, not built yet.
+- [x] **System administration**: decided 2026-09-20: a log view and block/delete users (built, see CHANGELOG); everything else (force-finish, opening other people's tournaments, ...) is treated as privacy and is not built.
 - [ ] **Push categories** (Phase 18: invites, results, "only my own matches") need a server-side change to the push function and real-device testing; not built. Confirm you want it in 0.8 or later.
 
 ## 4. Later, when the time comes

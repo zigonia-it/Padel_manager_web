@@ -15,6 +15,16 @@
       jobs: "Planlagte oppgaver", jobName: "Oppgave", jobSchedule: "Tidsplan", jobActive: "Aktiv", jobLastRun: "Siste kjøring", jobNever: "Ikke kjørt ennå", jobsNone: "Ingen planlagte oppgaver funnet.",
       waiting: "Venter på opprydding", waitExpired: "Utløpte turneringer", waitExpiredDue: "Utløpt over 7 dager (slettes)", waitFinishedDue: "Ferdige, oppbevaring over", waitIdle: "Inaktive over 30 dager", waitProfiles: "Profiler med utløpt slettefrist",
       format_roundRobin: "Round Robin", format_cup: "Cup", unconfirmed: "Ikke bekreftet",
+      tabLog: "Logg", colActions: "Handlinger", blocked: "Blokkert", block: "Blokker", unblock: "Fjern blokkering", deleteUser: "Slett",
+      confirmBlock: "Blokkere {email}? Kontoen kan ikke logge inn før blokkeringen fjernes, og innloggede økter avsluttes.",
+      confirmUnblock: "Fjerne blokkeringen av {email}?",
+      confirmDelete: "Slette kontoen {email} for godt? Profil, statistikk og koblinger slettes. Turneringer kontoen eier blir værende uten eier. Dette kan ikke angres.",
+      actionFailed: "Handlingen kunne ikke gjennomføres.", actionDone: "Ferdig.",
+      logAll: "Alt", logUsers: "Brukere", logTournaments: "Turneringer", colTime: "Tidspunkt", colEvent: "Hendelse", colSubject: "Gjelder", colDetail: "Detaljer", noLog: "Ingen hendelser ennå.",
+      log_user_signed_up: "Ny bruker", log_user_blocked: "Bruker blokkert", log_user_unblocked: "Blokkering fjernet", log_user_deleted: "Bruker slettet",
+      log_tournament_created: "Turnering opprettet", log_tournament_finished: "Turnering avsluttet", log_tournament_deleted: "Turnering slettet",
+      logKept: "Hendelser oppbevares i 90 dager. Loggen inneholder bare id-er og grove fakta, ingen navn eller e-postadresser.",
+      accountOwnedYes: "med konto", accountOwnedNo: "gjest", ownedTournaments: "{count} turneringer mistet eieren",
     },
     en: {
       title: "System administration", checking: "Checking access …", signIn: "Sign in to open system administration.", denied: "You do not have access to system administration.",
@@ -28,6 +38,16 @@
       jobs: "Scheduled jobs", jobName: "Job", jobSchedule: "Schedule", jobActive: "Active", jobLastRun: "Last run", jobNever: "Not run yet", jobsNone: "No scheduled jobs found.",
       waiting: "Waiting for cleanup", waitExpired: "Expired tournaments", waitExpiredDue: "Expired over 7 days (deleted)", waitFinishedDue: "Finished, retention over", waitIdle: "Idle over 30 days", waitProfiles: "Profiles past their deletion date",
       format_roundRobin: "Round Robin", format_cup: "Cup", unconfirmed: "Not confirmed",
+      tabLog: "Log", colActions: "Actions", blocked: "Blocked", block: "Block", unblock: "Unblock", deleteUser: "Delete",
+      confirmBlock: "Block {email}? The account cannot sign in until the block is removed, and its signed-in sessions end.",
+      confirmUnblock: "Remove the block on {email}?",
+      confirmDelete: "Delete the account {email} for good? Its profile, statistics and links are deleted. Tournaments the account owns stay without an owner. This cannot be undone.",
+      actionFailed: "The action could not be completed.", actionDone: "Done.",
+      logAll: "All", logUsers: "Users", logTournaments: "Tournaments", colTime: "Time", colEvent: "Event", colSubject: "Concerns", colDetail: "Details", noLog: "No events yet.",
+      log_user_signed_up: "New user", log_user_blocked: "User blocked", log_user_unblocked: "Block removed", log_user_deleted: "User deleted",
+      log_tournament_created: "Tournament created", log_tournament_finished: "Tournament finished", log_tournament_deleted: "Tournament deleted",
+      logKept: "Events are kept for 90 days. The log holds only ids and coarse facts, no names or email addresses.",
+      accountOwnedYes: "with account", accountOwnedNo: "guest", ownedTournaments: "{count} tournaments lost their owner",
     },
   };
 
@@ -88,18 +108,49 @@
     return table([t.colName, t.colStatus, t.colFormat, t.colPlayers, t.colRounds, t.colOwner, t.colCreated, t.colUpdated], rows) + renderPager(data, t);
   }
 
+  // The system owner is never offered block or delete (the database refuses them anyway).
+  function userActions(row, t) {
+    if (row.is_system_owner) return "";
+    const id = escapeHtml(row.id);
+    const email = escapeHtml(row.email || "");
+    const block = row.blocked
+      ? `<button class="secondary" type="button" data-user-action="unblock" data-user-id="${id}" data-user-email="${email}">${escapeHtml(t.unblock)}</button>`
+      : `<button class="secondary" type="button" data-user-action="block" data-user-id="${id}" data-user-email="${email}">${escapeHtml(t.block)}</button>`;
+    return `<span class="system-admin-actions">${block}<button class="ghost danger-button" type="button" data-user-action="delete" data-user-id="${id}" data-user-email="${email}">${escapeHtml(t.deleteUser)}</button></span>`;
+  }
+
   function renderUserList(data, t, locale = "nb-NO") {
     const rows = (data?.rows ?? []).map((row) => [
-      `${escapeHtml(row.email || "—")}${row.is_system_owner ? ` <span class="system-admin-badge">${escapeHtml(t.owner)}</span>` : ""}`,
+      `${escapeHtml(row.email || "—")}${row.is_system_owner ? ` <span class="system-admin-badge">${escapeHtml(t.owner)}</span>` : ""}${row.blocked ? ` <span class="system-admin-badge system-admin-badge-blocked">${escapeHtml(t.blocked)}</span>` : ""}`,
       escapeHtml(row.email_confirmed ? t.yes : t.unconfirmed),
       escapeHtml(formatDate(row.created_at, locale)),
       escapeHtml(row.last_sign_in_at ? formatDate(row.last_sign_in_at, locale) : t.never),
       escapeHtml(row.owned_tournaments ?? 0),
       escapeHtml(row.played_tournaments ?? 0),
       escapeHtml(row.finished_tournaments ?? 0),
+      userActions(row, t),
     ]);
     if (!rows.length) return `<p class="hint">${escapeHtml(t.noUsers)}</p>`;
-    return table([t.colEmail, t.colConfirmed, t.colCreated, t.colLastSignIn, t.colOwned, t.colPlayed, t.colFinished], rows) + renderPager(data, t);
+    return table([t.colEmail, t.colConfirmed, t.colCreated, t.colLastSignIn, t.colOwned, t.colPlayed, t.colFinished, t.colActions], rows) + renderPager(data, t);
+  }
+
+  function renderLog(data, t, locale = "nb-NO") {
+    const rows = (data?.rows ?? []).map((row) => {
+      const detail = row.detail ?? {};
+      const facts = [];
+      if (row.kind === "tournament_created") facts.push(detail.accountOwned ? t.accountOwnedYes : t.accountOwnedNo, t[`format_${detail.format}`] ?? detail.format);
+      if (row.kind === "tournament_finished") facts.push(detail.accountOwned ? t.accountOwnedYes : t.accountOwnedNo);
+      if (row.kind === "tournament_deleted") facts.push(detail.status, detail.accountOwned ? t.accountOwnedYes : t.accountOwnedNo, detail.expired ? t.expired : "");
+      if (row.kind === "user_deleted") facts.push(t.ownedTournaments.replace("{count}", detail.ownedTournaments ?? 0));
+      return [
+        escapeHtml(formatDate(row.at, locale)),
+        escapeHtml(t[`log_${row.kind}`] ?? row.kind),
+        escapeHtml(row.subject_id ?? ""),
+        escapeHtml(facts.filter(Boolean).join(" · ")),
+      ];
+    });
+    if (!rows.length) return `<p class="hint">${escapeHtml(t.noLog)}</p><p class="hint">${escapeHtml(t.logKept)}</p>`;
+    return table([t.colTime, t.colEvent, t.colSubject, t.colDetail], rows) + renderPager(data, t) + `<p class="hint">${escapeHtml(t.logKept)}</p>`;
   }
 
   function renderMaintenance(data, t, locale = "nb-NO") {
@@ -116,11 +167,11 @@
     return `<h2>${escapeHtml(t.waiting)}</h2><div class="system-admin-stats">${cards}</div><h2>${escapeHtml(t.jobs)}</h2>${list}<p class="hint">${escapeHtml(t.generated.replace("{time}", formatDate(data?.generatedAt, locale)))}</p>`;
   }
 
-  const TABS = ["overview", "tournaments", "users", "maintenance"];
+  const TABS = ["overview", "tournaments", "users", "log", "maintenance"];
 
   // The page skeleton: the tab bar and one panel per tab. Only the overview is filled in at first; the others load when opened.
   function renderShell(overview, t, locale = "nb-NO") {
-    const tabLabel = { overview: t.tabOverview, tournaments: t.tabTournaments, users: t.tabUsers, maintenance: t.tabMaintenance };
+    const tabLabel = { overview: t.tabOverview, tournaments: t.tabTournaments, users: t.tabUsers, log: t.tabLog, maintenance: t.tabMaintenance };
     const tabs = TABS.map((tab, index) => `<button type="button" role="tab" class="system-admin-tab" id="systemAdminTab-${tab}" data-tab="${tab}" aria-controls="systemAdminPanel-${tab}" aria-selected="${index === 0}" tabindex="${index === 0 ? 0 : -1}">${escapeHtml(tabLabel[tab])}</button>`).join("");
     const toolbar = (kind, placeholder, withStatus) => `<form class="system-admin-toolbar" data-search-form="${kind}" role="search">`
       + `<input type="search" name="q" maxlength="80" autocomplete="off" placeholder="${escapeHtml(placeholder)}" aria-label="${escapeHtml(placeholder)}">`
@@ -130,6 +181,7 @@
       overview: renderOverview(overview, t, locale),
       tournaments: `${toolbar("tournaments", t.searchTournaments, true)}<div class="system-admin-results" data-results="tournaments"></div>`,
       users: `${toolbar("users", t.searchUsers, false)}<div class="system-admin-results" data-results="users"></div>`,
+      log: `<form class="system-admin-toolbar" data-search-form="log" role="search"><select name="kind" aria-label="${escapeHtml(t.colEvent)}"><option value="all">${escapeHtml(t.logAll)}</option><option value="user">${escapeHtml(t.logUsers)}</option><option value="tournament">${escapeHtml(t.logTournaments)}</option></select><button class="secondary" type="submit">${escapeHtml(t.search)}</button></form><div class="system-admin-results" data-results="log"></div>`,
       maintenance: `<div class="system-admin-results" data-results="maintenance"></div>`,
     };
     const sections = TABS.map((tab, index) => `<section class="system-admin-panel" role="tabpanel" id="systemAdminPanel-${tab}" data-panel="${tab}" aria-labelledby="systemAdminTab-${tab}"${index === 0 ? "" : " hidden"}>${panels[tab]}</section>`).join("");
@@ -137,16 +189,17 @@
   }
 
   // Wires the tabs, the searches and the paging. Each list asks the server for one page at a time (25 rows).
-  function bindPanels({ content, client, t, locale, limit = 25 }) {
+  function bindPanels({ content, client, t, locale, limit = 25, confirmAction = (message) => global.confirm?.(message) ?? false }) {
     if (!content?.addEventListener) return null;
-    const state = { tournaments: { q: "", status: "all", offset: 0 }, users: { q: "", offset: 0 }, maintenance: {} };
+    const state = { tournaments: { q: "", status: "all", offset: 0 }, users: { q: "", offset: 0 }, log: { kind: "all", offset: 0 }, maintenance: {} };
     const loaded = new Set(["overview"]);
     const rpcFor = {
       tournaments: () => client.rpc("admin_list_tournaments", { p_search: state.tournaments.q || null, p_status: state.tournaments.status, p_limit: limit, p_offset: state.tournaments.offset }),
       users: () => client.rpc("admin_list_users", { p_search: state.users.q || null, p_limit: limit, p_offset: state.users.offset }),
+      log: () => client.rpc("admin_list_log", { p_kind: state.log.kind, p_limit: limit, p_offset: state.log.offset }),
       maintenance: () => client.rpc("admin_maintenance_status"),
     };
-    const renderFor = { tournaments: renderTournamentList, users: renderUserList, maintenance: renderMaintenance };
+    const renderFor = { tournaments: renderTournamentList, users: renderUserList, log: renderLog, maintenance: renderMaintenance };
 
     async function load(tab) {
       const target = content.querySelector(`[data-results="${tab}"]`);
@@ -171,13 +224,33 @@
       if (!loaded.has(tab)) void load(tab);
     }
 
+    // Block, unblock and delete: always confirmed with the address in the question; the database decides whether it is allowed.
+    async function runUserAction(button) {
+      const { userAction: kind, userId: id, userEmail: email } = button.dataset;
+      const message = { block: t.confirmBlock, unblock: t.confirmUnblock, delete: t.confirmDelete }[kind];
+      if (!message || !id || !confirmAction(message.replace("{email}", email ?? ""))) return;
+      const target = content.querySelector('[data-results="users"]');
+      const rpcName = kind === "delete" ? "admin_delete_user" : "admin_block_user";
+      const payload = kind === "delete" ? { p_user_id: id } : { p_user_id: id, p_blocked: kind === "block" };
+      try {
+        const { error } = await client.rpc(rpcName, payload);
+        if (error) throw error;
+        loaded.delete("log");
+        await load("users");
+      } catch {
+        if (target) target.insertAdjacentHTML?.("afterbegin", `<p class="hint" role="alert">${escapeHtml(t.actionFailed)}</p>`);
+      }
+    }
+
     content.addEventListener("click", (event) => {
       const tab = event.target.closest?.("[data-tab]");
       if (tab) { select(tab.dataset.tab); return; }
+      const action = event.target.closest?.("[data-user-action]");
+      if (action) { void runUserAction(action); return; }
       const page = event.target.closest?.("[data-page]");
       if (page && !page.disabled) {
         const panel = page.closest("[data-panel]")?.dataset.panel;
-        if (panel !== "tournaments" && panel !== "users") return;
+        if (panel !== "tournaments" && panel !== "users" && panel !== "log") return;
         state[panel].offset = Math.max(0, state[panel].offset + (page.dataset.page === "next" ? limit : -limit));
         void load(panel);
       }
@@ -196,7 +269,8 @@
       if (!form) return;
       event.preventDefault();
       const kind = form.dataset.searchForm;
-      state[kind].q = String(form.elements.q.value ?? "").trim();
+      if (kind === "log") state.log.kind = form.elements.kind.value;
+      else state[kind].q = String(form.elements.q.value ?? "").trim();
       if (kind === "tournaments") state.tournaments.status = form.elements.status.value;
       state[kind].offset = 0;
       void load(kind);
@@ -269,7 +343,7 @@
     return { refresh };
   }
 
-  global.PadelstarSystemAdmin = { TEXT, decideAccess, renderOverview, renderShell, renderTournamentList, renderUserList, renderMaintenance, renderPager, bindPanels, runPage, createLink, createClient, escapeHtml };
+  global.PadelstarSystemAdmin = { TEXT, decideAccess, renderOverview, renderShell, renderTournamentList, renderUserList, renderLog, renderMaintenance, renderPager, bindPanels, runPage, createLink, createClient, escapeHtml };
 
   if (global.document?.querySelector?.("#systemAdminContent")) {
     const start = () => {

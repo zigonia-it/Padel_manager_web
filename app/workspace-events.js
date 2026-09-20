@@ -11,10 +11,12 @@
       const button = event.target.closest("[data-tournament-id]");
       if (button) callbacks.openSavedTournament?.(button.dataset.tournamentId);
     });
-    elements.activeTournamentsList?.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-owned-tournament-id]");
-      if (button) callbacks.openOwnedTournament?.(button.dataset.ownedTournamentId);
-    });
+    for (const list of [elements.activeTournamentsList, elements.finishedTournamentsList]) {
+      list?.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-owned-tournament-id]");
+        if (button) callbacks.openOwnedTournament?.(button.dataset.ownedTournamentId);
+      });
+    }
     elements.copyInviteCodeButton?.addEventListener("click", callbacks.copyInviteCode);
     elements.copyJoinLinkButton?.addEventListener("click", callbacks.copyJoinLink);
     elements.copySpectatorLinkButton?.addEventListener("click", callbacks.copySpectatorLink);

@@ -7,6 +7,7 @@
     elements.tvModeButton?.addEventListener("click", callbacks.toggleTvMode);
     elements.tvModeMenuButton?.addEventListener("click", callbacks.toggleTvModeFromMenu);
     elements.tvModeRailButton?.addEventListener("click", callbacks.toggleTvModeFromMenu);
+    elements.tvModeBottomButton?.addEventListener("click", callbacks.toggleTvModeFromMenu);
     elements.deleteProfileButton?.addEventListener("click", callbacks.requestProfileDeletion);
     elements.cancelProfileDeletionButton?.addEventListener("click", callbacks.cancelProfileDeletion);
     elements.profileHistoryFilter?.addEventListener("change", callbacks.renderProfile);

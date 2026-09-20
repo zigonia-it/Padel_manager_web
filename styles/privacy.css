@@ -148,3 +148,6 @@ html.embedded .embedded-close:focus-visible {
 }
 
 html.embedded .privacy-document h1 { padding-right: 52px; }
+
+.privacy-services { margin: 0 0 16px; padding-left: 1.2rem; }
+.privacy-services li { margin: 0 0 8px; line-height: 1.5; overflow-wrap: anywhere; }

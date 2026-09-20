@@ -1,5 +1,5 @@
 window.PadelstarProfileUi = (() => {
-  function create({ defaultAvatarId, elements, escapeHtml, getLocalStorage, getProfile, getAccountUser = () => null, getActiveTournaments = () => [], getProfileManager, profileHistoryStorageKey, t, accentPicker, defaultAccent, tournamentStatusText }) {
+  function create({ defaultAvatarId, elements, escapeHtml, getLocalStorage, getProfile, getAccountUser = () => null, getActiveTournaments = () => [], getFinishedTournaments = () => [], getProfileManager, profileHistoryStorageKey, t, accentPicker, defaultAccent, tournamentStatusText }) {
     function renderProfile() {
       const profileManager = getProfileManager();
       const profile = getProfile();
@@ -47,6 +47,17 @@ window.PadelstarProfileUi = (() => {
               <strong>${escapeHtml(tournament.name ?? "")}</strong>
               <span>${tournament.playerCount} ${t("resume.players")} · ${tournament.inviteCode}</span>
               <button class="secondary" type="button" data-owned-tournament-id="${escapeHtml(tournament.id)}">${t("resume.continueAdmin")}</button>
+            </article>`).join("");
+      }
+      if (elements.finishedTournamentsList) {
+        const finished = account ? getFinishedTournaments() : [];
+        elements.finishedTournamentsList.innerHTML = finished.length === 0
+          ? `<p class="hint">${t("profile.noFinishedTournaments")}</p>`
+          : finished.map((tournament) => `
+            <article class="saved-tournament-item">
+              <strong>${escapeHtml(tournament.name ?? "")}</strong>
+              <span>${tournament.playerCount} ${t("resume.players")} · ${tournament.endedAt ? new Date(tournament.endedAt).toLocaleDateString(document.documentElement.lang || "nb-NO") : ""}</span>
+              <button class="secondary" type="button" data-owned-tournament-id="${escapeHtml(tournament.id)}">${t("profile.openToCorrect")}</button>
             </article>`).join("");
       }
       if (elements.profileAccountEmail) elements.profileAccountEmail.textContent = account?.email ?? "";

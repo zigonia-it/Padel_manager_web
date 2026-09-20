@@ -1278,6 +1278,30 @@ for (const [language, values] of Object.entries({
 })) {
   Object.assign(padelstarTranslations[language], values);
 }
+for (const [language, values] of Object.entries({
+  nb: { "invitations.emailSent": "Invitasjon sendt til {email}.", "invitations.emailFailed": "Invitasjonen er lagt inn, men e-posten kunne ikke sendes. Gi personen koden i stedet." },
+  nn: { "invitations.emailSent": "Invitasjon sendt til {email}.", "invitations.emailFailed": "Invitasjonen er lagt inn, men e-posten kunne ikkje sendast. Gi personen koden i staden." },
+  en: { "invitations.emailSent": "Invitation emailed to {email}.", "invitations.emailFailed": "The invitation was saved, but the email could not be sent. Give the person the code instead." },
+  es: { "invitations.emailSent": "Invitación enviada a {email}.", "invitations.emailFailed": "La invitación se guardó, pero no se pudo enviar el correo. Dale el código a la persona." },
+  de: { "invitations.emailSent": "Einladung an {email} gesendet.", "invitations.emailFailed": "Die Einladung wurde gespeichert, aber die E-Mail konnte nicht gesendet werden. Gib der Person stattdessen den Code." },
+  fr: { "invitations.emailSent": "Invitation envoyée à {email}.", "invitations.emailFailed": "L'invitation est enregistrée, mais l'e-mail n'a pas pu être envoyé. Donnez le code à la personne." },
+  sv: { "invitations.emailSent": "Inbjudan skickad till {email}.", "invitations.emailFailed": "Inbjudan är sparad, men e-posten kunde inte skickas. Ge personen koden i stället." },
+  da: { "invitations.emailSent": "Invitation sendt til {email}.", "invitations.emailFailed": "Invitationen er gemt, men e-mailen kunne ikke sendes. Giv personen koden i stedet." },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
+for (const [language, values] of Object.entries({
+  nb: { "profile.finishedTournaments": "Avsluttede turneringer", "profile.finishedTournamentsHint": "Åpne en avsluttet turnering for å korrigere et resultat. Statistikken oppdateres.", "profile.noFinishedTournaments": "Ingen avsluttede turneringer ennå.", "profile.openToCorrect": "Åpne og korriger" },
+  nn: { "profile.finishedTournaments": "Avslutta turneringar", "profile.finishedTournamentsHint": "Opne ei avslutta turnering for å korrigere eit resultat. Statistikken blir oppdatert.", "profile.noFinishedTournaments": "Ingen avslutta turneringar enno.", "profile.openToCorrect": "Opne og korriger" },
+  en: { "profile.finishedTournaments": "Finished tournaments", "profile.finishedTournamentsHint": "Open a finished tournament to correct a result. The statistics are updated.", "profile.noFinishedTournaments": "No finished tournaments yet.", "profile.openToCorrect": "Open and correct" },
+  es: { "profile.finishedTournaments": "Torneos terminados", "profile.finishedTournamentsHint": "Abre un torneo terminado para corregir un resultado. Las estadísticas se actualizan.", "profile.noFinishedTournaments": "Aún no hay torneos terminados.", "profile.openToCorrect": "Abrir y corregir" },
+  de: { "profile.finishedTournaments": "Beendete Turniere", "profile.finishedTournamentsHint": "Öffne ein beendetes Turnier, um ein Ergebnis zu korrigieren. Die Statistik wird aktualisiert.", "profile.noFinishedTournaments": "Noch keine beendeten Turniere.", "profile.openToCorrect": "Öffnen und korrigieren" },
+  fr: { "profile.finishedTournaments": "Tournois terminés", "profile.finishedTournamentsHint": "Ouvrez un tournoi terminé pour corriger un résultat. Les statistiques sont mises à jour.", "profile.noFinishedTournaments": "Aucun tournoi terminé pour le moment.", "profile.openToCorrect": "Ouvrir et corriger" },
+  sv: { "profile.finishedTournaments": "Avslutade turneringar", "profile.finishedTournamentsHint": "Öppna en avslutad turnering för att rätta ett resultat. Statistiken uppdateras.", "profile.noFinishedTournaments": "Inga avslutade turneringar ännu.", "profile.openToCorrect": "Öppna och rätta" },
+  da: { "profile.finishedTournaments": "Afsluttede turneringer", "profile.finishedTournamentsHint": "Åbn en afsluttet turnering for at rette et resultat. Statistikken opdateres.", "profile.noFinishedTournaments": "Ingen afsluttede turneringer endnu.", "profile.openToCorrect": "Åbn og ret" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 Object.assign(padelstarTranslations.nb, { "footer.linksAria": "Bruksanvisning og personvern" });
 // English strings for surfaces that previously fell back to Norwegian.
 Object.assign(padelstarTranslations.en, {

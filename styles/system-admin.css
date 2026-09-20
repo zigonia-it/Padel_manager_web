@@ -154,3 +154,7 @@
 }
 
 .system-admin-toast.is-visible { opacity: 1; }
+
+.system-admin-actions { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.system-admin-actions button { min-height: 36px; padding: 4px 12px; white-space: nowrap; }
+.system-admin-badge-blocked { border-color: rgba(255, 138, 138, 0.6); background: rgba(255, 138, 138, 0.16); }

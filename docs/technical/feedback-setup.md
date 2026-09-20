@@ -44,3 +44,11 @@ curl -s -X POST https://padelstar.app/api/feedback -H "Content-Type: application
 - `200 {"ok":true}`: it works; check inbox and spam.
 
 (Note: that command carries a valid payload, so once configured it *does* send a real email to you.)
+
+## Invitation emails (`api/invitation-email.js`)
+
+When an admin invites someone by email in the lobby, the app first saves the invitation in the database, then asks `/api/invitation-email` to send the email through Resend. The function re-checks everything with the database (the admin token via `admin_list_invitations`, a *pending* invitation for exactly that address, and that the invite code belongs to that tournament), so it cannot be used to send arbitrary mail. Limits per hour: 3 mails per address and tournament, 40 per tournament, 30 per client.
+
+- Uses `RESEND_API_KEY` (already set for the feedback form). The default sender is `Padelstar <invitations@padelstar.app>`; `padelstar.app` is a verified domain in Resend, so mail can go to any address. Override with `INVITE_FROM` if needed.
+- If the email fails, the invitation is still saved and listed; the admin is told to give the person the code instead.
+- The person also sees the invitation under Profil after signing in with that (verified) address.

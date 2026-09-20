@@ -10,7 +10,7 @@ A bug is complete only when it was reproduced or clearly verified, the smallest 
 
 ## Active defects
 
-- [ ] **Beta feedback form cannot send from the live site.** `POST /api/feedback` answers `503` with `"missing": ["RESEND_API_KEY", "FEEDBACK_TO_EMAIL"]`: the running Vercel deployment does not see either variable. This is a Vercel setting, not code: add both for **Production** and redeploy (`docs/technical/feedback-setup.md`, "Troubleshooting"). The email-draft fallback works. *Blocked on the developer.*
+- [x] ~~Beta feedback form cannot send from the live site.~~ Fixed 2026-09-20: `FEEDBACK_TO_EMAIL` held an API key instead of an address (Resend answered 422 on `to`); corrected in Vercel, redeployed, and the test message arrived. Open follow-up (developer): a stray Vercel variable whose *name* is a Resend API key, and that key should be revoked (see USER_ACTIONS).
 
 ## Known limitations (decided or accepted, not bugs to fix now)
 

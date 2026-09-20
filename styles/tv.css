@@ -96,3 +96,15 @@ button { font: inherit; color: inherit; }
 .tv-theme-toggle button { min-height: 34px; padding: 4px clamp(10px, 1vw, 18px); border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: clamp(.68rem, .8vw, .9rem); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
 .tv-theme-toggle button.is-active { background: rgba(99,181,255,.22); color: var(--ink); }
 .tv-theme-toggle button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* Phones: the panels stack and grow with their content (fixed row heights clipped names and the live card left an empty block). */
+@media (max-width: 700px) {
+  .tv-columns, .tv-columns.tv-idle { grid-template-rows: none; grid-auto-rows: auto; }
+  .tv-panel { min-height: 140px; }
+  .tv-card-list, .tv-standings { overflow: visible; grid-auto-rows: auto; }
+  .tv-match-card { overflow: visible; }
+  .tv-brand { width: min(160px, 42vw); }
+  .tv-header-end { flex-direction: column; align-items: flex-end; gap: 6px; }
+  .tv-clock { font-size: 1.3rem; }
+  .tv-theme-toggle button { min-height: 36px; padding: 4px 10px; }
+}

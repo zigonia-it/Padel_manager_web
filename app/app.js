@@ -130,7 +130,7 @@ const profileHistory = window.PadelstarProfileHistory.create({
 });
 const observability = window.PadelstarObservability;
 const uiEffects = window.PadelstarUiEffects;
-const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history", "admin_list_invitations", "list_my_invitations", "list_my_active_tournaments", "open_owned_tournament"]);
+const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history", "admin_list_invitations", "list_my_invitations", "list_my_active_tournaments", "list_my_finished_tournaments", "open_owned_tournament"]);
 const remoteRpc = (client, name, payload = {}) => {
   if (!remoteReadRpcNames.has(name)) markSyncAttempt();
   return window.PadelstarRemoteRpc.call(client, name, payload);
@@ -634,6 +634,7 @@ const profileUi = window.PadelstarProfileUi.create({
   getLocalStorage: () => localStorage,
   getAccountUser: () => accountAuth?.currentUser(),
   getActiveTournaments: () => getActiveTournaments(),
+  getFinishedTournaments: () => getFinishedTournaments(),
   getProfile: () => profile,
   getProfileManager: () => profileManager,
   profileHistoryStorageKey,
@@ -721,6 +722,13 @@ const invitations = window.PadelstarInvitations.create({
   prefillJoinForm: (code) => prefillJoinForm(code),
   showModule: (moduleName) => showModule(moduleName),
   getAccountUser: () => accountAuth?.currentUser(),
+  // The email itself is sent by a server function that re-checks the admin token and the invitation with the database.
+  sendEmail: async (details) => {
+    try {
+      const response = await fetch("/api/invitation-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(details) });
+      return response.ok;
+    } catch { return false; }
+  },
 });
 invitations.bind();
 const profileSession = window.PadelstarProfileSession.create({
@@ -833,7 +841,7 @@ const accountAuth = window.PadelstarAccountAuth?.create({
   getClient: () => supabaseClient,
   getElements: () => elements,
   getProfile: () => profile,
-  onAuthChange: (user) => { void systemAdminLink.refresh(user); void invitations.loadMine(); syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void tournamentEntry?.resumePendingEntry(); } },
+  onAuthChange: (user) => { void systemAdminLink.refresh(user); void invitations.loadMine(); syncAdminPlayerNameFromProfile(); syncAdminPlayerChoice(); void renderAdminIdentity(); render(); if (user) { void syncProfileHistoryRemoteRead(); void loadActiveTournaments(); void profileSession.loadFinishedTournaments(); void tournamentEntry?.resumePendingEntry(); } },
   onProfileLoaded: (remoteProfile) => {
     profile = profile
       ? profileManager.normalizeProfile({ ...profile, ...remoteProfile })
@@ -1262,6 +1270,7 @@ function syncProfileHistoryRemote(entry) { return profileSession.syncProfileHist
 function syncProfileHistoryRemoteRead() { return profileSession.syncProfileHistoryRemoteRead(); }
 function loadActiveTournaments() { return profileSession.loadActiveTournaments(); }
 function getActiveTournaments() { return profileSession.getActiveTournaments(); }
+function getFinishedTournaments() { return profileSession.getFinishedTournaments(); }
 function purgeLocalProfile() { return profileSession.purgeLocalProfile(); }
 function profileAvatarIdFromForm() { return profileSession.profileAvatarIdFromForm(); }
 function saveLocalProfileFromForm() { return profileSession.saveLocalProfileFromForm(); }
@@ -1279,6 +1288,7 @@ function saveProfileHistory() {
   // browser-authored history for a local profile or guest.
   void syncProfileHistoryRemoteRead();
   void loadActiveTournaments();
+  void profileSession.loadFinishedTournaments();
 }
 
 function requestRemoteProfileDeletion() { return profileSession.requestRemoteProfileDeletion(); }
@@ -2107,7 +2117,8 @@ function roundProgress(round) {
 }
 
 function isEditableAdminMatch(match) {
-  if (state.status === "Avsluttet") return false;
+  // A finished tournament: only a finished result can be opened (for a correction), and only by the admin.
+  if (state.status === "Avsluttet") return match.state === "finished" && state.lifecycleStatus !== "cancelled" && isCurrentUserAdmin();
   // A match waiting for a withdrawal decision can be decided at any time, also in a round that has not started.
   if (match.state === "awaitingWithdrawalDecision") return true;
   const activeRound = getActiveRound();

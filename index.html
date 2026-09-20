@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-5">
   <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-52">
   <link rel="stylesheet" href="styles/theme-toggle.css?v=padelstar-color-mode-1">
-  <link rel="stylesheet" href="styles/theme-light.css?v=padelstar-theme-light-8">
+  <link rel="stylesheet" href="styles/theme-light.css?v=padelstar-theme-light-9">
   <link rel="stylesheet" href="styles/theme-light-manual.css?v=padelstar-theme-light-manual-2">
   <link rel="stylesheet" href="styles/components-v2.css?v=padelstar-components-v2-2">
   <link rel="stylesheet" href="styles/workspace-nav.css?v=padelstar-workspace-nav-6">
@@ -336,6 +336,11 @@
             <h3 data-i18n="profile.activeTournaments">Mine aktive turneringer</h3>
           </div>
           <div id="activeTournamentsList"></div>
+          <div class="panel-heading">
+            <h3 data-i18n="profile.finishedTournaments">Avsluttede turneringer</h3>
+          </div>
+          <p class="hint" data-i18n="profile.finishedTournamentsHint">Åpne en avsluttet turnering for å korrigere et resultat. Statistikken oppdateres.</p>
+          <div id="finishedTournamentsList"></div>
           <div class="panel hidden" id="accountSettingsPanel">
             <div class="panel-heading">
               <h3 data-i18n="profile.accountSettings">Kontoinnstillinger</h3>
@@ -996,6 +1001,9 @@
             <button type="button" class="workspace-rail-item hidden" data-rail-target="player">
               <span class="workspace-rail-label" data-i18n="nav.player">Spiller</span>
             </button>
+            <button type="button" class="workspace-rail-item" id="tvModeBottomButton" data-action="tv-mode">
+              <span class="workspace-rail-label" data-i18n="actions.tvMode">TV Mode</span>
+            </button>
           </nav>
         </div>
       </section>
@@ -1177,7 +1185,7 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-56"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-57"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-6"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
   <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
@@ -1217,7 +1225,7 @@
   <script defer src="app/large-score.js?v=padelstar-large-score-2"></script>
   <script defer src="app/set-score-dialog.js?v=padelstar-set-score-dialog-1"></script>
   <script defer src="app/admin-status.js?v=padelstar-admin-status-3"></script>
-  <script defer src="app/profile-ui.js?v=padelstar-profile-ui-4"></script>
+  <script defer src="app/profile-ui.js?v=padelstar-profile-ui-5"></script>
   <script defer src="app/backup-ui.js?v=padelstar-backup-ui-2"></script>
   <script defer src="app/player-replacement.js?v=padelstar-player-replacement-2"></script>
   <script defer src="app/player-withdrawal.js?v=padelstar-player-withdrawal-1"></script>
@@ -1248,9 +1256,9 @@
   <script defer src="app/color-mode.js?v=padelstar-color-mode-1"></script>
   <script defer src="app/notification-center.js?v=padelstar-notification-center-7"></script>
   <script defer src="app/notification-center-ui.js?v=padelstar-notification-center-7"></script>
-  <script defer src="app/system-admin.js?v=padelstar-system-admin-2"></script>
-  <script defer src="app/invitations.js?v=padelstar-invitations-1"></script>
-  <script defer src="app/profile-session.js?v=padelstar-profile-session-3"></script>
+  <script defer src="app/system-admin.js?v=padelstar-system-admin-3"></script>
+  <script defer src="app/invitations.js?v=padelstar-invitations-2"></script>
+  <script defer src="app/profile-session.js?v=padelstar-profile-session-4"></script>
   <script defer src="app/account-auth.js?v=padelstar-account-auth-6"></script>
   <script defer src="app/config/storage-keys.js?v=padelstar-storage-keys-1"></script>
   <script defer src="app/config/supabase-config.js?v=padelstar-supabase-config-1"></script>
@@ -1259,17 +1267,17 @@
   <script defer src="app/core/session-controller.js?v=padelstar-session-controller-2"></script>
   <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
-  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-13"></script>
-  <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-9"></script>
-  <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-2"></script>
+  <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-14"></script>
+  <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-10"></script>
+  <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-3"></script>
   <script defer src="app/bootstrap/app-init.js?v=padelstar-app-init-2"></script>
   <script defer src="app/ui/theme.js?v=padelstar-theme-1"></script>
   <script defer src="app/ui/app-renderer.js?v=padelstar-app-renderer-5"></script>
   <script defer src="app/feedback.js?v=padelstar-feedback-2"></script>
   <script defer src="app/info-dialog.js?v=padelstar-info-dialog-2"></script>
-  <script defer src="app/result-correction.js?v=padelstar-result-correction-1"></script>
-  <script defer src="app/result-correction-dialog.js?v=padelstar-result-correction-dialog-1"></script>
-  <script defer src="app/match-card.js?v=padelstar-match-card-13"></script>
+  <script defer src="app/result-correction.js?v=padelstar-result-correction-2"></script>
+  <script defer src="app/result-correction-dialog.js?v=padelstar-result-correction-dialog-2"></script>
+  <script defer src="app/match-card.js?v=padelstar-match-card-14"></script>
   <script defer src="app/backup-format.js?v=padelstar-backup-format-2"></script>
   <script defer src="app/link-utils.js?v=padelstar-link-utils-2"></script>
   <script defer src="app/tournament-state.js?v=padelstar-tournament-state-5"></script>
@@ -1283,7 +1291,7 @@
   <script defer src="app/score-actions.js?v=padelstar-score-actions-6"></script>
   <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-5"></script>
   <script defer src="app/app-events.js?v=padelstar-app-events-5"></script>
-  <script defer src="app/workspace-events.js?v=padelstar-workspace-events-2"></script>
+  <script defer src="app/workspace-events.js?v=padelstar-workspace-events-3"></script>
   <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-7"></script>
   <script defer src="app/create-wizard.js?v=padelstar-create-wizard-3"></script>
   <script defer src="app/invite-code-input.js?v=padelstar-invite-code-input-1"></script>
@@ -1291,7 +1299,7 @@
   <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-7"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-3"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
-  <script defer src="app/app.js?v=padelstar-session-80"></script>
+  <script defer src="app/app.js?v=padelstar-session-81"></script>
 </body>
 
 </html>

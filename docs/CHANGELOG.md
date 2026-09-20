@@ -6,9 +6,19 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.10.0
+
+The developer's decisions of 2026-09-20 (batch 1). Verified: 484 automated tests, 15 database test files (all pass), the three new migrations (`20260920170000`, `20260920180000`, `20260920190000`) applied live and checked (grants, signup trigger via a rolled-back insert). Not built yet from that list: withdrawal in a Cup (with walkover and a lucky loser taking the place of two withdrawn teams) and the merge of lobby and workspace (0.11).
+
+- Privacy page: a bottom section names the services used (Supabase in the EU, Vercel and its analytics, Resend, jsDelivr, flagcdn.com, quickchart.io).
+- TV Mode in the phone's bottom tab bar; the TV page now fits a phone (stacked panels, nothing clipped, header fits 375px).
+- System administration: a **Logg** tab (sign-ups, tournaments created / finished / deleted, the owner's own actions; ids and coarse facts only, kept 90 days, cleaned nightly by the job `padelstar-log-cleanup`) and **block / unblock / delete** for accounts in the Brukere tab (always confirmed, never the system owner or yourself; blocking ends the sessions, deleting cascades to profile, statistics and links and leaves owned tournaments without an owner). Migration `20260920170000` (29 database checks, applied and checked live, signup trigger verified with a rolled-back insert).
+- Invitations by email (`api/invitation-email.js`): sent from `invitations@padelstar.app` after the invitation is saved; the function re-checks admin token, pending invitation and invite code with the database and is rate limited.
+
 - The feedback API ignores surrounding quotes, spaces and line breaks in `RESEND_API_KEY`, `FEEDBACK_TO_EMAIL` and `FEEDBACK_FROM` (a pasted value with quotes made Resend answer 422).
 
 - The feedback API's 502 now includes `providerStatus` and Resend's short error name (`providerError`), never the key, an address or Resend's message text, so a wrong key can be told from a sender/recipient mismatch (`docs/technical/feedback-setup.md`).
+- **Corrections after the tournament is finished**: the admin can correct a finished result in a finished (not cancelled) tournament; the account statistics (matches, wins, sets, games) are recalculated in the same transaction (`_recompute_account_statistics`), and the finished tournament stays read-only otherwise (only results and revision may change, only through the correction function). In the app only the correction button is offered on finished matches. Profile → "Avsluttede turneringer" (`list_my_finished_tournaments`) opens one of your finished tournaments on any device. A Cup result that later matches depend on stays blocked.
 
 ## 0.9.2
 

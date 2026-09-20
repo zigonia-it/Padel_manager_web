@@ -39,7 +39,7 @@
 
     function open(match, options = {}) {
       const state = getState();
-      if (state.status === "Avsluttet") return;
+      if (state.status === "Avsluttet" && state.lifecycleStatus === "cancelled") return;
       current = match;
       simulation = null;
       const reasons = correction.REASONS;
