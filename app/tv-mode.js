@@ -230,6 +230,8 @@
   async function start() {
     language = resolveLanguage();
     applyStaticTranslations();
+    document.querySelector("#tvThemeToggle")?.setAttribute("aria-label", t("theme.label"));
+    global.PadelstarColorMode?.create({ document, storage: global.localStorage }).bind();
     try { state = JSON.parse(global.localStorage.getItem(storageKey) ?? "null"); } catch { state = null; }
     await loadRemote();
     state ||= { name: "PADELSTAR", currentRound: 1, rounds: [], players: [], status: "Pågår" };

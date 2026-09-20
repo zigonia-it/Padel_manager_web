@@ -58,3 +58,26 @@ test("the tooling that keeps versions honest exists", () => {
   assert.ok(fs.existsSync(path.join(root, "scripts", "theme-parity-audit.js")));
   assert.match(read("scripts", "ui-audit.js"), /window\.__parity/);
 });
+
+test("the lobby lists a remove button per player, using the same rule and function as Styring", () => {
+  const lobby = read("app", "lobby.js");
+  assert.match(lobby, /data-remove-player="\$\{escapeHtml\(player\.id\)\}"/);
+  assert.match(lobby, /actions\.removePlayerAria/);
+  assert.match(lobby, /state\.rounds\.length > 0/, "disabled once the schedule has started");
+  assert.match(lobby, /removePlayer\(button\.dataset\.removePlayer\)/);
+  assert.match(read("app", "app.js"), /removePlayer: \(playerId\) => removePlayer\(playerId\),\n  render: \(\) => render\(\),/);
+  assert.match(read("styles", "lobby.css"), /\.lobby-players-card \.danger-button/);
+});
+
+test("Styring has a way back to the lobby (rail and phone tabs) while the tournament has not started", () => {
+  const html = read("index.html");
+  for (const nav of [html.match(/<nav class="workspace-rail[\s\S]*?<\/nav>/)[0], html.match(/<nav class="workspace-bottom-tabs[\s\S]*?<\/nav>/)[0]]) {
+    assert.match(nav, /data-rail-target="lobby"/);
+    assert.ok(nav.indexOf('data-rail-target="lobby"') < nav.indexOf('data-rail-target="control"'), "Lobby comes first");
+    assert.match(nav, /class="workspace-rail-item hidden" data-rail-target="lobby"/, "hidden until it applies");
+  }
+  const rail = read("app", "workspace-rail.js");
+  assert.match(rail, /target === "lobby"\) \{\s*showModule\("lobby"\)/);
+  assert.match(rail, /isLobbyAvailable/);
+  assert.match(read("app", "app.js"), /isLobbyAvailable: \(\) => isCurrentUserAdmin\(\) && \(state\.rounds \?\? \[\]\)\.length === 0 && state\.status !== "Avsluttet"/);
+});

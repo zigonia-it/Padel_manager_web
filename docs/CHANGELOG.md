@@ -6,6 +6,16 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.9.2
+
+Bug-fix batch from the developer's report of 2026-09-20 (second). Verified: 467 automated tests (new: `openTvMode` run against a fake window, the TV page and its generated light theme, the lobby's remove button, the rail's lobby item), and the fixes exercised in the browser (TV Mode in dark and light, the lobby, the rail). Not verifiable here: a real pop-up blocker and a real TV.
+
+### Fixed
+- **TV Mode opened in a new window and in the same window at the same time.** `window.open(url, "_blank", "noopener")` always returns `null`, which the code read as "pop-up blocked" and then also sent the current tab to the TV page. It is opened without that feature now, with the opener link cut by hand, and only a truly blocked pop-up falls back to the current tab. The old test pinned the buggy call; it now runs the function against a fake window.
+- **TV Mode had no Lys/Mørk switch.** The TV page has a switch next to the clock that uses the same saved choice as the app (and follows the device until one is chosen). Its light theme is generated from `tv.css` by the same generator (`styles/tv-light.css`, corrections in `styles/tv-light-manual.css`); text contrast was checked.
+- **Remove player was missing in the lobby.** Every player row has a "Fjern" button (same function and the same rule as in Styring: not after the schedule has started, then it is disabled).
+- **No way back to the lobby from Styring.** The side rail (desktop) and the bottom tabs (phone) have a "Lobby" item first, shown to the admin while the tournament has not started.
+
 ## 0.9.1
 
 Bug-fix batch from the developer's report of 2026-09-20. Verified: 463 automated tests, 13 database test files (all pass, including 36 new checks), the two new database migrations applied to the live project and checked there (grants and behaviour), and the fixes exercised in the browser at phone and desktop widths. Not verifiable without a real device or a second signed-in account: see `docs/USER_ACTIONS.md`.

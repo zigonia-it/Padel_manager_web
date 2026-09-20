@@ -89,3 +89,10 @@ button { font: inherit; color: inherit; }
 .tv-page .ds-avatar-gem-inner { inset: 2.5px; background: #0c1728; display: flex; align-items: center; justify-content: center; font-family: "Archivo", "Titillium Web", system-ui, sans-serif; font-weight: 800; color: var(--player-accent-light); }
 .tv-standing-player .tv-avatar.ds-avatar-gem { width: clamp(26px, 2.2vw, 40px) !important; height: clamp(26px, 2.2vw, 40px) !important; }
 .tv-standing-player .tv-avatar .ds-avatar-gem-inner { font-size: clamp(9px, .75vw, 14px) !important; }
+
+/* Color mode switch (Lys / Mørk) next to the clock; the same choice is used by the app. */
+.tv-header-end { display: flex; align-items: center; gap: clamp(10px, 1.2vw, 22px); justify-self: end; }
+.tv-theme-toggle { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.05); }
+.tv-theme-toggle button { min-height: 34px; padding: 4px clamp(10px, 1vw, 18px); border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: clamp(.68rem, .8vw, .9rem); font-weight: 800; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+.tv-theme-toggle button.is-active { background: rgba(99,181,255,.22); color: var(--ink); }
+.tv-theme-toggle button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }

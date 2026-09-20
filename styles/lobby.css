@@ -94,3 +94,23 @@
 .invitation-actions { display: flex; gap: 8px; }
 .invitation-declined .invitation-email,
 .invitation-expired .invitation-email { opacity: 0.6; }
+
+/* One row per player: name, where they came from, and the remove button */
+.lobby-players-card .compact-list li {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px 10px;
+  text-align: left;
+}
+
+.lobby-players-card .player-list-name {
+  flex: 1 1 8rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lobby-players-card .join-source-chip { flex: 0 0 auto; }
+.lobby-players-card .danger-button { flex: 0 0 auto; min-height: 36px; margin-left: auto; }
