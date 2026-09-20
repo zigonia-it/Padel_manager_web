@@ -6,6 +6,8 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+- The feedback API's 502 now includes `providerStatus` and Resend's short error name (`providerError`), never the key, an address or Resend's message text, so a wrong key can be told from a sender/recipient mismatch (`docs/technical/feedback-setup.md`).
+
 ## 0.9.2
 
 Bug-fix batch from the developer's report of 2026-09-20 (second). Verified: 467 automated tests (new: `openTvMode` run against a fake window, the TV page and its generated light theme, the lobby's remove button, the rail's lobby item), and the fixes exercised in the browser (TV Mode in dark and light, the lobby, the rail). Not verifiable here: a real pop-up blocker and a real TV.
