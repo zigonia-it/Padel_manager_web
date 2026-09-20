@@ -82,8 +82,11 @@ module.exports = async function handler(request, response) {
     return reply(response, 400, { ok: false, error: "invalid" });
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.FEEDBACK_TO_EMAIL;
+  // Values pasted into a dashboard often carry surrounding spaces, a line break or quotes ("me@example.com"): drop those.
+  const cleanEnv = (value) => String(value ?? "").trim().replace(/^(["'])(.*)\1$/s, "$2").trim();
+  const apiKey = cleanEnv(process.env.RESEND_API_KEY);
+  const to = cleanEnv(process.env.FEEDBACK_TO_EMAIL);
+  const from = cleanEnv(process.env.FEEDBACK_FROM);
   if (!apiKey || !to) {
     // Names only, never values: tells the developer which Vercel variable the running deployment cannot see.
     const missing = [!apiKey && "RESEND_API_KEY", !to && "FEEDBACK_TO_EMAIL"].filter(Boolean);
@@ -118,7 +121,7 @@ module.exports = async function handler(request, response) {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: process.env.FEEDBACK_FROM || "Padelstar Feedback <onboarding@resend.dev>",
+        from: from || "Padelstar Feedback <onboarding@resend.dev>",
         to: [to],
         subject,
         text: lines.join("\n"),
