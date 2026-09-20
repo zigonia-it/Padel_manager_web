@@ -133,8 +133,15 @@ module.exports = async function handler(request, response) {
       // Only the HTTP status and Resend's short error name (for example "invalid_api_key" or "validation_error") are passed on,
       // so a wrong key or an unverified sender can be told apart without leaking a key, an address or Resend's message text.
       let providerError;
-      try { const name = (await result.json())?.name; if (typeof name === "string" && /^[a-z_]{3,40}$/.test(name)) providerError = name; } catch { /* no readable body */ }
-      return reply(response, 502, { ok: false, error: "provider", providerStatus: Number(result.status) || undefined, ...(providerError ? { providerError } : {}) });
+      let providerField;
+      try {
+        const detail = await result.json();
+        if (typeof detail?.name === "string" && /^[a-z_]{3,40}$/.test(detail.name)) providerError = detail.name;
+        // "Invalid `to` field ...": only the name of the request field (from, to, ...) is passed on, never the message.
+        const field = typeof detail?.message === "string" ? detail.message.match(/`(from|to|reply_to|subject|cc|bcc)`/)?.[1] : undefined;
+        if (field) providerField = field;
+      } catch { /* no readable body */ }
+      return reply(response, 502, { ok: false, error: "provider", providerStatus: Number(result.status) || undefined, ...(providerError ? { providerError } : {}), ...(providerField ? { providerField } : {}) });
     }
     return reply(response, 200, { ok: true });
   } catch {

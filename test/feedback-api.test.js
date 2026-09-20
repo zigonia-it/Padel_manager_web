@@ -154,6 +154,9 @@ test("a provider failure returns 502 and does not leak details", async () => {
   const named = await post(valid(), { fetchImpl: async () => ({ ok: false, status: 403, json: async () => ({ name: "validation_error", message: "You can only send testing emails to your own email address (me@example.com)" }) }) });
   assert.equal(named.body.providerError, "validation_error");
   assert.doesNotMatch(JSON.stringify(named.body), /me@example|testing emails/, "Resend's message text is never passed on");
+  const field = await post(valid(), { fetchImpl: async () => ({ ok: false, status: 422, json: async () => ({ name: "validation_error", message: "Invalid `to` field. The email address needs to follow the `email@example.com` format: me@example.com" }) }) });
+  assert.equal(field.body.providerField, "to");
+  assert.doesNotMatch(JSON.stringify(field.body), /me@example|needs to follow/);
   const odd = await post(valid(), { fetchImpl: async () => ({ ok: false, status: 500, json: async () => ({ name: "<script>re_secret" }) }) });
   assert.equal(odd.body.providerError, undefined, "only a short lower-case error name is accepted");
   const thrown = await post(valid(), { fetchImpl: async () => { throw new Error("network down"); } });
