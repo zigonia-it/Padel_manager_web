@@ -4,7 +4,7 @@ window.PADELSTAR_SUPABASE = {
   // Set this to the public VAPID key when the trusted push sender is enabled.
   // Cloudflare Turnstile SITE key (public). Empty = no "I'm not a robot" check. Set it together with the Turnstile secret in
   // Supabase (Authentication -> Attack Protection); see docs/technical/captcha-setup.md.
-  captchaSiteKey: "",
+  captchaSiteKey: "0x4AAAAAAE95nXNYwBuQodlm",
   vapidPublicKey: "fzYP2O7OwsSyJHx5LbQLMUT_UAsolUCWKkzN2mlAsLk",
 };
 

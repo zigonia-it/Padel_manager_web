@@ -1314,6 +1314,18 @@ for (const [language, values] of Object.entries({
 })) {
   Object.assign(padelstarTranslations[language], values);
 }
+for (const [language, values] of Object.entries({
+  nb: { "footer.beta": "Denne siden er under Betautvikling" },
+  nn: { "footer.beta": "Denne sida er under betautvikling" },
+  en: { "footer.beta": "This site is under beta development" },
+  es: { "footer.beta": "Este sitio está en desarrollo beta" },
+  de: { "footer.beta": "Diese Seite befindet sich in der Beta-Entwicklung" },
+  fr: { "footer.beta": "Ce site est en développement bêta" },
+  sv: { "footer.beta": "Den här sidan är under betautveckling" },
+  da: { "footer.beta": "Denne side er under betaudvikling" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 Object.assign(padelstarTranslations.nb, { "footer.linksAria": "Bruksanvisning og personvern" });
 // English strings for surfaces that previously fell back to Norwegian.
 Object.assign(padelstarTranslations.en, {

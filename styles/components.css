@@ -379,10 +379,12 @@ h3 {
 }
 
 .share-details input {
-  padding: 0;
-  border: 0;
+  /* a link to copy: a real field, with room before the text */
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
 
-  background: transparent;
+  background: var(--surface-sunken);
   color: var(--ink);
 
   font-size: 0.84rem;

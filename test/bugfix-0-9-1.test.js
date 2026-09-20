@@ -81,3 +81,11 @@ test("Styring has a way back to the lobby (rail and phone tabs) while the tourna
   assert.match(rail, /isLobbyAvailable/);
   assert.match(read("app", "app.js"), /isLobbyAvailable: \(\) => isCurrentUserAdmin\(\) && \(state\.rounds \?\? \[\]\)\.length === 0 && state\.status !== "Avsluttet"/);
 });
+
+test("links to copy (join link, spectator link) are real fields with room before the text", () => {
+  const css = read("styles", "components.css");
+  const rule = css.match(/\.share-details input \{[^}]*\}/)[0];
+  assert.match(rule, /padding: 0\.6rem 0\.8rem/);
+  assert.match(rule, /border-radius: var\(--radius-sm\)/);
+  assert.doesNotMatch(rule, /padding: 0;/);
+});
