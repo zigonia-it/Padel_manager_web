@@ -8,7 +8,7 @@ Only verified completed changes belong here.
 
 ## 0.14.0
 
-Two-factor authentication for the system menu (developer's decision 2026-09-20), and a hint for common names. Verified: 514 automated tests (18 new in `test/system-two-factor.test.js`), the new PGlite suite `supabase/tests/system-owner-two-factor.pglite.mjs` (19 checks) and the existing owner suites, the migration applied live, the two-factor screens checked in the browser (dark and light). The live enrolment with a real authenticator app has to be done by the owner (USER_ACTIONS).
+Two-factor authentication for the system menu (developer's decision 2026-09-20), and a hint for common names. Verified: 514 automated tests (18 new in `test/system-two-factor.test.js`), the new PGlite suite `supabase/tests/system-owner-two-factor.pglite.mjs` (19 checks) and the existing owner suites, the migration applied live, the two-factor screens checked in the browser (dark and light). The live enrolment with a real authenticator app was done by the owner and confirmed working (2026-09-20).
 
 ### Added
 - **Two-factor for System.** The owner signs in as before and opens System; the page then asks for a 6-digit code from an authenticator app (TOTP, Supabase Auth MFA). The first time it shows a QR code and the key to set the app up (any app that supports one-time codes works), with the advice to scan the QR code on two devices or save the key in a password manager. The page loads no administration data before the code has been accepted.
