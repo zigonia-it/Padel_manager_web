@@ -113,7 +113,7 @@
       podiumFullStandings: document.querySelector("#podiumFullStandings"),
       podiumViewStandingsButton: document.querySelector("#podiumViewStandingsButton"),
       podiumNewTournamentButton: document.querySelector("#podiumNewTournamentButton"),
-      lobbyView: document.querySelector("#lobbyView"),
+      lobbyView: document.querySelector("#lobbyPanel"),
       lobbyHeading: document.querySelector("#lobbyHeading"),
       lobbyReadiness: document.querySelector("#lobbyReadiness"),
       lobbyInviteCode: document.querySelector("#lobbyInviteCode"),

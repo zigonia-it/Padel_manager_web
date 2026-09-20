@@ -6,6 +6,18 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.12.0
+
+The lobby and the tournament workspace are one screen (developer's decision 2026-09-20). Verified: 492 automated tests; the critical path (create -> lobby -> start -> Styring -> results) and the lobby panel checked in the browser (dark and light, desktop and 375 px phone).
+
+### Changed
+- **Lobby is the first panel of the workspace** (Lobby / Styring / Kamper / Tabell): the separate lobby screen is gone. The side rail, the phone tab bar and the sub-tabs all open it, before and after the tournament has started. `showModule("lobby")` (used after creating a tournament and by older links) now opens the workspace with the Lobby panel for an admin.
+- "Start turnering" and "Gå til styring" in the lobby lead straight to the Styring panel. After the start the lobby stays available as a read-only view: the start button, the add-players form and the court form are hidden and removing players is disabled (the same rule as in Styring).
+- The phone tab bar holds five items (Lobby, Styring, Kamper, Tabell, TV Mode) and fits a 375 px screen without widening the page.
+
+### Not changed
+- Styring still has its own player management, share details and court settings (the advanced ones); the lobby panel offers the same first-run set-up beside them. Removing that duplication is a later clean-up, not a blocker.
+
 ## 0.11.1
 
 - **Link fields** in Styring and the lobby (join link, spectator link) had no padding before the text: they are real fields with room now.

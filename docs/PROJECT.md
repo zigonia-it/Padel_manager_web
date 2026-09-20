@@ -104,12 +104,12 @@ Detailed sequencing is in `ROADMAP.md`.
 - **TV Mode** works on desktop and phone (button in the rail and the phone tab bar; the page stacks on a phone) and has the Lys/Mørk switch.
 - **Privacy text** ends with a section naming the services used (Supabase in the EU, Vercel, Resend, jsDelivr, flagcdn.com, Cloudflare Turnstile, quickchart.io).
 - **Colour system**: one token set (`styles/tokens.css`), two themes: dark is a lifted slate navy, light is a soft blue-white with white cards; the choice is saved, the device decides only on the first visit. No colour literals in components.
+- **One screen for lobby, Styring, Kamper and Tabell** (0.12.0): the lobby is the first panel of the workspace, reached from the side rail, the phone tab bar and the sub-tabs.
 - **Sign-up check**: a Cloudflare Turnstile "I'm not a robot" dialog before sign-up, sign-in and the admin sign-in link (enforced by Supabase once its secret is set).
 
-## Decided, not yet built (planned for 0.12)
+## Decided, not yet built (planned for 0.13)
 
 - **Withdrawal in a Cup** (developer, 2026-09-20): the same conditions as in a Round Robin. If all players of one team have withdrawn, a walkover is enforced for the opponents. If both sides of a match have withdrawn, the best-placed losing team takes their place, and the admin confirms it.
-- **One screen for lobby, Styring, Kamper and Tabell** (developer, 2026-09-20): the lobby and the three workspace tabs are merged into one screen.
 
 ## Later versions
 
@@ -121,7 +121,7 @@ Permanent tamper-protected security audit logging is post-1.0.
 
 ## Version baseline
 
-The actual current development baseline is `0.11.1` (fixes after the colour system, 2026-09-20; `0.11.0` was the colour system; `0.10.0` was the decisions batch; `0.9.1` was the first bug-fix batch the same day; `0.9.0` was applied 2026-09-19 under the developer's standing authorization to bump fully verified milestones; `docs/CHANGELOG.md` lists what was verified and what still awaits a person on real devices). `0.7.0` was the beta feature milestone.
+The actual current development baseline is `0.12.0` (lobby merged into the workspace, 2026-09-20; `0.11.1` was fixes after the colour system; `0.11.0` was the colour system; `0.10.0` was the decisions batch; `0.9.1` was the first bug-fix batch the same day; `0.9.0` was applied 2026-09-19 under the developer's standing authorization to bump fully verified milestones; `docs/CHANGELOG.md` lists what was verified and what still awaits a person on real devices). `0.7.0` was the beta feature milestone.
 
 `0.7.0` was applied on the developer's explicit instruction (2026-09-19) for the beta feature milestone (scorer roles, result approval and correction, timed matches and scoring rules, player replacement, TV Mode in every supported language, feedback button); `docs/CHANGELOG.md` lists which parts have been verified live and which still await it. `0.6.0` was set once the Monday critical path was verified end-to-end; `0.6.1` is a verified UI-redesign/polish batch on top of it (fonts, design tokens, gem avatars, workspace nav shell, a handful of real bug fixes) that changed no critical-path behavior.
 

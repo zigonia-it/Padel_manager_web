@@ -12,6 +12,7 @@ Status: `[ ]` open, `[x]` done.
 
 ## 2. Verify as a person (I cannot sign in or use real devices)
 
+- [ ] **The merged lobby (0.12) on your devices.** Create a tournament: you land in the workspace on the Lobby panel (invite code, QR, players with remove buttons, courts, invitations). "Start turnering" opens Styring; Lobby stays in the side rail / phone tab bar (now five items: check they fit on your smallest phone) and is read-only after the start. Also check that a returning admin (reload, profile → open tournament) reaches Styring/Kamper as before.
 - [ ] **System owner page.** Sign in on padelstar.app (or the preview) as `sigurd.grodem@live.no`. Expect a **"System"** link in the top menu and `admin.html` showing counts and the latest tournaments. Then sign in as any other account (or signed out): no "System" link, and opening `admin.html` sends you away with a message.
 - [ ] **Invitations with two real accounts.** Account A creates a tournament (not a guest one), lobby → "Inviter med e-post" → the email of account B. Account B (verified email) signs in → profile page → "Invitasjoner" → "Bli med" → join → A's list shows "Har blitt med". Also try "Avslå".
 - [ ] **Claim a pre-added slot with an account.** Admin adds a player name in the lobby; a signed-in account joins with that exact name → it is linked (their statistics follow the account). A second account or a guest using the same name must be refused.
@@ -30,13 +31,13 @@ Status: `[ ]` open, `[x]` done.
 
 ## 3. Decisions I need (I made a safe default; tell me if you want it different)
 
-- [ ] **Withdrawal in a Cup** — decided 2026-09-20, planned for 0.12, not built: same conditions as Round Robin (the remaining teammate plays alone or gives a walkover); if all players of a team have withdrawn, a walkover is enforced; if both sides of a match have withdrawn, the best-placed losing team takes the place and the admin confirms. Until then use "Bytt".
-- [ ] **Players on both teams withdrawn** — in a Round Robin the match is still cancelled (no new rule was given); in a Cup see the line above (lucky loser, admin confirms). Planned for 0.12.
+- [ ] **Withdrawal in a Cup** — decided 2026-09-20, planned for 0.13, not built: same conditions as Round Robin (the remaining teammate plays alone or gives a walkover); if all players of a team have withdrawn, a walkover is enforced; if both sides of a match have withdrawn, the best-placed losing team takes the place and the admin confirms. Until then use "Bytt".
+- [ ] **Players on both teams withdrawn** — in a Round Robin the match is still cancelled (no new rule was given); in a Cup see the line above (lucky loser, admin confirms). Planned for 0.13.
 - [x] **Corrections after the tournament is finished**: decided 2026-09-20 (added to the statistics); built in 0.10.0.
 - [x] **Invitations by email**: decided 2026-09-20; built in 0.10.0 (sender `invitations@padelstar.app`, verified domain). Needs a real check: invite an address in the lobby and look for the email.
 - [x] **Privacy text**: decided 2026-09-20 (a bottom section naming the services); built in 0.10.0.
 - [x] **TV Mode button** on the phone tab bar and TV on phones: decided 2026-09-20; built in 0.10.0.
-- [ ] **Lobby vs. workspace** — decided 2026-09-20: merge the lobby and Styring/Kamper/Tabell into one screen. Planned for 0.12, not built (0.9.2 gave Styring a "Lobby" item in the meantime).
+- [x] **Lobby vs. workspace** — decided 2026-09-20; built in 0.12.0: the lobby is the first panel of the workspace. Needs a look on your phone and desktop (see the list at the top).
 - [x] **System administration**: decided 2026-09-20: a log view and block/delete users (built, see CHANGELOG); everything else (force-finish, opening other people's tournaments, ...) is treated as privacy and is not built.
 - [ ] **Push categories** (Phase 18: invites, results, "only my own matches") need a server-side change to the push function and real-device testing; not built. Confirm you want it in 0.8 or later.
 

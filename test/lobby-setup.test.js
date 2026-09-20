@@ -9,7 +9,7 @@ const read = (...parts) => fs.readFileSync(path.join(root, ...parts), "utf8");
 
 test("the lobby has its own add-players and court forms, wired to the same handlers as the Styring tab", () => {
   const html = read("index.html");
-  const lobby = html.slice(html.indexOf('id="lobbyView"'), html.indexOf("</main>", html.indexOf('id="lobbyView"')));
+  const lobby = html.slice(html.indexOf('id="lobbyPanel"'), html.indexOf('data-admin-panel-section="control"', html.indexOf('id="lobbyPanel"')));
   assert.match(lobby, /id="lobbyAddPlayerForm"[\s\S]*name="playerName"/);
   assert.match(lobby, /id="lobbyCourtNamesForm"[\s\S]*name="courtCount"[\s\S]*id="lobbyCourtNamesList"/);
   const events = read("app", "admin-form-events.js");

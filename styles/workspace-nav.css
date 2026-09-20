@@ -135,7 +135,17 @@ body[data-theme] .admin-subtabs {
     justify-content: center;
     gap: 2px;
     min-height: 56px;
+    min-width: 0;
+    padding: 0 2px;
     text-align: center;
+  }
+
+  /* Five items (Lobby, Styring, Kamper, Tabell, TV) must fit a 375px phone without widening the page. */
+  .workspace-bottom-tabs .workspace-rail-item > span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .workspace-bottom-tabs .workspace-rail-item.is-active {

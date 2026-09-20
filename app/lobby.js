@@ -1,5 +1,5 @@
 window.PadelstarLobby = (() => {
-  function create({ createJoinLink, createQrCodeUrl, elements, escapeHtml, generateFullTournamentSchedule, generateRoundBlockReason, getState, removePlayer, render, saveState, showToast, showWorkspace, t }) {
+  function create({ activateAdminPanel = () => {}, createJoinLink, createQrCodeUrl, elements, escapeHtml, generateFullTournamentSchedule, generateRoundBlockReason, getState, removePlayer, render, saveState, showToast, showWorkspace, t }) {
     function sourceLabel(player) {
       return player.joinedFrom === "admin-self"
         ? t("player.adminPlays")
@@ -19,7 +19,6 @@ window.PadelstarLobby = (() => {
     function renderLobby() {
       if (!elements.lobbyView) return;
       const state = getState();
-      elements.lobbyHeading.textContent = state.name;
       elements.lobbyReadiness.textContent = t("tournament.playersReady", { players: state.players.length, courts: state.courts.length });
       elements.lobbyInviteCode.textContent = state.inviteCode;
       const joinLink = createJoinLink();
@@ -28,7 +27,12 @@ window.PadelstarLobby = (() => {
       elements.lobbyPlayersList.innerHTML = state.players.length
         ? state.players.map((player) => playerRowMarkup(player, state.rounds.length > 0)).join("")
         : `<li class="empty-list-item">${t("tournament.noPlayers", { code: state.inviteCode })}</li>`;
+      // One workspace: the lobby stays available after the start (code, QR and players), but the start button and the forms only apply before it.
+      const started = state.rounds.length > 0 || state.status === "Avsluttet";
+      elements.lobbyStartButton?.classList.toggle("hidden", started);
       elements.lobbyStartButton.disabled = Boolean(generateRoundBlockReason());
+      elements.lobbyAddPlayerForm?.classList.toggle("hidden", started);
+      elements.lobbyCourtNamesForm?.classList.toggle("hidden", started);
     }
 
     function startFromLobby() {
@@ -40,11 +44,13 @@ window.PadelstarLobby = (() => {
       generateFullTournamentSchedule();
       saveState();
       showWorkspace();
+      activateAdminPanel("control");
       render();
     }
 
     function skipToWorkspace() {
       showWorkspace();
+      activateAdminPanel("control");
     }
 
     elements.lobbyPlayersList?.addEventListener?.("click", (event) => {

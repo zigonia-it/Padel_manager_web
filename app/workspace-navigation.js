@@ -14,6 +14,7 @@
 
     function showModule(moduleName) {
       const requestedModule = deps.normalizeModule(moduleName);
+      const openLobbyPanel = moduleName === "lobby" && requestedModule === "admin";
       deps.setActiveModule(requestedModule);
       const workspaceModule = deps.workspaceModuleFromActiveModule();
       const isWorkspaceActive = Boolean(workspaceModule);
@@ -56,6 +57,7 @@
       deps.requestAnimationFrame(() => global.scrollTo?.({ top: 0, behavior: "auto" }));
       if (!deps.isTestMode()) deps.requestAnimationFrame(() => deps.focusModuleHeading(activeSections[0]));
       renderRoleVisibility();
+      if (openLobbyPanel) activateAdminPanel("lobby");
     }
 
     function activateTab(view) {

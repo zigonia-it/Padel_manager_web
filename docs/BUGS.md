@@ -18,7 +18,7 @@ A bug is complete only when it was reproduced or clearly verified, the smallest 
 ## Known limitations (decided or accepted, not bugs to fix now)
 
 - Two players with exactly the same name cannot be told apart by the claim flow; only the first match in the roster is reachable. Names are the only key the claim flow has.
-- Withdrawing a player is not offered in a **Cup** (the bracket refers to team ids); use "Bytt". Decided 2026-09-20, planned for 0.12: same rules as Round Robin; a fully withdrawn team = walkover; both sides withdrawn = the best-placed losing team takes the place, admin confirms.
+- Withdrawing a player is not offered in a **Cup** (the bracket refers to team ids); use "Bytt". Decided 2026-09-20, planned for 0.13: same rules as Round Robin; a fully withdrawn team = walkover; both sides withdrawn = the best-placed losing team takes the place, admin confirms.
 - When players on **both** teams of one Round Robin match have withdrawn, the match is cancelled (no rule was given for it). In a Cup the rule above will apply.
 - Corrections after the tournament is finished (built 0.10.0): only for finished, not cancelled tournaments, only by the admin, and a Cup result that later matches depend on stays blocked. Guests: the correction window ends when the 24-hour retention deletes the tournament.
 - Invitation emails (built 0.10.0) are limited to 3 per address and tournament per hour and 40 per tournament; if the email fails the invitation is still saved and the admin gives the person the code.
