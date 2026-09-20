@@ -1,6 +1,6 @@
 # v1.0.0 readiness (Phase 30 Definition of Done)
 
-Status at 0.9.0, 2026-09-19. `1.0.0` is **not** released: the checklist below still has open items and the developer has to approve the version change.
+Status at 0.9.1, 2026-09-20 (first written at 0.9.0 on 2026-09-19). `1.0.0` is **not** released: the checklist below still has open items and the developer has to approve the version change.
 Legend: verified = tested and confirmed with evidence; built = implemented and tested by automated tests/browser, but a person or an external service has to confirm it.
 
 | Definition of Done item | Status | Evidence / what is missing |
@@ -12,7 +12,7 @@ Legend: verified = tested and confirmed with evidence; built = implemented and t
 | Server persistence | verified | Production smoke test: 42 matches, revision 50 read back from Supabase, reload restores it |
 | History/retention | built | 24 h guest retention and finished-row cleanup verified live; 30-day inactivity/7-day recovery covered by 48 database tests, cron jobs active (`padelstar-retention-cleanup` hourly). Open: "expired — resume" banner, account-deletion lifecycle re-check |
 | Notifications/TV/PWA/i18n/help/privacy | partly | In-app notifications, sounds, vibration, TV, install (macOS/iOS confirmed), nb/en, guide and privacy done. Open: push categories (Phase 18), real-phone notification test, device-default language retest |
-| Minimum Systemeier | built | Migration and admin page tested; needs sign-in as `sigurd.grodem@live.no` (USER_ACTIONS §2) |
+| Minimum Systemeier | built | Migrations and admin page (tabs: overview, tournaments, users, maintenance) tested, applied and checked live; needs sign-in as `sigurd.grodem@live.no` (USER_ACTIONS §2). Block/delete users and logs not built |
 | Theme system (Phase 27) | built | Generated light layer, WCAG contrast audit, layout audit, tests. Needs eyes on real devices (USER_ACTIONS §2); contrast/token-architecture boxes stay open |
 | Claude Design UI completion (Phase 28) | built | Podium, wizard, invite-code cells, accent picker, Kamper/Styring pass shipped; see ROADMAP |
 | No known critical data-integrity / auth defect | none known | Supabase advisors: only intended findings (RLS without policy, token-checked SECURITY DEFINER RPCs; leaked-password protection needs the Pro plan) |
