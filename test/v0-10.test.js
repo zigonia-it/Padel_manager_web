@@ -33,3 +33,22 @@ test("TV Mode is in the phone's bottom tab bar and its page fits a phone", () =>
   assert.match(phone, /\.tv-match-card \{ overflow: visible; \}/, "names are not clipped");
   assert.match(phone, /\.tv-header-end \{ flex-direction: column/, "the switch and the clock stack so the header fits 375px");
 });
+
+test("corrections after the tournament is finished: card, dialog and profile list, and the database side", () => {
+  const card = read("app", "match-card.js");
+  assert.match(card, /const correctionOnly = Boolean\(editable && !scoreOnly && closedTournament && match\.state === "finished" && getState\(\)\.lifecycleStatus !== "cancelled"\)/);
+  assert.match(card, /if \(closedTournament\) editable = false;/, "no scoring, reopening or walkover once finished");
+  assert.match(card, /else if \(correctionOnly\)/);
+  const app = read("app", "app.js");
+  assert.match(app, /if \(state\.status === "Avsluttet"\) return match\.state === "finished" && state\.lifecycleStatus !== "cancelled" && isCurrentUserAdmin\(\);/);
+  assert.match(read("app", "result-correction-dialog.js"), /state\.status === "Avsluttet" && state\.lifecycleStatus === "cancelled"/);
+  const html = read("index.html");
+  assert.match(html, /id="finishedTournamentsList"/);
+  assert.match(read("app", "profile-ui.js"), /profile\.openToCorrect/);
+  assert.match(read("app", "profile-session.js"), /"list_my_finished_tournaments"/);
+  const migration = read("supabase", "migrations", "20260920180000_corrections_after_finish.sql");
+  assert.match(migration, /_recompute_account_statistics\(p_tournament_id\)/);
+  assert.match(migration, /app\.finished_correction/);
+  assert.match(migration, /revoke execute on function public\._recompute_account_statistics\(uuid\) from public, anon, authenticated/);
+  assert.ok(fs.existsSync(path.join(root, "supabase", "tests", "corrections-after-finish.pglite.mjs")));
+});

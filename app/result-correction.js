@@ -55,7 +55,8 @@
     const found = locate(state, matchId);
     if (!found) return { ok: false, error: "notFound" };
     const { match, roundIndex } = found;
-    if (state.status === "Avsluttet") return { ok: false, error: "closed" };
+    // A finished tournament can still be corrected (the statistics follow); a cancelled one stays closed.
+    if (state.status === "Avsluttet" && state.lifecycleStatus === "cancelled") return { ok: false, error: "closed" };
     if (match.state !== "finished") return { ok: false, error: "notFinished" };
     const rules = rulesFor(match, state.settings);
     const checked = validateSets(sets, rules, scoring);

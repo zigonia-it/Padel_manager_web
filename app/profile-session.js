@@ -29,6 +29,7 @@
     } = dependencies;
 
     let activeTournaments = [];
+    let finishedTournaments = [];
 
     function storage() {
       return getLocalStorage();
@@ -36,6 +37,22 @@
 
     function getActiveTournaments() {
       return activeTournaments;
+    }
+
+    function getFinishedTournaments() {
+      return finishedTournaments;
+    }
+
+    async function loadFinishedTournaments() {
+      const account = getAccountUser();
+      const client = getSupabaseClient();
+      if (!account?.id || !client) { finishedTournaments = []; return false; }
+      const { data, error } = await remoteRpc(client, "list_my_finished_tournaments", {});
+      if (error) { getObservability()?.error("finished_tournaments_read_failed", error); return false; }
+      if (getAccountUser()?.id !== account.id) return false;
+      finishedTournaments = Array.isArray(data) ? data : [];
+      renderProfile();
+      return true;
     }
 
     async function loadActiveTournaments() {
@@ -248,6 +265,8 @@
       getActiveTournaments,
       linkProfileToPlayer,
       loadActiveTournaments,
+      loadFinishedTournaments,
+      getFinishedTournaments,
       loadLocalProfile,
       persistLocalProfile,
       profileAvatarIdFromForm,

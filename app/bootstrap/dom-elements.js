@@ -172,6 +172,7 @@
       profileHistoryFilter: document.querySelector("#profileHistoryFilter"),
       profileHistoryList: document.querySelector("#profileHistoryList"),
       activeTournamentsList: document.querySelector("#activeTournamentsList"),
+      finishedTournamentsList: document.querySelector("#finishedTournamentsList"),
       accountSettingsPanel: document.querySelector("#accountSettingsPanel"),
       profileAccountEmail: document.querySelector("#profileAccountEmail"),
       profileAccountCreated: document.querySelector("#profileAccountCreated"),

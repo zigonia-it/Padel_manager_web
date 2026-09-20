@@ -26,13 +26,13 @@ Status: `[ ]` open, `[x]` done.
 
 ## 3. Decisions I need (I made a safe default; tell me if you want it different)
 
-- [ ] **Withdrawal in a Cup** is blocked (a Cup bracket refers to team ids). Use "Bytt" instead. Do you want withdrawal in Cups too? (needs a design for the bracket)
-- [ ] **Players on both teams withdrawn from the same match** → the match is **cancelled**. Alternative: the two teammates each decide (walkover / play 1 against 1).
-- [ ] **Corrections after the tournament is finished** are closed. Do you want them (needs statistics to be recalculated)?
-- [ ] **Invitations by email**: shown in the app only, no email is sent. Do you want an email through Resend as well (needs the feedback setup above and a sender domain)?
-- [ ] **Privacy text** names Supabase, Vercel, Vercel Analytics and Resend once in parentheses (a privacy notice normally has to name who handles the data). Remove them anyway?
-- [ ] **TV Mode button** is at the bottom of the desktop side rail and in the phone menu. Also add it to the phone bottom tab bar?
-- [ ] **Lobby vs. workspace**: I added "add players" and "name courts" to the lobby and kept Styring/Kamper/Tabell as they are. Do you want the workspace merged into one lobby screen (bigger redesign)?
+- [ ] **Withdrawal in a Cup** (decided 2026-09-20: same conditions as Round Robin; all players of a team withdrawn = walkover; both sides withdrawn = the best-placed losing team takes the place, admin confirms): planned for 0.11, not built yet.
+- [ ] **Players on both teams withdrawn** (in a Cup: see above; in Round Robin the match is cancelled): planned.
+- [x] **Corrections after the tournament is finished**: decided 2026-09-20 (added to the statistics); built in 0.10.0.
+- [x] **Invitations by email**: decided 2026-09-20; built in 0.10.0 (sender `invitations@padelstar.app`, verified domain). Needs a real check: invite an address in the lobby and look for the email.
+- [x] **Privacy text**: decided 2026-09-20 (a bottom section naming the services); built in 0.10.0.
+- [x] **TV Mode button** on the phone tab bar and TV on phones: decided 2026-09-20; built in 0.10.0.
+- [ ] **Lobby vs. workspace** (decided 2026-09-20: merge into one screen): planned for 0.11, not built yet.
 - [x] **System administration**: decided 2026-09-20: a log view and block/delete users (built, see CHANGELOG); everything else (force-finish, opening other people's tournaments, ...) is treated as privacy and is not built.
 - [ ] **Push categories** (Phase 18: invites, results, "only my own matches") need a server-side change to the push function and real-device testing; not built. Confirm you want it in 0.8 or later.
 

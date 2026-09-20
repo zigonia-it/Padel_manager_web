@@ -23,6 +23,8 @@ insert into public.tournaments(id, state, revision, admin_token, owner_user_id) 
  ('${T_GUEST}', '{"name":"Guest","status":"Runde pågår"}', 2, 'guest-token', null);
 `);
 await pg.exec(fs.readFileSync(dir + '20260920150000_open_owned_tournament.sql', 'utf8'));
+await pg.exec(`alter table public.tournaments add column ended_at timestamptz, add column invite_code text, add column updated_at timestamptz default now(); insert into public.tournaments(id, state, revision, admin_token, owner_user_id, ended_at) values ('10000000-0000-4000-8000-000000000003', '{"name":"Done","status":"Avsluttet","players":[1,2]}', 3, 't', '${A}', now()), ('10000000-0000-4000-8000-000000000004', '{"name":"Cancelled","status":"Avsluttet","lifecycleStatus":"cancelled"}', 3, 't', '${A}', now()), ('10000000-0000-4000-8000-000000000005', '{"name":"Theirs","status":"Avsluttet"}', 3, 't', '${B}', now());`);
+await pg.exec(fs.readFileSync(dir + '20260920190000_list_my_finished_tournaments.sql', 'utf8'));
 
 let pass = 0, fail = 0;
 const ok = (name, cond, extra = '') => { if (cond) { pass++; console.log('  ok  ', name); } else { fail++; console.log('  FAIL', name, extra); } };
@@ -46,6 +48,18 @@ r = await call(null, T_A);
 ok('anon cannot call it', r.error?.includes('permission denied'), JSON.stringify(r));
 r = await call(A, null);
 ok('null id is refused', r.error === 'Tournament not found', JSON.stringify(r));
+
+const listFinished = async (uid) => {
+  await pg.exec(`set role ${uid ? 'authenticated' : 'anon'}; select set_config('request.jwt.claim.sub', '${uid ?? ''}', false);`);
+  try { return { rows: (await pg.query('select public.list_my_finished_tournaments() as r')).rows[0].r }; } catch (e) { return { error: e.message }; }
+  finally { await pg.exec(`reset role; select set_config('request.jwt.claim.sub', '', false);`); }
+};
+let f = await listFinished(A);
+ok('list_my_finished_tournaments: only my finished, not cancelled ones', f.rows?.length === 1 && f.rows[0].name === 'Done' && f.rows[0].playerCount === 2, JSON.stringify(f));
+f = await listFinished(B);
+ok("another account sees only its own", f.rows?.length === 1 && f.rows[0].name === 'Theirs');
+f = await listFinished(null);
+ok('anon cannot call it', f.error?.includes('permission denied'), JSON.stringify(f));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

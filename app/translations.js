@@ -1290,6 +1290,18 @@ for (const [language, values] of Object.entries({
 })) {
   Object.assign(padelstarTranslations[language], values);
 }
+for (const [language, values] of Object.entries({
+  nb: { "profile.finishedTournaments": "Avsluttede turneringer", "profile.finishedTournamentsHint": "Åpne en avsluttet turnering for å korrigere et resultat. Statistikken oppdateres.", "profile.noFinishedTournaments": "Ingen avsluttede turneringer ennå.", "profile.openToCorrect": "Åpne og korriger" },
+  nn: { "profile.finishedTournaments": "Avslutta turneringar", "profile.finishedTournamentsHint": "Opne ei avslutta turnering for å korrigere eit resultat. Statistikken blir oppdatert.", "profile.noFinishedTournaments": "Ingen avslutta turneringar enno.", "profile.openToCorrect": "Opne og korriger" },
+  en: { "profile.finishedTournaments": "Finished tournaments", "profile.finishedTournamentsHint": "Open a finished tournament to correct a result. The statistics are updated.", "profile.noFinishedTournaments": "No finished tournaments yet.", "profile.openToCorrect": "Open and correct" },
+  es: { "profile.finishedTournaments": "Torneos terminados", "profile.finishedTournamentsHint": "Abre un torneo terminado para corregir un resultado. Las estadísticas se actualizan.", "profile.noFinishedTournaments": "Aún no hay torneos terminados.", "profile.openToCorrect": "Abrir y corregir" },
+  de: { "profile.finishedTournaments": "Beendete Turniere", "profile.finishedTournamentsHint": "Öffne ein beendetes Turnier, um ein Ergebnis zu korrigieren. Die Statistik wird aktualisiert.", "profile.noFinishedTournaments": "Noch keine beendeten Turniere.", "profile.openToCorrect": "Öffnen und korrigieren" },
+  fr: { "profile.finishedTournaments": "Tournois terminés", "profile.finishedTournamentsHint": "Ouvrez un tournoi terminé pour corriger un résultat. Les statistiques sont mises à jour.", "profile.noFinishedTournaments": "Aucun tournoi terminé pour le moment.", "profile.openToCorrect": "Ouvrir et corriger" },
+  sv: { "profile.finishedTournaments": "Avslutade turneringar", "profile.finishedTournamentsHint": "Öppna en avslutad turnering för att rätta ett resultat. Statistiken uppdateras.", "profile.noFinishedTournaments": "Inga avslutade turneringar ännu.", "profile.openToCorrect": "Öppna och rätta" },
+  da: { "profile.finishedTournaments": "Afsluttede turneringer", "profile.finishedTournamentsHint": "Åbn en afsluttet turnering for at rette et resultat. Statistikken opdateres.", "profile.noFinishedTournaments": "Ingen afsluttede turneringer endnu.", "profile.openToCorrect": "Åbn og ret" },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 Object.assign(padelstarTranslations.nb, { "footer.linksAria": "Bruksanvisning og personvern" });
 // English strings for surfaces that previously fell back to Norwegian.
 Object.assign(padelstarTranslations.en, {

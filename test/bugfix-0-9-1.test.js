@@ -31,7 +31,7 @@ test("a signed-in owner can open an active tournament from the profile list on a
   assert.match(ui, /data-owned-tournament-id="\$\{escapeHtml\(tournament\.id\)\}"/);
   assert.match(ui, /resume\.continueAdmin/);
   const events = read("app", "workspace-events.js");
-  assert.match(events, /elements\.activeTournamentsList\?\.addEventListener\("click"/);
+  assert.match(events, /for \(const list of \[elements\.activeTournamentsList, elements\.finishedTournamentsList\]\)/);
   assert.match(events, /callbacks\.openOwnedTournament/);
   const app = read("app", "app.js");
   assert.match(app, /async function openOwnedTournament\(tournamentId\)/);

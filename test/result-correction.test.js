@@ -79,7 +79,8 @@ test("invalid, unchanged, unfinished and closed corrections are rejected", () =>
   assert.equal(correction.simulate(state, "a", sets([6, 3]), scoring).error, "same");
   assert.equal(correction.simulate(state, "p", sets([6, 3]), scoring).error, "notFinished");
   assert.equal(correction.simulate(state, "zzz", sets([6, 3]), scoring).error, "notFound");
-  assert.equal(correction.simulate({ ...state, status: "Avsluttet" }, "a", sets([3, 6]), scoring).error, "closed");
+  assert.equal(correction.simulate({ ...state, status: "Avsluttet", lifecycleStatus: "cancelled" }, "a", sets([3, 6]), scoring).error, "closed", "a cancelled tournament stays closed");
+  assert.notEqual(correction.simulate({ ...state, status: "Avsluttet", lifecycleStatus: "completed" }, "a", sets([3, 6]), scoring).error, "closed", "a finished one can still be corrected (0.10)");
   assert.equal(correction.simulate(state, "a", [], scoring).error, "invalid");
   assert.equal(correction.simulate(state, "a", sets([6, 3], [6, 3]), scoring).error, "invalid", "too many sets for a one-set match");
 });

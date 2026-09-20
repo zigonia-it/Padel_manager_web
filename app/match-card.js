@@ -132,7 +132,7 @@
     function correctionHistoryMarkup(match, canRestore) {
       const history = match.correctionHistory ?? [];
       if (!history.length) return "";
-      const running = getState().status !== "Avsluttet";
+      const running = getState().status !== "Avsluttet" || getState().lifecycleStatus !== "cancelled";
       const items = history.map((entry, index) => {
         const time = new Date(entry.at);
         const when = Number.isNaN(time.getTime()) ? "" : time.toLocaleString(undefined, { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
@@ -352,6 +352,10 @@
     }
 
     function createMatchCard(match, editable, highlightedPlayerId = null, scoreOnly = false) {
+      // After the tournament is finished the admin can only correct a finished result: no scoring, no reopening, no walkover.
+      const closedTournament = getState().status === "Avsluttet";
+      const correctionOnly = Boolean(editable && !scoreOnly && closedTournament && match.state === "finished" && getState().lifecycleStatus !== "cancelled");
+      if (closedTournament) editable = false;
       const card = global.document.createElement("article");
       const expanded = isExpanded(match);
       card.className = `match-card match-${match.state} ${expanded ? "match-card-expanded" : "match-card-collapsed"} ${highlightedPlayerId && matchIncludesPlayer(match, highlightedPlayerId) ? "highlight-match" : ""}`;
@@ -397,7 +401,7 @@
       ${scorerPanelMarkup(match, editable, scoreOnly)}
       ${approvalPanelMarkup(match, editable, scoreOnly)}
       ${withdrawalPanelMarkup(match, editable, scoreOnly)}
-      ${correctionHistoryMarkup(match, editable && !scoreOnly)}
+      ${correctionHistoryMarkup(match, (editable || correctionOnly) && !scoreOnly)}
       ${matchNote ? `<div class="match-note">${matchNote}</div>` : ""}
     </div>
   `;
@@ -461,6 +465,12 @@
             button.addEventListener("click", () => void setWalkover(match, Number(button.dataset.walkoverTeam)));
           });
         }
+        body.append(controls);
+      } else if (correctionOnly) {
+        const controls = global.document.createElement("div");
+        controls.className = "match-controls";
+        controls.innerHTML = `<div class="correction-row"><button class="secondary correct-result-button" type="button">${translate("correction.button")}</button></div>`;
+        controls.querySelector(".correct-result-button").addEventListener("click", () => openCorrection(match));
         body.append(controls);
       }
       return card;
