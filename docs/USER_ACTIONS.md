@@ -50,6 +50,8 @@ Status: `[ ]` open, `[x]` done.
 - [x] **System administration**: decided 2026-09-20: a log view and block/delete users (built, see CHANGELOG); everything else (force-finish, opening other people's tournaments, ...) is treated as privacy and is not built.
 - [x] **Push categories** — confirmed 2026-09-20; built in 0.15.0 for match/round, results, withdrawal decisions and "only my own matches". Invitation push is not built yet (needs an account-level push subscription); tell me to go ahead and I build it as the next step.
 
+- [ ] **Two ways to report a result: keep both?** Players can (a) score point by point with the result sent for approval by the other team (the main flow), and (b) still send a result proposal through the older "Resultatforslag" panel in the player view. Both end with the admin deciding when they disagree. For 1.0 I would keep both (removing (b) is a visible change and (a) covers the normal case), but a single flow is simpler for players. Tell me if you want (b) removed.
+
 ## 4. Later, when the time comes
 
 - [x] Light mode (Phase 27) was built from the local copy of the design files in `assets/padelstar-webapp-ui-design/` (colors only, as the roadmap says); the Claude Design connector was not needed. The real-device check is in section 2.
