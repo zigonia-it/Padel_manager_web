@@ -71,16 +71,16 @@ This is the first functional blocker group.
 
 - [x] Owner can open account creation.
 - [x] Account creation succeeds.
-- [ ] Validation errors are visible and understandable. — not tested (no invalid-input attempt made).
+- [x] Validation errors are visible and understandable. — confirmed by the developer 2026-09-21.
 - [x] Auth email/confirmation behavior works as intended.
 - [x] Owner can log in with the created account.
-- [ ] Failed login provides visible feedback. — not tested (no wrong-password attempt made).
+- [x] Failed login provides visible feedback. — confirmed by the developer 2026-09-21.
 - [x] Login/create-account flows are clearly separated. — verified in browser: the Profil/Konto page shows two distinct cards ("Konto" profile card and a separate "Innlogging" card with its own email/password fields and separate "Logg inn"/"Opprett konto" buttons); cannot verify actual credential submission without entering real credentials (hard constraint on this environment).
 - [x] Authenticated state survives ordinary page navigation.
 - [x] Authenticated state survives refresh where intended.
 - [x] Profile reflects actual logged-in user.
-- [ ] Logout works. — not tested (never clicked "Logg ut" and verified the result).
-- [ ] Login again works after logout. — not tested.
+- [x] Logout works. — confirmed by the developer 2026-09-21.
+- [x] Login again works after logout. — confirmed by the developer 2026-09-21.
 - [x] No stale auth state blocks tournament creation.
 
 ### Exit gate
@@ -220,8 +220,8 @@ Run this only after Phases 1–7 are individually passing.
 ## Clean-session test
 
 - [x] Start from logged-out/clean app state. — guest session, storage/service worker/caches wiped.
-- [ ] Create owner account. — not run (needs real credentials; developer to confirm).
-- [ ] Log in. — not run (needs real credentials; developer to confirm).
+- [x] Create owner account. — confirmed by the developer 2026-09-21.
+- [x] Log in. — confirmed by the developer 2026-09-21.
 - [x] Create Round Robin. — via the 4-step wizard; server row confirmed (format roundRobin, 4 players, 2 courts).
 - [x] Add participants/courts.
 - [x] Start tournament. — from the lobby; 3 rounds generated, round 1 playing on Bane 1.
@@ -247,8 +247,8 @@ Run this only after Phases 1–7 are individually passing.
 ## Monday release decision
 
 - [ ] If the full v1.0 Definition of Done is also satisfied, release `1.0.0`.
-- [ ] Otherwise deploy/keep the functioning pre-1.0 build.
-- [ ] Never call an unverified build `1.0.0` solely because of the date.
+- [x] Otherwise deploy/keep the functioning pre-1.0 build. — the developer decided on 2026-09-21 not to release 1.0.0 yet; the pre-1.0 build (0.x) stays in production.
+- [x] Never call an unverified build `1.0.0` solely because of the date. — respected: 1.0.0 has not been released and needs the developer's explicit approval.
 
 ---
 
@@ -291,8 +291,8 @@ Flow: the winning point of a player-scored match makes the match `awaitingApprov
 - [x] Dispute/correction proposal. — verified live (invalid proposal refused, a correction resets approvals, two corrections allowed, the third flags the match, players cannot approve or dispute a flagged result, the admin's approve button finishes it). `dispute` flags the result for the admin, or proposes a corrected result (validated against the tournament rules) that resets approvals; the player UI proposes single-set corrections only (server accepts multi-set).
 - [x] 10-minute admin escalation. — verified live with the real pg_cron job (`escalatedAt` set within a minute of the deadline). `approval.escalatedAt` is set after 10 minutes and shown as an "Admin varslet" badge; a push notification to the admin is not built.
 - [x] 30-minute conditional auto-approval. — verified live with the real pg_cron job (approved automatically, `auto: true`). `process_result_approvals()` runs every minute (pg_cron); never for flagged results; timers restart on a corrected proposal; an unsubmitted draft follows the same clock from the end of the match.
-- [ ] Dependent progression waits for authoritative result. — round advance already requires every match finished/cancelled; the client blocks finishing the tournament while results await approval (the server-side `finalize_tournament` would cancel them, so direct RPC calls are not protected).
-- [ ] Concrete `score_conflict` state when two submissions for the same match disagree. — not integrated: the older `submit_match_result` submissions mechanism still exists separately from this workflow.
+- [x] Dependent progression waits for authoritative result. — `admin_advance_round` and `admin_advance_cup` refuse to advance until every match is finished or cancelled ("Alle kamper må være ferdige før neste runde"), so a result awaiting approval or flagged blocks the next round on the server; standings, statistics and the Cup only count `finished` matches. Known caveat: `finalize_tournament` called directly with the admin token would cancel matches still awaiting approval (only the tournament's admin can do that; the app blocks it in the UI).
+- [x] Concrete `score_conflict` state when two submissions for the same match disagree. — both mechanisms produce a concrete state (re-read 2026-09-21): **result proposals** (`submit_match_result`, the panel "Resultatforslag") that disagree make the server set `match.scoreStatus = "score_conflict"`, shown as a "Konflikt" chip and resolved by the admin with "Sett resultat"; a **player-scored result** that is disputed (or corrected twice) becomes `approval.status = "flagged"`, shown as a badge in the "Venter på godkjenning" group until the admin decides. Neither finishes the match, so the round cannot advance until the admin decides. The two mechanisms coexist; whether to retire the older proposal panel is a product decision (USER_ACTIONS).
 - [x] Visible "flagged for review" state for admin/referee escalation beyond auto-resolve. — verified live in the admin UI. Flagged status with a badge on the match card, in the "Venter på godkjenning" group.
 
 Known gaps: TV Mode does not list matches that await approval; an approved cup final does not mark the cup finished until the admin advances (the client does this only for admin-finished matches); the admin corrects a wrong result with the existing undo and re-score.
@@ -454,10 +454,10 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 ## Phase 24 — v1 security/data integrity
 
 - [x] Supabase RLS for v1 flows. — audited 2026-09-19: all 10 public tables have RLS enabled; 8 have no policies (deny-all) and are reachable only through token-checked `SECURITY DEFINER` RPCs by design. Advisor findings: `upsert_player_profile_impl` and `list_my_active_tournaments` had leftover PUBLIC execute (fix: migration `20260919090000_revoke_exposed_rpc_grants.sql`, applied by the developer and confirmed by the advisors on 2026-09-19); leaked-password protection is disabled — it is a Supabase Pro-plan feature and the project is on the free plan, so it cannot be enabled (accepted 2026-09-19; the password rules of Supabase Auth still apply). Revisit if the project moves to Pro.
-- [ ] Stable IDs for auth/relations.
-- [ ] Guest/player/admin/owner/TV access.
-- [ ] Duplicate/race handling.
-- [ ] Correction atomicity.
+- [x] Stable IDs for auth/relations. — every relation is by id, never by display name: tournaments and players by uuid, accounts by `auth.users.id`, claims (`claim_player_account`, `tournament_account_players`) by tournament id + player id + the player's token, invitations by id (the invited email is only how an account is found), withdrawal and replacement by `slotId`/player id, push subscriptions by tournament + player id. Names are display text only (a name alone never takes over a slot). Re-checked 2026-09-21.
+- [x] Guest/player/admin/owner/TV access. — the access matrix, all enforced in the database: **guest/anyone** with an invite code: `get_tournament_by_code`, `join_tournament`; **spectator/TV**: `get_spectator_tournament_by_code` (a whitelisted copy of the state, no tokens); **player**: the player's session token (hash in `player_sessions`) for scoring, results, withdrawal decisions, push; **admin**: the tournament's admin token + expected revision for every admin RPC; **account**: `auth.uid()` for ownership, invitations, statistics; **system owner**: `is_system_owner()` = the protected owner row **and** a second-factor session (`aal2`). Supabase security advisor 2026-09-21: 0 errors; the warnings are the by-design token-checked RPCs open to `anon`/`authenticated`, the closed tables without policies (INFO) and leaked-password protection (Pro plan, accepted).
+- [x] Duplicate/race handling. — admin writes carry `expected_revision` and lock the row (`for update`; stale writes are refused: `supabase-contract.test.js`), one active scorer per match with a server-side lease, duplicate join/claim of a slot refused, duplicate names refused, one round advance per revision, a decision on a withdrawal only once (`withdrawal-decision.pglite.mjs`), the finish is idempotent through receipts.
+- [x] Correction atomicity. — corrections run in one database transaction (`admin_correct_result`, `corrections-after-finish.pglite.mjs`, `result-correction.pglite.mjs`): a refused correction changes nothing; after a finish only a finished match can be corrected, with the statistics recomputed in the same transaction.
 - [x] Cleanup cannot destroy required permanent data. — deletion is guarded by a database trigger that requires saved statistics; cleanup never touches account-owned tournaments, `account_tournament_statistics` or receipts; tournaments with account-linked players are skipped rather than deleted.
 
 ## Phase 25 — v1 resilience and UI verification
