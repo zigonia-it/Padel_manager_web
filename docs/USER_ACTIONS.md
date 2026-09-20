@@ -5,11 +5,8 @@ Status: `[ ]` open, `[x]` done.
 
 ## 1. Fix first (something does not work for users today)
 
-- [ ] **Feedback form cannot send from padelstar.app.**
-  Production answers `503 {"missing":["RESEND_API_KEY","FEEDBACK_TO_EMAIL"]}`: the running deployment sees neither variable (I have no access to the Vercel team `zigonia-it`).
-  1. Vercel → project `padel-manager-web` → Settings → Environment Variables. Add **`RESEND_API_KEY`** (key from resend.com → API Keys) and **`FEEDBACK_TO_EMAIL`** (the address you signed up to Resend with). Tick **Production**. Optional: `FEEDBACK_FROM`.
-  2. **Redeploy** (Deployments → the latest → ⋯ → Redeploy). Variables are not applied to existing deployments.
-  3. Check: `curl -s -X POST https://padelstar.app/api/feedback -H "Content-Type: application/json" -d '{"category":"bug","message":"config check"}' -w "\n%{http_code}\n"` → expect `200`, and the email arrives (this sends a real email to you). Details: `docs/technical/feedback-setup.md`.
+- [x] **Feedback form** works (2026-09-20): `FEEDBACK_TO_EMAIL` contained an API key, not an address; corrected, redeployed, test message received.
+- [ ] **Clean up in Vercel and Resend.** (a) Vercel → padel-manager-web → Settings → Environment Variables: delete the third variable, whose *name* is a Resend API key (`re_Hvi…`). A key in a variable name is visible in plain text. (b) Resend → API Keys: revoke the key named "Feedback" (`re_Hvi…`) and the one named "FEEDBACK_TO_EMAIL" (`re_FQd…`), which is not used. Keep "RESEND_API_KEY" (the one the site uses). (c) Vercel shows "Deployment Storage 37.92 GB / 10 GB, exceeded free resources": old deployments count against it; delete old deployments (Deployments → ⋯ → Delete) or accept that Vercel may pause new deployments until it is under 10 GB.
 
 ## 2. Verify as a person (I cannot sign in or use real devices)
 
