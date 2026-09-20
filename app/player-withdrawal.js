@@ -12,6 +12,12 @@
   // scheduler, court queue or round advance starts it. It carries match.withdrawal = { playerId, teamIndex,
   // teammateId, absent, absentIndex, status: pending | playAlone | walkover, decidedBy, ... } so the absent
   // player can be put back or replaced later.
+  //
+  // A Cup (0.13) follows the same rules for the matches of the current round. A round is only created when the previous
+  // one is finished, so a team that advances with a withdrawn player meets it when the round is created:
+  // handleNewRound() applies the rules to the matches of that round (the server does the same in admin_advance_cup).
+  // If both sides of a match are affected the match is cancelled and the best-placed losing team of the round takes
+  // the place in the next one, when the admin confirms (tournament-rounds.js luckyLoserProposal).
 
   const BLOCKED_STATE = "awaitingWithdrawalDecision";
   const FUTURE_STATES = ["waiting", "scheduled", "ready"];
@@ -48,8 +54,6 @@
     const player = (state.players ?? []).find((item) => item.id === playerId);
     if (!player) return { ok: false, blocked: "notFound" };
     if (state.status === "Avsluttet") return { ok: false, blocked: "ended" };
-    // A Cup bracket refers to team ids and a team that plays alone gets a new one: not supported until decided (see ROADMAP).
-    if (state.settings?.format === "cup") return { ok: false, blocked: "cup" };
     if (player.withdrawn || player.active === false) return { ok: false, blocked: "inactive" };
     const matches = allMatches(state).filter((match) => teamIndexOf(match, playerId) !== null);
     if (matches.some((match) => match.state === "awaitingApproval")) return { ok: false, blocked: "awaitingApproval" };
@@ -99,6 +103,95 @@
     return true;
   }
 
+  function absentSummary(player) {
+    return { id: player.id, name: player.name, accent: player.accent ?? null };
+  }
+
+  function withdrawalRecord(match, teamIndex, player, nowIso) {
+    const team = teamOf(match, teamIndex);
+    const teammate = team.players.find((item) => item.id !== player.id);
+    return {
+      playerId: player.id,
+      teamIndex,
+      teammateId: teammate?.id ?? null,
+      absent: absentSummary(player),
+      absentIndex: team.players.findIndex((item) => item.id === player.id),
+      status: "pending",
+      at: nowIso,
+    };
+  }
+
+  // Puts one match of a withdrawn player in the right state (`result` collects what happened).
+  function applyAbsence(state, match, teamIndex, player, { nowIso, restartMatch, result }) {
+    const wasPlaying = match.state === "playing";
+    const team = teamOf(match, teamIndex);
+    const teammate = team.players.find((item) => item.id !== player.id);
+    const record = withdrawalRecord(match, teamIndex, player, nowIso);
+    if (wasPlaying) {
+      // the running match is annulled (same rule as a replacement); its court goes to the next waiting match
+      if (match.courtId || match.courtName) result.freed.push({ courtId: match.courtId ?? null, courtName: match.courtName ?? null });
+      restartMatch?.(match, nowIso);
+      match.courtId = null;
+      match.courtName = null;
+      result.restarted.push(match.id);
+    }
+    const otherSideAbsent = match.withdrawal && match.withdrawal.teamIndex !== teamIndex && match.withdrawal.status !== "walkover";
+    if (otherSideAbsent) {
+      match.withdrawal = { ...match.withdrawal, bothSides: true, secondAbsent: record.absent };
+      match.state = "cancelled";
+      match.status = "cancelled";
+      result.cancel.push(match.id);
+    } else if (!teammate || !isPresent(state, teammate.id)) {
+      match.withdrawal = { ...record, status: "walkover", decidedBy: "auto", decidedAt: nowIso };
+      finishWalkover(match, 1 - teamIndex, nowIso);
+      result.walkover.push(match.id);
+    } else {
+      match.withdrawal = record;
+      match.state = BLOCKED_STATE;
+      match.status = "blocked";
+      result.decide.push(match.id);
+    }
+  }
+
+  // A player who withdrew and was not replaced (a replaced one has been swapped out of the matches).
+  function isAbsent(state, playerId) {
+    const player = (state.players ?? []).find((item) => item.id === playerId);
+    return Boolean(player) && player.withdrawn === true && !player.replacedBy;
+  }
+
+  // Cup: a round that has just been created. Matches that have a withdrawn player are handled like the ones the player
+  // had when they withdrew, except that nothing is being played yet: a side with nobody left loses by walkover at once,
+  // both sides affected = the match is cancelled, otherwise the remaining teammate decides. The server applies the same
+  // rules when it creates the round (admin_advance_cup). Returns what happened, like withdraw().
+  function handleNewRound(state, round, { nowIso = new Date().toISOString() } = {}) {
+    const result = { ok: true, decide: [], walkover: [], cancel: [] };
+    (round.matches ?? []).forEach((match) => {
+      if (match.state !== "waiting") return;
+      const absent = [0, 1].map((teamIndex) => teamOf(match, teamIndex).players.filter((player) => isAbsent(state, player.id)));
+      if (!absent[0].length && !absent[1].length) return;
+      const gone = [0, 1].map((teamIndex) => absent[teamIndex].length > 0 && absent[teamIndex].length >= teamOf(match, teamIndex).players.length);
+      const first = (teamIndex) => state.players.find((item) => item.id === absent[teamIndex][0].id);
+      if ((gone[0] && gone[1]) || (absent[0].length && absent[1].length && !gone[0] && !gone[1])) {
+        match.withdrawal = { ...withdrawalRecord(match, 0, first(0), nowIso), bothSides: true, secondAbsent: absentSummary(first(1)) };
+        match.state = "cancelled";
+        match.status = "cancelled";
+        result.cancel.push(match.id);
+      } else if (gone[0] || gone[1]) {
+        const teamIndex = gone[0] ? 0 : 1;
+        match.withdrawal = { ...withdrawalRecord(match, teamIndex, first(teamIndex), nowIso), status: "walkover", decidedBy: "auto", decidedAt: nowIso };
+        finishWalkover(match, 1 - teamIndex, nowIso);
+        result.walkover.push(match.id);
+      } else {
+        const teamIndex = absent[0].length ? 0 : 1;
+        match.withdrawal = withdrawalRecord(match, teamIndex, first(teamIndex), nowIso);
+        match.state = BLOCKED_STATE;
+        match.status = "blocked";
+        result.decide.push(match.id);
+      }
+    });
+    return result;
+  }
+
   // Marks the player as withdrawn and puts every unplayed / running match of theirs in the right state.
   // Returns { ok, decide, walkover, cancel, restarted, freed } where `freed` are courts released by restarted matches.
   function withdraw(state, playerId, { createTeam, nowIso = new Date().toISOString(), restartMatch } = {}) {
@@ -115,43 +208,8 @@
       const teamIndex = teamIndexOf(match, playerId);
       if (teamIndex === null || ["finished", "cancelled"].includes(match.state)) return;
       const wasPlaying = match.state === "playing";
-      const isBlocked = match.state === BLOCKED_STATE;
-      if (!wasPlaying && !isFuture(match) && !isBlocked) return;
-      const team = teamOf(match, teamIndex);
-      const teammate = team.players.find((item) => item.id !== playerId);
-      const record = {
-        playerId,
-        teamIndex,
-        teammateId: teammate?.id ?? null,
-        absent: { id: player.id, name: player.name, accent: player.accent ?? null },
-        absentIndex: team.players.findIndex((item) => item.id === playerId),
-        status: "pending",
-        at: nowIso,
-      };
-      if (wasPlaying) {
-        // the running match is annulled (same rule as a replacement); its court goes to the next waiting match
-        if (match.courtId || match.courtName) result.freed.push({ courtId: match.courtId ?? null, courtName: match.courtName ?? null });
-        restartMatch?.(match, nowIso);
-        match.courtId = null;
-        match.courtName = null;
-        result.restarted.push(match.id);
-      }
-      const otherSideAbsent = match.withdrawal && match.withdrawal.teamIndex !== teamIndex && match.withdrawal.status !== "walkover";
-      if (otherSideAbsent) {
-        match.withdrawal = { ...match.withdrawal, bothSides: true, secondAbsent: record.absent };
-        match.state = "cancelled";
-        match.status = "cancelled";
-        result.cancel.push(match.id);
-      } else if (!teammate || !isPresent(state, teammate.id)) {
-        match.withdrawal = { ...record, status: "walkover", decidedBy: "auto", decidedAt: nowIso };
-        finishWalkover(match, 1 - teamIndex, nowIso);
-        result.walkover.push(match.id);
-      } else {
-        match.withdrawal = record;
-        match.state = BLOCKED_STATE;
-        match.status = "blocked";
-        result.decide.push(match.id);
-      }
+      if (!wasPlaying && !isFuture(match) && match.state !== BLOCKED_STATE) return;
+      applyAbsence(state, match, teamIndex, player, { nowIso, restartMatch, result });
     });
     return result;
   }
@@ -215,5 +273,5 @@
     return { ok: true, restored };
   }
 
-  global.PadelstarPlayerWithdrawal = { BLOCKED_STATE, plan, withdraw, decide, restoreForSlot, reinstate, startIfCourtFree };
+  global.PadelstarPlayerWithdrawal = { BLOCKED_STATE, plan, withdraw, decide, restoreForSlot, reinstate, startIfCourtFree, handleNewRound };
 })(window);

@@ -239,11 +239,3 @@ test("statistics stay with the person: the withdrawn player keeps what they play
   const standings = scoring.leaderboardEntries(state.players, state.rounds.flatMap((round) => round.matches), "matches");
   assert.equal(standings.find((entry) => entry.player.id === "Ann").matchWins, 1, "Ann's finished win is still hers");
 });
-
-test("withdrawal is not offered in a Cup (the bracket refers to team ids)", () => {
-  const state = tournament();
-  state.settings.format = "cup";
-  assert.equal(withdrawal.plan(state, "Ann").blocked, "cup");
-  assert.equal(doWithdraw(state, "Ann").blocked, "cup");
-  assert.equal(state.players.find((p) => p.id === "Ann").withdrawn, undefined);
-});

@@ -149,12 +149,14 @@
       }, "messages.nextRoundFailed", () => deps.sendPushNotification("round_ready"));
     }
 
-    function queueRemoteCupAdvance() {
+    // `confirmLuckyLoser`: the admin confirmed that the best-placed losing team takes the place of a match in which both
+    // sides withdrew (the server refuses to use one otherwise).
+    function queueRemoteCupAdvance({ confirmLuckyLoser = false } = {}) {
       if (!canWrite("messages.offlineNextCupRound")) return;
-      recordAdminEvent("cup_advance_requested", "round", null, {});
+      recordAdminEvent("cup_advance_requested", "round", null, { confirmLuckyLoser });
       enqueue("admin_advance_cup", () => {
         const state = deps.getState();
-        return { p_tournament_id: state.id, p_admin_token: state.adminToken, p_expected_revision: state.revision };
+        return { p_tournament_id: state.id, p_admin_token: state.adminToken, p_expected_revision: state.revision, p_confirm_lucky_loser: confirmLuckyLoser };
       }, "messages.nextCupRoundFailed", () => deps.sendPushNotification("round_ready"));
     }
 

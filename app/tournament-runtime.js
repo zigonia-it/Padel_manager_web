@@ -140,24 +140,40 @@ window.PadelstarTournamentRuntime = (() => {
       return state().cup?.bracket?.rounds?.find((round) => round.roundNumber === roundNumber) ?? null;
     }
 
-    function createNextCupRound() {
+    // Both sides of a match withdrew: the best-placed losing team of the round takes the place. Empty when there is none.
+    function luckyLoserProposal() {
+      const round = state().rounds.at(-1);
+      if (state().settings.format !== "cup" || !round) return { missing: 0, teams: [] };
+      return rounds.luckyLoserProposal(state(), round);
+    }
+
+    // `luckyLoserConfirmed`: the admin has confirmed the teams from luckyLoserProposal(). Without it a round that needs
+    // one is not created (returns null and changes nothing).
+    function createNextCupRound({ luckyLoserConfirmed = false } = {}) {
       const currentState = state();
       const previousRound = currentState.rounds.at(-1);
       if (!previousRound || !["finished", "completed"].includes(previousRound.status)) return null;
       const previousBracketRound = getCupBracketRound(previousRound.roundNumber);
+      const nextBracketRound = currentState.cup.bracket?.rounds?.find((round) => round.roundNumber > previousRound.roundNumber);
+      const nextRoundNumber = nextBracketRound?.roundNumber ?? previousRound.roundNumber + 1;
+      const proposal = rounds.luckyLoserProposal(currentState, previousRound);
+      if (proposal.teams.length && !luckyLoserConfirmed) return null;
+      const luckyLosers = proposal.teams.map((team) => ({ ...team, luckyLoserRound: nextRoundNumber }));
       const regularMatches = previousRound.matches.filter((match) => !match.isThirdPlaceMatch);
-      const advancing = rounds.advancingTeams(previousRound, previousBracketRound, currentState.cup?.byeTeams ?? []);
+      const advancing = rounds.advancingTeams(previousRound, previousBracketRound, currentState.cup?.byeTeams ?? [], luckyLosers);
       const losingTeams = regularMatches
         .filter((match) => match.state === "finished" && match.winnerTeamIndex !== null)
-        .map((match) => match.winnerTeamIndex === 0 ? match.teamTwo : match.teamOne);
+        .map((match) => match.winnerTeamIndex === 0 ? match.teamTwo : match.teamOne)
+        .filter((team) => !luckyLosers.some((lucky) => lucky.id === team.id));
       currentState.cup.byeTeams = [];
       if (advancing.length < 2) {
         currentState.cup.winnerTeam = advancing[0] ?? null;
         return null;
       }
-      const nextBracketRound = currentState.cup.bracket?.rounds?.find((round) => round.roundNumber > previousRound.roundNumber);
-      const nextRoundNumber = nextBracketRound?.roundNumber ?? previousRound.roundNumber + 1;
-      const nextRound = createScheduledRound({ teams: advancing, sittingOut: [] }, nextRoundNumber);
+      // an odd number of teams (a match was cancelled and nobody could take the place): the last team has a bye
+      const byeTeams = advancing.length % 2 === 1 ? [advancing.pop()] : [];
+      currentState.cup.byeTeams = byeTeams;
+      const nextRound = createScheduledRound({ teams: advancing, sittingOut: byeTeams.flatMap((team) => team.players) }, nextRoundNumber);
       const isFinalRound = nextBracketRound ? nextRoundNumber === currentState.cup.bracket.rounds.at(-1)?.roundNumber : advancing.length === 2;
       let thirdPlaceMatch = null;
       if (isFinalRound && currentState.cup.includesThirdPlaceMatch && losingTeams.length >= 2) {
@@ -166,7 +182,7 @@ window.PadelstarTournamentRuntime = (() => {
       }
       if (nextBracketRound) {
         nextBracketRound.slots = nextRound.matches.filter((match) => !match.isThirdPlaceMatch).map((match) => ({ type: "match", matchId: match.id }));
-        nextBracketRound.byeTeams = [];
+        nextBracketRound.byeTeams = byeTeams;
         nextBracketRound.thirdPlaceSlot = thirdPlaceMatch
           ? { type: "match", matchId: thirdPlaceMatch.id }
           : nextBracketRound.thirdPlaceSlot && nextBracketRound.thirdPlaceSlot.type === "pending" ? null : nextBracketRound.thirdPlaceSlot;
@@ -175,6 +191,8 @@ window.PadelstarTournamentRuntime = (() => {
           currentState.cup.bracket.thirdPlaceMatchId = thirdPlaceMatch?.id ?? null;
         }
       }
+      // players who withdrew earlier: their matches wait for the teammate, are won by walkover or cancelled
+      window.PadelstarPlayerWithdrawal?.handleNewRound(currentState, nextRound);
       return nextRound;
     }
 
@@ -183,7 +201,7 @@ window.PadelstarTournamentRuntime = (() => {
       if (currentState.settings.format !== "cup") return false;
       const round = currentState.rounds.at(-1);
       if (!round || (round.status !== "finished" && !(round.status === "active" && canCompleteRound(round)))) return false;
-      return rounds.advancingTeams(round, getCupBracketRound(round.roundNumber), currentState.cup?.byeTeams ?? []).length > 1;
+      return rounds.advancingTeams(round, getCupBracketRound(round.roundNumber), currentState.cup?.byeTeams ?? [], rounds.luckyLoserProposal(currentState, round).teams).length > 1;
     }
 
     function cupCanFinalize() {
@@ -195,7 +213,7 @@ window.PadelstarTournamentRuntime = (() => {
       return finalRoundNumber ? round.roundNumber === finalRoundNumber : true;
     }
 
-    function startNextScheduledRound() {
+    function startNextScheduledRound({ luckyLoserConfirmed = false } = {}) {
       const currentState = state();
       const nextRound = currentState.rounds.find((round) => round.status === "scheduled");
       if (nextRound) {
@@ -203,13 +221,16 @@ window.PadelstarTournamentRuntime = (() => {
         return;
       }
       if (currentState.settings.format !== "cup") return;
-      const nextCupRound = createNextCupRound();
+      if (!luckyLoserConfirmed && luckyLoserProposal().teams.length) return { needsConfirmation: true };
+      const nextCupRound = createNextCupRound({ luckyLoserConfirmed });
       if (!nextCupRound) {
         currentState.status = "Cup ferdig";
         return;
       }
       currentState.rounds.push(nextCupRound);
       activateRound(nextCupRound);
+      // a round in which every match was decided at once (walkovers) may already be the end of the cup
+      markCupCompleteIfDone();
     }
 
     function activateNextWaitingMatch(match) {
@@ -282,7 +303,7 @@ window.PadelstarTournamentRuntime = (() => {
       return currentState;
     }
 
-    return { activateNextWaitingMatch, cupCanAdvance, cupCanFinalize, createNextCupRound, enterApproval, finishMatch, generateCupTournament, generateFullTournamentSchedule, markCupCompleteIfDone, startNextScheduledRound };
+    return { activateNextWaitingMatch, cupCanAdvance, cupCanFinalize, createNextCupRound, enterApproval, finishMatch, generateCupTournament, generateFullTournamentSchedule, luckyLoserProposal, markCupCompleteIfDone, startNextScheduledRound };
   }
 
   return { create };

@@ -11,6 +11,7 @@
       getActiveRound,
       getState,
       isSupabaseReady,
+      luckyLoserProposal = () => ({ teams: [] }),
       queueRemoteCupAdvance,
       queueRemoteRoundAdvance,
       requestConfirmation,
@@ -116,18 +117,28 @@
           if (!await requestConfirmation(summary, t("round.endSummaryTitle", { round: activeRound.roundNumber }))) return;
         }
         const state = getState();
+        // Cup: both sides of a match withdrew, so the best-placed losing team takes the place. The admin confirms first.
+        let luckyLoserConfirmed = false;
+        if (state.rounds.length > 0 && state.settings.format === "cup") {
+          const proposal = luckyLoserProposal();
+          if (proposal.teams.length) {
+            const teams = proposal.teams.map((team) => team.displayName).join(", ");
+            if (!await requestConfirmation(t("withdrawal.luckyLoserConfirm", { teams, count: proposal.teams.length }), t("withdrawal.luckyLoserTitle"))) return;
+            luckyLoserConfirmed = true;
+          }
+        }
         if (state.rounds.length === 0) {
           generateFullTournamentSchedule();
         } else if (isSupabaseReady() && completingActiveRound) {
           if (state.settings.format !== "cup") queueRemoteRoundAdvance();
-          if (state.settings.format === "cup") queueRemoteCupAdvance();
+          if (state.settings.format === "cup") queueRemoteCupAdvance({ confirmLuckyLoser: luckyLoserConfirmed });
           return;
         } else {
           if (completingActiveRound) {
             activeRound.status = "completed";
             state.status = "Runde fullført";
           }
-          startNextScheduledRound();
+          startNextScheduledRound({ luckyLoserConfirmed });
         }
         saveState();
         deps.render();

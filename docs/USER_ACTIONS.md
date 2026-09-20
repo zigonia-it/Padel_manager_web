@@ -12,6 +12,7 @@ Status: `[ ]` open, `[x]` done.
 
 ## 2. Verify as a person (I cannot sign in or use real devices)
 
+- [ ] **Withdrawal in a Cup (0.13) with a real Cup.** Create a Cup (e.g. 8 players = 4 teams) on padelstar.app, start it, withdraw one player of a team in the admin's player list: their match waits for the teammate (play alone / walkover; the admin can decide). Then withdraw players on both sides of one match: it is cancelled; when the other matches are done, "Start neste runde" asks to confirm the best loser moving up, and the next round has that team (with a note on the match). Also check that declining the dialog changes nothing.
 - [ ] **The merged lobby (0.12) on your devices.** Create a tournament: you land in the workspace on the Lobby panel (invite code, QR, players with remove buttons, courts, invitations). "Start turnering" opens Styring; Lobby stays in the side rail / phone tab bar (now five items: check they fit on your smallest phone) and is read-only after the start. Also check that a returning admin (reload, profile → open tournament) reaches Styring/Kamper as before.
 - [ ] **System owner page.** Sign in on padelstar.app (or the preview) as `sigurd.grodem@live.no`. Expect a **"System"** link in the top menu and `admin.html` showing counts and the latest tournaments. Then sign in as any other account (or signed out): no "System" link, and opening `admin.html` sends you away with a message.
 - [ ] **Invitations with two real accounts.** Account A creates a tournament (not a guest one), lobby → "Inviter med e-post" → the email of account B. Account B (verified email) signs in → profile page → "Invitasjoner" → "Bli med" → join → A's list shows "Har blitt med". Also try "Avslå".
@@ -31,8 +32,8 @@ Status: `[ ]` open, `[x]` done.
 
 ## 3. Decisions I need (I made a safe default; tell me if you want it different)
 
-- [ ] **Withdrawal in a Cup** — decided 2026-09-20, planned for 0.13, not built: same conditions as Round Robin (the remaining teammate plays alone or gives a walkover); if all players of a team have withdrawn, a walkover is enforced; if both sides of a match have withdrawn, the best-placed losing team takes the place and the admin confirms. Until then use "Bytt".
-- [ ] **Players on both teams withdrawn** — in a Round Robin the match is still cancelled (no new rule was given); in a Cup see the line above (lucky loser, admin confirms). Planned for 0.13.
+- [x] **Withdrawal in a Cup** — decided 2026-09-20; built in 0.13.0 (see the check at the top).
+- [ ] **"Best-placed" loser — please confirm my definition.** You did not define the ranking. I built: all candidates lost in the same round, so the games difference over the cup decides, then the order of their match; a team that lost by walkover or has nobody left is not a candidate. Tell me if you want another rule (e.g. only the result of the lost match). In a Round Robin a match with players withdrawn on both teams is still cancelled (no rule was given).
 - [x] **Corrections after the tournament is finished**: decided 2026-09-20 (added to the statistics); built in 0.10.0.
 - [x] **Invitations by email**: decided 2026-09-20; built in 0.10.0 (sender `invitations@padelstar.app`, verified domain). Needs a real check: invite an address in the lobby and look for the email.
 - [x] **Privacy text**: decided 2026-09-20 (a bottom section naming the services); built in 0.10.0.
