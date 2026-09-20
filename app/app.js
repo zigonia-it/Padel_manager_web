@@ -130,7 +130,7 @@ const profileHistory = window.PadelstarProfileHistory.create({
 });
 const observability = window.PadelstarObservability;
 const uiEffects = window.PadelstarUiEffects;
-const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history", "admin_list_invitations", "list_my_invitations"]);
+const remoteReadRpcNames = new Set(["get_tournament_by_code", "get_spectator_tournament_by_code", "get_player_profile_history", "admin_list_invitations", "list_my_invitations", "list_my_active_tournaments", "open_owned_tournament"]);
 const remoteRpc = (client, name, payload = {}) => {
   if (!remoteReadRpcNames.has(name)) markSyncAttempt();
   return window.PadelstarRemoteRpc.call(client, name, payload);
@@ -1177,6 +1177,7 @@ function bindWorkspaceEvents() {
         render();
       },
       openSavedTournament: (tournamentId) => openSavedTournament(tournamentId),
+      openOwnedTournament: (tournamentId) => openOwnedTournament(tournamentId),
       copyInviteCode: () => copyText(state.inviteCode, t("messages.inviteCopied")),
       copyJoinLink: () => copyText(createJoinLink(), t("messages.joinLinkCopied")),
       copySpectatorLink: () => copyText(createSpectatorLink(), t("messages.spectatorLinkCopied")),
@@ -1398,6 +1399,46 @@ function openSavedTournament(tournamentId) {
   connectRealtimeForCurrentState();
   showWorkspace("admin");
   render();
+}
+
+// Resumes one of the signed-in user's own tournaments as admin on this device. The admin token lives only on the
+// device that created the tournament, so the database hands it to the verified owner (open_owned_tournament).
+async function openOwnedTournament(tournamentId) {
+  const account = accountAuth?.currentUser();
+  if (!tournamentId || !account?.id) return false;
+  if (tournamentId === state.id && isCurrentUserAdmin()) {
+    showWorkspace("admin");
+    render();
+    return true;
+  }
+  if (!isSupabaseReady()) {
+    showToast(t("profile.openTournamentFailed"), "status-message-error");
+    return false;
+  }
+  const { data, error } = await remoteRpc(supabaseClient, "open_owned_tournament", { p_tournament_id: tournamentId });
+  if (error || !data?.state || !data.adminToken) {
+    showToast(remoteErrorMessage(error, t("profile.openTournamentFailed")), "status-message-error");
+    return false;
+  }
+  const local = tournamentLibrary.get(tournamentId);
+  if (state.id && hasActiveTournament()) persistLocalState();
+  removeRealtimeChannel();
+  state = migrateState({ ...data.state, selectedPlayerId: local?.selectedPlayerId ?? null });
+  state.remoteMode = "shared";
+  state.adminToken = data.adminToken;
+  state.playerToken = local?.playerToken ?? null;
+  state.ownerUserId = account.id;
+  state.settings.language = loadUserLanguage(state.settings?.language ?? "nb");
+  pendingAdminSync = false;
+  pendingPlayerScores = [];
+  remoteConflict = false;
+  setLocalRole("admin");
+  saveState({ remote: false });
+  connectRealtimeForCurrentState();
+  if ((state.rounds ?? []).length === 0 && state.status !== "Avsluttet") showModule("lobby");
+  else showWorkspace("admin");
+  render();
+  return true;
 }
 
 function mirrorOfflineStorage() {

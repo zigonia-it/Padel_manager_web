@@ -177,7 +177,7 @@ h3 {
     rgba(5, 21, 43, 0.62);
 }
 
-.join-preview span,
+.join-preview div > span,
 .player-list-name small {
   display: block;
 

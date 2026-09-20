@@ -1212,3 +1212,6 @@ body[data-theme="classic"] .intro { padding-inline: 0; }
     overflow-wrap: anywhere;
   }
 }
+
+/* An empty status chip (for example the signed-out account line) is not drawn as a stray empty pill. */
+.status-chip:empty { display: none; }

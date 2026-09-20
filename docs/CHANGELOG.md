@@ -6,6 +6,21 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.9.1
+
+Bug-fix batch from the developer's report of 2026-09-20. Verified: 463 automated tests, 13 database test files (all pass, including 36 new checks), the two new database migrations applied to the live project and checked there (grants and behaviour), and the fixes exercised in the browser at phone and desktop widths. Not verifiable without a real device or a second signed-in account: see `docs/USER_ACTIONS.md`.
+
+### Fixed
+- **Profile → "Mine aktive turneringer"**: every row now has a "Fortsett som admin" button, and a signed-in owner can open their own tournament from any device (created on the phone, continued on the Mac). The admin token used to exist only on the device that created the tournament; the new function `open_owned_tournament` (migration `20260920150000`) hands it to the verified owner only (`owner_user_id = auth.uid()`, rate-limited, the same answer for "not found" and "not yours"). An unstarted tournament opens in the lobby.
+- **Language picker on iPhone**: tapping the flag opened the custom menu and then iOS's own language list. The picker was a `<label>` around the hidden native `<select>`, so a tap also activated the select. It is a `<div>` now.
+- **Phone menu**: rebuilt as one column (language first, then the links, the Lys/Mørk switch full width) with opaque background, fits short screens (scrolls) and shows the language name. Before, two columns of unequal buttons overlapped and the theme switch was cut off.
+- **Light mode, square panels and wrong colors**: the light theme generator dropped every later rule that reset a color (`background: transparent`, `border: 0`, ...), so the twin of an earlier rule won and panels got a background the dark theme never had (page sections, the workspace header, the footer, button shadows, ...). Reset rules are now carried over and the twins follow the browser's stylesheet load order. Also: the palette got the design's page, surface, border, accent and text colors for the `--figma-*` tokens, translucent light-blue fills stay light-blue (the design's `rgba(91,173,255,.14)`), primary buttons use the design's `#A1D6FF → #008DF9` gradient with dark text, secondary/ghost buttons are flat blue tints, the dark hero vignette no longer grays the light hero, placeholders are readable, the phone menu button's bars are dark. New audit `scripts/theme-parity-audit.js` finds any element the light theme fills, borders or shadows that the dark theme does not (it flagged the old build on every screen and reports nothing now).
+- **System administration** (`admin.html`): now has tabs. Turneringer (search on name, status filter, paging, 25 per page), Brukere (search on e-mail, owner/confirmed/last sign-in/counts), Vedlikehold (what waits for cleanup and the scheduled jobs with their last run). Read-only, owner-only (`admin_list_tournaments`, `admin_list_users`, `admin_maintenance_status`, migration `20260920160000`; none is executable by `anon`; no tokens, invite codes or password data). Text no longer runs outside the page: the heading scales, names and addresses wrap, and on phones every table row becomes a card.
+- The empty account status chip drawn as a stray circle on the signed-out account page; the join preview's avatar initials sat in a corner of the gem.
+
+### Added
+- `scripts/bump-asset-versions.js` (bumps the cache-busting versions of every changed asset and the service worker cache name; `--check` in CI-like use) and `scripts/theme-parity-audit.js`.
+
 ## 0.9.0
 
 Released on the developer's authorization to bump verified milestones (2026-09-19): the theme system (Phase 27). Verified: 446 automated tests, the light theme is generated and checked in sync, resolution rules tested and checked live (light device on first use, manual override, persistence, "Følg enheten"), a contrast sweep of every main view (nothing below 3.5:1) and screenshots of the light theme. **Awaiting your eyes** on real screens: see `docs/USER_ACTIONS.md`.

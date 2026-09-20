@@ -45,7 +45,8 @@ window.PadelstarProfileUi = (() => {
             <article class="saved-tournament-item">
               <span class="status-chip">${escapeHtml(tournamentStatusText?.(tournament.status) ?? tournament.status ?? "")}</span>
               <strong>${escapeHtml(tournament.name ?? "")}</strong>
-              <span>${tournament.playerCount} · ${tournament.inviteCode}</span>
+              <span>${tournament.playerCount} ${t("resume.players")} · ${tournament.inviteCode}</span>
+              <button class="secondary" type="button" data-owned-tournament-id="${escapeHtml(tournament.id)}">${t("resume.continueAdmin")}</button>
             </article>`).join("");
       }
       if (elements.profileAccountEmail) elements.profileAccountEmail.textContent = account?.email ?? "";

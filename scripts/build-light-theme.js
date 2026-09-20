@@ -80,6 +80,8 @@ function fallback(color, property = "") {
     if (l < 0.25 && color.a >= 0.4) return { r: 255, g: 255, b: 255, a: Math.min(0.95, color.a + 0.1) }; // dark translucent surface -> white glass
     if (l < 0.25) return { r: 15, g: 40, b: 70, a: color.a * 0.5 }; // veil -> softer
     if (l > 0.5 && s < 0.2) return { r: 13, g: 27, b: 42, a: Math.min(1, color.a * 0.7) }; // white tint -> ink tint
+    // a light-blue tint used as a *fill* stays a light-blue tint (the design's rgba(91,173,255,.14)); as a line or shadow it becomes an ink tint
+    if (l > 0.5 && /^background|glass|(^|-)bg$|surface/.test(property)) return { r: 91, g: 173, b: 255, a: Math.min(0.3, color.a * 0.6) };
     if (l > 0.5) return { r: 20, g: 60, b: 105, a: color.a }; // light blue tint -> ink tint
     return { ...hslToRgb(h, s, clamp(0.2, 0.6, l * 0.78)), a: color.a };
   }
@@ -116,6 +118,7 @@ function ensureTextContrast(cssColor) {
   return format(color);
 }
 const TEXT_PROPERTY = /^(color|fill|stroke|text-decoration-color|-webkit-text-fill-color|caret-color)$/;
+const COLOR_PROPERTY = /^(color|background(-image|-color)?|border(-top|-right|-bottom|-left)?(-color)?|outline(-color)?|box-shadow|fill|stroke|caret-color|-webkit-text-fill-color|text-decoration(-color)?)$/;
 const TEXT_TOKEN = /^--(?!soft$)(?!.*(?:bg|surface|page|line|border|glow|shadow|deep|dark|rgb|gradient|glass))(?:.*(?:text|muted|ink|gold|accent|blue|green|finished|success|danger|error|red|warn|silver|cream))/;
 const isTextCapable = (property) => TEXT_PROPERTY.test(property) || TEXT_TOKEN.test(property);
 
@@ -123,6 +126,20 @@ const paletteFile = JSON.parse(fs.readFileSync(PALETTE, "utf8"));
 const palette = paletteFile.pairs;
 const keep = new Set(paletteFile.keep ?? []);
 const normalize = (text) => text.trim().toLowerCase().replace(/\s+/g, "");
+
+// The same color written another way (rgba(91,173,255,.32) against the design's #5badff51) finds its pair too:
+// identical RGB and an alpha within 0.02.
+let pairColors = null;
+function nearestPair(color) {
+  if (!pairColors) pairColors = Object.entries(palette).map(([key, value]) => [parseColor(key), value]).filter(([parsed]) => parsed);
+  if (color.a >= 0.999) return null; // opaque colors keep the exact-match / fallback rules
+  for (const [candidate, value] of pairColors) {
+    if (candidate.a >= 0.999) continue;
+    if (Math.round(candidate.r) === Math.round(color.r) && Math.round(candidate.g) === Math.round(color.g) && Math.round(candidate.b) === Math.round(color.b)
+      && Math.abs(candidate.a - color.a) <= 0.02) return value;
+  }
+  return null;
+}
 
 function mapColor(text, property = "") {
   const mapped = mapColorRaw(text, property);
@@ -133,12 +150,15 @@ function mapColorRaw(text, property = "") {
   const key = normalize(text);
   if (/^background/.test(property)) {
     const tint = parseColor(text);
-    if (tint && tint.a > 0 && tint.a < 0.5 && rgbToHsl(tint)[2] < 0.35) return format({ ...tint, a: tint.a * 0.45 }); // a dark tint would gray a light surface
+    // a dark translucent well (inset panels on the dark theme) would gray a light surface: it becomes the design's light-blue tint
+    if (tint && tint.a > 0 && tint.a < 0.5 && rgbToHsl(tint)[2] < 0.35) return format({ r: 91, g: 173, b: 255, a: Math.max(0.06, Math.min(0.16, tint.a * 0.5)) });
   }
   if (palette[key]) return palette[key];
   if (keep.has(key)) return text;
   const parsed = parseColor(text);
   if (!parsed) return text;
+  const near = nearestPair(parsed);
+  if (near) return near;
   // white or near-white used as a *background* stays a light surface
   if (/^background|^--(?:ds-)?(?:page|soft|surface|panel)/.test(property) && parsed.a >= 0.999 && rgbToHsl(parsed)[2] > 0.85) return text;
   return format(fallback(parsed, property));
@@ -234,7 +254,13 @@ function convertDeclaration(declaration, preserveFilled = false) {
   if (TEXT_PROPERTY.test(property) && PLAYER_ACCENT_TEXT.test(value.replace(/\s*!important\s*$/i, ""))) {
     return `${property}: color-mix(in srgb, var(--player-accent-light, #4fa8ff) 38%, #0d1b2a)${/!important/i.test(value) ? " !important" : ""};`;
   }
-  if (!COLOR.test(value)) { COLOR.lastIndex = 0; return null; }
+  if (!COLOR.test(value)) {
+    COLOR.lastIndex = 0;
+    // A later rule that resets a color (background: transparent, border: 0, color: var(--x)) has to reach the light layer too,
+    // otherwise the twin of an earlier, colored rule wins in the light theme and a panel shows a background the dark theme
+    // never had. Values without a literal color are copied unchanged.
+    return COLOR_PROPERTY.test(property) ? `${property}: ${value};` : null;
+  }
   COLOR.lastIndex = 0;
   const important = /\s*!important\s*$/i.test(value);
   const bare = value.replace(/\s*!important\s*$/i, "");
@@ -328,8 +354,13 @@ function tripletTokens(sources) {
   return lines;
 }
 
+// Twins are written in the order the browser loads the stylesheets (index.html), so that "later rule wins" means the same
+// in both themes. Files index.html does not load come last, alphabetically.
 function sourceFiles() {
-  return fs.readdirSync(stylesDir).filter((f) => f.endsWith(".css") && !EXCLUDED.has(f)).sort();
+  const present = fs.readdirSync(stylesDir).filter((f) => f.endsWith(".css") && !EXCLUDED.has(f));
+  const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const loaded = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="styles\/([^"?]+)/g)].map((m) => m[1]).filter((f) => present.includes(f));
+  return [...new Set([...loaded, ...present.slice().sort()])];
 }
 
 function computeSourceHash() {
@@ -360,7 +391,7 @@ ${blocks.join("\n\n")}
 `;
 }
 
-module.exports = { build, computeSourceHash, mapColor, contrastRatio, ensureTextContrast, isFilledAccent, parseColor, format, fallback, sourceFiles, OUTPUT, SCOPE };
+module.exports = { build, computeSourceHash, convertDeclaration, nearestPair, mapColor, contrastRatio, ensureTextContrast, isFilledAccent, parseColor, format, fallback, sourceFiles, OUTPUT, SCOPE };
 
 if (require.main === module) {
   const generated = build();

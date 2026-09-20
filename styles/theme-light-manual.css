@@ -1,1 +1,69 @@
 /* Hand-made corrections to the generated light theme (styles/theme-light.css). Scope every rule with html[data-theme-mode="light"]. */
+
+/* Phase 31. The hero's side vignette is a dark scrim for the dark theme; on a light page it shows as a gray band above the card. */
+html[data-theme-mode="light"] .intro::before {
+  background: none;
+}
+
+/* The soft glow in the hero card is a light-blue blob in the design (not a dark one). */
+html[data-theme-mode="light"] .intro-copy::before {
+  background: radial-gradient(circle, rgba(108, 187, 248, 0.34), rgba(108, 187, 248, 0) 68%);
+}
+
+/* Primary buttons: the design's light-blue gradient with dark text (Padelstar UI Light: #A1D6FF -> #008DF9, #04121f). */
+html[data-theme-mode="light"] body[data-theme="classic"] button.primary,
+html[data-theme-mode="light"] body[data-theme="classic"] .primary {
+  border-color: transparent;
+  background: linear-gradient(180deg, #a1d6ff, #008df9);
+  color: #04121f;
+  box-shadow: none;
+}
+
+html[data-theme-mode="light"] body[data-theme="classic"] button.primary:disabled,
+html[data-theme-mode="light"] body[data-theme="classic"] .primary:disabled {
+  background: #d3e2f1;
+  color: #5b7490;
+}
+
+/* Secondary and ghost buttons: flat light-blue tint with a thin blue border (the design has no gradients or shadows on them). */
+html[data-theme-mode="light"] body[data-theme="classic"] .secondary,
+html[data-theme-mode="light"] body[data-theme="classic"]:not(.landing-active) button.secondary,
+html[data-theme-mode="light"] body[data-theme="classic"] .ds-btn-secondary {
+  border: 1px solid rgba(15, 122, 224, 0.34);
+  background: rgba(91, 173, 255, 0.14);
+  color: #0a4b80;
+  box-shadow: none;
+}
+
+html[data-theme-mode="light"] body[data-theme="classic"] .secondary:not(:disabled):hover,
+html[data-theme-mode="light"] body[data-theme="classic"]:not(.landing-active) button.secondary:not(:disabled):hover,
+html[data-theme-mode="light"] body[data-theme="classic"] .ds-btn-secondary:not(:disabled):hover {
+  border-color: rgba(15, 122, 224, 0.6);
+  background: rgba(91, 173, 255, 0.24);
+}
+
+html[data-theme-mode="light"] body[data-theme="classic"] .ds-btn-ghost,
+html[data-theme-mode="light"] body[data-theme="classic"]:not(.landing-active) button.ghost {
+  border: 1px solid rgba(20, 60, 105, 0.2);
+  background: transparent;
+  color: #0a4b80;
+  box-shadow: none;
+}
+
+html[data-theme-mode="light"] body[data-theme="classic"] .format-option:has(input:checked) {
+  border-color: rgba(15, 122, 224, 0.6);
+  background: rgba(91, 173, 255, 0.16);
+}
+
+/* The phone menu button's three bars are a pale blue for the dark theme; on a white button they must be dark. */
+html[data-theme-mode="light"] .app-menu-toggle span {
+  background: #0a4b80;
+  box-shadow: none;
+}
+
+/* Placeholders were a 40 % tint of the accent: nearly invisible on the light input fill. */
+html[data-theme-mode="light"] input::placeholder,
+html[data-theme-mode="light"] textarea::placeholder {
+  color: #5b7490;
+  opacity: 1;
+}
