@@ -2,26 +2,27 @@
 <html lang="no">
 
 <head>
-  <script>if (/[?&]embed=1\b/.test(location.search)) document.documentElement.classList.add("embedded");</script><script>(function(){try{var t=localStorage.getItem("padelstar-theme");var m=(t==="light"||t==="dark")?t:(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");document.documentElement.dataset.themeMode=m}catch(e){document.documentElement.dataset.themeMode="dark"}})();</script><meta charset="utf-8">
+  <script>if (/[?&]embed=1\b/.test(location.search)) document.documentElement.classList.add("embedded");</script><script>(function(){try{var t=localStorage.getItem("padelstar-theme");var m=(t==="light"||t==="dark")?t:(window.matchMedia&&matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");document.documentElement.dataset.theme=m}catch(e){document.documentElement.dataset.theme="dark"}})();</script><meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#08090b">
+  <meta name="theme-color" content="#1b2438">
   <meta name="description" content="Personvern for Padelstar beta.">
   <meta name="robots" content="noindex">
   <title>Personvern - Padelstar</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/icons/padelstar-icon.png">
   <link rel="icon" href="assets/icons/padelstar-icon.png" type="image/png">
-  <link rel="stylesheet" href="styles/base.css?v=padelstar-base-7">
-  <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-9">
-  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-20">
-  <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-14">
-  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-103">
-  <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-5">
-  <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-52">
-  <link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-6"><link rel="stylesheet" href="styles/theme-light.css?v=padelstar-theme-light-9"><link rel="stylesheet" href="styles/theme-light-manual.css?v=padelstar-theme-light-manual-2">
-  <script defer src="app/translations.js?v=padelstar-i18n-57"></script>
+  <link rel="stylesheet" href="styles/tokens.css?v=padelstar-tokens-1">
+  <link rel="stylesheet" href="styles/base.css?v=padelstar-base-8">
+  <link rel="stylesheet" href="styles/layout.css?v=padelstar-layout-10">
+  <link rel="stylesheet" href="styles/components.css?v=padelstar-components-21">
+  <link rel="stylesheet" href="styles/modules.css?v=padelstar-modules-15">
+  <link rel="stylesheet" href="styles/styles.css?v=padelstar-ui-104">
+  <link rel="stylesheet" href="styles/responsive.css?v=padelstar-responsive-6">
+  <link rel="stylesheet" href="styles/ui-consistency.css?v=padelstar-ui-consistency-53">
+  <link rel="stylesheet" href="styles/privacy.css?v=padelstar-privacy-7">
+  <script defer src="app/translations.js?v=padelstar-i18n-58"></script>
   <script defer src="app/page-language.js?v=padelstar-page-language-1"></script>
-  <script defer src="app/privacy-i18n.js?v=padelstar-privacy-i18n-8"></script>
+  <script defer src="app/privacy-i18n.js?v=padelstar-privacy-i18n-9"></script>
 </head>
 
 <body data-theme="classic">
@@ -114,6 +115,7 @@
         <li data-privacy-i18n="serviceResend">Resend: sender e-post fra padelstar.app, for eksempel tilbakemeldinger til utvikleren, innloggingslenker og invitasjoner til turneringer.</li>
         <li data-privacy-i18n="serviceJsdelivr">jsDelivr: leverer Supabase-biblioteket til nettleseren din. Som alle nettsteder ser de IP-adressen din.</li>
         <li data-privacy-i18n="serviceFlags">flagcdn.com: viser flaggene i språkmenyen.</li>
+        <li data-privacy-i18n="serviceTurnstile">Cloudflare Turnstile: robotkontrollen ved registrering og innlogging (når den er slått på). Den ser IP-adressen og nettleseren din for å skille mennesker fra roboter.</li>
         <li data-privacy-i18n="serviceQr">quickchart.io: tegner QR-koden for påmelding. Påmeldingslenken (med invitasjonskoden) sendes dit for å lage bildet.</li>
       </ul>
       <p data-privacy-i18n="updated">Sist oppdatert 2026-09-19. Dette er fortsatt en beta-tekst og bør kvalitetssikres av behandlingsansvarlig før bred bruk. Vi bruker Vercel Analytics til enkel, samlet trafikkmåling.</p>

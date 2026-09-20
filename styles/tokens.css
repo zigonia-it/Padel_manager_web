@@ -1,0 +1,104 @@
+/* =========================================================
+   COLOUR TOKENS - the single source of colour for both themes
+   ---------------------------------------------------------
+   Dark: a lifted slate navy (not near-black). Light: a soft blue-white page with pure white cards.
+   The two themes were tuned independently: light is NOT an inversion of dark. Same role, different value
+   (accent blue #3d97f0 on dark is #17559f on light).
+
+   Rules:
+   * Components use var(--token). No hex or rgb() literals for surfaces, borders, ink, accents or buttons in component CSS
+     (scripts/color-audit.js counts what is left; test/color-tokens.test.js keeps it from growing).
+   * Cards stay white in light mode. The page does the darkening.
+   * The primary action is a solid deep-blue gradient with white text in light mode; do not reuse the dark theme's pale gradient.
+   * Every text token was checked at 4.5:1 (body) / 3:1 (headline scale) against its real background: test/color-tokens.test.js.
+   The theme is set on <html data-theme="dark|light"> by app/color-mode.js (saved in localStorage; the device's
+   prefers-color-scheme decides only on the first visit).
+   ========================================================= */
+
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --surface-page:      #1b2438;
+  --surface-card:      #233049;
+  --surface-raised:    #212d45;
+  --surface-sunken:    #19283c;
+
+  /* hairlines / borders */
+  --border-subtle:     rgba(159, 207, 255, .108);
+  --border-default:    rgba(159, 207, 255, .18);
+  --border-strong:     rgba(159, 207, 255, .324);
+
+  /* ink */
+  --ink-heading:       #d5e2f0;
+  --ink-body:          #c2d4e5;
+  --ink-muted:         #9cb0c4;
+  --ink-faint:         #8a9db1;
+
+  /* accents */
+  --accent-blue:       #3d97f0;
+  --accent-blue-bright:#62b6ff;
+  --accent-cyan:       #17abe4;
+  --positive:          #7ed49e;
+  --negative:          #f2909f;
+  --warning:           #e6c05a;
+
+  /* accent as small text: bright on dark, deep on light (the bright accent only passes 3:1 on the light page) */
+  --accent-text:       var(--accent-blue-bright);
+
+  /* primary action gradient */
+  --btn-primary-from:  #a1d6ff;
+  --btn-primary-to:    #008df9;
+  --btn-primary-ink:   #04121f;
+
+  /* secondary / ghost button washes */
+  --btn-secondary-bg:  linear-gradient(180deg, #5badff0d, #5badff30);
+  --btn-secondary-border: rgba(91, 173, 255, .42);
+  --btn-secondary-ink: #8ecbff;
+
+  /* shadows follow the theme too (a derived role, not a new colour) */
+  --shadow-ink:        #000000;
+  /* the accent blue as an r, g, b triplet, only for rgba(var(--player-accent-rgb), a) where no player colour is set */
+  --accent-blue-rgb:   61, 151, 240;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --surface-page:      #eef3fa;
+  --surface-card:      #ffffff;
+  --surface-raised:    #fafcfe;
+  --surface-sunken:    #f2f6fb;
+
+  --border-subtle:     rgba(20, 60, 105, .1);
+  --border-default:    rgba(20, 60, 105, .154);
+  --border-strong:     rgba(20, 60, 105, .277);
+
+  --ink-heading:       #14243a;
+  --ink-body:          #3c5570;
+  --ink-muted:         #415870;
+  --ink-faint:         #415870;
+
+  --accent-blue:       #17559f;
+  --accent-blue-bright:#2f7fd4;
+  --accent-cyan:       #0a7aa8;
+  --accent-text:       var(--accent-blue);
+  --positive:          #17603c;
+  --negative:          #ad3550;
+  --warning:           #8a6a10;
+
+  --btn-primary-from:  #2f7fd4;
+  --btn-primary-to:    #17559f;
+  --btn-primary-ink:   #ffffff;
+
+  --btn-secondary-bg:  linear-gradient(180deg, #5badff0d, #5badff30);
+  --btn-secondary-border: rgba(91, 173, 255, .42);
+  --btn-secondary-ink: #17559f;
+
+  --shadow-ink:        #0f2846;
+  --accent-blue-rgb:   23, 85, 159;
+}
+
+/* derived: how strongly shadows and glows show. A dark page can carry a heavy shadow; a light page only a soft one. */
+:root { --shadow-strength: 1; --glow-strength: 1; --text-glow-strength: 1; }
+[data-theme="light"] { --shadow-strength: .42; --glow-strength: .5; --text-glow-strength: 0; }

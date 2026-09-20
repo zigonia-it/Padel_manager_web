@@ -3,38 +3,34 @@
    ========================================================= */
 
 :root {
-  color-scheme: dark;
   --font-ui: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: "Archivo", var(--font-ui);
-  --soft: #070d17;
-  --ink: #eef7ff;
-  --cream: #f4f9ff;
-  --ink-dark: #03101d;
-  --muted: #a9bfd5;
-  --silver-light: #a9bfd5;
-  --gold: #4fa8ff;
-  --gold-light: #d8efff;
-  --gold-bright: #62b6ff;
-  --gold-dark: #236ca8;
-  --gold-deep: #123a63;
-  --gold-rgb: 79, 168, 255;
-  --gold-light-rgb: 216, 239, 255;
-  --gold-bright-rgb: 98, 182, 255;
-  --gold-dark-rgb: 35, 108, 168;
-  --line: rgba(98, 182, 255, 0.30);
-  --finished: #8ee0ad;
-  --shadow: 0 20px 60px rgba(0, 0, 0, 0.52);
-  --ds-page: #070d17;
-  --ds-surface-0: rgba(12, 23, 39, 0.90);
-  --ds-surface-1: rgba(16, 31, 52, 0.94);
-  --ds-surface-2: rgba(26, 48, 77, 0.90);
-  --ds-glass: rgba(91, 173, 255, 0.09);
-  --ds-border: rgba(159, 207, 255, 0.20);
-  --ds-border-strong: rgba(91, 173, 255, 0.58);
-  --ds-text: #eef7ff;
-  --ds-text-muted: #a9bfd5;
-  --ds-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
-  --ds-shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.24);
+  --soft: var(--surface-page);
+  --ink: var(--ink-heading);
+  --cream: var(--ink-heading);
+  --ink-dark: var(--btn-primary-ink);
+  --muted: var(--ink-muted);
+  --silver-light: var(--ink-muted);
+  --gold: var(--accent-blue);
+  --gold-light: var(--ink-heading);
+  --gold-bright: var(--accent-text);
+  --gold-dark: color-mix(in srgb, var(--accent-blue) 62%, var(--surface-sunken));
+  --gold-deep: color-mix(in srgb, var(--accent-blue) 30%, var(--surface-sunken));
+  --gold-rgb: var(--accent-blue-rgb);
+  --line: var(--border-strong);
+  --finished: var(--positive);
+  --shadow: 0 20px 60px color-mix(in srgb, var(--shadow-ink) calc(52% * var(--shadow-strength)), transparent);
+  --ds-page: var(--surface-page);
+  --ds-surface-0: var(--surface-card);
+  --ds-surface-1: var(--surface-card);
+  --ds-surface-2: var(--surface-raised);
+  --ds-glass: color-mix(in srgb, var(--accent-blue-bright) 9%, transparent);
+  --ds-border: var(--border-default);
+  --ds-border-strong: var(--border-strong);
+  --ds-text: var(--ink-heading);
+  --ds-text-muted: var(--ink-muted);
+  --ds-shadow: 0 24px 70px color-mix(in srgb, var(--shadow-ink) calc(38% * var(--shadow-strength)), transparent);
+  --ds-shadow-soft: 0 12px 32px color-mix(in srgb, var(--shadow-ink) calc(24% * var(--shadow-strength)), transparent);
   --radius-sm: 8px;
   --radius-md: 10px;
   --radius-lg: 14px;
@@ -50,16 +46,15 @@
   --player-accent-rgb: var(--gold-rgb);
 
   /* Added for the Claude Design UI redesign (docs/ROADMAP.md, see .claude/plans/we-can-plan-new-playful-volcano.md) */
-  --ds-card-bg: #0e1a2c;
-  --ds-border-hairline: rgba(159, 207, 255, 0.13);
-  --danger: #ff8fa3;
-  --danger-bg: rgba(224, 90, 120, 0.13);
-  --danger-bg-strong: rgba(224, 90, 120, 0.3);
-  --danger-border: rgba(224, 90, 120, 0.36);
-  --warning: #e6c05a;
-  --warning-bg: rgba(184, 140, 0, 0.16);
-  --text-secondary: #c2d4e5;
-  --text-dim: #7e93a9;
+  --ds-card-bg: var(--surface-card);
+  --ds-border-hairline: var(--border-subtle);
+  --danger: var(--negative);
+  --danger-bg: color-mix(in srgb, var(--negative) 13%, transparent);
+  --danger-bg-strong: color-mix(in srgb, var(--negative) 30%, transparent);
+  --danger-border: color-mix(in srgb, var(--negative) 36%, transparent);
+  --warning-bg: color-mix(in srgb, var(--warning) 16%, transparent);
+  --text-secondary: var(--ink-body);
+  --text-dim: var(--ink-faint);
 }
 
 /* =========================================================
@@ -158,11 +153,7 @@ body {
   min-height: 100vh;
 
   background:
-    linear-gradient(180deg,
-      rgba(3, 16, 34, 0.72),
-      rgba(3, 16, 34, 0.97)),
-    url("../assets/backgrounds/bg_img-1600.jpg") center top / cover fixed,
-    var(--soft);
+    var(--surface-page);
 
   color: var(--ink);
   font-family: var(--font-ui);
@@ -175,11 +166,11 @@ body.workspace-active,
 body.setup-active {
   background:
     linear-gradient(180deg,
-      rgba(3, 16, 34, 0.86),
-      rgba(3, 16, 34, 0.98)),
+      color-mix(in srgb, var(--surface-sunken) 86%, transparent),
+      var(--surface-sunken)),
     linear-gradient(90deg,
-      rgba(3, 16, 34, 0.3),
-      rgba(5, 21, 43, 0.76)),
+      color-mix(in srgb, var(--surface-sunken) 30%, transparent),
+      color-mix(in srgb, var(--surface-card) 76%, transparent)),
     url("../assets/backgrounds/bg_img-1600.jpg") center bottom / auto 150% fixed,
     var(--soft);
 }
@@ -193,11 +184,11 @@ body::before {
   background:
     linear-gradient(135deg,
       transparent 0 46%,
-      rgba(var(--gold-bright-rgb), 0.12) 46.15% 46.45%,
+      color-mix(in srgb, var(--accent-blue-bright) 12%, transparent) 46.15% 46.45%,
       transparent 46.6% 100%),
     linear-gradient(45deg,
       transparent 0 64%,
-      rgba(var(--gold-rgb), 0.08) 64.15% 64.45%,
+      color-mix(in srgb, var(--accent-blue) 8%, transparent) 64.15% 64.45%,
       transparent 64.6% 100%);
 
   background-size: 340px 340px, 460px 460px;
@@ -250,7 +241,7 @@ select {
   width: 100%;
 
   border:
-    1px solid rgba(var(--gold-light-rgb), 0.34);
+    1px solid color-mix(in srgb, var(--ink-heading) 34%, transparent);
 
   border-radius: 8px;
 
@@ -258,9 +249,9 @@ select {
 
   background:
     linear-gradient(180deg,
-      rgba(var(--gold-light-rgb), 0.045),
-      rgba(var(--gold-light-rgb), 0.018)),
-    rgba(5, 21, 43, 0.74);
+      color-mix(in srgb, var(--ink-heading) 5%, transparent),
+      color-mix(in srgb, var(--ink-heading) 2%, transparent)),
+    color-mix(in srgb, var(--surface-sunken) 74%, transparent);
 
   color: var(--ink);
 
@@ -268,7 +259,7 @@ select {
   line-height: 1.5;
 
   box-shadow:
-    inset 0 1px 0 rgba(var(--gold-light-rgb), 0.045);
+    inset 0 1px 0 color-mix(in srgb, var(--ink-heading) 5%, transparent);
 }
 
 input:focus,
@@ -277,11 +268,11 @@ select:focus {
   outline: none;
 
   border-color:
-    rgba(var(--gold-bright-rgb), 0.72);
+    color-mix(in srgb, var(--accent-blue-bright) 72%, transparent);
 
   box-shadow:
-    0 0 0 3px rgba(var(--gold-rgb), 0.12),
-    inset 0 1px 0 rgba(var(--gold-light-rgb), 0.06);
+    0 0 0 3px color-mix(in srgb, var(--accent-blue) 12%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--ink-heading) 6%, transparent);
 }
 
 select {
@@ -297,14 +288,14 @@ select {
       var(--gold-light) 50%,
       transparent 50%) calc(100% - 13px) 50% / 7px 7px no-repeat,
 
-    rgba(5, 21, 43, 0.74);
+    color-mix(in srgb, var(--surface-sunken) 74%, transparent);
 
   padding-right: 2.2rem;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(var(--gold-light-rgb), 0.40);
+  color: color-mix(in srgb, var(--ink-heading) 40%, transparent);
 }
 
 textarea {

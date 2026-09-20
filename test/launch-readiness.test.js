@@ -36,7 +36,7 @@ test("privacy page reflects the current profile and retention behavior", () => {
   assert.match(privacySource, /7 dager/i);
   assert.match(privacySource, /2026-09-19/);
   assert.match(privacySource, /styles\/privacy\.css/);
-  assert.match(privacySource, /theme-color" content="#08090b"/);
+  assert.match(privacySource, /theme-color" content="#1b2438"/);
 });
 
 test("retention note records the approved beta policy and profile follow-up", () => {

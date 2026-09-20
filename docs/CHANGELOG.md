@@ -6,6 +6,24 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.11.0
+
+The colour system (developer's design decision 2026-09-20) and the sign-up check. Verified: 489 automated tests; both themes checked in the browser at desktop and phone widths on every main view, TV Mode, the privacy page and the dialogs with `scripts/contrast-audit.js` (nothing below 4.5:1 except the two exceptions listed below). No database changes.
+
+### Changed
+- **One token set, two themes** (`styles/tokens.css`): `:root` is the dark theme, `[data-theme="light"]` the light theme, with exactly the specified values. Dark is a lifted slate navy (page `#1b2438`, cards `#233049`, cards separate from the page by lightness); light is a soft blue-white (page `#eef3fa`, pure white cards). The themes are tuned separately (accent blue `#3d97f0` on dark is `#17559f` on light), and the light primary action is a solid deep-blue gradient with white text.
+- **No colour literals in components.** A codemod (`scripts/migrate-colors.js`) rewrote 769 hex/rgb literals in 24 stylesheets to role tokens (surfaces, borders, ink, accents, primary/secondary buttons, washes, shadows). `scripts/color-audit.js` finds any that come back and `test/color-tokens.test.js` fails on them. The legacy variables are aliases of the tokens.
+- The generated light layer is gone (`theme-light.css`, `tv-light.css`, the generator and its palette). The theme attribute is `data-theme` on `<html>` (was `data-theme-mode`). The saved choice (`padelstar-theme`) is unchanged; the device's `prefers-color-scheme` decides only on the first visit (no live following any more).
+- **Player gem colours from one helper** (`gemFill`, `gemInk`, `gemTint` in `PadelstarAccentSystem`): the base hex fills the gem in both themes; the initials are the hex lightened 45 % on dark and darkened 30 % on light (light initials are at least 4.5:1 on white; the old value was 1.7:1); the row tint is `rgba(hex, .09)`. The palette follows the design (`gold` is now `#8a6a10`).
+- TV Mode uses the same tokens and its switch; the browser bar colour (`theme-color`) follows the theme.
+- Contrast: every text token is at least 4.5:1 on every surface in both themes (tested). Two known exceptions of the specified values: white on the lighter end of the light primary gradient (`#2f7fd4`) is 4.1:1 (bold button text), and the dark-theme gem initials for the darkest hues (onyx 3.6, sapphire 4.0, garnet 4.2) are below 4.5.
+
+### Added
+- **"I'm not a robot" check** for sign-up, sign-in and the admin sign-in link (Cloudflare Turnstile, `app/captcha.js`). Off until a site key is put in `supabase-config.js` and the secret in Supabase (Authentication -> Attack Protection): see `docs/technical/captcha-setup.md`. The privacy page names Cloudflare Turnstile; the Content-Security-Policy allows it.
+
+### Operations
+- GitHub Pages is switched off (the workflow was disabled and the site unpublished; it failed on every push and nothing referenced it). Vercel is the only host.
+
 ## 0.10.0
 
 The developer's decisions of 2026-09-20 (batch 1). Verified: 484 automated tests, 15 database test files (all pass), the three new migrations (`20260920170000`, `20260920180000`, `20260920190000`) applied live and checked (grants, signup trigger via a rolled-back insert). Not built yet from that list: withdrawal in a Cup (with walkover and a lucky loser taking the place of two withdrawn teams) and the merge of lobby and workspace (0.11).

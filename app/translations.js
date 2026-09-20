@@ -1302,6 +1302,18 @@ for (const [language, values] of Object.entries({
 })) {
   Object.assign(padelstarTranslations[language], values);
 }
+for (const [language, values] of Object.entries({
+  nb: { "captcha.title": "Bekreft at du ikke er en robot", "captcha.hint": "Dette hindrer automatiske registreringer.", "captcha.required": "Bekreft at du ikke er en robot for å fortsette.", "captcha.failed": "Kontrollen feilet. Prøv igjen.", "captcha.expired": "Kontrollen utløp. Prøv igjen.", "captcha.unavailable": "Kontrollen kunne ikke lastes. Sjekk nettverket og prøv igjen." },
+  nn: { "captcha.title": "Stadfest at du ikkje er ein robot", "captcha.hint": "Dette hindrar automatiske registreringar.", "captcha.required": "Stadfest at du ikkje er ein robot for å halde fram.", "captcha.failed": "Kontrollen feila. Prøv igjen.", "captcha.expired": "Kontrollen gjekk ut. Prøv igjen.", "captcha.unavailable": "Kontrollen kunne ikkje lastast. Sjekk nettverket og prøv igjen." },
+  en: { "captcha.title": "Confirm you are not a robot", "captcha.hint": "This stops automated sign-ups.", "captcha.required": "Confirm you are not a robot to continue.", "captcha.failed": "The check failed. Try again.", "captcha.expired": "The check expired. Try again.", "captcha.unavailable": "The check could not load. Check your connection and try again." },
+  es: { "captcha.title": "Confirma que no eres un robot", "captcha.hint": "Esto evita los registros automáticos.", "captcha.required": "Confirma que no eres un robot para continuar.", "captcha.failed": "La comprobación falló. Inténtalo de nuevo.", "captcha.expired": "La comprobación caducó. Inténtalo de nuevo.", "captcha.unavailable": "No se pudo cargar la comprobación. Revisa la conexión e inténtalo de nuevo." },
+  de: { "captcha.title": "Bestätige, dass du kein Roboter bist", "captcha.hint": "Das verhindert automatische Registrierungen.", "captcha.required": "Bestätige, dass du kein Roboter bist, um fortzufahren.", "captcha.failed": "Die Prüfung ist fehlgeschlagen. Versuche es erneut.", "captcha.expired": "Die Prüfung ist abgelaufen. Versuche es erneut.", "captcha.unavailable": "Die Prüfung konnte nicht geladen werden. Prüfe die Verbindung und versuche es erneut." },
+  fr: { "captcha.title": "Confirmez que vous n'êtes pas un robot", "captcha.hint": "Cela empêche les inscriptions automatiques.", "captcha.required": "Confirmez que vous n'êtes pas un robot pour continuer.", "captcha.failed": "La vérification a échoué. Réessayez.", "captcha.expired": "La vérification a expiré. Réessayez.", "captcha.unavailable": "La vérification n'a pas pu se charger. Vérifiez la connexion et réessayez." },
+  sv: { "captcha.title": "Bekräfta att du inte är en robot", "captcha.hint": "Det stoppar automatiska registreringar.", "captcha.required": "Bekräfta att du inte är en robot för att fortsätta.", "captcha.failed": "Kontrollen misslyckades. Försök igen.", "captcha.expired": "Kontrollen har gått ut. Försök igen.", "captcha.unavailable": "Kontrollen kunde inte laddas. Kontrollera nätverket och försök igen." },
+  da: { "captcha.title": "Bekræft at du ikke er en robot", "captcha.hint": "Det forhindrer automatiske tilmeldinger.", "captcha.required": "Bekræft at du ikke er en robot for at fortsætte.", "captcha.failed": "Kontrollen mislykkedes. Prøv igen.", "captcha.expired": "Kontrollen er udløbet. Prøv igen.", "captcha.unavailable": "Kontrollen kunne ikke indlæses. Tjek netværket og prøv igen." },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 Object.assign(padelstarTranslations.nb, { "footer.linksAria": "Bruksanvisning og personvern" });
 // English strings for surfaces that previously fell back to Norwegian.
 Object.assign(padelstarTranslations.en, {

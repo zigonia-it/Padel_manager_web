@@ -19,7 +19,7 @@
 }
 
 .lobby-header .eyebrow {
-  color: var(--gold-bright, #62b6ff);
+  color: var(--gold-bright, var(--accent-text));
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -40,9 +40,9 @@
 }
 
 .lobby-players-card {
-  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.2));
+  border: 1px solid var(--ds-border, var(--border-default));
   border-radius: var(--radius-md, 10px);
-  background: var(--ds-surface-1, rgba(16, 31, 52, 0.94));
+  background: var(--ds-surface-1, color-mix(in srgb, var(--surface-card) 94%, transparent));
   padding: 16px;
 }
 
@@ -60,9 +60,9 @@
 
 .lobby-courts-card {
   padding: 16px;
-  border: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+  border: 1px solid var(--ds-border-hairline, var(--border-default));
   border-radius: var(--radius-lg, 18px);
-  background: var(--ds-surface-1, rgba(255, 255, 255, 0.03));
+  background: var(--ds-surface-1, color-mix(in srgb, var(--ink-heading) 2%, transparent));
 }
 
 .lobby-courts-card .court-names-list {
@@ -74,9 +74,9 @@
 /* Invitations by email (lobby) and my invitations (profile) */
 .lobby-invite-card {
   padding: 16px;
-  border: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+  border: 1px solid var(--ds-border-hairline, var(--border-default));
   border-radius: var(--radius-lg, 18px);
-  background: var(--ds-surface-1, rgba(255, 255, 255, 0.03));
+  background: var(--ds-surface-1, color-mix(in srgb, var(--ink-heading) 2%, transparent));
 }
 
 .lobby-invite-card.hidden { display: none; }

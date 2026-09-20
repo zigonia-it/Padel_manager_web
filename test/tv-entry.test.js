@@ -32,20 +32,18 @@ test("openTvMode: an opened window leaves the app where it is; only a blocked po
   assert.equal(win.location.href, "tv.html?spectate=AB%20CD", "a blocked pop-up falls back to this tab");
 });
 
-test("TV Mode has a Lys/Mørk switch that uses the app's color choice, and a generated light theme", () => {
+test("TV Mode has a Lys/Mørk switch that uses the app's color choice and the same tokens", () => {
   const html = read("tv.html");
   assert.match(html, /id="tvThemeToggle"[\s\S]*data-theme-option="light"[\s\S]*data-theme-option="dark"/);
   assert.match(html, /<script>\(function\(\)\{try\{var t=localStorage\.getItem\("padelstar-theme"\)/, "the saved choice is applied before the first paint");
-  assert.match(html, /styles\/tv-light\.css\?v=padelstar-tv-light-\d+/);
-  assert.match(html, /styles\/tv-light-manual\.css/);
+  assert.match(html, /styles\/tokens\.css\?v=padelstar-tokens-\d+/);
   assert.match(html, /app\/color-mode\.js\?v=padelstar-color-mode-\d+/);
   assert.match(read("app", "tv-mode.js"), /PadelstarColorMode\?\.create\(\{ document, storage: global\.localStorage \}\)\.bind\(\)/);
   const worker = read("service-worker.js");
-  assert.match(worker, /styles\/tv-light\.css\?v=padelstar-tv-light-\d+/);
-  assert.match(worker, /styles\/tv-light-manual\.css/);
-  const light = read("styles", "tv-light.css");
-  assert.match(light, /^\/\* GENERATED/);
-  assert.match(light, /html\[data-theme-mode="light"\] \.tv-panel/);
+  assert.match(worker, /styles\/tokens\.css\?v=padelstar-tokens-\d+/);
+  const tv = read("styles", "tv.css");
+  assert.match(tv, /:root \{ --ink: var\(--ink-heading\)/, "TV's own variables are aliases of the shared tokens");
+  assert.doesNotMatch(tv, /#[0-9a-fA-F]{3,8}\b/, "no hex colours in the TV stylesheet");
 });
 
 test("the TV Mode button sits at the bottom of the side rail", () => {

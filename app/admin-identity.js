@@ -1,5 +1,5 @@
 (function initPadelstarAdminIdentity(global) {
-  function create({ getClient, getElements, getState, isAdmin, observability, remoteErrorMessage, remoteRpc, saveState, translate }) {
+  function create({ getClient, getElements, getState, isAdmin, observability, remoteErrorMessage, remoteRpc, saveState, translate, captcha }) {
     async function currentAuthUser() {
       const client = getClient();
       if (!client) return null;
@@ -24,9 +24,14 @@
         elements.adminIdentityNotice.textContent = translate("admin.identityUnavailable");
         return false;
       }
+      const captchaToken = await captcha?.challenge();
+      if (captchaToken === null) {
+        elements.adminIdentityNotice.textContent = translate("captcha.required");
+        return false;
+      }
       const { error } = await client.auth.signInWithOtp({
         email,
-        options: { emailRedirectTo: global.location.origin },
+        options: { emailRedirectTo: global.location.origin, ...(captchaToken ? { captchaToken } : {}) },
       });
       elements.adminIdentityNotice.textContent = error
         ? remoteErrorMessage(error, translate("admin.identityFailed"))

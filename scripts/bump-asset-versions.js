@@ -41,11 +41,12 @@ for (const file of [...changed].sort()) {
         const updated = text.replace(ref, `$1${now[1]}-${next}`);
         if (updated !== text) fs.writeFileSync(full, updated);
       }
-      // tests that pin only the token, e.g. "padelstar-session-78"
+      // tests that pin the version: the plain path (app/x.js?v=...) and the regex-escaped one (app\\/x\\.js\\?v=...), for this file only
+      const escaped = file.replace(/\//g, "\\/").replace(/\./g, "\\.");
       for (const f of fs.readdirSync(path.join(root, "test")).filter((name) => name.endsWith(".js"))) {
         const full = path.join(root, "test", f);
         const text = fs.readFileSync(full, "utf8");
-        const updated = text.split(`${now[1]}-${now[2]}`).join(`${now[1]}-${next}`);
+        const updated = text.split(`${escaped}\\?v=${now[1]}-${now[2]}`).join(`${escaped}\\?v=${now[1]}-${next}`);
         if (updated !== text) fs.writeFileSync(full, updated);
       }
       bumped += 1;

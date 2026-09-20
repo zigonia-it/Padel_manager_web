@@ -44,33 +44,33 @@ function fake({ stored = null, device = null } = {}) {
 
 test("first use follows the device; without a device preference it is dark", () => {
   const light = fake({ device: "light" }); light.mode.bind();
-  assert.equal(light.attrs["data-theme-mode"], "light");
+  assert.equal(light.attrs["data-theme"], "light");
   assert.equal(light.root.style.colorScheme, "light");
-  assert.equal(light.meta.content, "#eef3f9");
+  assert.equal(light.meta.content, "#eef3fa");
   const none = fake({ device: null }); none.mode.bind();
-  assert.equal(none.attrs["data-theme-mode"], "dark");
-  assert.equal(none.meta.content, "#020b1c");
+  assert.equal(none.attrs["data-theme"], "dark");
+  assert.equal(none.meta.content, "#1b2438");
 });
 
 test("a manual choice overrides the device at once, is saved, and 'follow device' removes it", () => {
   const t = fake({ device: "dark" }); t.mode.bind();
   assert.equal(t.mode.setPreference("light"), "light");
-  assert.equal(t.attrs["data-theme-mode"], "light", "applied without a reload");
+  assert.equal(t.attrs["data-theme"], "light", "applied without a reload");
   assert.equal(t.storage.data["padelstar-theme"], "light");
   assert.equal(t.mode.setPreference("dark"), "dark");
   assert.equal(t.mode.setPreference("system"), "dark", "the device (dark) decides again");
   assert.equal("padelstar-theme" in t.storage.data, false);
   const saved = fake({ stored: "light", device: "dark" }); saved.mode.bind();
-  assert.equal(saved.attrs["data-theme-mode"], "light", "a saved choice wins over the device on the next visit");
+  assert.equal(saved.attrs["data-theme"], "light", "a saved choice wins over the device on the next visit");
 });
 
-test("the device is followed live only while no manual choice is saved", () => {
+test("the device decides only on the first visit: a change while the page is open does not switch the theme", () => {
   const following = fake({ device: "dark" }); following.mode.bind();
   following.setDevice("light");
-  assert.equal(following.attrs["data-theme-mode"], "light");
+  assert.equal(following.attrs["data-theme"], "dark", "no live following (the choice is read once when the page loads)");
   const manual = fake({ stored: "dark", device: "dark" }); manual.mode.bind();
   manual.setDevice("light");
-  assert.equal(manual.attrs["data-theme-mode"], "dark", "a manual choice is not overridden by the device");
+  assert.equal(manual.attrs["data-theme"], "dark", "a manual choice is not overridden by the device");
 });
 
 test("the controls show the active option and stay in step", () => {
@@ -80,7 +80,7 @@ test("the controls show the active option and stay in step", () => {
   t.mode.setPreference("light");
   assert.deepEqual(state(), { light: "true", dark: "false", system: "false" });
   t.listeners.click({ target: { closest: () => t.buttons[1] } });
-  assert.equal(t.attrs["data-theme-mode"], "dark", "clicking an option applies it");
+  assert.equal(t.attrs["data-theme"], "dark", "clicking an option applies it");
   assert.deepEqual(state(), { light: "false", dark: "true", system: "false" });
 });
 
@@ -91,15 +91,15 @@ test("blocked storage does not break the theme", () => {
   assert.equal(lib.readPreference({ getItem() { throw new Error("blocked"); } }), null);
 });
 
-test("every page applies the saved theme before it paints; TV Mode stays dark", () => {
-  for (const page of ["index.html", "guide.html", "privacy.html", "admin.html"]) {
+test("every page applies the saved theme before it paints and loads the one token file first", () => {
+  for (const page of ["index.html", "guide.html", "privacy.html", "admin.html", "tv.html"]) {
     const html = read(page);
     const head = html.split("</head>")[0];
-    assert.match(head, /localStorage\.getItem\("padelstar-theme"\)[\s\S]*prefers-color-scheme: light[\s\S]*themeMode/, `${page} sets the mode early`);
-    assert.match(html, /styles\/theme-light\.css\?v=padelstar-theme-light-\d+/, `${page} loads the light theme`);
-    assert.match(html, /styles\/theme-light-manual\.css/);
+    assert.match(head, /localStorage\.getItem\("padelstar-theme"\)[\s\S]*prefers-color-scheme: light[\s\S]*dataset\.theme=/, `${page} sets data-theme early`);
+    assert.match(html, /styles\/tokens\.css\?v=padelstar-tokens-\d+/, `${page} loads the tokens`);
+    assert.ok(html.indexOf("styles/tokens.css") < html.search(/styles\/(base|tv)\.css/), `${page}: tokens before every other stylesheet`);
+    assert.doesNotMatch(html, /theme-light|tv-light|data-theme-mode/, `${page}: the generated light layer is gone`);
   }
-  assert.doesNotMatch(read("tv.html"), /theme-light/, "TV Mode is always dark");
 });
 
 test("the controls exist in the header, the phone menu and the profile page, and the new files are precached", () => {
@@ -107,10 +107,9 @@ test("the controls exist in the header, the phone menu and the profile page, and
   assert.equal((html.match(/class="theme-toggle"/g) ?? []).length, 2, "header and menu drawer");
   assert.match(html, /class="theme-choice"[\s\S]*data-theme-option="system"[\s\S]*data-theme-option="light"[\s\S]*data-theme-option="dark"/);
   assert.match(html, /app\/color-mode\.js\?v=padelstar-color-mode-\d+/);
-  const order = ["ui-consistency.css", "theme-toggle.css", "theme-light.css", "theme-light-manual.css"].map((f) => html.indexOf(`styles/${f}`));
-  assert.ok(order.every((v, i) => v > -1 && (i === 0 || v > order[i - 1])), "the light theme loads after the classic theme so it wins");
   const worker = read("service-worker.js");
-  for (const f of ["app/color-mode.js", "styles/theme-toggle.css", "styles/theme-light.css", "styles/theme-light-manual.css"]) assert.ok(worker.includes(`./${f}`), f);
+  for (const f of ["app/color-mode.js", "styles/theme-toggle.css", "styles/tokens.css"]) assert.ok(worker.includes(`./${f}`), f);
+  assert.doesNotMatch(worker, /theme-light|tv-light/);
   const i18n = vm.createContext({ window: {} });
   vm.runInContext(read("app", "translations.js"), i18n);
   for (const language of ["nb", "en"]) for (const key of ["label", "light", "dark", "system", "title", "hint"]) assert.ok(i18n.window.PadelstarTranslations[language][`theme.${key}`], `${language} theme.${key}`);
