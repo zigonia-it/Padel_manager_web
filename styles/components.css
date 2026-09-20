@@ -1437,3 +1437,13 @@ h3 {
 .inline-form button {
   flex: 1;
 }
+
+/* A short hint under a form field (for example the name fields). */
+.field-hint {
+  display: block;
+  margin-top: 4px;
+  font-weight: 400;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--ink-muted);
+}

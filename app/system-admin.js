@@ -1,6 +1,8 @@
 // The system owner's administration page (admin.html) and the menu link that only the owner sees (Phase 23).
-// Nothing here grants access: the server decides (is_system_owner / admin_overview check auth.uid()). The page loads
-// no administration data before the server has confirmed the owner, and sends everyone else back Home with a message.
+// Nothing here grants access: the server decides (system_owner_status says who the caller is; every owner function
+// requires a session that has passed the second factor). The page loads no administration data before the server has
+// confirmed the owner and the owner has entered the code from the authenticator app (app/system-two-factor.js), and
+// sends everyone else back Home with a message.
 (function (global) {
   const TEXT = {
     nb: {
@@ -303,11 +305,21 @@
     let session = null;
     try { session = (await client.auth.getSession()).data?.session ?? null; } catch { session = null; }
     if (!session) return deny("signIn");
-    let isOwner = null;
+    let ownerStatus = null;
     let error = null;
-    try { ({ data: isOwner, error } = await client.rpc("is_system_owner")); } catch (caught) { error = caught; }
-    const decision = decideAccess({ session, isOwner, error });
+    try { ({ data: ownerStatus, error } = await client.rpc("system_owner_status")); } catch (caught) { error = caught; }
+    const decision = decideAccess({ session, isOwner: ownerStatus?.owner, error });
     if (decision !== "ok") return deny(decision);
+
+    // The owner has signed in; the server only answers owner functions for a session that has also passed the second factor.
+    if (ownerStatus.secondFactor !== true) {
+      const twoFactor = global.PadelstarSystemTwoFactor;
+      const passed = twoFactor
+        ? await twoFactor.run({ client, container: document.querySelector("#systemAdminTwoFactor"), t: twoFactor.TEXT[language] ?? twoFactor.TEXT.nb })
+        : false;
+      if (!passed) { setStatus(t.failed); return "twoFactorFailed"; }
+      setStatus(t.checking);
+    }
 
     // Authorized: only now is any administration data requested.
     try {
@@ -333,8 +345,8 @@
       let owner = false;
       try {
         const client = getClient();
-        const { data, error } = client ? await client.rpc("is_system_owner") : { data: false, error: null };
-        owner = !error && data === true;
+        const { data, error } = client ? await client.rpc("system_owner_status") : { data: null, error: null };
+        owner = !error && data?.owner === true;
       } catch { owner = false; }
       checkedFor = { id: user.id, owner };
       link.classList.toggle("hidden", !owner);

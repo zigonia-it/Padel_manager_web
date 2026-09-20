@@ -18,9 +18,9 @@ function page() {
   const els = { "#systemAdminStatus": { textContent: "" }, "#systemAdminContent": { hidden: true, innerHTML: "" }, "#systemAdminToast": { textContent: "", classList: { add(c) { this.added = c; } } } };
   return { els, document: { documentElement: {}, querySelector: (s) => els[s] ?? null, querySelectorAll: () => [] } };
 }
-const client = ({ session = { user: { id: "u" } }, isOwner = true, ownerError = null, overview = { counts: { tournaments: 3 }, recentTournaments: [] }, calls = [] } = {}) => ({
+const client = ({ session = { user: { id: "u" } }, isOwner = true, secondFactor = true, ownerError = null, overview = { counts: { tournaments: 3 }, recentTournaments: [] }, calls = [] } = {}) => ({
   auth: { getSession: async () => ({ data: { session } }) },
-  rpc: async (name) => { calls.push(name); if (name === "is_system_owner") return { data: isOwner, error: ownerError }; if (name === "admin_overview") return { data: overview, error: null }; return { data: null, error: new Error("unexpected") }; },
+  rpc: async (name) => { calls.push(name); if (name === "system_owner_status") return { data: { owner: isOwner, secondFactor }, error: ownerError }; if (name === "admin_overview") return { data: overview, error: null }; return { data: null, error: new Error("unexpected") }; },
 });
 
 test("the access decision: no session, not the owner, an error, or the owner", () => {
@@ -36,7 +36,7 @@ test("a stranger is redirected Home with a message and no administration data is
   const p = page(); const redirects = []; const calls = [];
   const result = await admin.runPage({ document: p.document, client: client({ isOwner: false, calls }), redirect: (url) => redirects.push(url) });
   assert.equal(result, "denied");
-  assert.deepEqual(calls, ["is_system_owner"], "admin_overview was never called");
+  assert.deepEqual(calls, ["system_owner_status"], "admin_overview was never called");
   assert.deepEqual(redirects, ["index.html"]);
   assert.equal(p.els["#systemAdminContent"].hidden, true);
   assert.match(p.els["#systemAdminToast"].textContent, /ikke tilgang/);
@@ -60,7 +60,7 @@ test("the owner sees the overview, loaded only after the server confirmed owners
   const overview = { generatedAt: "2026-09-19T12:00:00Z", counts: { tournaments: 3, running: 1, finished: 1, expired: 1, accountOwned: 1, profiles: 2 }, recentTournaments: [{ name: "<img src=x onerror=alert(1)>", status: "Avsluttet", players: 4, account_owned: true, created_at: "2026-09-01T10:00:00Z" }] };
   const result = await admin.runPage({ document: p.document, client: client({ overview, calls }), language: "en", redirect: () => { throw new Error("no redirect for the owner"); } });
   assert.equal(result, "ok");
-  assert.deepEqual(calls, ["is_system_owner", "admin_overview"], "checked first, data second");
+  assert.deepEqual(calls, ["system_owner_status", "admin_overview"], "checked first, data second");
   assert.equal(p.els["#systemAdminContent"].hidden, false);
   const html = p.els["#systemAdminContent"].innerHTML;
   assert.match(html, /Tournaments/);
@@ -72,22 +72,28 @@ test("the menu link is shown to the owner only, and stays hidden on any failure"
   const link = { classes: new Set(["hidden"]), classList: { toggle(c, on) { on ? link.classes.add(c) : link.classes.delete(c); }, add(c) { link.classes.add(c); } } };
   const doc = { querySelector: (s) => (s === "#systemAdminLink" ? link : null) };
   const makeLink = (rpc) => admin.createLink({ document: doc, getClient: () => ({ rpc }) });
-  let l = makeLink(async () => ({ data: true, error: null }));
+  let l = makeLink(async () => ({ data: { owner: true, secondFactor: false }, error: null }));
   assert.equal(await l.refresh({ id: "owner" }), true);
   assert.equal(link.classes.has("hidden"), false);
   assert.equal(await l.refresh(null), false);
   assert.equal(link.classes.has("hidden"), true, "signing out hides it");
-  l = makeLink(async () => ({ data: false, error: null }));
+  l = makeLink(async () => ({ data: { owner: false, secondFactor: false }, error: null }));
   assert.equal(await l.refresh({ id: "other" }), false);
   assert.equal(link.classes.has("hidden"), true);
   l = makeLink(async () => { throw new Error("network"); });
   assert.equal(await l.refresh({ id: "x" }), false);
-  l = makeLink(async () => ({ data: true, error: new Error("denied") }));
+  l = makeLink(async () => ({ data: { owner: true }, error: new Error("denied") }));
   assert.equal(await l.refresh({ id: "y" }), false, "an error is never ownership");
   let calls = 0;
-  l = makeLink(async () => { calls += 1; return { data: true, error: null }; });
+  l = makeLink(async () => { calls += 1; return { data: { owner: true }, error: null }; });
   await l.refresh({ id: "same" }); await l.refresh({ id: "same" });
   assert.equal(calls, 1, "the answer is cached per signed-in user");
+});
+
+test("the link is shown to the owner already at the password level: that is where the second factor is entered", async () => {
+  const link = { classes: new Set(["hidden"]), classList: { toggle(c, on) { on ? link.classes.add(c) : link.classes.delete(c); }, add(c) { link.classes.add(c); } } };
+  const l = admin.createLink({ document: { querySelector: () => link }, getClient: () => ({ rpc: async (name) => ({ data: name === "system_owner_status" ? { owner: true, secondFactor: false } : false, error: null }) }) });
+  assert.equal(await l.refresh({ id: "owner" }), true);
 });
 
 test("the page, the menu link and the assets are in place", () => {
@@ -110,7 +116,7 @@ test("the page has four tabs; only the overview is loaded at first (the lists lo
   const p = page(); const calls = [];
   const c = client({ calls });
   await admin.runPage({ document: p.document, client: c, redirect: () => {} });
-  assert.deepEqual(calls, ["is_system_owner", "admin_overview"]);
+  assert.deepEqual(calls, ["system_owner_status", "admin_overview"]);
   const html = p.els["#systemAdminContent"].innerHTML;
   for (const tab of ["overview", "tournaments", "users", "maintenance"]) assert.match(html, new RegExp(`data-tab="${tab}"`));
   assert.match(html, /id="systemAdminPanel-tournaments"[^>]* hidden/, "the other panels start hidden");

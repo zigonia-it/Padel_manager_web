@@ -69,3 +69,10 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync og to Ver
 - Join-lenke bruker `https://padelstar.app/?join=...`.
 - Opprett, join, live update, resultatregistrering, avslutning og offline fallback er smoke-testet.
 - Tilbakemeldingsknappen sender en melding som kommer frem i innboksen.
+
+## Tofaktor for systemmenyen (0.14)
+
+- Systemeieren bruker en autentiseringsapp (TOTP, Supabase Auth MFA). Databasen krever `aal2` i JWT-en i `is_system_owner()`, så alle eierfunksjoner avviser en økt uten kode.
+- Supabase-innstilling: Authentication -> Sign In / Providers (Multi-Factor): TOTP må være slått på for at innmelding av appen skal virke.
+- Første gang viser admin.html QR-kode og nøkkel. Skann på to enheter eller lagre nøkkelen i en passordbehandler som sikkerhetskopi.
+- Mistet app uten sikkerhetskopi: kjør i Supabase SQL-editor `delete from auth.mfa_factors where user_id = (select user_id from public.system_owner);` og sett opp på nytt. Dette rører bare tofaktoren, ikke kontoen.
