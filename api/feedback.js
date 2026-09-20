@@ -126,7 +126,13 @@ module.exports = async function handler(request, response) {
       }),
       signal: controller.signal,
     });
-    if (!result.ok) return reply(response, 502, { ok: false, error: "provider" });
+    if (!result.ok) {
+      // Only the HTTP status and Resend's short error name (for example "invalid_api_key" or "validation_error") are passed on,
+      // so a wrong key or an unverified sender can be told apart without leaking a key, an address or Resend's message text.
+      let providerError;
+      try { const name = (await result.json())?.name; if (typeof name === "string" && /^[a-z_]{3,40}$/.test(name)) providerError = name; } catch { /* no readable body */ }
+      return reply(response, 502, { ok: false, error: "provider", providerStatus: Number(result.status) || undefined, ...(providerError ? { providerError } : {}) });
+    }
     return reply(response, 200, { ok: true });
   } catch {
     return reply(response, 502, { ok: false, error: "provider" });
