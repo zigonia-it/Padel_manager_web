@@ -103,3 +103,107 @@ test("the page, the menu link and the assets are in place", () => {
   vm.runInContext(read("app", "translations.js"), i18n);
   for (const language of ["nb", "en"]) assert.ok(i18n.window.PadelstarTranslations[language]["nav.systemAdmin"], language);
 });
+
+const t = admin.TEXT.nb;
+
+test("the page has four tabs; only the overview is loaded at first (the lists load when opened)", async () => {
+  const p = page(); const calls = [];
+  const c = client({ calls });
+  await admin.runPage({ document: p.document, client: c, redirect: () => {} });
+  assert.deepEqual(calls, ["is_system_owner", "admin_overview"]);
+  const html = p.els["#systemAdminContent"].innerHTML;
+  for (const tab of ["overview", "tournaments", "users", "maintenance"]) assert.match(html, new RegExp(`data-tab="${tab}"`));
+  assert.match(html, /id="systemAdminPanel-tournaments"[^>]* hidden/, "the other panels start hidden");
+  assert.match(html, /role="tablist"/);
+});
+
+test("tournament list: escaped, labelled cells for phones, format names and a pager", () => {
+  const data = { total: 60, limit: 25, offset: 25, rows: [{ name: "<b>x</b>", status: "Avsluttet", format: "cup", players: 8, rounds: 3, account_owned: true, created_at: "2026-09-01T10:00:00Z", updated_at: "2026-09-02T10:00:00Z" }] };
+  const html = admin.renderTournamentList(data, t);
+  assert.match(html, /&lt;b&gt;x&lt;\/b&gt;/);
+  assert.doesNotMatch(html, /<b>x/);
+  assert.match(html, /data-label="Navn"/);
+  assert.match(html, />Cup</);
+  assert.match(html, /Viser 26–50 av 60/);
+  assert.match(html, /data-page="previous"(?![^>]*disabled)/, "previous is enabled on page 2");
+  assert.match(html, /data-page="next"(?![^>]*disabled)/);
+  assert.match(admin.renderTournamentList({ total: 3, limit: 25, offset: 0, rows: data.rows }, t), /data-page="previous" disabled/);
+  assert.match(admin.renderTournamentList({ total: 3, limit: 25, offset: 0, rows: data.rows }, t), /data-page="next" disabled/);
+  assert.match(admin.renderTournamentList({ total: 0, rows: [] }, t), /Ingen treff/);
+});
+
+test("user list: the owner badge, unconfirmed and never-signed-in, escaped e-mail, no password fields", () => {
+  const data = { total: 2, limit: 25, offset: 0, rows: [
+    { id: "1", email: "sigurd.grodem@live.no", email_confirmed: true, created_at: "2026-09-01T10:00:00Z", last_sign_in_at: "2026-09-19T10:00:00Z", owned_tournaments: 2, played_tournaments: 1, finished_tournaments: 1, is_system_owner: true },
+    { id: "2", email: "<script>@x.no", email_confirmed: false, created_at: "2026-09-02T10:00:00Z", last_sign_in_at: null, owned_tournaments: 0, played_tournaments: 0, finished_tournaments: 0, is_system_owner: false },
+  ] };
+  const html = admin.renderUserList(data, t);
+  assert.match(html, /Systemeier/);
+  assert.match(html, /Ikke bekreftet/);
+  assert.match(html, />Aldri</);
+  assert.match(html, /&lt;script&gt;@x\.no/);
+  assert.doesNotMatch(html, /<script/);
+  assert.match(admin.renderUserList({ total: 0, rows: [] }, t), /Ingen brukere/);
+});
+
+test("maintenance: waiting counts and the scheduled jobs with their last run", () => {
+  const html = admin.renderMaintenance({ generatedAt: "2026-09-20T01:00:00Z", waiting: { expired: 3, expiredDeletionDue: 1, finishedRetentionDue: 0, idleOver30Days: 2, profileDeletionDue: 0 }, jobs: [{ name: "padelstar-retention-cleanup", schedule: "15 * * * *", active: true, lastRun: { status: "succeeded", startedAt: "2026-09-20T01:15:00Z" } }, { name: "other", schedule: "* * * * *", active: false, lastRun: null }] }, t);
+  assert.match(html, /padelstar-retention-cleanup/);
+  assert.match(html, /succeeded/);
+  assert.match(html, /Ikke kjørt ennå/);
+  assert.match(html, /Utløpte turneringer[\s\S]*?<strong>3</);
+  assert.match(admin.renderMaintenance({ waiting: {}, jobs: [] }, t), /Ingen planlagte oppgaver/);
+});
+
+test("searching and paging ask the server for one page at a time", async () => {
+  const handlers = {}; const calls = [];
+  const targets = { tournaments: { innerHTML: "", setAttribute() {}, removeAttribute() {} }, users: { innerHTML: "", setAttribute() {}, removeAttribute() {} }, maintenance: { innerHTML: "", setAttribute() {}, removeAttribute() {} } };
+  const content = {
+    addEventListener: (type, fn) => { handlers[type] = fn; },
+    querySelector: (selector) => targets[selector.match(/data-results="(\w+)"/)?.[1]] ?? null,
+    querySelectorAll: () => [],
+  };
+  const rpc = async (name, args) => { calls.push([name, args]); return { data: { total: 80, limit: 25, offset: args?.p_offset ?? 0, rows: [{ name: "A", status: "Avsluttet", players: 1, rounds: 1, email: "a@b.no" }] }, error: null }; };
+  admin.bindPanels({ content, client: { rpc }, t, locale: "nb-NO" });
+
+  const form = { dataset: { searchForm: "tournaments" }, elements: { q: { value: "  cup  " }, status: { value: "finished" } } };
+  handlers.submit({ target: { closest: () => form }, preventDefault() {} });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1))), ["admin_list_tournaments", { p_search: "cup", p_status: "finished", p_limit: 25, p_offset: 0 }]);
+
+  const next = { dataset: { page: "next" }, disabled: false, closest: (s) => (s === "[data-panel]" ? { dataset: { panel: "tournaments" } } : null) };
+  handlers.click({ target: { closest: (s) => (s === "[data-page]" ? next : null) } });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(calls.at(-1)[1].p_offset, 25);
+  handlers.click({ target: { closest: (s) => (s === "[data-page]" ? next : null) } });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(calls.at(-1)[1].p_offset, 50);
+  const previous = { ...next, dataset: { page: "previous" } };
+  handlers.click({ target: { closest: (s) => (s === "[data-page]" ? previous : null) } });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(calls.at(-1)[1].p_offset, 25);
+
+  const userForm = { dataset: { searchForm: "users" }, elements: { q: { value: "%" } } };
+  handlers.submit({ target: { closest: () => userForm }, preventDefault() {} });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1))), ["admin_list_users", { p_search: "%", p_limit: 25, p_offset: 0 }], "a new search starts on the first page");
+  assert.match(targets.users.innerHTML, /a@b\.no/);
+});
+
+test("a failing list shows an error instead of an empty table", async () => {
+  const handlers = {};
+  const target = { innerHTML: "", setAttribute() {}, removeAttribute() {} };
+  const content = { addEventListener: (type, fn) => { handlers[type] = fn; }, querySelector: () => target, querySelectorAll: () => [] };
+  admin.bindPanels({ content, client: { rpc: async () => ({ data: null, error: new Error("denied") }) }, t, locale: "nb-NO" });
+  handlers.submit({ target: { closest: () => ({ dataset: { searchForm: "users" }, elements: { q: { value: "" } } }) }, preventDefault() {} });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.match(target.innerHTML, /Kunne ikke hente data/);
+});
+
+test("the admin styles keep long text inside the page: wrapping names, cards on phones, no cropped headings", () => {
+  const css = read("styles", "system-admin.css");
+  assert.match(css, /td:first-child \{[^}]*overflow-wrap: anywhere/);
+  assert.match(css, /@media \(max-width: 720px\)[\s\S]*attr\(data-label\)/);
+  assert.match(css, /#systemAdminTitle \{ font-size: clamp\(/);
+  assert.match(css, /\.privacy-page:has\(#systemAdminRoot\)/);
+});

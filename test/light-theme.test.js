@@ -62,3 +62,34 @@ test("text colors are darkened until they are readable; primary buttons keep the
   assert.match(generated, /body\[data-theme="classic"\] \.landing-cta:not\(\.landing-cta-secondary\) \{\s*box-shadow/, "the primary CTA twin only softens its shadow");
   assert.doesNotMatch(generated, /text-shadow:\s*0/, "dark-theme text glows are removed");
 });
+
+test("a later rule that resets a color reaches the light layer (no panel gets a background the dark theme does not have)", () => {
+  assert.equal(gen.convertDeclaration("background: transparent"), "background: transparent;");
+  assert.equal(gen.convertDeclaration("border: 0"), "border: 0;");
+  assert.equal(gen.convertDeclaration("box-shadow: none"), "box-shadow: none;");
+  assert.equal(gen.convertDeclaration("color: var(--ink)"), "color: var(--ink);");
+  assert.equal(gen.convertDeclaration("display: flex"), null, "layout properties are still not copied");
+  assert.equal(gen.convertDeclaration("border-radius: 12px"), null);
+});
+
+test("the light layer keeps the stylesheets in the order the browser loads them", () => {
+  const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+  const loaded = [...html.matchAll(/<link[^>]+rel="stylesheet"[^>]+href="styles\/([^"?]+)/g)].map((m) => m[1]).filter((file) => gen.sourceFiles().includes(file));
+  const order = gen.sourceFiles();
+  assert.deepEqual(order.slice(0, loaded.length), loaded);
+  const marks = [...generated.matchAll(/^\/\* ([a-z0-9-]+\.css) \*\/$/gm)].map((m) => m[1]);
+  assert.deepEqual(marks, order.filter((file) => marks.includes(file)), "the generated blocks follow that order");
+  assert.ok(order.indexOf("components-v2.css") < order.indexOf("workspace-nav.css"));
+});
+
+test("the same color written as rgba() finds the design's pair", () => {
+  assert.equal(gen.mapColor("rgba(91, 173, 255, 0.32)", "background"), "#5badff26");
+  assert.equal(gen.nearestPair(gen.parseColor("rgba(91,173,255,1)")), null, "opaque colors keep the exact-match rules");
+});
+
+test("the hand-made corrections cover the design's buttons and the scrims that turn gray on a light page", () => {
+  const manual = fs.readFileSync(path.join(root, "styles", "theme-light-manual.css"), "utf8");
+  assert.match(manual, /linear-gradient\(180deg, #a1d6ff, #008df9\)/, "primary buttons use the design gradient");
+  assert.match(manual, /\.intro::before[\s\S]*?background: none/, "no dark vignette on the light hero");
+  assert.match(manual, /input::placeholder/);
+});

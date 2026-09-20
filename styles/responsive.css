@@ -137,3 +137,78 @@
     flex: 0 0 auto;
   }
 }
+
+/* Phase 31: the phone menu drawer as one clean column. Language first, then the links, the Lys/Mørk switch spans the
+   full width. Written against the classic theme's specificity so the desktop menu rules do not leak into it. */
+@media (max-width: 900px) {
+  body[data-theme="classic"] .menu-drawer {
+    right: 12px;
+    width: min(320px, calc(100vw - 24px));
+    max-height: calc(100vh - 96px);
+    max-height: calc(100dvh - 96px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px;
+    gap: 10px;
+    border-radius: 16px;
+    background: rgb(7, 17, 32);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+  }
+
+  body[data-theme="classic"].app-menu-open .menu-drawer .app-menu {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+    gap: 6px;
+  }
+
+  body[data-theme="classic"] .menu-drawer .app-menu .module-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    padding: 0 14px;
+    text-align: left;
+    white-space: normal;
+    font-size: 0.95rem;
+    border: 1px solid transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  body[data-theme="classic"] .menu-drawer .app-menu .module-link.active,
+  body[data-theme="classic"] .menu-drawer .app-menu .module-link:hover {
+    border-color: rgba(99, 181, 255, 0.42);
+    background: rgba(99, 181, 255, 0.14);
+    box-shadow: none;
+  }
+
+  body[data-theme="classic"] .menu-drawer .app-menu .module-link.hidden { display: none; }
+
+  body[data-theme="classic"] .menu-drawer .theme-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    margin: 6px 0 2px;
+  }
+
+  body[data-theme="classic"] .menu-drawer .theme-toggle-option {
+    justify-content: center;
+    min-height: 40px;
+    font-size: 0.85rem;
+  }
+
+  /* the language menu opens inside the drawer instead of floating over the links */
+  body[data-theme="classic"] .menu-drawer .language-menu { width: 100%; }
+  body[data-theme="classic"] .menu-drawer .language-current { width: 100%; justify-content: flex-start; }
+  body[data-theme="classic"] .menu-drawer .language-current::after { margin-left: auto; }
+  body[data-theme="classic"] .menu-drawer .language-current-name { display: inline; margin-left: 4px; font-size: 0.9rem; }
+  body[data-theme="classic"] .menu-drawer .language-options {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    margin-top: 8px;
+    box-shadow: none;
+  }
+}

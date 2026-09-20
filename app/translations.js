@@ -1266,6 +1266,18 @@ for (const [language, values] of Object.entries({
 })) {
   Object.assign(padelstarTranslations[language], values);
 }
+for (const [language, values] of Object.entries({
+  nb: { "profile.openTournamentFailed": "Kunne ikke åpne turneringen. Sjekk nettverket og prøv igjen." },
+  nn: { "profile.openTournamentFailed": "Kunne ikkje opne turneringa. Sjekk nettverket og prøv igjen." },
+  en: { "profile.openTournamentFailed": "Could not open the tournament. Check your connection and try again." },
+  es: { "profile.openTournamentFailed": "No se pudo abrir el torneo. Comprueba la conexión e inténtalo de nuevo." },
+  de: { "profile.openTournamentFailed": "Das Turnier konnte nicht geöffnet werden. Prüfe die Verbindung und versuche es erneut." },
+  fr: { "profile.openTournamentFailed": "Impossible d'ouvrir le tournoi. Vérifiez la connexion et réessayez." },
+  sv: { "profile.openTournamentFailed": "Kunde inte öppna turneringen. Kontrollera nätverket och försök igen." },
+  da: { "profile.openTournamentFailed": "Kunne ikke åbne turneringen. Tjek netværket og prøv igen." },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 Object.assign(padelstarTranslations.nb, { "footer.linksAria": "Bruksanvisning og personvern" });
 // English strings for surfaces that previously fell back to Norwegian.
 Object.assign(padelstarTranslations.en, {

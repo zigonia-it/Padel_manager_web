@@ -18,7 +18,7 @@
 .system-admin-stat span { font-size: 0.8rem; opacity: 0.75; }
 .system-admin-stat strong { font-size: 1.6rem; }
 
-.system-admin-table-wrap { overflow-x: auto; }
+.system-admin-table-wrap { overflow-x: auto; max-width: 100%; }
 
 .system-admin-table {
   width: 100%;
@@ -31,7 +31,111 @@
   padding: 8px 10px;
   border-bottom: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
   text-align: left;
+  vertical-align: top;
+}
+
+/* Only the first column (a name or an address) may break anywhere; dates, counts and headings stay whole. */
+.system-admin-table th,
+.system-admin-table td:not(:first-child) { white-space: nowrap; }
+.system-admin-table td:first-child { min-width: 14ch; overflow-wrap: anywhere; }
+
+/* The administration tables need more room than the text pages this layout comes from. */
+.privacy-page:has(#systemAdminRoot) { width: min(1180px, calc(100% - 32px)); }
+
+/* Page-level text never runs past the card: long names, e-mail addresses and headings wrap. */
+#systemAdminRoot { min-width: 0; overflow-wrap: anywhere; }
+#systemAdminTitle { font-size: clamp(1.2rem, 5.4vw, 2.6rem); hyphens: auto; }
+.system-admin-stat span { overflow-wrap: anywhere; }
+
+.system-admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+}
+
+.system-admin-tab {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.system-admin-tab[aria-selected="true"] {
+  border-color: rgba(99, 181, 255, 0.5);
+  background: rgba(99, 181, 255, 0.16);
+}
+
+.system-admin-tab:focus-visible { outline: 2px solid var(--ui-blue-soft, #63b5ff); outline-offset: 2px; }
+
+.system-admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.system-admin-toolbar input[type="search"] { flex: 1 1 220px; min-width: 0; min-height: 40px; }
+.system-admin-toolbar select { flex: 0 1 160px; min-width: 0; min-height: 40px; }
+.system-admin-toolbar button { min-height: 40px; }
+
+.system-admin-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 0.85rem;
+}
+
+.system-admin-pager-buttons { display: inline-flex; gap: 8px; }
+.system-admin-pager button { min-height: 40px; }
+
+.system-admin-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border: 1px solid rgba(99, 181, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(99, 181, 255, 0.16);
+  font-size: 0.72rem;
+  font-weight: 700;
   white-space: nowrap;
+}
+
+/* Phones: every table row becomes a small card with the column name in front of each value. */
+@media (max-width: 720px) {
+  .system-admin-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .system-admin-table,
+  .system-admin-table tbody,
+  .system-admin-table tr,
+  .system-admin-table td { display: block; width: 100%; }
+  .system-admin-table tr {
+    margin: 0 0 10px;
+    padding: 6px 12px;
+    border: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.18));
+    border-radius: 12px;
+  }
+  .system-admin-table td {
+    display: grid;
+    grid-template-columns: minmax(84px, 38%) minmax(0, 1fr);
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--ds-border-hairline, rgba(159, 207, 255, 0.12));
+  }
+  .system-admin-table td:last-child { border-bottom: 0; }
+  .system-admin-table td:not(:first-child) { white-space: normal; }
+  .system-admin-table td::before { content: attr(data-label); font-size: 0.75rem; font-weight: 700; opacity: 0.7; }
+  .system-admin-tabs { gap: 4px; }
+  .system-admin-tab { flex: 1 1 calc(50% - 4px); padding: 8px 10px; }
 }
 
 .system-admin-toast {

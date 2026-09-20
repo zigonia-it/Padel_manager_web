@@ -35,7 +35,7 @@
     for (const r of await navigator.serviceWorker?.getRegistrations?.() ?? []) await r.unregister();
     const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const results = [];
-    const at = async (label, fn) => { await fn(); await wait(350); results.push(window.__audit(label)); };
+    const at = async (label, fn) => { await fn(); await wait(350); results.push(window.__audit(label)); if (window.__parity) results.push(window.__parity(label)); };
     await at("landing", () => showModule("landing"));
     await at("join", () => showModule("setup-player"));
     await at("create", () => showModule("setup-admin"));

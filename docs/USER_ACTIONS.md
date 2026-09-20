@@ -23,6 +23,8 @@ Status: `[ ]` open, `[x]` done.
 
 - [ ] **Light mode on your own devices (0.9).** Switch Lys/Mørk (header on desktop, menu on phone, or Profil → Utseende) and click through: landing, create, lobby, matches, scoring, standings, podium, guide/privacy, feedback, notifications. Tell me any screen where something is hard to read, too pale or looks wrong; I fix those in `styles/theme-light-manual.css`. Also check that a phone set to light/dark switches Padelstar when "Følg enheten" is chosen.
 
+- [ ] **0.9.1 fixes on real devices.** (a) iPhone: tap the flag in the menu, pick a language: only the custom list may open, never iOS's own list afterwards. (b) Phone menu: open it in dark and light, on a small phone too. (c) Create a tournament while signed in on the phone, sign in on the Mac, Profil → "Mine aktive turneringer" → "Fortsett som admin": it should open as admin (the lobby if not started). (d) Signed in as `sigurd.grodem@live.no`: `admin.html` → click through Oversikt, Turneringer, Brukere, Vedlikehold; look for text running outside the page. (e) Light mode: any screen where a panel still has a square background, a wrong color or a padding that looks off: tell me which screen, with a screenshot if you can.
+
 ## 3. Decisions I need (I made a safe default; tell me if you want it different)
 
 - [ ] **Withdrawal in a Cup** is blocked (a Cup bracket refers to team ids). Use "Bytt" instead. Do you want withdrawal in Cups too? (needs a design for the bracket)
@@ -32,9 +34,10 @@ Status: `[ ]` open, `[x]` done.
 - [ ] **Privacy text** names Supabase, Vercel, Vercel Analytics and Resend once in parentheses (a privacy notice normally has to name who handles the data). Remove them anyway?
 - [ ] **TV Mode button** is at the bottom of the desktop side rail and in the phone menu. Also add it to the phone bottom tab bar?
 - [ ] **Lobby vs. workspace**: I added "add players" and "name courts" to the lobby and kept Styring/Kamper/Tabell as they are. Do you want the workspace merged into one lobby screen (bigger redesign)?
+- [ ] **System administration, what next?** 0.9.1 gave `admin.html` read-only tabs (tournaments, users, maintenance). Not built until you decide: blocking/deleting users, force-finishing or deleting a tournament, opening any tournament as admin (support), a log view (there is no server-side log table today), and the global theme switch. Each of these is a new power over user data: tell me which you want and how they must be protected (confirmation, audit trail).
 - [ ] **Push categories** (Phase 18: invites, results, "only my own matches") need a server-side change to the push function and real-device testing; not built. Confirm you want it in 0.8 or later.
 
 ## 4. Later, when the time comes
 
-- [ ] Light mode (Phase 27, 0.9): the design files are in `assets/padelstar-webapp-ui-design/`. The Claude Design connector needs an interactive login (`/design-login`) that I cannot do; if you want me to use it instead of the local copy, log in from an interactive session and tell me.
+- [x] Light mode (Phase 27) was built from the local copy of the design files in `assets/padelstar-webapp-ui-design/` (colors only, as the roadmap says); the Claude Design connector was not needed. The real-device check is in section 2.
 - [ ] Supabase leaked-password protection needs the Pro plan (accepted for now).

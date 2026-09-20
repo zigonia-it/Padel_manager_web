@@ -1,5 +1,5 @@
 (function attachAppMeta(global) {
-  const APP_VERSION = "0.9.0";
+  const APP_VERSION = "0.9.1";
 
   function create({ navigator = global.navigator, window = global, elements = {}, startYear = 2026 } = {}) {
     function syncAppVersion() {
