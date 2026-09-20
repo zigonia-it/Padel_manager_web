@@ -131,6 +131,21 @@ test("without configuration the function says so instead of failing silently", a
   assert.doesNotMatch(JSON.stringify(half.body), /re_secret/, "never a value");
 });
 
+test("values pasted with quotes, spaces or a line break still work", async () => {
+  let sent;
+  const res = await post(valid(), {
+    env: { RESEND_API_KEY: '  "re_key"\n', FEEDBACK_TO_EMAIL: " 'me@example.com' ", FEEDBACK_FROM: '"Padelstar <feedback@example.com>"' },
+    fetchImpl: async (url, init) => { sent = { headers: init.headers, body: JSON.parse(init.body) }; return { ok: true, status: 200 }; },
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(sent.headers.Authorization, "Bearer re_key");
+  assert.deepEqual(sent.body.to, ["me@example.com"]);
+  assert.equal(sent.body.from, "Padelstar <feedback@example.com>");
+  const blank = await post(valid(), { env: { RESEND_API_KEY: "re_key", FEEDBACK_TO_EMAIL: '""' } });
+  assert.equal(blank.statusCode, 503, "an empty value counts as missing");
+  assert.deepEqual(blank.body.missing, ["FEEDBACK_TO_EMAIL"]);
+});
+
 test("a provider failure returns 502 and does not leak details", async () => {
   const res = await post(valid(), { fetchImpl: async () => ({ ok: false, status: 401, text: async () => "bad key re_secret" }) });
   assert.equal(res.statusCode, 502);

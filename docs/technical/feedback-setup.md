@@ -24,7 +24,7 @@ configured or reachable the user gets a ready-made email draft instead.
   plain-text email only, line breaks stripped from single-line fields.
 - Privacy: described on `privacy.html` (Vercel and Resend process the message).
 - Errors seen by the user: offline, not configured (503/404), too many messages (429), or a provider failure (502).
-- A 502 also carries `providerStatus` and, when Resend names it, `providerError`: `401`/`invalid_api_key` = wrong or revoked key; `403`/`validation_error` = the sender is not allowed to send to that address (the free `onboarding@resend.dev` sender only delivers to the address you signed up to Resend with, so `FEEDBACK_TO_EMAIL` must be exactly that address, or you verify a domain and set `FEEDBACK_FROM`); `422` = a malformed address.
+- A 502 also carries `providerStatus` and, when Resend names it, `providerError`: `401`/`invalid_api_key` = wrong or revoked key; `403`/`validation_error` = the sender is not allowed to send to that address (the free `onboarding@resend.dev` sender only delivers to the address you signed up to Resend with, so `FEEDBACK_TO_EMAIL` must be exactly that address, or you verify a domain and set `FEEDBACK_FROM`); `422` = a malformed address: check `FEEDBACK_TO_EMAIL` (one plain address) and, if you set it, `FEEDBACK_FROM` (`Name <address@your-verified-domain>`; delete the variable to use the free sender). Surrounding quotes and spaces in the values are ignored.
 
 ## Troubleshooting: "Feedback can't be sent from the app right now"
 
