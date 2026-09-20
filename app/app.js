@@ -721,6 +721,13 @@ const invitations = window.PadelstarInvitations.create({
   prefillJoinForm: (code) => prefillJoinForm(code),
   showModule: (moduleName) => showModule(moduleName),
   getAccountUser: () => accountAuth?.currentUser(),
+  // The email itself is sent by a server function that re-checks the admin token and the invitation with the database.
+  sendEmail: async (details) => {
+    try {
+      const response = await fetch("/api/invitation-email", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(details) });
+      return response.ok;
+    } catch { return false; }
+  },
 });
 invitations.bind();
 const profileSession = window.PadelstarProfileSession.create({

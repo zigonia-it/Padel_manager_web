@@ -14,7 +14,7 @@
     return ERRORS.find(([pattern]) => pattern.test(message))?.[1] ?? "invitations.error.failed";
   }
 
-  function create({ document, getState, getClient, isShared, remoteRpc, t, showToast, escapeHtml, prefillJoinForm, showModule, getAccountUser }) {
+  function create({ document, getState, getClient, isShared, remoteRpc, t, showToast, escapeHtml, prefillJoinForm, showModule, getAccountUser, sendEmail }) {
     const card = document.querySelector("#lobbyInviteCard");
     const form = document.querySelector("#lobbyInviteForm");
     const adminList = document.querySelector("#lobbyInvitationsList");
@@ -57,7 +57,16 @@
     async function invite(email) {
       if (!canInvite()) return null;
       const result = await admin("admin_invite_player", { p_email: email });
-      if (result) showToast(t("invitations.sent"), "status-message-success");
+      if (!result) return result;
+      const entry = result.find((item) => String(item.email).toLowerCase() === email.toLowerCase());
+      if (typeof sendEmail === "function" && entry?.status === "pending") {
+        // The invitation is already saved and shown in the app; the email is the second step and may fail on its own.
+        const state = getState();
+        const sent = await sendEmail({ tournamentId: state.id, adminToken: state.adminToken, inviteCode: state.inviteCode, email, language: state.settings?.language });
+        showToast(t(sent ? "invitations.emailSent" : "invitations.emailFailed", { email }), sent ? "status-message-success" : "status-message-error");
+      } else {
+        showToast(t("invitations.sent"), "status-message-success");
+      }
       return result;
     }
 

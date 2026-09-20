@@ -1278,6 +1278,18 @@ for (const [language, values] of Object.entries({
 })) {
   Object.assign(padelstarTranslations[language], values);
 }
+for (const [language, values] of Object.entries({
+  nb: { "invitations.emailSent": "Invitasjon sendt til {email}.", "invitations.emailFailed": "Invitasjonen er lagt inn, men e-posten kunne ikke sendes. Gi personen koden i stedet." },
+  nn: { "invitations.emailSent": "Invitasjon sendt til {email}.", "invitations.emailFailed": "Invitasjonen er lagt inn, men e-posten kunne ikkje sendast. Gi personen koden i staden." },
+  en: { "invitations.emailSent": "Invitation emailed to {email}.", "invitations.emailFailed": "The invitation was saved, but the email could not be sent. Give the person the code instead." },
+  es: { "invitations.emailSent": "Invitación enviada a {email}.", "invitations.emailFailed": "La invitación se guardó, pero no se pudo enviar el correo. Dale el código a la persona." },
+  de: { "invitations.emailSent": "Einladung an {email} gesendet.", "invitations.emailFailed": "Die Einladung wurde gespeichert, aber die E-Mail konnte nicht gesendet werden. Gib der Person stattdessen den Code." },
+  fr: { "invitations.emailSent": "Invitation envoyée à {email}.", "invitations.emailFailed": "L'invitation est enregistrée, mais l'e-mail n'a pas pu être envoyé. Donnez le code à la personne." },
+  sv: { "invitations.emailSent": "Inbjudan skickad till {email}.", "invitations.emailFailed": "Inbjudan är sparad, men e-posten kunde inte skickas. Ge personen koden i stället." },
+  da: { "invitations.emailSent": "Invitation sendt til {email}.", "invitations.emailFailed": "Invitationen er gemt, men e-mailen kunne ikke sendes. Giv personen koden i stedet." },
+})) {
+  Object.assign(padelstarTranslations[language], values);
+}
 Object.assign(padelstarTranslations.nb, { "footer.linksAria": "Bruksanvisning og personvern" });
 // English strings for surfaces that previously fell back to Norwegian.
 Object.assign(padelstarTranslations.en, {

@@ -128,3 +128,22 @@ test("the markup, script, precache and texts are in place", () => {
     assert.deepEqual(Array.from(missing), [], `missing in ${language}`);
   }
 });
+
+test("with an email sender, a pending invitation is also emailed, and a failed email is reported without losing the invitation", async () => {
+  const list = [{ id: "i1", email: "a@b.co", status: "pending" }];
+  const sent = [];
+  const doc = fakeDocument();
+  const make = (result) => lib.create({
+    document: doc, getState: () => ({ id: "t1", adminToken: "a".repeat(20), inviteCode: "ABCD2345", remoteMode: "shared", rounds: [], status: "Klar", settings: { language: "en" } }), getClient: () => ({}), isShared: () => true,
+    remoteRpc: async () => ({ data: { invitations: list }, error: null }),
+    t: (key) => key, showToast: (message, cls) => sent.push([message, cls]), escapeHtml: (v) => String(v), prefillJoinForm() {}, showModule() {}, getAccountUser: () => ({ id: "u1" }),
+    sendEmail: async (details) => { sent.push(["mail", details]); return result; },
+  });
+  assert.ok(await make(true).invite("A@b.co"));
+  assert.deepEqual(JSON.parse(JSON.stringify(sent[0])), ["mail", { tournamentId: "t1", adminToken: "a".repeat(20), inviteCode: "ABCD2345", email: "A@b.co", language: "en" }]);
+  assert.deepEqual(sent[1], ["invitations.emailSent", "status-message-success"]);
+  sent.length = 0;
+  assert.ok(await make(false).invite("a@b.co"), "the invitation itself still succeeded");
+  assert.deepEqual(sent.at(-1), ["invitations.emailFailed", "status-message-error"]);
+  assert.match(doc.map["#lobbyInvitationsList"].innerHTML, /a@b\.co/, "and it is listed");
+});
