@@ -716,6 +716,16 @@ const notificationCenterUi = window.PadelstarNotificationCenterUi.create({
 notificationCenterUi.bind();
 pushPreferences.bind({ document, storage: localStorage, onChange: () => void notificationSystem.syncPushPreferences() });
 const systemAdminLink = window.PadelstarSystemAdmin.createLink({ document, getClient: () => supabaseClient });
+const expiryNotice = window.PadelstarExpiryNotice.create({
+  document,
+  getState: () => state,
+  getClient: () => supabaseClient,
+  isShared: (current) => current.remoteMode === "shared",
+  remoteRpc: (client, name, payload) => remoteRpc(client, name, payload),
+  // one harmless change is enough: the database reactivates an expired tournament on any real change of its state
+  resume: async () => { state.lastResumedAt = new Date().toISOString(); saveState(); render(); showToast(t("expiry.resumed"), "status-message-success"); },
+  t: (key, values) => t(key, values),
+});
 const invitations = window.PadelstarInvitations.create({
   document,
   getState: () => state,
@@ -1719,6 +1729,7 @@ function render() {
   remotePlayerScore.syncHeartbeat();
   notificationCenterUi.render();
   invitations.renderAdmin();
+  void expiryNotice.refresh();
   return result;
 }
 

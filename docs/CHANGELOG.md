@@ -6,6 +6,17 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.16.0
+
+The "expired, resume" notice (Phase 16; in the 1.0 scope by the developer's decision 2026-09-20). Verified: 536 automated tests (5 new in `test/expiry-notice.test.js`), the new PGlite suite `supabase/tests/tournament-expiry-status.pglite.mjs` (8 checks), the migration applied live, and the notice rendered and dismissed in the browser against a stubbed server.
+
+### Added
+- **Expiry notice for the admin.** A guest tournament with no real activity for 30 days is marked expired and deleted 7 days later. The admin now sees a notice at the top of the workspace: "Turneringen har vært inaktiv i over 30 dager og er markert som utløpt. Den slettes {dato} hvis du ikke fortsetter.", with a button "Fortsett turneringen". The button makes one real change to the tournament (`lastResumedAt`), which the database trigger answers by clearing the expiry (any real state write reactivates it; this was already so).
+- `admin_tournament_expiry(uuid, text)` (migration `20260920240000_tournament_expiry_status.sql`, applied live): answers only to the tournament's admin token (rate-limited like the other admin functions) with `{expired, expiredAt, deletesAt}`; reading changes nothing. The app asks once per tournament and page load; a failure keeps the notice hidden. Account-owned tournaments never expire, so they never show it.
+
+### Not done
+- The notice is only seen when the admin opens the tournament (there is no email). A player or spectator sees nothing.
+
 ## 0.15.1
 
 The colour spec was sent again (2026-09-20). Every value in it already matched `styles/tokens.css` (0.11.0); this batch adds what the new text has on top, and fixes primary buttons that never followed the spec. Verified: 531 automated tests (3 new in `test/color-tokens.test.js`), computed styles checked in the browser in both themes.
