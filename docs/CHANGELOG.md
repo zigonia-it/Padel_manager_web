@@ -9,6 +9,7 @@ Only verified completed changes belong here.
 Work towards 0.10.0 (decisions of 2026-09-20), not yet released as a version:
 - Privacy page: a bottom section names the services used (Supabase in the EU, Vercel and its analytics, Resend, jsDelivr, flagcdn.com, quickchart.io).
 - TV Mode in the phone's bottom tab bar; the TV page now fits a phone (stacked panels, nothing clipped, header fits 375px).
+- System administration: a **Logg** tab (sign-ups, tournaments created / finished / deleted, the owner's own actions; ids and coarse facts only, kept 90 days, cleaned nightly by the job `padelstar-log-cleanup`) and **block / unblock / delete** for accounts in the Brukere tab (always confirmed, never the system owner or yourself; blocking ends the sessions, deleting cascades to profile, statistics and links and leaves owned tournaments without an owner). Migration `20260920170000` (29 database checks, applied and checked live, signup trigger verified with a rolled-back insert).
 - Invitations by email (`api/invitation-email.js`): sent from `invitations@padelstar.app` after the invitation is saved; the function re-checks admin token, pending invitation and invite code with the database and is rate limited.
 
 - The feedback API ignores surrounding quotes, spaces and line breaks in `RESEND_API_KEY`, `FEEDBACK_TO_EMAIL` and `FEEDBACK_FROM` (a pasted value with quotes made Resend answer 422).

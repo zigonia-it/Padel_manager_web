@@ -33,7 +33,7 @@ Status: `[ ]` open, `[x]` done.
 - [ ] **Privacy text** names Supabase, Vercel, Vercel Analytics and Resend once in parentheses (a privacy notice normally has to name who handles the data). Remove them anyway?
 - [ ] **TV Mode button** is at the bottom of the desktop side rail and in the phone menu. Also add it to the phone bottom tab bar?
 - [ ] **Lobby vs. workspace**: I added "add players" and "name courts" to the lobby and kept Styring/Kamper/Tabell as they are. Do you want the workspace merged into one lobby screen (bigger redesign)?
-- [ ] **System administration, what next?** 0.9.1 gave `admin.html` read-only tabs (tournaments, users, maintenance). Not built until you decide: blocking/deleting users, force-finishing or deleting a tournament, opening any tournament as admin (support), a log view (there is no server-side log table today), and the global theme switch. Each of these is a new power over user data: tell me which you want and how they must be protected (confirmation, audit trail).
+- [x] **System administration**: decided 2026-09-20: a log view and block/delete users (built, see CHANGELOG); everything else (force-finish, opening other people's tournaments, ...) is treated as privacy and is not built.
 - [ ] **Push categories** (Phase 18: invites, results, "only my own matches") need a server-side change to the push function and real-device testing; not built. Confirm you want it in 0.8 or later.
 
 ## 4. Later, when the time comes

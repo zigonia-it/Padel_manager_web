@@ -207,3 +207,71 @@ test("the admin styles keep long text inside the page: wrapping names, cards on 
   assert.match(css, /#systemAdminTitle \{ font-size: clamp\(/);
   assert.match(css, /\.privacy-page:has\(#systemAdminRoot\)/);
 });
+
+test("the log tab renders readable events with only ids and coarse facts, escaped", () => {
+  const data = { total: 3, limit: 25, offset: 0, rows: [
+    { id: 3, at: "2026-09-20T10:00:00Z", kind: "tournament_deleted", subject_type: "tournament", subject_id: "abc-<b>", actor_id: null, detail: { status: "Avsluttet", accountOwned: false, expired: true } },
+    { id: 2, at: "2026-09-20T09:00:00Z", kind: "user_deleted", subject_type: "user", subject_id: "u1", actor_id: "o", detail: { ownedTournaments: 2 } },
+    { id: 1, at: "2026-09-20T08:00:00Z", kind: "tournament_created", subject_type: "tournament", subject_id: "t1", actor_id: null, detail: { accountOwned: true, format: "cup" } },
+  ] };
+  const html = admin.renderLog(data, t);
+  assert.match(html, /Turnering slettet/);
+  assert.match(html, /Bruker slettet/);
+  assert.match(html, /2 turneringer mistet eieren/);
+  assert.match(html, /med konto · Cup/);
+  assert.match(html, /abc-&lt;b&gt;/);
+  assert.doesNotMatch(html, /<b>/);
+  assert.match(html, /90 dager/, "the retention is stated");
+  assert.match(admin.renderLog({ total: 0, rows: [] }, t), /Ingen hendelser/);
+});
+
+test("users can be blocked, unblocked and deleted from the list, never the system owner", () => {
+  const owner = { id: "o", email: "sigurd.grodem@live.no", email_confirmed: true, created_at: "2026-09-01T10:00:00Z", is_system_owner: true, blocked: false };
+  const other = { id: "u<1>", email: "a@b.no", email_confirmed: true, created_at: "2026-09-02T10:00:00Z", is_system_owner: false, blocked: false };
+  const gone = { id: "u2", email: "c@d.no", email_confirmed: true, created_at: "2026-09-03T10:00:00Z", is_system_owner: false, blocked: true };
+  const html = admin.renderUserList({ total: 3, limit: 25, offset: 0, rows: [owner, other, gone] }, t);
+  assert.equal((html.match(/data-user-action="delete"/g) ?? []).length, 2, "no delete for the owner");
+  assert.doesNotMatch(html.split("sigurd.grodem@live.no")[1].split("</tr>")[0], /data-user-action/, "the owner's row has no actions");
+  assert.match(html, /data-user-action="block" data-user-id="u&lt;1&gt;"/);
+  assert.match(html, /data-user-action="unblock" data-user-id="u2"/, "a blocked account offers unblock");
+  assert.match(html, /system-admin-badge-blocked">Blokkert</);
+});
+
+test("every user action is confirmed with the address, sends the right call, refreshes the list and reports a refusal", async () => {
+  const handlers = {}; const calls = []; const confirms = [];
+  const targets = { users: { innerHTML: "", inserted: "", setAttribute() {}, removeAttribute() {}, insertAdjacentHTML(_where, html) { this.inserted += html; } } };
+  const content = { addEventListener: (type, fn) => { handlers[type] = fn; }, querySelector: (s) => targets[s.match(/data-results="(\w+)"/)?.[1]] ?? null, querySelectorAll: () => [] };
+  let failNext = false;
+  const rpc = async (name, args) => { calls.push([name, args]); if (failNext) return { data: null, error: new Error("The system owner cannot be deleted") }; return { data: { total: 0, rows: [] }, error: null }; };
+  let answer = false;
+  admin.bindPanels({ content, client: { rpc }, t, locale: "nb-NO", confirmAction: (message) => { confirms.push(message); return answer; } });
+  const click = (action) => handlers.click({ target: { closest: (s) => (s === "[data-user-action]" ? { dataset: { userAction: action, userId: "u1", userEmail: "a@b.no" } } : null) } });
+
+  click("delete"); await new Promise((resolve) => setImmediate(resolve));
+  assert.match(confirms.at(-1), /a@b\.no/, "the question names the account");
+  assert.equal(calls.length, 0, "declining sends nothing");
+  answer = true;
+  click("delete"); await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(JSON.parse(JSON.stringify(calls[0])), ["admin_delete_user", { p_user_id: "u1" }]);
+  assert.equal(calls.at(-1)[0], "admin_list_users", "the list is refreshed");
+  click("block"); await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(JSON.parse(JSON.stringify(calls.find((c) => c[0] === "admin_block_user"))), ["admin_block_user", { p_user_id: "u1", p_blocked: true }]);
+  click("unblock"); await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(JSON.parse(JSON.stringify(calls.filter((c) => c[0] === "admin_block_user").at(-1))), ["admin_block_user", { p_user_id: "u1", p_blocked: false }]);
+  failNext = true;
+  click("delete"); await new Promise((resolve) => setImmediate(resolve));
+  assert.match(targets.users.inserted, /Handlingen kunne ikke gjennomføres/);
+});
+
+test("the log is fetched a page at a time with its filter", async () => {
+  const handlers = {}; const calls = [];
+  const target = { innerHTML: "", setAttribute() {}, removeAttribute() {} };
+  const content = { addEventListener: (type, fn) => { handlers[type] = fn; }, querySelector: () => target, querySelectorAll: () => [] };
+  admin.bindPanels({ content, client: { rpc: async (name, args) => { calls.push([name, args]); return { data: { total: 60, limit: 25, offset: args.p_offset, rows: [] }, error: null }; } }, t, locale: "nb-NO" });
+  handlers.submit({ target: { closest: () => ({ dataset: { searchForm: "log" }, elements: { kind: { value: "user" } } }) }, preventDefault() {} });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1))), ["admin_list_log", { p_kind: "user", p_limit: 25, p_offset: 0 }]);
+  const html = admin.renderShell({ counts: {}, recentTournaments: [] }, t);
+  assert.match(html, /data-tab="log"/);
+  assert.match(html, /data-search-form="log"/);
+});
