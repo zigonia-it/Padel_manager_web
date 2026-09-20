@@ -268,7 +268,7 @@ const remoteAdminActions = window.PadelstarRemoteAdminActions.create({
     saveState({ remote: false });
   },
   saveRemoteState: () => saveRemoteState(),
-  sendPushNotification: (kind, matchId) => sendPushNotification(kind, matchId),
+  sendPushNotification: (kind, matchId, options) => sendPushNotification(kind, matchId, options),
   showToast: (message, statusClass) => showToast(message, statusClass),
   setLastPersistedSequence: (sequence) => {
     lastRemotePersistedSequence = Math.max(lastRemotePersistedSequence, sequence);
@@ -667,6 +667,7 @@ const playerState = window.PadelstarPlayerState.create({
   getPlayerById: (id) => getPlayerById(id),
   getState: () => state,
   markCupCompleteIfDone: () => markCupCompleteIfDone(),
+  notifyWithdrawalDecision: (matchId, teammateId) => { if (teammateId) void sendPushNotification("withdrawal_decision", matchId, { playerIds: [teammateId] }); },
   recordEvent: (eventType, entityType, entityId, payload) => eventLog.record(eventType, entityType, entityId, payload),
   render: () => render(),
   saveState: () => saveState(),
@@ -686,8 +687,10 @@ const uiFeedback = window.PadelstarUiFeedback.create({
   elements,
   translate: (key, values) => t(key, values),
 });
+const pushPreferences = window.PadelstarPushPreferences;
 const notificationSystem = window.PadelstarNotificationSystem.create({
   getElements: () => elements,
+  getPushPreferences: () => pushPreferences.load(localStorage),
   getLocalStorage: () => localStorage,
   getNotificationPreferenceKey: () => notificationPreferenceKey,
   getObservability: () => observability,
@@ -711,6 +714,7 @@ const notificationCenterUi = window.PadelstarNotificationCenterUi.create({
   t: (key, values) => t(key, values),
 });
 notificationCenterUi.bind();
+pushPreferences.bind({ document, storage: localStorage, onChange: () => void notificationSystem.syncPushPreferences() });
 const systemAdminLink = window.PadelstarSystemAdmin.createLink({ document, getClient: () => supabaseClient });
 const invitations = window.PadelstarInvitations.create({
   document,
@@ -1950,8 +1954,8 @@ async function shareCurrentTournament() {
   return tournamentSharing.shareCurrentTournament();
 }
 
-async function sendPushNotification(kind, matchId = null) {
-  return notificationSystem.sendPushNotification(kind, matchId);
+async function sendPushNotification(kind, matchId = null, options = {}) {
+  return notificationSystem.sendPushNotification(kind, matchId, options);
 }
 
 function notificationsSupported() {

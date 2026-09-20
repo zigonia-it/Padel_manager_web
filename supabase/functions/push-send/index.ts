@@ -1,5 +1,6 @@
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { matchPlayerIds, normalizeCategory, selectRecipients, type Subscriber } from "./recipients.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://padelstar.app",
@@ -43,7 +44,7 @@ Deno.serve(async (request) => {
     return json({ error: "Push sender is not configured" }, 503);
   }
 
-  let payload: { tournamentId?: string; title?: string; body?: string; tag?: string };
+  let payload: { tournamentId?: string; title?: string; body?: string; tag?: string; category?: string; matchId?: string; playerIds?: unknown };
   try {
     payload = await request.json();
   } catch {
@@ -57,16 +58,25 @@ Deno.serve(async (request) => {
   if (!adminToken || adminToken.length < 32) return json({ error: "Push authorization failed" }, 401);
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } });
-  const { data: tournament } = await supabase.from("tournaments").select("id").eq("id", payload.tournamentId).eq("admin_token", adminToken).maybeSingle();
+  const { data: tournament } = await supabase.from("tournaments").select("id, state").eq("id", payload.tournamentId).eq("admin_token", adminToken).maybeSingle();
   if (!tournament) return json({ error: "Push authorization failed" }, 401);
 
   webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
-  const { data: subscriptions, error } = await supabase.from("push_subscriptions").select("id, subscription").eq("tournament_id", payload.tournamentId).limit(100);
+  const { data: subscriptions, error } = await supabase.from("push_subscriptions").select("id, player_id, subscription, prefs").eq("tournament_id", payload.tournamentId).limit(100);
   if (error) return json({ error: "Subscription lookup failed" }, 502);
+
+  // Each player chose which messages they want (prefs on their subscription); the choice is enforced here, not in the app.
+  // A match message goes only to the players of that match when they asked for "only my matches"; a message about a
+  // teammate's withdrawal (playerIds, sent by the tournament's admin) goes only to those players.
+  const category = normalizeCategory(payload.category);
+  const targets = Array.isArray(payload.playerIds) ? payload.playerIds.filter((id): id is string => typeof id === "string").slice(0, 8) : null;
+  // (a match that cannot be found gives an empty list: nobody who asked for "only mine" is bothered)
+  const participants = payload.matchId ? matchPlayerIds((tournament as { state?: unknown }).state, payload.matchId) : null;
+  const recipients = selectRecipients((subscriptions ?? []) as Subscriber[], { category, participants, targets });
 
   let sent = 0;
   let removed = 0;
-  for (const row of subscriptions ?? []) {
+  for (const row of recipients) {
     if (!isAllowedPushEndpoint((row.subscription as { endpoint?: unknown })?.endpoint)) {
       await supabase.from("push_subscriptions").delete().eq("id", row.id);
       removed += 1;
@@ -86,5 +96,5 @@ Deno.serve(async (request) => {
       }
     }
   }
-  return json({ ok: true, sent, removed });
+  return json({ ok: true, sent, removed, skipped: (subscriptions ?? []).length - recipients.length });
 });

@@ -95,7 +95,7 @@ const tournamentSharingSource = fs.readFileSync(path.join(root, "app", "tourname
 const resultSubmissionsSource = fs.readFileSync(path.join(root, "app", "result-submissions.js"), "utf8");
 
 test("service worker claims updates and keeps a navigation fallback", () => {
-  assert.match(serviceWorkerSource, /padelstar-v355/);
+  assert.match(serviceWorkerSource, /padelstar-v356/);
   assert.match(indexSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-53/);
   assert.match(serviceWorkerSource, /styles\/ui-consistency\.css\?v=padelstar-ui-consistency-53/);
   assert.match(indexSource, /app\/tournament-rounds\.js\?v=padelstar-rounds-2/);
@@ -111,7 +111,7 @@ test("service worker claims updates and keeps a navigation fallback", () => {
   assert.match(serviceWorkerSource, /padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /padelstar-accent-system-2/);
   assert.match(serviceWorkerSource, /padelstar-ui-feedback-2/);
-  assert.match(serviceWorkerSource, /padelstar-notification-system-2/);
+  assert.match(serviceWorkerSource, /padelstar-notification-system-3/);
   assert.match(serviceWorkerSource, /padelstar-profile-session-4/);
   assert.match(serviceWorkerSource, /padelstar-backup-format-2/);
   assert.match(serviceWorkerSource, /padelstar-link-utils-2/);
@@ -533,8 +533,8 @@ test("push notifications have their own browser and subscription boundary", () =
   assert.match(notificationSystemSource, /subscribeToPush/);
   assert.match(notificationSystemSource, /global\.PadelstarNotificationSystem/);
   assert.match(notificationSystemSource, /notifyPlayerMatch/);
-  assert.match(indexSource, /app\/notification-system\.js\?v=padelstar-notification-system-2/);
-  assert.match(serviceWorkerSource, /app\/notification-system\.js\?v=padelstar-notification-system-2/);
+  assert.match(indexSource, /app\/notification-system\.js\?v=padelstar-notification-system-3/);
+  assert.match(serviceWorkerSource, /app\/notification-system\.js\?v=padelstar-notification-system-3/);
   assert.doesNotMatch(appSource, /return Uint8Array\.from\(atob/);
 });
 
@@ -553,10 +553,10 @@ test("profile session lifecycle has its own storage and RPC boundary", () => {
   assert.match(indexSource, /app\/profile-session\.js\?v=padelstar-profile-session-4/);
   assert.match(serviceWorkerSource, /app\/profile-session\.js\?v=padelstar-profile-session-4/);
   assert.match(indexSource, /app\/bootstrap\/dom-elements\.js\?v=padelstar-dom-elements-15/);
-  assert.match(indexSource, /app\/bootstrap\/app-meta\.js\?v=padelstar-app-meta-16/);
+  assert.match(indexSource, /app\/bootstrap\/app-meta\.js\?v=padelstar-app-meta-17/);
   assert.match(indexSource, /app\/ui\/theme\.js\?v=padelstar-theme-2/);
   assert.match(serviceWorkerSource, /app\/bootstrap\/dom-elements\.js\?v=padelstar-dom-elements-15/);
-  assert.match(serviceWorkerSource, /app\/bootstrap\/app-meta\.js\?v=padelstar-app-meta-16/);
+  assert.match(serviceWorkerSource, /app\/bootstrap\/app-meta\.js\?v=padelstar-app-meta-17/);
   assert.match(serviceWorkerSource, /app\/ui\/theme\.js\?v=padelstar-theme-2/);
   assert.doesNotMatch(appSource, /p_profile_token:\s*profile\.accessToken/);
 });
@@ -772,8 +772,8 @@ test("player state operations have their own domain boundary", () => {
   assert.match(playerStateSource, /updatePlayer/);
   assert.match(playerStateSource, /removePlayer/);
   assert.match(playerStateSource, /window\.PadelstarPlayerState/);
-  assert.match(indexSource, /app\/player-state\.js\?v=padelstar-player-state-5/);
-  assert.match(serviceWorkerSource, /app\/player-state\.js\?v=padelstar-player-state-5/);
+  assert.match(indexSource, /app\/player-state\.js\?v=padelstar-player-state-6/);
+  assert.match(serviceWorkerSource, /app\/player-state\.js\?v=padelstar-player-state-6/);
   assert.match(appSource, /playerState\.updatePlayer\(playerId, updates\)/);
 });
 
@@ -977,22 +977,22 @@ test("active app files do not reference archived assets", () => {
 
 test("browser entrypoint and service worker use the same cache-busting versions", () => {
   assert.match(indexSource, /styles\/styles\.css\?v=padelstar-ui-104/);
-  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-84/);
+  assert.match(indexSource, /app\/app\.js\?v=padelstar-session-85/);
   assert.match(indexSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(indexSource, /app\/accent-system\.js\?v=padelstar-accent-system-2/);
   assert.match(indexSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
-  assert.match(indexSource, /app\/notification-system\.js\?v=padelstar-notification-system-2/);
+  assert.match(indexSource, /app\/notification-system\.js\?v=padelstar-notification-system-3/);
   assert.match(indexSource, /app\/link-utils\.js\?v=padelstar-link-utils-2/);
   assert.match(indexSource, /app\/tournament-state\.js\?v=padelstar-tournament-state-5/);
   assert.match(indexSource, /app\/state-bootstrap\.js\?v=padelstar-state-bootstrap-1/);
   assert.match(indexSource, /app\/module-routing\.js\?v=padelstar-module-routing-5/);
   assert.match(indexSource, /app\/session-policy\.js\?v=padelstar-session-policy-1/);
   assert.match(serviceWorkerSource, /styles\/styles\.css\?v=padelstar-ui-104/);
-  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-84/);
+  assert.match(serviceWorkerSource, /app\/app\.js\?v=padelstar-session-85/);
   assert.match(serviceWorkerSource, /app\/avatar-system\.js\?v=padelstar-avatar-system-1/);
   assert.match(serviceWorkerSource, /app\/accent-system\.js\?v=padelstar-accent-system-2/);
   assert.match(serviceWorkerSource, /app\/ui-feedback\.js\?v=padelstar-ui-feedback-2/);
-  assert.match(serviceWorkerSource, /app\/notification-system\.js\?v=padelstar-notification-system-2/);
+  assert.match(serviceWorkerSource, /app\/notification-system\.js\?v=padelstar-notification-system-3/);
   assert.match(indexSource, /app\/profile-session\.js\?v=padelstar-profile-session-4/);
   assert.match(serviceWorkerSource, /app\/profile-session\.js\?v=padelstar-profile-session-4/);
   assert.match(serviceWorkerSource, /app\/link-utils\.js\?v=padelstar-link-utils-2/);

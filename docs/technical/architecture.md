@@ -26,7 +26,7 @@ A static web app / PWA (no build step) served by Vercel, talking to Supabase for
 
 - **Supabase**: see `database.md`.
 - **Vercel functions** (`api/`): `health.js` (`/api/health`, reports the version) and `feedback.js` (emails the beta feedback through Resend; needs `RESEND_API_KEY` and `FEEDBACK_TO_EMAIL`, see `feedback-setup.md`).
-- **Edge Function**: `supabase/functions/push-send` sends Web Push notifications.
+- **Edge Function**: `supabase/functions/push-send` sends Web Push notifications. It authenticates the tournament's admin token, then filters the subscriptions by each player's choices (`recipients.ts`: category on/off, "only my matches", targeted withdrawal messages) before sending. Deployed with `verify_jwt: false`.
 - **Headers/CSP**: `vercel.json` (same-origin framing only, needed for the guide/privacy popup).
 
 ## Tests

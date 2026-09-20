@@ -5,6 +5,7 @@
       getLocalStorage = () => global.localStorage,
       getNotificationPreferenceKey,
       getObservability = () => null,
+      getPushPreferences = () => ({}),
       getPushSubscriptionStorageKey,
       getState,
       getSupabaseClient,
@@ -30,7 +31,8 @@
       return translate(key, values);
     }
 
-    async function sendPushNotification(kind, matchId = null) {
+    // `playerIds`: only these players get it (a teammate who must decide after a withdrawal).
+    async function sendPushNotification(kind, matchId = null, { playerIds = null } = {}) {
       const supabaseClient = getSupabaseClient();
       const currentState = state();
       if (!supabaseClient || !currentState.id || !currentState.adminToken || !supabaseClient.functions) return;
@@ -38,6 +40,11 @@
         ? {
           title: t("notifications.matchReadyTitle"),
           body: t("notifications.matchPlayingBody"),
+        }
+        : kind === "withdrawal_decision"
+        ? {
+          title: t("notifications.withdrawalTitle"),
+          body: t("notifications.withdrawalBody"),
         }
         : kind === "result_corrected"
           ? {
@@ -55,6 +62,9 @@
             title: copy.title,
             body: copy.body,
             tag: `padelstar-${kind}-${matchId ?? currentState.currentRound}`,
+            category: { match_started: "match", round_ready: "match", result_corrected: "result", withdrawal_decision: "withdrawal" }[kind] ?? "match",
+            matchId: matchId ?? undefined,
+            playerIds: playerIds ?? undefined,
           },
           headers: { "x-padelstar-admin-token": currentState.adminToken },
         });
@@ -151,6 +161,7 @@
             p_subscription: json,
           });
           if (error) throw error;
+          await syncPushPreferences();
         }
         getObservability()?.emit("push_subscription_enabled");
         return subscription;
@@ -158,6 +169,28 @@
         getObservability()?.error("push_subscription_failed", error);
         storage().removeItem(getPushSubscriptionStorageKey());
         return null;
+      }
+    }
+
+    // Copies this device's push choices to its subscription; the push-send function filters by them.
+    async function syncPushPreferences() {
+      const serialized = storage().getItem(getPushSubscriptionStorageKey());
+      const currentState = state();
+      const supabaseClient = getSupabaseClient();
+      if (!serialized || !supabaseClient || !currentState.playerToken || !currentState.selectedPlayerId) return false;
+      try {
+        const { error } = await remoteRpc(supabaseClient, "set_push_preferences", {
+          p_tournament_id: currentState.id,
+          p_player_id: currentState.selectedPlayerId,
+          p_player_token: currentState.playerToken,
+          p_endpoint: JSON.parse(serialized).endpoint,
+          p_prefs: getPushPreferences(),
+        });
+        if (error) throw error;
+        return true;
+      } catch (error) {
+        getObservability()?.error("push_preferences_failed", error);
+        return false;
       }
     }
 
@@ -196,6 +229,7 @@
       renderNotificationControl,
       sendPushNotification,
       subscribeToPush,
+      syncPushPreferences,
       toggleNotifications,
       unsubscribeFromPush,
     };
