@@ -17,7 +17,7 @@
 }
 
 .wizard-progress-bar.is-active {
-  background: var(--gold-bright, var(--accent-blue-bright));
+  background: var(--ramp-accent);
 }
 
 .wizard-step-label {

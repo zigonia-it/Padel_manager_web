@@ -358,7 +358,7 @@ body[data-theme="classic"] .button-primary {
   color: var(--btn-primary-ink);
   background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to));
   border-color: transparent;
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent-blue-bright) calc(26% * var(--glow-strength)), transparent);
+  box-shadow: var(--btn-primary-shadow);
 }
 
 body[data-theme="classic"] .match-card,
@@ -911,7 +911,7 @@ body.workspace-active {
   border-radius: 14px;
   background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to));
   color: var(--btn-primary-ink);
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--accent-blue-bright) calc(28% * var(--glow-strength)), transparent);
+  box-shadow: var(--btn-primary-shadow);
 }
 
 @media (max-width: 680px) {

@@ -1350,11 +1350,7 @@ h3 {
 
   border-radius: inherit;
 
-  background:
-    linear-gradient(90deg,
-      var(--gold-dark),
-      var(--gold),
-      var(--gold-light));
+  background: var(--ramp-accent);
 
   box-shadow:
     0 0 12px color-mix(in srgb, var(--accent-blue) 36%, transparent);
@@ -1391,7 +1387,7 @@ h3 {
   box-shadow:
     inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(38% * var(--glow-strength)), transparent),
     inset 0 -1px 0 color-mix(in srgb, var(--accent-blue) 52%, transparent),
-    0 10px 26px color-mix(in srgb, var(--accent-blue) 24%, transparent);
+    var(--btn-primary-shadow);
 }
 
 .primary:not(:disabled):hover {

@@ -43,6 +43,19 @@
   --negative:          #f2909f;
   --warning:           #e6c05a;
 
+  /* logo-derived: violet rim + chrome ramp. Violet only as the far end of an accent ramp (progress, live-state highlights,
+     the brand gem), never as body text or a large fill. The chrome ramp is for bevel/edge treatments on brand surfaces only. */
+  --accent-violet:     #7848f0;
+  --accent-violet-deep:#4800a8;
+  --chrome-high:       #f0f0f0;
+  --chrome-mid:        #b0d0f0;
+  --chrome-low:        #6080b0;
+  --brand-navy:        #001020;
+
+  /* accent ramp: blue into the logo's violet rim */
+  --ramp-accent:       linear-gradient(90deg, #3d97f0, #7848f0);
+  --ramp-gem:          linear-gradient(150deg, #62b6ff, #4800a8);
+
   /* accent as small text: bright on dark, deep on light (the bright accent only passes 3:1 on the light page) */
   --accent-text:       var(--accent-blue-bright);
 
@@ -50,6 +63,7 @@
   --btn-primary-from:  #a1d6ff;
   --btn-primary-to:    #008df9;
   --btn-primary-ink:   #04121f;
+  --btn-primary-shadow: 0 10px 26px rgba(35, 108, 168, .4);
 
   /* secondary / ghost button washes */
   --btn-secondary-bg:  linear-gradient(180deg, #5badff0d, #5badff30);
@@ -87,9 +101,20 @@
   --negative:          #ad3550;
   --warning:           #8a6a10;
 
+  --accent-violet:     #5a2bc4;
+  --accent-violet-deep:#3d1a8f;
+  --chrome-high:       #ffffff;
+  --chrome-mid:        #8aa8cc;
+  --chrome-low:        #46617f;
+  --brand-navy:        #001020;
+
+  --ramp-accent:       linear-gradient(90deg, #17559f, #5a2bc4);
+  --ramp-gem:          linear-gradient(150deg, #62b6ff, #3d1a8f);
+
   --btn-primary-from:  #2f7fd4;
   --btn-primary-to:    #17559f;
   --btn-primary-ink:   #ffffff;
+  --btn-primary-shadow: 0 8px 20px rgba(23, 85, 159, .28);
 
   --btn-secondary-bg:  linear-gradient(180deg, #5badff0d, #5badff30);
   --btn-secondary-border: rgba(91, 173, 255, .42);
