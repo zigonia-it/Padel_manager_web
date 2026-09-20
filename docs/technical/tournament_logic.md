@@ -34,11 +34,22 @@ Describes the implemented rules. The client (`app/*.js`) and the database functi
 
 The admin can correct a finished result with a mandatory reason (entry error, wrong team, players agreed, referee decision, restore, other + comment), after a consequence simulation (green/yellow/orange/red). The old result is kept in the match's correction history and can be restored (a restore is another correction). Cup results that later matches depend on are protected; nothing can be corrected after the tournament is finished, and statistics are computed from the final state.
 
+### Corrections after the tournament is finished (0.10.0)
+
+A finished (not cancelled) tournament still accepts a correction from the admin. The result and the correction history change; the tournament stays finished and read-only otherwise; the account statistics (matches, wins, sets, games) are recalculated from the corrected results in the same transaction. In a Cup a winner change that later matches depend on is refused. A guest tournament can be corrected only until the 24-hour retention deletes it (guests have no statistics).
+
 ## Replacement and withdrawal
 
 - Every player has a structural `slotId`. **Replacement** moves the slot to a new person in every unplayed match; finished matches keep who played; a running match restarts at 0–0 after a warning; a result awaiting approval blocks it. The original can be put back.
 - **Withdrawal without a replacement**: the player's finished matches and statistics stay; their unplayed matches are kept and wait for the remaining teammate, who plays alone (1 against 2) or gives a walkover; the admin can decide for them. If nobody is left on that side the opponents win by walkover automatically; a match where players on both teams withdrew is cancelled; a running match is annulled first. A withdrawn player can be put back (not while a match is being played 1 against 2) or replaced. Not offered in a Cup.
 
+### Withdrawal in a Cup (decided 2026-09-20, planned for 0.12, not built)
+
+- The same conditions as in a Round Robin: the remaining teammate plays alone or gives a walkover; the admin can decide.
+- If all players of one team have withdrawn, a walkover is enforced for the opponents and the bracket advances.
+- If both sides of a match have withdrawn, the best-placed losing team takes their place; the admin confirms (proposal for "best-placed": the round reached, then the games difference; to be confirmed in the design).
+- Until this is built, use "Bytt" (replacement) in a Cup.
+
 ## Statistics
 
-Per tournament and account: matches, wins, sets, games — computed once, at the finish, from the final locked state (see `database.md`). Guests get no permanent history.
+Per tournament and account: matches, wins, sets, games — computed at the finish from the final locked state, and recalculated when a result is corrected after the finish (see `database.md`). Guests get no permanent history.

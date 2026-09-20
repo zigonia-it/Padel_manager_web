@@ -17,7 +17,11 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync og to Ver
 2. Kjør full lokal verifisering.
 3. Én gren per versjon (`v0.8`, `v0.9`, ...). Ikke start en ny gren før gjeldende er stabil og kan merges til `main`.
 4. Åpne en PR mot `main`. Vercel bygger en preview per PR og produksjon fra `main`.
-5. Etter deploy: åpne `https://padelstar.app` og kontroller versjon, footer, personvernlenke, manifest og at `/api/health` svarer `ok: true`.
+5. Etter deploy: åpne `https://padelstar.app` og kontroller versjon, footer, personvernlenke, manifest og at `/api/health` svarer `ok: true` med riktig versjon. **Kontroller alltid versjonen etter en merge**: merge-committen til PR #16 startet ikke en produksjonsdeploy i Vercel (2026-09-20); en tom commit via en PR startet den.
+6. Vercel sletter gamle deployments etter 30 dager (retention). Lagringen for deployments kan gå over gratisgrensen; slett gamle deployments for hånd hvis Vercel nekter en ny deploy.
+7. GitHub Pages er slått av (workflowen og siden er deaktivert 2026-09-20); Vercel er eneste vert.
+8. Verktøy: `node scripts/bump-asset-versions.js` (bumper `?v=`-versjoner og cache-navnet etter endringer; `--check` verifiserer), `node scripts/color-audit.js` (ingen fargeliteraler utenfor `styles/tokens.css`), `scripts/ui-audit.js`, `scripts/contrast-audit.js` og `scripts/theme-parity-audit.js` (leses inn i nettleseren mot lokal preview).
+9. En kodeformaterer som formaterer `index.html` ved lagring endrer markup som testene sjekker nøyaktig; slå av formatering ved lagring for den filen.
 
 ## Supabase-migrering
 
@@ -29,13 +33,16 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync og to Ver
 
 ## Miljøvariabler (Vercel)
 
-- `RESEND_API_KEY`, `FEEDBACK_TO_EMAIL` (og valgfritt `FEEDBACK_FROM`) for tilbakemeldingsknappen. Ny variabel krever ny deployment. Se `docs/technical/feedback-setup.md`.
+- `RESEND_API_KEY`, `FEEDBACK_TO_EMAIL` (og valgfritt `FEEDBACK_FROM`) for tilbakemeldingsknappen. `RESEND_API_KEY` brukes også av invitasjons-e-posten (`api/invitation-email.js`; valgfritt `INVITE_FROM`, standard `Padelstar <invitations@padelstar.app>`, domenet er verifisert i Resend). Ny variabel krever ny deployment. Verdier lagt inn med anførselstegn eller mellomrom ignoreres. Se `docs/technical/feedback-setup.md`.
+- Aldri legg en nøkkel i variabelens *navn*, og aldri en nøkkel i `FEEDBACK_TO_EMAIL` (2026-09-20: det ga 422 fra Resend).
+- "Jeg er ikke en robot": Cloudflare Turnstile. Nettstedsnøkkelen (offentlig) ligger i `supabase-config.js` (`captchaSiteKey`); den hemmelige nøkkelen legges inn av utvikleren i Supabase (Authentication -> Attack Protection). Se `docs/technical/captcha-setup.md`.
 - Supabase-adresse og publiserbar nøkkel ligger i klienten; hemmelige nøkler skal aldri ligge i repoet.
 
 ## Retensjonsjobber
 
 - `padelstar-retention-cleanup` (`pg_cron`, hver time) kjører `cleanup_expired_tournaments()` og `cleanup_expired_player_profiles()`. Funksjonene er `SECURITY DEFINER` og tilbakekalt fra `public`, `anon` og `authenticated`.
 - `padelstar-result-approvals` (hvert minutt) eskalerer og auto-godkjenner resultater som venter.
+- `padelstar-log-cleanup` (03:40 daglig) sletter systemloggen eldre enn 90 dager (`cleanup_system_log()`).
 - Kontroller `cron.job` etter migrering. Loggfør returverdier uten profil-ID-er eller tokens.
 - Frister og oppførsel er beskrevet i `docs/technical/privacy-retention.md`.
 

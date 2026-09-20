@@ -97,7 +97,19 @@ Detailed sequencing is in `ROADMAP.md`.
 - **Retention**: a finished guest tournament stays readable for 24 hours; an idle one expires after 30 days and is deleted 7 days later unless resumed; account tournaments and statistics are kept.
 - **Notifications**: in-app notifications (match ready, result to approve, teammate withdrew, correction, finished) with a notification center; sounds and vibration can be switched off on the profile page.
 - **TV Mode** opens in a new tab, read-only, in the chosen language. **Guide and privacy** open as a popup.
-- **System owner**: exactly one protected owner, stored in the database; `admin.html` shows a minimal overview and only to the owner.
+- **System owner**: exactly one protected owner, stored in the database; `admin.html` and its data are for the owner only (details below).
+- **Corrections after the finish**: the admin can still correct a finished result (not in a cancelled tournament); the account statistics follow the corrected result. A Cup result that later matches depend on stays blocked.
+- **Invitations by email**: the invitation is saved in the app first, then emailed from `invitations@padelstar.app` (join link and code). The invited person also sees it under Profil after signing in with that verified address.
+- **System owner**: `admin.html` has Oversikt, Turneringer (search, filter, paging), Brukere (search, block, unblock, delete; never the owner), Logg (sign-ups, tournaments created/finished/deleted, the owner's own actions; ids only, 90 days) and Vedlikehold (cleanup jobs). Everything else the owner could do with other people's tournaments is deliberately not built (privacy).
+- **TV Mode** works on desktop and phone (button in the rail and the phone tab bar; the page stacks on a phone) and has the Lys/Mørk switch.
+- **Privacy text** ends with a section naming the services used (Supabase in the EU, Vercel, Resend, jsDelivr, flagcdn.com, Cloudflare Turnstile, quickchart.io).
+- **Colour system**: one token set (`styles/tokens.css`), two themes: dark is a lifted slate navy, light is a soft blue-white with white cards; the choice is saved, the device decides only on the first visit. No colour literals in components.
+- **Sign-up check**: a Cloudflare Turnstile "I'm not a robot" dialog before sign-up, sign-in and the admin sign-in link (enforced by Supabase once its secret is set).
+
+## Decided, not yet built (planned for 0.12)
+
+- **Withdrawal in a Cup** (developer, 2026-09-20): the same conditions as in a Round Robin. If all players of one team have withdrawn, a walkover is enforced for the opponents. If both sides of a match have withdrawn, the best-placed losing team takes their place, and the admin confirms it.
+- **One screen for lobby, Styring, Kamper and Tabell** (developer, 2026-09-20): the lobby and the three workspace tabs are merged into one screen.
 
 ## Later versions
 

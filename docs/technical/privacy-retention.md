@@ -19,6 +19,9 @@ Padelstar lagrer minst mulig persondata og bruker det bare til å administrere o
 - Varslingsabonnement (push) og lokale innstillinger i nettleseren (localStorage, IndexedDB, sync-kø, siste-kjente-gode kopi).
 - Tilbakemeldinger sendt fra appen: tekst, valgfri e-post og tekniske opplysninger, sendt som e-post via Vercel og Resend. Meldingen lagres ikke i appen.
 - Vercel Analytics for aggregert trafikkmåling.
+- Systemlogg (`system_log`, kun for systemeieren): nye kontoer, turneringer opprettet/avsluttet/slettet og eierens egne handlinger (blokkering, sletting). Bare id-er og grove fakta, aldri navn, e-postadresser eller turneringsinnhold. Oppbevares i **90 dager** (jobben `padelstar-log-cleanup`).
+- Invitasjoner: e-postadressen til den inviterte lagres i `tournament_invitations` til turneringen slettes, og sendes gjennom Resend. Robotkontrollen (Cloudflare Turnstile) ser IP-adresse og nettleser ved registrering og innlogging.
+- Tredjeparter som er nevnt i personvernsiden: Supabase (EU, Irland), Vercel, Resend, jsDelivr, flagcdn.com, Cloudflare Turnstile og quickchart.io (påmeldingslenken sendes dit for å tegne QR-koden).
 
 ## Retensjon (gjeldende oppførsel)
 
