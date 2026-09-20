@@ -473,14 +473,14 @@ body[data-theme="classic"] .landing-cta:hover:not(:disabled) {
   box-shadow: 0 12px 30px color-mix(in srgb, var(--accent-blue-bright) calc(20% * var(--glow-strength)), transparent), inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(8% * var(--glow-strength)), transparent);
 }
 body[data-theme="classic"] .landing-cta:not(.landing-cta-secondary) {
-  border-color: color-mix(in srgb, var(--accent-cyan) 92%, transparent);
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue-bright));
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to));
   color: var(--btn-primary-ink);
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent-blue-bright) calc(22% * var(--glow-strength)), transparent), inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(55% * var(--glow-strength)), transparent);
+  box-shadow: var(--btn-primary-shadow), inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(55% * var(--glow-strength)), transparent);
 }
 body[data-theme="classic"] .landing-cta:not(.landing-cta-secondary):hover:not(:disabled) {
-  border-color: var(--accent-cyan);
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-cyan));
+  border-color: transparent;
+  background: linear-gradient(180deg, var(--btn-primary-to), var(--btn-primary-to));
 }
 body[data-theme="classic"] .admin-subtabs {
   display: grid;
@@ -515,7 +515,7 @@ body[data-theme="classic"] .admin-subtabs .subtab.active {
   border-radius: 10px;
   background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to));
   color: var(--btn-primary-ink);
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent-blue-bright) calc(20% * var(--glow-strength)), transparent), inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(55% * var(--glow-strength)), transparent);
+  box-shadow: var(--btn-primary-shadow), inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(55% * var(--glow-strength)), transparent);
 }
 /* Figma's secondary actions share the same dark surface as the install
    action; the primary action remains the light-blue entry point. */
@@ -580,7 +580,7 @@ body[data-theme="classic"] input, body[data-theme="classic"] textarea, body[data
   font-family: var(--font-ui); font-size: 1rem; font-weight: 400;
 }
 body[data-theme="classic"] .primary, body[data-theme="classic"] button.primary {
-  border: 0; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--figma-accent), var(--figma-accent-strong)); color: var(--btn-primary-ink); box-shadow: none;
+  border: 0; border-radius: var(--radius-sm); background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to)); color: var(--btn-primary-ink); box-shadow: var(--btn-primary-shadow);
 }
 body[data-theme="classic"] .site-footer { margin-top: 0; padding: 48px 80px; border-top: 1px solid var(--figma-border); background: var(--surface-sunken); }
 @media (max-width: 900px) {

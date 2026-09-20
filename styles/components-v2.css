@@ -28,7 +28,7 @@
   background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to));
   color: var(--btn-primary-ink);
   border: 0;
-  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent-blue-bright) calc(40% * var(--glow-strength)), transparent);
+  box-shadow: var(--btn-primary-shadow);
 }
 
 .ds-btn-secondary {

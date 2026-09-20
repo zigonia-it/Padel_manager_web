@@ -23,7 +23,9 @@ const DARK = {
   "--border-subtle": "rgba(159, 207, 255, .108)", "--border-default": "rgba(159, 207, 255, .18)", "--border-strong": "rgba(159, 207, 255, .324)",
   "--ink-heading": "#d5e2f0", "--ink-body": "#c2d4e5", "--ink-muted": "#9cb0c4", "--ink-faint": "#8a9db1",
   "--accent-blue": "#3d97f0", "--accent-blue-bright": "#62b6ff", "--accent-cyan": "#17abe4", "--positive": "#7ed49e", "--negative": "#f2909f", "--warning": "#e6c05a",
-  "--btn-primary-from": "#a1d6ff", "--btn-primary-to": "#008df9", "--btn-primary-ink": "#04121f",
+  "--btn-primary-from": "#a1d6ff", "--btn-primary-to": "#008df9", "--btn-primary-ink": "#04121f", "--btn-primary-shadow": "0 10px 26px rgba(35, 108, 168, .4)",
+  "--accent-violet": "#7848f0", "--accent-violet-deep": "#4800a8", "--chrome-high": "#f0f0f0", "--chrome-mid": "#b0d0f0", "--chrome-low": "#6080b0", "--brand-navy": "#001020",
+  "--ramp-accent": "linear-gradient(90deg, #3d97f0, #7848f0)", "--ramp-gem": "linear-gradient(150deg, #62b6ff, #4800a8)",
   "--btn-secondary-bg": "linear-gradient(180deg, #5badff0d, #5badff30)", "--btn-secondary-border": "rgba(91, 173, 255, .42)", "--btn-secondary-ink": "#8ecbff",
 };
 const LIGHT = {
@@ -31,7 +33,9 @@ const LIGHT = {
   "--border-subtle": "rgba(20, 60, 105, .1)", "--border-default": "rgba(20, 60, 105, .154)", "--border-strong": "rgba(20, 60, 105, .277)",
   "--ink-heading": "#14243a", "--ink-body": "#3c5570", "--ink-muted": "#415870", "--ink-faint": "#415870",
   "--accent-blue": "#17559f", "--accent-blue-bright": "#2f7fd4", "--accent-cyan": "#0a7aa8", "--positive": "#17603c", "--negative": "#ad3550", "--warning": "#8a6a10",
-  "--btn-primary-from": "#2f7fd4", "--btn-primary-to": "#17559f", "--btn-primary-ink": "#ffffff",
+  "--btn-primary-from": "#2f7fd4", "--btn-primary-to": "#17559f", "--btn-primary-ink": "#ffffff", "--btn-primary-shadow": "0 8px 20px rgba(23, 85, 159, .28)",
+  "--accent-violet": "#5a2bc4", "--accent-violet-deep": "#3d1a8f", "--chrome-high": "#ffffff", "--chrome-mid": "#8aa8cc", "--chrome-low": "#46617f", "--brand-navy": "#001020",
+  "--ramp-accent": "linear-gradient(90deg, #17559f, #5a2bc4)", "--ramp-gem": "linear-gradient(150deg, #62b6ff, #3d1a8f)",
   "--btn-secondary-bg": "linear-gradient(180deg, #5badff0d, #5badff30)", "--btn-secondary-border": "rgba(91, 173, 255, .42)", "--btn-secondary-ink": "#17559f",
 };
 
@@ -82,6 +86,30 @@ test("the primary button: ink 4.5:1 on both ends of the dark gradient, and 4:1 o
   // white on #2f7fd4 is 4.11:1 (the lighter end of the specified light gradient), on #17559f 7.4:1
   assert.ok(contrast(LIGHT["--btn-primary-ink"], LIGHT["--btn-primary-from"]) >= 4);
   assert.ok(contrast(LIGHT["--btn-primary-ink"], LIGHT["--btn-primary-to"]) >= 4.5);
+});
+
+test("the primary shadow is themed (a tight deep one on light, the wide glow on dark) and every primary button uses it", () => {
+  assert.notEqual(dark["--btn-primary-shadow"], light["--btn-primary-shadow"]);
+  const css = ["components-v2.css", "components.css", "styles.css", "ui-consistency.css"].map((f) => read("styles", f)).join("\n");
+  assert.ok((css.match(/var\(--btn-primary-shadow\)/g) ?? []).length >= 5, "the primary buttons take their shadow from the token");
+  assert.doesNotMatch(css, /\.ds-btn-primary \{[^}]*box-shadow: 0 10px 26px/, "no local glow on the primary button");
+});
+
+test("the classic overrides do not replace the primary gradient or shadow (the buttons a person actually sees)", () => {
+  const css = read("styles", "ui-consistency.css");
+  const primary = css.match(/body\[data-theme="classic"\] \.primary, body\[data-theme="classic"\] button\.primary \{[^}]*\}/)[0];
+  assert.match(primary, /linear-gradient\(180deg, var\(--btn-primary-from\), var\(--btn-primary-to\)\)/);
+  assert.match(primary, /box-shadow: var\(--btn-primary-shadow\)/);
+  const landing = css.match(/body\[data-theme="classic"\] \.landing-cta:not\(\.landing-cta-secondary\) \{[^}]*\}/)[0];
+  assert.match(landing, /var\(--btn-primary-from\), var\(--btn-primary-to\)/);
+  assert.match(landing, /var\(--btn-primary-shadow\)/);
+});
+
+test("the accent ramp (blue into the logo's violet) fills progress bars; violet is never a text colour", () => {
+  assert.match(read("styles", "components.css"), /\.progress-track span \{[^}]*background: var\(--ramp-accent\)/);
+  assert.match(read("styles", "create-wizard.css"), /\.wizard-progress-bar\.is-active \{\s*background: var\(--ramp-accent\)/);
+  const css = fs.readdirSync(path.join(root, "styles")).filter((f) => f.endsWith(".css") && f !== "tokens.css").map((f) => read("styles", f)).join("\n");
+  assert.doesNotMatch(css, /(^|[^-])color:\s*var\(--(accent-violet|accent-violet-deep|chrome-[a-z]+)\)/m, "violet and chrome are not text colours");
 });
 
 test("components use tokens: no colour literal outside styles/tokens.css (scripts/color-audit.js)", () => {

@@ -6,6 +6,18 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.15.1
+
+The colour spec was sent again (2026-09-20). Every value in it already matched `styles/tokens.css` (0.11.0); this batch adds what the new text has on top, and fixes primary buttons that never followed the spec. Verified: 531 automated tests (3 new in `test/color-tokens.test.js`), computed styles checked in the browser in both themes.
+
+### Added
+- **Logo-derived tokens** (both themes, exact values from the spec): `--accent-violet`, `--accent-violet-deep`, `--chrome-high/mid/low`, `--brand-navy`, the two ramps `--ramp-accent` (blue into violet) and `--ramp-gem`, and the themed `--btn-primary-shadow` (dark: the wide blue glow, light: a tighter deeper shadow).
+- The accent ramp fills the progress bars (`.progress-track`, the create-wizard steps). Violet and chrome are never used as text colours (tested). `--ramp-gem` is defined for the brand monogram, but no component uses it yet: the header logo is an image, and the player gems keep the roster palette.
+
+### Fixed
+- **Primary buttons did not use the primary tokens.** A later override in `ui-consistency.css` gave `.primary` and the landing call-to-action a cyan-to-blue diagonal gradient and no shadow, so the spec's gradient (`--btn-primary-from/to`, pale-to-vivid on dark, deep blue with white text on light) and shadow were not what people saw. Both now use the tokens, and the other primary-style controls (active sub-tab, menu item, `.ds-btn-primary`) take their shadow from `--btn-primary-shadow` too. This is a visible change of the primary buttons in both themes: please look at it (USER_ACTIONS).
+- The service worker precached `./assets/icons/vs_icon`; the file is now `vs_icon.png` (renamed in the working tree), so the reference follows it. The old extensionless file is removed.
+
 ## 0.15.0
 
 Push categories (Phase 18; developer's decisions 2026-09-20: categories match/ready, results, withdrawal decisions and invitations, one "only my own matches" switch, choices stored on the push subscription). This version builds the tournament categories; **invitation push is not built yet** (it needs an account-level push subscription, see USER_ACTIONS). Verified: 514+ automated tests (new: `test/push-recipients.test.js` runs the TypeScript recipient rules directly, `test/push-preferences.test.js`), the new PGlite suite `supabase/tests/push-preferences.pglite.mjs` (15 checks), the migration applied live and the deployed function smoke-tested (unauthorized calls answer 401, bad requests 400). **Not tested with a real phone** (there were 0 push subscriptions in production): USER_ACTIONS.
