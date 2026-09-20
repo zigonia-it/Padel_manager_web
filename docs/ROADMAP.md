@@ -299,6 +299,8 @@ Known gaps: TV Mode does not list matches that await approval; an approved cup f
 
 ## Phase 12 — Result correction/consequences
 
+> Update 2026-09-20 (0.10.0): corrections are now possible after the tournament is finished (not in a cancelled one); the account statistics are recalculated in the same transaction (migration `20260920180000`, 19 database checks). The old "closed once finished" rule below is superseded.
+
 Built 2026-09-19 (spec: archived plan FASE J). Server: migration `20260919210000_admin_result_correction.sql` (applied; live function `admin_correct_result` verified 2026-09-19), 29 database tests (`supabase/tests/result-correction.pglite.mjs`). Client: `app/result-correction.js` (consequence simulation), `app/result-correction-dialog.js`, a "Korriger resultat" button and a correction history on finished match cards; 13 client tests (`test/result-correction.test.js`). The dialog and its simulation were checked in the browser; the confirm step still needs a live check.
 
 How it works: on a finished match the admin enters the new set score(s), picks a mandatory reason (wrong points entered / wrong team credited / players agree / referee decision / restore an earlier result / other, which needs a comment) and presses "Simuler konsekvens". The simulation runs on a copy (nothing changes) with the same scoring engine and shows a level with text and colour: green (standings unchanged), yellow (ranking positions change), orange (winner changes, points move), red (blocked), plus the concrete changes (winner, points and place per player) and "ongoing matches are not affected". Only after a successful simulation can the admin confirm. The server function is atomic, admin-token only, revision-checked, refuses invalid sets/unchanged results/unfinished matches, and appends every correction to `match.correctionHistory` (old result, new result, reason, comment, level, time) so nothing is overwritten. Restoring an old result is another correction (reason `restore`, one click from the history). Players get a push notification only after the correction succeeded.
@@ -316,6 +318,8 @@ How it works: on a finished match the admin enters the new set score(s), picks a
 Not built: correcting the result of a Cup match whose later round already exists (blocked by design), correcting after the tournament finished, and personal-statistics recalculation (Phase 15).
 
 ## Phase 13 — Replacement/withdrawal
+
+> Update 2026-09-20: withdrawal in a **Cup** is decided (same conditions as Round Robin; a fully withdrawn team = walkover; both sides withdrawn = the best-placed losing team takes the place, admin confirms) and planned for 0.12; see Phase 31.
 
 Built 2026-09-19 (spec: archived plan FASE K) as client logic (`app/player-replacement.js`, wired into `app/player-state.js` and the players list) with 13 tests (`test/player-replacement.test.js`). Checked in the browser with a live guest tournament: replacing a player in a running match shows the restart warning, restarts the match at 0–0 and the list shows "Erstattet av …" / "Erstatter …" with a "Sett … tilbake" button. There is no server migration: like all admin edits it is saved as tournament state by the admin (revision-checked). Items stay unchecked until the developer has reviewed the behaviour on a real tournament.
 
@@ -362,6 +366,8 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
 
 ## Phase 17 — Claiming/invitations
 
+> Update 2026-09-20 (0.10.0): invitations are also sent by email (`api/invitation-email.js`, from `invitations@padelstar.app`). Live-tested to Resend's test address; a real-address check is in USER_ACTIONS.
+
 - [ ] Claim unlinked slot. — fixed 2026-09-19 (migration `20260920120000_claim_unlinked_slot.sql`, applied live): a signed-in account can now claim a pre-added slot that nobody has claimed or linked; the slot is linked to the account so statistics and permissions follow it. A slot already linked to another account, or already claimed by a guest device, is still refused. 17 checks in `supabase/tests/claim-slot.pglite.mjs` (real `join_tournament_impl`); function and grants re-checked live.
 - [ ] Invitations without friend list. — built and applied live (migration `20260920130000_tournament_invitations.sql`): the admin invites by email in the lobby; the invited person sees it under "Invitasjoner" on the profile page after signing in with that verified email and joins through the normal join flow, or declines. The server never checks whether the address has an account (no way to find out who has one). Status "accepted" is derived from the account really being in the tournament. 30 checks in `supabase/tests/invitations.pglite.mjs`, live check rolled back, client tests in `test/invitations.test.js`. **Not verified end to end with two real accounts** (I cannot sign in): see USER ACTIONS. Delivery is in-app only; no invitation email is sent (decision for you: do you want an email too, through Resend?).
 - [ ] Acceptance/cutoff rules. — a pending invitation never counts as a participant or occupies a slot; it is valid until the first round starts (then "expired" for the admin and invisible for the invitee); accepting = joining, so there is no accepted-but-not-incorporated limbo; after the start the replacement flow is used. Round Robin schedules are generated at the start, so an acceptance before the start needs no regeneration. Tested in the database checks above.
@@ -384,6 +390,8 @@ Step 1 built 2026-09-19: the point-by-point engine now lives in one pure functio
       - notification2 is to be used when a tournament is live and have updates to the user other than the next match.
 
 ## Phase 19 — TV Mode
+
+> Update 2026-09-20: TV Mode has the Lys/Mørk switch (0.9.2), a button in the phone tab bar and a phone-friendly page (0.10.0), and uses the shared colour tokens (0.11.0).
 
 Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app, is translated (Norwegian and English; language from `?lang=`, the saved choice, then the device language; `test/tv-i18n.test.js` fails if a production language lacks a TV key or text gets hard-coded, so TV Mode supports every supported language at all times), lists matches awaiting approval, and shows the countdown of timed matches. Verified live: with the retention change a finished guest tournament stays viewable (TV shows FERDIG with full standings) for 24 hours. Still open: the reset/nullified state and the Court Queue view are not re-verified, and the remaining Phase 19 items are not ticked yet.
 
@@ -424,6 +432,8 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 
 ## Phase 22 — Help/privacy/info
 
+> Update 2026-09-20: the privacy page ends with a section naming the services used (Supabase in the EU, Vercel, Resend, jsDelivr, flagcdn.com, Cloudflare Turnstile, quickchart.io), decided by the developer.
+
 - [ ] Guide matches current product. Use clear and easy language, not production notes or technical language. (Use "in the cloud" instead of "supabase" etc. Its for the user/player, not the developer. — rewritten for `nb`/`en` (create wizard, lobby, guest use without account, invite code/QR, profile colour).
 - [ ] Privacy matches actual data flow. — added push-subscription and colour-choice data and the real retention lifecycle; the retention wording depends on migration `20260919090500_...` being applied.
 - [x] Display in chosen language — verified by the developer for the app (Norwegian, device language, English). Fixed 2026-09-19 on `v0.8`: the guide and privacy pages did not understand the saved value `device` and showed Norwegian on an English device; they now share `app/page-language.js` (tests in `test/page-language.test.js`).
@@ -432,6 +442,8 @@ Status 2026-09-19: TV Mode ranks with the same head-to-head standings as the app
 - [ ] Always opens in popup with an x button on the top right to close. — built on `v0.8`: the footer links to the guide and privacy page open a popup (`app/info-dialog.js`) with the page inside and an X in the card's top right corner (also Escape and a click outside); the links still work as normal links when opened in a new tab or without JavaScript. Framing is allowed for the site itself only (`frame-ancestors 'self'`). Checked in the browser in nb and en.
 
 ## Phase 23 — Initial system owner (v.0.8.0 reqiurement)
+
+> Update 2026-09-20 (0.10.0): `admin.html` also has a Logg tab and block/unblock/delete for accounts (migration `20260920170000`, 29 database checks); the log holds ids and coarse facts only and is kept 90 days (job `padelstar-log-cleanup`).
 
 - [ ] Exactly one protected Systemeier. — built and applied to the live database 2026-09-19 (migration `20260920110000_system_owner.sql`): singleton table `public.system_owner` seeded with `sigurd.grodem@live.no` (the developer's decision). Verified live: one row, the account id matches.
 - [ ] Backend/database enforcement. — the table is closed to `anon`/`authenticated` (RLS on, no grants); triggers refuse delete, truncate and any update unless the database owner deliberately sets `app.system_owner_transfer = 'confirmed'`; deleting the owner's account is refused (foreign key restrict). All checks run on `auth.uid()` in SECURITY DEFINER functions. 22 checks in `supabase/tests/system-owner.pglite.mjs` and the same protections re-checked on the live database (rolled back).
@@ -524,6 +536,34 @@ The design itself kept evolving in the source `claude.ai/design` conversation af
 
 ## Phase 29 - Debugging
 - Fix and repair all the current bugs in the BUGS.md list.
+
+## Phase 31 — Decisions of 2026-09-20 (0.9.1 – 0.12)
+
+The developer's answers to the open questions, the colour system and the sign-up check. Status per item:
+
+Built and released:
+- [x] Profile "Mine aktive turneringer" opens a tournament as admin on any device (`open_owned_tournament`) — 0.9.1.
+- [x] Phone menu, iOS language picker, light-theme cascade, link fields with padding, empty status chip — 0.9.1 / 0.11.1.
+- [x] TV Mode opens once, has the Lys/Mørk switch, is in the phone tab bar and fits a phone — 0.9.2 / 0.10.0.
+- [x] Lobby: remove a player; Styring has a "Lobby" item while the tournament has not started — 0.9.2.
+- [x] System administration: tabs Oversikt / Turneringer / Brukere / Logg / Vedlikehold; log view; block, unblock and delete users (owner only, never the owner) — 0.9.1 / 0.10.0. Everything else (force-finish, opening other people's tournaments) was decided to be privacy and is not built.
+- [x] Corrections after the tournament is finished, statistics recalculated — 0.10.0.
+- [x] Invitations by email from `invitations@padelstar.app` — 0.10.0.
+- [x] Privacy page: a bottom section naming the services used — 0.10.0 (Cloudflare Turnstile added 0.11.0).
+- [x] Colour system: one token set, two themes, no colour literals in components, gem colours from one helper — 0.11.0.
+- [x] Feedback form working (diagnostics in PRs #13-#15; the cause was a wrong Vercel value).
+- [x] "I'm not a robot" check on sign-up, sign-in and the sign-in link (Cloudflare Turnstile): widget and site key live — 0.11.0 / 0.11.1.
+- [x] GitHub Pages switched off.
+
+Still open:
+- [ ] Turnstile secret pasted and saved in Supabase (Authentication -> Attack Protection) so that sign-ups without the check are refused. Developer action; see `docs/technical/captcha-setup.md`.
+
+Planned for 0.12 (decided, not built):
+- [ ] **Withdrawal in a Cup**: the same conditions as Round Robin (Phase 13): the remaining teammate plays alone or gives a walkover, the admin can decide. If all players of one team have withdrawn, a walkover is enforced for the opponents (the bracket advances). Needs a design for the bracket, which refers to team ids, and both the client logic (`app/player-withdrawal.js`, `app/cup-bracket.js`) and the database (`admin_advance_cup`, `match_withdrawal_decision`).
+- [ ] **Both sides of a Cup match withdrawn**: the best-placed losing team takes their place; the admin confirms (a confirmation step in the UI and on the server, logged in the match history). "Best-placed" needs a defined ranking of the losing teams (proposal: by round reached, then games difference; to be confirmed when the design is written).
+- [ ] **Merge the lobby and Styring/Kamper/Tabell into one screen** (a redesign of the main workspace; the lobby content becomes part of the workspace, the separate lobby module goes away; the Phase 28 lobby and the workspace rail are the starting point). Must keep the whole critical path working (create, start, results, finish, another tournament) and be verified end to end.
+
+Not decided / later: push categories (Phase 18), Cup time overrides and the generic point/margin engine (Phase 14), the "expired, resume" banner (Phase 16).
 
 ## Phase 30 — v1.0 Definition of Done
 

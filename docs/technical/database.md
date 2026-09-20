@@ -27,6 +27,7 @@ Verified against the live project on 2026-09-19 (all migrations through `2026092
 | `profiles`, `player_profiles`, `player_profile_history` | account profile and local-profile history | policies / RPC |
 | `push_subscriptions` | Web Push subscriptions per tournament and player | RPC only |
 | `match_scorer_heartbeats` | which device is alive as a match's scorer | RPC only |
+| `system_log` | events: sign-ups, tournaments created/finished/deleted, owner actions; ids and coarse facts only; 90 days | internal (RLS, no grants) |
 | `api_rate_limits` | request counters for the rate limit | internal |
 
 ## Function groups
@@ -34,15 +35,16 @@ Verified against the live project on 2026-09-19 (all migrations through `2026092
 - **Tournament**: `create_tournament`, `get_tournament_by_code`, `get_spectator_tournament_by_code`, `save_tournament_state`, `delete_tournament`, `finalize_tournament`, `clear_tournament_expiry`, `claim_tournament`.
 - **Admin match/round**: `admin_match_action`, `admin_set_result`, `admin_undo_match`, `admin_advance_round`, `admin_advance_cup`, `admin_set_match_scorer`, `admin_resolve_result`, `admin_correct_result`.
 - **Players**: `join_tournament`, `set_player_availability`, `claim_player_account`, `save_player_point`, `submit_match_result`, `match_scorer_action`, `match_result_action`, `match_withdrawal_decision`.
-- **Profile/history**: `upsert_player_profile`, `get_player_profile_history`, `save_player_profile_history`, `request_player_profile_deletion`, `cancel_player_profile_deletion`, `list_my_active_tournaments`.
+- **Profile/history**: `upsert_player_profile`, `get_player_profile_history`, `save_player_profile_history`, `request_player_profile_deletion`, `cancel_player_profile_deletion`, `list_my_active_tournaments`, `list_my_finished_tournaments` (newest 20 finished, not cancelled), `open_owned_tournament` (owner only: returns the state and the admin token so the owner can resume on another device; rate limited; the same answer for "not found" and "not yours").
 - **Invitations**: `admin_invite_player`, `admin_list_invitations`, `admin_cancel_invitation`, `list_my_invitations`, `decline_invitation`.
-- **System owner**: `is_system_owner`, `admin_overview`.
+- **System owner** (all owner-only, none executable by `anon`): `is_system_owner`, `admin_overview`, `admin_list_tournaments`, `admin_list_users`, `admin_maintenance_status`, `admin_list_log`, `admin_block_user` (sets `auth.users.banned_until` and ends the sessions), `admin_delete_user` (cascades to profile, statistics and links; owned tournaments lose their owner). Neither block nor delete accepts the system owner or the caller. Internal helpers: `_admin_like`, `_log_system_event`, `_log_tournament_event`, `_log_user_signup`, `_recompute_account_statistics`.
 - **Push**: `upsert_push_subscription`, `delete_push_subscription` (sending is the Edge Function `supabase/functions/push-send`).
-- **Jobs (pg_cron, never callable from the client)**: `process_result_approvals` (every minute), `cleanup_expired_tournaments` and `cleanup_expired_player_profiles` (job `padelstar-retention-cleanup`, hourly).
+- **Jobs (pg_cron, never callable from the client)**: `process_result_approvals` (every minute), `cleanup_expired_tournaments` and `cleanup_expired_player_profiles` (job `padelstar-retention-cleanup`, hourly), `cleanup_system_log` (job `padelstar-log-cleanup`, 03:40 daily, removes entries older than 90 days).
 
 ## Guards (triggers)
 
-- A finished tournament (`state.status = 'Avsluttet'`) is read-only, and cannot be marked finished except through `finalize_tournament` (which writes statistics and a receipt first).
+- A finished tournament (`state.status = 'Avsluttet'`) is read-only, and cannot be marked finished except through `finalize_tournament` (which writes statistics and a receipt first). The one exception (0.10.0): `admin_correct_result_impl` sets the transaction-local switch `app.finished_correction`, and then only the results (`rounds`) and the revision may change; the account statistics are recalculated in the same transaction.
+- Triggers on `tournaments` (insert, status change, delete) and on `auth.users` (insert) write to `system_log`; every logging function swallows its own errors, so logging can never break what it observes.
 - A tournament cannot be deleted before its receipt exists.
 - The system owner row cannot be updated, deleted or truncated (only the database owner can hand the role over, see the migration).
 

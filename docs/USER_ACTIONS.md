@@ -6,7 +6,7 @@ Status: `[ ]` open, `[x]` done.
 ## 1. Fix first (something does not work for users today)
 
 - [x] **Feedback form** works (2026-09-20): `FEEDBACK_TO_EMAIL` contained an API key, not an address; corrected, redeployed, test message received.
-- [ ] **Clean up in Vercel and Resend.** (a) Vercel → padel-manager-web → Settings → Environment Variables: delete the third variable, whose *name* is a Resend API key (`re_Hvi…`). A key in a variable name is visible in plain text. (b) Resend → API Keys: revoke the key named "Feedback" (`re_Hvi…`) and the one named "FEEDBACK_TO_EMAIL" (`re_FQd…`), which is not used. Keep "RESEND_API_KEY" (the one the site uses). (c) Vercel shows "Deployment Storage 37.92 GB / 10 GB, exceeded free resources": old deployments count against it; delete old deployments (Deployments → ⋯ → Delete) or accept that Vercel may pause new deployments until it is under 10 GB.
+- [x] **Clean up in Vercel and Resend**: reported done by the developer 2026-09-20 (the key-named Vercel variable removed, the unused Resend keys revoked). Vercel deletes old deployments after 30 days, which also brings the deployment storage (it showed 38 GB of 10 GB) down over time; if Vercel ever refuses a deployment because of it, delete old deployments by hand.
 
 - [ ] **Last step of the "I'm not a robot" check: the secret key.** Done by Claude on 2026-09-20: the Cloudflare Turnstile widget `Padelstar` (Managed, `padelstar.app`) was created, its public site key is live in `supabase-config.js` (the real Cloudflare checkbox already appears on sign-up and sign-in on padelstar.app), and in Supabase (Authentication -> Attack Protection) CAPTCHA is switched on with provider "Turnstile by Cloudflare" but **not saved**, because Claude may not enter secrets. You: Cloudflare -> Turnstile -> the widget -> click the **Secret key** to copy it, paste it into "Captcha secret" in Supabase, click **Save changes**. Then test in a private window: create an account, the checkbox must appear and the confirmation mail must arrive. If sign-in ever breaks, switch CAPTCHA off in Supabase again.
 
@@ -26,15 +26,17 @@ Status: `[ ]` open, `[x]` done.
 
 - [ ] **0.9.2 fixes.** (a) TV Mode from the rail/menu opens exactly one new tab and the app stays where it is; with pop-ups blocked in the browser it falls back to the same tab. (b) On the TV page the Lys/Mørk switch works and stays chosen after a reload; try it on the real TV. (c) In the lobby remove a player; in Styring (before starting) click "Lobby" in the rail/bottom tabs.
 
+- [ ] **Check the 0.10 features with real accounts.** (a) Invitations by email: invite a real address in a lobby; the mail comes from `invitations@padelstar.app` with the join link and code. (b) Corrections after finish: signed in as the owner, finish a tournament that has account players, then Profil → "Avsluttede turneringer" → "Åpne og korriger" → correct a result; the statistics on the profile page must change with it. (c) System page: Brukere (search, block, unblock, delete a test account) and Logg (sign-ups, tournaments created/finished/deleted, your own actions). (d) Phone: TV Mode in the bottom tab bar and the TV page on a phone.
+
 ## 3. Decisions I need (I made a safe default; tell me if you want it different)
 
-- [ ] **Withdrawal in a Cup** (decided 2026-09-20: same conditions as Round Robin; all players of a team withdrawn = walkover; both sides withdrawn = the best-placed losing team takes the place, admin confirms): planned for 0.11, not built yet.
-- [ ] **Players on both teams withdrawn** (in a Cup: see above; in Round Robin the match is cancelled): planned.
+- [ ] **Withdrawal in a Cup** — decided 2026-09-20, planned for 0.12, not built: same conditions as Round Robin (the remaining teammate plays alone or gives a walkover); if all players of a team have withdrawn, a walkover is enforced; if both sides of a match have withdrawn, the best-placed losing team takes the place and the admin confirms. Until then use "Bytt".
+- [ ] **Players on both teams withdrawn** — in a Round Robin the match is still cancelled (no new rule was given); in a Cup see the line above (lucky loser, admin confirms). Planned for 0.12.
 - [x] **Corrections after the tournament is finished**: decided 2026-09-20 (added to the statistics); built in 0.10.0.
 - [x] **Invitations by email**: decided 2026-09-20; built in 0.10.0 (sender `invitations@padelstar.app`, verified domain). Needs a real check: invite an address in the lobby and look for the email.
 - [x] **Privacy text**: decided 2026-09-20 (a bottom section naming the services); built in 0.10.0.
 - [x] **TV Mode button** on the phone tab bar and TV on phones: decided 2026-09-20; built in 0.10.0.
-- [ ] **Lobby vs. workspace** (decided 2026-09-20: merge into one screen): planned for 0.11, not built yet.
+- [ ] **Lobby vs. workspace** — decided 2026-09-20: merge the lobby and Styring/Kamper/Tabell into one screen. Planned for 0.12, not built (0.9.2 gave Styring a "Lobby" item in the meantime).
 - [x] **System administration**: decided 2026-09-20: a log view and block/delete users (built, see CHANGELOG); everything else (force-finish, opening other people's tournaments, ...) is treated as privacy and is not built.
 - [ ] **Push categories** (Phase 18: invites, results, "only my own matches") need a server-side change to the push function and real-device testing; not built. Confirm you want it in 0.8 or later.
 

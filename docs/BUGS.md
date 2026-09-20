@@ -12,16 +12,19 @@ A bug is complete only when it was reproduced or clearly verified, the smallest 
 
 - [x] ~~Beta feedback form cannot send from the live site.~~ Fixed 2026-09-20: `FEEDBACK_TO_EMAIL` held an API key instead of an address (Resend answered 422 on `to`); corrected in Vercel, redeployed, and the test message arrived. Open follow-up (developer): a stray Vercel variable whose *name* is a Resend API key, and that key should be revoked (see USER_ACTIONS).
 
+- [ ] **Sign-ups are being abused** (2026-09-20): the Resend log shows "Confirm your email address" mails to strangers, some bounced. The "I'm not a robot" check is built and live on the forms (Cloudflare Turnstile widget `Padelstar`, site key in `supabase-config.js`), but Supabase does not enforce it until the developer pastes the Turnstile secret under Authentication -> Attack Protection and saves (`docs/technical/captcha-setup.md`). *Blocked on the developer.* Until then the Brukere and Logg tabs of the system page show the accounts and sign-ups, and accounts can be blocked or deleted there.
+- [ ] **Editor formatting breaks tests**: a code formatter that reformats `index.html` on save changes the exact markup that some tests check (found 2026-09-20). Turn format-on-save off for that file; if `git diff index.html` is huge, restore the file and re-apply only the intended change.
+
 ## Known limitations (decided or accepted, not bugs to fix now)
 
 - Two players with exactly the same name cannot be told apart by the claim flow; only the first match in the roster is reachable. Names are the only key the claim flow has.
-- Withdrawing a player is not offered in a **Cup** (the bracket refers to team ids); use "Bytt". Decision pending.
-- When players on **both** teams of one match have withdrawn, the match is cancelled (no rule was given for it). Decision pending.
-- Corrections of a result are closed once the tournament is finished, so statistics cannot change afterwards. Decision pending if post-finish corrections are wanted.
-- Invitations are shown in the app only; no email is sent to the invited person. Decision pending.
+- Withdrawing a player is not offered in a **Cup** (the bracket refers to team ids); use "Bytt". Decided 2026-09-20, planned for 0.12: same rules as Round Robin; a fully withdrawn team = walkover; both sides withdrawn = the best-placed losing team takes the place, admin confirms.
+- When players on **both** teams of one Round Robin match have withdrawn, the match is cancelled (no rule was given for it). In a Cup the rule above will apply.
+- Corrections after the tournament is finished (built 0.10.0): only for finished, not cancelled tournaments, only by the admin, and a Cup result that later matches depend on stays blocked. Guests: the correction window ends when the 24-hour retention deletes the tournament.
+- Invitation emails (built 0.10.0) are limited to 3 per address and tournament per hour and 40 per tournament; if the email fails the invitation is still saved and the admin gives the person the code.
 - The hidden languages (nn, es, de, fr, sv, da) still have old privacy/guide text; they are not offered until Phase 21 completes them.
-- Dark mode: white text on the mid-blue primary buttons is 3.8:1 (below 4.5:1); existing design, not changed by the light theme.
-- Light mode uses `color-mix()` for players' own colors; browsers older than iOS 16.2 / Chrome 111 fall back to the dark-theme color there.
+- Colour contrast (0.11.0): every text token is at least 4.5:1 on every surface in both themes, with two exceptions of the specified values: white on the lighter end of the light primary gradient is 4.1:1 (bold button text), and dark-theme gem initials for the darkest hues are 3.6 (onyx), 4.0 (sapphire) and 4.2 (garnet).
+- The colour system uses `color-mix()` and `light-dark()`; browsers older than iOS 17.5 / Chrome 123 / Firefox 120 fall back to the dark ink for player initials, and older than iOS 16.2 / Chrome 111 lose the tinted washes.
 - Sound and vibration depend on the browser: a browser may block sound until the page has been tapped once, and vibration does not exist on iPhone.
 - The 8 invite-code cells are 31px wide on a 375px phone (eight must fit across).
 - Not yet verified by a person on real devices: push notifications on a phone, sound levels, network loss during a running match (see `docs/USER_ACTIONS.md`).
