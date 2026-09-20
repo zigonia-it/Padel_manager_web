@@ -1,17 +1,11 @@
 (() => {
-  // The lobby is a screen of its own before the tournament starts; the rail gets a way back to it while that is still true.
-  let isLobbyAvailable = () => false;
-
-  function initialize({ showModule, activateAdminPanel, isLobbyAvailable: lobbyAvailable }) {
-    if (typeof lobbyAvailable === "function") isLobbyAvailable = lobbyAvailable;
+  function initialize({ showModule, activateAdminPanel }) {
     if (typeof showModule !== "function" || typeof activateAdminPanel !== "function") return;
 
     document.querySelectorAll("[data-rail-target]").forEach((button) => {
       button.addEventListener("click", () => {
         const target = button.dataset.railTarget;
-        if (target === "lobby") {
-          showModule("lobby");
-        } else if (target === "player") {
+        if (target === "player") {
           showModule("player");
         } else {
           showModule("admin");
@@ -64,10 +58,9 @@
     document.querySelectorAll('[data-rail-target="player"]').forEach((button) => {
       button.classList.toggle("hidden", !showPlayerItem);
     });
-    let lobbyAvailable = false;
-    try { lobbyAvailable = showRail && Boolean(isLobbyAvailable()); } catch { lobbyAvailable = false; }
+    // The lobby is the first panel of the admin workspace and stays there after the start.
     document.querySelectorAll('[data-rail-target="lobby"]').forEach((button) => {
-      button.classList.toggle("hidden", !lobbyAvailable);
+      button.classList.toggle("hidden", !showRail);
     });
 
     const playerSection = document.querySelector('[data-section="player"]');

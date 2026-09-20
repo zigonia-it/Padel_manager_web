@@ -482,6 +482,7 @@ const podium = window.PadelstarPodium.create({
   t: (key, values) => t(key, values),
 });
 const lobby = window.PadelstarLobby.create({
+  activateAdminPanel: (panel) => activateAdminPanel(panel),
   createJoinLink: () => createJoinLink(),
   createQrCodeUrl: (text) => createQrCodeUrl(text),
   elements,
@@ -1100,7 +1101,7 @@ async function handleResetTournament() {
 
 function initializeNavigation() {
   window.PadelstarNavigation?.initialize({ showModule, translate: t });
-  window.PadelstarWorkspaceRail?.initialize({ showModule, activateAdminPanel, isLobbyAvailable: () => isCurrentUserAdmin() && (state.rounds ?? []).length === 0 && state.status !== "Avsluttet" });
+  window.PadelstarWorkspaceRail?.initialize({ showModule, activateAdminPanel });
 }
 
 function bindSupabaseReady() {

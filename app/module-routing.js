@@ -18,7 +18,8 @@
       if (!hasActiveTournament()) {
         return ["setup-admin", "setup-player", "account"].includes(requestedModule) ? requestedModule : "landing";
       }
-      if (requestedModule === "lobby") return isCurrentUserAdmin() ? "lobby" : fallbackTournamentModule();
+      // the lobby is the first panel of the admin workspace (0.12): asking for it means "admin"; workspace-navigation opens the panel
+      if (requestedModule === "lobby") return isCurrentUserAdmin() ? "admin" : fallbackTournamentModule();
       if (requestedModule === "admin") return isCurrentUserAdmin() ? "admin" : fallbackTournamentModule();
       if (requestedModule === "player") return hasSelectedPlayer() ? "player" : fallbackTournamentModule();
       if (["landing", "setup-admin", "setup-player", "account"].includes(requestedModule)) return requestedModule;

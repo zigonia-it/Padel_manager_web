@@ -69,18 +69,27 @@ test("the lobby lists a remove button per player, using the same rule and functi
   assert.match(read("styles", "lobby.css"), /\.lobby-players-card \.danger-button/);
 });
 
-test("Styring has a way back to the lobby (rail and phone tabs) while the tournament has not started", () => {
+test("the lobby is the first panel of the admin workspace: rail, phone tabs and subtabs all open it (0.12)", () => {
   const html = read("index.html");
   for (const nav of [html.match(/<nav class="workspace-rail[\s\S]*?<\/nav>/)[0], html.match(/<nav class="workspace-bottom-tabs[\s\S]*?<\/nav>/)[0]]) {
     assert.match(nav, /data-rail-target="lobby"/);
     assert.ok(nav.indexOf('data-rail-target="lobby"') < nav.indexOf('data-rail-target="control"'), "Lobby comes first");
-    assert.match(nav, /class="workspace-rail-item hidden" data-rail-target="lobby"/, "hidden until it applies");
   }
   const rail = read("app", "workspace-rail.js");
-  assert.match(rail, /target === "lobby"\) \{\s*showModule\("lobby"\)/);
-  assert.match(rail, /isLobbyAvailable/);
-  assert.match(read("app", "app.js"), /isLobbyAvailable: \(\) => isCurrentUserAdmin\(\) && \(state\.rounds \?\? \[\]\)\.length === 0 && state\.status !== "Avsluttet"/);
+  assert.doesNotMatch(rail, /showModule\("lobby"\)/, "no separate lobby screen");
+  assert.match(rail, /activateAdminPanel\(target\)/, "the lobby item opens its panel like the other panels");
+  assert.match(rail, /data-rail-target="lobby"[\s\S]*classList\.toggle\("hidden", !showRail\)/, "shown whenever the workspace rail is (also after the start)");
+  assert.match(read("app", "module-routing.js"), /requestedModule === "lobby"\) return isCurrentUserAdmin\(\) \? "admin"/);
+  assert.match(read("app", "workspace-navigation.js"), /openLobbyPanel[\s\S]*activateAdminPanel\("lobby"\)/);
 });
+
+test("the phone tab bar fits five items (Lobby, Styring, Kamper, Tabell, TV) without widening the page", () => {
+  const css = read("styles", "workspace-nav.css");
+  const phone = css.slice(css.indexOf("Mobile/tablet: sticky bottom tab bar"));
+  assert.match(phone, /\.workspace-bottom-tabs \.workspace-rail-item \{[^}]*min-width: 0;/);
+  assert.match(phone, /workspace-rail-item > span \{[^}]*text-overflow: ellipsis/);
+});
+
 
 test("links to copy (join link, spectator link) are real fields with room before the text", () => {
   const css = read("styles", "components.css");
