@@ -276,11 +276,11 @@
 /* Final review cascade: classic surfaces intentionally follow all compatibility rules. */
 body[data-theme="classic"] .workspace,
 body[data-theme="classic"] .setup-panel {
-  border-color: rgba(159, 207, 255, 0.20);
+  border-color: var(--border-default);
   background:
-    linear-gradient(180deg, rgba(14, 28, 48, 0.92), rgba(6, 13, 24, 0.97)),
-    #070d17;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-card) 92%, transparent), var(--surface-sunken)),
+    var(--surface-sunken);
+  box-shadow: 0 24px 70px color-mix(in srgb, var(--shadow-ink) calc(38% * var(--shadow-strength)), transparent);
 }
 
 @media (min-width: 1100px) {
@@ -295,42 +295,25 @@ body[data-theme="classic"] .setup-panel {
 }
 
 body[data-theme="classic"] {
-  --background: #070d17;
-  --surface: rgba(12, 23, 39, 0.90);
-  --surface-secondary: rgba(16, 31, 52, 0.94);
-  --surface-elevated: rgba(26, 48, 77, 0.90);
-  --surface-glass: rgba(91, 173, 255, 0.09);
-  --text-primary: #eef7ff;
-  --text-secondary: #a9bfd5;
-  --text-muted: #a9bfd5;
-  --accent: #4fa8ff;
-  --accent-hover: #62b6ff;
-  --border-subtle: rgba(159, 207, 255, 0.20);
-  --gold: #4fa8ff;
-  --gold-light: #d8efff;
-  --gold-bright: #62b6ff;
-  --gold-dark: #236ca8;
-  --gold-deep: #123a63;
-  --gold-rgb: 79, 168, 255;
-  --gold-light-rgb: 216, 239, 255;
-  --gold-bright-rgb: 98, 182, 255;
-  --gold-dark-rgb: 35, 108, 168;
-  --line: rgba(98, 182, 255, 0.30);
-  --ink: #eef7ff;
-  --cream: #f4f9ff;
-  --muted: #a9bfd5;
-  --live: #ff7180;
-  --player-accent: #4fa8ff;
-  --player-accent-light: #d8efff;
-  --player-accent-dark: #236ca8;
-  --player-accent-rgb: 79, 168, 255;
+  --background: var(--surface-page);
+  --surface: var(--surface-card);
+  --surface-secondary: var(--surface-card);
+  --surface-elevated: var(--surface-raised);
+  --surface-glass: color-mix(in srgb, var(--accent-blue-bright) 9%, transparent);
+  --text-primary: var(--ink-heading);
+  --text-secondary: var(--ink-body);
+  --text-muted: var(--ink-muted);
+  --accent: var(--accent-blue);
+  --accent-hover: var(--accent-text);
+  --live: var(--negative);
+  --player-accent: var(--accent-blue);
+  --player-accent-light: var(--accent-blue-bright);
+  --player-accent-dark: color-mix(in srgb, var(--accent-blue) 62%, var(--surface-sunken));
 }
 
 body[data-theme="classic"] {
   background:
-    radial-gradient(circle at 76% -8%, rgba(71, 155, 255, 0.16), transparent 34rem),
-    linear-gradient(180deg, rgba(7, 13, 23, 0.84), rgba(7, 13, 23, 0.97)),
-    url("../assets/backgrounds/bg_img-1600.jpg") center top / cover fixed;
+    var(--surface-page);
 }
 
 body[data-theme="classic"] .topbar,
@@ -340,25 +323,25 @@ body[data-theme="classic"] .next-match,
 body[data-theme="classic"] .setup-card,
 body[data-theme="classic"] .match-card,
 body[data-theme="classic"] .intro {
-  border-color: rgba(159, 207, 255, 0.20);
+  border-color: var(--border-default);
   background:
-    linear-gradient(145deg, rgba(91, 173, 255, 0.10), transparent 44%),
-    rgba(12, 23, 39, 0.90);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+    linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 10%, transparent), transparent 44%),
+    color-mix(in srgb, var(--surface-card) 90%, transparent);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--shadow-ink) calc(24% * var(--shadow-strength)), transparent), inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(5% * var(--glow-strength)), transparent);
 }
 
 body[data-theme="classic"] .intro {
   background:
-    linear-gradient(120deg, rgba(8, 17, 30, 0.95), rgba(12, 28, 48, 0.82) 62%, rgba(46, 89, 143, 0.34)),
+    linear-gradient(120deg, var(--surface-sunken), color-mix(in srgb, var(--surface-card) 82%, transparent) 62%, color-mix(in srgb, var(--accent-blue-bright) 34%, transparent)),
     url("../assets/backgrounds/bg_img-1600.jpg") center / cover;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 70px color-mix(in srgb, var(--shadow-ink) calc(38% * var(--shadow-strength)), transparent), inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(6% * var(--glow-strength)), transparent);
 }
 
 body[data-theme="classic"] .app-menu,
 body[data-theme="classic"] .admin-subtabs {
-  border-color: rgba(159, 207, 255, 0.20);
-  background: rgba(5, 14, 26, 0.72);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 32px rgba(0, 0, 0, 0.24);
+  border-color: var(--border-default);
+  background: color-mix(in srgb, var(--surface-sunken) 72%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(4% * var(--glow-strength)), transparent), 0 12px 32px color-mix(in srgb, var(--shadow-ink) calc(24% * var(--shadow-strength)), transparent);
 }
 
 body[data-theme="classic"] .app-menu {
@@ -372,10 +355,10 @@ body[data-theme="classic"] .subtab.active,
 body[data-theme="classic"] .landing-cta:first-child,
 body[data-theme="classic"] button.primary,
 body[data-theme="classic"] .button-primary {
-  color: #03101d;
-  background: linear-gradient(135deg, #e6f6ff, #62b6ff);
+  color: var(--btn-primary-ink);
+  background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to));
   border-color: transparent;
-  box-shadow: 0 10px 24px rgba(79, 168, 255, 0.26);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent-blue-bright) calc(26% * var(--glow-strength)), transparent);
 }
 
 body[data-theme="classic"] .match-card,
@@ -387,55 +370,55 @@ body[data-theme="classic"] .cup-team-builder,
 body[data-theme="classic"] .admin-identity-panel,
 body[data-theme="classic"] .player-now-grid > div,
 body[data-theme="classic"] .rules-list > div {
-  border-color: rgba(159, 207, 255, 0.15);
+  border-color: var(--border-subtle);
   border-radius: 12px;
-  background: rgba(5, 15, 28, 0.62);
+  background: color-mix(in srgb, var(--surface-sunken) 62%, transparent);
 }
 
 body[data-theme="classic"] .match-card.match-playing,
 body[data-theme="classic"] .highlight-match {
-  border-color: rgba(20, 124, 255, 0.72);
-  background: linear-gradient(135deg, rgba(20, 124, 255, 0.16), transparent 54%), rgba(13, 28, 49, 0.88);
-  box-shadow: 0 16px 36px rgba(20, 124, 255, 0.12);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 72%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-blue-bright) 16%, transparent), transparent 54%), color-mix(in srgb, var(--surface-card) 88%, transparent);
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--accent-blue-bright) calc(12% * var(--glow-strength)), transparent);
 }
 
 body[data-theme="classic"] .next-match {
-  background: linear-gradient(135deg, rgba(69, 153, 239, 0.34), rgba(12, 36, 67, 0.92));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-blue-bright) 34%, transparent), color-mix(in srgb, var(--surface-card) 92%, transparent));
 }
 
 body[data-theme="classic"] .landing-cta-secondary,
 body[data-theme="classic"] button.secondary,
 body[data-theme="classic"] .button-secondary {
-  border-color: rgba(98, 182, 255, 0.54);
-  background: rgba(4, 14, 26, 0.70);
-  color: #eef7ff;
+  border-color: var(--btn-secondary-border);
+  background: color-mix(in srgb, var(--surface-sunken) 70%, transparent);
+  color: var(--accent-text);
 }
 
 body[data-theme="classic"] input,
 body[data-theme="classic"] textarea,
 body[data-theme="classic"] select {
-  border-color: rgba(159, 207, 255, 0.20);
-  background: rgba(3, 12, 24, 0.72);
-  color: #eef7ff;
+  border-color: var(--border-default);
+  background: color-mix(in srgb, var(--surface-sunken) 72%, transparent);
+  color: var(--accent-text);
 }
 
 body[data-theme="classic"] .status-chip,
 body[data-theme="classic"] .role-indicator,
 body[data-theme="classic"] .share-box,
 body[data-theme="classic"] .status-pill {
-  border-color: rgba(98, 182, 255, 0.28);
-  background: rgba(5, 15, 28, 0.58);
+  border-color: var(--border-default);
+  background: color-mix(in srgb, var(--surface-sunken) 58%, transparent);
 }
 
 /* Neutral by default (offline / not yet synced); green only when the
    realtime connection is actually up, so "Offline" never reads as healthy. */
 body[data-theme="classic"] .status-pill {
   padding: 5px 11px 5px 9px;
-  border: 1px solid rgba(154, 167, 184, 0.32);
+  border: 1px solid var(--border-strong);
   border-radius: 999px;
-  background: rgba(154, 167, 184, 0.08);
+  background: color-mix(in srgb, var(--ink-heading) 5%, transparent);
   box-shadow: none;
-  color: #9aa7b8;
+  color: var(--ink-muted);
   font-size: 0.72rem;
   letter-spacing: 0.02em;
 }
@@ -445,9 +428,9 @@ body[data-theme="classic"] .status-pill::before {
 }
 
 body[data-theme="classic"] .status-pill[data-status="connected"] {
-  border-color: rgba(85, 230, 154, 0.32);
-  background: rgba(85, 230, 154, 0.09);
-  color: #55e69a;
+  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--positive) 9%, transparent);
+  color: var(--positive);
 }
 
 body[data-theme="classic"] .status-pill[data-status="connected"]::before {
@@ -457,16 +440,16 @@ body[data-theme="classic"] .status-pill[data-status="connected"]::before {
 
 body[data-theme="classic"] .status-pill[data-status="connecting"],
 body[data-theme="classic"] .status-pill[data-status="reconnecting"] {
-  border-color: rgba(var(--gold-bright-rgb), 0.4);
-  background: rgba(var(--gold-bright-rgb), 0.08);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 40%, transparent);
+  background: color-mix(in srgb, var(--accent-blue-bright) 8%, transparent);
   color: var(--gold-bright);
 }
 
 body[data-theme="classic"] .status-pill[data-status="error"],
 body[data-theme="classic"] .status-pill[data-status="disconnected"] {
-  border-color: rgba(255, 47, 63, 0.4);
-  background: rgba(255, 47, 63, 0.08);
-  color: #ff2f3f;
+  border-color: color-mix(in srgb, var(--negative) 40%, transparent);
+  background: color-mix(in srgb, var(--negative) 8%, transparent);
+  color: var(--negative);
 }
 
 @keyframes statusPillPulse {
@@ -500,10 +483,10 @@ body:not(.workspace-active):not(.setup-active) .topbar {
   z-index: 200;
   min-height: 44px;
   padding: 0.72rem 1rem;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--border-strong);
   border-radius: 8px;
-  background: rgba(3, 12, 24, 0.96);
-  color: #ffffff;
+  background: var(--surface-sunken);
+  color: var(--ink-heading);
   transform: translateY(-180%);
   transition: transform 160ms ease;
 }
@@ -517,11 +500,11 @@ body:not(.workspace-active):not(.setup-active) .topbar {
   z-index: 180;
   max-width: min(420px, calc(100vw - 2rem));
   padding: 0.85rem 1rem;
-  border: 1px solid rgba(159, 207, 255, 0.42);
+  border: 1px solid color-mix(in srgb, var(--accent-blue-bright) 42%, transparent);
   border-radius: 12px;
-  background: rgba(5, 15, 28, 0.96);
-  color: #eef7ff;
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+  background: var(--surface-sunken);
+  color: var(--accent-text);
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--shadow-ink) calc(34% * var(--shadow-strength)), transparent);
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px);
@@ -536,14 +519,14 @@ body:not(.workspace-active):not(.setup-active) .topbar {
 .app-confirm-dialog {
   width: min(440px, calc(100vw - 2rem));
   padding: 0;
-  border: 1px solid rgba(159, 207, 255, 0.34);
+  border: 1px solid var(--border-strong);
   border-radius: 16px;
-  background: #0c1727;
-  color: #eef7ff;
+  background: var(--surface-card);
+  color: var(--accent-text);
 }
 
 .app-confirm-dialog::backdrop {
-  background: rgba(1, 6, 14, 0.72);
+  background: color-mix(in srgb, var(--surface-sunken) 72%, transparent);
   backdrop-filter: blur(3px);
 }
 
@@ -555,7 +538,7 @@ body:not(.workspace-active):not(.setup-active) .topbar {
   line-height: 1.1;
   overflow-wrap: anywhere;
 }
-.app-confirm-card p { color: #a9bfd5; line-height: 1.55; }
+.app-confirm-card p { color: var(--ink-muted); line-height: 1.55; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 0.75rem; }
 
 @media (max-width: 480px) {
@@ -587,23 +570,21 @@ body:not(.workspace-active):not(.setup-active) .topbar {
 }
 
 :root {
-  --card-navy: #06152c;
-  --card-navy-deep: #020b19;
-  --card-blue: #147cff;
-  --card-blue-soft: #7dafff;
-  --card-line: rgba(93, 164, 255, 0.32);
+  --card-navy: var(--surface-sunken);
+  --card-navy-deep: var(--surface-sunken);
+  --card-blue: var(--accent-blue);
+  --card-blue-soft: var(--accent-text);
+  --card-line: var(--border-strong);
 }
 
 body {
   background:
-    radial-gradient(circle at 50% 18%, rgba(18, 72, 139, 0.22), transparent 38%),
-    linear-gradient(180deg, #020816 0%, #06152c 52%, #020812 100%);
+    var(--surface-page);
 }
 
 body.workspace-active {
   background:
-    radial-gradient(circle at 50% 12%, rgba(20, 124, 255, 0.12), transparent 32%),
-    linear-gradient(180deg, #020816 0%, #06152c 58%, #020812 100%);
+    var(--surface-page);
 }
 
 .panel,
@@ -615,11 +596,11 @@ body.workspace-active {
   border-color: var(--card-line);
   border-radius: 18px;
   background:
-    linear-gradient(145deg, rgba(19, 64, 120, 0.22), transparent 42%),
-    linear-gradient(180deg, rgba(5, 21, 43, 0.96), rgba(2, 11, 25, 0.98));
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-card) 22%, transparent), transparent 42%),
+    linear-gradient(180deg, var(--surface-card), var(--surface-sunken));
   box-shadow:
-    inset 0 1px 0 rgba(177, 218, 255, 0.08),
-    0 20px 50px rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 color-mix(in srgb, var(--accent-blue-bright) calc(8% * var(--glow-strength)), transparent),
+    0 20px 50px color-mix(in srgb, var(--shadow-ink) calc(28% * var(--shadow-strength)), transparent);
 }
 
 .match-card {
@@ -661,7 +642,7 @@ body.workspace-active {
 }
 
 .match-status {
-  border-color: rgba(var(--gold-bright-rgb), 0.66);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 66%, transparent);
   background: transparent;
   color: var(--card-blue-soft);
   padding-inline: 0.85rem;
@@ -698,7 +679,7 @@ body.workspace-active {
   padding: 22px clamp(18px, 2vw, 34px);
   border: 1px solid rgba(var(--player-accent-rgb), 0.46);
   border-radius: 18px;
-  background: linear-gradient(145deg, rgba(var(--player-accent-rgb), 0.16), rgba(2, 11, 25, 0.76) 62%);
+  background: linear-gradient(145deg, rgba(var(--player-accent-rgb), 0.16), color-mix(in srgb, var(--surface-sunken) 76%, transparent) 62%);
 }
 
 .scorecard-team h3 {
@@ -709,8 +690,8 @@ body.workspace-active {
   border: 1px solid rgba(var(--player-accent-rgb), 0.42);
   border-top: 0;
   border-radius: 0 0 28px 28px;
-  background: rgba(5, 21, 43, 0.84);
-  color: var(--player-accent-light);
+  background: color-mix(in srgb, var(--surface-card) 84%, transparent);
+  color: var(--gem-ink, var(--accent-text));
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -759,7 +740,7 @@ body.workspace-active {
   width: 64px;
   height: 64px;
   object-fit: contain;
-  filter: drop-shadow(0 0 16px rgba(20, 124, 255, 0.22));
+  filter: drop-shadow(0 0 16px color-mix(in srgb, var(--accent-blue-bright) calc(22% * var(--glow-strength)), transparent));
 }
 
 .scorecard-score-pair {
@@ -783,7 +764,7 @@ body.workspace-active {
   overflow: hidden;
   border: 2px solid var(--card-blue);
   border-radius: 18px;
-  background: linear-gradient(145deg, rgba(20, 124, 255, 0.2), rgba(2, 11, 25, 0.88));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 20%, transparent), color-mix(in srgb, var(--surface-sunken) 88%, transparent));
   color: var(--cream);
   font-size: clamp(3rem, 15cqw, 7rem);
   font-family: "Anton", sans-serif;
@@ -791,7 +772,7 @@ body.workspace-active {
   letter-spacing: 0;
   white-space: nowrap;
   line-height: 0.85;
-  text-shadow: 0 0 22px rgba(126, 191, 255, 0.22);
+  text-shadow: 0 0 22px color-mix(in srgb, var(--accent-blue-bright) calc(22% * var(--text-glow-strength)), transparent);
 }
 
 .scorecard-point-button {
@@ -801,8 +782,8 @@ body.workspace-active {
 }
 
 .scorecard-point-button:not(:disabled):hover {
-  background: linear-gradient(145deg, rgba(45, 145, 255, 0.38), rgba(2, 11, 25, 0.88));
-  box-shadow: 0 0 24px rgba(20, 124, 255, 0.28);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 38%, transparent), color-mix(in srgb, var(--surface-sunken) 88%, transparent));
+  box-shadow: 0 0 24px color-mix(in srgb, var(--accent-blue-bright) calc(28% * var(--glow-strength)), transparent);
 }
 
 .scorecard-point-button:disabled { cursor: not-allowed; }
@@ -821,15 +802,15 @@ body.workspace-active {
   height: auto;
   max-width: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 0 12px rgba(20, 124, 255, 0.28));
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--accent-blue-bright) calc(28% * var(--glow-strength)), transparent));
 }
 
 .scorecard-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid rgba(96, 166, 255, 0.28);
+  border: 1px solid var(--border-default);
   border-radius: 18px;
-  background: rgba(2, 11, 25, 0.52);
+  background: color-mix(in srgb, var(--surface-sunken) 52%, transparent);
   overflow: hidden;
 }
 
@@ -842,7 +823,7 @@ body.workspace-active {
   min-height: clamp(88px, 9vw, 132px);
   padding: 16px clamp(12px, 2vw, 30px);
   text-align: center;
-  border-right: 1px solid rgba(96, 166, 255, 0.28);
+  border-right: 1px solid var(--border-default);
 }
 
 .scorecard-stats > div:last-child { border-right: 0; }
@@ -853,9 +834,9 @@ body.workspace-active {
 .teams {
   gap: clamp(14px, 2vw, 28px);
   padding: clamp(16px, 2.8vw, 28px);
-  border: 1px solid rgba(96, 166, 255, 0.22);
+  border: 1px solid var(--border-default);
   border-radius: 18px;
-  background: rgba(2, 11, 25, 0.64);
+  background: color-mix(in srgb, var(--surface-sunken) 64%, transparent);
 }
 
 .team {
@@ -891,9 +872,9 @@ body.workspace-active {
 
 .tennis-scoreboard {
   gap: 0;
-  border: 1px solid rgba(96, 166, 255, 0.22);
+  border: 1px solid var(--border-default);
   border-radius: 18px;
-  background: rgba(2, 11, 25, 0.52);
+  background: color-mix(in srgb, var(--surface-sunken) 52%, transparent);
   overflow: hidden;
 }
 
@@ -901,7 +882,7 @@ body.workspace-active {
   min-height: 92px;
   align-content: center;
   border: 0;
-  border-right: 1px solid rgba(96, 166, 255, 0.24);
+  border-right: 1px solid var(--border-default);
   border-radius: 0;
   padding: 1rem 1.25rem;
   background: transparent;
@@ -923,14 +904,14 @@ body.workspace-active {
 .admin-subtabs {
   border-color: var(--card-line);
   border-radius: 18px;
-  background: rgba(2, 11, 25, 0.74);
+  background: color-mix(in srgb, var(--surface-sunken) 74%, transparent);
 }
 
 .admin-subtabs .subtab.active {
   border-radius: 14px;
-  background: linear-gradient(135deg, #dff3ff, #5caeff);
-  color: #03101d;
-  box-shadow: 0 10px 28px rgba(20, 124, 255, 0.28);
+  background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to));
+  color: var(--btn-primary-ink);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--accent-blue-bright) calc(28% * var(--glow-strength)), transparent);
 }
 
 @media (max-width: 680px) {
@@ -965,40 +946,40 @@ body.workspace-active {
 
 .scorecard-team {
   min-height: clamp(270px, 23vw, 380px);
-  border-color: rgba(20, 124, 255, 0.48);
-  background: linear-gradient(145deg, rgba(20, 124, 255, 0.09), rgba(2, 11, 25, 0.88) 60%);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 48%, transparent);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 9%, transparent), color-mix(in srgb, var(--surface-sunken) 88%, transparent) 60%);
 }
 
 .scorecard-team h3 {
-  border-color: rgba(20, 124, 255, 0.42);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 42%, transparent);
   color: var(--card-blue);
-  background: rgba(2, 11, 25, 0.9);
+  background: color-mix(in srgb, var(--surface-sunken) 90%, transparent);
 }
 
 .scorecard-players .team-player {
-  border-bottom-color: rgba(20, 124, 255, 0.28);
+  border-bottom-color: var(--border-default);
 }
 
 .scorecard-score-pair .scorecard-point-button,
 .scorecard-score-pair .scorecard-point-value {
   min-height: clamp(138px, 17vw, 274px);
   border-radius: 24px;
-  background: linear-gradient(145deg, rgba(20, 124, 255, 0.2), rgba(2, 11, 25, 0.92));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 20%, transparent), color-mix(in srgb, var(--surface-sunken) 92%, transparent));
   font-size: clamp(3rem, 15cqw, 7rem);
 }
 
 .scorecard-stats {
-  border-color: rgba(20, 124, 255, 0.24);
-  background: rgba(2, 11, 25, 0.68);
+  border-color: var(--border-default);
+  background: color-mix(in srgb, var(--surface-sunken) 68%, transparent);
 }
 
 .scorecard-stats > div {
-  border-right-color: rgba(20, 124, 255, 0.24);
+  border-right-color: var(--border-default);
 }
 
 .match-card .match-status {
-  border-color: rgba(20, 124, 255, 0.72);
-  background: rgba(20, 124, 255, 0.12);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 72%, transparent);
+  background: color-mix(in srgb, var(--accent-blue-bright) 12%, transparent);
   color: var(--card-blue-soft);
   min-height: 24px;
   padding: 0.28rem 0.58rem;
@@ -1009,15 +990,15 @@ body.workspace-active {
 body[data-theme="classic"] .match-card.match-playing,
 body[data-theme="classic"] .match-card.match-waiting,
 body[data-theme="classic"] .highlight-match {
-  border-color: rgba(20, 124, 255, 0.72);
-  background: linear-gradient(135deg, rgba(20, 124, 255, 0.12), transparent 54%), rgba(5, 21, 43, 0.96);
-  box-shadow: 0 16px 36px rgba(20, 124, 255, 0.1);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 72%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-blue-bright) 12%, transparent), transparent 54%), var(--surface-card);
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--accent-blue-bright) calc(10% * var(--glow-strength)), transparent);
 }
 
 body[data-theme="classic"] .match-card.match-playing {
-  border-color: rgba(126, 191, 255, 0.92);
-  background: linear-gradient(135deg, rgba(126, 191, 255, 0.18), transparent 54%), rgba(7, 27, 54, 0.98);
-  box-shadow: 0 16px 36px rgba(20, 124, 255, 0.2);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 92%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-blue-bright) 18%, transparent), transparent 54%), var(--surface-card);
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--accent-blue-bright) calc(20% * var(--glow-strength)), transparent);
 }
 
 .scorecard-team h3 {
@@ -1194,18 +1175,18 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 .checkbox-card {
-  border-color: rgba(96, 166, 255, 0.46);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 46%, transparent);
   background:
-    linear-gradient(145deg, rgba(20, 124, 255, 0.16), transparent 58%),
-    rgba(3, 16, 34, 0.9);
+    linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 16%, transparent), transparent 58%),
+    color-mix(in srgb, var(--surface-sunken) 90%, transparent);
 }
 
 .checkbox-card:has(input:checked) {
   border-color: var(--card-blue);
   background:
-    linear-gradient(145deg, rgba(20, 124, 255, 0.28), transparent 64%),
-    rgba(3, 16, 34, 0.96);
-  box-shadow: 0 12px 28px rgba(20, 124, 255, 0.14);
+    linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 28%, transparent), transparent 64%),
+    var(--surface-sunken);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--accent-blue-bright) calc(14% * var(--glow-strength)), transparent);
 }
 
 .checkbox-card input {
@@ -1248,15 +1229,15 @@ body[data-theme="classic"] .match-card.match-playing {
 
 .match-card .cancel-match-button,
 .match-card .walkover-row .walkover-button {
-  border-color: rgba(96, 166, 255, 0.42);
-  background: rgba(20, 124, 255, 0.1);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 42%, transparent);
+  background: color-mix(in srgb, var(--accent-blue-bright) 10%, transparent);
   color: var(--card-blue-soft);
 }
 
 .match-card .cancel-match-button:hover:not(:disabled),
 .match-card .walkover-row .walkover-button:hover:not(:disabled) {
   border-color: var(--card-blue);
-  background: rgba(20, 124, 255, 0.2);
+  background: color-mix(in srgb, var(--accent-blue-bright) 20%, transparent);
   color: var(--cream);
 }
 
@@ -1270,18 +1251,18 @@ body[data-theme="classic"] .match-card.match-playing {
   border-color: var(--card-line);
   border-radius: 18px;
   background:
-    linear-gradient(145deg, rgba(19, 64, 120, 0.22), transparent 42%),
-    linear-gradient(180deg, rgba(5, 21, 43, 0.96), rgba(2, 11, 25, 0.98));
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-card) 22%, transparent), transparent 42%),
+    linear-gradient(180deg, var(--surface-card), var(--surface-sunken));
   box-shadow:
-    inset 0 1px 0 rgba(177, 218, 255, 0.08),
-    0 20px 50px rgba(0, 0, 0, 0.28);
+    inset 0 1px 0 color-mix(in srgb, var(--accent-blue-bright) calc(8% * var(--glow-strength)), transparent),
+    0 20px 50px color-mix(in srgb, var(--shadow-ink) calc(28% * var(--shadow-strength)), transparent);
 }
 
 .overview-stats > div {
   border-color: var(--card-line);
   background:
-    linear-gradient(145deg, rgba(19, 64, 120, 0.22), transparent 42%),
-    linear-gradient(180deg, rgba(5, 21, 43, 0.96), rgba(2, 11, 25, 0.98));
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-card) 22%, transparent), transparent 42%),
+    linear-gradient(180deg, var(--surface-card), var(--surface-sunken));
 }
 
 @media (max-width: 760px) {
@@ -1303,26 +1284,26 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 .workspace-header .danger-button {
-  border-color: rgba(20, 124, 255, 0.52);
-  background: rgba(20, 124, 255, 0.12);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 52%, transparent);
+  background: color-mix(in srgb, var(--accent-blue-bright) 12%, transparent);
   color: var(--card-blue-soft);
 }
 
 .workspace-header .danger-button:hover {
   border-color: var(--card-blue);
-  background: rgba(20, 124, 255, 0.22);
+  background: color-mix(in srgb, var(--accent-blue-bright) 22%, transparent);
   color: var(--cream);
 }
 
 .player-session-actions button {
-  border-color: rgba(20, 124, 255, 0.52);
-  background: rgba(20, 124, 255, 0.12);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 52%, transparent);
+  background: color-mix(in srgb, var(--accent-blue-bright) 12%, transparent);
   color: var(--card-blue-soft);
 }
 
 .player-session-actions button:hover {
   border-color: var(--card-blue);
-  background: rgba(20, 124, 255, 0.22);
+  background: color-mix(in srgb, var(--accent-blue-bright) 22%, transparent);
   color: var(--cream);
 }
 
@@ -1340,10 +1321,10 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 .standings li {
-  border-color: rgba(96, 166, 255, 0.28);
+  border-color: var(--border-default);
   background:
-    linear-gradient(145deg, rgba(20, 124, 255, 0.12), transparent 58%),
-    rgba(3, 16, 34, 0.94);
+    linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 12%, transparent), transparent 58%),
+    color-mix(in srgb, var(--surface-sunken) 94%, transparent);
 }
 
 .standings .player-name-badge {
@@ -1380,38 +1361,38 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 .join-preview {
-  border-color: rgba(96, 166, 255, 0.46);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 46%, transparent);
   background:
-    linear-gradient(145deg, rgba(20, 124, 255, 0.16), transparent 58%),
-    rgba(3, 16, 34, 0.9);
+    linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 16%, transparent), transparent 58%),
+    color-mix(in srgb, var(--surface-sunken) 90%, transparent);
 }
 
 #showExistingPlayersButton {
-  border-color: rgba(96, 166, 255, 0.46);
-  background: rgba(20, 124, 255, 0.1);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 46%, transparent);
+  background: color-mix(in srgb, var(--accent-blue-bright) 10%, transparent);
   color: var(--card-blue-soft);
 }
 
 #showExistingPlayersButton:hover {
   border-color: var(--card-blue);
-  background: rgba(20, 124, 255, 0.2);
+  background: color-mix(in srgb, var(--accent-blue-bright) 20%, transparent);
   color: var(--cream);
 }
 
 #profileAvatarPicker > label {
-  border-color: rgba(96, 166, 255, 0.46);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 46%, transparent);
   background:
-    linear-gradient(145deg, rgba(20, 124, 255, 0.14), transparent 60%),
-    rgba(3, 16, 34, 0.9);
+    linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 14%, transparent), transparent 60%),
+    color-mix(in srgb, var(--surface-sunken) 90%, transparent);
   color: var(--cream);
 }
 
 #profileAvatarPicker > label:hover,
 #profileAvatarPicker > label:has(input:checked) {
   border-color: var(--card-blue);
-  background: linear-gradient(135deg, #e6f6ff, #62b6ff);
-  color: #03101d;
-  box-shadow: 0 10px 24px rgba(20, 124, 255, 0.18);
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue-bright));
+  color: var(--btn-primary-ink);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent-blue-bright) calc(18% * var(--glow-strength)), transparent);
 }
 
 #profileForm > .button-row {
@@ -1488,10 +1469,10 @@ body[data-theme="classic"] .match-card.match-playing {
    ========================================================= */
 
 #playersList > li {
-  border-color: rgba(96, 166, 255, 0.28);
+  border-color: var(--border-default);
   background:
-    linear-gradient(145deg, rgba(20, 124, 255, 0.12), transparent 58%),
-    rgba(3, 16, 34, 0.94);
+    linear-gradient(145deg, color-mix(in srgb, var(--accent-blue-bright) 12%, transparent), transparent 58%),
+    color-mix(in srgb, var(--surface-sunken) 94%, transparent);
 }
 
 #playersList .player-name-badge {
@@ -1508,8 +1489,8 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 #playersList .join-source-chip {
-  border-color: rgba(96, 166, 255, 0.34);
-  background: rgba(20, 124, 255, 0.1);
+  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--accent-blue-bright) 10%, transparent);
   color: var(--card-blue-soft);
 }
 
@@ -1518,19 +1499,19 @@ body[data-theme="classic"] .match-card.match-playing {
 }
 
 #playersList .danger-button {
-  border-color: rgba(96, 166, 255, 0.42);
-  background: rgba(20, 124, 255, 0.1);
+  border-color: color-mix(in srgb, var(--accent-blue-bright) 42%, transparent);
+  background: color-mix(in srgb, var(--accent-blue-bright) 10%, transparent);
   color: var(--card-blue-soft);
 }
 
 #playersList .danger-button:hover:not(:disabled) {
   border-color: var(--card-blue);
-  background: rgba(20, 124, 255, 0.2);
+  background: color-mix(in srgb, var(--accent-blue-bright) 20%, transparent);
   color: var(--cream);
 }
 
 #playersList .player-edit-grid {
-  border-top: 1px solid rgba(96, 166, 255, 0.2);
+  border-top: 1px solid var(--border-default);
   padding-top: 10px;
 }
 

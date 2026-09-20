@@ -13,9 +13,9 @@
   min-width: 0;
   padding: 0;
 
-  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.2));
+  border: 1px solid var(--ds-border, var(--border-default));
   border-radius: var(--radius-sm, 8px);
-  background: var(--ds-surface-1, rgba(16, 31, 52, 0.94));
+  background: var(--ds-surface-1, color-mix(in srgb, var(--surface-sunken) 94%, transparent));
 
   font-family: var(--font-display);
   font-size: 1.1rem;
@@ -25,13 +25,13 @@
 }
 
 .invite-code-cell:focus {
-  border-color: var(--ds-border-strong, rgba(91, 173, 255, 0.58));
+  border-color: var(--ds-border-strong, color-mix(in srgb, var(--accent-blue-bright) 58%, transparent));
   outline: none;
 }
 
 .invite-code-cell:not(:placeholder-shown) {
-  border-color: var(--ds-border-strong, rgba(91, 173, 255, 0.58));
-  color: var(--gold-bright, #62b6ff);
+  border-color: var(--ds-border-strong, color-mix(in srgb, var(--accent-blue-bright) 58%, transparent));
+  color: var(--gold-bright, var(--accent-text));
 }
 
 .invite-code-hidden-field {

@@ -1,9 +1,9 @@
-// Color mode (Phase 27): light and dark share one markup and one set of components, only the color values differ
-// (styles/theme-light.css, generated from the dark theme). Resolution order: (1) the person's manual choice,
-// (2) the device's prefers-color-scheme, (3) dark. A manual choice is saved on this device and applied at once, without reloading.
+// Color mode: light and dark share one markup and one set of components; only the token values differ (styles/tokens.css).
+// The theme is set on <html data-theme="dark|light">. Resolution order: (1) the saved choice, (2) the device's prefers-color-scheme
+// (read once when the page loads: the first visit), (3) dark. A choice is saved on this device and applied at once, without reloading.
 (function (global) {
   const STORAGE_KEY = "padelstar-theme";
-  const THEME_COLOR = { dark: "#020b1c", light: "#eef3f9" };
+  const THEME_COLOR = { dark: "#1b2438", light: "#eef3fa" };
 
   // "light" | "dark" when the person chose one, otherwise null (follow the device).
   function readPreference(storage) {
@@ -36,7 +36,7 @@
 
     function apply() {
       mode = resolveMode({ preference: preference(), systemScheme: systemScheme(matchMedia) });
-      root?.setAttribute?.("data-theme-mode", mode);
+      root?.setAttribute?.("data-theme", mode);
       if (root?.style) root.style.colorScheme = mode;
       document?.querySelector?.('meta[name="theme-color"]')?.setAttribute("content", THEME_COLOR[mode]);
       syncControls();
@@ -68,9 +68,7 @@
         const button = event.target.closest?.("[data-theme-option]");
         if (button) setPreference(button.dataset.themeOption);
       });
-      // follow the device while no manual choice is saved
-      const query = matchMedia?.("(prefers-color-scheme: light)");
-      query?.addEventListener?.("change", () => { if (!preference()) apply(); });
+      // The device's preference decides only when there is no saved choice, and only when the page loads (first visit).
       apply();
     }
 

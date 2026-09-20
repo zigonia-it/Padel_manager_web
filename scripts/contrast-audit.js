@@ -62,7 +62,7 @@
       if (r < need) bad.push({ ratio: Math.round(r * 100) / 100, need, text: el.textContent.trim().slice(0, 28), el: (el.id ? "#" + el.id : "") + "." + String(el.className).split(" ").filter(Boolean).slice(0, 2).join("."), fg: cs.color, bg: `rgb(${Math.round(bg.r)},${Math.round(bg.g)},${Math.round(bg.b)})` });
     }
     bad.sort((a, b) => a.ratio - b.ratio);
-    return { mode: document.documentElement.dataset.themeMode, checked, failing: bad.length, worst: bad.slice(0, limit) };
+    return { mode: document.documentElement.dataset.theme, checked, failing: bad.length, worst: bad.slice(0, limit) };
   };
 
   // Visits every main view on a LOCAL tournament (detaches the Supabase client) and returns the distinct failures per view.
@@ -93,6 +93,6 @@
     await at("player", () => { showWorkspace("player"); render(); });
     podiumSnapshot = buildPodiumSnapshot(); await at("podium", () => { showModule("podium"); render(); });
     Object.keys(localStorage).filter((k) => /padelstar/i.test(k) && !/language|theme/.test(k)).forEach((k) => localStorage.removeItem(k));
-    return { mode: document.documentElement.dataset.themeMode, width: innerWidth, rows };
+    return { mode: document.documentElement.dataset.theme, width: innerWidth, rows };
   };
 })();

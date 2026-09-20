@@ -81,7 +81,7 @@
   gap: 10px;
 
   border:
-    1px solid rgba(var(--gold-light-rgb), 0.24);
+    1px solid color-mix(in srgb, var(--ink-heading) 24%, transparent);
 
   border-radius: 8px;
 
@@ -89,9 +89,9 @@
 
   background:
     linear-gradient(180deg,
-      rgba(var(--gold-rgb), 0.06),
-      rgba(0, 0, 0, 0.09)),
-    rgba(5, 21, 43, 0.56);
+      color-mix(in srgb, var(--accent-blue) 6%, transparent),
+      color-mix(in srgb, var(--surface-sunken) 9%, transparent)),
+    color-mix(in srgb, var(--surface-card) 56%, transparent);
 
   font-size: 0.96rem;
   line-height: 1.55;
@@ -146,7 +146,7 @@
   min-height: 32px;
 
   border:
-    1px solid rgba(255, 255, 255, 0.24);
+    1px solid var(--border-default);
 
   border-radius: 999px;
 
@@ -156,7 +156,7 @@
 
   background:
     linear-gradient(180deg,
-      rgba(255, 255, 255, 0.32),
+      color-mix(in srgb, var(--ink-heading) 19%, transparent),
       transparent 42%),
     linear-gradient(160deg,
       var(--player-accent-light),
@@ -164,22 +164,22 @@
       var(--player-accent-dark)),
     var(--player-accent);
 
-  color: white;
+  color: var(--ink-heading);
 
   font-weight: 700;
   line-height: 1.25;
 
   text-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.4);
+    0 1px 1px color-mix(in srgb, var(--shadow-ink) calc(40% * var(--text-glow-strength)), transparent);
 
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 1px 0 color-mix(in srgb, var(--ink-heading) calc(28% * var(--glow-strength)), transparent),
     0 8px 18px rgba(var(--player-accent-rgb), 0.24);
 }
 
 .player-name-badge small {
   color:
-    rgba(255, 255, 255, 0.72);
+    color-mix(in srgb, var(--ink-heading) 72%, transparent);
 
   text-shadow: none;
 }
@@ -192,14 +192,14 @@
   min-height: 28px;
 
   border:
-    1px solid rgba(var(--gold-bright-rgb), 0.18);
+    1px solid color-mix(in srgb, var(--accent-blue-bright) 18%, transparent);
 
   border-radius: 999px;
 
   padding: 0.22rem 0.56rem;
 
   background:
-    rgba(5, 21, 43, 0.42);
+    color-mix(in srgb, var(--surface-card) 42%, transparent);
 
   color: var(--muted);
 
@@ -245,7 +245,7 @@
     linear-gradient(135deg,
       rgba(var(--player-accent-rgb), 0.18),
       transparent 54%),
-    rgba(5, 21, 43, 0.44);
+    color-mix(in srgb, var(--surface-card) 44%, transparent);
 }
 
 .leave-tournament-button {
@@ -407,12 +407,12 @@
 
 .danger-button {
   border:
-    1px solid rgba(168, 59, 54, 0.38);
+    1px solid color-mix(in srgb, var(--negative) 38%, transparent);
 
   background:
-    rgba(168, 59, 54, 0.12);
+    color-mix(in srgb, var(--negative) 12%, transparent);
 
-  color: #f0b1ad;
+  color: var(--negative);
 }
 
 .avatar {
@@ -431,7 +431,7 @@
 
   box-shadow:
     0 0 0 2px rgba(var(--player-accent-rgb), 0.18),
-    0 6px 16px rgba(0, 0, 0, 0.22);
+    0 6px 16px color-mix(in srgb, var(--shadow-ink) calc(22% * var(--shadow-strength)), transparent);
 }
 
 .small-avatar {
@@ -466,7 +466,7 @@
   gap: 16px;
 
   border:
-    1px solid rgba(var(--gold-light-rgb), 0.28);
+    1px solid color-mix(in srgb, var(--ink-heading) 28%, transparent);
 
   border-radius: 8px;
 
@@ -474,12 +474,12 @@
 
   background:
     linear-gradient(135deg,
-      rgba(var(--gold-rgb), 0.12),
+      color-mix(in srgb, var(--accent-blue) 12%, transparent),
       transparent 42%),
-    rgba(5, 21, 43, 0.62);
+    color-mix(in srgb, var(--surface-card) 62%, transparent);
 
   box-shadow:
-    inset 0 1px 0 rgba(var(--gold-light-rgb), 0.06),
+    inset 0 1px 0 color-mix(in srgb, var(--ink-heading) 6%, transparent),
     0 12px 30px rgba(var(--player-accent-rgb), 0.12);
 }
 
@@ -503,14 +503,14 @@
   gap: 0.22rem;
 
   border:
-    1px solid rgba(var(--gold-light-rgb), 0.22);
+    1px solid color-mix(in srgb, var(--ink-heading) 22%, transparent);
 
   border-radius: 8px;
 
   padding: 0.68rem 0.76rem;
 
   background:
-    rgba(5, 21, 43, 0.64);
+    color-mix(in srgb, var(--surface-card) 64%, transparent);
 }
 
 .tennis-scoreboard small {
@@ -539,22 +539,22 @@
   background:
     linear-gradient(180deg,
       rgba(var(--player-accent-rgb), 0.22),
-      rgba(var(--gold-light-rgb), 0.045)),
+      color-mix(in srgb, var(--ink-heading) 5%, transparent)),
     var(--cell);
 }
 
 .match-playing {
   border-color:
-    rgba(var(--gold-bright-rgb), 0.50);
+    color-mix(in srgb, var(--accent-blue-bright) 50%, transparent);
 
   box-shadow:
-    0 0 0 1px rgba(var(--gold-rgb), 0.06),
-    0 14px 32px rgba(var(--gold-rgb), 0.12);
+    0 0 0 1px color-mix(in srgb, var(--accent-blue) 6%, transparent),
+    0 14px 32px color-mix(in srgb, var(--accent-blue) 12%, transparent);
 }
 
 .match-finished {
   border-color:
-    rgba(63, 157, 99, 0.42);
+    var(--border-strong);
 }
 
 .match-cancelled {
@@ -599,7 +599,7 @@
   align-items: center;
   min-height: 28px;
   padding: 0.28rem 0.62rem;
-  border: 1px solid rgba(var(--gold-rgb), 0.24);
+  border: 1px solid color-mix(in srgb, var(--accent-blue) 24%, transparent);
   border-radius: 999px;
   color: var(--gold-light);
   font-size: 0.76rem;
@@ -629,12 +629,12 @@
   justify-content: center;
 
   border:
-    1px solid rgba(var(--gold-rgb), 0.22);
+    1px solid color-mix(in srgb, var(--accent-blue) 22%, transparent);
 
   border-radius: 999px;
 
   background:
-    rgba(var(--gold-rgb), 0.14);
+    color-mix(in srgb, var(--accent-blue) 14%, transparent);
 
   padding:
     0.28rem 0.58rem;
@@ -659,10 +659,10 @@
 .match-status.finished,
 .status-chip.finished {
   border-color:
-    rgba(142, 224, 173, 0.28);
+    var(--border-default);
 
   background:
-    rgba(142, 224, 173, 0.13);
+    color-mix(in srgb, var(--positive) 13%, transparent);
 
   color: var(--finished);
 }
@@ -675,18 +675,18 @@
 }
 
 .offline-pending-chip {
-  border-color: rgba(240, 181, 46, 0.4);
-  background: rgba(240, 181, 46, 0.14);
-  color: var(--gold-bright, #f0b52e);
+  border-color: color-mix(in srgb, var(--warning) 40%, transparent);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+  color: var(--gold-bright, var(--warning));
 }
 
 .match-status.waiting,
 .status-chip.waiting {
   border-color:
-    rgba(96, 166, 255, 0.34);
+    var(--border-strong);
 
   background:
-    rgba(20, 124, 255, 0.12);
+    color-mix(in srgb, var(--accent-blue-bright) 12%, transparent);
 
   color: var(--card-blue-soft);
 }
@@ -786,12 +786,12 @@
   padding: 0.55rem 0.5rem;
 
   border:
-    1px solid rgba(var(--gold-bright-rgb), 0.22);
+    1px solid color-mix(in srgb, var(--accent-blue-bright) 22%, transparent);
 
   background:
     linear-gradient(180deg,
-      rgba(var(--gold-rgb), 0.08),
-      rgba(var(--gold-dark-rgb), 0.04));
+      color-mix(in srgb, var(--accent-blue) 8%, transparent),
+      color-mix(in srgb, var(--accent-blue) 4%, transparent));
 
   color: var(--silver-light);
 
@@ -801,12 +801,12 @@
 
 .quick-score-button:hover {
   border-color:
-    rgba(var(--gold-light-rgb), 0.46);
+    color-mix(in srgb, var(--ink-heading) 46%, transparent);
 
   color: var(--gold-light);
 
   background:
-    rgba(var(--gold-rgb), 0.12);
+    color-mix(in srgb, var(--accent-blue) 12%, transparent);
 }
 
 
@@ -835,8 +835,8 @@
   background:
     linear-gradient(180deg,
       rgba(var(--player-accent-rgb), 0.16),
-      rgba(var(--gold-light-rgb), 0.045)),
-    rgba(5, 21, 43, 0.52);
+      color-mix(in srgb, var(--ink-heading) 5%, transparent)),
+    color-mix(in srgb, var(--surface-card) 52%, transparent);
 
   color: var(--ink);
 }
@@ -855,21 +855,21 @@
 
 .player-buttons button.active {
   border:
-    1px solid rgba(var(--gold-light-rgb), 0.40);
+    1px solid color-mix(in srgb, var(--ink-heading) 40%, transparent);
 
   background:
     linear-gradient(180deg,
-      rgba(255, 255, 255, 0.28),
+      color-mix(in srgb, var(--ink-heading) 17%, transparent),
       transparent 42%),
     linear-gradient(160deg,
       var(--player-accent-light),
       var(--player-accent),
       var(--player-accent-dark));
 
-  color: white;
+  color: var(--ink-heading);
 
   text-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.38);
+    0 1px 1px color-mix(in srgb, var(--shadow-ink) calc(38% * var(--text-glow-strength)), transparent);
 
   box-shadow:
     0 10px 24px rgba(var(--player-accent-rgb), 0.28);
@@ -885,17 +885,17 @@
 
   background:
     linear-gradient(160deg,
-      rgba(var(--gold-bright-rgb), 0.28),
-      rgba(var(--gold-rgb), 0.10)),
-    #241205;
+      color-mix(in srgb, var(--accent-blue-bright) 28%, transparent),
+      color-mix(in srgb, var(--accent-blue) 10%, transparent)),
+    var(--surface-card);
 
-  color: white;
+  color: var(--ink-heading);
 }
 
 .next-match .eyebrow,
 .next-match p {
   color:
-    rgba(255, 255, 255, 0.80);
+    color-mix(in srgb, var(--ink-heading) 80%, transparent);
 }
 
 .next-match-summary {
@@ -904,7 +904,7 @@
   gap: 0.25rem;
 
   color:
-    rgba(255, 255, 255, 0.80);
+    color-mix(in srgb, var(--ink-heading) 80%, transparent);
 
   font-size: 0.92rem;
   font-weight: 600;
@@ -921,7 +921,7 @@
   gap: 12px;
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px solid rgba(155, 190, 222, .18);
+  border-top: 1px solid var(--border-default);
 }
 
 .court-queue>.panel-heading {
@@ -932,9 +932,9 @@
   display: grid;
   gap: 8px;
   padding: 14px;
-  border: 1px solid rgba(155, 190, 222, .16);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
-  background: rgba(4, 15, 29, .38);
+  background: color-mix(in srgb, var(--surface-sunken) 38%, transparent);
 }
 
 .court-queue-court h4,
@@ -952,7 +952,7 @@
 .court-queue-team {
   padding-left: 8px;
   border-left: 3px solid rgba(var(--player-accent-rgb), 0.7);
-  color: var(--player-accent-light, inherit);
+  color: var(--gem-ink, inherit);
 }
 
 .court-queue-match span,
@@ -965,7 +965,7 @@
   display: grid;
   gap: 5px;
   padding-top: 9px;
-  border-top: 1px solid rgba(155, 190, 222, .12);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .player-result-panel {
@@ -986,8 +986,8 @@
   margin: 0;
   padding: 8px 10px;
   border-radius: 8px;
-  color: #ffd4a8;
-  background: rgba(168, 91, 30, .2);
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 20%, transparent);
 }
 
 .result-submissions {
@@ -1004,7 +1004,7 @@
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: rgba(255, 255, 255, .03);
+  background: color-mix(in srgb, var(--ink-heading) 2%, transparent);
 }
 
 .result-submission>div {
@@ -1018,7 +1018,7 @@
 }
 
 .result-submission.is-conflict {
-  border-color: rgba(255, 177, 104, .7);
+  border-color: color-mix(in srgb, var(--warning) 70%, transparent);
 }
 
 @media (max-width: 680px) {
@@ -1033,7 +1033,7 @@
 }
 
 .tv-mode {
-  background: #020b16;
+  background: var(--surface-sunken);
 }
 
 .tv-mode,
@@ -1126,7 +1126,7 @@
   aspect-ratio: 1;
   object-fit: contain;
   opacity: 0.86;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.34));
+  filter: drop-shadow(0 8px 16px color-mix(in srgb, var(--shadow-ink) calc(34% * var(--shadow-strength)), transparent));
 }
 
 .tv-mode .tv-mode-wordmark {
@@ -1134,7 +1134,7 @@
   width: clamp(120px, 12vw, 220px);
   height: auto;
   opacity: 0.86;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.34));
+  filter: drop-shadow(0 8px 16px color-mix(in srgb, var(--shadow-ink) calc(34% * var(--shadow-strength)), transparent));
 }
 
 .tv-mode #tvModeButton {
@@ -1146,7 +1146,7 @@
   min-height: 28px;
   padding: 0.28rem 0.52rem;
   border-radius: 6px;
-  background: rgba(2, 11, 22, 0.72);
+  background: color-mix(in srgb, var(--surface-sunken) 72%, transparent);
   font-size: clamp(0.58rem, 0.62vw, 0.72rem);
   opacity: 0.7;
 }
@@ -1206,14 +1206,14 @@
   gap: 0.22rem;
 
   border:
-    1px solid rgba(var(--gold-light-rgb), 0.16);
+    1px solid color-mix(in srgb, var(--ink-heading) 16%, transparent);
 
   border-radius: 8px;
 
   padding: 0.72rem 0.78rem;
 
   background:
-    rgba(5, 21, 43, 0.44);
+    color-mix(in srgb, var(--surface-card) 44%, transparent);
 }
 
 .player-now-grid span {
@@ -1296,7 +1296,7 @@
 
 .score-dialog::backdrop {
   background:
-    rgba(0, 0, 0, 0.66);
+    color-mix(in srgb, var(--surface-sunken) 66%, transparent);
 
   backdrop-filter:
     blur(8px);
@@ -1306,7 +1306,7 @@
   padding: 42px 0 22px;
 
   color:
-    rgba(var(--gold-light-rgb), 0.62);
+    color-mix(in srgb, var(--ink-heading) 62%, transparent);
 
   font-size: 0.76rem;
   font-weight: 400;
@@ -1332,13 +1332,13 @@
 }
 
 .install-modal::backdrop {
-  background: rgba(0, 0, 0, 0.66);
+  background: color-mix(in srgb, var(--surface-sunken) 66%, transparent);
   backdrop-filter: blur(8px);
 }
 
 .install-modal-card {
   padding: 24px;
-  border: 1px solid rgba(var(--gold-bright-rgb), 0.24);
+  border: 1px solid color-mix(in srgb, var(--accent-blue-bright) 24%, transparent);
   border-radius: 8px;
   background: var(--ds-card-bg);
 }
@@ -1363,7 +1363,7 @@
 .site-footer a,
 .privacy-back-link {
   color: var(--gold-light);
-  text-decoration-color: rgba(var(--gold-light-rgb), 0.42);
+  text-decoration-color: color-mix(in srgb, var(--ink-heading) 42%, transparent);
   text-underline-offset: 0.22em;
 }
 
@@ -1384,13 +1384,13 @@
   display: grid;
   gap: 16px;
   padding: clamp(22px, 5vw, 44px);
-  border: 1px solid rgba(var(--gold-bright-rgb), 0.24);
+  border: 1px solid color-mix(in srgb, var(--accent-blue-bright) 24%, transparent);
   border-radius: 8px;
   background:
     linear-gradient(180deg,
-      rgba(var(--gold-light-rgb), 0.08),
-      rgba(var(--gold-light-rgb), 0.025) 32%),
-    rgba(3, 16, 34, 0.88);
+      color-mix(in srgb, var(--ink-heading) 8%, transparent),
+      color-mix(in srgb, var(--ink-heading) 3%, transparent) 32%),
+    color-mix(in srgb, var(--surface-sunken) 88%, transparent);
   box-shadow: var(--shadow);
 }
 
@@ -1418,7 +1418,7 @@
 
 .privacy-document p {
   max-width: 76ch;
-  color: rgba(255, 244, 189, 0.86);
+  color: color-mix(in srgb, var(--warning) 86%, transparent);
 }
 
 .score-dialog-surface {
@@ -1430,14 +1430,14 @@
 
   background:
     linear-gradient(180deg,
-      rgba(var(--gold-light-rgb), 0.09),
-      rgba(var(--gold-light-rgb), 0.025) 40%),
+      color-mix(in srgb, var(--ink-heading) 9%, transparent),
+      color-mix(in srgb, var(--ink-heading) 3%, transparent) 40%),
     var(--surface);
 }
 
 .large-score-dialog::backdrop {
   background:
-    rgba(0, 0, 0, 0.74);
+    color-mix(in srgb, var(--surface-sunken) 74%, transparent);
 
   backdrop-filter:
     blur(10px);
@@ -1462,11 +1462,11 @@
       rgba(var(--player-accent-rgb), 0.28),
       transparent 30rem),
     radial-gradient(circle at 84% 90%,
-      rgba(var(--gold-bright-rgb), 0.18),
+      color-mix(in srgb, var(--accent-blue-bright) 18%, transparent),
       transparent 28rem),
     linear-gradient(145deg,
-      #261204 0%,
-      #0d0602 100%);
+      var(--surface-card) 0%,
+      var(--surface-sunken) 100%);
 }
 
 .large-score-top {
@@ -1526,16 +1526,16 @@
 
   background:
     linear-gradient(180deg,
-      rgba(var(--gold-light-rgb), 0.18),
+      color-mix(in srgb, var(--ink-heading) 18%, transparent),
       transparent 36%),
     linear-gradient(160deg,
       rgba(var(--player-accent-rgb), 0.34),
-      rgba(5, 21, 43, 0.26));
+      color-mix(in srgb, var(--surface-card) 26%, transparent));
 
-  color: white;
+  color: var(--ink-heading);
 
   box-shadow:
-    inset 0 1px 0 rgba(var(--gold-light-rgb), 0.22),
+    inset 0 1px 0 color-mix(in srgb, var(--ink-heading) 22%, transparent),
     0 20px 60px rgba(var(--player-accent-rgb), 0.22);
 }
 
@@ -1561,7 +1561,7 @@
   letter-spacing: 0.01em;
 
   text-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.38);
+    0 10px 24px color-mix(in srgb, var(--shadow-ink) calc(38% * var(--text-glow-strength)), transparent);
 }
 
 .large-score-team small {
@@ -1573,12 +1573,12 @@
   min-height: 54px;
 
   border:
-    1px solid rgba(var(--gold-light-rgb), 0.22);
+    1px solid color-mix(in srgb, var(--ink-heading) 22%, transparent);
 
   border-radius: 999px;
 
   background:
-    rgba(5, 21, 43, 0.62);
+    color-mix(in srgb, var(--surface-card) 62%, transparent);
 
   color: var(--gold-light);
 
@@ -1604,14 +1604,14 @@
   gap: 0.18rem;
 
   border:
-    1px solid rgba(var(--gold-bright-rgb), 0.20);
+    1px solid color-mix(in srgb, var(--accent-blue-bright) 20%, transparent);
 
   border-radius: 8px;
 
   padding: 0.82rem 0.9rem;
 
   background:
-    rgba(var(--gold-light-rgb), 0.055);
+    color-mix(in srgb, var(--ink-heading) 6%, transparent);
 }
 
 .large-score-actions span {

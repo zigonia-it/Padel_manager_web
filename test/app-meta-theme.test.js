@@ -47,9 +47,9 @@ test("app metadata owns service-worker registration and copyright output", async
   assert.deepEqual(fixture.registrations, ["./service-worker.js"]);
 });
 
-test("theme module applies the single classic theme and browser color", () => {
+test("theme module applies the single classic layout theme and leaves the browser bar colour to the colour mode", () => {
   const fixture = loadModules();
   fixture.window.PadelstarTheme.create({ document: fixture.document }).applyTheme();
   assert.equal(fixture.document.body.dataset.theme, "classic");
-  assert.equal(fixture.document.querySelector('meta[name="theme-color"]')['content'], "#07101d");
+  assert.equal(fixture.document.querySelector('meta[name="theme-color"]')['content'], undefined, "no hard-coded colour here: app/color-mode.js sets it per theme");
 });

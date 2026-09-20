@@ -1,0 +1,9 @@
+/* The "I'm not a robot" dialog (Cloudflare Turnstile widget inside). */
+.captcha-dialog .captcha-slot {
+  display: flex;
+  justify-content: center;
+  min-height: 70px;
+  margin: 12px 0;
+}
+
+.captcha-dialog .status-message-error:empty { display: none; }

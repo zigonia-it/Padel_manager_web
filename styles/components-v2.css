@@ -25,21 +25,21 @@
 }
 
 .ds-btn-primary {
-  background: linear-gradient(180deg, #a1d6ff, #008df9);
-  color: #04121f;
+  background: linear-gradient(180deg, var(--btn-primary-from), var(--btn-primary-to));
+  color: var(--btn-primary-ink);
   border: 0;
-  box-shadow: 0 10px 26px rgba(35, 108, 168, 0.4);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--accent-blue-bright) calc(40% * var(--glow-strength)), transparent);
 }
 
 .ds-btn-secondary {
-  background: linear-gradient(180deg, rgba(91, 173, 255, 0.1), rgba(91, 173, 255, 0.38));
+  background: var(--btn-secondary-bg);
   border: 1px solid var(--ds-border-strong);
   color: var(--gold-light);
   font-weight: 600;
 }
 
 .ds-btn-ghost {
-  background: linear-gradient(180deg, rgba(91, 173, 255, 0), rgba(91, 173, 255, 0.32));
+  background: var(--btn-secondary-bg);
   border: 1px solid var(--ds-border-hairline);
   color: var(--text-secondary);
   font-weight: 600;
@@ -116,14 +116,14 @@
 
 .ds-avatar-gem-inner {
   inset: 2.5px;
-  background: #0c1728;
+  background: var(--surface-card);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
   font-weight: 800;
   font-size: 11px;
-  color: var(--player-accent-light);
+  color: var(--gem-ink, var(--accent-text));
 }
 
 .ds-avatar-gem-sm { width: 26px; height: 26px; }
@@ -160,7 +160,7 @@
   color: var(--gold-bright);
 }
 
-.ds-pill-finished { background: rgba(142, 224, 173, 0.13); color: var(--finished); }
+.ds-pill-finished { background: color-mix(in srgb, var(--positive) 13%, transparent); color: var(--finished); }
 .ds-pill-danger { background: var(--danger-bg); color: var(--danger); }
 .ds-pill-warning { background: var(--warning-bg); color: var(--warning); }
 .ds-pill-muted { background: transparent; border: 1px solid var(--ds-border-hairline); color: var(--text-dim); }

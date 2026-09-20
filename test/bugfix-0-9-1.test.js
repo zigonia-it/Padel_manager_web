@@ -23,7 +23,7 @@ test("the phone menu drawer is one column with full-width rows and a two-part th
   assert.match(block, /\.menu-drawer \.theme-toggle \{[^}]*grid-template-columns: repeat\(2/);
   assert.match(block, /\.menu-drawer \.language-options \{[^}]*position: static/, "the language list opens inside the drawer");
   assert.match(block, /max-height: calc\(100dvh - 96px\)/, "a short phone can scroll the drawer");
-  assert.match(block, /background: rgb\(7, 17, 32\)/, "an opaque drawer: the page behind it does not show through");
+  assert.match(block, /background: var\(--surface-card\)/, "an opaque drawer (a surface token): the page behind it does not show through");
 });
 
 test("a signed-in owner can open an active tournament from the profile list on any device", () => {

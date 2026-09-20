@@ -14,15 +14,15 @@
   display: flex;
   flex-direction: column;
 
-  border: 1px solid rgba(var(--gold-light-rgb), 0.22);
+  border: 1px solid color-mix(in srgb, var(--ink-heading) 22%, transparent);
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(5, 21, 43, 0.5);
+  background: color-mix(in srgb, var(--surface-card) 50%, transparent);
 }
 
 .settings-group-title {
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(var(--gold-light-rgb), 0.16);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-heading) 16%, transparent);
 
   color: var(--ink);
   font-family: var(--font-display);
@@ -39,7 +39,7 @@
   gap: 14px;
 
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(var(--gold-light-rgb), 0.08);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink-heading) 8%, transparent);
   background: transparent;
 }
 

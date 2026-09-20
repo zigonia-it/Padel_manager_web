@@ -1,7 +1,7 @@
 (function initializeAccountAuth(global) {
   "use strict";
 
-  function create({ getClient, getElements, getProfile, onProfileLoaded, translate, onAuthChange }) {
+  function create({ getClient, getElements, getProfile, onProfileLoaded, translate, onAuthChange, captcha }) {
     let user = null;
 
     function notice(message, error = false) {
@@ -73,6 +73,9 @@
       const password = form.elements.password.value;
       const client = getClient();
       if (!client) { notice(translate("account.authUnavailable"), true); return false; }
+      // The "I'm not a robot" check (undefined when it is not configured, null when the person backed out).
+      const captchaToken = await captcha?.challenge();
+      if (captchaToken === null) { notice(translate("captcha.required"), true); return false; }
       const submitButton = event.submitter ?? form.querySelector("[type=submit]");
       const previousLabel = submitButton?.textContent ?? "";
       if (submitButton) {
@@ -83,7 +86,7 @@
       let data;
       let error;
       try {
-        ({ data, error } = await client.auth.signInWithPassword({ email, password }));
+        ({ data, error } = await client.auth.signInWithPassword({ email, password, ...(captchaToken ? { options: { captchaToken } } : {}) }));
       } catch (authError) {
         error = authError;
       } finally {
@@ -110,7 +113,9 @@
       const password = elements.accountAuthPassword.value;
       const client = getClient();
       if (!client) { notice(translate("account.authUnavailable"), true); return false; }
-      const { data, error } = await client.auth.signUp({ email, password });
+      const captchaToken = await captcha?.challenge();
+      if (captchaToken === null) { notice(translate("captcha.required"), true); return false; }
+      const { data, error } = await client.auth.signUp({ email, password, ...(captchaToken ? { options: { captchaToken } } : {}) });
       if (error) { notice(translate("account.authFailed"), true); return false; }
       user = data.session?.user ?? null;
       await ensureRemoteProfile(user);

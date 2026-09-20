@@ -2,8 +2,7 @@
   function create({ document = global.document } = {}) {
     function applyTheme() {
       document.body.dataset.theme = "classic";
-      const themeColor = document.querySelector('meta[name="theme-color"]');
-      themeColor?.setAttribute("content", "#07101d");
+      // The browser bar colour (meta theme-color) follows the colour theme: app/color-mode.js owns it.
     }
 
     return Object.freeze({ applyTheme });

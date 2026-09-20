@@ -12,16 +12,16 @@
   flex: 1 1 0;
   height: 4px;
   border-radius: 2px;
-  background: var(--ds-border, rgba(159, 207, 255, 0.2));
+  background: var(--ds-border, color-mix(in srgb, var(--accent-blue-bright) 20%, transparent));
   transition: background-color 0.2s ease;
 }
 
 .wizard-progress-bar.is-active {
-  background: var(--gold-bright, #62b6ff);
+  background: var(--gold-bright, var(--accent-blue-bright));
 }
 
 .wizard-step-label {
-  color: var(--ui-muted, #9fb4d2);
+  color: var(--ui-muted, var(--accent-text));
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -47,9 +47,9 @@
   justify-content: center;
 
   padding: 14px 12px;
-  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.2));
+  border: 1px solid var(--ds-border, var(--border-default));
   border-radius: var(--radius-md, 10px);
-  background: var(--ds-surface-1, rgba(16, 31, 52, 0.94));
+  background: var(--ds-surface-1, color-mix(in srgb, var(--surface-card) 94%, transparent));
 
   font-weight: 700;
   text-align: center;
@@ -65,9 +65,9 @@
 }
 
 .format-option:has(input:checked) {
-  border-color: var(--ds-border-strong, rgba(91, 173, 255, 0.58));
-  background: linear-gradient(150deg, rgba(91, 173, 255, 0.22), rgba(91, 173, 255, 0.06));
-  color: var(--gold-bright, #62b6ff);
+  border-color: var(--ds-border-strong, color-mix(in srgb, var(--accent-blue-bright) 58%, transparent));
+  background: linear-gradient(150deg, color-mix(in srgb, var(--accent-blue-bright) 22%, transparent), color-mix(in srgb, var(--accent-blue-bright) 6%, transparent));
+  color: var(--gold-bright, var(--accent-text));
 }
 
 .wizard-summary {
@@ -87,12 +87,12 @@
   gap: 12px;
 
   padding: 10px 12px;
-  border: 1px solid var(--ds-border, rgba(159, 207, 255, 0.2));
+  border: 1px solid var(--ds-border, var(--border-default));
   border-radius: var(--radius-sm, 8px);
 }
 
 .wizard-summary li span {
-  color: var(--ui-muted, #9fb4d2);
+  color: var(--ui-muted, var(--accent-text));
   font-size: 0.86rem;
 }
 

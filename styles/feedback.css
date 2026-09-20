@@ -17,7 +17,7 @@
   display: inline-block;
   margin-left: 6px;
   padding: 1px 8px;
-  border: 1px solid var(--ds-border-strong, rgba(91, 173, 255, 0.58));
+  border: 1px solid var(--ds-border-strong, color-mix(in srgb, var(--accent-blue-bright) 58%, transparent));
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 700;
@@ -47,12 +47,12 @@
 
 .feedback-error {
   margin: 0;
-  color: var(--danger, #ff8a8a);
+  color: var(--danger, var(--negative));
   font-weight: 700;
 }
 
 .feedback-thanks {
   margin: 0;
-  color: var(--success, #3ecf8e);
+  color: var(--success, var(--positive));
   font-weight: 700;
 }

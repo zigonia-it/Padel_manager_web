@@ -67,7 +67,7 @@ body[data-theme] .admin-subtabs {
 
 .workspace-rail-item.is-active {
   background: var(--ds-glass);
-  color: var(--gold-bright);
+  color: var(--accent-text);
   border-color: var(--ds-border-hairline);
 }
 
@@ -97,7 +97,7 @@ body[data-theme] .admin-subtabs {
     position: sticky;
     top: 110px;
     padding: 10px;
-    background: #0a1322;
+    background: var(--surface-card);
     border: 1px solid var(--ds-border-hairline);
     border-radius: var(--radius-lg);
     box-shadow: var(--ds-shadow-soft);
@@ -124,7 +124,7 @@ body[data-theme] .admin-subtabs {
     z-index: 15;
     margin: 18px -8px 0;
     padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
-    background: linear-gradient(180deg, rgba(10, 19, 34, 0.7), rgba(10, 19, 34, 0.97));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--surface-card) 70%, transparent), var(--surface-card));
     border-top: 1px solid var(--ds-border-hairline);
     backdrop-filter: blur(18px);
   }

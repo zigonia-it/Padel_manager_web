@@ -825,7 +825,9 @@ const matchCard = window.PadelstarMatchCard.create({
   undoMatch: (match) => undoMatch(match),
   updateMatchCourt: (match, courtName) => updateMatchCourt(match, courtName),
 });
+const captcha = window.PadelstarCaptcha?.create({ translate: (key) => t(key) });
 const adminIdentity = window.PadelstarAdminIdentity.create({
+  captcha,
   getClient: () => supabaseClient,
   getProfile: () => profile,
   getElements: () => elements,
@@ -838,6 +840,7 @@ const adminIdentity = window.PadelstarAdminIdentity.create({
   translate: (key, values) => t(key, values),
 });
 const accountAuth = window.PadelstarAccountAuth?.create({
+  captcha,
   getClient: () => supabaseClient,
   getElements: () => elements,
   getProfile: () => profile,
