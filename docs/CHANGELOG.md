@@ -6,6 +6,22 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.14.0
+
+Two-factor authentication for the system menu (developer's decision 2026-09-20), and a hint for common names. Verified: 514 automated tests (18 new in `test/system-two-factor.test.js`), the new PGlite suite `supabase/tests/system-owner-two-factor.pglite.mjs` (19 checks) and the existing owner suites, the migration applied live, the two-factor screens checked in the browser (dark and light). The live enrolment with a real authenticator app has to be done by the owner (USER_ACTIONS).
+
+### Added
+- **Two-factor for System.** The owner signs in as before and opens System; the page then asks for a 6-digit code from an authenticator app (TOTP, Supabase Auth MFA). The first time it shows a QR code and the key to set the app up (any app that supports one-time codes works), with the advice to scan the QR code on two devices or save the key in a password manager. The page loads no administration data before the code has been accepted.
+- **Enforced in the database.** `is_system_owner()`, which every owner function starts with (overview, lists, log, block, delete), now also requires an `aal2` session, so a password alone or a stolen password-only session reaches nothing, whatever the page does. The new `system_owner_status()` (works at the password level, answers only about the caller) lets the page and the menu link know that the caller is the owner and must enter or set up the code. Migration `20260920220000_system_owner_two_factor.sql` (applied live).
+- The unverified-account cleanup (0.13.1) is unaffected (it runs in the database).
+
+### Changed
+- Name fields: a hint under the name on the join form and the profile form says that people with a common name should add the first letter of the surname (for example "Anna K."); the profile name (or nickname) is what fills the join form. The message for a duplicate name gives the same advice.
+
+### Notes
+- **Lost authenticator app without a backup:** the owner is locked out of System (not of the rest of the app) until the factor is removed in the database: `delete from auth.mfa_factors where user_id = (select user_id from public.system_owner);`. See `docs/technical/operations.md`.
+- The Cloudflare Turnstile secret has been pasted into Supabase by the developer, so sign-ups without the check are refused.
+
 ## 0.13.1
 
 Accounts whose email address is not verified within 7 days are deleted (developer's policy, 2026-09-20). Verified: `supabase/tests/unverified-user-cleanup.pglite.mjs` (17 checks), the migration applied live, and the live job, grants and due counts checked.

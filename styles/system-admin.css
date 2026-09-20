@@ -158,3 +158,18 @@
 .system-admin-actions { display: inline-flex; flex-wrap: wrap; gap: 6px; }
 .system-admin-actions button { min-height: 36px; padding: 4px 12px; white-space: nowrap; }
 .system-admin-badge-blocked { border-color: color-mix(in srgb, var(--negative) 60%, transparent); background: color-mix(in srgb, var(--negative) 16%, transparent); }
+
+/* Two-factor step: a code from an authenticator app, or the one-time set-up with a QR code. */
+.system-admin-two-factor { display: grid; gap: 12px; max-width: 34rem; }
+.system-admin-two-factor h2 { margin: 0; }
+.system-admin-two-factor ol { margin: 0; padding-left: 1.25rem; display: grid; gap: 6px; }
+.system-admin-two-factor-key { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.system-admin-two-factor-qr { width: 176px; height: 176px; border-radius: var(--radius-sm); background: var(--surface-card); padding: 8px; box-sizing: border-box; }
+.system-admin-two-factor-key p { display: grid; gap: 4px; margin: 0; min-width: 0; }
+.system-admin-two-factor-key span { font-size: 0.8rem; opacity: 0.75; }
+.system-admin-two-factor-key code { font-size: 1rem; letter-spacing: 0.06em; overflow-wrap: anywhere; }
+.system-admin-two-factor-form { display: grid; gap: 10px; }
+.system-admin-two-factor-form label { display: grid; gap: 6px; font-weight: 600; }
+.system-admin-two-factor-form input { max-width: 12rem; font-size: 1.4rem; letter-spacing: 0.3em; text-align: center; padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); }
+.system-admin-two-factor-form button { justify-self: start; }
+.system-admin-two-factor-error { min-height: 1.25rem; margin: 0; color: var(--negative); }

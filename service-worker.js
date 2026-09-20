@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v354";
+const cacheName = "padelstar-v355";
 
 const appShell = [
   "./",
@@ -9,7 +9,7 @@ const appShell = [
   "./styles/tokens.css?v=padelstar-tokens-1",
   "./styles/base.css?v=padelstar-base-8",
   "./styles/layout.css?v=padelstar-layout-10",
-  "./styles/components.css?v=padelstar-components-22",
+  "./styles/components.css?v=padelstar-components-23",
   "./styles/tv.css?v=padelstar-tv-17",
   "./assets/logos/main_logo_without_icon.png",
   "./assets/icons/padelstar-icon.png",
@@ -35,7 +35,7 @@ const appShell = [
   "./styles/invite-code-input.css?v=padelstar-invite-code-input-2",
   "./styles/accent-picker.css?v=padelstar-accent-picker-2",
   "./styles/privacy.css?v=padelstar-privacy-7",
-  "./app/translations.js?v=padelstar-i18n-61",
+  "./app/translations.js?v=padelstar-i18n-62",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-6",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -110,9 +110,10 @@ const appShell = [
   "./app/color-mode.js?v=padelstar-color-mode-2",
   "./app/notification-center.js?v=padelstar-notification-center-7",
   "./app/notification-center-ui.js?v=padelstar-notification-center-7",
-  "./app/system-admin.js?v=padelstar-system-admin-3",
+  "./app/system-admin.js?v=padelstar-system-admin-4",
+  "./app/system-two-factor.js?v=padelstar-system-two-factor-1",
   "./app/invitations.js?v=padelstar-invitations-2",
-  "./styles/system-admin.css?v=padelstar-system-admin-4",
+  "./styles/system-admin.css?v=padelstar-system-admin-5",
   "./admin.html",
   "./assets/sounds/notification1.mp3",
   "./assets/sounds/notification2.mp3",
@@ -127,7 +128,7 @@ const appShell = [
   "./app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3",
   "./app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1",
   "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-15",
-  "./app/bootstrap/app-meta.js?v=padelstar-app-meta-15",
+  "./app/bootstrap/app-meta.js?v=padelstar-app-meta-16",
   "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-3",
   "./app/bootstrap/app-init.js?v=padelstar-app-init-2",
   "./app/ui/theme.js?v=padelstar-theme-2",
