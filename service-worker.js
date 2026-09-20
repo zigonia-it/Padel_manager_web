@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v357";
+const cacheName = "padelstar-v358";
 
 const appShell = [
   "./",
@@ -9,7 +9,7 @@ const appShell = [
   "./styles/tokens.css?v=padelstar-tokens-2",
   "./styles/base.css?v=padelstar-base-8",
   "./styles/layout.css?v=padelstar-layout-10",
-  "./styles/components.css?v=padelstar-components-24",
+  "./styles/components.css?v=padelstar-components-25",
   "./styles/tv.css?v=padelstar-tv-17",
   "./assets/logos/main_logo_without_icon.png",
   "./assets/icons/padelstar-icon.png",
@@ -35,7 +35,7 @@ const appShell = [
   "./styles/invite-code-input.css?v=padelstar-invite-code-input-2",
   "./styles/accent-picker.css?v=padelstar-accent-picker-2",
   "./styles/privacy.css?v=padelstar-privacy-7",
-  "./app/translations.js?v=padelstar-i18n-63",
+  "./app/translations.js?v=padelstar-i18n-64",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-6",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -110,6 +110,7 @@ const appShell = [
   "./app/color-mode.js?v=padelstar-color-mode-2",
   "./app/notification-center.js?v=padelstar-notification-center-7",
   "./app/push-preferences.js?v=padelstar-push-preferences-1",
+  "./app/expiry-notice.js?v=padelstar-expiry-notice-1",
   "./app/notification-center-ui.js?v=padelstar-notification-center-7",
   "./app/system-admin.js?v=padelstar-system-admin-4",
   "./app/system-two-factor.js?v=padelstar-system-two-factor-1",
@@ -129,7 +130,7 @@ const appShell = [
   "./app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3",
   "./app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1",
   "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-15",
-  "./app/bootstrap/app-meta.js?v=padelstar-app-meta-18",
+  "./app/bootstrap/app-meta.js?v=padelstar-app-meta-19",
   "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-3",
   "./app/bootstrap/app-init.js?v=padelstar-app-init-2",
   "./app/ui/theme.js?v=padelstar-theme-2",
@@ -160,7 +161,7 @@ const appShell = [
   "./app/admin-form-events.js?v=padelstar-admin-form-events-8",
   "./app/match-actions.js?v=padelstar-match-actions-3",
   "./app/initial-view.js?v=padelstar-initial-view-3",
-  "./app/app.js?v=padelstar-session-85",
+  "./app/app.js?v=padelstar-session-86",
   "./supabase-config.js",
   "./manifest.webmanifest",
   "./assets/icons/padelstar-192.png",
