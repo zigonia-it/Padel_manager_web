@@ -12,7 +12,7 @@ the app behaves as before.
 
 1. **Cloudflare** (free, a Cloudflare account is needed): Turnstile -> Add widget. Name `Padelstar`, hostnames `padelstar.app` (add `localhost` if you want to test locally),
    widget mode **Managed**. Copy the **site key** (public) and keep the **secret key** private.
-2. **Site key into the app**: put the site key in `supabase-config.js` (`captchaSiteKey`), commit and deploy (or send it to Claude). It is public by design.
+2. **Site key into the app** (done 2026-09-20: the widget `Padelstar` exists in Cloudflare and its public site key is in `supabase-config.js`): put the site key in `supabase-config.js` (`captchaSiteKey`), commit and deploy (or send it to Claude). It is public by design.
    With the site key set but Supabase not yet checking, sign-up still works (the token is simply ignored).
 3. **Supabase** -> Authentication -> Attack Protection (or Settings -> Bot and Abuse Protection): enable CAPTCHA, provider **Cloudflare Turnstile**, paste the **secret key**. Save.
    From this moment Supabase refuses sign-ups and sign-ins without a valid token.

@@ -6,6 +6,13 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.11.1
+
+- **Link fields** in Styring and the lobby (join link, spectator link) had no padding before the text: they are real fields with room now.
+- **Footer**: "Denne siden er under Betautvikling" (the developer's text), translated in all languages.
+- **"I'm not a robot" check**: the Cloudflare Turnstile widget `Padelstar` (Managed, host `padelstar.app`) was created and its public site key is in `supabase-config.js`, so the dialog now appears on sign-up and sign-in. Supabase does not check the token yet: the secret key still has to be entered under Authentication -> Attack Protection (by the developer, `docs/technical/captcha-setup.md` step 3).
+- Note: a code formatter that reformats `index.html` on save breaks the tests that check its exact markup; keep the file's formatting as it is.
+
 ## 0.11.0
 
 The colour system (developer's design decision 2026-09-20) and the sign-up check. Verified: 489 automated tests; both themes checked in the browser at desktop and phone widths on every main view, TV Mode, the privacy page and the dialogs with `scripts/contrast-audit.js` (nothing below 4.5:1 except the two exceptions listed below). No database changes.
