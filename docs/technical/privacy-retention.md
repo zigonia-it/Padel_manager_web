@@ -21,6 +21,7 @@ Padelstar lagrer minst mulig persondata og bruker det bare til å administrere o
 - Vercel Analytics for aggregert trafikkmåling.
 - Systemlogg (`system_log`, kun for systemeieren): nye kontoer, turneringer opprettet/avsluttet/slettet og eierens egne handlinger (blokkering, sletting). Bare id-er og grove fakta, aldri navn, e-postadresser eller turneringsinnhold. Oppbevares i **90 dager** (jobben `padelstar-log-cleanup`).
 - Invitasjoner: e-postadressen til den inviterte lagres i `tournament_invitations` til turneringen slettes, og sendes gjennom Resend. Robotkontrollen (Cloudflare Turnstile) ser IP-adresse og nettleser ved registrering og innlogging.
+- Kontoer der e-postadressen ikke er bekreftet innen 7 dager slettes automatisk (`cleanup_unverified_users()`, jobben `padelstar-unverified-users`, daglig 03:20). Kontoer som fantes 2026-09-20 slettes tidligst 2026-09-28. Systemeieren og kontoer som eier en turnering slettes aldri. Sletting av en konto fjerner profilrad, statistikk og turneringskoblinger (turneringer den eide blir stående uten eier og følger gjestelivssyklusen).
 - Tredjeparter som er nevnt i personvernsiden: Supabase (EU, Irland), Vercel, Resend, jsDelivr, flagcdn.com, Cloudflare Turnstile og quickchart.io (påmeldingslenken sendes dit for å tegne QR-koden).
 
 ## Retensjon (gjeldende oppførsel)

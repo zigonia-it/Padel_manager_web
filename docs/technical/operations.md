@@ -43,6 +43,7 @@ Status: beta-runbook for statisk Vercel-hosting med Supabase live sync og to Ver
 - `padelstar-retention-cleanup` (`pg_cron`, hver time) kjører `cleanup_expired_tournaments()` og `cleanup_expired_player_profiles()`. Funksjonene er `SECURITY DEFINER` og tilbakekalt fra `public`, `anon` og `authenticated`.
 - `padelstar-result-approvals` (hvert minutt) eskalerer og auto-godkjenner resultater som venter.
 - `padelstar-log-cleanup` (03:40 daglig) sletter systemloggen eldre enn 90 dager (`cleanup_system_log()`).
+- `padelstar-unverified-users` (03:20 daglig) sletter kontoer uten bekreftet e-post 7 dager etter opprettelse, men ikke før 2026-09-28 (`cleanup_unverified_users()`; hopper over systemeieren og turneringseiere; logger `user_deleted` med årsak `unverifiedEmail`).
 - Kontroller `cron.job` etter migrering. Loggfør returverdier uten profil-ID-er eller tokens.
 - Frister og oppførsel er beskrevet i `docs/technical/privacy-retention.md`.
 
