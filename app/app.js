@@ -666,6 +666,7 @@ const playerState = window.PadelstarPlayerState.create({
   findPlayerByName: (name) => findPlayerByName(name),
   getPlayerById: (id) => getPlayerById(id),
   getState: () => state,
+  markCupCompleteIfDone: () => markCupCompleteIfDone(),
   recordEvent: (eventType, entityType, entityId, payload) => eventLog.record(eventType, entityType, entityId, payload),
   render: () => render(),
   saveState: () => saveState(),
@@ -1026,7 +1027,8 @@ const adminFormEvents = window.PadelstarAdminFormEvents?.create({
   importBackup: (event) => importBackup(event),
   isSupabaseReady: () => isSupabaseReady(),
   parsePlayerNames: (value) => parsePlayerNames(value),
-  queueRemoteCupAdvance: () => queueRemoteCupAdvance(),
+  luckyLoserProposal: () => tournamentRuntime.luckyLoserProposal(),
+  queueRemoteCupAdvance: (options) => queueRemoteCupAdvance(options),
   queueRemoteRoundAdvance: () => queueRemoteRoundAdvance(),
   render: () => render(),
   requestConfirmation: (message, title) => requestConfirmationWithTitle(message, title),
@@ -1034,7 +1036,7 @@ const adminFormEvents = window.PadelstarAdminFormEvents?.create({
   saveManualCupTeams: (value) => saveManualCupTeams(value),
   saveState: (options) => saveState(options),
   showToast: (message, statusClass) => showToast(message, statusClass),
-  startNextScheduledRound: () => startNextScheduledRound(),
+  startNextScheduledRound: (options) => startNextScheduledRound(options),
   t: (key, values) => t(key, values),
   updateCourtsFromInput: (value) => updateCourtsFromInput(value),
   updateCourtNames: (names) => updateCourtNames(names),
@@ -1546,8 +1548,8 @@ function queueRemoteRoundAdvance() {
   return remoteAdminActions.queueRemoteRoundAdvance();
 }
 
-function queueRemoteCupAdvance() {
-  return remoteAdminActions.queueRemoteCupAdvance();
+function queueRemoteCupAdvance(options) {
+  return remoteAdminActions.queueRemoteCupAdvance(options);
 }
 
 function queuePlayerScore(matchId, teamIndex) {
@@ -2193,8 +2195,8 @@ function cupCanFinalize() {
   return tournamentRuntime.cupCanFinalize();
 }
 
-function startNextScheduledRound() {
-  return tournamentRuntime.startNextScheduledRound();
+function startNextScheduledRound(options) {
+  return tournamentRuntime.startNextScheduledRound(options);
 }
 
 function buildSchedule(players, format = "roundRobin") {

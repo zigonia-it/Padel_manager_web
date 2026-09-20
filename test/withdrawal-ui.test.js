@@ -121,7 +121,7 @@ test("the new module and its texts are wired in and translated", () => {
     .map((file) => fs.readFileSync(path.join(root, "app", file), "utf8")).join("\n");
   const keys = new Set([...sources.matchAll(/t\("((?:withdrawal|players\.withdrawn|actions\.(?:withdraw|reinstate)|messages\.(?:withdraw|reinstate|playerWithdrawn|playerReinstated))[\w.]*)"/g)].map((m) => m[1]));
   ["outOfDate", "notTeammate", "failed"].forEach((name) => keys.add(`withdrawal.error.${name}`));
-  ["Approval", "Ended", "Inactive", "Cup"].forEach((name) => keys.add(`messages.withdrawBlocked${name}`));
+  ["Approval", "Ended", "Inactive"].forEach((name) => keys.add(`messages.withdrawBlocked${name}`));
   ["Running", "Replaced"].forEach((name) => keys.add(`messages.reinstateBlocked${name}`));
   keys.add("common.awaitingWithdrawal");
   assert.ok(keys.size > 15, "the keys were actually collected");

@@ -33,7 +33,7 @@ Verified against the live project on 2026-09-19 (all migrations through `2026092
 ## Function groups
 
 - **Tournament**: `create_tournament`, `get_tournament_by_code`, `get_spectator_tournament_by_code`, `save_tournament_state`, `delete_tournament`, `finalize_tournament`, `clear_tournament_expiry`, `claim_tournament`.
-- **Admin match/round**: `admin_match_action`, `admin_set_result`, `admin_undo_match`, `admin_advance_round`, `admin_advance_cup`, `admin_set_match_scorer`, `admin_resolve_result`, `admin_correct_result`.
+- **Admin match/round**: `admin_match_action`, `admin_set_result`, `admin_undo_match`, `admin_advance_round`, `admin_advance_cup` (fourth argument `p_confirm_lucky_loser`; applies withdrawals to the new round, see migration `20260920200000_cup_withdrawal.sql`), `admin_set_match_scorer`, `admin_resolve_result`, `admin_correct_result`.
 - **Players**: `join_tournament`, `set_player_availability`, `claim_player_account`, `save_player_point`, `submit_match_result`, `match_scorer_action`, `match_result_action`, `match_withdrawal_decision`.
 - **Profile/history**: `upsert_player_profile`, `get_player_profile_history`, `save_player_profile_history`, `request_player_profile_deletion`, `cancel_player_profile_deletion`, `list_my_active_tournaments`, `list_my_finished_tournaments` (newest 20 finished, not cancelled), `open_owned_tournament` (owner only: returns the state and the admin token so the owner can resume on another device; rate limited; the same answer for "not found" and "not yours").
 - **Invitations**: `admin_invite_player`, `admin_list_invitations`, `admin_cancel_invitation`, `list_my_invitations`, `decline_invitation`.

@@ -6,6 +6,23 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.13.0
+
+Withdrawal in a Cup (developer's decision 2026-09-20). Verified: 504 automated tests (12 new in `test/cup-withdrawal.test.js`), a new PGlite suite for the migration (`supabase/tests/cup-withdrawal.pglite.mjs`, 28 checks; all 16 suites pass), the migration applied live and its grants checked, and the whole flow run in the browser (4 teams; players on both sides of a match withdraw; the confirmation dialog; declining changes nothing; confirming creates the next round with the best loser).
+
+### Added
+- **A player can withdraw in a Cup**, with the same conditions as in a Round Robin: the team's matches in the current round wait for the remaining teammate, who plays alone or gives a walkover (the admin can decide too). If nobody is left on a side the opponents win by walkover at once.
+- **Teams that advance with a withdrawn player** meet the rules when the next round is created: a match with a withdrawn player waits for the teammate, a side with nobody left loses by walkover, both sides affected = the match is cancelled. The server does this in `admin_advance_cup` (guest and account tournaments); the local (offline) path does the same in `app/player-withdrawal.js` `handleNewRound`.
+- **Lucky loser**: when both sides of a Cup match withdrew, the match is cancelled and the best-placed losing team of that round takes its place in the next round. The admin has to confirm ("Beste taper rykker opp", naming the team) and the server refuses to use a lucky loser without the confirmation (`p_confirm_lucky_loser`). The team gets a note on its match. "Best-placed" (the proposal was confirmed in use, see USER_ACTIONS): the losers of the round all reached the same round, so the games difference over the cup decides, then the order of their match; a team that lost by walkover or has nobody left is not a candidate. No candidate = nobody takes the place; an odd number of teams gives the last team a bye (also in the local path, which used to drop it).
+- Migration `20260920200000_cup_withdrawal.sql` (applied live): `admin_advance_cup(uuid, text, integer, boolean default false)` replaces the three-argument function (old callers keep working) plus the private helpers `_cup_absent_players`, `_cup_absent_record`, `_cup_games_difference`, `_cup_lucky_losers`, `_cup_apply_withdrawals` (not callable from the API). `match_withdrawal_decision` needed no change.
+
+### Changed
+- The Cup no longer refuses withdrawal (the message `messages.withdrawBlockedCup` is gone). A walkover or decision in the final round now ends the Cup at once (`markCupCompleteIfDone`).
+
+### Known limits
+- A team that plays alone gets a new team id, so its earlier games (under the old id) do not count in the lucky-loser ranking.
+- A walkover decided by the teammate through the database function in the final round does not by itself set the Cup champion on the TV page until the admin next acts; the standings are unaffected.
+
 ## 0.12.0
 
 The lobby and the tournament workspace are one screen (developer's decision 2026-09-20). Verified: 492 automated tests; the critical path (create -> lobby -> start -> Styring -> results) and the lobby panel checked in the browser (dark and light, desktop and 375 px phone).

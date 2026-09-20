@@ -289,8 +289,20 @@
       });
     }
 
+    // Cup: a team that took the place of a match in which both sides withdrew (the best-placed losing team).
+    function luckyLoserNoteMarkup(match) {
+      return [match.teamOne, match.teamTwo]
+        .filter((team) => team?.luckyLoserRound && team.luckyLoserRound === match.rotationNumber)
+        .map((team) => `<p class="withdrawal-note">${translate("withdrawal.luckyLoserNote", { team: escapeHtml(team.displayName) })}</p>`)
+        .join("");
+    }
+
     // Short note on a match that was decided after a withdrawal.
     function withdrawalNoteMarkup(match) {
+      return luckyLoserNoteMarkup(match) + withdrawalOutcomeMarkup(match);
+    }
+
+    function withdrawalOutcomeMarkup(match) {
       const record = match.withdrawal;
       if (!record || match.state === "awaitingWithdrawalDecision") return "";
       const absent = escapeHtml(record.absent?.name ?? "");

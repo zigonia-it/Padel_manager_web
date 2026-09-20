@@ -1,5 +1,5 @@
 window.PadelstarPlayerState = (() => {
-  function create({ activateNextWaitingMatch, buildSchedule, createPlayer, createTeam, defaultAvatarId, findPlayerByName, getPlayerById, getState, recordEvent, render, saveState, showToast, t }) {
+  function create({ activateNextWaitingMatch, buildSchedule, createPlayer, createTeam, defaultAvatarId, findPlayerByName, getPlayerById, getState, markCupCompleteIfDone = () => {}, recordEvent, render, saveState, showToast, t }) {
     function parsePlayerNames(value) {
       return String(value).split(/[\n,;]+/).map((name) => name.trim()).filter(Boolean);
     }
@@ -111,7 +111,6 @@ window.PadelstarPlayerState = (() => {
       const key = {
         awaitingApproval: "messages.withdrawBlockedApproval",
         ended: "messages.withdrawBlockedEnded",
-        cup: "messages.withdrawBlockedCup",
       }[reason] ?? "messages.withdrawBlockedInactive";
       return t(key, { name });
     }
@@ -134,6 +133,7 @@ window.PadelstarPlayerState = (() => {
       }
       // a court freed by an annulled match goes to the next waiting match
       result.freed.forEach((court) => activateNextWaitingMatch?.(court));
+      markCupCompleteIfDone();
       recordEvent?.("player_withdrawn", "player", playerId, { slotId: player.slotId, awaitingDecision: result.decide, walkover: result.walkover, cancelled: result.cancel, restartedMatches: result.restarted });
       result.restarted.forEach((matchId) => recordEvent?.("match_restarted", "match", matchId, { reason: "playerWithdrawn" }));
       saveState();
@@ -172,6 +172,7 @@ window.PadelstarPlayerState = (() => {
         return null;
       }
       recordEvent?.("withdrawal_decided", "match", matchId, { decision, by, started: result.started });
+      markCupCompleteIfDone();
       saveState();
       render();
       return result;
