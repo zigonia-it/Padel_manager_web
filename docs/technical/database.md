@@ -39,7 +39,7 @@ Verified against the live project on 2026-09-19 (all migrations through `2026092
 - **Invitations**: `admin_invite_player`, `admin_list_invitations`, `admin_cancel_invitation`, `list_my_invitations`, `decline_invitation`.
 - **System owner** (all owner-only, none executable by `anon`): `is_system_owner`, `admin_overview`, `admin_list_tournaments`, `admin_list_users`, `admin_maintenance_status`, `admin_list_log`, `admin_block_user` (sets `auth.users.banned_until` and ends the sessions), `admin_delete_user` (cascades to profile, statistics and links; owned tournaments lose their owner). Neither block nor delete accepts the system owner or the caller. Internal helpers: `_admin_like`, `_log_system_event`, `_log_tournament_event`, `_log_user_signup`, `_recompute_account_statistics`.
 - **Push**: `upsert_push_subscription`, `delete_push_subscription` (sending is the Edge Function `supabase/functions/push-send`).
-- **Jobs (pg_cron, never callable from the client)**: `process_result_approvals` (every minute), `cleanup_expired_tournaments` and `cleanup_expired_player_profiles` (job `padelstar-retention-cleanup`, hourly), `cleanup_system_log` (job `padelstar-log-cleanup`, 03:40 daily, removes entries older than 90 days).
+- **Jobs (pg_cron, never callable from the client)**: `process_result_approvals` (every minute), `cleanup_expired_tournaments` and `cleanup_expired_player_profiles` (job `padelstar-retention-cleanup`, hourly), `cleanup_unverified_users` (job `padelstar-unverified-users`, 03:20 daily, deletes accounts unverified for 7 days, not before 2026-09-28), `cleanup_system_log` (job `padelstar-log-cleanup`, 03:40 daily, removes entries older than 90 days).
 
 ## Guards (triggers)
 

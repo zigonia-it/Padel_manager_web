@@ -6,6 +6,18 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.13.1
+
+Accounts whose email address is not verified within 7 days are deleted (developer's policy, 2026-09-20). Verified: `supabase/tests/unverified-user-cleanup.pglite.mjs` (17 checks), the migration applied live, and the live job, grants and due counts checked.
+
+### Added
+- **Automatic deletion of unverified accounts** (`cleanup_unverified_users()`, pg_cron job `padelstar-unverified-users`, daily 03:20). An account is deleted once 7 days have passed since it was created and its email is still not verified. Accounts that existed when the policy was set are deleted on **2026-09-28** at the earliest (nothing is deleted before then; at the time of applying, 41 of 45 accounts were unverified and all 41 come due that day). The system owner and any account that owns a tournament are never deleted. Each deletion is written to the system log with the reason and the account id only. The function is not callable from the API.
+- The privacy page (nb, en) and the "check your email" message at sign-up say that unverified accounts are deleted after 7 days.
+- Migration `20260920210000_unverified_user_cleanup.sql` (applied live).
+
+### Not done
+- No reminder email is sent before an account is deleted (see USER_ACTIONS).
+
 ## 0.13.0
 
 Withdrawal in a Cup (developer's decision 2026-09-20). Verified: 504 automated tests (12 new in `test/cup-withdrawal.test.js`), a new PGlite suite for the migration (`supabase/tests/cup-withdrawal.pglite.mjs`, 28 checks; all 16 suites pass), the migration applied live and its grants checked, and the whole flow run in the browser (4 teams; players on both sides of a match withdraw; the confirmation dialog; declining changes nothing; confirming creates the next round with the best loser).

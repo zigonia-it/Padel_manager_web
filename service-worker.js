@@ -1,4 +1,4 @@
-const cacheName = "padelstar-v353";
+const cacheName = "padelstar-v354";
 
 const appShell = [
   "./",
@@ -35,7 +35,7 @@ const appShell = [
   "./styles/invite-code-input.css?v=padelstar-invite-code-input-2",
   "./styles/accent-picker.css?v=padelstar-accent-picker-2",
   "./styles/privacy.css?v=padelstar-privacy-7",
-  "./app/translations.js?v=padelstar-i18n-60",
+  "./app/translations.js?v=padelstar-i18n-61",
   "./app/i18n-ui.js?v=padelstar-i18n-ui-6",
   "./app/storage.js?v=padelstar-storage-1",
   "./app/tournament-library.js?v=padelstar-tournament-library-3",
@@ -48,7 +48,7 @@ const appShell = [
   "./app/tournament-sharing.js?v=padelstar-tournament-sharing-1",
   "./app/result-submissions.js?v=padelstar-result-submissions-1",
   "./app/player-actions.js?v=padelstar-player-actions-1",
-  "./app/privacy-i18n.js?v=padelstar-privacy-i18n-9",
+  "./app/privacy-i18n.js?v=padelstar-privacy-i18n-10",
   "./app/page-language.js?v=padelstar-page-language-1",
   "./app/guide-i18n.js?v=padelstar-guide-i18n-5",
   "./app/tournament-engine.js?v=padelstar-engine-2",
@@ -127,7 +127,7 @@ const appShell = [
   "./app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3",
   "./app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1",
   "./app/bootstrap/dom-elements.js?v=padelstar-dom-elements-15",
-  "./app/bootstrap/app-meta.js?v=padelstar-app-meta-14",
+  "./app/bootstrap/app-meta.js?v=padelstar-app-meta-15",
   "./app/bootstrap/app-events.js?v=padelstar-bootstrap-events-3",
   "./app/bootstrap/app-init.js?v=padelstar-app-init-2",
   "./app/ui/theme.js?v=padelstar-theme-2",

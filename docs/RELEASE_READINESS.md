@@ -1,6 +1,6 @@
 # v1.0.0 readiness (Phase 30 Definition of Done)
 
-Status at 0.13.0, 2026-09-20 (first written at 0.9.0 on 2026-09-19). `1.0.0` is **not** released: the checklist below still has open items and the developer has to approve the version change.
+Status at 0.13.1, 2026-09-20 (first written at 0.9.0 on 2026-09-19). `1.0.0` is **not** released: the checklist below still has open items and the developer has to approve the version change.
 Legend: verified = tested and confirmed with evidence; built = implemented and tested by automated tests/browser, but a person or an external service has to confirm it.
 
 | Definition of Done item | Status | Evidence / what is missing |
@@ -16,7 +16,7 @@ Legend: verified = tested and confirmed with evidence; built = implemented and t
 | Theme system (Phase 27) | built | 0.11.0: one token set (`styles/tokens.css`), two themes, zero colour literals in components (`scripts/color-audit.js`, tested), contrast of every text token tested at 4.5:1 (two documented exceptions), both themes checked in the browser at desktop and phone widths. Needs eyes on real devices (USER_ACTIONS §2) |
 | Claude Design UI completion (Phase 28) | built | Podium, wizard, invite-code cells, accent picker, Kamper/Styring pass shipped; see ROADMAP |
 | No known critical data-integrity / auth defect | none known | Supabase advisors: only intended findings (RLS without policy, token-checked SECURITY DEFINER RPCs; leaked-password protection needs the Pro plan) |
-| Production build | verified | Vercel serves 0.13.0 (`/api/health`), the new pages and assets answer 200 (checked after every merge) |
+| Production build | verified | Vercel serves 0.13.1 (`/api/health`), the new pages and assets answer 200 (checked after every merge) |
 | Production smoke test | verified | 2026-09-19 on padelstar.app, see ROADMAP Phase 30 |
 | Docs match shipped behaviour | built | Docs updated with each phase; re-read before release |
 | Release-gated later features remain gated | verified | Format picker limited to Round Robin/Cup, language list, no hidden features exposed |
