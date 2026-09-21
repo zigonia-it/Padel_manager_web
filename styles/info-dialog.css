@@ -27,6 +27,32 @@
   height: 100%;
 }
 
+/* The X belongs to the dialog (not to the page in the frame), so it is there even if the frame stays blank. */
+.info-dialog-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-card);
+  color: var(--ink-heading);
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.info-dialog-close:hover,
+.info-dialog-close:focus-visible {
+  border-color: var(--accent-blue-bright);
+  color: var(--accent-text);
+}
+
 .info-dialog-frame {
   display: block;
   width: 100%;

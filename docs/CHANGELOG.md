@@ -6,6 +6,15 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.16.1
+
+Critical bug (developer, 2026-09-21): on a phone, pressing Personvern (or the guide) gave a blank screen with no way back. Verified: 540 automated tests (5 new in `test/info-dialog.test.js`) and the popup checked in a phone-sized browser. **I could not reproduce the blank screen** in the browser here (the popup rendered), so the fix removes every way the popup can trap a phone user rather than one identified cause: it needs a check on the real phone (USER_ACTIONS).
+
+### Fixed
+- **The X belongs to the dialog now, not to the page in the frame.** On a phone the popup fills the screen and its only close button was inside the frame, so a frame that stayed blank left nothing to press. The dialog has its own X (always on top, outside the frame); the page's own X is no longer shown inside the popup. Escape still closes it.
+- **The frame is no longer lazy-loaded** (`loading="lazy"` on a frame inside a dialog is the most likely cause of a blank frame on iOS Safari).
+- **Fallback:** if the page has not loaded within 8 seconds, or the frame shows something other than the page (for example an empty or wrong document), the popup closes and the guide/privacy page opens as an ordinary page (with its own back link). A page that loads properly cancels the wait.
+
 ## 0.16.0
 
 The "expired, resume" notice (Phase 16; in the 1.0 scope by the developer's decision 2026-09-20). Verified: 536 automated tests (5 new in `test/expiry-notice.test.js`), the new PGlite suite `supabase/tests/tournament-expiry-status.pglite.mjs` (8 checks), the migration applied live, and the notice rendered and dismissed in the browser against a stubbed server.
