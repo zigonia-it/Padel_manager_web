@@ -18,6 +18,8 @@ Status: `[ ]` open, `[x]` done.
 
 - [ ] **Look at the primary buttons (0.15.1).** They now follow your colour spec exactly: on dark a pale-to-vivid blue with dark text and a wide blue glow, on light a solid deep blue with white text and a tighter shadow. Before, they were a cyan-to-blue diagonal without a shadow. Check "Opprett turnering", "Bli med", "Start turnering" and the landing buttons in both themes on a real device, and the progress bars (now blue into violet). If you prefer the old look for some buttons, tell me which.
 
+- [ ] **Privacy / guide popup on your phone (0.16.1).** Open padelstar.app on the phone that gave the blank screen (reload once so the new version loads; if it is the installed app, close and reopen it), press Personvern and Bruksanvisning: the page should show with an X in the top right that closes it. If it ever stays blank, the X still closes it, and after 8 seconds the page opens normally instead. Tell me the phone and browser (for example iPhone, Safari or the installed app) if anything still goes wrong, because I could not reproduce the original blank screen here.
+
 ## 2. Verify as a person (I cannot sign in or use real devices)
 
 - [x] **Withdrawal in a Cup (0.13) with a real Cup.** Create a Cup (e.g. 8 players = 4 teams) on padelstar.app, start it, withdraw one player of a team in the admin's player list: their match waits for the teammate (play alone / walkover; the admin can decide). Then withdraw players on both sides of one match: it is cancelled; when the other matches are done, "Start neste runde" asks to confirm the best loser moving up, and the next round has that team (with a note on the match). Also check that declining the dialog changes nothing.
