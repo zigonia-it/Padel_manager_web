@@ -55,13 +55,11 @@
       callbacks.renderRoundSummary();
       callbacks.renderCupBracket();
       callbacks.renderMatches(matches);
-      callbacks.renderResultSubmissions(matches);
       callbacks.renderStandings(matches);
       callbacks.renderPlayerIdentity();
       callbacks.renderLeaveTournamentControl();
       callbacks.renderAvailabilityControl();
       callbacks.renderPlayerNextMatch(matches);
-      callbacks.renderPlayerResultForm(matches);
       callbacks.renderPlayerStatus(matches);
       callbacks.renderAdminLiveOverview(matches);
       callbacks.renderAssistant();

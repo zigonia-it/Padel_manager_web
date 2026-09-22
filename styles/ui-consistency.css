@@ -655,7 +655,6 @@ body[data-theme="classic"] #joinTournamentForm {
   body[data-theme="classic"] [data-section="admin"] > .panel,
   body[data-theme="classic"] [data-section="player"] > .panel,
   body[data-theme="classic"] [data-section="player"] > .next-match,
-  body[data-theme="classic"] [data-section="player"] > .player-result-panel,
   body[data-theme="classic"] [data-section="player"] > .player-profile-panel,
   body[data-theme="classic"] [data-section="admin"] .admin-panel,
   body[data-theme="classic"] [data-section="player"] .matches,
@@ -675,11 +674,6 @@ body[data-theme="classic"] #joinTournamentForm {
 
   body[data-theme="classic"] [data-section="player"] > .player-profile-panel {
     grid-column: 2;
-  }
-
-  body[data-theme="classic"] [data-section="player"] > .player-result-panel {
-    grid-column: 1 / -1;
-    grid-row: 2;
   }
 
   body[data-theme="classic"] [data-section="player"] > .panel.wide {

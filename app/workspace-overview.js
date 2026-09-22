@@ -57,7 +57,9 @@ window.PadelstarWorkspaceOverview = (() => {
       if (!panel || !list) return;
       const findings = assistantFindings(getState());
       panel.classList.toggle("hidden", findings.length === 0);
-      list.innerHTML = findings.map((finding) => `<li class="assistant-${escapeHtml(finding.severity)}">${escapeHtml(finding.code.replaceAll("_", " "))}</li>`).join("");
+      // a readable sentence when one is translated for this code, the code itself otherwise
+      const label = (finding) => { const key = `assistant.finding.${finding.code}`; const text = translate(key); return text && text !== key ? text : finding.code.replaceAll("_", " "); };
+      list.innerHTML = findings.map((finding) => `<li class="assistant-${escapeHtml(finding.severity)}">${escapeHtml(label(finding))}</li>`).join("");
     }
 
     function renderCupTeamBuilder() {

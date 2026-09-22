@@ -64,7 +64,6 @@
         schedule: buildSchedule(tournamentPlayers, validatedFormat),
         schedulerHistory: { partners: {}, opponents: {}, matches: [], byes: [] },
         events: [],
-        scoreSubmissions: [],
         rounds: [],
         cup: null,
         cupTeams: [],

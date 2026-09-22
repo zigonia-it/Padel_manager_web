@@ -26,6 +26,8 @@ test("DOM registry resolves every app-owned reference once and stays immutable",
   assert.equal(elements.profileLightPanel.selector, ".profile-light-panel");
   assert.equal(elements.playerMatches.selector, "#playerMatches");
   assert.equal(elements.closeSetScoreButton.selector, "#closeSetScoreButton");
+  assert.equal(elements.tournamentAssistant.selector, "#tournamentAssistant", "the assistant panel must resolve, or renderAssistant() never runs");
+  assert.equal(elements.tournamentAssistantFindings.selector, "#tournamentAssistantFindings");
   assert.equal(Object.keys(elements).length, selectors.length);
   assert.equal(new Set(selectors).size, selectors.length);
   assert.equal(Object.isFrozen(elements), true);

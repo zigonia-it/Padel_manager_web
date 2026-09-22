@@ -3,7 +3,6 @@
     elements.profileForm?.addEventListener("submit", callbacks.saveProfile);
     elements.createAccountAuthButton?.addEventListener("click", callbacks.openAccountAuth);
     elements.adminAccountAuthButton?.addEventListener("click", callbacks.openAccountAuth);
-    elements.playerResultForm?.addEventListener("submit", callbacks.submitPlayerResult);
     elements.tvModeButton?.addEventListener("click", callbacks.toggleTvMode);
     elements.tvModeMenuButton?.addEventListener("click", callbacks.toggleTvModeFromMenu);
     elements.tvModeRailButton?.addEventListener("click", callbacks.toggleTvModeFromMenu);
