@@ -40,7 +40,7 @@
     // These are transient submission/audit structures and can contain guest IDs.
     // Registered-player statistics remain available through the retained matches.
     nextState.schedulerHistory = { partners: {}, opponents: {}, matches: [], byes: [] };
-    nextState.scoreSubmissions = [];
+    delete nextState.scoreSubmissions;
     nextState.events = [];
     nextState.selectedPlayerId = null;
     delete nextState.playerToken;

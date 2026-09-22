@@ -33,7 +33,10 @@ window.PadelstarTournamentInsights = (() => {
     if (active.length < 2) findings.push({ code: "too_few_players", severity: "error" });
     if (!(state?.courts ?? []).some((court) => court.active)) findings.push({ code: "no_active_court", severity: "error" });
     if (state?.status === "Klar" && state?.settings?.format === "cup" && (state.cupTeams?.length ?? 0) < 2 && state.settings.cupTeamSetupMode === "manual") findings.push({ code: "cup_teams_missing", severity: "warning" });
-    if ((state?.scoreSubmissions ?? []).some((submission) => submission.status === "conflict")) findings.push({ code: "score_conflict", severity: "warning" });
+    // A player-scored result that was disputed (or corrected twice) until the admin has to decide (Phase 11's
+    // approval workflow). This is the only conflict state left since the older result-proposal flow was removed.
+    (state?.rounds ?? []).flatMap((round) => round.matches ?? []).filter((match) => match.state === "awaitingApproval" && match.approval?.status === "flagged")
+      .forEach((match) => findings.push({ code: "score_conflict", severity: "warning", matchId: match.id }));
     return findings;
   }
 

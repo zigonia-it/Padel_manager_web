@@ -22,7 +22,9 @@ window.PadelstarState = (() => {
       ...(nextState.schedulerHistory ?? {}),
     };
     nextState.events = Array.isArray(nextState.events) ? nextState.events.slice(-200) : [];
-    nextState.scoreSubmissions = Array.isArray(nextState.scoreSubmissions) ? nextState.scoreSubmissions.slice(-200) : [];
+    // scoreSubmissions was the old result-proposal flow (removed in 0.17.0, replaced entirely by the point-by-point
+    // approval workflow); drop it from any state that still carries it from before the removal.
+    delete nextState.scoreSubmissions;
     nextState.rounds ??= [];
     nextState.cup ??= null;
     nextState.cupTeams = Array.isArray(nextState.cupTeams) ? nextState.cupTeams : [];

@@ -50,7 +50,6 @@ const rendering = window.PadelstarRendering.create({
   translate: (key, values) => t(key, values),
   globalMatchNumber: (match) => globalMatchNumber(match),
   setScoreText: (match) => setScoreText(match),
-  scoreConflict: (match) => match.scoreStatus === "score_conflict" || window.PadelstarScoreSubmissions?.forMatch(state, match.id)?.status === "conflict",
   gameScoreText: (match) => gameScoreText(match),
   escapeHtml: (value) => escapeHtml(value),
 });
@@ -135,15 +134,6 @@ const remoteRpc = (client, name, payload = {}) => {
   if (!remoteReadRpcNames.has(name)) markSyncAttempt();
   return window.PadelstarRemoteRpc.call(client, name, payload);
 };
-const remotePlayerResult = window.PadelstarRemotePlayerResult?.create({
-  applyRemoteState: (nextState, options) => applyRemoteState(nextState, options),
-  getState: () => state,
-  getSupabaseClient: () => supabaseClient,
-  isSupabaseReady: () => isSupabaseReady(),
-  remoteRpc,
-  showToast: (message, statusClass) => showToast(message, statusClass),
-  translate: (key, values) => t(key, values),
-});
 let profile = null;
 
 const defaultTournament = createTournament({
@@ -309,7 +299,6 @@ const scoreActions = window.PadelstarScoreActions.create({
   queueRemoteSetResult: (match, teamOne, teamTwo) => queueRemoteSetResult(match, teamOne, teamTwo),
   render: () => render(),
   renderLargeScore: () => renderLargeScore(),
-  resolveScoreSubmission: (matchId, teamOne, teamTwo) => window.PadelstarScoreSubmissions?.resolve(state, matchId, teamOne, teamTwo, "admin"),
   saveState: () => saveState(),
   scoring,
   showToast: (message, statusClass) => showToast(message, statusClass),
@@ -409,29 +398,6 @@ const tournamentSharing = window.PadelstarTournamentSharing.create({
   createJoinLink: () => createJoinLink(),
   observability,
 });
-const resultSubmissions = window.PadelstarResultSubmissions.create({
-  elements,
-  getState: () => state,
-  getPlayerById: (id) => getPlayerById(id),
-  getMatchById: (id) => getMatchById(id),
-  matchIncludesPlayer: (match, playerId) => matchIncludesPlayer(match, playerId),
-  matchContextText: (match) => matchContextText(match),
-  validateSetScore: (teamOne, teamTwo, settings) => scoring.validateSetScore(teamOne, teamTwo, settings),
-  scoreSubmissions: window.PadelstarScoreSubmissions,
-  eventLog,
-  saveMatchResult: (match, teamOne, teamTwo) => saveMatchResult(match, teamOne, teamTwo),
-  saveState: () => saveState(),
-  queueRemoteSetResult: (match, teamOne, teamTwo) => queueRemoteSetResult(match, teamOne, teamTwo),
-  render: () => render(),
-  showToast: (message, statusClass) => showToast(message, statusClass),
-  isCurrentUserAdmin: () => isCurrentUserAdmin(),
-  isSupabaseReady: () => isSupabaseReady(),
-  remotePlayerResult,
-  translate: (key, values) => t(key, values),
-  escapeHtml: (value) => escapeHtml(value),
-  escapeAttribute: (value) => escapeAttribute(value),
-});
-
 const workspaceOverview = window.PadelstarWorkspaceOverview.create({
   appendEmptyText: (container, text) => appendEmptyText(container, text),
   assistantFindings: (currentState) => window.PadelstarTournamentInsights?.assistantFindings(currentState) ?? [],
@@ -1145,11 +1111,6 @@ function bindBootstrapEvents() {
         saveLocalProfileFromForm();
       },
       openAccountAuth,
-      submitPlayerResult: (event) => {
-        event.preventDefault();
-        const form = event.currentTarget;
-        submitPlayerResult(form.elements.matchId.value, Number(form.elements.teamOne.value), Number(form.elements.teamTwo.value));
-      },
       toggleTvMode,
       toggleTvModeFromMenu: () => {
         if (!hasActiveTournament()) return;
@@ -1885,22 +1846,6 @@ function renderPlayerNextMatch(matches) {
   playerNextMatch.renderPlayerNextMatch(matches);
 }
 
-function renderPlayerResultForm(matches) {
-  return resultSubmissions.renderPlayerResultForm(matches);
-}
-
-function renderResultSubmissions(matches) {
-  return resultSubmissions.renderResultSubmissions(matches);
-}
-
-function reviewPlayerSubmission(submissionId) {
-  return resultSubmissions.reviewPlayerSubmission(submissionId);
-}
-
-function submitPlayerResult(matchId, teamOne, teamTwo) {
-  return resultSubmissions.submitPlayerResult(matchId, teamOne, teamTwo);
-}
-
 function notifyPlayerMatch(match, kind) {
   return notificationSystem.notifyPlayerMatch(match, kind);
 }
@@ -2495,13 +2440,11 @@ const appRenderer = window.PadelstarAppRenderer.create({
     renderRoundSummary,
     renderCupBracket,
     renderMatches,
-    renderResultSubmissions,
     renderStandings,
     renderPlayerIdentity,
     renderLeaveTournamentControl,
     renderAvailabilityControl,
     renderPlayerNextMatch,
-    renderPlayerResultForm,
     renderPlayerStatus,
     renderAdminLiveOverview,
     renderAssistant,

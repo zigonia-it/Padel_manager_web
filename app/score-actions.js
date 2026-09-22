@@ -21,7 +21,6 @@
       match.currentSet = { teamOne, teamTwo };
       match.currentGame = { teamOne: 0, teamTwo: 0 };
       match.completedSets.push({ teamOne, teamTwo });
-      deps.resolveScoreSubmission?.(match.id, teamOne, teamTwo);
       if (hasMatchWinner(match)) {
         deps.finishMatch(match);
       } else {

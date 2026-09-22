@@ -6,6 +6,18 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.16.2
+
+Developer's decision 2026-09-22 ("keep the new one"): removed the older "Resultatforslag" result-proposal flow, keeping only the point-by-point live scoring + approval workflow as the single way to report a result. Verified: 538 automated tests (new: a dom-elements test locks in a wiring fix found while verifying this, an insights test for the replacement conflict finding), the live database grant revoked and checked, the change checked in the browser (dark/light, desktop/phone, admin and player views).
+
+### Removed
+- **The player-side "Registrer kampresultat" form** (typed set score, sent for the admin to pick between disagreeing proposals) and its admin-side "Resultatforslag" review panel. Deleted `app/result-submissions.js`, `app/score-submissions.js`, `app/remote-player-result.js` and all their wiring (dom-elements, event bindings, render dispatch, CSS, translations in all 8 languages).
+- The database RPC `submit_match_result` is decommissioned: revoked from `anon` (applied live), kept defined rather than dropped since it never touched scores, standings or progression.
+
+### Changed
+- `assistantFindings()`'s `score_conflict` finding (Turnerings­assistenten) now looks at a player-scored result that is flagged for the admin (the only conflict state left), instead of the removed proposal mechanism it used to read.
+- **Fixed while verifying this**: `#tournamentAssistant` / `#tournamentAssistantFindings` were never captured in `app/bootstrap/dom-elements.js`, so the tournament assistant panel has never rendered in production regardless of what it had to show. Now wired in.
+
 ## 0.16.1
 
 Critical bug (developer, 2026-09-21): on a phone, pressing Personvern (or the guide) gave a blank screen with no way back. Verified: 540 automated tests (5 new in `test/info-dialog.test.js`) and the popup checked in a phone-sized browser. **I could not reproduce the blank screen** in the browser here (the popup rendered), so the fix removes every way the popup can trap a phone user rather than one identified cause: it needs a check on the real phone (USER_ACTIONS).

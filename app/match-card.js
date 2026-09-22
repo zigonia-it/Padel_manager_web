@@ -16,7 +16,6 @@
       reopenMatch,
       setWalkover,
       setsWonByTeam,
-      scoreConflict,
       scoreSummary,
       scorerAction,
       adminSetScorer,
@@ -377,7 +376,7 @@
       const teamTwoName = escapeHtml(match.teamTwo.displayName);
       const winner = match.winnerTeamIndex === 0 ? match.teamOne : match.winnerTeamIndex === 1 ? match.teamTwo : null;
       const sittingOut = sittingOutSummary(match);
-      const matchNote = [sittingOut, withdrawalNoteMarkup(match), winner ? `<p class="winner-note">${translate("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : "", scoreConflict?.(match) ? `<p class="match-conflict">${translate("score.conflictAdminHint")}</p>` : ""]
+      const matchNote = [sittingOut, withdrawalNoteMarkup(match), winner ? `<p class="winner-note">${translate("score.winnerNote", { winner: escapeHtml(winner.displayName) })}</p>` : ""]
         .filter(Boolean)
         .join("");
       card.innerHTML = `

@@ -23,3 +23,21 @@ test("ratings can be calculated across historical finished matches", () => {
   assert.equal(ratings.p1, 1016);
   assert.equal(ratings.p2, 984);
 });
+
+test("the assistant surfaces a flagged, player-scored result waiting for the admin (the only conflict left after 0.17.0's removal)", () => {
+  const insights = api();
+  const state = {
+    players: [{ active: true, availability: "active" }, { active: true, availability: "active" }],
+    courts: [{ active: true }],
+    status: "Runde pågår",
+    settings: {},
+    rounds: [{ matches: [
+      { id: "m1", state: "awaitingApproval", approval: { status: "flagged" } },
+      { id: "m2", state: "awaitingApproval", approval: { status: "pending" } },
+      { id: "m3", state: "finished" },
+    ] }],
+  };
+  assert.deepEqual(JSON.parse(JSON.stringify(insights.assistantFindings(state))), [{ code: "score_conflict", severity: "warning", matchId: "m1" }]);
+  const noConflict = JSON.parse(JSON.stringify(insights.assistantFindings({ players: [], courts: [], status: "Klar", settings: {} }))).filter((f) => f.code === "score_conflict");
+  assert.deepEqual(noConflict, []);
+});

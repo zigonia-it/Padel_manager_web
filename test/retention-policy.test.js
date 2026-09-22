@@ -21,7 +21,6 @@ test("ended tournament state removes guest players and guest matches", () => {
     schedule: [],
     cupTeams: [],
     schedulerHistory: { matches: [{ playerId: "guest" }] },
-    scoreSubmissions: [{ submittedBy: "guest" }],
     events: [{ actorId: "guest" }],
     playerToken: "secret",
   };
@@ -29,7 +28,7 @@ test("ended tournament state removes guest players and guest matches", () => {
   assert.deepEqual(result.players.map((player) => player.id), ["admin", "registered"]);
   assert.deepEqual(result.rounds[0].matches.map((match) => match.id), ["registered-match"]);
   assert.equal(result.schedulerHistory.matches.length, 0);
-  assert.equal(result.scoreSubmissions.length, 0);
+  assert.equal(result.scoreSubmissions, undefined, "the old result-proposal flow's data is dropped, not just emptied");
   assert.equal(result.events.length, 0);
   assert.equal(result.playerToken, undefined);
   assert.equal(state.players.length, 3);
