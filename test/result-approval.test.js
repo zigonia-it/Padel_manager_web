@@ -26,7 +26,7 @@ const awaitingMatch = (approval = {}, extra = {}) => ({
 });
 
 function cardApi(role, selectedPlayerId = ME, settings = { setsToWinMatch: 1 }) {
-  const { window } = load("match-card.js");
+  const { window } = load("match-card.js", { PadelstarScoring: load("scoring-engine.js").PadelstarScoring });
   return window.PadelstarMatchCard.create({
     currentLocalRole: () => role,
     escapeAttribute: (v) => String(v),

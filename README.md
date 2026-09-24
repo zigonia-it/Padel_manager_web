@@ -4,7 +4,7 @@ Live app: https://padelstar.app
 
 Sist oppdatert: 2026-09-12
 
-Status: 0.16.2 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
+Status: 0.17.0 Beta, responsiv PWA som kan hostes statisk med Supabase live sync
 
 Aktiv utviklingsplan ligger i `docs/Development/Padelstar-komplett-utviklingsplan.md`, kronologisk implementeringsdokumentasjon ligger i `docs/documentation.md`, og godkjente produktvalg med endringsvern ligger i `docs/Development/produktbeslutninger.md`. Historiske planer, logger og designutkast ligger i `docs/archive/`.
 

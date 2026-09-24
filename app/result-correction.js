@@ -16,26 +16,13 @@
   }
 
   // The rules the match was played by (the snapshot taken on its first point, else the tournament rules).
-  function rulesFor(match, settings = {}) {
-    return {
-      gamesToWinSet: match.rules?.gamesToWinSet ?? settings.gamesToWinSet ?? 6,
-      setsToWinMatch: match.rules?.setsToWinMatch ?? settings.setsToWinMatch ?? 1,
-    };
+  function rulesFor(match, settings = {}, scoring = global.PadelstarScoring) {
+    return scoring.matchRules(match, settings);
   }
 
   // Same validation as the server (admin_correct_result): only complete, valid sets, one winner.
   function validateSets(sets, rules, scoring) {
-    if (!Array.isArray(sets) || sets.length < 1 || sets.length > 2 * rules.setsToWinMatch - 1) return { error: "invalid" };
-    let one = 0;
-    let two = 0;
-    for (const set of sets) {
-      if (!Number.isInteger(set?.teamOne) || !Number.isInteger(set?.teamTwo)) return { error: "invalid" };
-      if (set.teamOne < 0 || set.teamTwo < 0 || set.teamOne === set.teamTwo) return { error: "invalid" };
-      if (!scoring.isSetComplete(set.teamOne, set.teamTwo, rules)) return { error: "invalid" };
-      if (set.teamOne > set.teamTwo) one += 1; else two += 1;
-    }
-    if (Math.max(one, two) !== rules.setsToWinMatch || Math.min(one, two) >= rules.setsToWinMatch) return { error: "invalid" };
-    return { winner: one > two ? 0 : 1 };
+    return scoring.validateMatchSets(sets, rules);
   }
 
   function sameSets(left, right) {
@@ -58,7 +45,7 @@
     // A finished tournament can still be corrected (the statistics follow); a cancelled one stays closed.
     if (state.status === "Avsluttet" && state.lifecycleStatus === "cancelled") return { ok: false, error: "closed" };
     if (match.state !== "finished") return { ok: false, error: "notFinished" };
-    const rules = rulesFor(match, state.settings);
+    const rules = rulesFor(match, state.settings, scoring);
     const checked = validateSets(sets, rules, scoring);
     if (checked.error) return { ok: false, error: checked.error };
     const oldWinner = match.winnerTeamIndex;

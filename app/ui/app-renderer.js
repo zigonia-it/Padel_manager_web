@@ -31,11 +31,7 @@
       elements.tournamentSettingsForm.elements.cupTeamSetupMode.value = state.settings.cupTeamSetupMode;
       elements.tournamentSettingsForm.elements.includesThirdPlaceMatch.checked = state.settings.includesThirdPlaceMatch;
       elements.tournamentSettingsForm.elements.pointMode.value = state.settings.pointMode;
-      elements.tournamentSettingsForm.elements.gamesToWinSet.value = state.settings.gamesToWinSet;
-      elements.tournamentSettingsForm.elements.setsToWinMatch.value = state.settings.setsToWinMatch;
-      elements.tournamentSettingsForm.elements.gameMode.value = state.settings.gameMode ?? "advantage";
-      elements.tournamentSettingsForm.elements.setTiebreak.checked = Boolean(state.settings.setTiebreak);
-      elements.tournamentSettingsForm.elements.timedMinutes.value = state.settings.timedMinutes ?? 0;
+      window.PadelstarScoringRulesForm.apply(elements.tournamentSettingsForm.querySelector("[data-scoring-rules]"), state.settings);
       elements.generateRoundButton.disabled = Boolean(callbacks.generateRoundBlockReason());
       elements.generateRoundButton.textContent = callbacks.tournamentActionText();
       elements.completeRoundButton.textContent = translate("finishTournament");

@@ -1,5 +1,5 @@
 (() => {
-  function create({ translate, globalMatchNumber, setScoreText, gameScoreText, escapeHtml }) {
+  function create({ translate, globalMatchNumber, setScoreText, gameScoreText, escapeHtml, isPointsMatch = () => false }) {
     function matchContextText(match) {
       const matchIndex = globalMatchNumber(match);
       const sitOutCount = match.sittingOut?.length ?? 0;
@@ -27,6 +27,12 @@
 
     function scoreSummary(match) {
       if (match.isWalkover) return translate("score.walkover");
+      if (isPointsMatch(match) && match.state !== "finished") {
+        // Points scoring: the games won so far and the running points
+        if (!match.completedSets.length) return translate("score.pointsSummary", { points: setScoreText(match) });
+        const games = match.completedSets.map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ");
+        return translate("score.pointsSummaryGames", { games, points: setScoreText(match) });
+      }
       if (match.completedSets.length) {
         const sets = match.completedSets.map((set) => `${set.teamOne}-${set.teamTwo}`).join(", ");
         return match.state === "finished"

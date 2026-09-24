@@ -6,6 +6,26 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+## 0.17.0
+
+The generic scoring engine (Phase 14, in the 1.0 scope; developer's decisions 2026-09-24). Verified: 561 automated tests (new: 14 engine scenarios shared by JS and SQL, form/validation/quick-pick tests), 22 PGlite database suites green (new: `generic-result-rules`), the migration applied live and checked (legacy rules, a points result, the three patched functions, grants, and a rolled-back 8-point points match through `save_player_point_impl`), and the wizard, Styring rules form, live scoring of a full best-of-three points match and the tennis labels checked in the browser.
+
+### Added
+- **Three configurable levels.** Game (points), set (games) and match (sets) each follow "first to N, win by M", every number 1..999, no hard cap. Tennis and padel are the default numbers (game 4 points win by 2, set 6 games win by 2, first to N sets); older tournaments map onto the new rules exactly and all 23 existing scenarios pass unchanged, in JS and in SQL.
+- **"Points" scoring** next to "Tennis and padel": first to N points, win by M, first to G games (best of several games), e.g. first to 21 win by 2. Works for Round Robin and Cup, live point-by-point (admin and players), typed results, corrections, approval, statistics and timed matches. Play continues without an upper limit until the margin is reached (20-20 goes on to 22-20).
+- **Rules form**: a Scoring choice (Tennis and padel / Points) in the create wizard and in Styring. Tennis shows games per set, sets per match, tiebreak and an "Advanced rules" section (points per game, game margin, set margin, match margin); Points shows first to, win by and games to win the match.
+- Set-result dialog: quick buttons for short lists of finished scores, two number fields when the list is long (first to 21).
+- `_scoring_rules`, `_scoring_set_complete`, `_scoring_match_won` and `_approval_validate_proposal(sets, rules)` in the database; `save_player_point_impl` reissued; `admin_set_result_impl`, `admin_correct_result_impl` and `match_result_action_impl` patched in place (migration `20260924120000_generic_scoring_rules.sql`, applied live).
+
+### Changed
+- The scoreboard, large score, match summary, live overview and rules page follow the rules: 15/30/40/A only for four-point games, points matches show games won and running points.
+- The rules page says "best of 2N-1 sets" for "first to N sets" (it said best of N).
+- The game-mode select is replaced by the game margin field (1 = golden point); `gameMode` is still written for older readers.
+- Rule limits raised: games per set and sets per match up to 999 (were 12 and 5).
+
+### Known open question
+- "Match: 3 sets, no margin": the engine can do it (first to N sets); new tournaments still default to one set per match until the developer decides the default (USER_ACTIONS).
+
 ## 0.16.2
 
 Developer's decision 2026-09-22 ("keep the new one"): removed the older "Resultatforslag" result-proposal flow, keeping only the point-by-point live scoring + approval workflow as the single way to report a result. Verified: 538 automated tests (new: a dom-elements test locks in a wiring fix found while verifying this, an insights test for the replacement conflict finding), the live database grant revoked and checked, the change checked in the browser (dark/light, desktop/phone, admin and player views).

@@ -41,7 +41,7 @@ window.PadelstarWorkspaceOverview = (() => {
     <div class="overview-main">
       <span class="status-chip ${spotlightMatch.state}">${matchStateText(spotlightMatch.state)}</span>
       <strong>${escapeHtml(primaryMatchHeadline(spotlightMatch))}</strong>
-      <small>${escapeHtml(matchContextText(spotlightMatch))} · ${escapeHtml(setScoreText(spotlightMatch))} ${translate("common.games")} · ${escapeHtml(gameScoreText(spotlightMatch))}</small>
+      <small>${escapeHtml(matchContextText(spotlightMatch))} · ${window.PadelstarScoring.isPointsMatch(spotlightMatch, state.settings) ? `${escapeHtml(setScoreText(spotlightMatch))} ${translate("common.points")}` : `${escapeHtml(setScoreText(spotlightMatch))} ${translate("common.games")} · ${escapeHtml(gameScoreText(spotlightMatch))}`}</small>
     </div>
     <div class="overview-stats">
       <div><span>${translate("common.active")}</span><strong>${playingMatches.length}</strong></div>

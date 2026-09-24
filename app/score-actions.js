@@ -44,7 +44,11 @@
       if (message === "messages.invalidScoreNegative") return t(message);
       if (message === "messages.invalidScoreDraw") return t(message);
       if (message === "messages.invalidScoreShape") {
-        const gamesToWinSet = deps.getState().settings.gamesToWinSet ?? 6;
+        const rules = deps.scoring.normalizeRules(deps.getState().settings);
+        if (rules.setDecider === "continue") {
+          return t("messages.invalidScoreShapeMargin", { target: rules.gamesToWinSet, margin: rules.setWinBy, teamOne, teamTwo });
+        }
+        const gamesToWinSet = rules.gamesToWinSet;
         return t("messages.invalidScoreShape", {
           gamesToWinSet,
           tieBreakOne: gamesToWinSet + 1,

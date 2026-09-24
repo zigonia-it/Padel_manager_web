@@ -3,7 +3,7 @@
 import { PGlite } from '@electric-sql/pglite';
 import fs from 'fs';
 
-const MIG = new URL('../migrations/20260919120000_match_scorer_lease.sql', import.meta.url).pathname;
+const MIG2 = new URL('../migrations/20260924120000_generic_scoring_rules.sql', import.meta.url).pathname;
 const FIXTURE = new URL('../../test/fixtures/scoring-scenarios.json', import.meta.url).pathname;
 const { scenarios } = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));
 
@@ -17,7 +17,9 @@ create table public.player_sessions(tournament_id uuid, player_id uuid, token_ha
 create table public.api_rate_limits(bucket_hash text primary key, window_started_at timestamptz, request_count int, updated_at timestamptz);
 create or replace function public.consume_api_rate_limit(p_bucket text, p_limit integer, p_window_seconds integer) returns boolean language sql as $$ select true $$;
 `);
-await pg.exec(fs.readFileSync(MIG, 'utf8'));
+const migDir = new URL('../migrations/', import.meta.url).pathname;
+for (const f of ['20260915040000_admin_set_result_status_sync.sql', '20260919120000_match_scorer_lease.sql', '20260919150000_result_approval.sql', '20260919210000_admin_result_correction.sql']) await pg.exec(fs.readFileSync(migDir + f, 'utf8'));
+await pg.exec(fs.readFileSync(MIG2, 'utf8'));
 
 const uuid = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 const M1 = uuid(11);
@@ -82,7 +84,7 @@ for (const scenario of scenarios) {
     if (Boolean(got.inTiebreak) !== e.inTiebreak) problems.push(`inTiebreak ${got.inTiebreak}`);
     if (Boolean(got.decidingGame) !== Boolean(e.decidingGame)) problems.push(`decidingGame ${got.decidingGame}`);
     if ((got.endReason ?? null) !== (e.endReason ?? null)) problems.push(`endReason ${got.endReason}`);
-    if (got.rules?.gameMode !== scenario.settings.gameMode) problems.push(`rules snapshot ${JSON.stringify(got.rules)}`);
+    if (got.rules?.gameMode !== (scenario.settings.gameMode === 'goldenPoint' || scenario.settings.gameWinBy === 1 ? 'goldenPoint' : 'advantage')) problems.push(`rules snapshot ${JSON.stringify(got.rules)}`);
   }
   if (problems.length) { fail += 1; console.log('  FAIL', scenario.name, problems.join('; ')); } else { pass += 1; console.log('  ok  ', scenario.name); }
 }

@@ -52,6 +52,7 @@ const rendering = window.PadelstarRendering.create({
   setScoreText: (match) => setScoreText(match),
   gameScoreText: (match) => gameScoreText(match),
   escapeHtml: (value) => escapeHtml(value),
+  isPointsMatch: (match) => window.PadelstarScoring.isPointsMatch(match, state?.settings),
 });
 const remoteTournament = window.PadelstarRemoteTournament.create({
   isReady: () => isSupabaseReady(),
@@ -1236,8 +1237,9 @@ function activateSupabaseClient() {
   connectRealtimeForCurrentState();
 }
 
-function createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, timedMinutes, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
-  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, gamesToWinSet, setsToWinMatch, gameMode, setTiebreak, timedMinutes, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
+function createTournament({ name, inviteCode, players, courtCount, format, rulesFormData, pointMode, cupTeamSetupMode, includesThirdPlaceMatch }) {
+  const rules = rulesFormData ? window.PadelstarScoring.rulesInputFromFormData(rulesFormData) : {};
+  return tournamentState.createTournament({ name, inviteCode, players, courtCount, format, rules, pointMode, cupTeamSetupMode, includesThirdPlaceMatch });
 }
 
 function createPlayer(name, index, avatarId = null, accent = null) {
@@ -2375,7 +2377,7 @@ function setScoreText(match) {
 
 function gameScoreText(match) {
   const currentGame = match.currentGame ?? { teamOne: 0, teamTwo: 0 };
-  const label = (value) => (match.inTiebreak ? String(value ?? 0) : tennisPointLabel(value));
+  const label = (value) => window.PadelstarScoring.pointLabel(match, value);
   return `${label(currentGame.teamOne)}-${label(currentGame.teamTwo)}`;
 }
 
