@@ -589,6 +589,8 @@ Object.assign(padelstarTranslations.nb, {
   "score.finishedPrefix": "Ferdig: {sets}",
   "score.setsPrefix": "Sett: {sets}",
   "score.currentSummary": "Sett: {sets} · Game: {game}",
+  "score.pointsSummary": "Poeng: {points}",
+  "score.pointsSummaryGames": "Games: {games} · Poeng: {points}",
   "score.walkoverWinner": "{winner} vant på walkover",
   "score.walkover": "Walkover",
   "score.matchWinner": "{winner} vant {score}",
@@ -674,6 +676,11 @@ Object.assign(padelstarTranslations.nb, {
   "messages.invalidScoreNegative": "Resultatet kan ikke være negativt.",
   "messages.invalidScoreDraw": "Resultatet kan ikke være uavgjort.",
   "messages.invalidScoreShape": "Sett må vinnes {gamesToWinSet}-x med to games margin, eller {tieBreakOne}-{tieBreakTwo} / {tieBreakOne}-{gamesToWinSet}.",
+  "messages.invalidScoreShapeMargin": "Et sett må vinnes med minst {margin} i margin, og minst {target} poeng/games. {teamOne}-{teamTwo} er ikke et ferdig sett.",
+  "admin.scoringMode": "Poengsystem", "admin.scoringModeTennis": "Tennis og padel (game, sett, kamp)", "admin.scoringModePoints": "Poeng (først til N)", "admin.advancedRules": "Avanserte regler", "admin.pointsPerGame": "Poeng per game", "admin.gameMargin": "Margin i game (1 = golden point)", "admin.setMargin": "Margin i sett (games)", "admin.matchMargin": "Margin i kamp (sett)", "admin.pointsToWin": "Først til (poeng)", "admin.pointsWinBy": "Må vinne med (poeng)", "admin.pointsMatchGames": "Games for å vinne kampen (1 = én game)",
+  "wizard.confirmPointsValue": "Først til {points} poeng, {margin} i margin, først til {games} game(s)",
+  "rules.gameGenericTitle": "Poeng i et game", "rules.gameGenericText": "Et game vinnes av første lag til {points} poeng, med minst {margin} poengs margin.", "rules.marginsText": "Marginer: {setMargin} games i et sett og {matchMargin} sett i kampen.",
+  "rules.pointsTitle": "Poengspill", "rules.pointsText": "Først til {points} poeng, og du må vinne med minst {margin}. Det finnes ingen øvre grense: står det likt, spilles det til noen leder med {margin}.", "rules.pointsGamesText": "Kampen vinnes av første lag som vinner {games} games.",
   "messages.markAwayConfirm": "Markere {name} som ute/reist? Spilleren blir ikke satt opp i nye runder, men historiske kamper beholdes.",
   "messages.returnToTournamentConfirm": "Gjøre {name} tilgjengelig for nye runder igjen?",
   "messages.availabilityUpdateFailed": "Kunne ikke oppdatere spillerstatus live akkurat nå. Prøv igjen når forbindelsen er tilbake.",
@@ -850,6 +857,8 @@ Object.assign(padelstarTranslations.en, {
   "score.finishedPrefix": "Finished: {sets}",
   "score.setsPrefix": "Sets: {sets}",
   "score.currentSummary": "Sets: {sets} · Game: {game}",
+  "score.pointsSummary": "Points: {points}",
+  "score.pointsSummaryGames": "Games: {games} · Points: {points}",
   "matches.restingPlayers": "Break: {players}",
 });
 
@@ -1124,6 +1133,11 @@ Object.assign(padelstarTranslations.en, {
   "messages.invalidScoreNegative": "Scores cannot be negative.",
   "messages.invalidScoreDraw": "Scores cannot be tied.",
   "messages.invalidScoreShape": "A set must be won {gamesToWinSet}-x with a two-game margin, or {tieBreakOne}-{tieBreakTwo} / {tieBreakOne}-{gamesToWinSet}.",
+  "messages.invalidScoreShapeMargin": "A set must be won by a margin of at least {margin}, with at least {target} points/games. {teamOne}-{teamTwo} is not a finished set.",
+  "admin.scoringMode": "Scoring", "admin.scoringModeTennis": "Tennis and padel (games, sets, match)", "admin.scoringModePoints": "Points (first to N)", "admin.advancedRules": "Advanced rules", "admin.pointsPerGame": "Points per game", "admin.gameMargin": "Game margin (1 = golden point)", "admin.setMargin": "Set margin (games)", "admin.matchMargin": "Match margin (sets)", "admin.pointsToWin": "First to (points)", "admin.pointsWinBy": "Win by (points)", "admin.pointsMatchGames": "Games to win the match (1 = a single game)",
+  "wizard.confirmPointsValue": "First to {points} points, win by {margin}, first to {games} game(s)",
+  "rules.gameGenericTitle": "Points in a game", "rules.gameGenericText": "A game is won by the first side to {points} points, with a margin of at least {margin}.", "rules.marginsText": "Margins: {setMargin} games in a set and {matchMargin} sets in the match.",
+  "rules.pointsTitle": "Points game", "rules.pointsText": "First to {points} points, and you must win by at least {margin}. There is no upper limit: when it is level, play continues until someone leads by {margin}.", "rules.pointsGamesText": "The match is won by the first side to win {games} games.",
 });
 
 const missingTranslationKeys = new Set();

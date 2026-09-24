@@ -228,7 +228,7 @@
             button("approve", translate("result.approve")),
             button("dispute", translate("result.dispute")),
             Number(getState().settings?.setsToWinMatch ?? 1) === 1
-              ? `<span class="approval-correct"><input class="approval-correct-one" type="number" min="0" max="9" inputmode="numeric" aria-label="${escapeAttribute(match.teamOne.displayName)}"><span>–</span><input class="approval-correct-two" type="number" min="0" max="9" inputmode="numeric" aria-label="${escapeAttribute(match.teamTwo.displayName)}">${button("correct", translate("result.correct"))}</span>`
+              ? `<span class="approval-correct"><input class="approval-correct-one" type="number" min="0" max="999" inputmode="numeric" aria-label="${escapeAttribute(match.teamOne.displayName)}"><span>–</span><input class="approval-correct-two" type="number" min="0" max="999" inputmode="numeric" aria-label="${escapeAttribute(match.teamTwo.displayName)}">${button("correct", translate("result.correct"))}</span>`
               : "",
           ].join("");
       } else if (participant && approval.status === "flagged") {
@@ -311,7 +311,7 @@
       return "";
     }
 
-    function scoreboardRow(match, teamIndex, teamName, pointControlsEnabled) {
+    function scoreboardRow(match, teamIndex, teamName, pointControlsEnabled, pointsMode) {
       const team = teamIndex === 0 ? match.teamOne : match.teamTwo;
       const key = teamIndex === 0 ? "teamOne" : "teamTwo";
       const awaiting = match.state === "awaitingApproval";
@@ -323,10 +323,10 @@
     <tr class="scoreboard-row" style="${teamAccentStyle(team)}">
       <td class="scoreboard-team-name">${teamName}</td>
       <td class="scoreboard-cell scoreboard-sets">${setsWonByTeam(match, teamIndex)}</td>
-      <td class="scoreboard-cell scoreboard-games">${match.currentSet?.[key] ?? 0}</td>
+      ${pointsMode ? "" : `<td class="scoreboard-cell scoreboard-games">${match.currentSet?.[key] ?? 0}</td>`}
       <td class="scoreboard-cell scoreboard-points">
         <button class="scoreboard-point-minus" type="button" data-undo-team="${teamIndex}" aria-label="${translate("score.undoLastAria")}" ${canUndo ? "" : "disabled"}>−</button>
-        <strong class="scoreboard-point-value">${match.inTiebreak ? (match.currentGame?.[key] ?? 0) : tennisPointLabel(match.currentGame?.[key] ?? 0)}</strong>
+        <strong class="scoreboard-point-value">${pointsMode ? (match.currentSet?.[key] ?? 0) : window.PadelstarScoring.pointLabel(match, match.currentGame?.[key] ?? 0)}</strong>
         <button class="scoreboard-point-plus" type="button" data-point-team="${teamIndex}" aria-label="${translate("score.pointsLabel", { team: teamName })}" ${canAward ? "" : "disabled"}>+</button>
       </td>
     </tr>`;
@@ -334,14 +334,19 @@
 
     function scoreboardTableMarkup(match, editable) {
       const pointControlsEnabled = editable && match.state !== "cancelled" && match.state !== "awaitingWithdrawalDecision" && playerMayScore(match);
+      // Points scoring has no set/game/point split: the games won and the running points
+      const pointsMode = window.PadelstarScoring.isPointsMatch(match, getState().settings);
+      const headers = pointsMode
+        ? `<th scope="col">${translate("common.games")}</th><th scope="col">${translate("common.points")}</th>`
+        : `<th scope="col">${translate("common.sets")}</th><th scope="col">${translate("common.games")}</th><th scope="col">${translate("common.points")}</th>`;
       return `
-    <table class="scoreboard-table" aria-label="${translate("score.scoreboardAria")}">
+    <table class="scoreboard-table${pointsMode ? " scoreboard-table-points" : ""}" aria-label="${translate("score.scoreboardAria")}">
       <thead>
-        <tr><th scope="col"></th><th scope="col">${translate("common.sets")}</th><th scope="col">${translate("common.games")}</th><th scope="col">${translate("common.points")}</th></tr>
+        <tr><th scope="col"></th>${headers}</tr>
       </thead>
       <tbody>
-        ${scoreboardRow(match, 0, escapeHtml(match.teamOne.displayName), pointControlsEnabled)}
-        ${scoreboardRow(match, 1, escapeHtml(match.teamTwo.displayName), pointControlsEnabled)}
+        ${scoreboardRow(match, 0, escapeHtml(match.teamOne.displayName), pointControlsEnabled, pointsMode)}
+        ${scoreboardRow(match, 1, escapeHtml(match.teamTwo.displayName), pointControlsEnabled, pointsMode)}
       </tbody>
     </table>`;
     }

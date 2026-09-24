@@ -1,6 +1,105 @@
 window.PadelstarScoring = (() => {
+  // ---- The rules: three levels, each "first to N, win by M" (Phase 14, developer's decision 2026-09-24) -----------------
+  //   game  (points):  gameToWin, gameWinBy      tennis default 4 points, win by 2 (15/30/40/game); golden point = win by 1
+  //   set   (games):   gamesToWinSet, setWinBy   tennis default 6 games, win by 2, with a decider at 6-6 (see below)
+  //   match (sets):    setsToWinMatch, matchWinBy   first to N sets, no margin by default
+  // Every number is 1..999. Tennis/padel is just the default set of numbers; "Points" (first to 21, win by 2, best of 3
+  // games) is the same engine with the game level set to 1 point (every point wins a game), so the "games" of a set are
+  // the points. What is shown (15/30/40 or plain numbers) is decided by the UI from the rules.
+  //   setDecider: what happens when the set is level at the target ("nextGame" = the next game wins, 7-6; "tiebreak" =
+  //   a tiebreak to 7 win by 2; "continue" = play on until someone leads by setWinBy, no cap). Tennis rules only make
+  //   sense with setWinBy 2, so any other margin plays on ("continue"). The SQL twin (_scoring_rules) does the same.
+  // Older tournaments carry only gamesToWinSet, setsToWinMatch, gameMode and setTiebreak: they map onto these rules exactly.
+  const MAX_LEVEL = 999;
+  const GAME_MODES = ["advantage", "goldenPoint"];
+  const SET_DECIDERS = ["nextGame", "tiebreak", "continue"];
+
+  function clampLevel(value, fallback) {
+    const number = Math.floor(Number(value));
+    return Number.isFinite(number) ? Math.max(1, Math.min(MAX_LEVEL, number)) : fallback;
+  }
+
+  function normalizeRules(source = {}, fallback = {}) {
+    const pick = (key) => source?.[key] ?? fallback?.[key];
+    const gameMode = GAME_MODES.includes(pick("gameMode")) ? pick("gameMode") : "advantage";
+    const setWinBy = clampLevel(pick("setWinBy"), 2);
+    let setDecider = SET_DECIDERS.includes(pick("setDecider")) ? pick("setDecider") : (pick("setTiebreak") ? "tiebreak" : "nextGame");
+    if (setWinBy !== 2) setDecider = "continue";
+    const gameWinBy = clampLevel(pick("gameWinBy"), gameMode === "goldenPoint" ? 1 : 2);
+    return {
+      scoringMode: pick("scoringMode") === "points" ? "points" : "tennis",
+      gamesToWinSet: clampLevel(pick("gamesToWinSet"), 6),
+      setsToWinMatch: clampLevel(pick("setsToWinMatch"), 1),
+      gameToWin: clampLevel(pick("gameToWin"), 4),
+      gameWinBy,
+      setWinBy,
+      matchWinBy: clampLevel(pick("matchWinBy"), 1),
+      setDecider,
+      gameMode: gameWinBy === 1 ? "goldenPoint" : "advantage", // kept for older readers; gameWinBy is the rule
+      setTiebreak: setDecider === "tiebreak",
+      timedMinutes: Math.max(0, Math.floor(Number(pick("timedMinutes") ?? 0)) || 0),
+    };
+  }
+
+  // Rules from the raw values of a form (create wizard or Styring): "tennis" shows all the numbers, "points" shows
+  // only "first to N, win by M, first to G games" and maps them onto the same three levels (a point is a game).
+  function rulesFromInput(raw = {}) {
+    const number = (value) => (value === undefined || value === null || value === "" ? undefined : Number(value));
+    const timedMinutes = Math.max(0, Math.min(180, Math.floor(Number(raw.timedMinutes)) || 0));
+    if (raw.scoringMode === "points") {
+      return normalizeRules({
+        scoringMode: "points",
+        gameToWin: 1,
+        gameWinBy: 1,
+        gamesToWinSet: number(raw.pointsToWin) ?? 21,
+        setWinBy: number(raw.pointsWinBy) ?? 2,
+        setDecider: "continue",
+        setsToWinMatch: number(raw.pointsMatchGames) ?? 1,
+        matchWinBy: 1,
+        timedMinutes,
+      });
+    }
+    return normalizeRules({
+      scoringMode: "tennis",
+      gamesToWinSet: number(raw.gamesToWinSet),
+      setsToWinMatch: number(raw.setsToWinMatch),
+      gameToWin: number(raw.gameToWin),
+      gameWinBy: number(raw.gameWinBy),
+      setWinBy: number(raw.setWinBy),
+      matchWinBy: number(raw.matchWinBy),
+      gameMode: raw.gameMode,
+      setTiebreak: Boolean(raw.setTiebreak),
+      timedMinutes,
+    });
+  }
+
+  const RULE_FIELDS = ["scoringMode", "gamesToWinSet", "setsToWinMatch", "gameToWin", "gameWinBy", "setWinBy", "matchWinBy", "gameMode", "timedMinutes", "pointsToWin", "pointsWinBy", "pointsMatchGames"];
+  function rulesInputFromFormData(formData) {
+    const raw = Object.fromEntries(RULE_FIELDS.map((key) => [key, formData.get(key)]));
+    raw.setTiebreak = formData.get("setTiebreak") === "on";
+    return raw;
+  }
+
+  // The form values for a tournament's settings (the reverse of rulesFromInput).
+  function formValuesFromRules(settings = {}) {
+    const rules = normalizeRules(settings);
+    return {
+      scoringMode: rules.scoringMode,
+      gamesToWinSet: rules.gamesToWinSet,
+      setsToWinMatch: rules.setsToWinMatch,
+      gameToWin: rules.gameToWin,
+      gameWinBy: rules.gameWinBy,
+      setWinBy: rules.setWinBy,
+      matchWinBy: rules.matchWinBy,
+      setTiebreak: rules.setDecider === "tiebreak",
+      timedMinutes: rules.timedMinutes,
+      pointsToWin: rules.gamesToWinSet,
+      pointsWinBy: rules.setWinBy,
+      pointsMatchGames: rules.setsToWinMatch,
+    };
+  }
+
   function validateSetScore(teamOne, teamTwo, settings) {
-    const gamesToWinSet = settings.gamesToWinSet ?? 6;
     if (!Number.isInteger(teamOne) || !Number.isInteger(teamTwo)) return "messages.invalidScoreInteger";
     if (teamOne < 0 || teamTwo < 0) return "messages.invalidScoreNegative";
     if (teamOne === teamTwo) return "messages.invalidScoreDraw";
@@ -10,18 +109,63 @@ window.PadelstarScoring = (() => {
     return "";
   }
 
+  // A typed match result (the list of finished sets): every set finished by the set rule, the match undecided before
+  // the last set and decided by it. Returns { winner: 0|1 } or { error: "invalid" }. The SQL twin is _approval_validate_proposal.
+  function validateMatchSets(sets, settings) {
+    const rules = normalizeRules(settings);
+    if (!Array.isArray(sets) || sets.length < 1) return { error: "invalid" };
+    if (rules.matchWinBy === 1 && sets.length > 2 * rules.setsToWinMatch - 1) return { error: "invalid" };
+    let one = 0;
+    let two = 0;
+    for (const [index, set] of sets.entries()) {
+      if (!Number.isInteger(set?.teamOne) || !Number.isInteger(set?.teamTwo)) return { error: "invalid" };
+      if (set.teamOne < 0 || set.teamTwo < 0 || set.teamOne === set.teamTwo) return { error: "invalid" };
+      if (!isSetComplete(set.teamOne, set.teamTwo, rules)) return { error: "invalid" };
+      if (set.teamOne > set.teamTwo) one += 1; else two += 1;
+      const decided = (one >= rules.setsToWinMatch && one - two >= rules.matchWinBy) || (two >= rules.setsToWinMatch && two - one >= rules.matchWinBy);
+      if (decided && index < sets.length - 1) return { error: "invalid" };
+      if (!decided && index === sets.length - 1) return { error: "invalid" };
+    }
+    return { winner: one > two ? 0 : 1 };
+  }
+
+  // The finished scores of one set as [winnerGames, loserGames] pairs, for quick-pick buttons (the caller falls back
+  // to two number fields when the list is long).
+  function finishedSetScores(settings) {
+    const rules = normalizeRules(settings);
+    const target = rules.gamesToWinSet;
+    const margin = rules.setDecider === "continue" ? rules.setWinBy : 2;
+    const scores = [];
+    for (let loser = 0; loser <= target - margin; loser += 1) scores.push([target, loser]);
+    if (rules.setDecider === "continue") {
+      if (margin >= 2) for (let over = 1; over <= 2; over += 1) scores.push([target + over, target + over - margin]);
+    } else {
+      scores.push([target + 1, target - 1], [target + 1, target]);
+    }
+    return scores.filter(([winner, loser]) => winner >= 0 && loser >= 0 && isSetComplete(winner, loser, rules));
+  }
+
   function isSetComplete(teamOne, teamTwo, settings) {
-    const gamesToWinSet = settings.gamesToWinSet ?? 6;
+    const rules = normalizeRules(settings);
+    const gamesToWinSet = rules.gamesToWinSet;
     const winnerGames = Math.max(teamOne, teamTwo);
     const loserGames = Math.min(teamOne, teamTwo);
+    // Only scores that play can reach: at the target with the margin, or beyond it with exactly the margin.
+    if (rules.setDecider === "continue") {
+      return (winnerGames === gamesToWinSet && winnerGames - loserGames >= rules.setWinBy)
+        || (winnerGames > gamesToWinSet && winnerGames - loserGames === rules.setWinBy && rules.setWinBy >= 2);
+    }
     if (winnerGames === gamesToWinSet && winnerGames - loserGames >= 2) return true;
     if (winnerGames === gamesToWinSet + 1 && [gamesToWinSet - 1, gamesToWinSet].includes(loserGames)) return true;
     return false;
   }
 
   function hasMatchWinner(match, settings) {
-    return setsWonByTeam(match, 0) >= (settings.setsToWinMatch ?? 1) ||
-      setsWonByTeam(match, 1) >= (settings.setsToWinMatch ?? 1);
+    const rules = normalizeRules(settings);
+    const one = setsWonByTeam(match, 0);
+    const two = setsWonByTeam(match, 1);
+    return (one >= rules.setsToWinMatch && one - two >= rules.matchWinBy)
+      || (two >= rules.setsToWinMatch && two - one >= rules.matchWinBy);
   }
 
   function setsWonByTeam(match, teamIndex) {
@@ -191,19 +335,16 @@ window.PadelstarScoring = (() => {
   // and test/scoring-rules.test.js run both against test/fixtures/scoring-scenarios.json.
 
   const TIEBREAK_TARGET = 7;
-  const GAME_MODES = ["advantage", "goldenPoint"];
 
   // The rule profile a match is played by. Tournament rules are locked once round 1 exists,
   // and the profile is snapshotted onto the match on its first point.
   function matchRules(match, settings = {}) {
-    const source = match?.rules ?? {};
-    return {
-      gamesToWinSet: source.gamesToWinSet ?? settings.gamesToWinSet ?? 6,
-      setsToWinMatch: source.setsToWinMatch ?? settings.setsToWinMatch ?? 1,
-      gameMode: GAME_MODES.includes(source.gameMode ?? settings.gameMode) ? (source.gameMode ?? settings.gameMode) : "advantage",
-      setTiebreak: Boolean(source.setTiebreak ?? settings.setTiebreak ?? false),
-      timedMinutes: Math.max(0, Math.floor(Number(source.timedMinutes ?? settings.timedMinutes ?? 0)) || 0),
-    };
+    return normalizeRules(match?.rules ?? {}, settings);
+  }
+
+  // Points scoring shows "games won" and running points; tennis scoring shows sets, games and 15/30/40.
+  function isPointsMatch(match, settings = {}) {
+    return (match?.rules?.scoringMode ?? settings?.scoringMode) === "points";
   }
 
   function snapshotRules(match, settings) {
@@ -264,7 +405,7 @@ window.PadelstarScoring = (() => {
   }
 
   function applyPoint(match, teamIndex, rules) {
-    const gameMode = match.decidingGame ? "goldenPoint" : rules.gameMode;
+    const gameWinBy = match.decidingGame ? 1 : rules.gameWinBy; // the deciding game of a timed match: the next point wins
     const scoringTeam = teamIndex === 0 ? "teamOne" : "teamTwo";
     const otherTeam = teamIndex === 0 ? "teamTwo" : "teamOne";
     const game = match.currentGame;
@@ -278,14 +419,15 @@ window.PadelstarScoring = (() => {
         gameWon = true;
         tiebreakWon = true;
       }
-    } else if (scoring === 4 || (scoring === 3 && (other < 3 || gameMode === "goldenPoint"))) {
+    } else if (scoring + 1 >= rules.gameToWin && scoring + 1 - other >= gameWinBy) {
       gameWon = true;
-    } else if (scoring === 3 && other === 3) {
-      game[scoringTeam] = 4;
-    } else if (other === 4) {
-      game[otherTeam] = 3;
     } else {
       game[scoringTeam] = scoring + 1;
+      // Keep the counts small when the game is in its "deuce" zone (both one short of the target or more): only the
+      // difference matters, so 4-4 is stored as 3-3 (the same as the 40-40 / advantage model this replaces).
+      const floor = rules.gameToWin - 1;
+      const lowest = Math.min(game.teamOne, game.teamTwo);
+      if (lowest > floor) { game.teamOne -= lowest - floor; game.teamTwo -= lowest - floor; }
     }
     if (!gameWon) return { gameWon: false, setWon: false, matchWon: false };
 
@@ -297,7 +439,7 @@ window.PadelstarScoring = (() => {
       match.inTiebreak = false;
     } else {
       match.currentSet[scoringTeam] += 1;
-      if (rules.setTiebreak
+      if (rules.setDecider === "tiebreak"
         && match.currentSet.teamOne === rules.gamesToWinSet
         && match.currentSet.teamTwo === rules.gamesToWinSet) {
         match.inTiebreak = true;
@@ -314,15 +456,19 @@ window.PadelstarScoring = (() => {
   }
 
   // Display label for one side's points in the current game (tiebreak points are plain numbers).
+  // Only the classic four-point game is shown as 15/30/40/A; any other game rule shows plain numbers.
   const POINT_LABELS = ["0", "15", "30", "40", "A"];
   function pointLabel(match, value) {
     if (match?.inTiebreak) return String(value ?? 0);
+    if ((match?.rules?.gameToWin ?? 4) !== 4) return String(value ?? 0);
     return POINT_LABELS[value] ?? "0";
   }
 
   return {
     validateSetScore,
     isSetComplete,
+    validateMatchSets,
+    finishedSetScores,
     hasMatchWinner,
     setsWonByTeam,
     leaderboardEntries,
@@ -338,8 +484,14 @@ window.PadelstarScoring = (() => {
     matchIncludesPlayer,
     playerTournamentState,
     TIEBREAK_TARGET,
-    GAME_MODES,
+    MAX_LEVEL,
+    normalizeRules,
+    rulesFromInput,
+    rulesInputFromFormData,
+    formValuesFromRules,
     matchRules,
+    isPointsMatch,
+    GAME_MODES,
     snapshotRules,
     awardPoint,
     remainingSeconds,

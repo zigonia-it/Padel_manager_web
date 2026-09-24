@@ -24,15 +24,16 @@
 
     function setRows(match, prefill) {
       const rules = correction.rulesFor(match, getState().settings);
-      const rows = 2 * rules.setsToWinMatch - 1;
       const values = prefill ?? match.completedSets ?? [];
+      // One row per possible set (a longer match than 15 sets keeps only the rows it needs)
+      const rows = Math.max(Math.min(2 * rules.setsToWinMatch - 1 + 2 * (rules.matchWinBy - 1), 15), values.length);
       return Array.from({ length: rows }, (_, index) => {
         const set = values[index];
         return `<div class="correction-set">
           <span>${t("correction.setLabel", { n: index + 1 })}</span>
-          <input class="correction-one" type="number" min="0" max="20" inputmode="numeric" value="${set ? set.teamOne : ""}" aria-label="${escapeHtml(match.teamOne.displayName)} – ${t("correction.setLabel", { n: index + 1 })}">
+          <input class="correction-one" type="number" min="0" max="999" inputmode="numeric" value="${set ? set.teamOne : ""}" aria-label="${escapeHtml(match.teamOne.displayName)} – ${t("correction.setLabel", { n: index + 1 })}">
           <span aria-hidden="true">–</span>
-          <input class="correction-two" type="number" min="0" max="20" inputmode="numeric" value="${set ? set.teamTwo : ""}" aria-label="${escapeHtml(match.teamTwo.displayName)} – ${t("correction.setLabel", { n: index + 1 })}">
+          <input class="correction-two" type="number" min="0" max="999" inputmode="numeric" value="${set ? set.teamTwo : ""}" aria-label="${escapeHtml(match.teamTwo.displayName)} – ${t("correction.setLabel", { n: index + 1 })}">
         </div>`;
       }).join("");
     }

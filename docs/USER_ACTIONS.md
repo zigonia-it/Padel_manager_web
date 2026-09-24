@@ -54,7 +54,9 @@ Status: `[ ]` open, `[x]` done.
 
 - [x] **Two ways to report a result: keep both?** Decided 2026-09-22: keep only the point-by-point approval flow. The older "Resultatforslag" panel is removed (0.17.0); a disputed player-scored result still flags for the admin the same way.
 
-- [ ] **Scoring engine plan: 7 decisions before I build it.** Read `docs/technical/scoring-engine-plan.md`, section 6: default and limits for points-to-win and win-by, whether the hard cap and "best of several games" are in the first version, how table points behave in points mode, the wording in the UI, Round Robin and Cup from day one, timed matches allowed. My recommendations are written next to each; "go with your recommendations" is a valid answer.
+- [x] **Scoring engine: 7 decisions** — answered 2026-09-24; built in 0.17.0 (see the plan doc).
+- [ ] **Default for "sets per match" in new tournaments.** You said "Match: 3 sets, no margin". I built the ability to set it (first to N sets, any N up to 999) but new tournaments still start at one set per match. Tell me which you want as the default: best of 3 (first to 2 sets) or first to 3 sets; it is a one-line change either way.
+- [ ] **Try the Points mode as a person (0.17).** Create a tournament, step 2 "Poengsystem" = "Poeng (først til N)" (for example first to 21, win by 2, 1 game), start it and score a match: the table shows GAMES and POENG, 20-20 continues until someone leads by 2, "Set resultat" takes two numbers. Also try best of 3 games and a timed match. On a phone with a second player: the point-by-point flow and the approval should behave exactly as for padel.
 
 ## 4. Later, when the time comes
 

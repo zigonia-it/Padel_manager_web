@@ -802,6 +802,503 @@
         ],
         "completedSets": []
       }
+    },
+    {
+      "name": "generic points: first to 21 wins the game and the match",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "setWinBy": 2,
+        "setDecider": "continue",
+        "setsToWinMatch": 1,
+        "gamesToWinSet": 21
+      },
+      "steps": [
+        "a0:21"
+      ],
+      "expect": {
+        "state": "finished",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          21,
+          0
+        ],
+        "completedSets": [
+          [
+            21,
+            0
+          ]
+        ],
+        "inTiebreak": false,
+        "winnerTeamIndex": 0
+      }
+    },
+    {
+      "name": "generic points: 20-20 plays on until a 2 point lead (22-20)",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "setWinBy": 2,
+        "setDecider": "continue",
+        "setsToWinMatch": 1,
+        "gamesToWinSet": 21
+      },
+      "steps": [
+        "a0:20",
+        "a1:20",
+        "0",
+        "0"
+      ],
+      "expect": {
+        "state": "finished",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          22,
+          20
+        ],
+        "completedSets": [
+          [
+            22,
+            20
+          ]
+        ],
+        "inTiebreak": false,
+        "winnerTeamIndex": 0
+      }
+    },
+    {
+      "name": "generic points: 21-20 is not enough with a margin of 2",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "setWinBy": 2,
+        "setDecider": "continue",
+        "setsToWinMatch": 1,
+        "gamesToWinSet": 21
+      },
+      "steps": [
+        "a0:20",
+        "a1:20",
+        "0"
+      ],
+      "expect": {
+        "state": "playing",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          21,
+          20
+        ],
+        "completedSets": [],
+        "inTiebreak": false
+      }
+    },
+    {
+      "name": "generic points: a lost lead keeps the game going (21-20, 21-21)",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "setWinBy": 2,
+        "setDecider": "continue",
+        "setsToWinMatch": 1,
+        "gamesToWinSet": 21
+      },
+      "steps": [
+        "a0:20",
+        "a1:20",
+        "0",
+        "1"
+      ],
+      "expect": {
+        "state": "playing",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          21,
+          21
+        ],
+        "completedSets": [],
+        "inTiebreak": false
+      }
+    },
+    {
+      "name": "generic points: margin 1 (first to 24) ends at 24-23",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "setWinBy": 1,
+        "setDecider": "continue",
+        "setsToWinMatch": 1,
+        "gamesToWinSet": 24
+      },
+      "steps": [
+        "a1:23",
+        "a0:24"
+      ],
+      "expect": {
+        "state": "finished",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          24,
+          23
+        ],
+        "completedSets": [
+          [
+            24,
+            23
+          ]
+        ],
+        "inTiebreak": false,
+        "winnerTeamIndex": 0
+      }
+    },
+    {
+      "name": "generic points: best of 3 games to 11, first game does not end the match",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "setWinBy": 2,
+        "setDecider": "continue",
+        "setsToWinMatch": 2,
+        "gamesToWinSet": 11
+      },
+      "steps": [
+        "a0:11"
+      ],
+      "expect": {
+        "state": "playing",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          0,
+          0
+        ],
+        "completedSets": [
+          [
+            11,
+            0
+          ]
+        ],
+        "inTiebreak": false
+      }
+    },
+    {
+      "name": "generic points: best of 3 games to 11 ends 2-1",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "setWinBy": 2,
+        "setDecider": "continue",
+        "setsToWinMatch": 2,
+        "gamesToWinSet": 11
+      },
+      "steps": [
+        "a0:11",
+        "a1:11",
+        "a0:11"
+      ],
+      "expect": {
+        "state": "finished",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          11,
+          0
+        ],
+        "completedSets": [
+          [
+            11,
+            0
+          ],
+          [
+            0,
+            11
+          ],
+          [
+            11,
+            0
+          ]
+        ],
+        "inTiebreak": false,
+        "winnerTeamIndex": 0
+      }
+    },
+    {
+      "name": "generic game: first to 3 with margin 1 has no advantage phase",
+      "settings": {
+        "gamesToWinSet": 6,
+        "setsToWinMatch": 1,
+        "gameToWin": 3,
+        "gameWinBy": 1
+      },
+      "steps": [
+        "0",
+        "0",
+        "0"
+      ],
+      "expect": {
+        "state": "playing",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          1,
+          0
+        ],
+        "completedSets": [],
+        "inTiebreak": false
+      }
+    },
+    {
+      "name": "generic game: first to 3 win by 2 stores deuce as 2-2",
+      "settings": {
+        "gamesToWinSet": 6,
+        "setsToWinMatch": 1,
+        "gameToWin": 3,
+        "gameWinBy": 2
+      },
+      "steps": [
+        "0",
+        "1",
+        "0",
+        "1",
+        "0",
+        "1"
+      ],
+      "expect": {
+        "state": "playing",
+        "currentGame": [
+          2,
+          2
+        ],
+        "currentSet": [
+          0,
+          0
+        ],
+        "completedSets": [],
+        "inTiebreak": false
+      }
+    },
+    {
+      "name": "generic game: first to 3 win by 2 is won at a 2 point lead",
+      "settings": {
+        "gamesToWinSet": 6,
+        "setsToWinMatch": 1,
+        "gameToWin": 3,
+        "gameWinBy": 2
+      },
+      "steps": [
+        "0",
+        "1",
+        "0",
+        "1",
+        "0",
+        "1",
+        "0",
+        "0"
+      ],
+      "expect": {
+        "state": "playing",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          1,
+          0
+        ],
+        "completedSets": [],
+        "inTiebreak": false
+      }
+    },
+    {
+      "name": "generic set: a margin of 3 games plays on without a cap",
+      "settings": {
+        "gamesToWinSet": 3,
+        "setsToWinMatch": 1,
+        "setWinBy": 3,
+        "setDecider": "continue"
+      },
+      "steps": [
+        "g0",
+        "g1",
+        "g0",
+        "g1",
+        "g0",
+        "g1",
+        "g0",
+        "g0"
+      ],
+      "expect": {
+        "state": "playing",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          5,
+          3
+        ],
+        "completedSets": [],
+        "inTiebreak": false
+      }
+    },
+    {
+      "name": "generic set: a margin of 1 ends the set at the target",
+      "settings": {
+        "gamesToWinSet": 3,
+        "setsToWinMatch": 1,
+        "setWinBy": 1,
+        "setDecider": "continue"
+      },
+      "steps": [
+        "g0",
+        "g0",
+        "g0"
+      ],
+      "expect": {
+        "state": "finished",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          3,
+          0
+        ],
+        "completedSets": [
+          [
+            3,
+            0
+          ]
+        ],
+        "inTiebreak": false,
+        "winnerTeamIndex": 0
+      }
+    },
+    {
+      "name": "generic match: a two set margin needs 4-2 in sets when first to 2",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "gamesToWinSet": 1,
+        "setWinBy": 1,
+        "setDecider": "continue",
+        "setsToWinMatch": 2,
+        "matchWinBy": 2
+      },
+      "steps": [
+        "0",
+        "1",
+        "0",
+        "1",
+        "0",
+        "0"
+      ],
+      "expect": {
+        "state": "finished",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          1,
+          0
+        ],
+        "completedSets": [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ],
+        "inTiebreak": false,
+        "winnerTeamIndex": 0
+      }
+    },
+    {
+      "name": "generic timed: the leader on points wins when the clock has run out",
+      "settings": {
+        "scoringMode": "points",
+        "gameToWin": 1,
+        "gameWinBy": 1,
+        "setWinBy": 2,
+        "setDecider": "continue",
+        "setsToWinMatch": 1,
+        "gamesToWinSet": 21,
+        "timedMinutes": 10
+      },
+      "steps": [
+        "a0:5",
+        "a1:3",
+        "x",
+        "0"
+      ],
+      "expect": {
+        "state": "finished",
+        "currentGame": [
+          0,
+          0
+        ],
+        "currentSet": [
+          6,
+          3
+        ],
+        "completedSets": [
+          [
+            6,
+            3
+          ]
+        ],
+        "inTiebreak": false,
+        "winnerTeamIndex": 0,
+        "endReason": "timeExpired"
+      }
     }
   ]
 }

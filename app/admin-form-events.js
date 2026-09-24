@@ -86,11 +86,7 @@
           cupTeamSetupMode: formData.get("cupTeamSetupMode"),
           includesThirdPlaceMatch: formData.get("includesThirdPlaceMatch") === "on",
           pointMode: formData.get("pointMode"),
-          gamesToWinSet: Number(formData.get("gamesToWinSet")),
-          setsToWinMatch: Number(formData.get("setsToWinMatch")),
-          gameMode: formData.get("gameMode"),
-          setTiebreak: formData.get("setTiebreak") === "on",
-          timedMinutes: Number(formData.get("timedMinutes")) || 0,
+          rules: window.PadelstarScoring.rulesInputFromFormData(formData),
         });
         saveState();
         deps.render();

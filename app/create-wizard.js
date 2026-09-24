@@ -56,18 +56,18 @@ window.PadelstarCreateWizard = (() => {
         .split("\n")
         .map((line) => line.trim())
         .filter(Boolean).length;
+      const rules = window.PadelstarScoring.rulesFromInput(window.PadelstarScoring.rulesInputFromFormData(new FormData(form)));
       const rows = [
         [t("setup.tournamentName"), form.elements.tournamentName.value.trim() || t("setup.defaultTournamentName")],
         [t("admin.tournamentFormat"), formatValue],
         [t("setup.courtCount"), form.elements.courts.value],
         [t("wizard.stepPlayers"), String(playerCount)],
-        [t("wizard.stepRules"), t("wizard.confirmRulesValue", {
-          games: form.elements.gamesToWinSet.value,
-          sets: form.elements.setsToWinMatch.value,
-        })],
-        ...(form.elements.gameMode.value === "goldenPoint" ? [[t("admin.gameMode"), t("admin.gameModeGoldenPoint")]] : []),
-        ...(form.elements.setTiebreak.checked ? [[t("admin.setTiebreak"), t("common.yes")]] : []),
-        ...(Number(form.elements.timedMinutes.value) > 0 ? [[t("admin.timedMinutes"), t("common.minutesValue", { minutes: form.elements.timedMinutes.value })]] : []),
+        [t("wizard.stepRules"), rules.scoringMode === "points"
+          ? t("wizard.confirmPointsValue", { points: rules.gamesToWinSet, margin: rules.setWinBy, games: rules.setsToWinMatch })
+          : t("wizard.confirmRulesValue", { games: rules.gamesToWinSet, sets: rules.setsToWinMatch })],
+        ...(rules.scoringMode !== "points" && rules.gameWinBy === 1 ? [[t("admin.gameMode"), t("admin.gameModeGoldenPoint")]] : []),
+        ...(rules.setDecider === "tiebreak" ? [[t("admin.setTiebreak"), t("common.yes")]] : []),
+        ...(rules.timedMinutes > 0 ? [[t("admin.timedMinutes"), t("common.minutesValue", { minutes: rules.timedMinutes })]] : []),
       ];
       elements.createWizardSummary.innerHTML = rows
         .map(([label, value]) => `<li><span>${label}</span><strong>${value}</strong></li>`)

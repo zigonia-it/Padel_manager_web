@@ -17,12 +17,14 @@ window.PadelstarLargeScore = (() => {
           <button class="large-score-team" type="button" data-large-score-team="${index}" style="${teamAccentStyle(team)}">
             <span>${teamDisplay(team)}</span>
             <strong>${match.currentSet[teamKey]}</strong>
-            <small>${match.inTiebreak ? match.currentGame[teamKey] : tennisPointLabel(match.currentGame[teamKey])}</small>
+            ${window.PadelstarScoring.isPointsMatch(match, state.settings) ? "" : `<small>${window.PadelstarScoring.pointLabel(match, match.currentGame[teamKey])}</small>`}
           </button>`;
       }).join("");
+      const pointsMode = window.PadelstarScoring.isPointsMatch(match, state.settings);
+      const gamesWon = `${window.PadelstarScoring.setsWonByTeam(match, 0)}-${window.PadelstarScoring.setsWonByTeam(match, 1)}`;
       elements.largeScoreActions.innerHTML = `
-        <div><span>${t("common.games")}</span><strong>${setScoreText(match)}</strong></div>
-        <div><span>${t("common.points")}</span><strong>${gameScoreText(match)}</strong></div>
+        <div><span>${t("common.games")}</span><strong>${pointsMode ? gamesWon : setScoreText(match)}</strong></div>
+        <div><span>${t("common.points")}</span><strong>${pointsMode ? setScoreText(match) : gameScoreText(match)}</strong></div>
         <div><span>${t("common.server")}</span><strong>${escapeHtml(startingTeamText(match))}</strong></div>`;
       elements.largeScoreBoard.querySelectorAll("[data-large-score-team]").forEach((button) => {
         button.addEventListener("click", () => awardTennisPoint(match, Number(button.dataset.largeScoreTeam)));

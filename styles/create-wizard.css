@@ -106,3 +106,21 @@
 .wizard-nav button {
   flex: 1 1 auto;
 }
+
+/* Scoring rules (create wizard and Styring): a Tennis panel and a Points panel, one shown at a time */
+.scoring-rules,
+.scoring-panel,
+.scoring-advanced[open] {
+  display: grid;
+  gap: 16px;
+}
+
+.scoring-advanced summary {
+  cursor: pointer;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+.scoring-advanced[open] summary {
+  margin-bottom: 4px;
+}

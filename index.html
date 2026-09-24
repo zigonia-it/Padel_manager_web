@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="styles/components-v2.css?v=padelstar-components-v2-4">
   <link rel="stylesheet" href="styles/workspace-nav.css?v=padelstar-workspace-nav-8">
   <link rel="stylesheet" href="styles/podium.css?v=padelstar-podium-5">
-  <link rel="stylesheet" href="styles/create-wizard.css?v=padelstar-create-wizard-5">
+  <link rel="stylesheet" href="styles/create-wizard.css?v=padelstar-create-wizard-6">
   <link rel="stylesheet" href="styles/invite-code-input.css?v=padelstar-invite-code-input-2">
   <link rel="stylesheet" href="styles/accent-picker.css?v=padelstar-accent-picker-2">
   <link rel="stylesheet" href="styles/lobby.css?v=padelstar-lobby-6">
@@ -477,29 +477,66 @@
                 <option value="games" data-i18n="common.games">Games</option>
               </select>
             </label>
-            <label>
-              <span data-i18n="admin.gamesPerSet">Games per sett</span>
-              <input name="gamesToWinSet" type="number" min="1" max="12" value="6" required>
-            </label>
-            <label>
-              <span data-i18n="admin.setsPerMatch">Sett per match</span>
-              <input name="setsToWinMatch" type="number" min="1" max="5" value="1" required>
-            </label>
-            <label>
-              <span data-i18n="admin.gameMode">Poengregel</span>
-              <select name="gameMode">
-                <option value="advantage" data-i18n="admin.gameModeAdvantage">Klassisk (fordel)</option>
-                <option value="goldenPoint" data-i18n="admin.gameModeGoldenPoint">Golden point (ingen fordel)</option>
-              </select>
-            </label>
-            <label class="checkbox-field">
-              <input name="setTiebreak" type="checkbox">
-              <span data-i18n="admin.setTiebreak">Tiebreak ved lik stilling</span>
-            </label>
-            <label>
-              <span data-i18n="admin.timedMinutes">Tidsbegrenset kamp (minutter, 0 = ingen)</span>
-              <input name="timedMinutes" type="number" min="0" max="180" step="1" value="0">
-            </label>
+            <div class="scoring-rules" data-scoring-rules>
+              <label>
+                <span data-i18n="admin.scoringMode">Poengsystem</span>
+                <select name="scoringMode">
+                  <option value="tennis" data-i18n="admin.scoringModeTennis">Tennis og padel (game, sett, kamp)</option>
+                  <option value="points" data-i18n="admin.scoringModePoints">Poeng (først til N)</option>
+                </select>
+              </label>
+              <div class="scoring-panel" data-scoring-panel="tennis">
+                <label>
+                  <span data-i18n="admin.gamesPerSet">Games per sett</span>
+                  <input name="gamesToWinSet" type="number" min="1" max="999" value="6" required>
+                </label>
+                <label>
+                  <span data-i18n="admin.setsPerMatch">Sett per match</span>
+                  <input name="setsToWinMatch" type="number" min="1" max="999" value="1" required>
+                </label>
+                <label class="checkbox-field">
+                  <input name="setTiebreak" type="checkbox">
+                  <span data-i18n="admin.setTiebreak">Tiebreak ved lik stilling</span>
+                </label>
+                <details class="scoring-advanced">
+                  <summary data-i18n="admin.advancedRules">Avanserte regler</summary>
+                  <label>
+                    <span data-i18n="admin.pointsPerGame">Poeng per game</span>
+                    <input name="gameToWin" type="number" min="1" max="999" value="4" required>
+                  </label>
+                  <label>
+                    <span data-i18n="admin.gameMargin">Margin i game (1 = golden point)</span>
+                    <input name="gameWinBy" type="number" min="1" max="999" value="2" required>
+                  </label>
+                  <label>
+                    <span data-i18n="admin.setMargin">Margin i sett (games)</span>
+                    <input name="setWinBy" type="number" min="1" max="999" value="2" required>
+                  </label>
+                  <label>
+                    <span data-i18n="admin.matchMargin">Margin i kamp (sett)</span>
+                    <input name="matchWinBy" type="number" min="1" max="999" value="1" required>
+                  </label>
+                </details>
+              </div>
+              <div class="scoring-panel hidden" data-scoring-panel="points">
+                <label>
+                  <span data-i18n="admin.pointsToWin">Først til (poeng)</span>
+                  <input name="pointsToWin" type="number" min="1" max="999" value="21" required disabled>
+                </label>
+                <label>
+                  <span data-i18n="admin.pointsWinBy">Må vinne med (poeng)</span>
+                  <input name="pointsWinBy" type="number" min="1" max="999" value="2" required disabled>
+                </label>
+                <label>
+                  <span data-i18n="admin.pointsMatchGames">Games for å vinne kampen (1 = én game)</span>
+                  <input name="pointsMatchGames" type="number" min="1" max="999" value="1" required disabled>
+                </label>
+              </div>
+              <label>
+                <span data-i18n="admin.timedMinutes">Tidsbegrenset kamp (minutter, 0 = ingen)</span>
+                <input name="timedMinutes" type="number" min="0" max="180" step="1" value="0">
+              </label>
+            </div>
             <label id="createCupTeamSetupModeField" class="hidden">
               <span data-i18n="admin.cupTeamSetup">Cup-lagoppsett</span>
               <select name="cupTeamSetupMode">
@@ -819,29 +856,66 @@
                           <option value="games" data-i18n="common.games">Games</option>
                         </select>
                       </label>
-                      <label class="settings-row">
-                        <span data-i18n="admin.gamesPerSet">Games per sett</span>
-                        <input name="gamesToWinSet" type="number" min="1" max="12" value="6" required>
-                      </label>
-                      <label class="settings-row">
-                        <span data-i18n="admin.setsPerMatch">Sett per match</span>
-                        <input name="setsToWinMatch" type="number" min="1" max="5" value="1" required>
-                      </label>
-            <label>
-              <span data-i18n="admin.gameMode">Poengregel</span>
-              <select name="gameMode">
-                <option value="advantage" data-i18n="admin.gameModeAdvantage">Klassisk (fordel)</option>
-                <option value="goldenPoint" data-i18n="admin.gameModeGoldenPoint">Golden point (ingen fordel)</option>
-              </select>
-            </label>
-            <label class="checkbox-field">
-              <input name="setTiebreak" type="checkbox">
-              <span data-i18n="admin.setTiebreak">Tiebreak ved lik stilling</span>
-            </label>
-            <label>
-              <span data-i18n="admin.timedMinutes">Tidsbegrenset kamp (minutter, 0 = ingen)</span>
-              <input name="timedMinutes" type="number" min="0" max="180" step="1" value="0">
-            </label>
+                      <div class="scoring-rules" data-scoring-rules>
+                        <label>
+                          <span data-i18n="admin.scoringMode">Poengsystem</span>
+                          <select name="scoringMode">
+                            <option value="tennis" data-i18n="admin.scoringModeTennis">Tennis og padel (game, sett, kamp)</option>
+                            <option value="points" data-i18n="admin.scoringModePoints">Poeng (først til N)</option>
+                          </select>
+                        </label>
+                        <div class="scoring-panel" data-scoring-panel="tennis">
+                          <label>
+                            <span data-i18n="admin.gamesPerSet">Games per sett</span>
+                            <input name="gamesToWinSet" type="number" min="1" max="999" value="6" required>
+                          </label>
+                          <label>
+                            <span data-i18n="admin.setsPerMatch">Sett per match</span>
+                            <input name="setsToWinMatch" type="number" min="1" max="999" value="1" required>
+                          </label>
+                          <label class="checkbox-field">
+                            <input name="setTiebreak" type="checkbox">
+                            <span data-i18n="admin.setTiebreak">Tiebreak ved lik stilling</span>
+                          </label>
+                          <details class="scoring-advanced">
+                            <summary data-i18n="admin.advancedRules">Avanserte regler</summary>
+                            <label>
+                              <span data-i18n="admin.pointsPerGame">Poeng per game</span>
+                              <input name="gameToWin" type="number" min="1" max="999" value="4" required>
+                            </label>
+                            <label>
+                              <span data-i18n="admin.gameMargin">Margin i game (1 = golden point)</span>
+                              <input name="gameWinBy" type="number" min="1" max="999" value="2" required>
+                            </label>
+                            <label>
+                              <span data-i18n="admin.setMargin">Margin i sett (games)</span>
+                              <input name="setWinBy" type="number" min="1" max="999" value="2" required>
+                            </label>
+                            <label>
+                              <span data-i18n="admin.matchMargin">Margin i kamp (sett)</span>
+                              <input name="matchWinBy" type="number" min="1" max="999" value="1" required>
+                            </label>
+                          </details>
+                        </div>
+                        <div class="scoring-panel hidden" data-scoring-panel="points">
+                          <label>
+                            <span data-i18n="admin.pointsToWin">Først til (poeng)</span>
+                            <input name="pointsToWin" type="number" min="1" max="999" value="21" required disabled>
+                          </label>
+                          <label>
+                            <span data-i18n="admin.pointsWinBy">Må vinne med (poeng)</span>
+                            <input name="pointsWinBy" type="number" min="1" max="999" value="2" required disabled>
+                          </label>
+                          <label>
+                            <span data-i18n="admin.pointsMatchGames">Games for å vinne kampen (1 = én game)</span>
+                            <input name="pointsMatchGames" type="number" min="1" max="999" value="1" required disabled>
+                          </label>
+                        </div>
+                        <label>
+                          <span data-i18n="admin.timedMinutes">Tidsbegrenset kamp (minutter, 0 = ingen)</span>
+                          <input name="timedMinutes" type="number" min="0" max="180" step="1" value="0">
+                        </label>
+                      </div>
                     </div>
                     <button class="secondary" type="submit" data-i18n="actions.saveRules">Lagre regler</button>
                   </form>
@@ -1201,12 +1275,12 @@
   <script async fetchpriority="low" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     onload="window.dispatchEvent(new Event('padelstar-supabase-ready'))"></script>
   <script defer src="supabase-config.js"></script>
-  <script defer src="app/translations.js?v=padelstar-i18n-65"></script>
+  <script defer src="app/translations.js?v=padelstar-i18n-66"></script>
   <script defer src="app/i18n-ui.js?v=padelstar-i18n-ui-6"></script>
   <script defer src="app/storage.js?v=padelstar-storage-1"></script>
-  <script defer src="app/rendering.js?v=padelstar-rendering-2"></script>
+  <script defer src="app/rendering.js?v=padelstar-rendering-3"></script>
   <script defer src="app/remote-tournament.js?v=padelstar-remote-tournament-2"></script>
-  <script defer src="app/admin-actions.js?v=padelstar-admin-actions-4"></script>
+  <script defer src="app/admin-actions.js?v=padelstar-admin-actions-5"></script>
   <script defer src="app/court-settings.js?v=padelstar-court-settings-2"></script>
   <script defer src="app/setup-forms.js?v=padelstar-setup-forms-5"></script>
   <script defer src="app/tournament-queries.js?v=padelstar-tournament-queries-1"></script>
@@ -1221,7 +1295,7 @@
   <script defer src="app/tournament-scheduler.js?v=padelstar-scheduler-1"></script>
   <script defer src="app/tournament-rounds.js?v=padelstar-rounds-2"></script>
   <script defer src="app/tournament-runtime.js?v=padelstar-tournament-runtime-4"></script>
-  <script defer src="app/workspace-overview.js?v=padelstar-workspace-overview-3"></script>
+  <script defer src="app/workspace-overview.js?v=padelstar-workspace-overview-4"></script>
   <script defer src="app/court-queue.js?v=padelstar-court-queue-3"></script>
   <script defer src="app/tournament-events.js?v=padelstar-tournament-events-1"></script>
   <script defer src="app/retention-policy.js?v=padelstar-retention-2"></script>
@@ -1233,10 +1307,10 @@
   <script defer src="app/cup-bracket.js?v=padelstar-cup-bracket-2"></script>
   <script defer src="app/player-status.js?v=padelstar-player-status-1"></script>
   <script defer src="app/player-next-match.js?v=padelstar-player-next-match-7"></script>
-  <script defer src="app/rules.js?v=padelstar-rules-4"></script>
+  <script defer src="app/rules.js?v=padelstar-rules-5"></script>
   <script defer src="app/player-controls.js?v=padelstar-player-controls-2"></script>
-  <script defer src="app/large-score.js?v=padelstar-large-score-2"></script>
-  <script defer src="app/set-score-dialog.js?v=padelstar-set-score-dialog-1"></script>
+  <script defer src="app/large-score.js?v=padelstar-large-score-3"></script>
+  <script defer src="app/set-score-dialog.js?v=padelstar-set-score-dialog-2"></script>
   <script defer src="app/admin-status.js?v=padelstar-admin-status-3"></script>
   <script defer src="app/profile-ui.js?v=padelstar-profile-ui-5"></script>
   <script defer src="app/backup-ui.js?v=padelstar-backup-ui-2"></script>
@@ -1245,7 +1319,8 @@
   <script defer src="app/player-state.js?v=padelstar-player-state-6"></script>
   <script defer src="app/tournament-status.js?v=padelstar-tournament-status-1"></script>
   <script defer src="app/tournament-finalization.js?v=padelstar-finalization-1"></script>
-  <script defer src="app/scoring-engine.js?v=padelstar-scoring-5"></script>
+  <script defer src="app/scoring-engine.js?v=padelstar-scoring-6"></script>
+  <script defer src="app/scoring-rules-form.js?v=padelstar-scoring-rules-form-1"></script>
   <script defer src="app/state-manager.js?v=padelstar-state-3"></script>
   <script defer src="app/realtime-sync.js?v=padelstar-realtime-sync-1"></script>
   <script defer src="app/offline-storage.js?v=padelstar-offline-1"></script>
@@ -1284,19 +1359,19 @@
   <script defer src="app/core/remote-state-controller.js?v=padelstar-remote-state-controller-3"></script>
   <script defer src="app/core/remote-sync-controller.js?v=padelstar-remote-sync-controller-1"></script>
   <script defer src="app/bootstrap/dom-elements.js?v=padelstar-dom-elements-16"></script>
-  <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-21"></script>
+  <script defer src="app/bootstrap/app-meta.js?v=padelstar-app-meta-22"></script>
   <script defer src="app/bootstrap/app-events.js?v=padelstar-bootstrap-events-4"></script>
   <script defer src="app/bootstrap/app-init.js?v=padelstar-app-init-2"></script>
   <script defer src="app/ui/theme.js?v=padelstar-theme-2"></script>
-  <script defer src="app/ui/app-renderer.js?v=padelstar-app-renderer-6"></script>
+  <script defer src="app/ui/app-renderer.js?v=padelstar-app-renderer-7"></script>
   <script defer src="app/feedback.js?v=padelstar-feedback-2"></script>
   <script defer src="app/info-dialog.js?v=padelstar-info-dialog-3"></script>
-  <script defer src="app/result-correction.js?v=padelstar-result-correction-2"></script>
-  <script defer src="app/result-correction-dialog.js?v=padelstar-result-correction-dialog-2"></script>
-  <script defer src="app/match-card.js?v=padelstar-match-card-16"></script>
+  <script defer src="app/result-correction.js?v=padelstar-result-correction-3"></script>
+  <script defer src="app/result-correction-dialog.js?v=padelstar-result-correction-dialog-3"></script>
+  <script defer src="app/match-card.js?v=padelstar-match-card-17"></script>
   <script defer src="app/backup-format.js?v=padelstar-backup-format-2"></script>
   <script defer src="app/link-utils.js?v=padelstar-link-utils-2"></script>
-  <script defer src="app/tournament-state.js?v=padelstar-tournament-state-6"></script>
+  <script defer src="app/tournament-state.js?v=padelstar-tournament-state-7"></script>
   <script defer src="app/tournament-library.js?v=padelstar-tournament-library-3"></script>
   <script defer src="app/state-bootstrap.js?v=padelstar-state-bootstrap-1"></script>
   <script defer src="app/module-routing.js?v=padelstar-module-routing-5"></script>
@@ -1304,18 +1379,18 @@
   <script defer src="app/remote-state-write.js?v=padelstar-remote-state-write-1"></script>
   <script defer src="app/remote-admin-actions.js?v=padelstar-remote-admin-actions-5"></script>
   <script defer src="app/remote-player-score.js?v=padelstar-remote-player-score-4"></script>
-  <script defer src="app/score-actions.js?v=padelstar-score-actions-7"></script>
+  <script defer src="app/score-actions.js?v=padelstar-score-actions-8"></script>
   <script defer src="app/workspace-navigation.js?v=padelstar-workspace-navigation-6"></script>
   <script defer src="app/app-events.js?v=padelstar-app-events-5"></script>
   <script defer src="app/workspace-events.js?v=padelstar-workspace-events-3"></script>
-  <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-7"></script>
-  <script defer src="app/create-wizard.js?v=padelstar-create-wizard-3"></script>
+  <script defer src="app/tournament-entry.js?v=padelstar-tournament-entry-8"></script>
+  <script defer src="app/create-wizard.js?v=padelstar-create-wizard-4"></script>
   <script defer src="app/invite-code-input.js?v=padelstar-invite-code-input-1"></script>
   <script defer src="app/accent-picker.js?v=padelstar-accent-picker-1"></script>
-  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-8"></script>
+  <script defer src="app/admin-form-events.js?v=padelstar-admin-form-events-9"></script>
   <script defer src="app/match-actions.js?v=padelstar-match-actions-3"></script>
   <script defer src="app/initial-view.js?v=padelstar-initial-view-3"></script>
-  <script defer src="app/app.js?v=padelstar-session-87"></script>
+  <script defer src="app/app.js?v=padelstar-session-88"></script>
 </body>
 
 </html>
