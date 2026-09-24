@@ -301,6 +301,7 @@ function makeTournament(api, playerNames, options = {}) {
     ...tournament,
     settings: {
       ...tournament.settings,
+      setsToWinMatch: 1, // these tests play single-set matches; new tournaments default to best of 3
       ...(options.settings ?? {}),
     },
   });

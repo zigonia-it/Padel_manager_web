@@ -6,6 +6,9 @@ Only verified completed changes belong here.
 
 ## Unreleased
 
+### Changed
+- New tournaments default to best of 3 (first to 2 sets) in Tennis and padel (developer's decision 2026-09-24). Older tournaments keep one set per match; the create wizard field and the engine's form-input default are both 2, `normalizeRules` (older settings) stays 1. Points mode keeps one game as its default.
+
 ## 0.17.0
 
 The generic scoring engine (Phase 14, in the 1.0 scope; developer's decisions 2026-09-24). Verified: 561 automated tests (new: 14 engine scenarios shared by JS and SQL, form/validation/quick-pick tests), 22 PGlite database suites green (new: `generic-result-rules`), the migration applied live and checked (legacy rules, a points result, the three patched functions, grants, and a rolled-back 8-point points match through `save_player_point_impl`), and the wizard, Styring rules form, live scoring of a full best-of-three points match and the tennis labels checked in the browser.
