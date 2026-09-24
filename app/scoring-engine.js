@@ -62,7 +62,8 @@ window.PadelstarScoring = (() => {
     return normalizeRules({
       scoringMode: "tennis",
       gamesToWinSet: number(raw.gamesToWinSet),
-      setsToWinMatch: number(raw.setsToWinMatch),
+      // new tournaments default to best of 3 (first to 2 sets); older tournaments keep 1 through normalizeRules
+      setsToWinMatch: number(raw.setsToWinMatch) ?? 2,
       gameToWin: number(raw.gameToWin),
       gameWinBy: number(raw.gameWinBy),
       setWinBy: number(raw.setWinBy),

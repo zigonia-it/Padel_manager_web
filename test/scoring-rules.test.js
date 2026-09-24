@@ -148,7 +148,9 @@ test("rules from form input: tennis keeps every number, points maps onto the thr
     ["points", 1, 1, 21, 2, "continue", 2]);
   // empty fields fall back to the tennis defaults
   const empty = scoring.rulesFromInput({});
-  assert.deepEqual([empty.gamesToWinSet, empty.setsToWinMatch, empty.gameToWin, empty.gameWinBy, empty.setWinBy, empty.matchWinBy], [6, 1, 4, 2, 2, 1]);
+  assert.deepEqual([empty.gamesToWinSet, empty.setsToWinMatch, empty.gameToWin, empty.gameWinBy, empty.setWinBy, empty.matchWinBy], [6, 2, 4, 2, 2, 1]);
+  // older tournaments without the field still mean one set
+  assert.equal(scoring.normalizeRules({ gamesToWinSet: 6 }).setsToWinMatch, 1);
   assert.equal(scoring.rulesFromInput({ timedMinutes: "999" }).timedMinutes, 180);
 });
 
