@@ -54,6 +54,8 @@ Status: `[ ]` open, `[x]` done.
 
 - [x] **Two ways to report a result: keep both?** Decided 2026-09-22: keep only the point-by-point approval flow. The older "Resultatforslag" panel is removed (0.17.0); a disputed player-scored result still flags for the admin the same way.
 
+- [ ] **Scoring engine plan: 7 decisions before I build it.** Read `docs/technical/scoring-engine-plan.md`, section 6: default and limits for points-to-win and win-by, whether the hard cap and "best of several games" are in the first version, how table points behave in points mode, the wording in the UI, Round Robin and Cup from day one, timed matches allowed. My recommendations are written next to each; "go with your recommendations" is a valid answer.
+
 ## 4. Later, when the time comes
 
 - [x] Light mode (Phase 27) was built from the local copy of the design files in `assets/padelstar-webapp-ui-design/` (colors only, as the roadmap says); the Claude Design connector was not needed. The real-device check is in section 2.
